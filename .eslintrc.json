@@ -33,7 +33,8 @@
         "no-eval":"warn", // prevent using eval
         "no-self-assign":["error", {"props": false}],
         "prefer-const":"warn",
-        "no-prototype-builtins":"warn"
+        "no-prototype-builtins":"warn",
+        "no-use-before-define":"warn"
     },
     "globals":{
         "$3Dmol": "writable",

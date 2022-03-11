@@ -4,7 +4,7 @@
 
 // TODO: generate normals directly in drawStrip and drawThinStrip
 
-var $3Dmol = $3Dmol || {};
+const $3Dmol = $3Dmol || {};
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
