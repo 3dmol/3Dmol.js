@@ -743,7 +743,7 @@ $3Dmol.getColorFromStyle = function(atom, style) {
     }
     
     let {color} = atom;
-    if (typeof (style.color) != "undefined" && style.color != "spectrum")
+    if (typeof (style.color) != "undefined" && style.color !== "spectrum")
         color = style.color;
     if(typeof(scheme) != "undefined") {
         let prop; let val;

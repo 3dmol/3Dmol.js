@@ -31,7 +31,7 @@
         "prefer-spread":"warn", "prefer-rest-params":"warn",
         "no-unreachable-loop":["error", {"ignore":["ForInStatement"]}],// ignore all for-in loops
         "no-eval":"warn", // prevent using eval
-        "no-self-assign":["error", {"props": true}]
+        "no-self-assign":["error", {"props": false}]
 
     },
     "globals":{
