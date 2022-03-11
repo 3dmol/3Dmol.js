@@ -7,6 +7,7 @@ $3Dmol.autoload=function(viewer,callback){
         $3Dmol.autoinit = true;
 
     if ($3Dmol.autoinit) {
+        $3Dmol.processing_autoinit = true;
         viewer =(viewer!== undefined) ? viewer :null;
         
         $3Dmol.viewers = {};
@@ -168,25 +169,27 @@ $3Dmol.autoload=function(viewer,callback){
                     glviewer.addResLabels(sel, sty);
                 }               
                 
+                glviewer.render();             
                 glviewer.zoomTo(zoomto);
+                
                 if(spin) {
                     glviewer.spin(spin.axis,spin.speed);
                 }
-                glviewer.render();             
             };
             
             let glviewer = viewer;
             try {
+                const config = viewerdiv.data('config') || {};
+                config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
+                if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
+                if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;
+                config.ui = showUI;		    
                 if(glviewer==null) {
-                    const config = viewerdiv.data('config') || {};
-                    config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
-                    if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
-                    if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;                     
-                    config.ui = showUI;
-                    glviewer = $3Dmol.viewers[this.id || nviewers+=1] = $3Dmol.createViewer(viewerdiv, config);
-
+                    // eslint-disable-next-line no-plusplus
+                    glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, config);
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
+		            glviewer.setConfig(config);
                     if(showUI) glviewer.ui.initiateUI();
                 } 
             } catch ( error ) {
@@ -205,7 +208,6 @@ $3Dmol.autoload=function(viewer,callback){
                     glviewer.addModel(moldata, type, options);
                     if(showUI){
                         const modelName = viewerdiv.data(datatypes[i]);
-
                         glviewer.ui.setModelTitle(modelName);
                     }
                     i += 1;
@@ -223,6 +225,7 @@ $3Dmol.autoload=function(viewer,callback){
                                 runres(glviewer);
                             }
                         }
+                        $3Dmol.processing_autoinit = false;
                         if(callback) callback(glviewer);
                     }
                 };
@@ -253,15 +256,16 @@ $3Dmol.autoload=function(viewer,callback){
                     if(typeof(runres) === 'function') {
                         runres(glviewer);
                     }
-                }                
+                }
+                $3Dmol.processing_autoinit = false;                
                 if (callback) 
                     callback(glviewer);
             }            
         });                      
     }};
-$(document).ready(() => {
-    $3Dmol.autoload();
     
+document.addEventListener('DOMContentLoaded', () => {
+    $3Dmol.autoload();    
 });
     
  

@@ -608,6 +608,21 @@ $3Dmol.GLViewer = (function() {
         };
 
         /**
+         * Return configuration of viewer
+         */
+        this.getConfig = function() {
+          return config;
+        };
+        
+        /**
+         * Set the configuration object.  Note that some setting may only
+         * have an effect at viewer creation time.
+         */
+        this.setConfig = function(c) {
+          config = c;
+        };
+        	    
+        /**
          * Return object representing internal state of
          * the viewer appropriate for passing to setInternalState
          *
