@@ -16,7 +16,7 @@ $3Dmol.Camera = function(fov, aspect, near, far, ortho) {
     this.projectionMatrixInverse = new $3Dmol.Matrix4();
     this.matrixWorldInverse = new $3Dmol.Matrix4();
     
-    var center = this.position.z;
+    const center = this.position.z;
     this.right = center * Math.tan(Math.PI / 180 * fov);
     this.left = -this.right;
     this.top = this.right / this.aspect;
@@ -28,12 +28,12 @@ $3Dmol.Camera = function(fov, aspect, near, far, ortho) {
         
 };
 
-//Inherit Object3D's prototyped methods
+// Inherit Object3D's prototyped methods
 $3Dmol.Camera.prototype = Object.create($3Dmol.Object3D.prototype);
 
 $3Dmol.Camera.prototype.lookAt = function(vector){
     
-    //Why is the parameter order switched (compared to Object3D)?
+    // Why is the parameter order switched (compared to Object3D)?
     this.matrix.lookAt(this.position, vector, this.up);
     
     if (this.rotationAutoUpdate) {    
