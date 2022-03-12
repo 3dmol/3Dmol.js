@@ -32,9 +32,13 @@
         "no-unreachable-loop":["error", {"ignore":["ForInStatement"]}],// ignore all for-in loops
         "no-eval":"warn", // prevent using eval
         "no-self-assign":["error", {"props": false}],
-        "prefer-const":"warn",
+        "prefer-const":["warn", {"ignoreReadBeforeAssign": true}],
         "no-prototype-builtins":"warn",
-        "no-use-before-define":"warn"
+        "no-use-before-define":"warn",
+        "no-lonely-if":"off",
+        "no-underscore-dangle":"warn",
+        "no-undef":"warn",
+        "new-cap":["error", {"newIsCap": false}]
     },
     "globals":{
         "$3Dmol": "writable",
