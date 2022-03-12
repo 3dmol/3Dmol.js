@@ -1,6 +1,6 @@
-var $3Dmol = $3Dmol || {};
+const $3Dmol = $3Dmol || {};
 
-//properties for mapping
+// properties for mapping
 
 /* partial charges for proteins */
 $3Dmol.partialCharges = {
@@ -173,11 +173,11 @@ $3Dmol.partialCharges = {
 "VAL:O": -0.55
 };
     
-//this can be supplied to mapAtomProperties
+// this can be supplied to mapAtomProperties
 $3Dmol.applyPartialCharges = function(atom, keepexisting) {
     if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
         if(atom.resn && atom.atom) {
-            var key = atom.resn+":"+atom.atom;
+            const key = `${atom.resn}:${atom.atom}`;
             atom.properties.partialCharge = $3Dmol.partialCharges[key];
         }
     }
