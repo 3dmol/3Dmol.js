@@ -1,3 +1,4 @@
+/* eslint-disable no-multi-assign */
 // a molecular viewer based on GLMol
 
 
@@ -27,18 +28,19 @@ $3Dmol.GLViewer = (function() {
         let bgColor = 0;
         config.backgroundColor = config.backgroundColor || "#ffffff";
        // config.disableFog= config.disableFog || false;
-        if(typeof(config.backgroundColor) != undefined) {
+        if(typeof(config.backgroundColor) != 'undefined') {
             bgColor = $3Dmol.CC.color(config.backgroundColor).getHex();
         }
-        config.backgroundAlpha = config.backgroundAlpha == undefined ? 1.0 : config.backgroundAlpha;
+        config.backgroundAlpha = config.backgroundAlpha === undefined ? 1.0 : config.backgroundAlpha;
 
 
         let camerax = 0;
-        if(typeof(config.camerax) != undefined) {
+        if(typeof(config.camerax) != 'undefined') {
             camerax = parseFloat(config.camerax);
         }
         const _viewer = this;
-        let container = this.container = $(element); // we expect container to be jquery
+        let container = $(element);
+        this.container = $(element); // we expect container to be jquery
         let glDOM = null;
         let _stateManager = null;
 
@@ -46,15 +48,15 @@ $3Dmol.GLViewer = (function() {
         const surfaces = {};
         const shapes = []; // Generic shapes
         const labels = [];
-        const fixed_labels = [];
+        const fixedLabels = [];
         const clickables = []; // things you can click on
         const hoverables = []; // things you can hover over
         const contextMenuEnabledAtoms = []; // atoms with context menu
-        let current_hover = null;
+        let currentHover = null;
         let hoverDuration = 500;
-        let viewer_frame = 0;
+        let viewerFrame = 0;
 
-        if(config.hoverDuration != undefined) {
+        if(config.hoverDuration !== undefined) {
             hoverDuration = config.hoverDuration;
         }
         if(config.antialias === undefined) config.antialias = true;
@@ -64,7 +66,7 @@ $3Dmol.GLViewer = (function() {
         const getRect = function() {
           const div = container[0];
           let rect = div.getBoundingClientRect();
-          if(rect.width == 0 && rect.height == 0 && div.style.display === 'none' ) {
+          if(rect.width === 0 && rect.height === 0 && div.style.display === 'none' ) {
             const oldpos = div.style.position;
             const oldvis = div.style.visibility;
             div.style.display = 'block';
@@ -130,7 +132,7 @@ $3Dmol.GLViewer = (function() {
         const {cols} = config;
         const {rows} = config;
         const {viewers} = config;
-        const {control_all} = config;
+        const {controlAll} = config;
 
         let ASPECT =renderer.getAspect(WIDTH,HEIGHT);
 
@@ -169,11 +171,11 @@ $3Dmol.GLViewer = (function() {
 
         const decAnim = function() {
             // decrement the number of animations currently
-            animated--;
+            animated-=1;
             if(animated < 0) animated = 0;
         };
         const incAnim = function() {
-            animated++;
+            animated+=1;
         };
         const nextSurfID = function() {
             // compute the next highest surface id directly from surfaces
@@ -283,14 +285,14 @@ $3Dmol.GLViewer = (function() {
                         clickable : true
                     });
 
-                    const hoverable_atoms = model.selectedAtoms({
+                    const hoverableAtoms = model.selectedAtoms({
                         hoverable : true
                     });
 
-                    const contextMenuEnabled_atom = model.selectedAtoms({ contextMenuEnabled : true });
-                    // Array.prototype.push.apply(hoverables,hoverable_atoms);
-                    for (let n = 0; n < hoverable_atoms.length; n++) {
-                        hoverables.push(hoverable_atoms[n]);
+                    const contextMenuEnabledAtom = model.selectedAtoms({ contextMenuEnabled : true });
+                    // Array.prototype.push.apply(hoverables,hoverableAtoms);
+                    for (let n = 0; n < hoverableAtoms.length; n++) {
+                        hoverables.push(hoverableAtoms[n]);
                     }
 
                     // Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
@@ -299,8 +301,8 @@ $3Dmol.GLViewer = (function() {
                     }
 
                     // add atoms into contextMenuEnabledAtoms
-                    for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
-                        contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
+                    for (let m = 0; m < contextMenuEnabledAtom.length; m++) {
+                        contextMenuEnabledAtoms.push(contextMenuEnabledAtom[m]);
                     }
 
                 }
@@ -334,7 +336,7 @@ $3Dmol.GLViewer = (function() {
             if(!Array.isArray(objects)) { // assume selection object
                 objects = this.selectedAtoms(objects);
             }
-            if(objects.length == 0) return [];
+            if(objects.length === 0) return [];
             raycaster.setFromCamera(mouse,camera);
             return raycaster.intersectObjects(modelGroup, objects);
         };
@@ -397,16 +399,16 @@ $3Dmol.GLViewer = (function() {
 
 
 
-        // set current_hover to sel (which can be null), calling appropraite callbacks
+        // set currentHover to sel (which can be null), calling appropraite callbacks
         const setHover = function(selected, event) {
-            if(current_hover == selected) return;
-            if(current_hover) {
-                if(typeof (current_hover.unhoverCallback) != "function") {
-                    current_hover.unhoverCallback = $3Dmol.makeFunction(current_hover.unhoverCallback);
+            if(currentHover === selected) return;
+            if(currentHover) {
+                if(typeof (currentHover.unhoverCallback) != "function") {
+                    currentHover.unhoverCallback = $3Dmol.makeFunction(currentHover.unhoverCallback);
                 }
-                current_hover.unhoverCallback(current_hover, _viewer, event, container);
+                currentHover.unhoverCallback(currentHover, _viewer, event, container);
             }
-            current_hover=selected;
+            currentHover=selected;
 
             if (selected && selected.hoverCallback !== undefined) {
                 if(typeof (selected.hoverCallback) != "function") {
@@ -421,12 +423,12 @@ $3Dmol.GLViewer = (function() {
 
         // checks for selection intersects on hover
         const handleHoverSelection = function(mouseX, mouseY){
-            if(hoverables.length == 0) return;
+            if(hoverables.length === 0) return;
             const intersects = targetedObjects(mouseX,mouseY,hoverables);
             if (intersects.length) {
                 const selected = intersects[0].clickable;
                 setHover(selected);
-                current_hover=selected;
+                currentHover=selected;
             }
             else{
                 setHover(null);
@@ -436,10 +438,10 @@ $3Dmol.GLViewer = (function() {
         // sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
         const handleHoverContinue = function(mouseX,mouseY){
             const intersects = targetedObjects(mouseX,mouseY,hoverables);
-            if(intersects.length == 0 || intersects[0] === undefined){
+            if(intersects.length === 0 || intersects[0] === undefined){
                 setHover(null);
             }
-            if(intersects[0]!== undefined && intersects[0].clickable !== current_hover){
+            if(intersects[0]!== undefined && intersects[0].clickable !== currentHover){
                 setHover(null);
             }
         };
@@ -456,7 +458,7 @@ $3Dmol.GLViewer = (function() {
         // check targetTouches as well
         const getX = function(ev) {
             let x = ev.pageX;
-            if(x == undefined) x = ev.originalEvent.pageX; // firefox
+            if(x === undefined) x = ev.originalEvent.pageX; // firefox
             if (ev.originalEvent.targetTouches &&
                     ev.originalEvent.targetTouches[0]) {
                 x = ev.originalEvent.targetTouches[0].pageX;
@@ -470,7 +472,7 @@ $3Dmol.GLViewer = (function() {
 
         const getY = function(ev) {
             let y = ev.pageY;
-            if(y == undefined) y = ev.originalEvent.pageY;
+            if(y === undefined) y = ev.originalEvent.pageY;
             if (ev.originalEvent.targetTouches &&
                     ev.originalEvent.targetTouches[0]) {
                 y = ev.originalEvent.targetTouches[0].pageY;
@@ -528,7 +530,7 @@ $3Dmol.GLViewer = (function() {
 
         // for grid viewers, return true if point is in this viewer
         const isInViewer = function(x,y) {
-            if(viewers != undefined && !control_all){
+            if(viewers !== undefined && !controlAll){
                 const width = WIDTH/cols;
                 const height = HEIGHT/rows;
                 const offset = canvasOffset();
@@ -538,7 +540,7 @@ $3Dmol.GLViewer = (function() {
                 const r = rows-Math.floor(rely/height)-1;
                 const c = Math.floor(relx/width);
 
-                if(r != row || c != col)
+                if(r !== row || c !== col)
                     return false;
             }
             return true;
@@ -554,7 +556,7 @@ $3Dmol.GLViewer = (function() {
             if(isDragging && scene) { // saw mousedown, haven't moved
                 const x = getX(ev);
                 const y = getY(ev);
-                if(x == mouseStartX && y == mouseStartY) {
+                if(x === mouseStartX && y === mouseStartY) {
                     const offset = canvasOffset();
                     const mouseX = ((x - offset.left) / WIDTH) * 2 - 1;
                     const mouseY = -((y - offset.top) / HEIGHT) * 2 + 1;
@@ -739,7 +741,7 @@ $3Dmol.GLViewer = (function() {
             touchHold = true;
             touchDistanceStart = 0;
             if (ev.originalEvent.targetTouches &&
-                    ev.originalEvent.targetTouches.length == 2) {
+                    ev.originalEvent.targetTouches.length === 2) {
                 touchDistanceStart = calcTouchDistance(ev);
             }
             cq = rotationGroup.quaternion.clone();
@@ -750,7 +752,7 @@ $3Dmol.GLViewer = (function() {
 
             setTimeout(()=> {
                 if(ev.originalEvent.targetTouches) {
-                    if(touchHold == true){
+                    if(touchHold === true){
                         // console.log('Touch hold', x,y);
                         glDOM = $(renderer.domElement);
                         glDOM.trigger('contextmenu');
@@ -828,7 +830,7 @@ $3Dmol.GLViewer = (function() {
                         }, "image/png");
                     }));
                     framecnt += 1;
-                    if(framecnt == nframes) {
+                    if(framecnt === nframes) {
                          viewChangeCallback = oldcb;
                         
                          Promise.all(bufpromise).then((buffers) => {                                
@@ -893,7 +895,7 @@ $3Dmol.GLViewer = (function() {
             const mouseY = -((getY(ev) - offset.top) / HEIGHT) * 2 + 1;
 
             // hover timeout
-            if(current_hover !== null) {
+            if(currentHover !== null) {
                 handleHoverContinue(mouseX,mouseY,ev);
             }
 
@@ -925,15 +927,15 @@ $3Dmol.GLViewer = (function() {
             let dx = (x - mouseStartX) / WIDTH;
             let dy = (y - mouseStartY) / HEIGHT;
             // check for pinch
-            if (touchDistanceStart != 0 &&
+            if (touchDistanceStart !== 0 &&
                     ev.originalEvent.targetTouches &&
-                    ev.originalEvent.targetTouches.length == 2) {
+                    ev.originalEvent.targetTouches.length === 2) {
                 const newdist = calcTouchDistance(ev);
                 // change to zoom
                 mode = 2;
                 dy = (newdist - touchDistanceStart) * 2 / (WIDTH + HEIGHT);
             } else if (ev.originalEvent.targetTouches &&
-                    ev.originalEvent.targetTouches.length == 3) {
+                    ev.originalEvent.targetTouches.length === 3) {
                 // translate
                 mode = 1;
             }
@@ -943,20 +945,20 @@ $3Dmol.GLViewer = (function() {
             dy*=ratioY;
             const r = Math.sqrt(dx * dx + dy * dy);
             let scaleFactor;
-            if (mode == 3 || (mouseButton == 3 && ev.ctrlKey)) { // Slab
+            if (mode === 3 || (mouseButton === 3 && ev.ctrlKey)) { // Slab
                 slabNear = cslabNear + dx * 100;
                 slabFar = cslabFar - dy * 100;
-            } else if (mode == 2 || mouseButton == 3 || ev.shiftKey) { // Zoom
+            } else if (mode === 2 || mouseButton === 3 || ev.shiftKey) { // Zoom
                 scaleFactor = (CAMERA_Z - rotationGroup.position.z) * 0.85;
                 if (scaleFactor < 80)
                     scaleFactor = 80;
                 rotationGroup.position.z = cz + dy * scaleFactor;
                 rotationGroup.position.z = adjustZoomToLimits(rotationGroup.position.z);
-            } else if (mode == 1 || mouseButton == 2 || ev.ctrlKey) { // Translate
+            } else if (mode === 1 || mouseButton === 2 || ev.ctrlKey) { // Translate
                 const t = screenOffsetToModel(ratioX*(x-mouseStartX), ratioY*(y-mouseStartY));
                 modelGroup.position.addVectors(currentModelPos,t);
 
-            } else if ((mode === 0 || mouseButton == 1) && r !== 0) { // Rotate
+            } else if ((mode === 0 || mouseButton === 1) && r !== 0) { // Rotate
                 const rs = Math.sin(r * Math.PI) / r;
                 dq.x = Math.cos(r * Math.PI);
                 dq.y = 0;
@@ -989,9 +991,10 @@ $3Dmol.GLViewer = (function() {
             const newX = getX(ev);
             const newY = getY(ev);
 
-            if(newX != mouseStartX || newY != mouseStartY){
+            // eslint-disable-next-line no-empty
+            if(newX !== mouseStartX || newY !== mouseStartY){
                 
-            }else{
+            }else{// if(newX === mouseStartX && newY === mouseStartY)
                 // console.log('Context Menu Called', ev);
                 const x = mouseStartX;
                 const y = mouseStartY;
@@ -1197,7 +1200,7 @@ $3Dmol.GLViewer = (function() {
 
         $(window).resize(this.resize);
 
-        if(typeof(window.ResizeObserver) !== undefined) {
+        if(typeof(window.ResizeObserver) !== 'undefined') {
             const divwatcher = new window.ResizeObserver(this.resize);
             divwatcher.observe(container[0]);
         }
@@ -1224,13 +1227,13 @@ $3Dmol.GLViewer = (function() {
          */
         this.getModel = function(id) {
             if(id === undefined) {
-                return models.length == 0 ? null : models[models.length-1];
+                return models.length === 0 ? null : models[models.length-1];
             }
             if(id instanceof $3Dmol.GLModel) {
                 return id;
             }
             if(!(id in models)) {
-                if(models.length == 0)
+                if(models.length === 0)
                     return null;
                 return models[models.length-1]; // get last model if no (or invalid) id specified
             }
@@ -1242,8 +1245,8 @@ $3Dmol.GLViewer = (function() {
         const slerp = function(v0, v1, t) {
             // Compute the cosine of the angle between the two vectors.
             // dot product
-            if(t == 1) return v1;
-            if(t == 0) return v0;
+            if(t === 1) return v1;
+            if(t === 0) return v0;
             let dot = v0.x*v1.x+v0.y*v1.y+v0.z*v1.z+v0.w*v1.w;
             if (dot > 0.9995) {
                 // If the inputs are too close for comfort, linearly interpolate
@@ -1269,8 +1272,8 @@ $3Dmol.GLViewer = (function() {
             if(dot > 1) dot = 1.0;
             else if(dot < -1) dot = -1.0;
 
-            const theta_0 = Math.acos(dot);  // theta_0 = angle between input vectors
-            const theta = theta_0*t;    // theta = angle between v0 and result
+            const theta0 = Math.acos(dot);  // theta0 = angle between input vectors
+            const theta = theta0*t;    // theta = angle between v0 and result
 
             const v2 = v1.clone();
             v2.sub(v0.clone().multiplyScalar(dot));
@@ -1476,20 +1479,20 @@ $3Dmol.GLViewer = (function() {
                 axis = "y";
             }
 
-            if(axis == "x"){
+            if(axis === "x"){
                 axis = {x:1,y:0,z:0};
-            }else if(axis =="y"){
+            }else if(axis ==="y"){
                 axis = {x:0,y:1,z:0};
-            }else if(axis =="z"){
+            }else if(axis ==="z"){
                 axis = {x:0,y:0,z:1};
             }
 
             // support rotating with respect to view axis, not model
-            if(axis == "vx"){
+            if(axis === "vx"){
                 axis = {vx:1,vy:0,vz:0};
-            }else if(axis =="vy"){
+            }else if(axis ==="vy"){
                 axis = {vx:0,vy:1,vz:0};
-            }else if(axis =="vz"){
+            }else if(axis ==="vz"){
                 axis = {vx:0,vy:0,vz:1};
             }
 
@@ -1611,8 +1614,8 @@ $3Dmol.GLViewer = (function() {
 
             for (i = 0; i < shapes.length; i++) {
                 if (shapes[i]) { // exists
-                    if ((typeof(shapes[i].frame) === 'undefined' || viewer_frame < 0 ||
-                                    shapes[i].frame < 0 || shapes[i].frame == viewer_frame)) {
+                    if ((typeof(shapes[i].frame) === 'undefined' || viewerFrame < 0 ||
+                                    shapes[i].frame < 0 || shapes[i].frame === viewerFrame)) {
                         shapes[i].globj(modelGroup, exts);
                     } else { // should not be displayed in current frame
                         shapes[i].removegl(modelGroup);
@@ -1623,7 +1626,7 @@ $3Dmol.GLViewer = (function() {
             for (i = 0; i < labels.length; i++) {
                 if (labels[i] && typeof(labels[i].frame) != 'undefined' && labels[i].frame >= 0) { // exists and has frame specifier
                     modelGroup.remove(labels[i].sprite);
-                    if (viewer_frame < 0 || labels[i].frame == viewer_frame) {
+                    if (viewerFrame < 0 || labels[i].frame === viewerFrame) {
                         modelGroup.add(labels[i].sprite);
                     }
                 }
@@ -1665,16 +1668,16 @@ $3Dmol.GLViewer = (function() {
                             else {
                                 smesh = new $3Dmol.Mesh(geo, surfArr[n].mat);
                             }
-                            if(surfArr[n].mat.transparent && surfArr[n].mat.opacity == 0) {
+                            if(surfArr[n].mat.transparent && surfArr[n].mat.opacity === 0) {
                                 // don't bother with hidden surfaces
                                 smesh.visible = false;
                             } else {
                                 smesh.visible = true;
                             }
                             if (surfArr[n].symmetries.length > 1 ||
-                            (surfArr[n].symmetries.length == 1 &&
+                            (surfArr[n].symmetries.length === 1 &&
                             !(surfArr[n].symmetries[n].isIdentity()))) {
-                                var j;
+                                let j;
                                 const tmeshes = new $3Dmol.Object3D(); // transformed meshes
                                 for (j = 0; j < surfArr[n].symmetries.length; j++) {
                                     const tmesh = smesh.clone();
@@ -1849,16 +1852,16 @@ $3Dmol.GLViewer = (function() {
             factor = factor || 2;
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
             const scale = (CAMERA_Z - rotationGroup.position.z) / factor;
-            const final_z = CAMERA_Z - scale;
+            const finalZ = CAMERA_Z - scale;
 
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
-                        adjustZoomToLimits(final_z),
+                        adjustZoomToLimits(finalZ),
                         rotationGroup.quaternion,
                         lookingAt);
             } else { // no animation
-                rotationGroup.position.z = adjustZoomToLimits(final_z);
+                rotationGroup.position.z = adjustZoomToLimits(finalZ);
                 show();
             }
             return this;
@@ -1897,15 +1900,15 @@ $3Dmol.GLViewer = (function() {
             projector.unprojectVector(v, camera);
             v.z = 0;
 
-            const final_position=lookingAt.clone().add(v);
+            const finalPosition=lookingAt.clone().add(v);
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
                         modelGroup.position,
                         rotationGroup.position.z,
                         rotationGroup.quaternion,
-                        final_position);
+                        finalPosition);
             } else { // no animation
-                lookingAt = final_position;
+                lookingAt = finalPosition;
                 camera.lookAt(lookingAt);
                 show();
             }
@@ -1938,7 +1941,7 @@ $3Dmol.GLViewer = (function() {
             animationDuration = animationDuration!==undefined ? animationDuration : 0;
 
             const t = screenOffsetToModel(x,y);
-            const final_position=modelGroup.position.clone().add(t);
+            const finalPosition=modelGroup.position.clone().add(t);
 
             if(animationDuration>0){
                 animateMotion(animationDuration,fixedPath,
@@ -1947,7 +1950,7 @@ $3Dmol.GLViewer = (function() {
                         rotationGroup.quaternion,
                         lookingAt);
             } else { // no animation
-                modelGroup.position = final_position;
+                modelGroup.position = finalPosition;
                 show();
             }
             return this;
@@ -2304,7 +2307,7 @@ $3Dmol.GLViewer = (function() {
             label.setContext();
             modelGroup.add(label.sprite);
             if(options.fixed)
-                fixed_labels.push(labels.length);
+                fixedLabels.push(labels.length);
             labels.push(label);
 
             if(!noshow) show();
@@ -2383,7 +2386,7 @@ $3Dmol.GLViewer = (function() {
         this.removeLabel = function(label) {
             // todo: don't do the linear search
             for(let i = 0; i < labels.length; i++) {
-                if(labels[i] == label) {
+                if(labels[i] === label) {
                     labels.splice(i,1);
                     label.dispose();
                     modelGroup.remove(label.sprite);
@@ -2520,7 +2523,7 @@ $3Dmol.GLViewer = (function() {
             if(spec.hasOwnProperty("x") && spec.hasOwnProperty("y") && spec.hasOwnProperty("z"))
                 return spec;
             const atoms = getAtomsFromSel(spec);
-            if(atoms.length == 0)
+            if(atoms.length === 0)
                 return {x:0,y:0,z:0};
 
             const extent = $3Dmol.getExtent(atoms);
@@ -2574,10 +2577,10 @@ $3Dmol.GLViewer = (function() {
         this.addBox = function(spec) {
             spec = spec || {};
 
-            if(spec.corner != undefined) {
+            if(spec.corner !== undefined) {
                 spec.corner = getSelectionCenter(spec.corner);
             }
-            if(spec.center != undefined) {
+            if(spec.center !== undefined) {
                 spec.center = getSelectionCenter(spec.center);
             }
 
@@ -2975,14 +2978,14 @@ $3Dmol.GLViewer = (function() {
                 const {matrix} = cryst;
                 const makeoff = function(I) {
                     // alternate around zero: 1,-1,2,-2...
-                    if(I%2 == 0) return -I/2;
+                    if(I%2 === 0) return -I/2;
                     return Math.ceil(I/2);
                 };
 
                 for(let i = 0; i < A; i++) {
                     for(let j = 0; j < B; j++) {
                         for(let k = 0; k < C; k++) {
-                            if(i == 0 && j == 0 && k == 0) continue; // actual unit cell
+                            if(i === 0 && j === 0 && k === 0) continue; // actual unit cell
                             const offset = new $3Dmol.Vector3(makeoff(i),makeoff(j),makeoff(k));
                             offset.applyMatrix3(matrix);
 
@@ -3213,7 +3216,7 @@ $3Dmol.GLViewer = (function() {
          * @return {Promise}
          */
         this.setFrame = function (framenum) {
-            viewer_frame = framenum;
+            viewerFrame = framenum;
             const viewer = this;
             return new Promise((resolve) => {
                 const modelMap = models.map((model) => model.setFrame(framenum,viewer));
@@ -3228,7 +3231,7 @@ $3Dmol.GLViewer = (function() {
          * @function $3Dmol.GLViewer#getFrame
          */
         this.getFrame = function () {
-            return viewer_frame;
+            return viewerFrame;
         };
 
         /**
@@ -3295,14 +3298,14 @@ $3Dmol.GLViewer = (function() {
             let resolve; let intervalID;
             const display = function(direction) {
                 time = new Date();
-                if (direction == "forward") {
+                if (direction === "forward") {
                     that.setFrame(currFrame)
                     .then(() => {
                         currFrame = (currFrame + inc) % mostFrames;
                         resolve();
                     });
                 }
-                else if (direction == "backward") {
+                else if (direction === "backward") {
                     that.setFrame((mostFrames-1) - currFrame)
                     .then(() => {
                         currFrame = (currFrame + inc) % mostFrames;
@@ -3313,7 +3316,7 @@ $3Dmol.GLViewer = (function() {
                     that.setFrame(currFrame)
                     .then(() => {
                         currFrame += inc;
-                        inc *= (((currFrame % (mostFrames-1)) == 0) ? -1 : 1);
+                        inc *= (((currFrame % (mostFrames-1)) === 0) ? -1 : 1);
                         resolve();
                     });
                 }
@@ -3324,7 +3327,8 @@ $3Dmol.GLViewer = (function() {
                     // we no longer exist
                     that.stopAnimate();
                 }
-                else if (++displayCount == displayMax || !that.isAnimated()) {
+                // eslint-disable-next-line no-plusplus
+                else if (++displayCount === displayMax || !that.isAnimated()) {
                     clearTimeout(intervalID);
                     animationTimers.delete(intervalID);
                     decAnim();
@@ -3820,7 +3824,7 @@ $3Dmol.GLViewer = (function() {
                 ret[1] = [ extent[1][0], extent[1][1], extent[1][2] ];
                 return ret;
             }; // copyExtent
-            var splitExtentR = function(extent) {
+            const splitExtentR = function(extent) {
                 // recursively split until volume is below maxVol
                 if (volume(extent) < maxVolume) {
                     return [ extent ];
@@ -3920,7 +3924,7 @@ $3Dmol.GLViewer = (function() {
                 vertexArray[offset] = v[i].x;
                 vertexArray[offset + 1] = v[i].y;
                 vertexArray[offset + 2] = v[i].z;
-                geoGroup.vertices++;
+                geoGroup.vertices+=1;
             }
 
             // set colorArray of there are per-atom colors
@@ -4032,7 +4036,7 @@ $3Dmol.GLViewer = (function() {
 
             ps.buildboundary();
 
-            if (type == $3Dmol.SurfaceType.SES || type == $3Dmol.SurfaceType.MS) {
+            if (type === $3Dmol.SurfaceType.SES || type === $3Dmol.SurfaceType.MS) {
                 ps.fastdistancemap();
                 ps.boundingatom(false);
                 ps.fillvoxelswaals(atoms, extendedAtoms);
@@ -4171,7 +4175,7 @@ $3Dmol.GLViewer = (function() {
             for (n = 0; n < models.length; n++) {
                 if(models[n]) {
                     const symMatrices = models[n].getSymmetries();
-                    if (symMatrices.length > 1 || (symMatrices.length == 1 && !(symMatrices[0].isIdentity()))) {
+                    if (symMatrices.length > 1 || (symMatrices.length === 1 && !(symMatrices[0].isIdentity()))) {
                         symmetries = true;
                         break;
                     }
@@ -4327,8 +4331,8 @@ $3Dmol.GLViewer = (function() {
                             _viewer.render();
 
                         //    console.log("async mesh generation " + (+new Date() - time) + "ms");
-                            cnt++;
-                            if (cnt == extents.length) {
+                            cnt+=1;
+                            if (cnt === extents.length) {
                                 surfobj.done = true;
                                 releaseMemory();
                                 resolve(surfid); // caller of helper will resolve callback if present

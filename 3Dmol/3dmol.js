@@ -162,7 +162,7 @@ $3Dmol.createViewer = function(element, config, sharedViewerResources)
      {
        rows: 2,
        cols: 2,
-       control_all: true  //mouse controls all viewers
+       controlAll: true  //mouse controls all viewers
      },
      { backgroundColor: 'lightgrey' }
    );
@@ -209,7 +209,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewerConfig){
 
     viewerConfig.rows = config.rows;
     viewerConfig.cols = config.cols;
-    viewerConfig.control_all = config.control_all !== undefined ? config.control_all : false;
+    viewerConfig.controlAll = config.controlAll !== undefined ? config.controlAll : false;
     $(element).append($(canvas));
 
       // try to create the  viewer
@@ -221,7 +221,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewerConfig){
           viewerConfig.col = c;
           viewerConfig.canvas = canvas;
           viewerConfig.viewers = viewers;
-          viewerConfig.control_all = config.control_all;
+          viewerConfig.controlAll = config.controlAll;
           const viewer = $3Dmol.createViewer(element, viewerConfig);
           row.push(viewer);
         }
@@ -683,7 +683,7 @@ $3Dmol.createStereoViewer = function(element) {
         element = $(`#${element}`);
     if(!element) return;
     
-    const viewers = $3Dmol.createViewerGrid(element, {rows: 1, cols: 2, control_all: true});
+    const viewers = $3Dmol.createViewerGrid(element, {rows: 1, cols: 2, controlAll: true});
     
     this.glviewer1 = viewers[0][0];
     this.glviewer2 = viewers[0][1];

@@ -28,7 +28,7 @@
  * @prop lowerZoomLimit
  * @prop upperZoomLimit
  * @prop {boolean} antialias
- * @prop {boolean} control_all
+ * @prop {boolean} controlAll
  * @prop {boolean} orthographic
  * @prop {boolean} disableFog - Disable fog, default to false
  */
@@ -38,7 +38,7 @@
  * @typedef ViewerGridSpec
  * @prop {number} rows - number of rows in grid
  * @prop {number} cols - number of columns in grid
- * @prop {boolean} control_all - if true, mouse events are linked
+ * @prop {boolean} controlAll - if true, mouse events are linked
  */
 
 /**

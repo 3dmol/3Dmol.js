@@ -143,7 +143,7 @@ $$$$
      {
        rows: 2,
        cols: 1,
-       control_all: true  //mouse controls all viewers
+       controlAll: true  //mouse controls all viewers
      }
    );
    

@@ -115,7 +115,7 @@ if(warn) {
             if len(viewergrid) != 2:
                 raise ValueError("Incorrectly formated viewergrid arguments.  Must specify rows x columns",viewergrid)
             self.startjs += "var viewergrid_UNIQUEID = null;\n";
-            self.startjs += 'viewergrid_UNIQUEID = $3Dmol.createViewerGrid($("#%s"),{rows: %d, cols: %d, control_all: %s},{backgroundColor:"white"});\n' % (divid, viewergrid[0],viewergrid[1],'true' if linked else 'false')
+            self.startjs += 'viewergrid_UNIQUEID = $3Dmol.createViewerGrid($("#%s"),{rows: %d, cols: %d, controlAll: %s},{backgroundColor:"white"});\n' % (divid, viewergrid[0],viewergrid[1],'true' if linked else 'false')
             self.startjs += "viewer_UNIQUEID = viewergrid_UNIQUEID[0][0];\n"
             self.viewergrid = viewergrid
         else:
