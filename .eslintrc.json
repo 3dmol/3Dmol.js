@@ -23,7 +23,7 @@
         "no-shadow":"warn",
         "no-useless-escape":"warn",
         "radix":"warn",
-        "no-multi-assign":["error", {"ignoreNonDeclaration":true}],
+        "no-multi-assign":["warn", {"ignoreNonDeclaration":true}],
         "no-continue":"warn",
         "no-redeclare":["error", {"builtinGlobals": false}],
         "no-unused-vars":"warn",
@@ -39,7 +39,7 @@
         "no-underscore-dangle":"warn",
         "no-undef":"warn",
         "new-cap":["error", {"newIsCap": false, "capIsNew": false}],
-        "no-bitwise":["error", {"allow":["|=", "&", ">>", "<<", "~", "&="]}]
+        "no-bitwise":["error", {"allow":["|=", "&", ">>", "<<", "~", "&=", "|"]}]
     },
     "globals":{
         "$3Dmol": "writable",

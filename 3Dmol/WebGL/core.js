@@ -3,11 +3,11 @@
  * Geometry class
  */
 
-//Event Handling
+// Event Handling
 /** @this {$3Dmol.EventDispatcher} */
 $3Dmol.EventDispatcher = function() {
   
-    var listeners = {};
+    const listeners = {};
     
     this.addEventListener = function(type, listener) {
         if (listeners[type] === undefined)
@@ -19,7 +19,7 @@ $3Dmol.EventDispatcher = function() {
     
     this.removeEventListener = function(type, listener) {
         
-        var index = listeners[type].indexOf(listener);
+        const index = listeners[type].indexOf(listener);
         
         if (index !== -1)
             listeners[type].splice(index, 1);
@@ -28,12 +28,12 @@ $3Dmol.EventDispatcher = function() {
     
     this.dispatchEvent = function(event) {
         
-        var listenerArray = listeners[event.type];
+        const listenerArray = listeners[event.type];
         
         if (listenerArray !== undefined) {
             event.target = this;
             
-            for (var i = 0, l = listenerArray.length; i < l; i++)
+            for (let i = 0, l = listenerArray.length; i < l; i++)
                 listenerArray[i].call(this, event);
                 
         }
@@ -62,12 +62,12 @@ $3Dmol.Color.prototype = {
     
     r: 0.0, g: 0.0, b: 0.0,
     
-    set : function(val) {
+    set(val) {
         
             if (val instanceof $3Dmol.Color) 
                 return val.clone();
 
-            else if (typeof val === 'number')
+            if (typeof val === 'number')
                 this.setHex(val);
             
             else if (typeof val === 'object' && "r" in val && "g" in val && "b" in val) {
@@ -77,7 +77,7 @@ $3Dmol.Color.prototype = {
             }
     },
     
-    setHex: function(hex) {
+    setHex(hex) {
         
             hex = Math.floor(hex);
 
@@ -88,18 +88,18 @@ $3Dmol.Color.prototype = {
             return this;
     },
     
-    getHex: function() {
-        var R = Math.round(this.r*255);
-        var G = Math.round(this.g*255);
-        var B = Math.round(this.b*255);
+    getHex() {
+        const R = Math.round(this.r*255);
+        const G = Math.round(this.g*255);
+        const B = Math.round(this.b*255);
         return R<<16 | G << 8 | B;
     },
     
-    clone : function() {
+    clone() {
             return new $3Dmol.Color(this.r, this.g, this.b);
     },
         
-    copy : function(color) {
+    copy(color) {
         this.r = color.r;
         this.g = color.g;
         this.b = color.b;
@@ -107,9 +107,9 @@ $3Dmol.Color.prototype = {
         return this;
     },
     
-    //return object that represents color components from 0 to 255
-    scaled : function() {
-        var ret = {};
+    // return object that represents color components from 0 to 255
+    scaled() {
+        const ret = {};
         ret.r = Math.round(this.r*255);
         ret.g = Math.round(this.g*255);
         ret.b = Math.round(this.b*255);
@@ -119,11 +119,11 @@ $3Dmol.Color.prototype = {
     
 };
 
-//Object3D base constructor function
+// Object3D base constructor function
 /** @this {$3Dmol.Object3D} */
 $3Dmol.Object3D = function() {
     
-    this.id = $3Dmol.Object3DIDCount++;
+    this.id = $3Dmol.Object3DIDCount+=1;
     
     this.name = "";
     
@@ -153,7 +153,7 @@ $3Dmol.Object3D.prototype = {
     
     constructor : $3Dmol.Object3D,
     
-    lookAt : function(vector) {
+    lookAt(vector) {
         
         this.matrix.lookAt(vector, this.position, this.up);
         
@@ -166,8 +166,8 @@ $3Dmol.Object3D.prototype = {
         }
     },
     
-    //add child object
-    add : function(object) {
+    // add child object
+    add(object) {
         if (object === this){
             console.error("Can't add $3Dmol.Object3D to itself");
             return;
@@ -176,9 +176,9 @@ $3Dmol.Object3D.prototype = {
         object.parent = this;
         this.children.push(object);
         
-        //add to the scene (i.e. follow up this instance's parents until reach the top)
+        // add to the scene (i.e. follow up this instance's parents until reach the top)
         
-        var scene = this;
+        let scene = this;
         
         while (scene.parent !== undefined)
             scene = scene.parent;
@@ -188,18 +188,18 @@ $3Dmol.Object3D.prototype = {
         
     },
     
-    remove : function(object) {
+    remove(object) {
         
-        var index = this.children.indexOf(object);
+        const index = this.children.indexOf(object);
         
         if (index !== -1) {
             
             object.parent = undefined;
             this.children.splice(index, 1);
             
-            //Remove from scene
+            // Remove from scene
             
-            var scene = this;
+            let scene = this;
             
             while (scene.parent !== undefined)
                 scene = scene.parent;
@@ -210,37 +210,37 @@ $3Dmol.Object3D.prototype = {
         }
     },
     
-    //convert to vrml
-    vrml: function(indent) {
-        //attempt to pretty print
+    // convert to vrml
+    vrml(indent) {
+        // attempt to pretty print
         if(!indent) indent = ' ';
-        //all objects have a transformation (usually identity)
-        //not quite sure if getting rotation right here..
-        var theta = 2*Math.atan2(this.quaternion.lengthxyz(),this.quaternion.w);
-        var x = 0, y = 0, z = 0;
-        if(theta != 0) {
-            let st = Math.sin(theta/2);
+        // all objects have a transformation (usually identity)
+        // not quite sure if getting rotation right here..
+        const theta = 2*Math.atan2(this.quaternion.lengthxyz(),this.quaternion.w);
+        let x = 0; let y = 0; let z = 0;
+        if(theta !== 0) {
+            const st = Math.sin(theta/2);
             x = this.quaternion.x/st;
             y = this.quaternion.y/st;
             z = this.quaternion.z/st;
         } 
-        var ret = indent+"Transform {\n" +
-        indent+" center "+this.position.x+" "+this.position.y+" "+this.position.z+"\n"+
-        indent+" rotation "+x+" "+y+" "+z+" "+theta+"\n"+
-        indent+" children [\n";
+        let ret = `${indent}Transform {\n${ 
+        indent} center ${this.position.x} ${this.position.y} ${this.position.z}\n${
+        indent} rotation ${x} ${y} ${z} ${theta}\n${
+        indent} children [\n`;
         
         if(this.geometry) {
             ret += this.geometry.vrml(indent, this.material);
         }
-        for(var i = 0; i < this.children.length; i++) {
-            ret += this.children[i].vrml(indent+" ")+",\n";
+        for(let i = 0; i < this.children.length; i++) {
+            ret += `${this.children[i].vrml(`${indent} `)},\n`;
         }
         ret += ' ]\n';
         ret += '}';
         return ret;
     },
     
-    updateMatrix : function() {
+    updateMatrix() {
         
         this.matrix.setPosition(this.position);
         
@@ -249,7 +249,7 @@ $3Dmol.Object3D.prototype = {
         else
             this.matrix.setRotationFromQuaternion(this.quaternion);
         
-        //TODO: Do I need this??
+        // TODO: Do I need this??
         if (this.scale.x !== 1 || this.scale.y !== 1 || this.scale.z !== 1)
             this.matrix.scale(this.scale);
             
@@ -257,7 +257,7 @@ $3Dmol.Object3D.prototype = {
         
     },
     
-    updateMatrixWorld : function(force) {
+    updateMatrixWorld(force) {
         
         if (this.matrixAutoUpdate === true) 
             this.updateMatrix();
@@ -273,13 +273,13 @@ $3Dmol.Object3D.prototype = {
         
         this.matrixWorldNeedsUpdate = false;
         
-        //Update matrices of all children
-        for (var i = 0; i < this.children.length; i++) {
+        // Update matrices of all children
+        for (let i = 0; i < this.children.length; i++) {
             this.children[i].updateMatrixWorld(true);
         }
     },
     
-    clone : function(object) {
+    clone(object) {
         
         if (object === undefined)
             object = new $3Dmol.Object3D();
@@ -303,8 +303,8 @@ $3Dmol.Object3D.prototype = {
         
         object.visible = this.visible;
         
-        for (var i = 0; i < this.children.length; i++) {
-            var child = this.children[i];
+        for (let i = 0; i < this.children.length; i++) {
+            const child = this.children[i];
             object.add(child.clone());
         }
         
@@ -312,10 +312,10 @@ $3Dmol.Object3D.prototype = {
         
     },
     
-    setVisible: function(val) { //recursively set visibility
+    setVisible(val) { // recursively set visibility
         this.visible = val;
-        for (var i = 0; i < this.children.length; i++) {
-            var child = this.children[i];
+        for (let i = 0; i < this.children.length; i++) {
+            const child = this.children[i];
             child.setVisible(val);
         }
     }
@@ -323,23 +323,23 @@ $3Dmol.Object3D.prototype = {
 
 $3Dmol.Object3DIDCount = 0;
 
-//Geometry class
-//TODO: What can I remove - how can I optimize ?
+// Geometry class
+// TODO: What can I remove - how can I optimize ?
 $3Dmol.Geometry = (function() {
    
-    var BUFFERSIZE = 65535; //limited to 16bit indices
+    const BUFFERSIZE = 65535; // limited to 16bit indices
     
     
     /** @constructor */
-    var geometryGroup = function(id) {
+    const geometryGroup = function(id) {
         this.id = id || 0;
-        //for performance reasons, callers must directly modify these
+        // for performance reasons, callers must directly modify these
         this.vertexArray = null;
         this.colorArray = null;
         this.normalArray = null;
         this.faceArray = null;
         this.radiusArray = null;
-        //this.adjFaceArray=null;
+        // this.adjFaceArray=null;
         this.lineArray = null;
         this.vertices = 0;
         this.faceidx = 0;
@@ -348,15 +348,15 @@ $3Dmol.Geometry = (function() {
     };
     
     geometryGroup.prototype.setColors = function(setcolor) {
-        //apply a function that takes the vertex coordinate and returns a color
-        var v = this.vertexArray;
-        var c = this.colorArray;
-        if(v.length != c.length) {
+        // apply a function that takes the vertex coordinate and returns a color
+        const v = this.vertexArray;
+        const c = this.colorArray;
+        if(v.length !== c.length) {
             console.log("Cannot re-color geometry group due to mismatched lengths.");
             return;
         }
-        for(var i = 0; i < v.length; i+= 3) {
-            var col = setcolor(v[i],v[i+1],v[i+2]);
+        for(let i = 0; i < v.length; i+= 3) {
+            let col = setcolor(v[i],v[i+1],v[i+2]);
             if(!(col instanceof $3Dmol.Color)) {
                 col = $3Dmol.CC.color(col);
             }
@@ -376,10 +376,10 @@ $3Dmol.Geometry = (function() {
     
     geometryGroup.prototype.getCentroid = function() {
         
-        var centroid = new $3Dmol.Vector3();
-        var offset, x, y, z;
+        const centroid = new $3Dmol.Vector3();
+        let offset; let x; let y; let z;
         
-        for (var i = 0; i < this.vertices; ++i) {
+        for (let i = 0; i < this.vertices; ++i) {
             offset = i*3;
             
             x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
@@ -387,28 +387,28 @@ $3Dmol.Geometry = (function() {
             centroid.x += x; centroid.y += y; centroid.z += z;
         }
         
-        //divideScalar checks for 0 denom
+        // divideScalar checks for 0 denom
         centroid.divideScalar(this.vertices);
         
         return centroid;
     };
     
-    //setup normals - vertex and face array must exist
+    // setup normals - vertex and face array must exist
     geometryGroup.prototype.setNormals = function() {        
         
-        var faces = this.faceArray;
-        var verts = this.vertexArray;
-        var norms = this.normalArray;
+        const faces = this.faceArray;
+        const verts = this.vertexArray;
+        const norms = this.normalArray;
         
         if (! this.vertices || ! this.faceidx) 
             return;
         
-        //vertex indices
-        var a, b, c, 
-        //and actual vertices
-        vA, vB, vC, norm;
+        // vertex indices
+        let a; let b; let c; 
+        // and actual vertices
+        let vA; let vB; let vC; let norm;
             
-        for (var i = 0; i < faces.length / 3; ++i) {
+        for (let i = 0; i < faces.length / 3; ++i) {
             
             a = faces[i * 3] * 3;
             b = faces[i * 3 + 1] * 3;
@@ -422,7 +422,7 @@ $3Dmol.Geometry = (function() {
             vC.subVectors(vC, vB);
             vC.cross(vA);
             
-            //face normal
+            // face normal
             norm = vC;
             norm.normalize();
             
@@ -434,27 +434,27 @@ $3Dmol.Geometry = (function() {
                 
     };
     
-    //sets line index array from face arr
-    //Note - assumes all faces are triangles (i.e. there will
-    //be an extra diagonal for four-sided faces - user should 
-    //specify linearr for custom shape generation to show wireframe squares
-    //as rectangles rather than two triangles)
+    // sets line index array from face arr
+    // Note - assumes all faces are triangles (i.e. there will
+    // be an extra diagonal for four-sided faces - user should 
+    // specify linearr for custom shape generation to show wireframe squares
+    // as rectangles rather than two triangles)
     geometryGroup.prototype.setLineIndices = function() {
         
         if (! this.faceidx)
             return;
                     
-        if(this.lineArray && this.lineArray.length == this.faceidx*2 && this.lineidx == this.faceidx*2) 
-            return; //assume already computed
+        if(this.lineArray && this.lineArray.length === this.faceidx*2 && this.lineidx === this.faceidx*2) 
+            return; // assume already computed
         
-        var faceArr = this.faceArray, lineArr = this.lineArray = new Uint16Array(this.faceidx*2);      
+        const faceArr = this.faceArray; const lineArr = this.lineArray = new Uint16Array(this.faceidx*2);      
         this.lineidx = this.faceidx*2;         
             
-        for (var i = 0; i < this.faceidx / 3; ++i) {
+        for (let i = 0; i < this.faceidx / 3; ++i) {
             
-            var faceoffset = i*3;
-            var lineoffset = faceoffset*2;
-            var a = faceArr[faceoffset], b = faceArr[faceoffset+1], c = faceArr[faceoffset+2];
+            const faceoffset = i*3;
+            const lineoffset = faceoffset*2;
+            const a = faceArr[faceoffset]; const b = faceArr[faceoffset+1]; const c = faceArr[faceoffset+2];
             
             lineArr[lineoffset] = a; lineArr[lineoffset+1] = b;
             lineArr[lineoffset+2] = a; lineArr[lineoffset+3] = c;
@@ -464,120 +464,120 @@ $3Dmol.Geometry = (function() {
     };
     
     geometryGroup.prototype.vrml = function(indent, material) {
-        var ret = '';
-        ret += indent+'Shape {\n'+
-               indent+' appearance Appearance {\n'+
-               indent+'  material Material {\n' +
-               indent+'   diffuseColor '+material.color.r+' '+material.color.g+' '+material.color.b+'\n';
+        let ret = '';
+        ret += `${indent}Shape {\n${
+               indent} appearance Appearance {\n${
+               indent}  material Material {\n${ 
+               indent}   diffuseColor ${material.color.r} ${material.color.g} ${material.color.b}\n`;
         if(material.transparent) {
-            ret += indent+'   transparency '+(1.0-material.opacity)+'\n';            
+            ret += `${indent}   transparency ${1.0-material.opacity}\n`;            
         }
-        ret += indent+ '  }\n'; //material
-        ret += indent+' }\n'; //appearance
+        ret += `${indent }  }\n`; // material
+        ret += `${indent} }\n`; // appearance
         
-        var oldindent = indent;
-        indent += ' '; //inshape
+        const oldindent = indent;
+        indent += ' '; // inshape
         if(material instanceof $3Dmol.LineBasicMaterial) {
-            ret += indent+'geometry IndexedLineSet {\n' +
-            indent+' colorPerVertex TRUE\n'+
-            indent+' coord Coordinate {\n'+
-            indent+'  point [\n';
-            let x,y,z;
+            ret += `${indent}geometry IndexedLineSet {\n${ 
+            indent} colorPerVertex TRUE\n${
+            indent} coord Coordinate {\n${
+            indent}  point [\n`;
+            let x; let y; let z;
             for (let i = 0; i < this.vertices; ++i) {
-                let offset = i*3;                
+                const offset = i*3;                
                 x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
-                ret += indent+'   '+x+' '+y+' '+z+',\n';
+                ret += `${indent}   ${x} ${y} ${z},\n`;
             }
-            ret += indent+'  ]\n';
-            ret += indent+' }\n'; //end coordinate
+            ret += `${indent}  ]\n`;
+            ret += `${indent} }\n`; // end coordinate
             
             if(this.colorArray) {
-                ret += indent+' color Color {\n'+
-                    indent+'  color [\n';
+                ret += `${indent} color Color {\n${
+                    indent}  color [\n`;
                 for (let i = 0; i < this.vertices; ++i) {
-                    let offset = i*3;                
+                    const offset = i*3;                
                     x = this.colorArray[offset]; y = this.colorArray[offset+1]; z = this.colorArray[offset+2];
-                    ret += indent+'   '+x+' '+y+' '+z+',\n';
+                    ret += `${indent}   ${x} ${y} ${z},\n`;
                 }
-                ret += indent+'  ]\n';
-                ret += indent+' }\n'; //end color
+                ret += `${indent}  ]\n`;
+                ret += `${indent} }\n`; // end color
             }
             
-            ret += indent+' coordIndex [\n';
+            ret += `${indent} coordIndex [\n`;
             for(let i = 0; i < this.vertices; i += 2) {
-                ret += indent+'  '+i+', '+(i+1)+', -1,\n';
+                ret += `${indent}  ${i}, ${i+1}, -1,\n`;
             }
-            ret += indent+' ]\n';
-            ret += indent+'}\n'; //geometry
+            ret += `${indent} ]\n`;
+            ret += `${indent}}\n`; // geometry
         } else {
-            //faces
-            ret += indent+'geometry IndexedFaceSet {\n' +
-            indent+' colorPerVertex TRUE\n'+
-            indent+' normalPerVertex TRUE\n'+
-            indent+' solid FALSE\n';
+            // faces
+            ret += `${indent}geometry IndexedFaceSet {\n${ 
+            indent} colorPerVertex TRUE\n${
+            indent} normalPerVertex TRUE\n${
+            indent} solid FALSE\n`;
             
-            //vertices
-            ret += indent+' coord Coordinate {\n'+
-            indent+'  point [\n';
-            let x,y,z;
+            // vertices
+            ret += `${indent} coord Coordinate {\n${
+            indent}  point [\n`;
+            let x; let y; let z;
             for (let i = 0; i < this.vertices; ++i) {
-                let offset = i*3;                
+                const offset = i*3;                
                 x = this.vertexArray[offset]; y = this.vertexArray[offset+1]; z = this.vertexArray[offset+2];
-                ret += indent+'   '+x+' '+y+' '+z+',\n';
+                ret += `${indent}   ${x} ${y} ${z},\n`;
             }
-            ret += indent+'  ]\n';
-            ret += indent+' }\n'; //end coordinate
+            ret += `${indent}  ]\n`;
+            ret += `${indent} }\n`; // end coordinate
             
-            //normals
-            ret += indent+' normal Normal {\n'+
-                   indent+'  vector [\n';
+            // normals
+            ret += `${indent} normal Normal {\n${
+                   indent}  vector [\n`;
             for (let i = 0; i < this.vertices; ++i) {
-                let offset = i*3;                
+                const offset = i*3;                
                 x = this.normalArray[offset]; y = this.normalArray[offset+1]; z = this.normalArray[offset+2];
-                ret += indent+'   '+x+' '+y+' '+z+',\n';
+                ret += `${indent}   ${x} ${y} ${z},\n`;
             }
-            ret += indent+'  ]\n';
-            ret += indent+' }\n'; //end normal
+            ret += `${indent}  ]\n`;
+            ret += `${indent} }\n`; // end normal
             
-            //colors
+            // colors
             if(this.colorArray) {
-                ret += indent+' color Color {\n'+
-                    indent+'  color [\n';
+                ret += `${indent} color Color {\n${
+                    indent}  color [\n`;
                 for (let i = 0; i < this.vertices; ++i) {
-                    let offset = i*3;                
+                    const offset = i*3;                
                     x = this.colorArray[offset]; y = this.colorArray[offset+1]; z = this.colorArray[offset+2];
-                    ret += indent+'   '+x+' '+y+' '+z+',\n';
+                    ret += `${indent}   ${x} ${y} ${z},\n`;
                 }
-                ret += indent+'  ]\n';
-                ret += indent+' }\n'; //end color
+                ret += `${indent}  ]\n`;
+                ret += `${indent} }\n`; // end color
             }
             
-            //faces
-            ret += indent+' coordIndex [\n';
-            for(var i = 0; i < this.faceidx; i += 3) {
+            // faces
+            ret += `${indent} coordIndex [\n`;
+            for(let i = 0; i < this.faceidx; i += 3) {
                 x = this.faceArray[i]; y = this.faceArray[i+1]; z = this.faceArray[i+2];                
-                ret += indent+'  '+x+', '+y+', '+z+', -1,\n';
+                ret += `${indent}  ${x}, ${y}, ${z}, -1,\n`;
             }
-            ret += indent+' ]\n'; //end faces 
-            ret += indent+'}\n'; //geometry            
+            ret += `${indent} ]\n`; // end faces 
+            ret += `${indent}}\n`; // geometry            
         }
         
-        ret += oldindent+'}'; //shape
+        ret += `${oldindent}}`; // shape
         return ret;
     };
     
     geometryGroup.prototype.truncateArrayBuffers = function(mesh, reallocatemem) {
         
-        mesh = (mesh === true) ? true : false;
+        mesh = (mesh === true);
         
-        var vertexArr = this.vertexArray,
-            colorArr = this.colorArray,
-            normalArr = this.normalArray,
-            faceArr = this.faceArray,
-            lineArr = this.lineArray,
-            radiusArr = this.radiusArray;
+        const vertexArr = this.vertexArray;
+            const colorArr = this.colorArray;
+            const normalArr = this.normalArray;
+            const faceArr = this.faceArray;
+            const lineArr = this.lineArray;
+            const radiusArr = this.radiusArray;
 
-        //subarray to avoid copying and reallocating memory
+        // subarray to avoid copying and reallocating memory
         this.vertexArray = vertexArr.subarray(0,this.vertices*3);
         this.colorArray = colorArr.subarray(0,this.vertices*3);
         
@@ -585,7 +585,7 @@ $3Dmol.Geometry = (function() {
             this.normalArray = normalArr.subarray(0,this.vertices*3);
             this.faceArray = faceArr.subarray(0,this.faceidx); 
             
-            if(this.lineidx > 0) //not always set so reclaim memory
+            if(this.lineidx > 0) // not always set so reclaim memory
                 this.lineArray = lineArr.subarray(0,this.lineidx); 
             else
                 this.lineArray = new Uint16Array(0);
@@ -601,7 +601,7 @@ $3Dmol.Geometry = (function() {
         }
         
         if(reallocatemem) { 
-            //actually copy smaller arrays to save memory
+            // actually copy smaller arrays to save memory
             if(this.normalArray) this.normalArray = new Float32Array(this.normalArray);
             if(this.faceArray) this.faceArray = new Uint16Array(this.faceArray);
             if(this.lineArray) this.lineArray = new Uint16Array(this.lineArray);
@@ -612,15 +612,15 @@ $3Dmol.Geometry = (function() {
         this.__inittedArrays = true;                
     };
     
-    var addGroup = function(geo) {
-        var ret = new geometryGroup(geo.geometryGroups.length);
+    const addGroup = function(geo) {
+        const ret = new geometryGroup(geo.geometryGroups.length);
         geo.geometryGroups.push(ret);
         geo.groups = geo.geometryGroups.length;
         
         ret.vertexArray = new Float32Array(BUFFERSIZE*3);
         ret.colorArray = new Float32Array(BUFFERSIZE*3);
         
-        //TODO: instantiating uint arrays according to max number of vertices
+        // TODO: instantiating uint arrays according to max number of vertices
         // is dangerous, since there exists the possibility that there will be 
         // more face or line indices than vertex points - but so far that doesn't
         // seem to be the case for any of the renders 
@@ -638,20 +638,20 @@ $3Dmol.Geometry = (function() {
         return ret;
     };
     /** @constructor */
-    var Geometry = function(mesh, radii,offset) {
+    const Geometry = function(mesh, radii,offset) {
         
         $3Dmol.EventDispatcher.call(this);
         
-        this.id = $3Dmol.GeometryIDCount++;
+        this.id = $3Dmol.GeometryIDCount+=1;
     
         this.name = '';
     
         this.hasTangents = false;
     
         this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
-        this.mesh = (mesh === true) ? true : false; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
+        this.mesh = (mesh === true); // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
         this.radii = radii || false;
-        this.offset = offset || false; //offset buffer used for instancing
+        this.offset = offset || false; // offset buffer used for instancing
         // update flags
     
         this.verticesNeedUpdate = false;
@@ -670,13 +670,13 @@ $3Dmol.Geometry = (function() {
         
         constructor : Geometry,
 
-        //Get geometry group to accomodate addVertices new vertices - create 
+        // Get geometry group to accomodate addVertices new vertices - create 
         // new group if necessary       
-        updateGeoGroup : function(addVertices) {
+        updateGeoGroup(addVertices) {
         
             addVertices = addVertices || 0;
             
-            var retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
+            let retGroup = this.groups > 0 ? this.geometryGroups[ this.groups - 1 ] : null;
             
             if (!retGroup || retGroup.vertices + addVertices > retGroup.vertexArray.length/3) 
                 retGroup = addGroup(this);
@@ -685,28 +685,28 @@ $3Dmol.Geometry = (function() {
             
         },
         
-        //return comma separated list of IndexedFace (or Line) sets from geometry groups
-        vrml : function(indent, material) {
-            var ret = '';
-            var len = this.geometryGroups.length;
-            for (var g = 0; g < len; g++) {
-                var geoGroup = this.geometryGroups[g];
-                ret += geoGroup.vrml(indent, material) +',\n';                
+        // return comma separated list of IndexedFace (or Line) sets from geometry groups
+        vrml(indent, material) {
+            let ret = '';
+            const len = this.geometryGroups.length;
+            for (let g = 0; g < len; g++) {
+                const geoGroup = this.geometryGroups[g];
+                ret += `${geoGroup.vrml(indent, material) },\n`;                
             }
             return ret;
         },
         
-        addGeoGroup : function() {
+        addGeoGroup() {
             return addGroup(this);  
         },
         
-        setUpNormals : function(three) {
+        setUpNormals(three) {
             
             three = three || false;
             
-            for (var g = 0; g < this.groups; g++) {
+            for (let g = 0; g < this.groups; g++) {
             
-                var geoGroup = this.geometryGroups[g];            
+                const geoGroup = this.geometryGroups[g];            
                 
                 geoGroup.setNormals(three);
                 
@@ -714,45 +714,45 @@ $3Dmol.Geometry = (function() {
                       
         },
         
-        setColors : function(setcolor) {
-            var len = this.geometryGroups.length;
-            for (var g = 0; g < len; g++) {
+        setColors(setcolor) {
+            const len = this.geometryGroups.length;
+            for (let g = 0; g < len; g++) {
                 
-                var geoGroup = this.geometryGroups[g];                            
+                const geoGroup = this.geometryGroups[g];                            
                 geoGroup.setColors(setcolor);
                 
             }  
         },
         
-        setUpWireframe : function() {
-            for (var g = 0; g < this.groups; g++) {
-                var geoGroup = this.geometryGroups[g];
+        setUpWireframe() {
+            for (let g = 0; g < this.groups; g++) {
+                const geoGroup = this.geometryGroups[g];
                 
                 geoGroup.setLineIndices();
             }
         },
         
-        //After vertices, colors, etc are collected in regular or typed arrays,
+        // After vertices, colors, etc are collected in regular or typed arrays,
         //  create typed arrays from regular arrays if they don't already exist,
-        initTypedArrays : function() {
+        initTypedArrays() {
                 
-            for (var g = 0; g < this.groups; g++) {
+            for (let g = 0; g < this.groups; g++) {
                 
-                var group = this.geometryGroups[g];
+                const group = this.geometryGroups[g];
                 
                 if (group.__inittedArrays === true)
                     continue;
                 
-                //do not actually reallocate smaller memory here because
-                //of the performance hit - if you know your geometry is small,
-                //truncate manually with the second parameter true
+                // do not actually reallocate smaller memory here because
+                // of the performance hit - if you know your geometry is small,
+                // truncate manually with the second parameter true
                 group.truncateArrayBuffers(this.mesh, false);
             }
             
         
         },
         
-        dispose : function() {
+        dispose() {
             this.dispatchEvent( {type : 'dispose'} );
         }
     };
@@ -765,9 +765,9 @@ $3Dmol.Geometry = (function() {
 Object.defineProperty($3Dmol.Geometry.prototype, "vertices", {
     
     /** @this {$3Dmol.Geometry} */
-    get : function() {
-        var vertices = 0;
-        for (var g = 0; g < this.groups; g++)
+    get() {
+        let vertices = 0;
+        for (let g = 0; g < this.groups; g++)
             vertices += this.geometryGroups[g].vertices;
             
         return vertices;
@@ -778,11 +778,11 @@ Object.defineProperty($3Dmol.Geometry.prototype, "vertices", {
 $3Dmol.GeometryIDCount = 0;
 
 
-//Raycaster
+// Raycaster
 /** @constructor */
 $3Dmol.Raycaster = (function() {
     
-    var Raycaster = function(origin, direction, far, near) {
+    const Raycaster = function(origin, direction, far, near) {
         
         this.ray = new $3Dmol.Ray(origin, direction);
         
@@ -794,38 +794,38 @@ $3Dmol.Raycaster = (function() {
     
     };
     
-    var sphere = new $3Dmol.Sphere();
-    var cylinder = new $3Dmol.Cylinder();
-    var triangle = new $3Dmol.Triangle();
-    var w_0 = new $3Dmol.Vector3(); // for cylinders, cylinder.c1 - ray.origin
-    var v1 = new $3Dmol.Vector3(); // all purpose local vector
-    var v2 = new $3Dmol.Vector3();
-    var v3 = new $3Dmol.Vector3();
-    //var facePlane = new $3Dmol.Plane();
-    var matrixPosition = new $3Dmol.Vector3();
+    const sphere = new $3Dmol.Sphere();
+    const cylinder = new $3Dmol.Cylinder();
+    const triangle = new $3Dmol.Triangle();
+    const w0 = new $3Dmol.Vector3(); // for cylinders, cylinder.c1 - ray.origin
+    const v1 = new $3Dmol.Vector3(); // all purpose local vector
+    const v2 = new $3Dmol.Vector3();
+    const v3 = new $3Dmol.Vector3();
+    // var facePlane = new $3Dmol.Plane();
+    const matrixPosition = new $3Dmol.Vector3();
             
-    var descSort = function(a, b) {
+    const descSort = function(a, b) {
         return a.distance - b.distance;
     };
 
     // [-1, 1]
-    var clamp = function(x) {
+    const clamp = function(x) {
         return Math.min(Math.max(x, -1), 1);
     };
     
-    //object is a Sphere or (Bounding) Box
-    var intersectObject = function(group, clickable, raycaster, intersects) {
+    // object is a Sphere or (Bounding) Box
+    const intersectObject = function(group, clickable, raycaster, intersects) {
         
         matrixPosition.getPositionFromMatrix(group.matrixWorld);
         
         if (clickable.intersectionShape === undefined)
             return intersects;       
-        var intersectionShape = clickable.intersectionShape;
-        var precision = raycaster.linePrecision;
+        const {intersectionShape} = clickable;
+        let precision = raycaster.linePrecision;
         precision *= group.matrixWorld.getMaxScaleOnAxis();
-        var precisionSq = precision*precision;
+        const precisionSq = precision*precision;
 
-        //Check for intersection with clickable's bounding sphere, if it exists
+        // Check for intersection with clickable's bounding sphere, if it exists
         if (clickable.boundingSphere !== undefined && clickable.boundingSphere instanceof $3Dmol.Sphere) {
             sphere.copy(clickable.boundingSphere);
             sphere.applyMatrix4(group.matrixWorld);          
@@ -835,12 +835,12 @@ $3Dmol.Raycaster = (function() {
         }     
 
 
-        //Iterate through intersection objects
-        var i, il,
-            norm, normProj, cylProj, rayProj,
-            distance, closestDistSq, denom, discriminant,
-            s, t, s_c, t_c;
-        //triangle faces
+        // Iterate through intersection objects
+        let i; let il;
+            let norm; let normProj; let cylProj; let rayProj;
+            let distance; let closestDistSq; let denom; let discriminant;
+            let s; let t; let sC; let tC;
+        // triangle faces
         for (i = 0, il = intersectionShape.triangle.length; i < il; i++) {
             
             if (intersectionShape.triangle[i] instanceof $3Dmol.Triangle) {
@@ -852,46 +852,46 @@ $3Dmol.Raycaster = (function() {
                 
                 normProj = raycaster.ray.direction.dot(norm);
                 
-                //face culling
+                // face culling
                 if (normProj >= 0)
                     continue;
                 
-                w_0.subVectors(triangle.a, raycaster.ray.origin);
+                w0.subVectors(triangle.a, raycaster.ray.origin);
                 
-                distance = (norm.dot(w_0)) / normProj;
+                distance = (norm.dot(w0)) / normProj;
                 
                 if (distance < 0)
                     continue;
                     
-                //intersects with plane, check if P inside triangle
+                // intersects with plane, check if P inside triangle
                 v1.copy(raycaster.ray.direction).multiplyScalar(distance).add(raycaster.ray.origin);
                 v1.sub(triangle.a); // from pt a to intersection point P
                 
                 v2.copy(triangle.b).sub(triangle.a); // from pt a to b
                 v3.copy(triangle.c).sub(triangle.a); // from pt a to c
-                var b_dot_c = v2.dot(v3);
-                var b_sq = v2.lengthSq();
-                var c_sq = v3.lengthSq();
+                const bDotC = v2.dot(v3);
+                const bSq = v2.lengthSq();
+                const cSq = v3.lengthSq();
                 
                 // P = A + s(v2) + t(v3), inside trianle if 0 <= s, t <=1  and (s + t) <=0
                 
-                t = ( b_sq*v1.dot(v3) - b_dot_c*v1.dot(v2) ) / ( b_sq*c_sq - b_dot_c*b_dot_c );
+                t = ( bSq*v1.dot(v3) - bDotC*v1.dot(v2) ) / ( bSq*cSq - bDotC*bDotC );
                 
                 if (t < 0 || t > 1)
                     continue;
                 
-                s = ( v1.dot(v2) - t*b_dot_c ) / b_sq;
+                s = ( v1.dot(v2) - t*bDotC ) / bSq;
                 
                 if ( (s < 0 || s > 1) || s + t > 1)
                     continue;
                     
                 else{
-                    intersects.push({clickable : clickable,
-                                     distance : distance});
+                    intersects.push({clickable,
+                                     distance});
 				}  
             }
         }    
-        //cylinders
+        // cylinders
         for (i = 0, il = intersectionShape.cylinder.length; i < il; i++) {
             
             if (intersectionShape.cylinder[i] instanceof $3Dmol.Cylinder){
@@ -899,10 +899,10 @@ $3Dmol.Raycaster = (function() {
                 cylinder.copy(intersectionShape.cylinder[i]);
                 cylinder.applyMatrix4(group.matrixWorld);
                 
-                w_0.subVectors(cylinder.c1, raycaster.ray.origin); 
+                w0.subVectors(cylinder.c1, raycaster.ray.origin); 
                 
-                cylProj = w_0.dot(cylinder.direction); // Dela
-                rayProj = w_0.dot(raycaster.ray.direction); // Epsilon
+                cylProj = w0.dot(cylinder.direction); // Dela
+                rayProj = w0.dot(raycaster.ray.direction); // Epsilon
                 
                 normProj = clamp(raycaster.ray.direction.dot(cylinder.direction)); // Beta
                 
@@ -911,25 +911,25 @@ $3Dmol.Raycaster = (function() {
                 if (denom === 0.0)
                     continue;
                 
-                s_c = (normProj*rayProj - cylProj) / denom;
-                t_c = (rayProj - normProj*cylProj) / denom;
+                sC = (normProj*rayProj - cylProj) / denom;
+                tC = (rayProj - normProj*cylProj) / denom;
                 
-                v1.copy(cylinder.direction).multiplyScalar(s_c).add(cylinder.c1);  // Q_c
-                v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
+                v1.copy(cylinder.direction).multiplyScalar(sC).add(cylinder.c1);  // Q_c
+                v2.copy(raycaster.ray.direction).multiplyScalar(tC).add(raycaster.ray.origin); // P_c
                 
                 closestDistSq = v3.subVectors(v1, v2).lengthSq();
-                var radiusSq = cylinder.radius*cylinder.radius;
+                const radiusSq = cylinder.radius*cylinder.radius;
                 
-                //Smoothing?
-                //if (closestDistSq > radiusSq) radiusSq += precisionSq;
+                // Smoothing?
+                // if (closestDistSq > radiusSq) radiusSq += precisionSq;
                 
                 // closest distance between ray and cylinder axis not greater than cylinder radius;
                 // might intersect this cylinder between atom and bond midpoint
                 if (closestDistSq <= radiusSq){
 
-                    //Find points where ray intersects sides of cylinder
+                    // Find points where ray intersects sides of cylinder
                     discriminant = (normProj*cylProj - rayProj)*(normProj*cylProj - rayProj) - 
-                            denom*(w_0.lengthSq() - cylProj*cylProj - radiusSq);
+                            denom*(w0.lengthSq() - cylProj*cylProj - radiusSq);
                     
                     // ray tangent to cylinder?
                     if (discriminant <= 0)
@@ -937,18 +937,18 @@ $3Dmol.Raycaster = (function() {
                     else
                         t = distance = ( (rayProj - normProj*cylProj) - Math.sqrt(discriminant) ) / denom; 
                     
-                    //find closest intersection point; make sure it's between atom's position and cylinder midpoint
+                    // find closest intersection point; make sure it's between atom's position and cylinder midpoint
                     
                     s = normProj*t - cylProj;
                     
-                    //does not intersect cylinder between atom and midpoint,
+                    // does not intersect cylinder between atom and midpoint,
                     // or intersects cylinder behind camera
                     if (s < 0 || s*s > cylinder.lengthSq() || t < 0)
                         continue;
                     
                     else
-                        intersects.push({clickable : clickable,
-                                         distance : distance});
+                        intersects.push({clickable,
+                                         distance});
                     
                 }
                     
@@ -956,7 +956,7 @@ $3Dmol.Raycaster = (function() {
             }
             
         }       
-        //lines
+        // lines
         for (i = 0, il = intersectionShape.line.length; i < il; i += 2) {
             
             v1.copy(intersectionShape.line[i]);
@@ -965,13 +965,13 @@ $3Dmol.Raycaster = (function() {
             v2.applyMatrix4(group.matrixWorld);
             
             v3.subVectors(v2, v1);
-            var bondLengthSq = v3.lengthSq();
+            const bondLengthSq = v3.lengthSq();
             v3.normalize();
             
-            w_0.subVectors(v1, raycaster.ray.origin);
+            w0.subVectors(v1, raycaster.ray.origin);
             
-            var lineProj = w_0.dot(v3);
-            rayProj = w_0.dot(raycaster.ray.direction);
+            const lineProj = w0.dot(v3);
+            rayProj = w0.dot(raycaster.ray.direction);
             
             normProj = clamp(raycaster.ray.direction.dot(v3));
             
@@ -980,22 +980,22 @@ $3Dmol.Raycaster = (function() {
             if (denom === 0.0)
                 continue;
             
-            s_c = (normProj*rayProj - lineProj) / denom;
-            t_c = (rayProj - normProj*lineProj) / denom;
+            sC = (normProj*rayProj - lineProj) / denom;
+            tC = (rayProj - normProj*lineProj) / denom;
             
-            v1.add(v3.multiplyScalar(s_c)); // Q_c
-            v2.copy(raycaster.ray.direction).multiplyScalar(t_c).add(raycaster.ray.origin); // P_c
+            v1.add(v3.multiplyScalar(sC)); // Q_c
+            v2.copy(raycaster.ray.direction).multiplyScalar(tC).add(raycaster.ray.origin); // P_c
             
             closestDistSq = v3.subVectors(v2, v1).lengthSq();
             
-            if (closestDistSq < precisionSq && s_c*s_c < bondLengthSq)
-                intersects.push({clickable : clickable,
-                                 distance : t_c
+            if (closestDistSq < precisionSq && sC*sC < bondLengthSq)
+                intersects.push({clickable,
+                                 distance : tC
                                 });
             
         }
         for (i = 0, il = intersectionShape.sphere.length; i < il; i++) {
-            //sphere
+            // sphere
             if (intersectionShape.sphere[i] instanceof $3Dmol.Sphere) {
                 
                 sphere.copy(intersectionShape.sphere[i]);
@@ -1005,27 +1005,27 @@ $3Dmol.Raycaster = (function() {
                     
                     v1.subVectors(sphere.center, raycaster.ray.origin);
                     
-                    //distance from ray origin to point on the ray normal to sphere's center
-                    //must be less than sphere's radius (since ray intersects sphere)
-                    var distanceToCenter = v1.dot(raycaster.ray.direction);
+                    // distance from ray origin to point on the ray normal to sphere's center
+                    // must be less than sphere's radius (since ray intersects sphere)
+                    const distanceToCenter = v1.dot(raycaster.ray.direction);
                     
                     discriminant = distanceToCenter*distanceToCenter - (v1.lengthSq() - sphere.radius*sphere.radius);
                     
-                    //Don't select if sphere center behind camera
+                    // Don't select if sphere center behind camera
                     if (distanceToCenter < 0) 
                         return intersects;
                     
-                    //ray tangent to sphere?
+                    // ray tangent to sphere?
                     if (discriminant <= 0)
                         distance = distanceToCenter;
                     
-                    //This is reversed if sphere is closer than ray origin.  Do we have 
-                    //to worry about handling that case?
+                    // This is reversed if sphere is closer than ray origin.  Do we have 
+                    // to worry about handling that case?
                     else 
                         distance = distanceToCenter - Math.sqrt(discriminant);
     
-                    intersects.push({clickable : clickable, 
-                                     distance : distance});                    
+                    intersects.push({clickable, 
+                                     distance});                    
                 }
             }        
        }
@@ -1042,7 +1042,7 @@ $3Dmol.Raycaster = (function() {
     };
     
     Raycaster.prototype.setFromCamera =  function ( ) { 
-        var _viewProjectionMatrix = new $3Dmol.Matrix4();
+        const _viewProjectionMatrix = new $3Dmol.Matrix4();
         return function(coords, camera ) {    
 
             if ( !camera.ortho ) {            
@@ -1063,9 +1063,9 @@ $3Dmol.Raycaster = (function() {
     }();
     
     Raycaster.prototype.intersectObjects = function(group, objects) {     
-        var intersects = [];
+        const intersects = [];
         
-        for (var i = 0, l = objects.length; i < l; i++)            
+        for (let i = 0, l = objects.length; i < l; i++)            
             intersectObject(group, objects[i], this, intersects);
             
         intersects.sort(descSort);
@@ -1079,11 +1079,11 @@ $3Dmol.Raycaster = (function() {
 })();
 
 
-//$3Dmol Projection 
+// $3Dmol Projection 
 /** @constructor */
 $3Dmol.Projector = function () {
 
-    let _viewProjectionMatrix = new $3Dmol.Matrix4();
+    const _viewProjectionMatrix = new $3Dmol.Matrix4();
 
     this.projectVector = function ( vector, camera ) {
 
