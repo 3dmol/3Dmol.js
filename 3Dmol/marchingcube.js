@@ -1,12 +1,12 @@
 
 $3Dmol = $3Dmol || {};
-//Encapsulate marching cube algorithm for isosurface generation
+// Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
 $3Dmol.MarchingCubeInitializer = function() {
     
-    //Marching cube algorithm - assume data has been pre-treated so isovalue is 0 
+    // Marching cube algorithm - assume data has been pre-treated so isovalue is 0 
     // (i.e. select points greater than 0)
-    //origin -  vector of origin of volumetric data (default is (0,0,0))
+    // origin -  vector of origin of volumetric data (default is (0,0,0))
     // nX, nY, nZ - specifies number of voxels in each dimension
     // scale - cube diagonal unit vector scale (3Dmol vector) (specifying distance between data points); diagonal of cube
     // - default is 1 - assumes unit cube (1,1,1) diag)
@@ -14,35 +14,35 @@ $3Dmol.MarchingCubeInitializer = function() {
     // voxel - if true, draws with a blocky voxel style (default false)
     // verts, faces - vertex and face arrays to fill up
     
-    //to match with protein surface...
-    var ISDONE = 2;
-    var my = {};
-    var edgeTable, edgeTable2;
-    var triTable, triTable2;
+    // to match with protein surface...
+    const ISDONE = 2;
+    const my = {};
+    let edgeTable; let edgeTable2;
+    let triTable; let triTable2;
     
     my.march = function(data, verts, faces, spec) {
 
-        var fulltable = !!(spec.fulltable);
-        var origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
-        var voxel = !!(spec.voxel);
-        var transform = spec.matrix; //if this is set, it overrides origin and unitCube
+        const fulltable = !!(spec.fulltable);
+        const origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
+        const voxel = !!(spec.voxel);
+        const transform = spec.matrix; // if this is set, it overrides origin and unitCube
         
-        var nX = spec.nX || 0;
-        var nY = spec.nY || 0;
-        var nZ = spec.nZ || 0;
+        const nX = spec.nX || 0;
+        const nY = spec.nY || 0;
+        const nZ = spec.nZ || 0;
         
-        var scale = spec.scale || 1.0;
-        var unitCube = null;
+        const scale = spec.scale || 1.0;
+        let unitCube = null;
         if(spec.unitCube) {
             unitCube = spec.unitCube;
         } else {
             unitCube = {x:scale,y:scale,z:scale};
         }
         
-        //keep track of calculated vertices to avoid repeats
-        var vertnums = new Int32Array(nX*nY*nZ);
+        // keep track of calculated vertices to avoid repeats
+        const vertnums = new Int32Array(nX*nY*nZ);
         
-        var i, il;
+        let i; let il;
         
         for (i = 0, il = vertnums.length; i < il; ++i)
             vertnums[i] = -1;
@@ -50,37 +50,37 @@ $3Dmol.MarchingCubeInitializer = function() {
         // create (or retrieve) a vertex at the appropriate point for
         // the edge (p1,p2)
         
-        var getVertex = function(i, j, k, code, p1, p2) {
-            var pt = {x:0,y:0,z:0};
-            var val1 = !!(code & (1 << p1));
-            var val2 = !!(code & (1 << p2));
+        const getVertex = function(i, j, k, code, p1, p2) {
+            let pt = {x:0,y:0,z:0};
+            const val1 = !!(code & (1 << p1));
+            const val2 = !!(code & (1 << p2));
              
             // p1 if they are the same or if !val1
-            var p = p1;
+            let p = p1;
             if (!val1 && val2)
                 p = p2;
             
             // adjust i,j,k by p
             if (p & 1)
-                k++;
+                k+=1;
             if (p & 2)
-                j++;
+                j+=1;
             if (p & 4)
-                i++;
+                i+=1;
 
             if(transform) {
                 pt = new $3Dmol.Vector3(i,j,k);
                 pt = pt.applyMatrix4(transform);
-                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
+                pt = {x: pt.x, y: pt.y, z: pt.z}; // remove vector gunk
             } else {
                 pt.x = origin.x+unitCube.x*i;
                 pt.y = origin.y+unitCube.y*j;
                 pt.z = origin.z+unitCube.z*k;
             }
             
-            var index = ((nY * i) + j) * nZ + k;
+            const index = ((nY * i) + j) * nZ + k;
             
-            //Have to add option to do voxels
+            // Have to add option to do voxels
             if (!voxel) {
             
                 if (vertnums[index] < 0) // not created yet
@@ -92,34 +92,34 @@ $3Dmol.MarchingCubeInitializer = function() {
             
             }
             
-            else {
+            
                 verts.push(pt);
                 return verts.length - 1;
-            }
+            
             
         };
             
-        var intersects = new Int32Array(12);
+        const intersects = new Int32Array(12);
         
-        var etable = (fulltable) ? edgeTable2 : edgeTable;
-        var tritable = (fulltable) ? triTable2 : triTable;
+        const etable = (fulltable) ? edgeTable2 : edgeTable;
+        const tritable = (fulltable) ? triTable2 : triTable;
                 
-        //Run marching cubes algorithm
+        // Run marching cubes algorithm
         for (i = 0; i < nX-1; ++i) {
             
-            for (var j = 0; j < nY-1; ++j){
+            for (let j = 0; j < nY-1; ++j){
                 
-                for (var k = 0; k < nZ-1; ++k){
+                for (let k = 0; k < nZ-1; ++k){
                     
-                    var code = 0;
+                    let code = 0;
                     
-                    for (var p = 0; p < 8; ++p) {
-                        var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1)) *
+                    for (let p = 0; p < 8; ++p) {
+                        const index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1)) *
                                         nZ + k + (p & 1);
 
-                        //TODO: Need to fix vpBits in protein surface for this to work
-                        var val = !!(data[index] & ISDONE);
-                        //var val = !!(data[index] > 0);   
+                        // TODO: Need to fix vpBits in protein surface for this to work
+                        const val = !!(data[index] & ISDONE);
+                        // var val = !!(data[index] > 0);   
                         
                         code |= val << p;                        
                     }
@@ -127,12 +127,12 @@ $3Dmol.MarchingCubeInitializer = function() {
                     if (code === 0 || code === 255)
                         continue;
                     
-                    var ecode = etable[code];
+                    const ecode = etable[code];
                     
                     if (ecode === 0)
                         continue;
                         
-                    var ttable = tritable[code];                        
+                    const ttable = tritable[code];                        
                     
                     if (ecode & 1)
                         intersects[0] = getVertex(i, j, k, code, 0, 1);
@@ -159,11 +159,11 @@ $3Dmol.MarchingCubeInitializer = function() {
                     if (ecode & 2048)
                         intersects[11] = getVertex(i, j, k, code, 2, 6);       
 
-                    for (var t = 0; t < ttable.length; t += 3) {
+                    for (let t = 0; t < ttable.length; t += 3) {
                         
-                        var a = intersects[ttable[t]],
-                            b = intersects[ttable[t+1]],
-                            c = intersects[ttable[t+2]];         
+                        let a = intersects[ttable[t]];
+                            let b = intersects[ttable[t+1]];
+                            let c = intersects[ttable[t+2]];         
                                            
                         if (voxel && t >= 3) {
                             verts.push(verts[a]); a = verts.length - 1;
@@ -185,94 +185,94 @@ $3Dmol.MarchingCubeInitializer = function() {
     };
 
     my.laplacianSmooth = function(numiter, verts, faces) {
-            var tps = new Array(verts.length);
-            var i, il, j, jl, k;
+            const tps = new Array(verts.length);
+            let i; let il; let j; let jl; let k;
             for (i = 0, il = verts.length; i < il; i++)
                     tps[i] = {
                         x : 0,
                         y : 0,
                         z : 0
                     };
-            var vertdeg = new Array(20);
-            var flagvert;
+            const vertdeg = new Array(20);
+            let flagvert;
             for (i = 0; i < 20; i++)
                     vertdeg[i] = new Array(verts.length);
             for (i = 0, il = verts.length; i < il; i++)
                     vertdeg[0][i] = 0;
             for (i = 0, il = faces.length / 3; i < il; i++) {
-                var aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
+                const aoffset = i*3; const boffset = i*3 + 1; const coffset = i*3 + 2;
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[aoffset]]; j < jl; j++) {
-                    if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
+                    if (faces[boffset] === vertdeg[j + 1][faces[aoffset]]) {
                         flagvert = false;
                         break;
                     }
                 }
                 if (flagvert) {
-                    vertdeg[0][faces[aoffset]]++;
+                    vertdeg[0][faces[aoffset]]+=1;
                     vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[boffset];
                 }
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[aoffset]]; j < jl; j++) {
-                    if (faces[coffset] == vertdeg[j + 1][faces[aoffset]]) {
+                    if (faces[coffset] === vertdeg[j + 1][faces[aoffset]]) {
                         flagvert = false;
                         break;
                     }
                 }
                 if (flagvert) {
-                    vertdeg[0][faces[aoffset]]++;
+                    vertdeg[0][faces[aoffset]]+=1;
                     vertdeg[vertdeg[0][faces[aoffset]]][faces[aoffset]] = faces[coffset];
                 }
                 // b
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[boffset]]; j < jl; j++) {
-                    if (faces[aoffset] == vertdeg[j + 1][faces[boffset]]) {
+                    if (faces[aoffset] === vertdeg[j + 1][faces[boffset]]) {
                         flagvert = false;
                         break;
                     }
                 }
                 if (flagvert) {
-                    vertdeg[0][faces[boffset]]++;
+                    vertdeg[0][faces[boffset]]+=1;
                     vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[aoffset];
                 }
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[boffset]]; j < jl; j++) {
-                    if (faces[coffset] == vertdeg[j + 1][faces[boffset]]) {
+                    if (faces[coffset] === vertdeg[j + 1][faces[boffset]]) {
                         flagvert = false;
                         break;
                     }
                 }
                 if (flagvert) {
-                    vertdeg[0][faces[boffset]]++;
+                    vertdeg[0][faces[boffset]]+=1;
                     vertdeg[vertdeg[0][faces[boffset]]][faces[boffset]] = faces[coffset];
                 }
                 // c
                 flagvert = true;
                 for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
-                    if (faces[aoffset] == vertdeg[j + 1][faces[coffset]]) {
+                    if (faces[aoffset] === vertdeg[j + 1][faces[coffset]]) {
                         flagvert = false;
                         break;
                     }
                 }
                 if (flagvert) {
-                    vertdeg[0][faces[coffset]]++;
+                    vertdeg[0][faces[coffset]]+=1;
                     vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[aoffset];
                 }
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[coffset]]; j < jl; j++) {
-                    if (faces[boffset] == vertdeg[j + 1][faces[coffset]]) {
+                    if (faces[boffset] === vertdeg[j + 1][faces[coffset]]) {
                         flagvert = false;
                         break;
                     }
                 }
                 if (flagvert) {
-                    vertdeg[0][faces[coffset]]++;
+                    vertdeg[0][faces[coffset]]+=1;
                     vertdeg[vertdeg[0][faces[coffset]]][faces[coffset]] = faces[boffset];
                 }
             }
 
-            var wt = 1.00;
-            var wt2 = 0.50;
+            const wt = 1.00;
+            const wt2 = 0.50;
 //            var ssign;
 //            var scaleFactor = 1;
 //            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
@@ -282,7 +282,7 @@ $3Dmol.MarchingCubeInitializer = function() {
                                     tps[i].x = verts[i].x;
                                     tps[i].y = verts[i].y;
                                     tps[i].z = verts[i].z;
-                            } else if (vertdeg[0][i] == 3 || vertdeg[0][i] == 4) {
+                            } else if (vertdeg[0][i] === 3 || vertdeg[0][i] === 4) {
                                     tps[i].x = 0;
                                     tps[i].y = 0;
                                     tps[i].z = 0;
@@ -627,7 +627,7 @@ $3Dmol.MarchingCubeInitializer = function() {
             return my;
 };
 
-//each webworker needs its own marching cube object
+// each webworker needs its own marching cube object
 $3Dmol.MarchingCube  = $3Dmol.MarchingCubeInitializer();    
 
 
