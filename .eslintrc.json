@@ -38,7 +38,8 @@
         "no-lonely-if":"off",
         "no-underscore-dangle":"warn",
         "no-undef":"warn",
-        "new-cap":["error", {"newIsCap": false}]
+        "new-cap":["error", {"newIsCap": false}],
+        "no-bitwise":["error", {"allow":["|="]}]
     },
     "globals":{
         "$3Dmol": "writable",

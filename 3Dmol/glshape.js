@@ -167,11 +167,11 @@ $3Dmol.GLShape = (function() {
             vertexArray[offset + 8] = conebase.z;
 
             if (i > 0) {
-                const prev_x = vertexArray[offset - 3];
-                const prev_y = vertexArray[offset - 2];
-                const prev_z = vertexArray[offset - 1];
+                const prevX = vertexArray[offset - 3];
+                const prevY = vertexArray[offset - 2];
+                const prevZ = vertexArray[offset - 1];
 
-                const c = new $3Dmol.Vector3(prev_x, prev_y, prev_z);
+                const c = new $3Dmol.Vector3(prevX, prevY, prevZ);
                 const b = end.clone(); const b2 = to.clone();
                 const a = new $3Dmol.Vector3(conebase.x, conebase.y, conebase.z);
 
@@ -525,7 +525,7 @@ $3Dmol.GLShape = (function() {
             let cnt = 0;
             for (let g = 0; g < geo.geometryGroups.length; g++) {
                 center.add(geo.geometryGroups[g].getCentroid());
-                cnt++;
+                cnt+=1;
             }
             center.divideScalar(cnt);
 
@@ -541,7 +541,8 @@ $3Dmol.GLShape = (function() {
             geoGroup.setNormals();
         else {
 
-            const normalArray = geoGroup.normalArray = new Float32Array(geoGroup.vertices * 3);
+            const normalArray = new Float32Array(geoGroup.vertices * 3);
+            geoGroup.normalArray = new Float32Array(geoGroup.vertices * 3);
             let n;
             for (i = 0, il = geoGroup.vertices; i < il; ++i) {
                 offset = i * 3;
@@ -641,7 +642,7 @@ $3Dmol.GLShape = (function() {
     function GLShape(stylespec) {
 
         stylespec = stylespec || {};
-        $3Dmol.ShapeIDCount++;
+        $3Dmol.ShapeIDCount+=1;
 
         this.boundingSphere = new $3Dmol.Sphere();
         /** @type {IntersectionShapes} */
@@ -787,7 +788,7 @@ $3Dmol.GLShape = (function() {
 
             // can position using corner OR center
             let c = boxSpec.corner;
-            if (c == undefined) {
+            if (c === undefined) {
                 if (boxSpec.center !== undefined) {
 
                     c = {
@@ -948,22 +949,22 @@ $3Dmol.GLShape = (function() {
 
             const count = cylinderLength / (cylinderSpec.gapLength + cylinderSpec.dashLength);
 
-            let new_start = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
+            let newStart = new $3Dmol.Vector3(cylinderSpec.start.x || 0,
                 cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
-            let new_end = new $3Dmol.Vector3(cylinderSpec.end.x,
+            let newEnd = new $3Dmol.Vector3(cylinderSpec.end.x,
                 cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
 
             const gapVector = new $3Dmol.Vector3((end.x - start.x) / (cylinderLength / cylinderSpec.gapLength), (end.y - start.y) / (cylinderLength / cylinderSpec.gapLength), (end.z - start.z) / (cylinderLength / cylinderSpec.gapLength));
             const dashVector = new $3Dmol.Vector3((end.x - start.x) / (cylinderLength / cylinderSpec.dashLength), (end.y - start.y) / (cylinderLength / cylinderSpec.dashLength), (end.z - start.z) / (cylinderLength / cylinderSpec.dashLength));
 
             for (let place = 0; place < count; place++) {
-                new_end = new $3Dmol.Vector3(new_start.x + dashVector.x, new_start.y + dashVector.y, new_start.z + dashVector.z);
+                newEnd = new $3Dmol.Vector3(newStart.x + dashVector.x, newStart.y + dashVector.y, newStart.z + dashVector.z);
 
-                this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(new_start, new_end, radius));
+                this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(newStart, newEnd, radius));
 
-                $3Dmol.GLDraw.drawCylinder(geo, new_start, new_end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);
+                $3Dmol.GLDraw.drawCylinder(geo, newStart, newEnd, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);
 
-                new_start = new $3Dmol.Vector3(new_end.x + gapVector.x, new_end.y + gapVector.y, new_end.z + gapVector.z);
+                newStart = new $3Dmol.Vector3(newEnd.x + gapVector.x, newEnd.y + gapVector.y, newEnd.z + gapVector.z);
 
             }
             const centroid = new $3Dmol.Vector3();
@@ -1172,14 +1173,14 @@ $3Dmol.GLShape = (function() {
         };
 
 
-        const distance_from = function(c1, c2) {
+        const distanceFrom = function(c1, c2) {
             return Math.sqrt((c1.x - c2.x)**2 + (c1.y - c2.y)**2 + (c1.z - c2.z)**2);
         };
 
         const inSelectedRegion = function(coordinate, selectedRegion, radius) {
 
             for (let i = 0; i < selectedRegion.length; i++) {
-                if (distance_from(selectedRegion[i], coordinate) <= radius)
+                if (distanceFrom(selectedRegion[i], coordinate) <= radius)
                     return true;
             }
             return false;
@@ -1414,7 +1415,7 @@ $3Dmol.GLShape = (function() {
             shapeObj = new $3Dmol.Object3D();
             let material = null;
 
-            if (this.side == $3Dmol.DoubleSide) {
+            if (this.side === $3Dmol.DoubleSide) {
                 material = new $3Dmol.MeshDoubleLambertMaterial({
                     wireframe: this.wireframe,
                     side: this.side,
@@ -1540,7 +1541,7 @@ $3Dmol.splitMesh = function(mesh) {
             // new slice
             slices.push({ vertexArr: [], normalArr: [], faceArr: [] });
             if (mesh.colorArr) slices.colorArr = [];
-            currentSlice++;
+            currentSlice+=1;
         }
     }
     return slices;
