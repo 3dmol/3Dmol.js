@@ -27,7 +27,7 @@ TODO: Improved performance on Firefox
 if (typeof console === 'undefined') {
     // this should only be true inside of a webworker
     console = {
-        log : function() {
+        log() {
         }
     };
 }
@@ -36,26 +36,26 @@ $3Dmol.ProteinSurface = function() {
 
     // constants for vpbits bitmasks
     /** @const */
-    var INOUT = 1;
+    const INOUT = 1;
     /** @const */
-    var ISDONE = 2;
+    const ISDONE = 2;
     /** @const */
-    var ISBOUND = 4;
+    const ISBOUND = 4;
 
-    var ptranx = 0, ptrany = 0, ptranz = 0;
-    var probeRadius = 1.4;
-    var defaultScaleFactor = 2;
-    var scaleFactor = defaultScaleFactor; // 2 is .5A grid; if this is made user configurable,
+    let ptranx = 0; let ptrany = 0; let ptranz = 0;
+    const probeRadius = 1.4;
+    const defaultScaleFactor = 2;
+    let scaleFactor = defaultScaleFactor; // 2 is .5A grid; if this is made user configurable,
                             // also have to adjust offset used to find non-shown
                             // atoms
-    var pHeight = 0, pWidth = 0, pLength = 0;
-    var cutRadius = 0;
-    var vpBits = null; // uint8 array of bitmasks
-    var vpDistance = null; // floatarray of _squared_ distances
-    var vpAtomID = null; // intarray
-    var pminx = 0, pminy = 0, pminz = 0, pmaxx = 0, pmaxy = 0, pmaxz = 0;
+    let pHeight = 0; let pWidth = 0; let pLength = 0;
+    let cutRadius = 0;
+    let vpBits = null; // uint8 array of bitmasks
+    let vpDistance = null; // floatarray of _squared_ distances
+    let vpAtomID = null; // intarray
+    let pminx = 0; let pminy = 0; let pminz = 0; let pmaxx = 0; let pmaxy = 0; let pmaxz = 0;
 
-    var vdwRadii = {
+    const vdwRadii = {
             "H" : 1.2,
             "Li" : 1.82,
             "Na" : 2.27,
@@ -76,16 +76,16 @@ $3Dmol.ProteinSurface = function() {
         };
     
     /** @param {AtomSpec} atom */
-    var getVDWIndex = function(atom) {
+    const getVDWIndex = function(atom) {
         if(!atom.elem || typeof(vdwRadii[atom.elem]) == "undefined") {
             return "X";
         }
         return atom.elem;
     };
     
-    var depty = {}, widxz = {};
-    var faces, verts;
-    var nb = [ new Int32Array([ 1, 0, 0 ]), new Int32Array([ -1, 0, 0 ]), 
+    const depty = {}; const widxz = {};
+    let faces; let verts;
+    const nb = [ new Int32Array([ 1, 0, 0 ]), new Int32Array([ -1, 0, 0 ]), 
                new Int32Array([ 0, 1, 0 ]), new Int32Array([ 0, -1, 0 ]),
                new Int32Array([ 0, 0, 1 ]), 
                new Int32Array([ 0, 0, -1 ]), 
@@ -112,24 +112,24 @@ $3Dmol.ProteinSurface = function() {
 
 
     this.getFacesAndVertices = function(atomlist) {
-        var atomsToShow = {};
+        const atomsToShow = {};
         for (let i = 0, il = atomlist.length; i < il; i++)
             atomsToShow[atomlist[i]] = true;
-        var vertices = verts;
+        const vertices = verts;
         for (let i = 0, il = vertices.length; i < il; i++) {
             vertices[i].x = vertices[i].x / scaleFactor - ptranx;
             vertices[i].y = vertices[i].y / scaleFactor - ptrany;
             vertices[i].z = vertices[i].z / scaleFactor - ptranz;
         }
 
-        var finalfaces = [];
+        const finalfaces = [];
         for (let i = 0, il = faces.length; i < il; i += 3) {
-            //var f = faces[i];
-            var fa = faces[i], fb = faces[i+1], fc = faces[i+2];
-            var a = vertices[fa].atomid, b = vertices[fb].atomid, c = vertices[fc].atomid;
+            // var f = faces[i];
+            const fa = faces[i]; const fb = faces[i+1]; const fc = faces[i+2];
+            const a = vertices[fa].atomid; const b = vertices[fb].atomid; const c = vertices[fc].atomid;
 
             // must be a unique face for each atom
-            var which = a;
+            let which = a;
             if (b < which)
                 which = b;
             if (c < which)
@@ -149,7 +149,7 @@ $3Dmol.ProteinSurface = function() {
                
         }
 
-        //try to help the garbage collector
+        // try to help the garbage collector
         vpBits = null; // uint8 array of bitmasks
         vpDistance = null; // floatarray
         vpAtomID = null; // intarray
@@ -162,10 +162,10 @@ $3Dmol.ProteinSurface = function() {
 
 
     this.initparm = function(extent, btype, volume) {
-        if(volume > 1000000) //heuristical decrease resolution to avoid large memory consumption
+        if(volume > 1000000) // heuristical decrease resolution to avoid large memory consumption
             scaleFactor = defaultScaleFactor/2;
         
-        var margin = (1 / scaleFactor) * 5.5; // need margin to avoid
+        const margin = (1 / scaleFactor) * 5.5; // need margin to avoid
                                                 // boundary/round off effects
         pminx = extent[0][0]; pmaxx = extent[1][0];
         pminy = extent[0][1]; pmaxy = extent[1][1];
@@ -214,17 +214,17 @@ $3Dmol.ProteinSurface = function() {
         // native
         // floats
         vpAtomID = new Int32Array(pLength * pWidth * pHeight);
-        //console.log("Box size: ", pLength, pWidth, pHeight, vpBits.length);
+        // console.log("Box size: ", pLength, pWidth, pHeight, vpBits.length);
     };
 
     this.boundingatom = function(btype) {
-        var tradius = [];
-        var txz, tdept, sradius;
+        const tradius = [];
+        let txz; let tdept; let sradius;
 
-        for ( var i in vdwRadii) {
+        for ( const i in vdwRadii) {
             if(!vdwRadii.hasOwnProperty(i))
                 continue;
-            var r = vdwRadii[i];
+            const r = vdwRadii[i];
             if (!btype)
                 tradius[i] = r * scaleFactor + 0.5;
             else
@@ -233,7 +233,7 @@ $3Dmol.ProteinSurface = function() {
             sradius = tradius[i] * tradius[i];
             widxz[i] = Math.floor(tradius[i]) + 1;
             depty[i] = new Int32Array(widxz[i] * widxz[i]);
-            var indx = 0;
+            let indx = 0;
             for (let j = 0; j < widxz[i]; j++) {
                 for (let k = 0; k < widxz[i]; k++) {
                     txz = j * j + k * k;
@@ -243,7 +243,7 @@ $3Dmol.ProteinSurface = function() {
                         tdept = Math.sqrt(sradius - txz);
                         depty[i][indx] = Math.floor(tdept);
                     }
-                    indx++;
+                    indx+=1;
                 }
             }
         }
@@ -259,8 +259,8 @@ $3Dmol.ProteinSurface = function() {
             vpAtomID[i] = -1;
         }
 
-        for (let i in atomlist) {
-            var atom = atoms[atomlist[i]];
+        for (const i in atomlist) {
+            const atom = atoms[atomlist[i]];
             if (atom === undefined)
                 continue;
             this.fillAtom(atom, atoms);
@@ -274,19 +274,19 @@ $3Dmol.ProteinSurface = function() {
 
 
     this.fillAtom = function(atom, atoms) {
-        var cx, cy, cz, ox, oy, oz, mi, mj, mk, i, j, k, si, sj, sk;
-        var ii, jj, kk, n;
+        let cx; let cy; let cz; let ox; let oy; let oz; let mi; let mj; let mk; let i; let j; let k; let si; let sj; let sk;
+        let ii; let jj; let kk; let n;
         cx = Math.floor(0.5 + scaleFactor * (atom.x + ptranx));
         cy = Math.floor(0.5 + scaleFactor * (atom.y + ptrany));
         cz = Math.floor(0.5 + scaleFactor * (atom.z + ptranz));
 
-        var at = getVDWIndex(atom);
-        var nind = 0;
-        var pWH = pWidth*pHeight;
+        const at = getVDWIndex(atom);
+        let nind = 0;
+        const pWH = pWidth*pHeight;
         
         for (i = 0, n = widxz[at]; i < n; i++) {
             for (j = 0; j < n; j++) {
-                if (depty[at][nind] != -1) {
+                if (depty[at][nind] !== -1) {
                     for (ii = -1; ii < 2; ii++) {
                         for (jj = -1; jj < 2; jj++) {
                             for (kk = -1; kk < 2; kk++) {
@@ -304,14 +304,14 @@ $3Dmol.ProteinSurface = function() {
                                                 sj >= pWidth || 
                                                 sk >= pHeight)
                                             continue;
-                                        var index = si * pWH + sj * pHeight + sk;
+                                        const index = si * pWH + sj * pHeight + sk;
 
                                         if (!(vpBits[index] & INOUT)) {
                                             vpBits[index] |= INOUT;
                                             vpAtomID[index] = atom.serial;
                                         } else {
-                                            var atom2 = atoms[vpAtomID[index]];
-                                            if(atom2.serial != atom.serial) {
+                                            const atom2 = atoms[vpAtomID[index]];
+                                            if(atom2.serial !== atom.serial) {
                                                 ox = cx + mi - Math.floor(0.5 + scaleFactor *
                                                         (atom2.x + ptranx));
                                                 oy = cy + mj - Math.floor(0.5 + scaleFactor *
@@ -330,7 +330,7 @@ $3Dmol.ProteinSurface = function() {
                         }// jj
                     }// ii
                 }// if
-                nind++;
+                nind+=1;
             }// j
         }// i
     };
@@ -339,8 +339,8 @@ $3Dmol.ProteinSurface = function() {
         for (let i = 0, il = vpBits.length; i < il; i++)
             vpBits[i] &= ~ISDONE; // not isdone
 
-        for (let i in atomlist) {
-            let atom = atoms[atomlist[i]];
+        for (const i in atomlist) {
+            const atom = atoms[atomlist[i]];
             if (atom === undefined)
                 continue;
 
@@ -349,17 +349,17 @@ $3Dmol.ProteinSurface = function() {
     };
 
     this.fillAtomWaals = function(atom, atoms) {
-        var cx, cy, cz, ox, oy, oz, nind = 0;
-        var mi, mj, mk, si, sj, sk, i, j, k, ii, jj, kk, n;
+        let cx; let cy; let cz; let ox; let oy; let oz; let nind = 0;
+        let mi; let mj; let mk; let si; let sj; let sk; let i; let j; let k; let ii; let jj; let kk; let n;
         cx = Math.floor(0.5 + scaleFactor * (atom.x + ptranx));
         cy = Math.floor(0.5 + scaleFactor * (atom.y + ptrany));
         cz = Math.floor(0.5 + scaleFactor * (atom.z + ptranz));
 
-        var at = getVDWIndex(atom);
-        var pWH = pWidth*pHeight;
+        const at = getVDWIndex(atom);
+        const pWH = pWidth*pHeight;
         for (i = 0, n = widxz[at]; i < n; i++) {
             for (j = 0; j < n; j++) {
-                if (depty[at][nind] != -1) {
+                if (depty[at][nind] !== -1) {
                     for (ii = -1; ii < 2; ii++) {
                         for (jj = -1; jj < 2; jj++) {
                             for (kk = -1; kk < 2; kk++) {
@@ -377,13 +377,13 @@ $3Dmol.ProteinSurface = function() {
                                                 sj >= pWidth || 
                                                 sk >= pHeight)
                                             continue;
-                                        var index = si * pWH + sj * pHeight + sk;
+                                        const index = si * pWH + sj * pHeight + sk;
                                         if (!(vpBits[index] & ISDONE)) {
                                             vpBits[index] |= ISDONE;
                                             vpAtomID[index] = atom.serial;
                                         }  else {
-                                            var atom2 = atoms[vpAtomID[index]];
-                                            if(atom2.serial != atom.serial) {
+                                            const atom2 = atoms[vpAtomID[index]];
+                                            if(atom2.serial !== atom.serial) {
                                                 ox = cx + mi - Math.floor(0.5 + scaleFactor *
                                                         (atom2.x + ptranx));
                                                 oy = cy + mj - Math.floor(0.5 + scaleFactor *
@@ -401,21 +401,21 @@ $3Dmol.ProteinSurface = function() {
                         }// jj
                     }// ii
                 }// if
-                nind++;
+                nind+=1;
             }// j
         }// i
     };
 
     this.buildboundary = function() {
-        var pWH = pWidth*pHeight;
+        const pWH = pWidth*pHeight;
         for (let i = 0; i < pLength; i++) {
             for (let j = 0; j < pHeight; j++) {
                 for (let k = 0; k < pWidth; k++) {
-                    var index = i * pWH + k * pHeight + j;
+                    const index = i * pWH + k * pHeight + j;
                     if (vpBits[index] & INOUT) {
-                        var ii = 0;
+                        let ii = 0;
                         while (ii < 26) {
-                            var ti = i + nb[ii][0], tj = j + nb[ii][2], tk = k +
+                            const ti = i + nb[ii][0]; const tj = j + nb[ii][2]; const tk = k +
                                     nb[ii][1];
                             if (ti > -1 && 
                                 ti < pLength && 
@@ -427,7 +427,7 @@ $3Dmol.ProteinSurface = function() {
                                 vpBits[index] |= ISBOUND;
                                 break;
                             } else
-                                ii++;
+                                ii+=1;
                         }
                     }
                 }
@@ -437,13 +437,13 @@ $3Dmol.ProteinSurface = function() {
 
     // a little class for 3d array, should really generalize this and
     // use throughout...
-    var PointGrid = function(length, width, height) {
+    const PointGrid = function(length, width, height) {
         // the standard says this is zero initialized
-        var data = new Int32Array(length * width * height * 3);
+        const data = new Int32Array(length * width * height * 3);
 
         // set position x,y,z to pt, which has ix,iy,and iz
         this.set = function(x, y, z, pt) {
-            var index = ((((x * width) + y) * height) + z) * 3;
+            const index = ((((x * width) + y) * height) + z) * 3;
             data[index] = pt.ix;
             data[index + 1] = pt.iy;
             data[index + 2] = pt.iz;
@@ -451,7 +451,7 @@ $3Dmol.ProteinSurface = function() {
 
         // return point at x,y,z
         this.get = function(x, y, z) {
-            var index = ((((x * width) + y) * height) + z) * 3;
+            const index = ((((x * width) + y) * height) + z) * 3;
             return {
                 ix : data[index],
                 iy : data[index + 1],
@@ -461,16 +461,16 @@ $3Dmol.ProteinSurface = function() {
     };
 
     this.fastdistancemap = function() {
-        var i, j, k, n;
+        let i; let j; let k; let n;
 
-        var boundPoint = new PointGrid(pLength, pWidth, pHeight);
-        var pWH = pWidth*pHeight;
-        var cutRSq = cutRadius*cutRadius;
+        let boundPoint = new PointGrid(pLength, pWidth, pHeight);
+        const pWH = pWidth*pHeight;
+        const cutRSq = cutRadius*cutRadius;
         
-        var inarray = [];
-        var outarray = [];
+        let inarray = [];
+        let outarray = [];
         
-        var index;
+        let index;
         
         for (i = 0; i < pLength; i++) {
             for (j = 0; j < pWidth; j++) {
@@ -479,7 +479,7 @@ $3Dmol.ProteinSurface = function() {
                     vpBits[index] &= ~ISDONE; // isdone = false
                     if (vpBits[index] & INOUT) {
                         if (vpBits[index] & ISBOUND) {
-                            var triple = {
+                            const triple = {
                                 ix : i,
                                 iy : j,
                                 iz : k
@@ -516,10 +516,10 @@ $3Dmol.ProteinSurface = function() {
         outarray = [];
         boundPoint = null;
         
-        var cutsf = scaleFactor - 0.5;
+        let cutsf = scaleFactor - 0.5;
         if (cutsf < 0)
             cutsf = 0;
-        var cutoff = cutRSq - 0.50 / (0.1 + cutsf);
+        const cutoff = cutRSq - 0.50 / (0.1 + cutsf);
         for (i = 0; i < pLength; i++) {
             for (j = 0; j < pWidth; j++) {
                 for (k = 0; k < pHeight; k++) {
@@ -542,21 +542,21 @@ $3Dmol.ProteinSurface = function() {
         // *allocout,voxel2
         // ***boundPoint, int*
         // outnum, int *elimi)
-        var tx, ty, tz;
-        var dx, dy, dz;
-        var i, j, n;
-        var square;
-        var bp, index;
-        var outarray = [];
+        let tx; let ty; let tz;
+        let dx; let dy; let dz;
+        let i; let j; let n;
+        let square;
+        let bp; let index;
+        const outarray = [];
         if (inarray.length === 0)
             return outarray;
 
-        var tnv = {
+        const tnv = {
             ix : -1,
             iy : -1,
             iz : -1
         };
-        var pWH = pWidth*pHeight;
+        const pWH = pWidth*pHeight;
         for ( i = 0, n = inarray.length; i < n; i++) {
             tx = inarray[i].ix;
             ty = inarray[i].iy;
@@ -728,20 +728,20 @@ $3Dmol.ProteinSurface = function() {
     };
 
     this.marchingcubeinit = function(stype) {
-        for ( var i = 0, lim = vpBits.length; i < lim; i++) {
-            if (stype == 1) {// vdw
+        for ( let i = 0, lim = vpBits.length; i < lim; i++) {
+            if (stype === 1) {// vdw
                 vpBits[i] &= ~ISBOUND;
-            } else if (stype == 4) { // ses
+            } else if (stype === 4) { // ses
                 vpBits[i] &= ~ISDONE;
                 if (vpBits[i] & ISBOUND)
                     vpBits[i] |= ISDONE;
                 vpBits[i] &= ~ISBOUND;
-            } else if (stype == 2) {// after vdw
+            } else if (stype === 2) {// after vdw
                 if ((vpBits[i] & ISBOUND) && (vpBits[i] & ISDONE))
                     vpBits[i] &= ~ISBOUND;
                 else if ((vpBits[i] & ISBOUND) && !(vpBits[i] & ISDONE))
                     vpBits[i] |= ISDONE;
-            } else if (stype == 3) { // sas
+            } else if (stype === 3) { // sas
                 vpBits[i] &= ~ISBOUND;
             }
         }
@@ -757,8 +757,8 @@ $3Dmol.ProteinSurface = function() {
             nZ : pHeight        
         });      
 
-        var pWH = pWidth*pHeight;
-        for (var i = 0, vlen = verts.length; i < vlen; i++) {
+        const pWH = pWidth*pHeight;
+        for (let i = 0, vlen = verts.length; i < vlen; i++) {
             verts[i].atomid = vpAtomID[verts[i].x * pWH + pHeight *
                     verts[i].y + verts[i].z];
         }  
