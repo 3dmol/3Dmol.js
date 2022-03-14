@@ -3,15 +3,15 @@
  * quaternion, vector, matrix
  */
 
-var $3Dmol = $3Dmol || {};
+const $3Dmol = $3Dmol || {};
 $3Dmol.Math = {
 
-    clamp : function(x, min, max) {
+    clamp(x, min, max) {
         return Math.min(Math.max(x, min), max);
     },
 
     degToRad : function() {
-        var degreeToRadiansFactor = Math.PI / 180;
+        const degreeToRadiansFactor = Math.PI / 180;
 
         return function(deg) {
             return deg * degreeToRadiansFactor;
@@ -36,7 +36,7 @@ $3Dmol.Quaternion.prototype = {
 
     constructor : $3Dmol.Quaternion,
 
-    set : function(x, y, z, w) {
+    set(x, y, z, w) {
 
         this.x = x;
         this.y = y;
@@ -46,7 +46,7 @@ $3Dmol.Quaternion.prototype = {
         return this;
     },
 
-    copy : function(q) {
+    copy(q) {
 
         this.x = q.x;
         this.y = q.y;
@@ -56,7 +56,7 @@ $3Dmol.Quaternion.prototype = {
         return this;
     },
 
-    conjugate : function() {
+    conjugate() {
 
         this.x *= -1;
         this.y *= -1;
@@ -65,25 +65,25 @@ $3Dmol.Quaternion.prototype = {
         return this;
     },
 
-    inverse : function() {
+    inverse() {
 
         return this.conjugate().normalize();
     },
 
-    length : function() {
+    length() {
 
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z
                 + this.w * this.w);
     },
 
-    lengthxyz : function() {
+    lengthxyz() {
 
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     },
 
-    normalize : function() {
+    normalize() {
 
-        var l = this.length();
+        let l = this.length();
 
         if (l === 0) {
             this.x = 0;
@@ -103,12 +103,12 @@ $3Dmol.Quaternion.prototype = {
 
     },
 
-    multiply : function(q) {
+    multiply(q) {
 
         return this.multiplyQuaternions(this, q);
     },
 
-    multiplyScalar : function(s) {
+    multiplyScalar(s) {
         this.x *= s;
         this.y *= s;
         this.z *= s;
@@ -116,10 +116,10 @@ $3Dmol.Quaternion.prototype = {
         return this;
     },
 
-    multiplyQuaternions : function(a, b) {
+    multiplyQuaternions(a, b) {
 
-        var qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
-        var qbx = b.x, qby = b.y, qbz = b.z, qbw = b.w;
+        const qax = a.x; const qay = a.y; const qaz = a.z; const qaw = a.w;
+        const qbx = b.x; const qby = b.y; const qbz = b.z; const qbw = b.w;
 
         this.x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
         this.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
@@ -128,7 +128,7 @@ $3Dmol.Quaternion.prototype = {
         return this;
     },
 
-    sub : function(q) {
+    sub(q) {
         this.x -= q.x;
         this.y -= q.y;
         this.z -= q.z;
@@ -136,16 +136,16 @@ $3Dmol.Quaternion.prototype = {
         return this;
     },
 
-    clone : function() {
+    clone() {
         return new $3Dmol.Quaternion(this.x, this.y, this.z, this.w);
     },
-    setFromEuler : function(e) {
-        var c1 = Math.cos(e.x / 2);
-        var c2 = Math.cos(e.y / 2);
-        var c3 = Math.cos(e.z / 2);
-        var s1 = Math.sin(e.x / 2);
-        var s2 = Math.sin(e.y / 2);
-        var s3 = Math.sin(e.z / 2);
+    setFromEuler(e) {
+        const c1 = Math.cos(e.x / 2);
+        const c2 = Math.cos(e.y / 2);
+        const c3 = Math.cos(e.z / 2);
+        const s1 = Math.sin(e.x / 2);
+        const s2 = Math.sin(e.y / 2);
+        const s3 = Math.sin(e.z / 2);
 
         this.x = s1 * c2 * c3 + c1 * s2 * s3;
         this.y = c1 * s2 * c3 - s1 * c2 * s3;
@@ -169,7 +169,7 @@ $3Dmol.Vector2.prototype = {
 
     constructor : $3Dmol.Vector2,
 
-    set : function(x, y) {
+    set(x, y) {
 
         this.x = x;
         this.y = y;
@@ -177,7 +177,7 @@ $3Dmol.Vector2.prototype = {
         return this;
     },
 
-    subVectors : function(a, b) {
+    subVectors(a, b) {
 
         this.x = a.x - b.x;
         this.y = a.y - b.y;
@@ -185,7 +185,7 @@ $3Dmol.Vector2.prototype = {
         return this;
     },
 
-    copy : function(v) {
+    copy(v) {
 
         this.x = v.x;
         this.y = v.y;
@@ -193,7 +193,7 @@ $3Dmol.Vector2.prototype = {
         return this;
     },
 
-    clone : function() {
+    clone() {
 
         return new $3Dmol.Vector2(this.x, this.y);
     }
@@ -212,7 +212,7 @@ $3Dmol.Vector3.prototype = {
 
     constructor : $3Dmol.Vector3,
 
-    set : function(x, y, z) {
+    set(x, y, z) {
 
         this.x = x;
         this.y = y;
@@ -221,7 +221,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    copy : function(v) {
+    copy(v) {
 
         this.x = v.x;
         this.y = v.y;
@@ -230,7 +230,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    add : function(v) {
+    add(v) {
 
         this.x += v.x;
         this.y += v.y;
@@ -239,7 +239,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    addVectors : function(a, b) {
+    addVectors(a, b) {
 
         this.x = a.x + b.x;
         this.y = a.y + b.y;
@@ -248,14 +248,14 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    multiplyVectors: function(a, b) { //elementwise
+    multiplyVectors(a, b) { // elementwise
         this.x = a.x * b.x;
         this.y = a.y * b.y;
         this.z = a.z * b.z;
 
         return this;
     },
-    sub : function(v) {
+    sub(v) {
 
         this.x -= v.x;
         this.y -= v.y;
@@ -264,7 +264,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    subVectors : function(a, b) {
+    subVectors(a, b) {
 
         this.x = a.x - b.x;
         this.y = a.y - b.y;
@@ -273,7 +273,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    multiplyScalar : function(s) {
+    multiplyScalar(s) {
 
         this.x *= s;
         this.y *= s;
@@ -282,7 +282,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    divideScalar : function(s) {
+    divideScalar(s) {
 
         if (s !== 0) {
             this.x /= s;
@@ -300,7 +300,7 @@ $3Dmol.Vector3.prototype = {
     },
 
     // accumulate maximum
-    max : function(s) {
+    max(s) {
 
         this.x = Math.max(this.x, s.x);
         this.y = Math.max(this.y, s.y);
@@ -310,7 +310,7 @@ $3Dmol.Vector3.prototype = {
     },
 
     // accumulate min
-    min : function(s) {
+    min(s) {
 
         this.x = Math.min(this.x, s.x);
         this.y = Math.min(this.y, s.y);
@@ -318,24 +318,24 @@ $3Dmol.Vector3.prototype = {
 
         return this;
     },
-    distanceTo : function(v) {
+    distanceTo(v) {
         return Math.sqrt(this.distanceToSquared(v));
     },
 
-    distanceToSquared : function(v) {
-        var dx = this.x - v.x;
-        var dy = this.y - v.y;
-        var dz = this.z - v.z;
+    distanceToSquared(v) {
+        const dx = this.x - v.x;
+        const dy = this.y - v.y;
+        const dz = this.z - v.z;
 
         return dx * dx + dy * dy + dz * dz;
     },
 
-    applyMatrix3 : function(m) {
+    applyMatrix3(m) {
         
-       var x = this.x, y = this.y, z = this.z;
+       const {x} = this; const {y} = this; const {z} = this;
 
-        var e = m.elements;
-        //column major ordering
+        const e = m.elements;
+        // column major ordering
         this.x = e[0] * x + e[3] * y + e[6] * z;
         this.y = e[1] * x + e[4] * y + e[7] * z;
         this.z = e[2] * x + e[5] * y + e[8] * z;
@@ -343,11 +343,11 @@ $3Dmol.Vector3.prototype = {
         return this;       
     },
     
-    applyMatrix4 : function(m) {
+    applyMatrix4(m) {
 
-        var x = this.x, y = this.y, z = this.z;
+        const {x} = this; const {y} = this; const {z} = this;
 
-        var e = m.elements;
+        const e = m.elements;
 
         this.x = e[0] * x + e[4] * y + e[8] * z + e[12];
         this.y = e[1] * x + e[5] * y + e[9] * z + e[13];
@@ -356,14 +356,14 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    applyProjection : function(m) {
+    applyProjection(m) {
 
         // input: $3Dmol.Matrix4 projection matrix
 
-        var x = this.x, y = this.y, z = this.z;
+        const {x} = this; const {y} = this; const {z} = this;
 
-        var e = m.elements;
-        var d = (e[3] * x + e[7] * y + e[11] * z + e[15]);
+        const e = m.elements;
+        const d = (e[3] * x + e[7] * y + e[11] * z + e[15]);
 
         this.x = (e[0] * x + e[4] * y + e[8] * z + e[12]) / d;
         this.y = (e[1] * x + e[5] * y + e[9] * z + e[13]) / d;
@@ -372,30 +372,30 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    applyQuaternion : function(q) {
+    applyQuaternion(q) {
 
         // save values
-        var x = this.x;
-        var y = this.y;
-        var z = this.z;
+        const {x} = this;
+        const {y} = this;
+        const {z} = this;
 
-        var qx = q.x;
-        var qy = q.y;
-        var qz = q.z;
-        var qw = q.w;
+        const qx = q.x;
+        const qy = q.y;
+        const qz = q.z;
+        const qw = q.w;
 
         // compute this as
         // t = 2 * cross(q.xyz, v)
         // newv = v + q.w * t + cross(q.xyz, t)
         // this from molecularmusings
         // http://molecularmusings.wordpress.com/2013/05/24/a-faster-quaternion-vector-multiplication/
-        var t = {};
+        const t = {};
         t.x = 2 * (y * qz - z * qy);
         t.y = 2 * (z * qx - x * qz);
         t.z = 2 * (x * qy - y * qx);
 
         // cross t with q
-        var t2 = {};
+        const t2 = {};
         t2.x = t.y * qz - t.z * qy;
         t2.y = t.z * qx - t.x * qz;
         t2.z = t.x * qy - t.y * qx;
@@ -407,34 +407,34 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    negate : function() {
+    negate() {
 
         return this.multiplyScalar(-1);
     },
 
-    dot : function(v) {
+    dot(v) {
 
         return this.x * v.x + this.y * v.y + this.z * v.z;
     },
 
-    length : function() {
+    length() {
 
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     },
 
-    lengthSq : function() {
+    lengthSq() {
 
         return (this.x * this.x + this.y * this.y + this.z * this.z);
     },
 
-    normalize : function() {
+    normalize() {
 
         return this.divideScalar(this.length());
     },
 
-    cross : function(v) {
+    cross(v) {
 
-        var x = this.x, y = this.y, z = this.z;
+        const {x} = this; const {y} = this; const {z} = this;
 
         this.x = y * v.z - z * v.y;
         this.y = z * v.x - x * v.z;
@@ -443,7 +443,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    crossVectors : function(a, b) {
+    crossVectors(a, b) {
 
         this.x = a.y * b.z - a.z * b.y;
         this.y = a.z * b.x - a.x * b.z;
@@ -452,7 +452,7 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    getPositionFromMatrix : function(m) {
+    getPositionFromMatrix(m) {
 
         this.x = m.elements[12];
         this.y = m.elements[13];
@@ -461,16 +461,16 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    setEulerFromRotationMatrix : function(m, order) {
+    setEulerFromRotationMatrix(m, order) {
 
         // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
 
-        var te = m.elements;
-        var m11 = te[0], m12 = te[4], m13 = te[8];
+        const te = m.elements;
+        const m11 = te[0]; const m12 = te[4]; const m13 = te[8];
         // var m21 = te[1];
-        var m22 = te[5], m23 = te[9];
+        const m22 = te[5]; const m23 = te[9];
         // var m31 = te[2];
-        var m32 = te[6], m33 = te[10];
+        const m32 = te[6]; const m33 = te[10];
 
         if (order === undefined || order === 'XYZ') {
 
@@ -491,27 +491,27 @@ $3Dmol.Vector3.prototype = {
 
         else {
             console
-                    .error("Error with vector's setEulerFromRotationMatrix: Unknown order: "
-                            + order);
+                    .error(`Error with vector's setEulerFromRotationMatrix: Unknown order: ${
+                             order}`);
         }
 
         return this;
 
     },
 
-    rotateAboutVector : function(axis, ang) {
+    rotateAboutVector(axis, ang) {
 
         axis.normalize();
-        var cosang = Math.cos(ang);
-        var sinang = Math.sin(ang);
+        const cosang = Math.cos(ang);
+        const sinang = Math.sin(ang);
         // Rodrigues' rotation formula, from wikipedia
 
-        var term1 = this.clone().multiplyScalar(cosang);
-        var term2 = (axis.clone().cross(this)).multiplyScalar(sinang);
-        var term3 = axis.clone().multiplyScalar(axis.clone().dot(this))
+        const term1 = this.clone().multiplyScalar(cosang);
+        const term2 = (axis.clone().cross(this)).multiplyScalar(sinang);
+        const term3 = axis.clone().multiplyScalar(axis.clone().dot(this))
                 .multiplyScalar(1 - cosang);
 
-        var rot = term1.add(term2).add(term3);
+        const rot = term1.add(term2).add(term3);
 
         this.x = rot.x;
         this.y = rot.y;
@@ -520,9 +520,9 @@ $3Dmol.Vector3.prototype = {
         return this;
     },
 
-    setFromMatrixPosition : function(m) {
+    setFromMatrixPosition(m) {
 
-        var e = m.elements;
+        const e = m.elements;
 
         this.x = e[12];
         this.y = e[13];
@@ -533,13 +533,13 @@ $3Dmol.Vector3.prototype = {
     },
     // unproject is defined after Matrix4
 
-    transformDirection : function(m) {
+    transformDirection(m) {
 
         // input: THREE.Matrix4 affine matrix
         // vector interpreted as a direction
 
-        var x = this.x, y = this.y, z = this.z;
-        var e = m.elements;
+        const {x} = this; const {y} = this; const {z} = this;
+        const e = m.elements;
 
         this.x = e[0] * x + e[4] * y + e[8] * z;
         this.y = e[1] * x + e[5] * y + e[9] * z;
@@ -548,7 +548,7 @@ $3Dmol.Vector3.prototype = {
         return this.normalize();
     },
 
-    clone : function() {
+    clone() {
         return new $3Dmol.Vector3(this.x, this.y, this.z);
     }
 
@@ -572,21 +572,21 @@ $3Dmol.square = function(n) {
         return n*n;
 };
     
-//return conversion matrix given crystal unit cell parameters
+// return conversion matrix given crystal unit cell parameters
 $3Dmol.conversionMatrix3 = function(a, b, c, alpha, beta, gamma) {
-    //convert to radians
+    // convert to radians
     alpha = alpha * Math.PI / 180;
     beta = beta * Math.PI / 180;
     gamma = gamma * Math.PI / 180;
-    let sqr = $3Dmol.square;
-    let cos_alpha = Math.cos(alpha);
-    let cos_beta = Math.cos(beta);
-    let cos_gamma = Math.cos(gamma);
-    let sin_gamma = Math.sin(gamma);
-    let conversionMatrix = new $3Dmol.Matrix3(
-            a, b*cos_gamma, c*cos_beta,
-            0, b*sin_gamma, c*(cos_alpha-cos_beta*cos_gamma)/sin_gamma,
-            0, 0, c*Math.sqrt(1-sqr(cos_alpha)-sqr(cos_beta)-sqr(cos_gamma)+2*cos_alpha*cos_beta*cos_gamma)/sin_gamma);
+    const sqr = $3Dmol.square;
+    const cosAlpha = Math.cos(alpha);
+    const cosBeta = Math.cos(beta);
+    const cosGamma = Math.cos(gamma);
+    const sinGamma = Math.sin(gamma);
+    const conversionMatrix = new $3Dmol.Matrix3(
+            a, b*cosGamma, c*cosBeta,
+            0, b*sinGamma, c*(cosAlpha-cosBeta*cosGamma)/sinGamma,
+            0, 0, c*Math.sqrt(1-sqr(cosAlpha)-sqr(cosBeta)-sqr(cosGamma)+2*cosAlpha*cosBeta*cosGamma)/sinGamma);
     return conversionMatrix;
 };
 
@@ -594,8 +594,8 @@ $3Dmol.Matrix3.prototype = {
 
     constructor : $3Dmol.Matrix3,
 
-    set : function(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
-        var te = this.elements;
+    set(n11, n12, n13, n21, n22, n23, n31, n32, n33) {
+        const te = this.elements;
 
         te[0] = n11;
         te[3] = n12;
@@ -610,20 +610,20 @@ $3Dmol.Matrix3.prototype = {
         return this;
     },
 
-    identity : function() {
+    identity() {
         this.set(1, 0, 0, 0, 1, 0, 0, 0, 1);
 
         return this;
     },
 
-    copy : function(m) {
-        var me = m.elements;
+    copy(m) {
+        const me = m.elements;
 
         this.set(me[0], me[3], me[6], me[1], me[4], me[7], me[2], me[5], me[8]);
     },
 
-    multiplyScalar : function(s) {
-        var te = this.elements;
+    multiplyScalar(s) {
+        const te = this.elements;
 
         te[0] *= s;
         te[3] *= s;
@@ -639,11 +639,11 @@ $3Dmol.Matrix3.prototype = {
     },
     
 
-    getInverse3 : function(matrix) {
+    getInverse3(matrix) {
         // input: Matrix3
 
-        let me = matrix.elements;
-        let te = this.elements;
+        const me = matrix.elements;
+        const te = this.elements;
         
         te[0] = me[4] * me[8] - me[5] * me[7];
         te[3] = me[6] * me[5] - me[3] * me[8];
@@ -655,17 +655,17 @@ $3Dmol.Matrix3.prototype = {
         te[5] = me[2] * me[3] - me[0] * me[5];
         te[8] = me[0] * me[4] - me[1] * me[3];
 
-        let det = me[0] * te[0] + me[3]* te[1] + me[6]*te[2];
+        const det = me[0] * te[0] + me[3]* te[1] + me[6]*te[2];
         this.multiplyScalar(1.0 / det);
 
         return this;
     },
     
-    getInverse : function(matrix, throwOnInvertible) {
+    getInverse(matrix, throwOnInvertible) {
         // input: Matrix4
 
-        var me = matrix.elements;
-        var te = this.elements;
+        const me = matrix.elements;
+        const te = this.elements;
 
         te[0] = me[10] * me[5] - me[6] * me[9];
         te[1] = -me[10] * me[1] + me[2] * me[9];
@@ -677,13 +677,13 @@ $3Dmol.Matrix3.prototype = {
         te[7] = -me[9] * me[0] + me[1] * me[8];
         te[8] = me[5] * me[0] - me[1] * me[4];
 
-        var det = me[0] * te[0] + me[1] * te[3] + me[2] * te[6];
+        const det = me[0] * te[0] + me[1] * te[3] + me[2] * te[6];
 
         // no inverse
 
         if (det === 0) {
 
-            var msg = "Matrix3.getInverse(): can't invert matrix, determinant is 0";
+            const msg = "Matrix3.getInverse(): can't invert matrix, determinant is 0";
 
             if (throwOnInvertible || false) {
 
@@ -707,14 +707,14 @@ $3Dmol.Matrix3.prototype = {
     },
 
     // https://en.wikipedia.org/wiki/Determinant
-    getDeterminant : function() {
-        var m = this.elements;
+    getDeterminant() {
+        const m = this.elements;
 
         /*
          * |a b c| |d e f| |g h i|
          */
 
-        var determinant = m[0] * m[4] * m[8] // +aei
+        const determinant = m[0] * m[4] * m[8] // +aei
                 + m[1] * m[5] * m[6] // +bfg
                 + m[2] * m[3] * m[7] // +cdh
                 - m[2] * m[4] * m[6] // -ceg
@@ -723,13 +723,13 @@ $3Dmol.Matrix3.prototype = {
         return determinant;
     },
 
-    getMatrix4 : function() {
-      var m = this.elements;
+    getMatrix4() {
+      const m = this.elements;
       return new $3Dmol.Matrix4(m[0],m[3],m[6],0,m[1],m[4],m[7],0,m[2],m[5],m[8],0);
     },
     
-    transpose : function() {
-        var tmp, m = this.elements;
+    transpose() {
+        let tmp; const m = this.elements;
 
         tmp = m[1];
         m[1] = m[3];
@@ -744,8 +744,8 @@ $3Dmol.Matrix3.prototype = {
         return this;
     },
 
-    clone : function() {
-        var te = this.elements;
+    clone() {
+        const te = this.elements;
 
         return new $3Dmol.Matrix3(
 
@@ -765,7 +765,7 @@ $3Dmol.Matrix4 = function(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32,
         // passing list like initialization
         this.elements = new Float32Array(n11);
     } else {
-        var te = this.elements = new Float32Array(16);
+        const te = this.elements = new Float32Array(16);
 
         te[0] = (n11 !== undefined) ? n11 : 1;
         te[4] = n12 || 0;
@@ -790,9 +790,9 @@ $3Dmol.Matrix4.prototype = {
 
     constructor : $3Dmol.Matrix4,
 
-    set : function(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34,
+    set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34,
             n41, n42, n43, n44) {
-        var te = this.elements;
+        const te = this.elements;
 
         te[0] = n11;
         te[4] = n12;
@@ -814,7 +814,7 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    identity : function() {
+    identity() {
         this.set(
 
         1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
@@ -824,8 +824,8 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    copy : function(m) {
-        var me = m.elements;
+    copy(m) {
+        const me = m.elements;
 
         this.set(
 
@@ -837,24 +837,24 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    matrix3FromTopLeft : function() {
-        var te = this.elements;
+    matrix3FromTopLeft() {
+        const te = this.elements;
         return new $3Dmol.Matrix3(te[0], te[4], te[8], te[1], te[5], te[9],
                 te[2], te[6], te[10]);
     },
 
-    setRotationFromEuler : function(v, order) {
+    setRotationFromEuler(v, order) {
 
-        var te = this.elements;
+        const te = this.elements;
 
-        var x = v.x, y = v.y, z = v.z;
-        var a = Math.cos(x), b = Math.sin(x);
-        var c = Math.cos(y), d = Math.sin(y);
-        var e = Math.cos(z), f = Math.sin(z);
+        const {x} = v; const {y} = v; const {z} = v;
+        const a = Math.cos(x); const b = Math.sin(x);
+        const c = Math.cos(y); const d = Math.sin(y);
+        const e = Math.cos(z); const f = Math.sin(z);
 
         if (order === undefined || order === 'XYZ') {
 
-            var ae = a * e, af = a * f, be = b * e, bf = b * f;
+            const ae = a * e; const af = a * f; const be = b * e; const bf = b * f;
 
             te[0] = c * e;
             te[4] = -c * f;
@@ -871,21 +871,21 @@ $3Dmol.Matrix4.prototype = {
         }
 
         else
-            console.error("Error with matrix4 setRotationFromEuler. Order: "
-                    + order);
+            console.error(`Error with matrix4 setRotationFromEuler. Order: ${
+                     order}`);
 
         return this;
 
     },
 
-    setRotationFromQuaternion : function(q) {
-        var te = this.elements;
+    setRotationFromQuaternion(q) {
+        const te = this.elements;
 
-        var x = q.x, y = q.y, z = q.z, w = q.w;
-        var x2 = x + x, y2 = y + y, z2 = z + z;
-        var xx = x * x2, xy = x * y2, xz = x * z2;
-        var yy = y * y2, yz = y * z2, zz = z * z2;
-        var wx = w * x2, wy = w * y2, wz = w * z2;
+        const {x} = q; const {y} = q; const {z} = q; const {w} = q;
+        const x2 = x + x; const y2 = y + y; const z2 = z + z;
+        const xx = x * x2; const xy = x * y2; const xz = x * z2;
+        const yy = y * y2; const yz = y * z2; const zz = z * z2;
+        const wx = w * x2; const wy = w * y2; const wz = w * z2;
 
         te[0] = 1 - (yy + zz);
         te[4] = xy - wz;
@@ -903,13 +903,13 @@ $3Dmol.Matrix4.prototype = {
     },
 
     lookAt : function() {
-        var x = new $3Dmol.Vector3();
-        var y = new $3Dmol.Vector3();
-        var z = new $3Dmol.Vector3();
+        const x = new $3Dmol.Vector3();
+        const y = new $3Dmol.Vector3();
+        const z = new $3Dmol.Vector3();
 
         return function(eye, target, up) {
 
-            var te = this.elements;
+            const te = this.elements;
 
             z.subVectors(eye, target).normalize();
 
@@ -945,20 +945,20 @@ $3Dmol.Matrix4.prototype = {
 
     }(),
 
-    multiplyMatrices : function(a, b) {
-        var ae = a.elements;
-        var be = b.elements;
-        var te = this.elements;
+    multiplyMatrices(a, b) {
+        const ae = a.elements;
+        const be = b.elements;
+        const te = this.elements;
 
-        var a11 = ae[0], a12 = ae[4], a13 = ae[8], a14 = ae[12];
-        var a21 = ae[1], a22 = ae[5], a23 = ae[9], a24 = ae[13];
-        var a31 = ae[2], a32 = ae[6], a33 = ae[10], a34 = ae[14];
-        var a41 = ae[3], a42 = ae[7], a43 = ae[11], a44 = ae[15];
+        const a11 = ae[0]; const a12 = ae[4]; const a13 = ae[8]; const a14 = ae[12];
+        const a21 = ae[1]; const a22 = ae[5]; const a23 = ae[9]; const a24 = ae[13];
+        const a31 = ae[2]; const a32 = ae[6]; const a33 = ae[10]; const a34 = ae[14];
+        const a41 = ae[3]; const a42 = ae[7]; const a43 = ae[11]; const a44 = ae[15];
 
-        var b11 = be[0], b12 = be[4], b13 = be[8], b14 = be[12];
-        var b21 = be[1], b22 = be[5], b23 = be[9], b24 = be[13];
-        var b31 = be[2], b32 = be[6], b33 = be[10], b34 = be[14];
-        var b41 = be[3], b42 = be[7], b43 = be[11], b44 = be[15];
+        const b11 = be[0]; const b12 = be[4]; const b13 = be[8]; const b14 = be[12];
+        const b21 = be[1]; const b22 = be[5]; const b23 = be[9]; const b24 = be[13];
+        const b31 = be[2]; const b32 = be[6]; const b33 = be[10]; const b34 = be[14];
+        const b41 = be[3]; const b42 = be[7]; const b43 = be[11]; const b44 = be[15];
 
         te[0] = a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41;
         te[4] = a11 * b12 + a12 * b22 + a13 * b32 + a14 * b42;
@@ -983,8 +983,8 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    multiplyScalar : function(s) {
-        var te = this.elements;
+    multiplyScalar(s) {
+        const te = this.elements;
 
         te[0] *= s;
         te[4] *= s;
@@ -1006,7 +1006,7 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    makeTranslation : function(x, y, z) {
+    makeTranslation(x, y, z) {
 
         this.set(
 
@@ -1018,24 +1018,24 @@ $3Dmol.Matrix4.prototype = {
 
     },
     
-    //snap values close to integers to their integer value
-    //useful and identifying identity matrices
-    snap : function(digits) {
+    // snap values close to integers to their integer value
+    // useful and identifying identity matrices
+    snap(digits) {
         if(!digits) digits = 4;
-        let mult = Math.pow(10,4);
-        let te = this.elements;
+        const mult = 10**4;
+        const te = this.elements;
         for(let i = 0; i < 16; i++) {
-            let rounded = Math.round(te[i]);
-            if(rounded == Math.round(te[i]*mult)/mult) {
+            const rounded = Math.round(te[i]);
+            if(rounded === Math.round(te[i]*mult)/mult) {
                 te[i] = rounded;
             }
         }
         return this;
     },
 
-    transpose : function() {
-        var te = this.elements;
-        var tmp;
+    transpose() {
+        const te = this.elements;
+        let tmp;
 
         tmp = te[1];
         te[1] = te[4];
@@ -1061,21 +1061,21 @@ $3Dmol.Matrix4.prototype = {
     },
 
     getPosition : function() {
-        var v1 = new $3Dmol.Vector3();
+        const v1 = new $3Dmol.Vector3();
 
         return function() {
 
             console
                     .warn('DEPRECATED: Matrix4\'s .getPosition() has been removed. Use Vector3.getPositionFromMatrix( matrix ) instead.');
 
-            var te = this.elements;
+            const te = this.elements;
             return v1.set(te[12], te[13], te[14]);
         };
 
     }(),
 
-    setPosition : function(v) {
-        var te = this.elements;
+    setPosition(v) {
+        const te = this.elements;
 
         te[12] = v.x;
         te[13] = v.y;
@@ -1084,8 +1084,8 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
     
-    translate : function(v) {
-        var te = this.elements;
+    translate(v) {
+        const te = this.elements;
 
         te[12] += v.x;
         te[13] += v.y;
@@ -1094,16 +1094,16 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    getInverse : function(m, throwOnInvertible) {
+    getInverse(m, throwOnInvertible) {
         // based on
         // http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
-        var te = this.elements;
-        var me = m.elements;
+        const te = this.elements;
+        const me = m.elements;
 
-        var n11 = me[0], n12 = me[4], n13 = me[8], n14 = me[12];
-        var n21 = me[1], n22 = me[5], n23 = me[9], n24 = me[13];
-        var n31 = me[2], n32 = me[6], n33 = me[10], n34 = me[14];
-        var n41 = me[3], n42 = me[7], n43 = me[11], n44 = me[15];
+        const n11 = me[0]; const n12 = me[4]; const n13 = me[8]; const n14 = me[12];
+        const n21 = me[1]; const n22 = me[5]; const n23 = me[9]; const n24 = me[13];
+        const n31 = me[2]; const n32 = me[6]; const n33 = me[10]; const n34 = me[14];
+        const n41 = me[3]; const n42 = me[7]; const n43 = me[11]; const n44 = me[15];
 
         te[0] = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34
                 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
@@ -1138,11 +1138,11 @@ $3Dmol.Matrix4.prototype = {
         te[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11
                 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
 
-        var det = n11 * te[0] + n21 * te[4] + n31 * te[8] + n41 * te[12];
+        const det = n11 * te[0] + n21 * te[4] + n31 * te[8] + n41 * te[12];
 
         if (det === 0) {
 
-            var msg = "Matrix4.getInverse(): can't invert matrix, determinant is 0";
+            const msg = "Matrix4.getInverse(): can't invert matrix, determinant is 0";
 
             if (throwOnInvertible || false) {
 
@@ -1162,20 +1162,20 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    isReflected : function() {
-        let te = this.elements;                
+    isReflected() {
+        const te = this.elements;                
         
-        let m0 = te[0],
-            m3 = te[4],
-            m6 = te[8],
-            m1 = te[1],
-            m4 = te[5],
-            m7 = te[9],
-            m2 = te[2],
-            m5 = te[6],
-            m8 = te[10];                
+        const m0 = te[0];
+            const m3 = te[4];
+            const m6 = te[8];
+            const m1 = te[1];
+            const m4 = te[5];
+            const m7 = te[9];
+            const m2 = te[2];
+            const m5 = te[6];
+            const m8 = te[10];                
         
-        let determinant = m0 * m4 * m8 // +aei
+        const determinant = m0 * m4 * m8 // +aei
                 + m1 * m5 * m6 // +bfg
                 + m2 * m3 * m7 // +cdh
                 - m2 * m4 * m6 // -ceg
@@ -1186,11 +1186,11 @@ $3Dmol.Matrix4.prototype = {
     },
 
     compose : function() {
-        var mRotation = new $3Dmol.Matrix4(), mScale = new $3Dmol.Matrix4();
+        const mRotation = new $3Dmol.Matrix4(); const mScale = new $3Dmol.Matrix4();
 
         return function(translation, rotation, scale) {
 
-            var te = this.elements;
+            const te = this.elements;
 
             mRotation.identity();
             mRotation.setRotationFromQuaternion(rotation);
@@ -1209,11 +1209,11 @@ $3Dmol.Matrix4.prototype = {
     }(),
     /// Return scale factor present in trnsformation matrix
     getScale : function() {
-        var x = new $3Dmol.Vector3(), y = new $3Dmol.Vector3(), z = new $3Dmol.Vector3();
+        const x = new $3Dmol.Vector3(); const y = new $3Dmol.Vector3(); const z = new $3Dmol.Vector3();
 
         return function(scale) {
 
-            var te = this.elements;
+            const te = this.elements;
             scale = (scale instanceof $3Dmol.Vector3) ? scale
                     : new $3Dmol.Vector3();
             // grab the axis vectors
@@ -1230,11 +1230,11 @@ $3Dmol.Matrix4.prototype = {
         };
     }(),
     decompose : function() {
-        var x = new $3Dmol.Vector3(), y = new $3Dmol.Vector3(), z = new $3Dmol.Vector3(), matrix = new $3Dmol.Matrix4();
+        const x = new $3Dmol.Vector3(); const y = new $3Dmol.Vector3(); const z = new $3Dmol.Vector3(); const matrix = new $3Dmol.Matrix4();
 
         return function(translation, rotation, scale) {
 
-            var te = this.elements;
+            const te = this.elements;
 
             // grab the axis vectors
             x.set(te[0], te[1], te[2]);
@@ -1279,9 +1279,9 @@ $3Dmol.Matrix4.prototype = {
         };
     }(),
 
-    scale : function(v) {
-        var te = this.elements;
-        var x = v.x, y = v.y, z = v.z;
+    scale(v) {
+        const te = this.elements;
+        const {x} = v; const {y} = v; const {z} = v;
 
         te[0] *= x;
         te[4] *= y;
@@ -1299,28 +1299,28 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    getMaxScaleOnAxis : function() {
+    getMaxScaleOnAxis() {
 
-        var te = this.elements;
+        const te = this.elements;
 
-        var scaleXSq = te[0] * te[0] + te[1] * te[1] + te[2] * te[2];
-        var scaleYSq = te[4] * te[4] + te[5] * te[5] + te[6] * te[6];
-        var scaleZSq = te[8] * te[8] + te[9] * te[9] + te[10] * te[10];
+        const scaleXSq = te[0] * te[0] + te[1] * te[1] + te[2] * te[2];
+        const scaleYSq = te[4] * te[4] + te[5] * te[5] + te[6] * te[6];
+        const scaleZSq = te[8] * te[8] + te[9] * te[9] + te[10] * te[10];
 
         return Math.sqrt(Math.max(scaleXSq, Math.max(scaleYSq, scaleZSq)));
 
     },
 
-    makeFrustum : function(left, right, bottom, top, near, far) {
-        var te = this.elements;
+    makeFrustum(left, right, bottom, top, near, far) {
+        const te = this.elements;
 
-        var x = 2 * near / (right - left);
-        var y = 2 * near / (top - bottom);
+        const x = 2 * near / (right - left);
+        const y = 2 * near / (top - bottom);
 
-        var a = (right + left) / (right - left);
-        var b = (top + bottom) / (top - bottom);
-        var c = -(far + near) / (far - near);
-        var d = -2 * far * near / (far - near);
+        const a = (right + left) / (right - left);
+        const b = (top + bottom) / (top - bottom);
+        const c = -(far + near) / (far - near);
+        const d = -2 * far * near / (far - near);
 
         te[0] = x;
         te[4] = 0;
@@ -1342,25 +1342,25 @@ $3Dmol.Matrix4.prototype = {
         return this;
     },
 
-    makePerspective : function(fov, aspect, near, far) {
-        var ymax = near * Math.tan($3Dmol.Math.degToRad(fov * 0.5));
-        var ymin = -ymax;
-        var xmin = ymin * aspect;
-        var xmax = ymax * aspect;
+    makePerspective(fov, aspect, near, far) {
+        const ymax = near * Math.tan($3Dmol.Math.degToRad(fov * 0.5));
+        const ymin = -ymax;
+        const xmin = ymin * aspect;
+        const xmax = ymax * aspect;
 
         return this.makeFrustum(xmin, xmax, ymin, ymax, near, far);
     },
 
-    makeOrthographic : function(left, right, top, bottom, near, far) {
+    makeOrthographic(left, right, top, bottom, near, far) {
 
-        var te = this.elements;
-        var w = 1.0 / (right - left);
-        var h = 1.0 / (top - bottom);
-        var p = 1.0 / (far - near);
+        const te = this.elements;
+        const w = 1.0 / (right - left);
+        const h = 1.0 / (top - bottom);
+        const p = 1.0 / (far - near);
 
-        var x = (right + left) * w;
-        var y = (top + bottom) * h;
-        var z = (far + near) * p;
+        const x = (right + left) * w;
+        const y = (top + bottom) * h;
+        const z = (far + near) * p;
 
         te[0] = 2 * w;
         te[4] = 0;
@@ -1383,24 +1383,24 @@ $3Dmol.Matrix4.prototype = {
 
     },
 
-    isEqual : function(m) {
-        var me = m.elements;
-        var te = this.elements;
+    isEqual(m) {
+        const me = m.elements;
+        const te = this.elements;
 
-        if (te[0] == me[0] && te[4] == me[4] && te[8] == me[8]
-                && te[12] == me[12] && te[1] == me[1] && te[5] == me[5]
-                && te[9] == me[9] && te[13] == me[13] && te[2] == me[2]
-                && te[6] == me[6] && te[10] == me[10] && te[14] == me[14]
-                && te[3] == me[3] && te[7] == me[7] && te[11] == me[11]
-                && te[15] == me[15]) {
+        if (te[0] === me[0] && te[4] === me[4] && te[8] === me[8]
+                && te[12] === me[12] && te[1] === me[1] && te[5] === me[5]
+                && te[9] === me[9] && te[13] === me[13] && te[2] === me[2]
+                && te[6] === me[6] && te[10] === me[10] && te[14] === me[14]
+                && te[3] === me[3] && te[7] === me[7] && te[11] === me[11]
+                && te[15] === me[15]) {
             return true;
-        } else {
+        } 
             return false;
-        }
+        
     },
 
-    clone : function() {
-        var te = this.elements;
+    clone() {
+        const te = this.elements;
 
         return new $3Dmol.Matrix4(
 
@@ -1410,22 +1410,22 @@ $3Dmol.Matrix4.prototype = {
         );
     },
 
-    isIdentity : function() {
-        var te = this.elements;
+    isIdentity() {
+        const te = this.elements;
 
-        if (te[0] == 1 && te[4] == 0 && te[8] == 0 && te[12] == 0 && te[1] == 0
-                && te[5] == 1 && te[9] == 0 && te[13] == 0 && te[2] == 0
-                && te[6] == 0 && te[10] == 1 && te[14] == 0 && te[3] == 0
-                && te[7] == 0 && te[11] == 0 && te[15] == 1) {
+        if (te[0] === 1 && te[4] === 0 && te[8] === 0 && te[12] === 0 && te[1] === 0
+                && te[5] === 1 && te[9] === 0 && te[13] === 0 && te[2] === 0
+                && te[6] === 0 && te[10] === 1 && te[14] === 0 && te[3] === 0
+                && te[7] === 0 && te[11] === 0 && te[15] === 1) {
             return true;
-        } else {
+        } 
             return false;
-        }
+        
     },
     
-    //return true if elements are with digits of identity
-    isNearlyIdentity : function(digits) {
-        let snapped = this.clone().snap(digits);
+    // return true if elements are with digits of identity
+    isNearlyIdentity(digits) {
+        const snapped = this.clone().snap(digits);
         return snapped.isIdentity();
     }
 
@@ -1433,7 +1433,7 @@ $3Dmol.Matrix4.prototype = {
 
 $3Dmol.Vector3.prototype.unproject = function() {
 
-    var matrix = new $3Dmol.Matrix4();
+    const matrix = new $3Dmol.Matrix4();
 
     return function unproject(camera) {
 
@@ -1460,7 +1460,7 @@ $3Dmol.Ray.prototype = {
 
     constructor : $3Dmol.Ray,
 
-    set : function(origin, direction) {
+    set(origin, direction) {
 
         this.origin.copy(origin);
         this.direction.copy(direction);
@@ -1469,7 +1469,7 @@ $3Dmol.Ray.prototype = {
 
     },
 
-    copy : function(ray) {
+    copy(ray) {
 
         this.origin.copy(ray.origin);
         this.direction.copy(ray.direction);
@@ -1478,9 +1478,9 @@ $3Dmol.Ray.prototype = {
 
     },
 
-    at : function(t, optionalTarget) {
+    at(t, optionalTarget) {
 
-        var result = optionalTarget || new $3Dmol.Vector3();
+        const result = optionalTarget || new $3Dmol.Vector3();
 
         return result.copy(this.direction).multiplyScalar(t).add(this.origin);
 
@@ -1488,7 +1488,7 @@ $3Dmol.Ray.prototype = {
 
     recast : function() {
 
-        var v1 = new $3Dmol.Vector3();
+        const v1 = new $3Dmol.Vector3();
 
         return function(t) {
             this.origin.copy(this.at(t, v1));
@@ -1498,11 +1498,11 @@ $3Dmol.Ray.prototype = {
 
     }(),
 
-    closestPointToPoint : function(point, optionalTarget) {
+    closestPointToPoint(point, optionalTarget) {
 
-        var result = optionalTarget || new $3Dmol.Vector3();
+        const result = optionalTarget || new $3Dmol.Vector3();
         result.subVectors(point, this.origin);
-        var directionDistance = result.dot(this.direction);
+        const directionDistance = result.dot(this.direction);
 
         // returns a point on this ray
         return result.copy(this.direction).multiplyScalar(directionDistance)
@@ -1512,10 +1512,10 @@ $3Dmol.Ray.prototype = {
 
     distanceToPoint : function() {
 
-        var v1 = new $3Dmol.Vector3();
+        const v1 = new $3Dmol.Vector3();
 
         return function(point) {
-            var directionDistance = v1.subVectors(point, this.origin).dot(
+            const directionDistance = v1.subVectors(point, this.origin).dot(
                     this.direction);
             v1.copy(this.direction).multiplyScalar(directionDistance).add(
                     this.origin);
@@ -1524,18 +1524,18 @@ $3Dmol.Ray.prototype = {
 
     }(),
 
-    isIntersectionCylinder : function() {
+    isIntersectionCylinder() {
 
     },
 
-    isIntersectionSphere : function(sphere) {
+    isIntersectionSphere(sphere) {
         return (this.distanceToPoint(sphere.center) <= sphere.radius);
 
     },
 
-    isIntersectionPlane : function(plane) {
+    isIntersectionPlane(plane) {
 
-        var denominator = plane.normal.dot(this.direction);
+        const denominator = plane.normal.dot(this.direction);
 
         // plane and ray are not perpendicular
         if (denominator !== 0)
@@ -1548,9 +1548,9 @@ $3Dmol.Ray.prototype = {
 
     },
 
-    distanceToPlane : function(plane) {
+    distanceToPlane(plane) {
 
-        var denominator = plane.normal.dot(this.direction);
+        const denominator = plane.normal.dot(this.direction);
         if (denominator === 0) {
 
             // line is coplanar
@@ -1561,15 +1561,15 @@ $3Dmol.Ray.prototype = {
             return undefined;
         }
 
-        var t = -(this.origin.dot(plane.normal) + plane.constant) / denominator;
+        const t = -(this.origin.dot(plane.normal) + plane.constant) / denominator;
 
         return t;
 
     },
 
-    intersectPlane : function(plane, optionalTarget) {
+    intersectPlane(plane, optionalTarget) {
 
-        var t = this.distanceToPlane(plane);
+        const t = this.distanceToPlane(plane);
 
         if (t === undefined)
             return undefined;
@@ -1578,7 +1578,7 @@ $3Dmol.Ray.prototype = {
 
     },
 
-    applyMatrix4 : function(matrix4) {
+    applyMatrix4(matrix4) {
 
         this.direction.add(this.origin).applyMatrix4(matrix4);
         this.origin.applyMatrix4(matrix4);
@@ -1588,14 +1588,14 @@ $3Dmol.Ray.prototype = {
 
     },
 
-    equals : function(ray) {
+    equals(ray) {
 
         return ray.origin.equals(this.origin)
                 && ray.direction.equals(this.direction);
 
     },
 
-    clone : function() {
+    clone() {
 
         return new $3Dmol.Ray().copy(this);
 
