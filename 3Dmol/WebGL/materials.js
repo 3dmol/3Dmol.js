@@ -6,11 +6,11 @@ $3Dmol.Material = function () {
 
     $3Dmol.EventDispatcher.call( this );
 
-    this.id = $3Dmol.MaterialIdCount ++;
+    this.id = $3Dmol.MaterialIdCount +=1;
 
     this.name = '';
 
-    //TODO: Which of these instance variables can I remove??
+    // TODO: Which of these instance variables can I remove??
     this.side = $3Dmol.FrontSide;
 
     this.opacity = 1;
@@ -38,20 +38,20 @@ $3Dmol.Material.prototype.setValues = function ( values ) {
 
     if ( values === undefined ) return;
 
-    for ( var key in values ) {
+    for ( const key in values ) {
 
-        var newValue = values[ key ];
+        const newValue = values[ key ];
 
         if ( newValue === undefined ) {
 
-            console.warn( '$3Dmol.Material: \'' + key + '\' parameter is undefined.' );
+            console.warn( `$3Dmol.Material: '${  key  }' parameter is undefined.` );
             continue;
 
         }
 
         if ( key in this ) {
 
-            var currentValue = this[ key ];
+            const currentValue = this[ key ];
 
             if ( currentValue instanceof $3Dmol.Color && newValue instanceof $3Dmol.Color ) {
 
@@ -76,7 +76,7 @@ $3Dmol.Material.prototype.setValues = function ( values ) {
     }
 
 };
-//TODO: might want to look into blending equations
+// TODO: might want to look into blending equations
 $3Dmol.Material.prototype.clone = function ( material ) {
 
     if ( material === undefined ) material = new $3Dmol.Material();
@@ -114,7 +114,7 @@ $3Dmol.Material.prototype.dispose = function () {
 
 $3Dmol.MaterialIdCount = 0;
 
-//Line basic material
+// Line basic material
 /** @constructor */
 $3Dmol.LineBasicMaterial = function(parameters) {
 
@@ -138,7 +138,7 @@ $3Dmol.LineBasicMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.LineBasicMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.LineBasicMaterial();
+    const material = new $3Dmol.LineBasicMaterial();
 
     $3Dmol.Material.prototype.clone.call(this, material);
 
@@ -146,7 +146,7 @@ $3Dmol.LineBasicMaterial.prototype.clone = function() {
     return material;
 };
 
-//Mesh Lambert material
+// Mesh Lambert material
 /** @constructor */
 $3Dmol.MeshLambertMaterial = function(parameters) {
 
@@ -156,7 +156,7 @@ $3Dmol.MeshLambertMaterial = function(parameters) {
     this.ambient = new $3Dmol.Color(0xfffff);
     this.emissive = new $3Dmol.Color(0x000000);
 
-    //TODO: Which of these instance variables do I really need?
+    // TODO: Which of these instance variables do I really need?
     this.wrapAround = false;
     this.wrapRGB = new $3Dmol.Vector3(1,1,1);
 
@@ -227,7 +227,7 @@ $3Dmol.MeshLambertMaterial.prototype.clone = function(material) {
 
 };
 
-//Double sided Mesh Lambert material
+// Double sided Mesh Lambert material
 /** @constructor */
 $3Dmol.MeshDoubleLambertMaterial = function(parameters) {
 
@@ -242,7 +242,7 @@ $3Dmol.MeshDoubleLambertMaterial.prototype = Object.create($3Dmol.MeshLambertMat
 
 $3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.MeshDoubleLambertMaterial();
+    const material = new $3Dmol.MeshDoubleLambertMaterial();
 
     $3Dmol.MeshLambertMaterial.prototype.clone.call(this, material);
 
@@ -250,7 +250,7 @@ $3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
 
 };
 
-//Outlined Mesh Lamert material
+// Outlined Mesh Lamert material
 /** @constructor */
 $3Dmol.MeshOutlineMaterial = function(parameters) {
     $3Dmol.Material.call(this);
@@ -276,7 +276,7 @@ $3Dmol.MeshOutlineMaterial.prototype.clone = function(material) {
 };
 
 
-//Imposter material
+// Imposter material
 /** @constructor */
 $3Dmol.ImposterMaterial = function(parameters) {
 
@@ -287,7 +287,7 @@ $3Dmol.ImposterMaterial = function(parameters) {
   this.emissive = new $3Dmol.Color(0x000000);
   this.imposter = true;
 
-  //TODO: Which of these instance variables do I really need?
+  // TODO: Which of these instance variables do I really need?
   this.wrapAround = false;
   this.wrapRGB = new $3Dmol.Vector3(1,1,1);
 
@@ -322,7 +322,7 @@ $3Dmol.ImposterMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.ImposterMaterial.prototype.clone = function() {
 
-  var material = new $3Dmol.ImposterMaterial();
+  const material = new $3Dmol.ImposterMaterial();
 
   $3Dmol.Material.prototype.clone.call(this, material);
 
@@ -372,7 +372,7 @@ $3Dmol.SphereImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.
 
 $3Dmol.SphereImposterMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.SphereImposterMaterial();
+    const material = new $3Dmol.SphereImposterMaterial();
     $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
     return material;
 };
@@ -396,7 +396,7 @@ $3Dmol.SphereImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMa
 
 $3Dmol.SphereImposterOutlineMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.SphereImposterOutlineMaterial();
+    const material = new $3Dmol.SphereImposterOutlineMaterial();
     $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
     material.outlineColor = this.outlineColor;
     material.outlineWidth = this.outlineWidth;
@@ -418,7 +418,7 @@ $3Dmol.StickImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.p
 
 $3Dmol.StickImposterMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.StickImposterMaterial();
+    const material = new $3Dmol.StickImposterMaterial();
     $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
     return material;
 };
@@ -442,7 +442,7 @@ $3Dmol.StickImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMat
 
 $3Dmol.StickImposterOutlineMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.StickImposterOutlineMaterial();
+    const material = new $3Dmol.StickImposterOutlineMaterial();
     $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
     material.outlineColor = this.outlineColor;
     material.outlineWidth = this.outlineWidth;
@@ -459,7 +459,7 @@ $3Dmol.InstancedMaterial = function(parameters) {
     this.ambient = new $3Dmol.Color(0xfffff);
     this.emissive = new $3Dmol.Color(0x000000);
 
-    //TODO: Which of these instance variables do I really need?
+    // TODO: Which of these instance variables do I really need?
     this.wrapAround = false;
     this.wrapRGB = new $3Dmol.Vector3(1,1,1);
 
@@ -496,7 +496,7 @@ $3Dmol.InstancedMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.InstancedMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.InstancedMaterial();
+    const material = new $3Dmol.InstancedMaterial();
 
     $3Dmol.Material.prototype.clone.call(this, material);
 
@@ -535,7 +535,7 @@ $3Dmol.InstancedMaterial.prototype.clone = function() {
 };
 
 
-//Volumetric material
+// Volumetric material
 /** @constructor */
 $3Dmol.VolumetricMaterial = function(parameters) {
 
@@ -568,14 +568,14 @@ $3Dmol.VolumetricMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.VolumetricMaterial.prototype.clone = function() {
 
-    var material = Object.assign(new $3Dmol.VolumetricMaterial(),this);
+    const material = Object.assign(new $3Dmol.VolumetricMaterial(),this);
 
     $3Dmol.Material.prototype.clone.call(this, material);
     return material;
 
 };
 
-//Sprite material
+// Sprite material
 /** @constructor */
 $3Dmol.SpriteMaterial = function(parameters) {
 
@@ -613,7 +613,7 @@ $3Dmol.SpriteMaterial.prototype = Object.create($3Dmol.Material.prototype);
 
 $3Dmol.SpriteMaterial.prototype.clone = function() {
 
-    var material = new $3Dmol.SpriteMaterial();
+    const material = new $3Dmol.SpriteMaterial();
 
     $3Dmol.Material.prototype.clone.call(this, material);
 
@@ -632,7 +632,7 @@ $3Dmol.SpriteMaterial.prototype.clone = function() {
 
 };
 
-//Alignment for Sprites
+// Alignment for Sprites
 
 $3Dmol.SpriteAlignment = {};
 $3Dmol.SpriteAlignment.topLeft = new $3Dmol.Vector2(1, -1);
@@ -646,15 +646,15 @@ $3Dmol.SpriteAlignment.bottomCenter = new $3Dmol.Vector2(0, 1);
 $3Dmol.SpriteAlignment.bottomRight = new $3Dmol.Vector2(-1, 1);
 
 
-//Texture
-//We really only create textures from 2d rendering contexts (to display text labels)
-//edit: we can now create 3dtextures using volumetric data
+// Texture
+// We really only create textures from 2d rendering contexts (to display text labels)
+// edit: we can now create 3dtextures using volumetric data
 /** @constructor */
 $3Dmol.Texture = function(image, is3D) {
 
     $3Dmol.EventDispatcher.call(this);
 
-    this.id = $3Dmol.TextureIdCount++;
+    this.id = $3Dmol.TextureIdCount+=1;
 
     this.name = "";
 
@@ -704,7 +704,7 @@ $3Dmol.Texture.prototype = {
 
     constructor : $3Dmol.Texture,
 
-    clone : function(texture) {
+    clone(texture) {
 
         if (texture === undefined)
             texture = new $3Dmol.Texture();
@@ -735,7 +735,7 @@ $3Dmol.Texture.prototype = {
 
     },
 
-    dispose : function() {
+    dispose() {
 
         this.dispatchEvent( {type: 'dispose'});
 
@@ -761,8 +761,8 @@ $3Dmol.NoColors = 0;
 $3Dmol.FaceColors = 1;
 $3Dmol.VertexColors = 2;
 
-//Texture constants
-//TODO: Which of these do I need (since I only use textures to display label sprites) ?
+// Texture constants
+// TODO: Which of these do I need (since I only use textures to display label sprites) ?
 $3Dmol.MultiplyOperation = 0;
 $3Dmol.MixOperation = 1;
 $3Dmol.AddOperation = 2;
@@ -774,16 +774,16 @@ $3Dmol.UVMapping = function() {};
 // wrapping modes
 $3Dmol.ClampToEdgeWrapping = 1001;
 
-//Filters
+// Filters
 $3Dmol.LinearFilter = 1006;
 $3Dmol.NearestFilter = 1007;
 $3Dmol.LinearMipMapLinearFilter = 1008;
 
-//Data types
+// Data types
 $3Dmol.UnsignedByteType = 1009;
 $3Dmol.FloatType = 1010;
 
-//Pixel formats
+// Pixel formats
 $3Dmol.RGBAFormat = 1021;
 $3Dmol.RFormat = 1022;
 $3Dmol.R32Format = 1023;
