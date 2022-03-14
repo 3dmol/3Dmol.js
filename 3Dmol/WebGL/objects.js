@@ -3,14 +3,14 @@
  */
 
 
-//Line Object
+// Line Object
 /** @constructor */
 $3Dmol.Line = function (geometry, material, type) {
 
     $3Dmol.Object3D.call(this);
 
     this.geometry = geometry;
-        //TODO: update material and type to webgl
+        // TODO: update material and type to webgl
     this.material = (material !== undefined) ? material : new $3Dmol.LineBasicMaterial( { color: Math.random() * 0xffffff } );
     this.type = (type !== undefined) ? type : $3Dmol.LineStrip;
 
@@ -32,7 +32,7 @@ $3Dmol.Line.prototype.clone = function (object) {
 };
 
 
-//Mesh Object
+// Mesh Object
 /** @constructor */
 $3Dmol.Mesh = function(geometry, material) {
 
@@ -56,7 +56,7 @@ $3Dmol.Mesh.prototype.clone = function (object) {
 };
 
 
-//Sprite object
+// Sprite object
 /** @constructor */
 $3Dmol.Sprite = function(material) {
     
