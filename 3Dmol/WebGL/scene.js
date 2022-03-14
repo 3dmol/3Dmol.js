@@ -8,7 +8,7 @@ $3Dmol.Scene = function() {
     
     this.fog = null;
     
-    //May not need...
+    // May not need...
     this.overrideMaterial = null;
     
     this.matrixAutoUpdate = false;
@@ -25,19 +25,19 @@ $3Dmol.Scene.prototype = Object.create($3Dmol.Object3D.prototype);
 
 $3Dmol.Scene.prototype.__addObject = function(object) {
     
-    //Directional Lighting
+    // Directional Lighting
     if (object instanceof $3Dmol.Light) {
         
         if (this.__lights.indexOf(object) === -1)
             this.__lights.push(object);
         
-        //TODO: Do I need this??
+        // TODO: Do I need this??
         if (object.target && object.target.parent === undefined)
             this.add(object.target);
             
     }
     
-    //Rotation group
+    // Rotation group
     else {
         
         if (this.__objects.indexOf(object) === -1) {
@@ -45,9 +45,9 @@ $3Dmol.Scene.prototype.__addObject = function(object) {
             this.__objects.push(object);
             this.__objectsAdded.push(object);
             
-            //Check if previously removed
+            // Check if previously removed
             
-            var idx = this.__objectsRemoved.indexOf(object);
+            const idx = this.__objectsRemoved.indexOf(object);
             
             if (idx !== -1)
                 this.__objectsRemoved.splice(idx, 1);
@@ -55,16 +55,16 @@ $3Dmol.Scene.prototype.__addObject = function(object) {
         }
     }
     
-    //Add object's children
+    // Add object's children
     
-    for (var i = 0; i < object.children.length; i++) 
+    for (let i = 0; i < object.children.length; i++) 
         this.__addObject(object.children[i]);
     
 };
 
 $3Dmol.Scene.prototype.__removeObject = function(object) {
     
-    var idx;
+    let idx;
     if (object instanceof $3Dmol.Light) {
         
         idx = this.__lights.indexOf(object);
@@ -74,7 +74,7 @@ $3Dmol.Scene.prototype.__removeObject = function(object) {
             
     }
     
-    //Object3D
+    // Object3D
     else {
         
         idx = this.__objects.indexOf(object);
@@ -84,9 +84,9 @@ $3Dmol.Scene.prototype.__removeObject = function(object) {
             this.__objects.splice(idx, 1);
             this.__objectsRemoved.push(object);
             
-            //Check if previously added
+            // Check if previously added
             
-            var ai = this.__objectsAdded.indexOf(object);
+            const ai = this.__objectsAdded.indexOf(object);
             
             if (ai !== -1) 
                 this.__objectsAdded.splice(idx, 1);
@@ -95,8 +95,8 @@ $3Dmol.Scene.prototype.__removeObject = function(object) {
     
     }
     
-    //Remove object's children
-    for (var i = 0; i < object.children.length; i++)
+    // Remove object's children
+    for (let i = 0; i < object.children.length; i++)
         this.__removeObject(object.children[i]);
     
 };
