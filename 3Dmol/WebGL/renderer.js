@@ -1,3 +1,4 @@
+/* eslint-disable no-cond-assign */
 /**
  * Simplified webGL renderer
  */
@@ -9,27 +10,27 @@ $3Dmol.Renderer = function(parameters) {
     this.col = parameters.col;
     this.rows = parameters.rows;
     this.cols = parameters.cols;
-    var _canvas = parameters.canvas !== undefined ? parameters.canvas
-            : document.createElement('canvas'),
+    const _canvas = parameters.canvas !== undefined ? parameters.canvas
+            : document.createElement('canvas');
 
 
-    _precision = parameters.precision !== undefined ? parameters.precision
-            : 'highp', _alpha = parameters.alpha !== undefined ? parameters.alpha
-            : true, _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha
-            : true, _antialias = parameters.antialias !== undefined ? parameters.antialias
-            : false, _stencil = parameters.stencil !== undefined ? parameters.stencil
-            : true, _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
-            : false, _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
-            parameters.clearColor) : new $3Dmol.Color(0x000000),
-             _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0,
-            _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters.outline),
-            _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters.outline),
-            _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline),
-            _outlineEnabled = !!parameters.outline
+    const _precision = parameters.precision !== undefined ? parameters.precision
+            : 'highp'; const _alpha = parameters.alpha !== undefined ? parameters.alpha
+            : true; const _premultipliedAlpha = parameters.premultipliedAlpha !== undefined ? parameters.premultipliedAlpha
+            : true; const _antialias = parameters.antialias !== undefined ? parameters.antialias
+            : false; const _stencil = parameters.stencil !== undefined ? parameters.stencil
+            : true; const _preserveDrawingBuffer = parameters.preserveDrawingBuffer !== undefined ? parameters.preserveDrawingBuffer
+            : false; const _clearColor = parameters.clearColor !== undefined ? new $3Dmol.Color(
+            parameters.clearColor) : new $3Dmol.Color(0x000000);
+             let _clearAlpha = parameters.clearAlpha !== undefined ? parameters.clearAlpha : 0;
+            let _outlineMaterial = new $3Dmol.MeshOutlineMaterial(parameters.outline);
+            let _outlineSphereImposterMaterial = new $3Dmol.SphereImposterOutlineMaterial(parameters.outline);
+            let _outlineStickImposterMaterial = new $3Dmol.StickImposterOutlineMaterial(parameters.outline);
+            let _outlineEnabled = !!parameters.outline
             ;
     this.domElement = _canvas;
     this.context = null;
-    this.devicePixelRatio = 1.0; //set in setSize
+    this.devicePixelRatio = 1.0; // set in setSize
 
     _canvas.id=parameters.id;
     this.autoClear = true;
@@ -65,35 +66,35 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     // internal properties
-    var _this = this,
-    _programs = [], _programs_counter = 0,
-    _webglversion = 1,
+    const _this = this;
+    let _programs = []; let _programsCounter = 0;
+    let _webglversion = 1;
     // internal state cache
-    _currentProgram = null,
-    _currentMaterialId = -1, _currentGeometryGroupHash = null, _currentCamera = null, _geometryGroupCounter = 0,
+    let _currentProgram = null;
+    let _currentMaterialId = -1; let _currentGeometryGroupHash = null; let _currentCamera = null; let _geometryGroupCounter = 0;
 
     // GL state cache
-    _oldDoubleSided = -1, _oldFlipSided = -1,
-    _oldBlending = -1,
-    _oldDepthTest = -1, _oldDepthWrite = -1,
-    _oldPolygonOffset = null,
-    _oldLineWidth = null,
+    let _oldDoubleSided = -1; let _oldFlipSided = -1;
+    let _oldBlending = -1;
+    let _oldDepthTest = -1; let _oldDepthWrite = -1;
+    const _oldPolygonOffset = null;
+    let _oldLineWidth = null;
 
-    _viewportWidth = 0, _viewportHeight = 0, _currentWidth = 0, _currentHeight = 0,
-    _enabledAttributes = {},
+    let _viewportWidth = 0; let _viewportHeight = 0; let _currentWidth = 0; let _currentHeight = 0;
+    const _enabledAttributes = {};
 
     // camera matrices cache
-    _projScreenMatrix = new $3Dmol.Matrix4(),
-    _vector3 = new $3Dmol.Vector3(),
+    const _projScreenMatrix = new $3Dmol.Matrix4();
+    const _vector3 = new $3Dmol.Vector3();
 
-    _worldInverse = new $3Dmol.Matrix4(),
-    _projInverse = new $3Dmol.Matrix4(),
-    _textureMatrix = new $3Dmol.Matrix4(),
+    const _worldInverse = new $3Dmol.Matrix4();
+    const _projInverse = new $3Dmol.Matrix4();
+    const _textureMatrix = new $3Dmol.Matrix4();
     // light arrays cache
-    _direction = new $3Dmol.Vector3(),
-    _lightsNeedUpdate = true,
+    const _direction = new $3Dmol.Vector3();
+    let _lightsNeedUpdate = true;
 
-    _lights = {
+    const _lights = {
         ambient : [ 0, 0, 0 ],
         directional : {
             length : 0,
@@ -124,29 +125,29 @@ $3Dmol.Renderer = function(parameters) {
 
     };
 
-    var sprites = new $3Dmol.SpritePlugin();
+    const sprites = new $3Dmol.SpritePlugin();
 
-    //screensshader related variables
-    var _screenshader = null;
-    var _vertexattribpos = null;
-    var _screenQuadVBO = null;
+    // screensshader related variables
+    let _screenshader = null;
+    let _vertexattribpos = null;
+    let _screenQuadVBO = null;
 
-    //framebuffer variables
-    var _fb = null;
-    var _targetTexture = null;
-    var _depthTexture = null;
+    // framebuffer variables
+    let _fb = null;
+    let _targetTexture = null;
+    let _depthTexture = null;
 
     // initialize
-    var _gl;
+    let _gl;
 
     initGL();
     setDefaultGLState();
 
     this.context = _gl;
-    var _extInstanced = _gl.getExtension("ANGLE_instanced_arrays");
-    var _extFragDepth = _gl.getExtension("EXT_frag_depth");
-    var _extFloatLinear = _gl.getExtension('OES_texture_float_linear');
-    var _extColorBufferFloat = _gl.getExtension('EXT_color_buffer_float');
+    const _extInstanced = _gl.getExtension("ANGLE_instanced_arrays");
+    const _extFragDepth = _gl.getExtension("EXT_frag_depth");
+    const _extFloatLinear = _gl.getExtension('OES_texture_float_linear');
+    const _extColorBufferFloat = _gl.getExtension('EXT_color_buffer_float');
 
     // API
 
@@ -187,10 +188,10 @@ $3Dmol.Renderer = function(parameters) {
         _outlineEnabled = false;
     };
     this.setViewport = function(){
-        if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
+        if(this.rows !== undefined && this.cols !== undefined && this.row !== undefined && this.col !== undefined){
 
-            var wid = _canvas.width/this.cols;
-            var hei = _canvas.height/this.rows;
+            const wid = _canvas.width/this.cols;
+            const hei = _canvas.height/this.rows;
 
             _viewportWidth =  wid;
             _viewportHeight = hei;
@@ -203,32 +204,32 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     this.setSize = function(width, height) {
-        //zooming (in the browser) changes the pixel ratio and width/height
+        // zooming (in the browser) changes the pixel ratio and width/height
         this.devicePixelRatio = (window.devicePixelRatio !== undefined) ? window.devicePixelRatio : 1;
-        //with antialiasing on (which doesn't seem to do much), render at double rsolution to eliminate jaggies
-	      //my iphone crashes if we do though, so as a hacky workaround, don't do it with retina displays
+        // with antialiasing on (which doesn't seem to do much), render at double rsolution to eliminate jaggies
+	      // my iphone crashes if we do though, so as a hacky workaround, don't do it with retina displays
         if(_antialias && this.devicePixelRatio < 2.0) this.devicePixelRatio *= 2.0;
 
 
-        if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
-            var wid = width/this.cols;
-            var hei = height/this.rows;
+        if(this.rows !== undefined && this.cols !== undefined && this.row !== undefined && this.col !== undefined){
+            const wid = width/this.cols;
+            const hei = height/this.rows;
             _canvas.width = width* this.devicePixelRatio;
             _canvas.height = height*this.devicePixelRatio;
 
             _viewportWidth =  wid * this.devicePixelRatio;
             _viewportHeight = hei * this.devicePixelRatio;
 
-            _canvas.style.width = width + 'px';
-            _canvas.style.height = height + 'px';
+            _canvas.style.width = `${width  }px`;
+            _canvas.style.height = `${height  }px`;
 
             this.setViewport();
         }else{
             _viewportWidth = _canvas.width = width * this.devicePixelRatio;
             _viewportHeight =  _canvas.height = height * this.devicePixelRatio;
 
-            _canvas.style.width = width + 'px';
-            _canvas.style.height = height + 'px';
+            _canvas.style.width = `${width  }px`;
+            _canvas.style.height = `${height  }px`;
 
             _gl.viewport(0, 0, _gl.drawingBufferWidth, _gl.drawingBufferHeight);
         }
@@ -237,7 +238,7 @@ $3Dmol.Renderer = function(parameters) {
 
     this.clear = function(color, depth, stencil) {
 
-        var bits = 0;
+        let bits = 0;
         if (color === undefined || color)
             bits |= _gl.COLOR_BUFFER_BIT;
         if (depth === undefined || depth)
@@ -256,10 +257,10 @@ $3Dmol.Renderer = function(parameters) {
 
     this.setMaterialFaces = function(material, reflected) {
 
-        var doubleSided = material.side === $3Dmol.DoubleSide;
-        var flipSided = material.side === $3Dmol.BackSide;
+        const doubleSided = material.side === $3Dmol.DoubleSide;
+        let flipSided = material.side === $3Dmol.BackSide;
 
-        if(!material.imposter) //ignore reflection with imposters
+        if(!material.imposter) // ignore reflection with imposters
             flipSided = reflected ? !flipSided : flipSided;
 
         if (_oldDoubleSided !== doubleSided) {
@@ -349,7 +350,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function disableAttributes() {
 
-        for ( let attribute in _enabledAttributes) {
+        for ( const attribute in _enabledAttributes) {
 
             if (_enabledAttributes[attribute]) {
 
@@ -378,7 +379,7 @@ $3Dmol.Renderer = function(parameters) {
         }
     }
 
-    var deallocateGeometry = function(geometry) {
+    const deallocateGeometry = function(geometry) {
 
         geometry.__webglInit = undefined;
 
@@ -390,9 +391,9 @@ $3Dmol.Renderer = function(parameters) {
 
         if (geometry.geometryGroups !== undefined) {
 
-            for (var g = 0, gl = geometry.groups; g < gl; g++) {
+            for (let g = 0, gl = geometry.groups; g < gl; g++) {
 
-                var geometryGroup = geometry.geometryGroups[g];
+                const geometryGroup = geometry.geometryGroups[g];
 
                 if (geometryGroup.__webglVertexBuffer !== undefined)
                     _gl.deleteBuffer(geometryGroup.__webglVertexBuffer);
@@ -413,9 +414,9 @@ $3Dmol.Renderer = function(parameters) {
         }
     };
 
-    var deallocateMaterial = function(material) {
+    const deallocateMaterial = function(material) {
 
-        var program = material.program;
+        const {program} = material;
 
         if (program === undefined)
             return;
@@ -427,8 +428,8 @@ $3Dmol.Renderer = function(parameters) {
         // list
         // (that's how it's constructed)
 
-        var i, il, programInfo;
-        var deleteProgram = false;
+        let i; let il; let programInfo;
+        let deleteProgram = false;
 
         for (i = 0, il = _programs.length; i < il; i++) {
 
@@ -436,7 +437,7 @@ $3Dmol.Renderer = function(parameters) {
 
             if (programInfo.program === program) {
 
-                programInfo.usedTimes--;
+                programInfo.usedTimes-=1;
 
                 if (programInfo.usedTimes === 0) {
 
@@ -455,7 +456,7 @@ $3Dmol.Renderer = function(parameters) {
             // avoid using array.splice, this is costlier than creating new
             // array from scratch
 
-            var newPrograms = [];
+            const newPrograms = [];
 
             for (i = 0, il = _programs.length; i < il; i++) {
 
@@ -473,13 +474,13 @@ $3Dmol.Renderer = function(parameters) {
 
             _gl.deleteProgram(program);
 
-            _this.info.memory.programs--;
+            _this.info.memory.programs-=1;
 
         }
 
     };
 
-    var deallocateTexture = function(texture) {
+    const deallocateTexture = function(texture) {
 
         if (texture.image && texture.image.__webglTextureCube) {
 
@@ -504,32 +505,32 @@ $3Dmol.Renderer = function(parameters) {
     };
 
 
-    var onGeometryDispose = function(event) {
+    const onGeometryDispose = function(event) {
 
-        var geometry = event.target;
+        const geometry = event.target;
         geometry.removeEventListener('dispose', onGeometryDispose);
 
         deallocateGeometry(geometry);
 
-        _this.info.memory.geometries--;
+        _this.info.memory.geometries-=1;
 
     };
 
-    var onTextureDispose = function(event) {
+    const onTextureDispose = function(event) {
 
-        var texture = event.target;
+        const texture = event.target;
 
         texture.removeEventListener('dispose', onTextureDispose);
 
         deallocateTexture(texture);
 
-        _this.info.memory.textures--;
+        _this.info.memory.textures-=1;
 
     };
 
-    var onMaterialDispose = function(event) {
+    const onMaterialDispose = function(event) {
 
-        var material = event.target;
+        const material = event.target;
         material.removeEventListener('dispose', onMaterialDispose);
 
         deallocateMaterial(material);
@@ -539,12 +540,12 @@ $3Dmol.Renderer = function(parameters) {
     // Compile and return shader
     function getShader(type, str) {
 
-        var shader;
+        let shader;
 
         if(!isWebGL1() && !str.startsWith("#version")) {
-            //convert webgl1 to webgl2, unless a version is already explicit
+            // convert webgl1 to webgl2, unless a version is already explicit
             str = str.replace(/gl_FragDepthEXT/g,"gl_FragDepth");
-            if(type == "fragment") {
+            if(type === "fragment") {
                 str = str.replace(/varying/g,"in");
             } else {
                 str = str.replace(/varying/g,"out");
@@ -553,7 +554,7 @@ $3Dmol.Renderer = function(parameters) {
             str = str.replace(/texture2D/g,"texture");
             str = str.replace(/\/\/DEFINEFRAGCOLOR/g,'out vec4 glFragColor;');
             str = str.replace(/gl_FragColor/g,"glFragColor");
-            str = "#version 300 es\n"+str;
+            str = `#version 300 es\n${str}`;
         }
         if (type === "fragment")
             shader = _gl.createShader(_gl.FRAGMENT_SHADER);
@@ -579,8 +580,8 @@ $3Dmol.Renderer = function(parameters) {
     // gl program.
     function buildProgram(fragmentShader, vertexShader, uniforms, parameters) {
 
-        var p, pl, program, code;
-        var chunks = [];
+        let p; let pl; let program; let code;
+        const chunks = [];
 
         chunks.push(fragmentShader);
         chunks.push(vertexShader);
@@ -596,11 +597,11 @@ $3Dmol.Renderer = function(parameters) {
 
         for (p = 0, pl = _programs.length; p < pl; p++) {
 
-            var programInfo = _programs[p];
+            const programInfo = _programs[p];
 
             if (programInfo.code === code) {
 
-                programInfo.usedTimes++;
+                programInfo.usedTimes+=1;
 
                 return programInfo.program;
             }
@@ -618,23 +619,23 @@ $3Dmol.Renderer = function(parameters) {
         program = _gl.createProgram();
 
         // set up precision
-        var precision = _precision;
-        var prefix = "precision " + precision + " float;";
+        const precision = _precision;
+        const prefix = `precision ${  precision  } float;`;
 
-        var prefix_vertex = [
+        const prefixVertex = [
                 parameters.volumetric ? "#version 300 es" : "", prefix ]
                 .join("\n");
 
-        var prefix_fragment = [
+        const prefixFragment = [
                 parameters.volumetric ? "#version 300 es" : "",
                 parameters.fragdepth && isWebGL1() ? "#extension GL_EXT_frag_depth: enable"
                         : "",
                 parameters.wireframe ? "#define WIREFRAME 1" : "", prefix ]
                 .join("\n");
 
-        var glFragmentShader = getShader("fragment", prefix_fragment
+        const glFragmentShader = getShader("fragment", prefixFragment
                 + fragmentShader);
-        var glVertexShader = getShader("vertex", prefix_vertex + vertexShader);
+        const glVertexShader = getShader("vertex", prefixVertex + vertexShader);
 
         _gl.attachShader(program, glVertexShader);
         _gl.attachShader(program, glFragmentShader);
@@ -649,7 +650,7 @@ $3Dmol.Renderer = function(parameters) {
         program.uniforms = {};
         program.attributes = {};
 
-        var identifiers, u, i;
+        let identifiers; let u; let i;
 
         // uniform vars
         identifiers = [ 'viewMatrix', 'modelViewMatrix', 'projectionMatrix',
@@ -661,7 +662,7 @@ $3Dmol.Renderer = function(parameters) {
 
         for (i = 0; i < identifiers.length; i++) {
 
-            var uniformVar = identifiers[i];
+            const uniformVar = identifiers[i];
             program.uniforms[uniformVar] = _gl.getUniformLocation(program,
                     uniformVar);
 
@@ -677,15 +678,15 @@ $3Dmol.Renderer = function(parameters) {
 
         for (i = 0; i < identifiers.length; i++) {
 
-            var attributeVar = identifiers[i];
+            const attributeVar = identifiers[i];
             program.attributes[attributeVar] = _gl.getAttribLocation(program,
                     attributeVar);
         }
 
-        program.id = _programs_counter++;
+        program.id = _programsCounter+=1;
         _programs.push({
-            program : program,
-            code : code,
+            program,
+            code,
             usedTimes : 1
         });
         _this.info.memory.programs = _programs.length;
@@ -701,13 +702,13 @@ $3Dmol.Renderer = function(parameters) {
 
         material.addEventListener('dispose', onMaterialDispose);
 
-        var parameters, shaderID;
+        let parameters; let shaderID;
 
         shaderID = material.shaderID;
 
         if (shaderID) {
 
-            var shader = $3Dmol.ShaderLib[shaderID];
+            const shader = $3Dmol.ShaderLib[shaderID];
             material.vertexShader = shader.vertexShader;
             material.fragmentShader = shader.fragmentShader;
             material.uniforms = $3Dmol.ShaderUtils.clone(shader.uniforms);
@@ -737,34 +738,34 @@ $3Dmol.Renderer = function(parameters) {
             material.needsUpdate = false;
         }
 
-        var refreshMaterial = false;
+        let refreshMaterial = false;
 
-        // p_uniforms: uniformVarName => uniformLocation
-        // m_uniforms: uniformVarName => uniformJsVal
-        var program = material.program, p_uniforms = program.uniforms, m_uniforms = material.uniforms;
+        // pUniform: uniformVarName => uniformLocation
+        // mUniform: uniformVarName => uniformJsVal
+        const {program} = material; const pUniform = program.uniforms; const mUniform = material.uniforms;
 
-        if (program != _currentProgram) {
+        if (program !== _currentProgram) {
             _gl.useProgram(program);
             _currentProgram = program;
 
             refreshMaterial = true;
         }
 
-        if (material.id != _currentMaterialId) {
+        if (material.id !== _currentMaterialId) {
             _currentMaterialId = material.id;
             refreshMaterial = true;
         }
 
-        if (camera != _currentCamera) {
+        if (camera !== _currentCamera) {
             _currentCamera = camera;
             refreshMaterial = true;
         }
 
-        _gl.uniformMatrix4fv(p_uniforms.projectionMatrix, false,
+        _gl.uniformMatrix4fv(pUniform.projectionMatrix, false,
                 camera.projectionMatrix.elements);
-        _gl.uniformMatrix4fv(p_uniforms.modelViewMatrix, false,
+        _gl.uniformMatrix4fv(pUniform.modelViewMatrix, false,
                 object._modelViewMatrix.elements);
-        _gl.uniformMatrix3fv(p_uniforms.normalMatrix, false,
+        _gl.uniformMatrix3fv(pUniform.normalMatrix, false,
                 object._normalMatrix.elements);
 
         // Send projection matrix to uniform variable in shader
@@ -773,9 +774,9 @@ $3Dmol.Renderer = function(parameters) {
             // Load projection, model-view matrices for perspective
 
             // Set up correct fog uniform vals
-            m_uniforms.fogColor.value = fog.color;
-            m_uniforms.fogNear.value = fog.near;
-            m_uniforms.fogFar.value = fog.far;
+            mUniform.fogColor.value = fog.color;
+            mUniform.fogNear.value = fog.near;
+            mUniform.fogFar.value = fog.far;
 
             // Set up lights for lambert shader
             if (material.shaderID.startsWith("lambert")
@@ -784,7 +785,7 @@ $3Dmol.Renderer = function(parameters) {
 
                 // load view and normal matrices for directional and object
                 // lighting
-                _gl.uniformMatrix4fv(p_uniforms.viewMatrix, false,
+                _gl.uniformMatrix4fv(pUniform.viewMatrix, false,
                         camera.matrixWorldInverse.elements);
 
                 if (_lightsNeedUpdate) {
@@ -793,47 +794,47 @@ $3Dmol.Renderer = function(parameters) {
                 }
 
                 // Set up correct light uniform var vals
-                m_uniforms.directionalLightColor.value = _lights.directional.colors;
-                m_uniforms.directionalLightDirection.value = _lights.directional.positions;
+                mUniform.directionalLightColor.value = _lights.directional.colors;
+                mUniform.directionalLightDirection.value = _lights.directional.positions;
 
             } else if (material.shaderID.endsWith("outline")) {
-                m_uniforms.outlineColor.value = material.outlineColor;
-                m_uniforms.outlineWidth.value = material.outlineWidth;
-                m_uniforms.outlinePushback.value = material.outlinePushback;
+                mUniform.outlineColor.value = material.outlineColor;
+                mUniform.outlineWidth.value = material.outlineWidth;
+                mUniform.outlinePushback.value = material.outlinePushback;
             }  else if (material.shaderID === "volumetric") {
 
-                //need a matrix that maps back from model coordinates to texture coordinates
+                // need a matrix that maps back from model coordinates to texture coordinates
                 //  textureMat*modelInv*position
-                object._modelViewMatrix.getScale(_direction); //scale factor of conversion
+                object._modelViewMatrix.getScale(_direction); // scale factor of conversion
                 _worldInverse.getInverse(object._modelViewMatrix);
                 _projInverse.getInverse(camera.projectionMatrix);
                 _textureMatrix.multiplyMatrices(object.material.texmatrix,_worldInverse);
-                _gl.uniformMatrix4fv(p_uniforms.textmat, false, _textureMatrix.elements);
-                _gl.uniformMatrix4fv(p_uniforms.projinv, false, _projInverse.elements);
+                _gl.uniformMatrix4fv(pUniform.textmat, false, _textureMatrix.elements);
+                _gl.uniformMatrix4fv(pUniform.projinv, false, _projInverse.elements);
 
                 //  need the resolution (step size of ray in viewer coordinates)
-                let invscale = Math.min(Math.min(_direction.x,_direction.y),_direction.z);
-                m_uniforms.step.value = object.material.unit*invscale;
-                m_uniforms.maxdepth.value = object.material.maxdepth*invscale;
-                m_uniforms.transfermax.value = object.material.transfermax;
-                m_uniforms.transfermin.value = object.material.transfermin;
-                m_uniforms.subsamples.value = object.material.subsamples;
+                const invscale = Math.min(Math.min(_direction.x,_direction.y),_direction.z);
+                mUniform.step.value = object.material.unit*invscale;
+                mUniform.maxdepth.value = object.material.maxdepth*invscale;
+                mUniform.transfermax.value = object.material.transfermax;
+                mUniform.transfermin.value = object.material.transfermin;
+                mUniform.subsamples.value = object.material.subsamples;
 
 
 
                 renderer.setTexture(object.material.transferfn, 4, false);
                 renderer.setTexture(object.material.map, 3, true);
-                //depth texture from the renderbuffer, for volumetric integration with surfaces
+                // depth texture from the renderbuffer, for volumetric integration with surfaces
                 _gl.activeTexture(_gl.TEXTURE5);
                 _gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
 
             }
 
             // opacity, diffuse, emissive, etc
-            m_uniforms.opacity.value = material.opacity;
+            mUniform.opacity.value = material.opacity;
 
             // Load any other material specific uniform variables to gl shaders
-            loadMaterialUniforms(p_uniforms, m_uniforms);
+            loadMaterialUniforms(pUniform, mUniform);
 
         }
 
@@ -841,16 +842,16 @@ $3Dmol.Renderer = function(parameters) {
 
     }
 
-    function loadMaterialUniforms(p_uniforms, m_uniforms) {
-        var uniformVar, type, uniformVal, uniformLoc;
+    function loadMaterialUniforms(pUniform, mUniform) {
+        let uniformVar; let type; let uniformVal; let uniformLoc;
 
-        for (uniformVar in m_uniforms) {
-            if (!p_uniforms[uniformVar])
+        for (uniformVar in mUniform) {
+            if (!pUniform[uniformVar])
                 continue;
 
-            type = m_uniforms[uniformVar].type;
-            uniformVal = m_uniforms[uniformVar].value;
-            uniformLoc = p_uniforms[uniformVar];
+            type = mUniform[uniformVar].type;
+            uniformVal = mUniform[uniformVar].value;
+            uniformLoc = pUniform[uniformVar];
 
             // single float
             if (type === 'f')
@@ -879,7 +880,7 @@ $3Dmol.Renderer = function(parameters) {
         if (!material.visible)
             return;
 
-        var program, attributes;
+        let program; let attributes;
 
         // Sets up proper vertex and fragment shaders and attaches them to webGL
         // program
@@ -888,7 +889,7 @@ $3Dmol.Renderer = function(parameters) {
 
         attributes = program.attributes;
 
-        var updateBuffers = false, wireframeBit = material.wireframe ? 1 : 0, geometryGroupHash = (geometryGroup.id * 0xffffff)
+        let updateBuffers = false; const wireframeBit = material.wireframe ? 1 : 0; const geometryGroupHash = (geometryGroup.id * 0xffffff)
                 + (program.id * 2) + wireframeBit;
 
         if (geometryGroupHash !== _currentGeometryGroupHash) {
@@ -950,13 +951,13 @@ $3Dmol.Renderer = function(parameters) {
         }
 
         // Render
-        var faceCount, lineCount;
+        let faceCount; let lineCount;
         // lambert shaders - draw triangles
         // TODO: make sure geometryGroup's face count is setup correctly
         if (object instanceof $3Dmol.Mesh) {
 
             if (material.shaderID === "instanced") {
-                var sphereGeometryGroup = material.sphere.geometryGroups[0];
+                const sphereGeometryGroup = material.sphere.geometryGroups[0];
                 if (updateBuffers) {
                     _gl.bindBuffer(_gl.ARRAY_BUFFER,
                             geometryGroup.__webglVertexBuffer);
@@ -1010,7 +1011,7 @@ $3Dmol.Renderer = function(parameters) {
 
             }
 
-            _this.info.render.calls++;
+            _this.info.render.calls+=1;
             _this.info.render.vertices += faceCount;
             _this.info.render.faces += faceCount / 3;
         }
@@ -1022,7 +1023,7 @@ $3Dmol.Renderer = function(parameters) {
             setLineWidth(material.linewidth);
             _gl.drawArrays(_gl.LINES, 0, lineCount);
 
-            _this.info.render.calls++;
+            _this.info.render.calls+=1;
         }
 
     };
@@ -1031,7 +1032,7 @@ $3Dmol.Renderer = function(parameters) {
     function renderObjects(renderList, reverse, materialType, camera, lights,
             fog, useBlending) {
 
-        var webglObject, object, buffer, material, start, end, delta;
+        let webglObject; let object; let buffer; let material; let start; let end; let delta;
 
         // Forward or backward render
 
@@ -1047,7 +1048,7 @@ $3Dmol.Renderer = function(parameters) {
             delta = 1;
         }
 
-        for (var i = start; i !== end; i += delta) {
+        for (let i = start; i !== end; i += delta) {
 
             webglObject = renderList[i];
 
@@ -1069,18 +1070,18 @@ $3Dmol.Renderer = function(parameters) {
                         material.polygonOffsetFactor,
                         material.polygonOffsetUnits);
 
-                var reflected = object._modelViewMatrix.isReflected();
+                const reflected = object._modelViewMatrix.isReflected();
 
                 _this.setMaterialFaces(material, reflected);
 
                 _this.renderBuffer(camera, lights, fog, material, buffer,
                         object);
                 if (_outlineEnabled || material.outline) {
-                    if(material.shaderID == 'sphereimposter') {
+                    if(material.shaderID === 'sphereimposter') {
                         _this.renderBuffer(camera, lights, fog, _outlineSphereImposterMaterial,
                                 buffer, object);
                     }
-                    else if(material.shaderID == 'stickimposter') {
+                    else if(material.shaderID === 'stickimposter') {
                         _this.renderBuffer(camera, lights, fog, _outlineStickImposterMaterial,
                                 buffer, object);
                     }
@@ -1106,11 +1107,11 @@ $3Dmol.Renderer = function(parameters) {
 
         }
 
-        var i, il,
+        let i; let il;
 
-        webglObject, object, renderList,
+        let webglObject; let object; let renderList;
 
-        lights = scene.__lights, fog = scene.fog;
+        const lights = scene.__lights; const {fog} = scene;
 
         // reset caching for this frame
 
@@ -1157,7 +1158,7 @@ $3Dmol.Renderer = function(parameters) {
         // set matrices for regular objects (frustum culled)
 
         renderList = scene.__webglObjects;
-        var hasvolumetric = false;
+        let hasvolumetric = false;
         for (i = 0, il = renderList.length; i < il; i++) {
 
             webglObject = renderList[i];
@@ -1175,7 +1176,7 @@ $3Dmol.Renderer = function(parameters) {
 
         // set matrices for immediate objects
 
-        var material = null;
+        const material = null;
 
         // opaque pass (front-to-back order)
 
@@ -1196,9 +1197,9 @@ $3Dmol.Renderer = function(parameters) {
         renderObjects(scene.__webglObjects, false, "transparent", camera,
                 lights, fog, true, material);
 
-        //volumetric is separate
+        // volumetric is separate
         if(hasvolumetric && _fb) {
-            //disconnect framebuffer to get depth texture
+            // disconnect framebuffer to get depth texture
             this.reinitFrameBuffer();
             renderObjects(scene.__webglObjects, false, "volumetric", camera,
                     lights, fog, true, material);
@@ -1244,8 +1245,8 @@ $3Dmol.Renderer = function(parameters) {
         _oldFlipSided = -1;
     }
 
-    //reinitialize framebuffer without the depth texture attached so we can read to it
-    //do not allocate new textures
+    // reinitialize framebuffer without the depth texture attached so we can read to it
+    // do not allocate new textures
     this.reinitFrameBuffer = function() {
         // only needed/works with webgl2
         if (isWebGL1()) return;
@@ -1256,18 +1257,18 @@ $3Dmol.Renderer = function(parameters) {
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);
     };
 
-    //setup framebuffer for drawing into, assumes buffers already allocated
+    // setup framebuffer for drawing into, assumes buffers already allocated
     this.setFrameBuffer = function() {
         if (isWebGL1() || !_fb) return;
-        let width = _viewportWidth;
-        let height = _viewportHeight;
+        const width = _viewportWidth;
+        const height = _viewportHeight;
 
-        //when using framebuffer, always draw from origin, will shift the viewport when we render
+        // when using framebuffer, always draw from origin, will shift the viewport when we render
         _gl.enable(_gl.SCISSOR_TEST);
         _gl.scissor(0,0, width, height);
         _gl.viewport(0,0, width, height);
 
-        //color texture
+        // color texture
         _gl.bindTexture(_gl.TEXTURE_2D, _targetTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.RGBA, width, height, 0, _gl.RGBA, _gl.UNSIGNED_BYTE, null);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.LINEAR);
@@ -1275,7 +1276,7 @@ $3Dmol.Renderer = function(parameters) {
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
 
-        //depth texture
+        // depth texture
         _gl.bindTexture(_gl.TEXTURE_2D, _depthTexture);
         _gl.texImage2D(_gl.TEXTURE_2D, 0, _gl.DEPTH_COMPONENT32F, width, height, 0, _gl.DEPTH_COMPONENT, _gl.FLOAT, null);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_MIN_FILTER, _gl.NEAREST);
@@ -1283,40 +1284,40 @@ $3Dmol.Renderer = function(parameters) {
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_S, _gl.CLAMP_TO_EDGE);
         _gl.texParameteri(_gl.TEXTURE_2D, _gl.TEXTURE_WRAP_T, _gl.CLAMP_TO_EDGE);
 
-        //bind fb
+        // bind fb
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, _fb);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.COLOR_ATTACHMENT0, _gl.TEXTURE_2D, _targetTexture, 0);
         _gl.framebufferTexture2D(_gl.FRAMEBUFFER, _gl.DEPTH_ATTACHMENT,  _gl.TEXTURE_2D, _depthTexture, 0);
 
     };
 
-    //allocate buffers for framebuffer, needs to be called with every resize
+    // allocate buffers for framebuffer, needs to be called with every resize
     this.initFrameBuffer = function() {
         // only needed/works with webgl2
         if (isWebGL1()) return;
 
 
-        let width = _viewportWidth;
-        let height = _viewportHeight;
+        const width = _viewportWidth;
+        const height = _viewportHeight;
 
-        //when using framebuffer, always draw from origin, will shift the viewport when we render
+        // when using framebuffer, always draw from origin, will shift the viewport when we render
         _gl.enable(_gl.SCISSOR_TEST);
         _gl.scissor(0,0, width, height);
         _gl.viewport(0,0, width, height);
 
-        //create textures and frame buffer, will be initialized in setFrameBuffer
+        // create textures and frame buffer, will be initialized in setFrameBuffer
         _targetTexture = _gl.createTexture();
         _depthTexture = _gl.createTexture();
         _fb = _gl.createFramebuffer();
 
         // build screenshader
-        var screenshader = $3Dmol.ShaderLib.screen;
+        const screenshader = $3Dmol.ShaderLib.screen;
 
         _screenshader = buildProgram(screenshader.fragmentShader,
             screenshader.vertexShader, screenshader.uniforms, {});
         _vertexattribpos = _gl.getAttribLocation(_screenshader, 'vertexPosition');
         // create the vertex array and attrib array for the full screenquad
-        var verts = [
+        const verts = [
             // First triangle:
              1.0,  1.0,
             -1.0,  1.0,
@@ -1336,7 +1337,7 @@ $3Dmol.Renderer = function(parameters) {
         // only needed/works with webgl2
         if (isWebGL1() || _fb === null) return;
 
-        this.setViewport(); //draw texture in correct viewport
+        this.setViewport(); // draw texture in correct viewport
 
         // bind default framebuffer
         _gl.bindFramebuffer(_gl.FRAMEBUFFER, null);
@@ -1400,7 +1401,7 @@ $3Dmol.Renderer = function(parameters) {
 
         // update must be called after objects adding / removal
         // This sends typed arrays to GL buffers for each geometryGroup
-        for (var o = 0, ol = scene.__webglObjects.length; o < ol; o++) {
+        for (let o = 0, ol = scene.__webglObjects.length; o < ol; o++) {
 
             updateObject(scene.__webglObjects[o].object);
 
@@ -1412,7 +1413,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function addObject(object, scene) {
 
-        var g, gl, geometry, material, geometryGroup;
+        let g; let gl; let geometry; let material; let geometryGroup;
 
         if (!object.__webglInit) {
 
@@ -1437,7 +1438,7 @@ $3Dmol.Renderer = function(parameters) {
 
                     geometryGroup = geometry.geometryGroups[g];
 
-                    geometryGroup.id = _geometryGroupCounter++;
+                    geometryGroup.id = _geometryGroupCounter+=1;
 
                     // initialise VBO on the first access
 
@@ -1489,11 +1490,11 @@ $3Dmol.Renderer = function(parameters) {
 
     function updateObject(object) {
 
-        var geometry = object.geometry, geometryGroup;
+        const {geometry} = object; let geometryGroup;
 
         if (object instanceof $3Dmol.Mesh || object instanceof $3Dmol.Line) {
 
-            for (var g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
+            for (let g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
 
                 geometryGroup = geometry.geometryGroups[g];
 
@@ -1529,7 +1530,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function removeInstances(objList, object) {
 
-        for (var o = objList.length - 1; o >= 0; --o) {
+        for (let o = objList.length - 1; o >= 0; --o) {
 
             if (objList[o].object === object)
                 objList.splice(o, 1);
@@ -1539,7 +1540,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function removeInstancesDirect(objList, object) {
 
-        for (var o = objList.length - 1; o >= 0; --o) {
+        for (let o = objList.length - 1; o >= 0; --o) {
 
             if (objList[o] === object)
                 objList.splice(o, 1);
@@ -1549,8 +1550,8 @@ $3Dmol.Renderer = function(parameters) {
 
     function unrollBufferMaterial(globject) {
 
-        var object = globject.object;
-        var material = object.material;
+        const {object} = globject;
+        const {material} = object;
 
         if (material.volumetric) {
             globject.opaque = null;
@@ -1562,7 +1563,7 @@ $3Dmol.Renderer = function(parameters) {
             globject.volumetric = null;
             globject.transparent = material;
             if (!material.wireframe) {
-                var blankMaterial = material.clone();
+                const blankMaterial = material.clone();
                 blankMaterial.opacity = 0.0;
                 globject.blank = blankMaterial;
             }
@@ -1576,8 +1577,8 @@ $3Dmol.Renderer = function(parameters) {
 
     function setBuffers(geometryGroup, hint) {
 
-        var vertexArray = geometryGroup.vertexArray;
-        var colorArray = geometryGroup.colorArray;
+        const {vertexArray} = geometryGroup;
+        const {colorArray} = geometryGroup;
 
         // offset buffers
         if (geometryGroup.__webglOffsetBuffer !== undefined ) {
@@ -1585,7 +1586,7 @@ $3Dmol.Renderer = function(parameters) {
             _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
         }
         else {
-            //normal, non-instanced case
+            // normal, non-instanced case
             _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
             _gl.bufferData(_gl.ARRAY_BUFFER, vertexArray, hint);
         }
@@ -1596,7 +1597,7 @@ $3Dmol.Renderer = function(parameters) {
         // normal buffers
         if (geometryGroup.normalArray
                 && geometryGroup.__webglNormalBuffer !== undefined) {
-            var normalArray = geometryGroup.normalArray;
+            const {normalArray} = geometryGroup;
             _gl.bindBuffer(_gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer);
             _gl.bufferData(_gl.ARRAY_BUFFER, normalArray, hint);
 
@@ -1614,7 +1615,7 @@ $3Dmol.Renderer = function(parameters) {
         // face (index) buffers
         if (geometryGroup.faceArray
                 && geometryGroup.__webglFaceBuffer !== undefined) {
-            var faceArray = geometryGroup.faceArray;
+            const {faceArray} = geometryGroup;
             _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER,
                     geometryGroup.__webglFaceBuffer);
             _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, faceArray, hint);
@@ -1624,7 +1625,7 @@ $3Dmol.Renderer = function(parameters) {
         // line (index) buffers (for wireframe)
         if (geometryGroup.lineArray
                 && geometryGroup.__webglLineBuffer !== undefined) {
-            var lineArray = geometryGroup.lineArray;
+            const {lineArray} = geometryGroup;
             _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER,
                     geometryGroup.__webglLineBuffer);
             _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, lineArray, hint);
@@ -1650,7 +1651,7 @@ $3Dmol.Renderer = function(parameters) {
         geometryGroup.__webglFaceBuffer = _gl.createBuffer();
         geometryGroup.__webglLineBuffer = _gl.createBuffer();
 
-        _this.info.memory.geometries++;
+        _this.info.memory.geometries+=1;
     }
 
     function createLineBuffers(geometry) {
@@ -1658,14 +1659,14 @@ $3Dmol.Renderer = function(parameters) {
         geometry.__webglVertexBuffer = _gl.createBuffer();
         geometry.__webglColorBuffer = _gl.createBuffer();
 
-        _this.info.memory.geometries++;
+        _this.info.memory.geometries+=1;
     }
 
     function addBuffer(objlist, buffer, object) {
 
         objlist.push({
-            buffer : buffer,
-            object : object,
+            buffer,
+            object,
             opaque : null,
             transparent : null
         });
@@ -1690,7 +1691,7 @@ $3Dmol.Renderer = function(parameters) {
 
     function setTextureParameters(textureType, texture) {
 
-        if (textureType == _gl.TEXTURE_2D){
+        if (textureType === _gl.TEXTURE_2D){
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_S,
                     _gl.CLAMP_TO_EDGE);
             _gl.texParameteri(textureType, _gl.TEXTURE_WRAP_T,
@@ -1709,7 +1710,7 @@ $3Dmol.Renderer = function(parameters) {
                 _gl.CLAMP_TO_EDGE);
 
             if(_extColorBufferFloat && _extFloatLinear) {
-              //linear interpolation isn't supported by default (despite being the default??)
+              // linear interpolation isn't supported by default (despite being the default??)
               _gl.texParameteri(textureType, _gl.TEXTURE_MAG_FILTER,_gl.LINEAR);
               _gl.texParameteri(textureType, _gl.TEXTURE_MIN_FILTER,_gl.LINEAR);
             } else {
@@ -1732,14 +1733,14 @@ $3Dmol.Renderer = function(parameters) {
     };
 
     this.getAspect = function(width,height){
-        if(width == undefined || height == undefined){
+        if(width === undefined || height === undefined){
             width = _canvas.width;
             height = _canvas.height;
         }
-        var aspect = width/height;
-        if(this.rows != undefined && this.cols != undefined && this.row != undefined && this.col != undefined){
-            var wid = width/this.cols;
-            var hei = height/this.rows;
+        let aspect = width/height;
+        if(this.rows !== undefined && this.cols !== undefined && this.row !== undefined && this.col !== undefined){
+            const wid = width/this.cols;
+            const hei = height/this.rows;
             aspect = wid/hei;
         }
         return aspect;
@@ -1753,38 +1754,38 @@ $3Dmol.Renderer = function(parameters) {
                 texture.__webglInit = true;
                 texture.addEventListener('dispose', onTextureDispose);
                 texture.__webglTexture = _gl.createTexture();
-                _this.info.memory.textures++;
+                _this.info.memory.textures+=1;
 
             }
 
             _gl.activeTexture(_gl.TEXTURE0 + slot);
-            var gltextureType = is3D ? _gl.TEXTURE_3D : _gl.TEXTURE_2D;
+            const gltextureType = is3D ? _gl.TEXTURE_3D : _gl.TEXTURE_2D;
             _gl.bindTexture(gltextureType, texture.__webglTexture);
             _gl.pixelStorei(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
             _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
             _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
             _gl.pixelStorei(_gl.PACK_ALIGNMENT, texture.unpackAlignment);
 
-            var glFormat = paramToGL(texture.format), glType = paramToGL(texture.type);
+            const glFormat = paramToGL(texture.format); const glType = paramToGL(texture.type);
 
             if(!is3D) {
-              var image = texture.image;
-              var width = image.width; //might not be defined
-              var height = image.height;
-              if(typeof(width) === 'undefined') { //if no width,
+              const {image} = texture;
+              let {width} = image; // might not be defined
+              let {height} = image;
+              if(typeof(width) === 'undefined') { // if no width,
                 width = image.length;
-                if(glFormat == _gl.RGBA) {
-                    width /= 4; //each element takes up 4 bytes
+                if(glFormat === _gl.RGBA) {
+                    width /= 4; // each element takes up 4 bytes
                 }
                 height = 1;
               }
               setTextureParameters(_gl.TEXTURE_2D, texture);
-              if(!isWebGL1()) { //webgl2
+              if(!isWebGL1()) { // webgl2
                 _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, width, height, 0, glFormat, glType, texture.image);
               } else {
                 _gl.texImage2D(_gl.TEXTURE_2D, 0, glFormat, glFormat, glType, texture.image);
               }
-            } else { //3D
+            } else { // 3D
               setTextureParameters(_gl.TEXTURE_3D, texture);
               _gl.texImage3D(_gl.TEXTURE_3D, 0, _gl.R32F, texture.image.size.z, texture.image.size.y,
                   texture.image.size.x, 0, _gl.RED, _gl.FLOAT, texture.image.data);
@@ -1823,13 +1824,13 @@ $3Dmol.Renderer = function(parameters) {
     }
 
     function setupLights(program, lights) {
-        var l, ll, light, r = 0, g = 0, b = 0, color, intensity, distance,
+        let l; let ll; let light; const r = 0; const g = 0; const b = 0; let color; let intensity; let distance;
 
-        zlights = _lights,
+        const zlights = _lights;
 
-        dirColors = zlights.directional.colors, dirPositions = zlights.directional.positions,
+        const dirColors = zlights.directional.colors; const dirPositions = zlights.directional.positions;
 
-        dirCount = 0, dirLength = 0, dirOffset = 0;
+        let dirCount = 0; let dirLength = 0; let dirOffset = 0;
 
         for (l = 0, ll = lights.length; l < ll; l++) {
 
@@ -1841,7 +1842,7 @@ $3Dmol.Renderer = function(parameters) {
 
             if (light instanceof $3Dmol.Light) {
 
-                dirCount++;
+                dirCount+=1;
 
                 _direction.getPositionFromMatrix(light.matrixWorld);
                 _vector3.getPositionFromMatrix(light.target.matrixWorld);
@@ -1862,7 +1863,7 @@ $3Dmol.Renderer = function(parameters) {
 
                 dirOffset += 3;
 
-                dirLength++;
+                dirLength+=1;
             }
 
         }
@@ -1874,8 +1875,8 @@ $3Dmol.Renderer = function(parameters) {
     }
 
     function initGL() {
-        //note setting antialis to true doesn't seem to do much and
-        //causes problems on iOS Safari
+        // note setting antialis to true doesn't seem to do much and
+        // causes problems on iOS Safari
 
         try {
             if (!(_gl = _canvas.getContext('webgl2', {
@@ -1899,11 +1900,11 @@ $3Dmol.Renderer = function(parameters) {
                         stencil : _stencil,
                         preserveDrawingBuffer : _preserveDrawingBuffer
                     }))) {
-                        throw 'Error creating WebGL context.';
+                        throw new Error("Error creating WebGL context.");
                     }
                 }
             }
-            var vers = _gl.getParameter(_gl.VERSION);
+            const vers = _gl.getParameter(_gl.VERSION);
             _webglversion = parseInt(vers[6]);
         } catch (error) {
 
@@ -1913,7 +1914,7 @@ $3Dmol.Renderer = function(parameters) {
     }
 
     function isWebGL1() {
-      return _webglversion == 1;
+      return _webglversion === 1;
     }
 
     this.supportsVolumetric = function() { return !isWebGL1(); };

@@ -12558,8 +12558,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 		var refreshMaterial = false;
 
 		var program = material.program,
-			p_uniforms = program.uniforms,
-			m_uniforms = material.uniforms;
+			pUniform = program.uniforms,
+			mUniform = material.uniforms;
 
 		if ( program !== _currentProgram ) {
 
@@ -12579,7 +12579,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( refreshMaterial || camera !== _currentCamera ) {
 
-			_gl.uniformMatrix4fv( p_uniforms.projectionMatrix, false, camera._projectionMatrixArray );
+			_gl.uniformMatrix4fv( pUniform.projectionMatrix, false, camera._projectionMatrixArray );
 
 			if ( camera !== _currentCamera ) _currentCamera = camera;
 
@@ -12591,7 +12591,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if ( fog && material.fog ) {
 
-				refreshUniformsFog( m_uniforms, fog );
+				refreshUniformsFog( mUniform, fog );
 
 			}
 
@@ -12606,7 +12606,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				}
 
-				refreshUniformsLights( m_uniforms, _lights );
+				refreshUniformsLights( mUniform, _lights );
 
 			}
 
@@ -12614,7 +12614,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 				 material instanceof THREE.MeshLambertMaterial ||
 				 material instanceof THREE.MeshPhongMaterial ) {
 
-				refreshUniformsCommon( m_uniforms, material );
+				refreshUniformsCommon( mUniform, material );
 
 			}
 
@@ -12622,35 +12622,35 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if ( material instanceof THREE.LineBasicMaterial ) {
 
-				refreshUniformsLine( m_uniforms, material );
+				refreshUniformsLine( mUniform, material );
 
 			} else if ( material instanceof THREE.ParticleBasicMaterial ) {
 
-				refreshUniformsParticle( m_uniforms, material );
+				refreshUniformsParticle( mUniform, material );
 
 			} else if ( material instanceof THREE.MeshPhongMaterial ) {
 
-				refreshUniformsPhong( m_uniforms, material );
+				refreshUniformsPhong( mUniform, material );
 
 			} else if ( material instanceof THREE.MeshLambertMaterial ) {
 
-				refreshUniformsLambert( m_uniforms, material );
+				refreshUniformsLambert( mUniform, material );
 
 			} else if ( material instanceof THREE.MeshDepthMaterial ) {
 
-				m_uniforms.mNear.value = camera.near;
-				m_uniforms.mFar.value = camera.far;
-				m_uniforms.opacity.value = material.opacity;
+				mUniform.mNear.value = camera.near;
+				mUniform.mFar.value = camera.far;
+				mUniform.opacity.value = material.opacity;
 
 			} else if ( material instanceof THREE.MeshNormalMaterial ) {
 
-				m_uniforms.opacity.value = material.opacity;
+				mUniform.opacity.value = material.opacity;
 
 			}
 
 			if ( object.receiveShadow && ! material._shadowPass ) {
 
-				refreshUniformsShadow( m_uniforms, lights );
+				refreshUniformsShadow( mUniform, lights );
 
 			}
 
@@ -12665,10 +12665,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 				 material instanceof THREE.MeshPhongMaterial ||
 				 material.envMap ) {
 
-				if ( p_uniforms.cameraPosition !== null ) {
+				if ( pUniform.cameraPosition !== null ) {
 
 					var position = camera.matrixWorld.getPosition();
-					_gl.uniform3f( p_uniforms.cameraPosition, position.x, position.y, position.z );
+					_gl.uniform3f( pUniform.cameraPosition, position.x, position.y, position.z );
 
 				}
 
@@ -12679,9 +12679,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 				 material instanceof THREE.ShaderMaterial ||
 				 material.skinning ) {
 
-				if ( p_uniforms.viewMatrix !== null ) {
+				if ( pUniform.viewMatrix !== null ) {
 
-					_gl.uniformMatrix4fv( p_uniforms.viewMatrix, false, camera._viewMatrixArray );
+					_gl.uniformMatrix4fv( pUniform.viewMatrix, false, camera._viewMatrixArray );
 
 				}
 
@@ -12689,17 +12689,17 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if ( material.skinning ) {
 
-				_gl.uniformMatrix4fv( p_uniforms.boneGlobalMatrices, false, object.boneMatrices );
+				_gl.uniformMatrix4fv( pUniform.boneGlobalMatrices, false, object.boneMatrices );
 
 			}
 
 		}
 
-		loadUniformsMatrices( p_uniforms, object );
+		loadUniformsMatrices( pUniform, object );
 
-		if ( p_uniforms.objectMatrix !== null ) {
+		if ( pUniform.objectMatrix !== null ) {
 
-			_gl.uniformMatrix4fv( p_uniforms.objectMatrix, false, object.matrixWorld.elements );
+			_gl.uniformMatrix4fv( pUniform.objectMatrix, false, object.matrixWorld.elements );
 
 		}
 
@@ -13586,7 +13586,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		program = _gl.createProgram();
 
-		var prefix_vertex = [
+		var prefixVertex = [
 
 			"precision " + _precision + " float;",
 
@@ -13678,7 +13678,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		].join("\n");
 
-		var prefix_fragment = [
+		var prefixFragment = [
 
 			"precision " + _precision + " float;",
 
@@ -13718,8 +13718,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		].join("\n");
 
-		_gl.attachShader( program, getShader( "fragment", prefix_fragment + fragmentShader ) );
-		_gl.attachShader( program, getShader( "vertex", prefix_vertex + vertexShader ) );
+		_gl.attachShader( program, getShader( "fragment", prefixFragment + fragmentShader ) );
+		_gl.attachShader( program, getShader( "vertex", prefixVertex + vertexShader ) );
 
 		_gl.linkProgram( program );
 
@@ -13729,8 +13729,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		//console.log( prefix_fragment + fragmentShader );
-		//console.log( prefix_vertex + vertexShader );
+		//console.log( prefixFragment + fragmentShader );
+		//console.log( prefixVertex + vertexShader );
 
 		program.uniforms = {};
 		program.attributes = {};
