@@ -1,4 +1,4 @@
-//Render plugins go here
+// Render plugins go here
 
 /**
  * Sprite render plugin
@@ -7,7 +7,7 @@
 
 $3Dmol.SpritePlugin = function () {
 
-    var _gl, _renderer, _precision, _sprite = {};
+    let _gl; let _renderer; let _precision; const _sprite = {};
 
     this.init = function ( renderer ) {
 
@@ -19,24 +19,24 @@ $3Dmol.SpritePlugin = function () {
         _sprite.vertices = new Float32Array( 8 + 8 );
         _sprite.faces    = new Uint16Array( 6 );
 
-        var i = 0;
+        let i = 0;
 
-        _sprite.vertices[ i++ ] = -1; _sprite.vertices[ i++ ] = -1; // vertex 0
-        _sprite.vertices[ i++ ] = 0;  _sprite.vertices[ i++ ] = 0;  // uv 0
+        _sprite.vertices[ i+=1 ] = -1; _sprite.vertices[ i+=1 ] = -1; // vertex 0
+        _sprite.vertices[ i+=1 ] = 0;  _sprite.vertices[ i+=1 ] = 0;  // uv 0
 
-        _sprite.vertices[ i++ ] = 1;  _sprite.vertices[ i++ ] = -1; // vertex 1
-        _sprite.vertices[ i++ ] = 1;  _sprite.vertices[ i++ ] = 0;  // uv 1
+        _sprite.vertices[ i+=1 ] = 1;  _sprite.vertices[ i+=1 ] = -1; // vertex 1
+        _sprite.vertices[ i+=1 ] = 1;  _sprite.vertices[ i+=1 ] = 0;  // uv 1
 
-        _sprite.vertices[ i++ ] = 1;  _sprite.vertices[ i++ ] = 1;  // vertex 2
-        _sprite.vertices[ i++ ] = 1;  _sprite.vertices[ i++ ] = 1;  // uv 2
+        _sprite.vertices[ i+=1 ] = 1;  _sprite.vertices[ i+=1 ] = 1;  // vertex 2
+        _sprite.vertices[ i+=1 ] = 1;  _sprite.vertices[ i+=1 ] = 1;  // uv 2
 
-        _sprite.vertices[ i++ ] = -1; _sprite.vertices[ i++ ] = 1;  // vertex 3
-        _sprite.vertices[ i++ ] = 0;  _sprite.vertices[ i++ ] = 1;  // uv 3
+        _sprite.vertices[ i+=1 ] = -1; _sprite.vertices[ i+=1 ] = 1;  // vertex 3
+        _sprite.vertices[ i+=1 ] = 0;  _sprite.vertices[ i+=1 ] = 1;  // uv 3
 
         i = 0;
 
-        _sprite.faces[ i++ ] = 0; _sprite.faces[ i++ ] = 1; _sprite.faces[ i++ ] = 2;
-        _sprite.faces[ i++ ] = 0; _sprite.faces[ i++ ] = 2; _sprite.faces[ i++ ] = 3;
+        _sprite.faces[ i+=1 ] = 0; _sprite.faces[ i+=1 ] = 1; _sprite.faces[ i+=1 ] = 2;
+        _sprite.faces[ i+=1 ] = 0; _sprite.faces[ i+=1 ] = 2; _sprite.faces[ i+=1 ] = 3;
 
         _sprite.vertexBuffer  = _gl.createBuffer();
         _sprite.elementBuffer = _gl.createBuffer();
@@ -82,25 +82,25 @@ $3Dmol.SpritePlugin = function () {
     };
 
     this.render = function ( scene, camera, viewportWidth, viewportHeight, inFront ) {
-        let sprites = [];
+        const sprites = [];
         scene.__webglSprites.forEach(sprite => {
-           //depthTest is false for inFront labels
-            if(inFront && sprite.material.depthTest == false) {
+           // depthTest is false for inFront labels
+            if(inFront && sprite.material.depthTest === false) {
                 sprites.push(sprite);
             } else if(!inFront && sprite.material.depthTest) {
                 sprites.push(sprite);
             }
         });
 
-        let nSprites = sprites.length;
+        const nSprites = sprites.length;
 
         if ( ! nSprites ) return;
 
-        var attributes = _sprite.attributes,
-            uniforms = _sprite.uniforms;
+        const {attributes} = _sprite;
+            const {uniforms} = _sprite;
 
-        var halfViewportWidth = viewportWidth * 0.5,
-            halfViewportHeight = viewportHeight * 0.5;
+        const halfViewportWidth = viewportWidth * 0.5;
+            const halfViewportHeight = viewportHeight * 0.5;
 
         // setup gl
 
@@ -123,9 +123,9 @@ $3Dmol.SpritePlugin = function () {
         _gl.activeTexture( _gl.TEXTURE0 );
         _gl.uniform1i( uniforms.map, 0 );
 
-        var oldFogType = 0;
-        var sceneFogType = 0;
-        var fog = scene.fog;
+        let oldFogType = 0;
+        let sceneFogType = 0;
+        const {fog} = scene;
 
         if ( fog ) {
 
@@ -151,13 +151,13 @@ $3Dmol.SpritePlugin = function () {
 
         // update positions and sort
 
-        var i, sprite, material, size, fogType, scale = [];
+        let i; let sprite; let material; let size; let fogType; const scale = [];
 
         for( i = 0; i < nSprites; i ++ ) {
 
             sprite = sprites[ i ];
             material = sprite.material;
-            if(material.depthTest == false && !inFront) continue;
+            if(material.depthTest === false && !inFront) continue;
             
             if ( ! sprite.visible || material.opacity === 0 ) continue;
 
@@ -183,8 +183,8 @@ $3Dmol.SpritePlugin = function () {
             if ( material.map && material.map.image && material.map.image.width ) {
 
                 _gl.uniform1f( uniforms.alphaTest, material.alphaTest );
-                var w = material.map.image.width;
-                var h = material.map.image.height;
+                const w = material.map.image.width;
+                const h = material.map.image.height;
                 
                 scale[ 0 ] = w*_renderer.devicePixelRatio/viewportWidth;
                 scale[ 1 ] = h*_renderer.devicePixelRatio/viewportHeight;
@@ -227,8 +227,8 @@ $3Dmol.SpritePlugin = function () {
                 scale[ 0 ] *= size * sprite.scale.x;
                 scale[ 1 ] *= size * sprite.scale.y;
                 
-                let alignx = material.alignment.x, aligny = material.alignment.y; 
-                if(material.screenOffset) { //adjust alignment offset by screenOffset adjusted to sprite coords
+                let alignx = material.alignment.x; let aligny = material.alignment.y; 
+                if(material.screenOffset) { // adjust alignment offset by screenOffset adjusted to sprite coords
                     alignx += 2.0*material.screenOffset.x/w;
                     aligny += 2.0*material.screenOffset.y/h;
                 }
@@ -243,7 +243,7 @@ $3Dmol.SpritePlugin = function () {
                 _gl.uniform1f( uniforms.rotation, sprite.rotation );
                 _gl.uniform2fv( uniforms.scale, scale );
 
-                //_renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
+                // _renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
                 _renderer.setDepthTest( material.depthTest );
                 _renderer.setDepthWrite( material.depthWrite );
                 _renderer.setTexture( material.map, 0 );
@@ -261,12 +261,12 @@ $3Dmol.SpritePlugin = function () {
 
     function createProgram ( shader, precision ) {
 
-        var program = _gl.createProgram();
+        const program = _gl.createProgram();
 
-        var fragmentShader = _gl.createShader( _gl.FRAGMENT_SHADER );
-        var vertexShader = _gl.createShader( _gl.VERTEX_SHADER );
+        const fragmentShader = _gl.createShader( _gl.FRAGMENT_SHADER );
+        const vertexShader = _gl.createShader( _gl.VERTEX_SHADER );
 
-        var prefix = "precision " + precision + " float;\n";
+        const prefix = `precision ${  precision  } float;\n`;
 
         _gl.shaderSource( fragmentShader, prefix + shader.fragmentShader );
         _gl.shaderSource( vertexShader, prefix + shader.vertexShader );
@@ -299,11 +299,11 @@ $3Dmol.SpritePlugin = function () {
 
             return b.z - a.z;
 
-        } else {
+        } 
 
             return b.id - a.id;
 
-        }
+        
 
     }
 
