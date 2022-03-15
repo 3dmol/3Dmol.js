@@ -10,35 +10,35 @@
       config = config || {}
 
       // Extract the viewer and then render it
-      var icons =new $3Dmol.UI.Icons();
-      var body = $('body');
+      const icons =new $3Dmol.UI.Icons();
+      const body = $('body');
       
-      var mainParent = $(parentElement[0]);
+      const mainParent = $(parentElement[0]);
       // Generates the necessary UI elements
-      var HEIGHT = config.height;
-      var WIDTH = config.width;
-      var uiElements = this.tools = generateUI(config);
+      const HEIGHT = config.height;
+      const WIDTH = config.width;
+      const uiElements = this.tools = generateUI(config);
       
       /**
        * Creates all the jquery object of different UI features
        * @param  {Object} config
        */
       function generateUI(config){
-        var modelToolBar = new ModelToolbar();
+        const modelToolBar = new ModelToolbar();
         mainParent.append(modelToolBar.ui);
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
         // modelToolBar.updateInputLength();
 
-        var contextMenu = new ContextMenu();
+        const contextMenu = new ContextMenu();
         mainParent.append(contextMenu.ui);
         setPosition(contextMenu.ui, 100, 100)
         
-        var surfaceMenu = new SurfaceMenu();
+        const surfaceMenu = new SurfaceMenu();
         mainParent.append(surfaceMenu.ui);
         setLocation(mainParent, surfaceMenu.ui, 'right', 'top', 0, modelToolBar.ui.height() + 5 );
         
 
-        var selectionBox = new SelectionBox(icons.select);
+        const selectionBox = new SelectionBox(icons.select);
         mainParent.append(selectionBox.ui);
         setLocation(mainParent, selectionBox.ui, 'left', 'top',  0, modelToolBar.ui.height() + 5);
 
@@ -52,10 +52,10 @@
         });
 
         return {
-          modelToolBar : modelToolBar,
-          selectionBox : selectionBox,
-          contextMenu : contextMenu,
-          surfaceMenu : surfaceMenu
+          modelToolBar,
+          selectionBox,
+          contextMenu,
+          surfaceMenu
         } 
       }
 
@@ -65,10 +65,10 @@
        * @function $3Dmol.UI#resize
        */
       this.resize = function(){
-        var selectionBox = this.tools.selectionBox;
-        var surfaceMenu = this.tools.surfaceMenu;
-        var modelToolBar = this.tools.modelToolBar;
-        var HEIGHT = mainParent.height();
+        const {selectionBox} = this.tools;
+        const {surfaceMenu} = this.tools;
+        const {modelToolBar} = this.tools;
+        const HEIGHT = mainParent.height();
 
         setLocation(mainParent, modelToolBar.ui, 'left', 'top');
         // modelToolBar.updateInputLength();
@@ -84,7 +84,7 @@
        * @function ModelToolbar
        */
       function ModelToolbar(){
-        var boundingBox = this.ui = $('<div></div>');
+        const boundingBox = this.ui = $('<div></div>');
 
         boundingBox.css({
           'position' : 'relative',
@@ -92,7 +92,7 @@
         });
 
         
-        var modelButton = new button(icons.molecule, 20, {tooltip : 'Toggle Model Selection Bar'} );
+        const modelButton = new button(icons.molecule, 20, {tooltip : 'Toggle Model Selection Bar'} );
         boundingBox.append(modelButton.ui);
 
         modelButton.ui.css({
@@ -100,7 +100,7 @@
           'top':'3px',
         });
 
-        var control = {
+        const control = {
           urlType : {
             active : true,
             value : null,
@@ -114,7 +114,7 @@
           },
         };
 
-        var surroundingBox = $('<div></div>');
+        const surroundingBox = $('<div></div>');
 
         surroundingBox.css({
           'display' : 'inline-block',
@@ -126,12 +126,12 @@
 
         boundingBox.append(surroundingBox);
 
-        var currentModelBox = $('<div></div>');
+        const currentModelBox = $('<div></div>');
         currentModelBox.css({
           
         });
 
-        var currentModel = $('<div></div>');
+        const currentModel = $('<div></div>');
         currentModel.css({
           'display' : 'inline-block',
           'font-family':'Arial',
@@ -142,7 +142,7 @@
 
         currentModelBox.append(currentModel);
 
-        var changeButton = new button(icons.change, 16, { tooltip : 'Change Model', backgroundColor : 'white', bfr : 0.5});
+        const changeButton = new button(icons.change, 16, { tooltip : 'Change Model', backgroundColor : 'white', bfr : 0.5});
         changeButton.ui.css({
           'display' : 'inline-block',
           'margin-left' : '4px',
@@ -152,11 +152,11 @@
         currentModelBox.hide();
         surroundingBox.append(currentModelBox);
 
-        var formBox = $('<div></div>');
+        const formBox = $('<div></div>');
         surroundingBox.append(formBox);
 
-        var dbs = 'pdb,mmtf,cid'.split(',');
-        var list = this.list = new $3Dmol.UI.Form.ListInput(control.urlType, dbs);
+        const dbs = 'pdb,mmtf,cid'.split(',');
+        const list = this.list = new $3Dmol.UI.Form.ListInput(control.urlType, dbs);
         list.showAlertBox = false;
 
         list.ui.css({
@@ -165,7 +165,7 @@
 
         formBox.append(list.ui);
 
-        var input = this.url = new $3Dmol.UI.Form.Input(control.url);
+        const input = this.url = new $3Dmol.UI.Form.Input(control.url);
         formBox.append(input.ui);
 
         input.ui.css({
@@ -175,7 +175,7 @@
 
         // input.setWidth(125);
 
-        var submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'});
+        const submitButton = new button(icons.tick, 16, { bfr : 0.5, backgroundColor : 'lightgreen', tooltip : 'Add Model'});
         submitButton.ui.css({
           'margin' : '0px'
         })
@@ -191,15 +191,14 @@
           surroundingBox.toggle();
         });
 
-        submitButton.ui.on('click', function(){
-          var validateDb = list.validate();
-          var validateId = input.validate();
+        submitButton.ui.on('click', ()=> {
+          const validateDb = list.validate();
+          const validateId = input.validate();
 
           if(validateId && validateDb){
             stateManager.addModel(control);
           }
-          else {
-          }
+        
         });
 
         /**
@@ -214,13 +213,13 @@
           formBox.hide();
         }
 
-        changeButton.ui.on('click', function(){
+        changeButton.ui.on('click', ()=> {
           currentModelBox.hide();
           formBox.show();
           input.setValue('');
         });
 
-        boundingBox.on('keypress', function(e){
+        boundingBox.on('keypress', (e)=> {
           if(e.key == 'Enter' || e.key == 'Return'){
             submitButton.ui.trigger('click')
           }
@@ -238,21 +237,21 @@
        * @return {Object}  Jquery element of div
        */
       function SelectionBox(icon, side='left') {
-        var selectionBox = this.ui = $('<div></div>');
+        const selectionBox = this.ui = $('<div></div>');
         _editingForm = false;
-        var selectionObjects = [];
+        const selectionObjects = [];
 
-        var selections = $('<div></div>');
-        var scrollBox = $('<div></div>');
+        const selections = $('<div></div>');
+        const scrollBox = $('<div></div>');
 
         selections.css('opacity', '0.9');
         
-        var showArea = $('<div></div>');
-        var addArea = $('<div></div>');
-        var plusButton = new button(icons.plus, 20, { tooltip : 'Add New Selection'});
+        const showArea = $('<div></div>');
+        const addArea = $('<div></div>');
+        const plusButton = new button(icons.plus, 20, { tooltip : 'Add New Selection'});
         plusButton.ui.css('margin','0px');
         
-        var hideButton = new button(icon, 20, { tooltip : 'Toggle Selection Menu'});
+        const hideButton = new button(icon, 20, { tooltip : 'Toggle Selection Menu'});
         this.selectionObjects = [];
 
         // Content
@@ -264,7 +263,7 @@
         showArea.append(scrollBox);
         addArea.append(plusButton.ui);
 
-        var alertBox = new AlertBox();
+        const alertBox = new AlertBox();
         showArea.append(alertBox.ui);
         showArea.append(addArea);
         alertBox.ui.css('width', 162);
@@ -296,7 +295,7 @@
         }
 
         // Action
-        var hidden = true;
+        let hidden = true;
         showArea.hide();
 
         hideButton.ui.click(toggleHide);
@@ -317,8 +316,8 @@
          * @function Selection
          */
         function Selection(){
-          var boundingBox = this.ui = $('<div></div>');
-          var sid = this.id = null;
+          const boundingBox = this.ui = $('<div></div>');
+          let sid = this.id = null;
           selectionObjects.push(this);
           boundingBox.css({
             'background' : '#e8e8e8',
@@ -329,10 +328,10 @@
             'width':'156px'
           });
 
-          var header = $('<div></div>');
+          const header = $('<div></div>');
           boundingBox.append(header);
-          var heading = $('<div></div>');
-          var controls = $('<div></div>');
+          const heading = $('<div></div>');
+          const controls = $('<div></div>');
 
           header.append(heading, controls);
           heading.css({
@@ -350,18 +349,18 @@
           header.hide();
           controls.editMode = false;
 
-          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Selection'});
-          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Selection'});
-          var visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Selection'});
+          const removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Selection'});
+          const editButton = new button(icons.pencil, 16, { tooltip : 'Edit Selection'});
+          const visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Selection'});
 
           controls.append(removeButton.ui)
           controls.append(editButton.ui);
           controls.append(visibleButton.ui);
 
-          var parameters = $('<div></div>');
+          const parameters = $('<div></div>');
           boundingBox.append(parameters);
 
-          var styleHolder = $('<div></div>');
+          const styleHolder = $('<div></div>');
           
           removeButton.ui.on('click', function(){
             stateManager.removeSelection(sid);
@@ -369,11 +368,11 @@
             delete this;
           });
 
-          editButton.ui.on('click', function(){
+          editButton.ui.on('click', ()=> {
             parameters.toggle();
           });
 
-          var hidden = false;
+          let hidden = false;
           visibleButton.ui.on('click', ()=>{
             stateManager.toggleHide(sid);
             if(hidden){
@@ -386,9 +385,9 @@
             }
           });
 
-          var styleBox = new StyleBox();
+          const styleBox = new StyleBox();
 
-          var showStyle = false;
+          let showStyle = false;
           styleHolder.append(styleBox.ui);
           styleBox.ui.css({
             'position' : 'static',
@@ -399,32 +398,32 @@
 
           styleBox.ui.hide();
 
-          var allControl = this.allSelector = {
+          const allControl = this.allSelector = {
             key : 'Select All Atom',
             value : null,
             active : true
           }
 
-          var allCheckBox = new $3Dmol.UI.Form.Checkbox(allControl);
+          const allCheckBox = new $3Dmol.UI.Form.Checkbox(allControl);
           parameters.append(allCheckBox.ui);
 
 
-          var selectionFormControl = this.selectionValue = {
+          const selectionFormControl = this.selectionValue = {
             key : 'Selection Spec',
             value : null,
             active : true
           }
           
-          var selectionSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, selectionFormControl);
+          const selectionSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomSelectionSpecs, selectionFormControl);
           parameters.append(selectionSpecForm.ui);
 
-          var submitControls = $('<div></div>');
-          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
-          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
+          const submitControls = $('<div></div>');
+          const submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
+          const cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
           submitControls.append(submit.ui, cancel.ui);
 
           
-          var alertBox = new AlertBox();
+          const alertBox = new AlertBox();
           parameters.append(alertBox.ui);
           
           parameters.append(submitControls);
@@ -438,7 +437,7 @@
             header.show();
             controls.editMode = true;
             sid = this.id = id;
-            heading.text('Sel#' + id);
+            heading.text(`Sel#${  id}`);
             boundingBox.attr('data-id', id);
             parameters.hide();
             showStyle = true;
@@ -447,17 +446,17 @@
           }
 
           function checkAndAddSelection(sid = null){
-            var validate = selectionSpecForm.validate();
+            const validate = selectionSpecForm.validate();
             if(validate){
               selectionSpecForm.getValue();
-              var checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
+              const checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
 
               if(Object.keys(selectionFormControl.value).length == 0){
                 alertBox.error('Please enter some input');
               }
               else{
                 if(checkAtoms){
-                  var id = stateManager.addSelection(selectionFormControl.value, sid);
+                  const id = stateManager.addSelection(selectionFormControl.value, sid);
                   finalizeSelection(id);
                   if(sid == null ) _editingForm = false;
                 }
@@ -472,7 +471,7 @@
           }
 
           function removeSelf(selection){
-            var selectionToRemove = selectionObjects.find((sel)=>{
+            const selectionToRemove = selectionObjects.find((sel)=>{
               if(selection == sel){
                 console.log('Selection found', selection);
                 return true;
@@ -507,7 +506,7 @@
             }
           });
 
-          var self = this;
+          const self = this;
 
           cancel.ui.on('click', ()=>{
             if(controls.editMode){
@@ -560,7 +559,7 @@
 
         plusButton.ui.on('click', ()=>{
           if(!_editingForm){
-            var newSelection = new Selection();
+            const newSelection = new Selection();
             selections.append(newSelection.ui);
             _editingForm = true;
           }else {
@@ -593,7 +592,7 @@
           // This thing works but I am not sure how!
 
           // Search selection with id 
-          var selectionUI = selections.children('[data-id='+ id +']');
+          const selectionUI = selections.children(`[data-id=${ id }]`);
 
           if(selectionUI.length != 0) {
             
@@ -623,23 +622,23 @@
        * @param {String} side Alignment of text inside the box
        */
        function StyleBox(selId, side='left') {
-        var styleBox = this.ui = $('<div></div>');
+        const styleBox = this.ui = $('<div></div>');
         _editingForm = false;
-        var sid = this.sid = selId; // selection id
+        let sid = this.sid = selId; // selection id
 
         this.setSid = function(id){
           sid = this.sid = id;
         }
 
-        var styles = $('<div></div>');
-        var scrollBox = $('<div></div>');
+        const styles = $('<div></div>');
+        const scrollBox = $('<div></div>');
 
         styles.css('opacity', '0.9');
         
-        var showArea = $('<div></div>');
-        var addArea = $('<div></div>');
+        const showArea = $('<div></div>');
+        const addArea = $('<div></div>');
         addArea.css('text-align' , 'center');
-        var plusButton = new button(icons.plus, 20, { tooltip : 'Add New Style'});
+        const plusButton = new button(icons.plus, 20, { tooltip : 'Add New Style'});
         plusButton.ui.css('margin','0px');
       
         this.selectionObjects = [];
@@ -651,7 +650,7 @@
         scrollBox.append(styles);
         showArea.append(scrollBox);
 
-        var alertBox = new AlertBox();
+        const alertBox = new AlertBox();
         showArea.append(alertBox.ui);
         
         addArea.append(plusButton.ui);
@@ -690,8 +689,8 @@
          * and this stye will be added under that selection
          */
         function Style(sid){
-          var boundingBox = this.ui = $('<div></div>');
-          var stid = this.id = null; // style id 
+          const boundingBox = this.ui = $('<div></div>');
+          let stid = this.id = null; // style id 
           boundingBox.css({
             'background' : '#e8e8e8',
             'padding' : '4px 4px 2px 4px',
@@ -700,10 +699,10 @@
             'position':'relative'
           });
 
-          var header = $('<div></div>');
+          const header = $('<div></div>');
           boundingBox.append(header);
-          var heading = $('<div></div>');
-          var controls = $('<div></div>');
+          const heading = $('<div></div>');
+          const controls = $('<div></div>');
 
           header.append(heading, controls);
           heading.css({
@@ -721,28 +720,28 @@
           header.hide();
           controls.editMode = false;
 
-          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Style'});
-          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Style'});
-          var visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Style'});
+          const removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f', tooltip : 'Remove Style'});
+          const editButton = new button(icons.pencil, 16, { tooltip : 'Edit Style'});
+          const visibleButton = new button(icons.visible, 16, { tooltip : 'Show / Hide Style'});
 
           controls.append(removeButton.ui)
           controls.append(editButton.ui);
           controls.append(visibleButton.ui);
 
-          var parameters = $('<div></div>');
+          const parameters = $('<div></div>');
           boundingBox.append(parameters);
 
-          removeButton.ui.on('click', { parent: this, stid : stid }, function(e){
+          removeButton.ui.on('click', { parent: this, stid }, function(e){
             stateManager.removeStyle(sid, stid);
             boundingBox.detach();
             delete this;
           });
 
-          editButton.ui.on('click', function(){
+          editButton.ui.on('click', ()=> {
             parameters.toggle();
           });
 
-          var hidden = false;
+          let hidden = false;
           visibleButton.ui.on('click', ()=>{
             stateManager.toggleHideStyle(sid, stid);
             if(hidden){
@@ -755,22 +754,22 @@
             }
           });
 
-          var styleFormControl = this.selectionValue = {
+          const styleFormControl = this.selectionValue = {
             key : 'Style Spec',
             value : null,
             active : true
           }
           
-          var styleSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomStyleSpecs, styleFormControl);
+          const styleSpecForm = new $3Dmol.UI.Form($3Dmol.GLModel.validAtomStyleSpecs, styleFormControl);
           parameters.append(styleSpecForm.ui);
 
-          var submitControls = $('<div></div>');
-          var submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
-          var cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
+          const submitControls = $('<div></div>');
+          const submit = new button(icons.tick, 16, { backgroundColor : 'lightgreen', tooltip : 'Submit'});
+          const cancel = new button(icons.cross, 16, { backgroundColor : 'lightcoral', tooltip : 'Cancel'});
           submitControls.append(submit.ui, cancel.ui);
 
           
-          var alertBox = new AlertBox();
+          const alertBox = new AlertBox();
           parameters.append(alertBox.ui);
           
           parameters.append(submitControls);
@@ -779,12 +778,12 @@
             header.show();
             controls.editMode = true;
             stid = id;
-            heading.text('Sty#' + id);
+            heading.text(`Sty#${  id}`);
             parameters.hide();
           }
 
           function checkAndAddStyle(stid = null){
-            var validate = styleSpecForm.validate();
+            const validate = styleSpecForm.validate();
             if(validate){
               styleSpecForm.getValue();
               
@@ -793,7 +792,7 @@
                 alertBox.error('Please enter some value');
               }
               else{  
-                var id = stateManager.addStyle(styleFormControl.value, sid, stid);
+                const id = stateManager.addStyle(styleFormControl.value, sid, stid);
                 finalizeStyle(id);
                 if(stid == null) _editingForm = false;
               }
@@ -809,7 +808,7 @@
               checkAndAddStyle(); 
             }
             else {
-              var id = stid
+              const id = stid
               styleSpecForm.getValue();
 
               if(Object.keys(styleFormControl.value).length == 0){
@@ -853,7 +852,7 @@
 
         plusButton.ui.on('click', ()=>{
           if( !_editingForm){
-            var newStyle = new Style(sid);
+            const newStyle = new Style(sid);
             styles.append(newStyle.ui);
             _editingForm = true;
           }
@@ -870,7 +869,7 @@
          * style for the specified selection and set default values in the Style card
          */
         this.addStyle = function(selectionId, styleId, styleSpecs){
-          var style = new Style(selectionId);
+          const style = new Style(selectionId);
           styles.append(style.ui);
           style.updateStyle(styleId, styleSpecs);
         }
@@ -884,10 +883,10 @@
        * @param {Object} config Configuraiton for alert box display
        */
       function AlertBox(config){
-        var boundingBox = this.ui = $('<div></div>');
+        const boundingBox = this.ui = $('<div></div>');
         config = config || {}
-        var delay = config.delay || 5000;
-        var autohide = (config.autohide == undefined )? true : config.autohide;
+        const delay = config.delay || 5000;
+        const autohide = (config.autohide == undefined )? true : config.autohide;
 
         boundingBox.css({
           'font-family' : 'Arial',
@@ -968,14 +967,14 @@
        * @function ContextMenu
        */
       function ContextMenu(){
-        var boundingBox = this.ui = $('<div></div>');
+        const boundingBox = this.ui = $('<div></div>');
 
         boundingBox.css('position', 'absolute');
         // boundingBox.css('border', '1px solid black');
         boundingBox.css('border-radius', '3px');
         boundingBox.css('background', '#f1f1f1');
         boundingBox.css('z-index', 99);
-        var contentBox = $('<div></div>');
+        const contentBox = $('<div></div>');
         contentBox.css('position', 'relative');
         boundingBox.css('opacity', '0.85');
 
@@ -989,7 +988,7 @@
         // Context Box
         // Remove Label Button 
         
-        var labelMenuStyle = {
+        const labelMenuStyle = {
           'background' : '#d3e2ee',
           'padding' : '2px',
           'font-family':'Arial',
@@ -999,7 +998,7 @@
           // 'margin-top':'3px'
         }
 
-        var removeLabelMenu = $('<div></div>');
+        const removeLabelMenu = $('<div></div>');
         removeLabelMenu.text('Remove Label');
         removeLabelMenu.css(labelMenuStyle);
         removeLabelMenu.css('margin-bottom', '3px');
@@ -1008,19 +1007,19 @@
         removeLabelMenu.hide();
 
         // Label Property List 
-        var propertyKeys = Object.keys($3Dmol.GLModel.validAtomSpecs);
-        var propertyList = [];
-        var propertyObjectList = [];
+        const propertyKeys = Object.keys($3Dmol.GLModel.validAtomSpecs);
+        const propertyList = [];
+        let propertyObjectList = [];
 
         propertyKeys.forEach((prop)=>{
-          var propObj = $3Dmol.GLModel.validAtomSpecs;
+          const propObj = $3Dmol.GLModel.validAtomSpecs;
           if(propObj[prop].prop === true){
             propertyList.push(prop);
           }
         });
 
         // Property Menu 
-        var propertyMenu = $('<div></div>');
+        const propertyMenu = $('<div></div>');
         contentBox.append(propertyMenu);
         
         /**
@@ -1032,7 +1031,7 @@
          */
         function Property(key, value){
           this.row = $('<tr></tr>');
-          var propLabelValue = this.control = {
+          const propLabelValue = this.control = {
             key : '',
             value : null,
             active : true,
@@ -1042,12 +1041,12 @@
           this.key = key;
           this.value = value;
 
-          var checkbox = new $3Dmol.UI.Form.Checkbox(propLabelValue);
-          var checkboxHolder = $('<td></td>');
+          const checkbox = new $3Dmol.UI.Form.Checkbox(propLabelValue);
+          const checkboxHolder = $('<td></td>');
           checkboxHolder.append(checkbox.ui); 
-          var keyHolder = $('<td></td>');
-          var separatorHolder = $('<td></td>').text(':');
-          var valueHolder = $('<td></td>');
+          const keyHolder = $('<td></td>');
+          const separatorHolder = $('<td></td>').text(':');
+          const valueHolder = $('<td></td>');
 
           this.row.append(checkboxHolder, keyHolder, separatorHolder, valueHolder);
 
@@ -1070,10 +1069,10 @@
           propertyMenu.empty();
           propertyObjectList = [];
           
-          var propertyTable = $('<table></table>');
+          const propertyTable = $('<table></table>');
           
           propertyList.forEach((prop)=>{
-            var propObj = new Property(prop, atom[prop]);
+            const propObj = new Property(prop, atom[prop]);
             propertyTable.append(propObj.row);
             propertyObjectList.push(propObj);
           });
@@ -1085,7 +1084,7 @@
             key : 'Atom Label Style'
           }
           
-          var labelStyleHolder = $('<div><div>');
+          const labelStyleHolder = $('<div><div>');
 
           var labelStyle = $('<div><div>');
           labelStyle.text('Style');
@@ -1097,7 +1096,7 @@
             'margin-left' : '6px'
           });
 
-          var stylesForLabel = new $3Dmol.UI.Form.ListInput(labelStyle, Object.keys($3Dmol.labelStyles));
+          const stylesForLabel = new $3Dmol.UI.Form.ListInput(labelStyle, Object.keys($3Dmol.labelStyles));
           stylesForLabel.ui.css({
             'display' : 'inline-block'
           });
@@ -1107,22 +1106,22 @@
           labelStyleHolder.append(labelStyle, stylesForLabel.ui);
           propertyMenu.append(labelStyleHolder);
           
-          var submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
-          var cancel = new button(icons.cross, 18, { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
+          const submit = new button(icons.tick, 18, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          const cancel = new button(icons.cross, 18, { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
 
-          var controlButtons = $('<div></div>');
+          const controlButtons = $('<div></div>');
           controlButtons.append(submit.ui, cancel.ui);
           // controlButtons.css('text-align', 'center');
 
-          var alertBox = new AlertBox();
+          const alertBox = new AlertBox();
           propertyMenu.append(alertBox.ui);   
 
           propertyMenu.append(controlButtons);
 
 
           submit.ui.on('click', ()=>{
-            var props = processPropertyList();
-            var labelStyleValidation = stylesForLabel.validate();
+            const props = processPropertyList();
+            const labelStyleValidation = stylesForLabel.validate();
 
             if(props !=null){
               if(labelStyleValidation){
@@ -1144,15 +1143,15 @@
         }
 
         // Previous Labels 
-        var labelHolder = $('<div></div>');
+        const labelHolder = $('<div></div>');
         contentBox.append(labelHolder);
 
         // Add Menu 
-        var addMenu = $('<div></div>');
+        const addMenu = $('<div></div>');
         contentBox.append(addMenu);
         addMenu.css('width', '100%');
 
-        var addLabelMenu = $('<div></div>');
+        const addLabelMenu = $('<div></div>');
         addMenu.append(addLabelMenu);
 
 
@@ -1162,7 +1161,7 @@
         addLabelMenu.hide();
 
         // Edit Menu
-        var editMenu = $('<div></div>');
+        const editMenu = $('<div></div>');
         contentBox.append(editMenu);
 
         contentBox.css({
@@ -1184,7 +1183,7 @@
         });
         editMenu.hide();
 
-        var alertBox = new AlertBox({ autohide : false });
+        const alertBox = new AlertBox({ autohide : false });
         contentBox.append(alertBox.ui);
 
         // Add Label Inputs 
@@ -1194,9 +1193,9 @@
          * @returns {Object} that holds different input elements
          */
         function generateAddLabelForm(){
-          var addLabelForm = $('<div></div>');
+          const addLabelForm = $('<div></div>');
 
-          var addLabelValue = {
+          const addLabelValue = {
             text : {
               key : 'Label Text',
               value : null,
@@ -1215,34 +1214,34 @@
               active : true,
             }
           }
-          var formModifierControl = $('<div></div>');
-          var removeButton = new button(icons.minus, 16);
-          var tick = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
-          var cross = new button(icons.cross, 16,  { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
+          const formModifierControl = $('<div></div>');
+          const removeButton = new button(icons.minus, 16);
+          const tick = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          const cross = new button(icons.cross, 16,  { backgroundColor: 'lightcoral', tooltip : 'Cancel'});
           formModifierControl.append(removeButton.ui, tick.ui, cross.ui);
           removeButton.ui.hide();
           addLabelForm.append(formModifierControl);
   
-          var addLabelTextBox = $('<div></div>');
-          var lt = $('<div></div>').text('Label Text');
-          var addLabelTextInput = new $3Dmol.UI.Form.Input(addLabelValue.text);
+          const addLabelTextBox = $('<div></div>');
+          const lt = $('<div></div>').text('Label Text');
+          const addLabelTextInput = new $3Dmol.UI.Form.Input(addLabelValue.text);
           addLabelTextBox.append(lt, addLabelTextInput.ui);
-          var width = 126//editMenu.innerWidth()*0.8;
+          const width = 126// editMenu.innerWidth()*0.8;
           addLabelTextInput.setWidth(width);
           addLabelForm.append(addLabelTextBox);
 
-          var addLabelStyleBox = $('<div></div>');
-          var ls = $('<div></div>').text('Label Style');
-          var addLabelStyleInput = new $3Dmol.UI.Form.ListInput(addLabelValue.style, Object.keys($3Dmol.labelStyles));
+          const addLabelStyleBox = $('<div></div>');
+          const ls = $('<div></div>').text('Label Style');
+          const addLabelStyleInput = new $3Dmol.UI.Form.ListInput(addLabelValue.style, Object.keys($3Dmol.labelStyles));
           addLabelStyleInput.setValue('milk');
           addLabelStyleBox.append(ls, addLabelStyleInput.ui);
           addLabelForm.append(addLabelStyleBox);
 
-          var selectionList = stateManager.getSelectionList();
+          const selectionList = stateManager.getSelectionList();
           
-          var addLabelSelectionBox = $('<div></div>');
-          var lsl = $('<div></div>').text('Label Selection');
-          var addLabelSelectionInput = new $3Dmol.UI.Form.ListInput(addLabelValue.sel, selectionList);
+          const addLabelSelectionBox = $('<div></div>');
+          const lsl = $('<div></div>').text('Label Selection');
+          const addLabelSelectionInput = new $3Dmol.UI.Form.ListInput(addLabelValue.sel, selectionList);
           addLabelSelectionBox.append(lsl, addLabelSelectionInput.ui);
           addLabelForm.append(addLabelSelectionBox);
 
@@ -1253,7 +1252,7 @@
           });
 
           tick.ui.on('click', ()=>{
-            var validate = true;
+            let validate = true;
 
             if(!addLabelStyleInput.validate())
               validate = false;
@@ -1290,7 +1289,7 @@
             text : addLabelTextInput,
             style : addLabelStyleInput,
             selection: addLabelSelectionInput,
-            editMode : function(){
+            editMode(){
               removeButton.ui.show();
             }
           }
@@ -1298,7 +1297,7 @@
 
 
         function processPropertyList(){
-          var propsForLabel = {};
+          const propsForLabel = {};
           
           propertyObjectList.forEach((propObj)=>{
             if(propObj.control.value === true){
@@ -1309,9 +1308,9 @@
           if(Object.keys(propsForLabel).length != 0){
             return propsForLabel
           }
-          else{
+          
             return null;
-          }
+          
         }
 
         // Context Menu UI Funciton 
@@ -1319,7 +1318,7 @@
         this.hidden = true;
         this.atom = null;
 
-        removeLabelMenu.on('click', { atom : this.atom }, function(e){
+        removeLabelMenu.on('click', { atom : this.atom }, (e)=> {
           stateManager.removeAtomLabel(removeLabelMenu.atom);
         });
 
@@ -1377,7 +1376,7 @@
 
         this.hide = function(processContextMenu){
           if(processContextMenu){
-            var propsForLabel = processPropertyList();
+            const propsForLabel = processPropertyList();
             if(propsForLabel != null){
               stateManager.addAtomLabel(propsForLabel, this.atom);
             }
@@ -1388,8 +1387,8 @@
           unsetForm();
         }
 
-        addLabelMenu.on('click', function(){
-          var addLabelMenuForm = generateAddLabelForm();
+        addLabelMenu.on('click', ()=> {
+          const addLabelMenuForm = generateAddLabelForm();
           setForm(addLabelMenuForm);
         });
 
@@ -1411,8 +1410,8 @@
        * @function SurfaceMenu 
        */
       function SurfaceMenu(){
-        var boundingBox = this.ui = $('<div></div>');
-        var _editingForm = false;
+        const boundingBox = this.ui = $('<div></div>');
+        let _editingForm = false;
         // Selection Layout
 
         boundingBox.css({
@@ -1421,12 +1420,12 @@
           'text-align': 'right'   
         });
         
-        var surfaceButton = new button(icons.surface, 20, { tooltip : 'Toggle Surface Menu'});
+        const surfaceButton = new button(icons.surface, 20, { tooltip : 'Toggle Surface Menu'});
 
         boundingBox.append(surfaceButton.ui);
 
 
-        var displayBox = $('<div></div>');
+        const displayBox = $('<div></div>');
         boundingBox.append(displayBox);
 
         // Overflow fix 
@@ -1434,7 +1433,7 @@
           'overflow':'visible',
         });
 
-        var newSurfaceSpace = $('<div></div>');
+        const newSurfaceSpace = $('<div></div>');
         newSurfaceSpace.css({
           'max-height' : HEIGHT*0.8,
           'overflow-y': 'auto',
@@ -1449,16 +1448,16 @@
 
         displayBox.append(newSurfaceSpace);
 
-        var alertBox = new AlertBox();
+        const alertBox = new AlertBox();
         displayBox.append(alertBox.ui);
 
-        var addArea = $('<div></div>');
-        var addButton = new button(icons.plus, 20, { tooltip : 'Add New Surface'});
+        const addArea = $('<div></div>');
+        const addButton = new button(icons.plus, 20, { tooltip : 'Add New Surface'});
         addArea.append(addButton.ui);
         displayBox.append(addArea);
         displayBox.hide();
 
-        var surfaces = this.surfaces = [];
+        const surfaces = this.surfaces = [];
 
         /**
          * Creates cards for manipulation of surface
@@ -1466,7 +1465,7 @@
          * @function Surface 
          */
         function Surface(){
-          var control = {
+          const control = {
             surfaceType: {
               key : 'Surface Type',
               value : null
@@ -1485,7 +1484,7 @@
             },
           };
   
-          var surfaceBox = this.ui = $('<div></div>');
+          const surfaceBox = this.ui = $('<div></div>');
           surfaceBox.css({
             'margin-top':'3px',
             'padding':'6px',
@@ -1499,18 +1498,18 @@
             'text-align':'left'
           });
         
-          var heading = this.heading = $('<div></div>');
-          var header = $('<div></div>');
+          const heading = this.heading = $('<div></div>');
+          const header = $('<div></div>');
 
           header.css({
             'text-align' : 'right'
           })
 
           // Control Buttons
-          var toolButtons = $('<div></div>');
+          const toolButtons = $('<div></div>');
           
-          var editButton = new button(icons.pencil, 16, { tooltip : 'Edit Surface'});
-          var removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
+          const editButton = new button(icons.pencil, 16, { tooltip : 'Edit Surface'});
+          const removeButton = new button(icons.minus, 16, { bfr:0.5, backgroundColor:'#f06f6f'});
           
           toolButtons.append(removeButton.ui);
           toolButtons.append(editButton.ui);
@@ -1519,7 +1518,7 @@
           toolButtons.removeButton = removeButton;
           toolButtons.editMode = false;
           
-          var defaultTextStyle = {
+          const defaultTextStyle = {
             'font-weight': 'bold',
             'font-family' : 'Arial',
             'font-size' : '12px'
@@ -1535,17 +1534,17 @@
           surfaceBox.append(header);
 
           // toolButtons.hide();
-          var surfacePropertyBox = $('<div></div>');
+          const surfacePropertyBox = $('<div></div>');
           surfaceBox.append(surfacePropertyBox);
 
           // Surface Type
-          var surfaceType = $('<div></div>');
+          const surfaceType = $('<div></div>');
 
-          var labelSurfaceType = $('<div></div>');
+          const labelSurfaceType = $('<div></div>');
           labelSurfaceType.text('Surface Type');
           labelSurfaceType.css(defaultTextStyle);
 
-          var listSurfaceType =new $3Dmol.UI.Form.ListInput(control.surfaceType, Object.keys($3Dmol.SurfaceType));
+          const listSurfaceType =new $3Dmol.UI.Form.ListInput(control.surfaceType, Object.keys($3Dmol.SurfaceType));
           
 
           surfaceType.append(labelSurfaceType, listSurfaceType.ui);
@@ -1553,32 +1552,32 @@
           
           listSurfaceType.setValue(Object.keys($3Dmol.SurfaceType)[0]);
           // Surface Style
-          var surfaceStyle = $('<div></div>');
+          const surfaceStyle = $('<div></div>');
 
-          var labelSurfaceStyle = $('<div></div>');
+          const labelSurfaceStyle = $('<div></div>');
           // labelSurfaceStyle.text('Surface Style');
 
-          var formSurfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.validSurfaceSpecs, control.surfaceStyle);
+          const formSurfaceStyle = new $3Dmol.UI.Form($3Dmol.GLModel.validSurfaceSpecs, control.surfaceStyle);
 
           surfaceStyle.append(labelSurfaceStyle, formSurfaceStyle.ui);
           surfacePropertyBox.append(surfaceStyle);
           
           // Surface Of
-          var surfaceOf = $('<div></div>');
+          const surfaceOf = $('<div></div>');
           
-          var labelSurfaceOf = $('<div></div>');
+          const labelSurfaceOf = $('<div></div>');
           labelSurfaceOf.text('Surface Atoms');
           labelSurfaceOf.css(defaultTextStyle);
           
-          var surfaceGeneratorAtomType = ['self', 'all'];
-          var surfaceGeneratorDesc = {
+          const surfaceGeneratorAtomType = ['self', 'all'];
+          const surfaceGeneratorDesc = {
             'self' : 'Atoms in the selections will be used to generate the surface',
             'all' : 'All the atoms will be used to generate the surface'
           }
           
-          var listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, surfaceGeneratorAtomType);
+          const listSurfaceOf = new $3Dmol.UI.Form.ListInput(control.surfaceOf, surfaceGeneratorAtomType);
           
-          var hintbox = $('<div></div>');
+          const hintbox = $('<div></div>');
           hintbox.css({
             'background-color' : '#e4e4e4',
             'border' : '1px solid grey',
@@ -1596,11 +1595,11 @@
           listSurfaceOf.update = function(control){
             if(control.value == 'self'){
               hintbox.show();
-              hintbox.text(surfaceGeneratorDesc['self']);
+              hintbox.text(surfaceGeneratorDesc.self);
             }
             else if( control.value == 'all'){
               hintbox.show();
-              hintbox.text(surfaceGeneratorDesc['all']);
+              hintbox.text(surfaceGeneratorDesc.all);
             }
             else {
               hintbox.hide();
@@ -1613,38 +1612,38 @@
           surfacePropertyBox.append(surfaceOf);
           
           // Surface For
-          var selectionListElement = ['all'].concat(stateManager.getSelectionList());
-          var surfaceFor = $('<div></div>');
+          const selectionListElement = ['all'].concat(stateManager.getSelectionList());
+          const surfaceFor = $('<div></div>');
           
-          var labelSurfaceFor = $('<div></div>');
+          const labelSurfaceFor = $('<div></div>');
           labelSurfaceFor.text('Show Atoms');
           labelSurfaceFor.css(defaultTextStyle);
 
-          var listSurfaceFor = new $3Dmol.UI.Form.ListInput(control.surfaceFor, selectionListElement);
+          const listSurfaceFor = new $3Dmol.UI.Form.ListInput(control.surfaceFor, selectionListElement);
           listSurfaceFor.setValue('all');
 
           surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
           surfacePropertyBox.append(surfaceFor);
           
-          var alertBox = new AlertBox();
+          const alertBox = new AlertBox();
           surfacePropertyBox.append(alertBox.ui);
 
           // Control Button
-          var controlButton = $('<div></div>');
-          var submit = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
-          var cancel = new button(icons.cross, 16, { backgroundColor: 'lightcoral', tooltip: 'Cancel'});
+          const controlButton = $('<div></div>');
+          const submit = new button(icons.tick, 16, { backgroundColor: 'lightgreen', tooltip : 'Submit'});
+          const cancel = new button(icons.cross, 16, { backgroundColor: 'lightcoral', tooltip: 'Cancel'});
           controlButton.append(submit.ui);
           controlButton.append(cancel.ui);
           surfacePropertyBox.append(controlButton);
 
           // Functionality 
-          removeButton.ui.on('click', { surfaceBox : surfaceBox }, function(e){
-            var id = e.data.surfaceBox.data('surf-id');
+          removeButton.ui.on('click', { surfaceBox }, (e)=> {
+            const id = e.data.surfaceBox.data('surf-id');
             surfaceBox.remove();
             stateManager.removeSurface(id);
           });
 
-          editButton.ui.on('click', function(){
+          editButton.ui.on('click', ()=> {
             surfacePropertyBox.toggle();
             
             // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode == true;
@@ -1652,8 +1651,8 @@
 
           // Form Validation 
 
-          var validateInput = this.validateInput = function(){
-            var validated = true;
+          const validateInput = this.validateInput = function(){
+            let validated = true;
             
             if( !listSurfaceFor.validate()){
               validated = false;
@@ -1687,7 +1686,7 @@
           function finalize(id){
             // element properties
             surfaceBox.data('surf-id', id);
-            heading.text('surf#' + id);
+            heading.text(`surf#${  id}`);
 
             header.show();
             toolButtons.editMode = true;
@@ -1703,7 +1702,7 @@
 
             if(validateInput()){ 
               if(toolButtons.editMode === false){
-                var id = stateManager.addSurface(control);
+                const id = stateManager.addSurface(control);
                 control.id = id;
 
                 finalize(id);
@@ -1725,7 +1724,7 @@
           });
 
           // Cancel Edit
-          cancel.ui.on('click', {}, function(){
+          cancel.ui.on('click', {}, ()=> {
             if(toolButtons.editMode == false){
               surfaceBox.detach();
               surfaceBox.remove();
@@ -1770,10 +1769,10 @@
 
         // Surface addition
 
-        addButton.ui.on('click', { surfaces: this }, function(e){
+        addButton.ui.on('click', { surfaces: this }, (e)=> {
           
           if(!_editingForm){
-            var newSurface = new Surface();
+            const newSurface = new Surface();
             newSurfaceSpace.append(newSurface.ui);
             _editingForm = true;
           }else {
@@ -1805,7 +1804,7 @@
          * @param {Object} surfaceSpec Values of different property required for setting values in surface menu
          */
         this.addSurface = function(id, surfaceSpec){          
-          var newSurface = new Surface();
+          const newSurface = new Surface();
           newSurfaceSpace.append(newSurface.ui);
 
           newSurface.editSurface(id, surfaceSpec);
@@ -1845,22 +1844,22 @@
         child.css('z-index', 99);
 
 
-        var p_position = parent.position();
-        var p_width = getWidth(parent);
-        var p_height = getHeight(parent);
+        const p_position = parent.position();
+        const p_width = getWidth(parent);
+        const p_height = getHeight(parent);
 
         // c_ stand for child
-        var c_width = child.outerWidth(); // includes padding and margin
-        var c_height = child.outerHeight(); // includes padding and margin
+        const c_width = child.outerWidth(); // includes padding and margin
+        const c_height = child.outerHeight(); // includes padding and margin
 
-        var padding = parseInt(parent.css('padding').replace('px', ''));
-        padding = (padding)? padding: 0;
-        var p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
-        var p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
+        let padding = parseInt(parent.css('padding').replace('px', ''));
+        padding = (padding) || 0;
+        const p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
+        const p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
 
 
         // Setting position
-        var c_position = {
+        const c_position = {
           left: 0,
           top: 0
         };
@@ -1896,11 +1895,11 @@
 
       // Copied from glviewer.js
       function getRect(container) {
-        let div = container[0];
+        const div = container[0];
         let rect = div.getBoundingClientRect();
         if(rect.width == 0 && rect.height == 0 && div.style.display === 'none' ) {
-          let oldpos = div.style.position;
-          let oldvis = div.style.visibility;
+          const oldpos = div.style.position;
+          const oldvis = div.style.visibility;
           div.style.display = 'block';
           div.style.visibility = 'hidden';
           div.style.position = 'absolute';
@@ -1937,15 +1936,15 @@
         */
       function button(svg, height, config){
         config = config || {};
-        var borderRadius = config.bfr*height || (height/4); // body radius factor
-        var bgColor = config.backgroundColor || 'rgb(177, 194, 203)';
-        var color = config.color || 'black'; 
-        var hoverable = config.hoverable || 'true';
-        var tooltipText = config.tooltip || null;
+        const borderRadius = config.bfr*height || (height/4); // body radius factor
+        const bgColor = config.backgroundColor || 'rgb(177, 194, 203)';
+        const color = config.color || 'black'; 
+        const hoverable = config.hoverable || 'true';
+        const tooltipText = config.tooltip || null;
 
         // Button instance
-        var button = this.ui = $('<div></div>');
-        var innerButton = $('<div></div>');
+        const button = this.ui = $('<div></div>');
+        const innerButton = $('<div></div>');
         button.append(innerButton);
 
         // CSS
@@ -1954,7 +1953,7 @@
         button.css('margin', '3px');
         button.css('height', height);
         button.css('width', height);
-        button.css('border-radius', borderRadius + 'px');
+        button.css('border-radius', `${borderRadius  }px`);
         
         //  button.css('padding', '3px');
         button.css('color', color);
@@ -1968,7 +1967,7 @@
         // content
         this.setSVG = function(svg){
           innerButton.empty();
-          var formatted_content = $(svg);
+          const formatted_content = $(svg);
           innerButton.append(formatted_content);
 
         }
@@ -2000,9 +1999,9 @@
             }
           );
             
-          var longPressTime = 0;
-          var mouseX = 0;
-          var mouseY = 0;
+          const longPressTime = 0;
+          const mouseX = 0;
+          const mouseY = 0;
 
           // click
           button.on('mousedown', (e)=>{
