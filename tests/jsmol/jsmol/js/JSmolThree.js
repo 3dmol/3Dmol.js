@@ -7525,17 +7525,17 @@ THREE.UniformsUtils = {
 
 	},
 
-	clone ( uniforms_src ) {
+	clone ( uniformsSrc ) {
 
 		let u; let p; let parameter; let parameter_src; const uniforms_dst = {};
 
-		for ( u in uniforms_src ) {
+		for ( u in uniformsSrc ) {
 
 			uniforms_dst[ u ] = {};
 
-			for ( p in uniforms_src[ u ] ) {
+			for ( p in uniformsSrc[ u ] ) {
 
-				parameter_src = uniforms_src[ u ][ p ];
+				parameter_src = uniformsSrc[ u ][ p ];
 
 				if ( parameter_src instanceof THREE.Color ||
 					 parameter_src instanceof THREE.Vector2 ||

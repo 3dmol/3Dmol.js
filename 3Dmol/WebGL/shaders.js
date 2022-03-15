@@ -2,30 +2,30 @@
 
 $3Dmol.ShaderUtils = {
 
-    clone: function ( uniforms_src ) {
+    clone ( uniformsSrc ) {
 
-        var u, uniforms_clone = {};
+        let u; const uniformsClone = {};
 
-        for (u in uniforms_src) {
-            uniforms_clone[u] = {};
-            uniforms_clone[u].type = uniforms_src[u].type;
+        for (u in uniformsSrc) {
+            uniformsClone[u] = {};
+            uniformsClone[u].type = uniformsSrc[u].type;
 
-            var srcValue = uniforms_src[u].value;
+            const srcValue = uniformsSrc[u].value;
 
             if (srcValue instanceof $3Dmol.Color)
-                uniforms_clone[u].value = srcValue.clone();
+                uniformsClone[u].value = srcValue.clone();
             else if (typeof srcValue === "number")
-                uniforms_clone[u].value = srcValue;
+                uniformsClone[u].value = srcValue;
             else if (srcValue instanceof Array)
-                uniforms_clone[u].value = [];
+                uniformsClone[u].value = [];
             else
                 console.error("Error copying shader uniforms from ShaderLib: unknown type for uniform");
 
         }
 
-        return uniforms_clone;
+        return uniformsClone;
     },
-    //fragment shader reused by outline shader
+    // fragment shader reused by outline shader
     stickimposterFragmentShader: [
      "uniform float opacity;",
      "uniform mat4 projectionMatrix;",
@@ -43,17 +43,17 @@ $3Dmol.ShaderUtils = {
 
      "//DEFINEFRAGCOLOR",
 
-     //cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
-     //also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
-     //with a bit more care (caps) this could be a general cylinder imposter (see also outline)
+     // cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
+     // also useful: http://stackoverflow.com/questions/9595300/cylinder-impostor-in-glsl
+     // with a bit more care (caps) this could be a general cylinder imposter (see also outline)
      "void main() {",
      "    vec3 color = abs(vColor);",
      "    vec3 pos = cposition;",
-     "    vec3 p = pos;", //ray point
-     "    vec3 v = vec3(0.0,0.0,-1.0);", //ray normal - orthographic
-     "    if(projectionMatrix[3][3] == 0.0) v = normalize(pos);", //ray normal - perspective
-     "    vec3 pa = p1;", //cyl start
-     "    vec3 va = normalize(p2-p1);", //cyl norm
+     "    vec3 p = pos;", // ray point
+     "    vec3 v = vec3(0.0,0.0,-1.0);", // ray normal - orthographic
+     "    if(projectionMatrix[3][3] == 0.0) v = normalize(pos);", // ray normal - perspective
+     "    vec3 pa = p1;", // cyl start
+     "    vec3 va = normalize(p2-p1);", // cyl norm
      "    vec3 tmp1 = v-(dot(v,va)*va);",
      "    vec3 deltap = p-pa;",
      "    float A = dot(tmp1,tmp1);",
@@ -61,7 +61,7 @@ $3Dmol.ShaderUtils = {
      "    vec3 tmp2 = deltap-(dot(deltap,va)*va);",
      "    float B = 2.0*dot(tmp1, tmp2);",
      "    float C = dot(tmp2,tmp2)-r*r;",
-     //quadratic equation!
+     // quadratic equation!
      "    float det = (B*B) - (4.0*A*C);",
      "    if(det < 0.0) discard;",
      "    float sqrtDet = sqrt(det);",
@@ -72,13 +72,13 @@ $3Dmol.ShaderUtils = {
      "    float dotp1 = dot(va,qi-p1);",
      "    float dotp2 = dot(va,qi-p2);",
      "    vec3 norm;",
-     "    if( dotp1 < 0.0 || dotp2 > 0.0) {", //(p-c)^2 + 2(p-c)vt +v^2+t^2 - r^2 = 0
+     "    if( dotp1 < 0.0 || dotp2 > 0.0) {", // (p-c)^2 + 2(p-c)vt +v^2+t^2 - r^2 = 0
      "       vec3 cp;",
      "       if( dotp1 < 0.0) { " +
-     //"        if(vColor.x < 0.0 ) discard;", //color sign bit indicates if we should cap or not
+     // "        if(vColor.x < 0.0 ) discard;", //color sign bit indicates if we should cap or not
      "        cp = p1;",
      "       } else {",
-     //"          if(vColor.y < 0.0 ) discard;",
+     // "          if(vColor.y < 0.0 ) discard;",
      "          cp = p2;",
      "       }",
      "       vec3 diff = p-cp;",
@@ -424,7 +424,7 @@ $3Dmol.ShaderLib = {
 
     },
 
-//for outline
+// for outline
      'outline' : {
         fragmentShader : [
 
@@ -460,8 +460,8 @@ $3Dmol.ShaderLib = {
 "    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 "    mvPosition.xy += norm.xy*outlineWidth;",
 "    gl_Position = projectionMatrix * mvPosition;",
-"    mvPosition.z -= outlinePushback;", //go backwards in model space
-"    vec4 pushpos = projectionMatrix*mvPosition;", //project to get z in projection space, I'm probably missing some simple math to do the same thing..
+"    mvPosition.z -= outlinePushback;", // go backwards in model space
+"    vec4 pushpos = projectionMatrix*mvPosition;", // project to get z in projection space, I'm probably missing some simple math to do the same thing..
 "    gl_Position.z = gl_Position.w*pushpos.z/pushpos.w;",
 "}"
 
@@ -478,7 +478,7 @@ $3Dmol.ShaderLib = {
         }
 
     },
-//for outlining sphere imposter
+// for outlining sphere imposter
     'sphereimposteroutline' : {
        fragmentShader : [
 
@@ -552,7 +552,7 @@ $3Dmol.ShaderLib = {
        }
 
    },
-   //stick imposters
+   // stick imposters
    'stickimposter' : {
       fragmentShader : [$3Dmol.ShaderUtils.stickimposterFragmentShader,
     "    float dotProduct = dot( norm, vLight );",
@@ -584,33 +584,33 @@ $3Dmol.ShaderLib = {
 
 "void main() {",
 
-"    vColor = color; vColor.z = abs(vColor.z);", //z indicates which vertex and so would vary
+"    vColor = color; vColor.z = abs(vColor.z);", // z indicates which vertex and so would vary
 "    r = abs(radius);",
-"    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
+"    vec4 to = modelViewMatrix*vec4(normal, 1.0);", // normal is other point of cylinder
 "    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
 "    vec4 mvPosition = pt;",
 "    p1 = pt.xyz; p2 = to.xyz;",
 "    vec3 norm = to.xyz-pt.xyz;","" +
-"    float mult = 1.1;", //slop to account for perspective of sphere
-"    if(length(p1) > length(p2)) {", //billboard at level of closest point
+"    float mult = 1.1;", // slop to account for perspective of sphere
+"    if(length(p1) > length(p2)) {", // billboard at level of closest point
 "       mvPosition = to;",
 "    }",
 "    vec3 n = normalize(mvPosition.xyz);",
-//intersect with the plane defined by the camera looking at the billboard point
-"    if(color.z >= 0.0) {", //p1
-"       if(projectionMatrix[3][3] == 0.0) {", //perspective
+// intersect with the plane defined by the camera looking at the billboard point
+"    if(color.z >= 0.0) {", // p1
+"       if(projectionMatrix[3][3] == 0.0) {", // perspective
 "         vec3 pnorm = normalize(p1);",
 "         float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
 "         mvPosition.xyz = p1+t*pnorm;", 
-"       } else {", //orthographic
+"       } else {", // orthographic
 "         mvPosition.xyz = p1;",
 "       }",
 "    } else {",
-"      if(projectionMatrix[3][3] == 0.0) {", //perspective
+"      if(projectionMatrix[3][3] == 0.0) {", // perspective
 "         vec3 pnorm = normalize(p2);",
 "         float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);",
 "         mvPosition.xyz = p2+t*pnorm;",
-"       } else {", //orthographic
+"       } else {", // orthographic
 "         mvPosition.xyz = p2;",
 "       }", 
 "       mult *= -1.0;",
@@ -621,7 +621,7 @@ $3Dmol.ShaderLib = {
 "    cposition = mvPosition.xyz;",
 "    gl_Position = projectionMatrix * mvPosition;",
 "    vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );",
-"    vLight = normalize( lDirection.xyz )*directionalLightColor[0];", //not really sure this is right, but color is always white so..
+"    vLight = normalize( lDirection.xyz )*directionalLightColor[0];", // not really sure this is right, but color is always white so..
 "}"
 
 ].join("\n"),
@@ -636,9 +636,9 @@ $3Dmol.ShaderLib = {
        }
 
    },
-   //stick imposter outlines
+   // stick imposter outlines
    'stickimposteroutline' : {
-      fragmentShader : $3Dmol.ShaderUtils.stickimposterFragmentShader + 'gl_FragColor = vec4(color,1.0);}',
+      fragmentShader : `${$3Dmol.ShaderUtils.stickimposterFragmentShader  }gl_FragColor = vec4(color,1.0);}`,
       vertexShader : [
 
 "uniform mat4 modelViewMatrix;",
@@ -669,22 +669,22 @@ $3Dmol.ShaderLib = {
 "    vColor = outlineColor;",
 "    float rad = radius+sign(radius)*outlineWidth;",
 "    r = abs(rad);",
-"    vec4 to = modelViewMatrix*vec4(normal, 1.0);", //normal is other point of cylinder
+"    vec4 to = modelViewMatrix*vec4(normal, 1.0);", // normal is other point of cylinder
 "    vec4 pt = modelViewMatrix*vec4(position, 1.0);",
-//pushback
+// pushback
 "    to.xyz += normalize(to.xyz)*outlinePushback;",
 "    pt.xyz += normalize(pt.xyz)*outlinePushback;",
 
 "    vec4 mvPosition = pt;",
 "    p1 = pt.xyz; p2 = to.xyz;",
 "    vec3 norm = to.xyz-pt.xyz;","" +
-"    float mult = 1.1;", //slop to account for perspective of sphere
-"    if(length(p1) > length(p2)) {", //billboard at level of closest point
+"    float mult = 1.1;", // slop to account for perspective of sphere
+"    if(length(p1) > length(p2)) {", // billboard at level of closest point
 "       mvPosition = to;",
 "    }",
 "    vec3 n = normalize(mvPosition.xyz);",
-//intersect with the plane defined by the camera looking at the billboard point
-"    if(color.z >= 0.0) {", //p1
+// intersect with the plane defined by the camera looking at the billboard point
+"    if(color.z >= 0.0) {", // p1
 "       vec3 pnorm = normalize(p1);",
 "       float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);",
 "       mvPosition.xyz = p1+t*pnorm;",
@@ -715,7 +715,7 @@ $3Dmol.ShaderLib = {
        }
 
    },
-    //for double sided lighting
+    // for double sided lighting
     'lambertdouble' : {
         fragmentShader : [
 
@@ -908,7 +908,7 @@ $3Dmol.ShaderLib = {
         }
 
     },
-    //raycasting volumetric rendering
+    // raycasting volumetric rendering
     'volumetric': {
         fragmentShader: [
             "uniform highp sampler3D data;",
@@ -935,8 +935,8 @@ $3Dmol.ShaderLib = {
             "   color = vec4(1,1,1,0);",
             "   float increment = 1.0/subsamples;",
             "   float maxsteps = (maxdepth*subsamples/step);",
-            //there's probably a better way to do this..
-            //calculate farthest possible point in model coordinates
+            // there's probably a better way to do this..
+            // calculate farthest possible point in model coordinates
             "   vec4 maxpos = vec4(pos.x,pos.y,pos.z-maxdepth,1.0);",
             // convert to projection
             "   maxpos = projectionMatrix*maxpos;",
@@ -944,17 +944,17 @@ $3Dmol.ShaderLib = {
             // homogonize
             "   maxpos /= maxpos.w;",
             "   startp /= startp.w;",
-            //take x,y from start and z from max
+            // take x,y from start and z from max
             "   maxpos = vec4(startp.x,startp.y,maxpos.z,1.0);",
-            //convert back to model space
+            // convert back to model space
             "   maxpos = projinv*maxpos;",
             "   maxpos /= maxpos.w;",
             "   float incr = step/subsamples;",
-            //get depth from depthmap
-            //startp is apparently [-1,1]
+            // get depth from depthmap
+            // startp is apparently [-1,1]
             "   vec2 tpos = startp.xy/2.0+0.5;",
             "   float depth = texture(depthmap, tpos).r;",
-            //compute vector between start and end
+            // compute vector between start and end
             "   vec4 direction = maxpos-pos;",
             "   for( i = 0.0; i <= maxsteps; i++) {",
             "      vec4 pt = (pos+(i/maxsteps)*direction);",
@@ -975,8 +975,8 @@ $3Dmol.ShaderLib = {
             "      }",
             "      else {",
             "         float val = texture(data, pt.zyx).r;",
-            "         if(isinf(val)) continue;", //masked out
-            "         float cval = (val-transfermin)/(transfermax-transfermin);", //scale to texture 0-1 range
+            "         if(isinf(val)) continue;", // masked out
+            "         float cval = (val-transfermin)/(transfermax-transfermin);", // scale to texture 0-1 range
             "         vec4 val_color = texture(colormap, vec2(cval,0.5));",
             "         color.rgb = color.rgb*color.a + (1.0-color.a)*val_color.a*val_color.rgb;",
             "         color.a += (1.0 - color.a) * val_color.a; ",
@@ -1012,9 +1012,9 @@ $3Dmol.ShaderLib = {
             data: { type: 'i', value: 3 },
             colormap: { type: 'i', value: 4 },
             depthmap: { type: 'i', value: 5 },
-            step: { type: 'f', value: 1.0 }, //length of a step
-            maxdepth: {type: 'f',value: 100.0}, //how far to step along ray before stopping
-            subsamples: { type: 'f', value: 5.0}, //how many substeps to take
+            step: { type: 'f', value: 1.0 }, // length of a step
+            maxdepth: {type: 'f',value: 100.0}, // how far to step along ray before stopping
+            subsamples: { type: 'f', value: 5.0}, // how many substeps to take
             textmat: { type: 'mat4', value: []},
             projinv: { type: 'mat4', value: []},
             transfermin: {type: 'f', value: -0.2 },
@@ -1048,7 +1048,7 @@ $3Dmol.ShaderLib = {
         uniforms: {
         }
     },
-    //screen with antialiasing
+    // screen with antialiasing
     'screenaa': {
         fragmentShader: [
             "uniform sampler2D colormap;",
