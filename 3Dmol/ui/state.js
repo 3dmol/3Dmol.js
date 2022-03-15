@@ -11,31 +11,31 @@ $3Dmol.StateManager = (function(){
     config = config || {};
     config.ui = config.ui || false;
 
-    var canvas = $(glviewer.getRenderer().domElement);
-    var parentElement = glviewer.container;
+    const canvas = $(glviewer.getRenderer().domElement);
+    const parentElement = glviewer.container;
 
-    var height = parentElement.height();
-    var width = parentElement.width();
-    var offset = canvas.offset();
-    var stateManager = this;
+    const height = parentElement.height();
+    const width = parentElement.width();
+    const offset = canvas.offset();
+    const stateManager = this;
 
-    var uiOverlayConfig = {
-      height : height,
-      width : width,
-      offset : offset,
+    const uiOverlayConfig = {
+      height,
+      width,
+      offset,
       ui : config.ui || undefined
     }
 
     // Selection Handlers
-    var selections = {};
+    let selections = {};
 
     // Surface handlers
-    var surfaces = {};
+    let surfaces = {};
 
     // Label Handlers
-    var labels = {};
+    let labels = {};
 
-    var atomLabel = {};
+    let atomLabel = {};
 
     /**
      * Add Selection from the ui to glviewer
@@ -47,10 +47,10 @@ $3Dmol.StateManager = (function(){
      */
     this.addSelection = function(spec, sid = null){
 
-      var id = sid || makeid(4);
+      const id = sid || makeid(4);
 
-      var selectionSpec = {
-        spec : spec,
+      const selectionSpec = {
+        spec,
         styles : {},
         hidden : false
       };
@@ -72,7 +72,7 @@ $3Dmol.StateManager = (function(){
      * @returns Boolean
      */
     this.checkAtoms = function(sel){
-      var atoms = glviewer.selectedAtoms(sel);
+      const atoms = glviewer.selectedAtoms(sel);
       if( atoms.length > 0)
         return true
 
@@ -108,15 +108,15 @@ $3Dmol.StateManager = (function(){
      * @returns String
      */
     this.addStyle = function( spec, sid, stid = null){
-      var selection = selections[sid];
+      const selection = selections[sid];
       
       
-      var styleSpec = {
-        spec : spec,
+      const styleSpec = {
+        spec,
         hidden : false
       }
       
-      var id = null; 
+      let id = null; 
       
       if(stid == null) {
         id = makeid(4);
@@ -167,16 +167,16 @@ $3Dmol.StateManager = (function(){
      * @returns String
      */
     this.addSurface = function(property, callback){
-      var id = makeid(4);
+      const id = makeid(4);
       property.id = id;
 
-      var style = property.surfaceStyle.value;
+      let style = property.surfaceStyle.value;
       if(style == null)
         style = {};
 
-      var sel = (property.surfaceFor.value == 'all') ? { spec : {} } : selections[property.surfaceFor.value];
+      const sel = (property.surfaceFor.value === 'all') ? { spec : {} } : selections[property.surfaceFor.value];
 
-      var generatorAtom = (property.surfaceOf.value == 'self')? sel.spec : {};
+      const generatorAtom = (property.surfaceOf.value === 'self')? sel.spec : {};
 
 
       glviewer.addSurface(
@@ -187,7 +187,7 @@ $3Dmol.StateManager = (function(){
       ).then((surfParam)=>{
         surfaces[id] = surfParam[0];
 
-        if(callback != undefined)
+        if(callback !== undefined)
           callback(id, surfParam[0]);
       }, (err)=>{
 
@@ -215,10 +215,10 @@ $3Dmol.StateManager = (function(){
      * @param {Object} surfaceProperty Surface Style
      */
     this.editSurface = function(surfaceProperty){
-      var style = surfaceProperty.surfaceStyle.value || {}
+      const style = surfaceProperty.surfaceStyle.value || {}
 
-      var sel = (surfaceProperty.surfaceFor.value == 'all') ? { spec : {} } : selections[surfaceProperty.surfaceFor.value];
-      var generatorAtom = (surfaceProperty.surfaceOf.value == 'self')? sel.spec : {};
+      const sel = (surfaceProperty.surfaceFor.value === 'all') ? { spec : {} } : selections[surfaceProperty.surfaceFor.value];
+      const generatorAtom = (surfaceProperty.surfaceOf.value === 'self')? sel.spec : {};
 
       glviewer.removeSurface(surfaces[surfaceProperty.id]);
 
@@ -251,17 +251,16 @@ $3Dmol.StateManager = (function(){
      * @param {Number} y y coordinate of mouse on the viewport
      */
     this.openContextMenu = function(atom, x, y){ 
-      var atomExist = false;
+      let atomExist = false;
 
       if(atom){
         atomExist = Object.keys(atomLabel).find((i)=>{
-          if (i == atom.index)
+          if (i === atom.index)
             return true;
-          else 
-            return false;
+          return false;
         });
   
-        if(atomExist != undefined )
+        if(atomExist !== undefined )
           atomExist = true;
         else 
           atomExist = false;
@@ -279,11 +278,11 @@ $3Dmol.StateManager = (function(){
     this.addLabel = function(labelValue){
       labels[labelValue.sel.value] = labels[labelValue.sel.value] || [];
 
-      var labelProp = $3Dmol.labelStyles[labelValue.style.value];
-      var selection = selections[labelValue.sel.value];
+      const labelProp = $3Dmol.labelStyles[labelValue.style.value];
+      const selection = selections[labelValue.sel.value];
 
-      var offset = labels[labelValue.sel.value].length;
-      labelProp['screenOffset'] = new $3Dmol.Vector2(0, -1*offset*35);
+      const offset = labels[labelValue.sel.value].length;
+      labelProp.screenOffset = new $3Dmol.Vector2(0, -1*offset*35);
 
       labels[labelValue.sel.value].push(glviewer.addLabel(labelValue.text.value, labelProp, selection.spec));
 
@@ -298,14 +297,13 @@ $3Dmol.StateManager = (function(){
      * @param {AtomSpec} atom Atom spec that are to be added in the label 
      */
     this.addAtomLabel = function(labelValue, atom, styleName='milk'){
-      var atomExist = Object.keys(atomLabel).find((i)=>{
-        if (i == atom.index)
+      let atomExist = Object.keys(atomLabel).find((i)=>{
+        if (i === atom.index)
           return true;
-        else 
-          return false;
+        return false;
       });
 
-      if(atomExist != undefined )
+      if(atomExist !== undefined )
         atomExist = true;
       else 
         atomExist = false;
@@ -318,12 +316,12 @@ $3Dmol.StateManager = (function(){
       
       atomLabel[atom.index] = atomLabel[atom.index] || null;
       
-      var labelProp = $3Dmol.deepCopy($3Dmol.labelStyles[styleName]);
+      const labelProp = $3Dmol.deepCopy($3Dmol.labelStyles[styleName]);
       labelProp.position = {
         x : atom.x, y : atom.y, z : atom.z
       }
 
-      var labelText = [];
+      let labelText = [];
       for ( key in labelValue){
         labelText.push(`${key} : ${labelValue[key]}`);
       }
@@ -361,7 +359,7 @@ $3Dmol.StateManager = (function(){
      * @param {AtomSpec} atom Atom spec
      */
     this.removeAtomLabel = function(atom){
-      var label = atomLabel[atom.index];
+      const label = atomLabel[atom.index];
       glviewer.removeLabel(label);
       delete atomLabel[atom.index]; 
       
@@ -379,7 +377,7 @@ $3Dmol.StateManager = (function(){
       glviewer.removeAllLabels();
       glviewer.removeAllShapes();
 
-      var query = modelDesc.urlType.value + ':' + modelDesc.url.value;
+      const query = `${modelDesc.urlType.value  }:${  modelDesc.url.value}`;
       $3Dmol.download(query, glviewer, {}, ()=>{
         this.ui.tools.modelToolBar.setModel(modelDesc.url.value.toUpperCase());
       });
@@ -397,19 +395,19 @@ $3Dmol.StateManager = (function(){
 
     // State Management helper function 
     function findSelectionBySpec(spec){
-      var ids = Object.keys(selections);
-      var matchingObjectIds = null;
-      for(var i = 0; i < ids.length; i++){
-        var lookSelection = selections[ids[i]].spec;
+      const ids = Object.keys(selections);
+      let matchingObjectIds = null;
+      for(let i = 0; i < ids.length; i++){
+        const lookSelection = selections[ids[i]].spec;
 
-        var match = true;
+        let match = true;
         
         // looking for same parameters length 
-        var parameters = Object.keys(spec);
+        const parameters = Object.keys(spec);
 
-        if( Object.keys(lookSelection).length == parameters.length){
-          for(var j = 0; j < parameters.length; j++){
-            if( lookSelection[parameters[j]] != spec[parameters[j]]){
+        if( Object.keys(lookSelection).length === parameters.length){
+          for(let j = 0; j < parameters.length; j++){
+            if( lookSelection[parameters[j]] !== spec[parameters[j]]){
               match = false;
               break;
             }
@@ -439,15 +437,15 @@ $3Dmol.StateManager = (function(){
      */
     this.createSelectionAndStyle = function(selSpec, styleSpec){
 
-      var selId = findSelectionBySpec(selSpec);
+      let selId = findSelectionBySpec(selSpec);
 
       if(selId == null){
         selId = this.addSelection(selSpec);
       }
 
-      var styleId = null;
+      let styleId = null;
 
-      if(Object.keys(styleSpec).length != 0){
+      if(Object.keys(styleSpec).length !== 0){
         styleId = this.addStyle(styleSpec, selId);
       }
 
@@ -465,7 +463,7 @@ $3Dmol.StateManager = (function(){
      * @param {String} sid selection id
      */
     this.createSurface = function(surfaceType, sel, style, sid){
-      var selId = findSelectionBySpec(sel);
+      let selId = findSelectionBySpec(sel);
       
       if(selId == null){
         selId = this.addSelection(selSpec);
@@ -473,9 +471,9 @@ $3Dmol.StateManager = (function(){
       }
       this.ui.tools.selectionBox.editSelection(selId, sel, null);
 
-      var surfaceType = Object.keys(style)[0];
+      surfaceType = Object.keys(style)[0];
 
-      var surfaceInput = {
+      const surfaceInput = {
         surfaceType : {
           value : surfaceType
         },
@@ -493,7 +491,7 @@ $3Dmol.StateManager = (function(){
         }
       }
 
-      var surfId = makeid(4);
+      const surfId = makeid(4);
       surfaces[surfId] = sid;
 
       this.ui.tools.surfaceMenu.addSurface(surfId, surfaceInput);
@@ -511,7 +509,7 @@ $3Dmol.StateManager = (function(){
     }
 
     canvas.on('click', ()=>{
-      if(this.ui && this.ui.tools.contextMenu.hidden == false){
+      if(this.ui && this.ui.tools.contextMenu.hidden === false){
         this.ui.tools.contextMenu.hide();
       }
     });
@@ -522,11 +520,11 @@ $3Dmol.StateManager = (function(){
      * @returns $3Dmol.UI
      */
     this.showUI = function(){
-      var ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
+      const ui = new $3Dmol.UI(this, uiOverlayConfig, parentElement);  
       return ui;
     };
 
-    if(config.ui == true){
+    if(config.ui === true){
      this.ui = this.showUI(); 
     };
 
@@ -551,16 +549,16 @@ $3Dmol.StateManager = (function(){
       // glviewer.();
       glviewer.setStyle({});
 
-      let selList = Object.keys(selections);
+      const selList = Object.keys(selections);
 
       selList.forEach( (selKey) =>{
-        var sel = selections[selKey];
+        const sel = selections[selKey];
 
         if( !sel.hidden ) {
-          var styleList = Object.keys(sel.styles);
+          const styleList = Object.keys(sel.styles);
           
           styleList.forEach((styleKey)=>{
-            var style = sel.styles[styleKey];
+            const style = sel.styles[styleKey];
 
             if( !style.hidden){
               glviewer.addStyle(sel.spec, style.spec);
@@ -581,10 +579,10 @@ $3Dmol.StateManager = (function(){
     }
 
     function makeid(length) {
-      var result           = '';
-      var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      var charactersLength = characters.length;
-      for ( var i = 0; i < length; i++ ) {
+      let result           = '';
+      const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      for ( let i = 0; i < length; i++ ) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
      }
      return result;
