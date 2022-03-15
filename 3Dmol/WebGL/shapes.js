@@ -1,7 +1,7 @@
-//Intersection sphere and box shapes.  
+// Intersection sphere and box shapes.  
 
 
-//Intersection sphere for sphere, stick render
+// Intersection sphere for sphere, stick render
 /** @constructor */
 $3Dmol.Sphere = function(center, radius) {
 
@@ -17,7 +17,7 @@ $3Dmol.Sphere.prototype = {
     
     constructor : $3Dmol.Sphere,
     
-    set : function(center, radius) {
+    set(center, radius) {
         
         this.center.copy(center);
         this.radius = radius;
@@ -26,7 +26,7 @@ $3Dmol.Sphere.prototype = {
         
     },
     
-    copy : function(sphere) {
+    copy(sphere) {
         
         this.center.copy(sphere.center);
         this.radius = sphere.radius;
@@ -35,16 +35,16 @@ $3Dmol.Sphere.prototype = {
         
     },
     
-    applyMatrix4 : function(matrix) {
+    applyMatrix4(matrix) {
         
         this.center.applyMatrix4(matrix);
-        this.radius = this.radius * matrix.getMaxScaleOnAxis();
+        this.radius *= matrix.getMaxScaleOnAxis();
         
         return this;
         
     },
     
-    translate : function(offset) {
+    translate(offset) {
         
         this.center.add(offset);
         
@@ -52,13 +52,13 @@ $3Dmol.Sphere.prototype = {
         
     },
     
-    equals : function(sphere) {
+    equals(sphere) {
         
         return sphere.center.equals(this.center) && (sphere.radius === this.radius);
         
     },
        
-    clone : function() {
+    clone() {
         
         return new $3Dmol.Sphere().copy(this);
         
@@ -67,7 +67,7 @@ $3Dmol.Sphere.prototype = {
 };
 
 
-//Bounding cylinder for stick render  
+// Bounding cylinder for stick render  
 /** @constructor */
 $3Dmol.Cylinder = function(c1, c2, radius) {
 
@@ -88,7 +88,7 @@ $3Dmol.Cylinder.prototype = {
 
     constructor : $3Dmol.Cylinder,
 
-    copy : function(cylinder) {
+    copy(cylinder) {
 
         this.c1.copy(cylinder.c1);
         this.c2.copy(cylinder.c2);
@@ -101,7 +101,7 @@ $3Dmol.Cylinder.prototype = {
     
     lengthSq : function() {
     
-        var vector = new $3Dmol.Vector3();
+        const vector = new $3Dmol.Vector3();
         
         return function(){
             return vector.subVectors(this.c2, this.c1).lengthSq();
@@ -109,13 +109,13 @@ $3Dmol.Cylinder.prototype = {
         
     }(),
 
-    applyMatrix4 : function(matrix) {
+    applyMatrix4(matrix) {
         
         this.direction.add(this.c1).applyMatrix4(matrix);
         this.c1.applyMatrix4(matrix);
         this.c2.applyMatrix4(matrix);
         this.direction.sub(this.c1).normalize();
-        this.radius = this.radius * matrix.getMaxScaleOnAxis();
+        this.radius *= matrix.getMaxScaleOnAxis();
 
         return this;
 
@@ -124,7 +124,7 @@ $3Dmol.Cylinder.prototype = {
 };
 
 
-//plane specified by three points
+// plane specified by three points
 /** @constructor */
 $3Dmol.Triangle = function(a, b, c){
    
@@ -143,7 +143,7 @@ $3Dmol.Triangle.prototype = {
 
     constructor : $3Dmol.Triangle,
     
-    copy : function(triangle) {
+    copy(triangle) {
         
         this.a.copy(triangle.a);
         this.b.copy(triangle.b);
@@ -153,7 +153,7 @@ $3Dmol.Triangle.prototype = {
         
     },
     
-    applyMatrix4 : function(matrix) {
+    applyMatrix4(matrix) {
         
         this.a.applyMatrix4(matrix);
         this.b.applyMatrix4(matrix);
@@ -165,11 +165,11 @@ $3Dmol.Triangle.prototype = {
     
     getNormal : function() {
         
-        var v1 = new $3Dmol.Vector3();
+        const v1 = new $3Dmol.Vector3();
         
         return function() {
             
-            var norm = this.a.clone();
+            const norm = this.a.clone();
             norm.sub(this.b);
             v1.subVectors(this.c, this.b);
             
