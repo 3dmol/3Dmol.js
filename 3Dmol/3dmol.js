@@ -143,7 +143,7 @@ $3Dmol.createViewer = function(element, config, sharedViewerResources)
     }
     catch(e) {
         // throw `error creating viewer: ${e}`;
-        throw new Error("error creating viewer");// how to have a message like what the previous line does
+        throw new Error("error creating viewer");
     }
     
     // return null;

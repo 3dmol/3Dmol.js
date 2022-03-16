@@ -1,4 +1,3 @@
-export {};
 /**
  * $3Dmol.UI - UI creates panels in the viewer to assist control of the viewport
  * @constructor 

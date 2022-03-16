@@ -41,7 +41,8 @@
         "new-cap":["error", {"newIsCap": false, "capIsNew": false}],
         "no-bitwise":["error", {"allow":["|=", "&", ">>", "<<", "~", "&=", "|"]}],
         "no-unused-expressions":["error", {"allowTernary": true}],
-        "array-callback-return":"warn"
+        "array-callback-return":"warn",
+        "import/no-unresolved":["error", {"caseSensitive":false}]
     },
     "globals":{
         "$3Dmol": "writable",
