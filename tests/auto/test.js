@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    window.devicePixelRatio = 2.001; // for compat with headless
     var getKeys = function(obj){
        var keys = [];
        for(var key in obj){
@@ -56,7 +57,7 @@ $(document).ready(function(){
         var tr = $('<tr class="examplerow">').prop('id',key+"_row");
         $('<td class="label">').appendTo(tr).append('<a class="testname">'+key+'</a>');
         $('<td class="rendered">').appendTo(tr);
-        $('<td class="reference">').appendTo(tr).append('<img src="imgs/'+key+'.png">');
+        $('<td class="reference">').appendTo(tr).append('<img src="../glcheck/reference-images/tests-glcheck-render-tests-'+key+'.html.png">');
         $('<td class="difference">').appendTo(tr);
         $('#tests_table').append(tr);
         return tr;
@@ -94,10 +95,11 @@ $(document).ready(function(){
     var i=0;
     $('#gldiv').hide();
 
-    // apparently toDataURL isn't technically a standard for webgl canvases
-    // and (some versions of) safari return the image flipped vertically
-    // this returns an image uri in a (hopefully) portable way
+
     function imageFromWebGlCanvas(canvas) {
+        return canvas.toDataURL("image/png");
+        /* the below has trouble with transparent backgrounds, it was needed
+         * for older versions of safari.
         var w = canvas.width;
         var h = canvas.height;
         var c = $("<canvas>").get(0);
@@ -121,6 +123,7 @@ $(document).ready(function(){
         drawctx.scale(1, -1);
         drawctx.drawImage(c, 0, -h);
         return c.toDataURL("image/png"); // standard in 2d
+        */
     }
 
     var beginTime = Date.now();
@@ -163,7 +166,7 @@ $(document).ready(function(){
                 });
             return;
         }
-        console.log("%c-------------------------- "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
+        console.log("%c-------------------------- "+i+": "+keys[i]+" -----------------------------",'background: green; color: white; display: block;')
         var before=Date.now();
         var key=keys[i];
         
@@ -218,7 +221,7 @@ $(document).ready(function(){
                 var differenceImage=$('<img>');
                 var differ=0;
 
-                var diff = resemble(canvasImageData).compareTo("imgs/"+key+".png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
+                var diff = resemble(canvasImageData).compareTo("../glcheck/reference-images/tests-glcheck-render-tests-"+key+".html.png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
                     //scaletosamesize is necessary for retina displays
                     if(data.error) {
                         throw data.error; //probably need to create an image file
