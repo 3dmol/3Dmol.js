@@ -220,7 +220,7 @@
         });
 
         boundingBox.on('keypress', (e)=> {
-          if(e.key == 'Enter' || e.key == 'Return'){
+          if(e.key === 'Enter' || e.key === 'Return'){
             submitButton.ui.trigger('click')
           }
         });
@@ -269,10 +269,10 @@
         alertBox.ui.css('width', 162);
         
         // CSS
-        if(side == 'left'){
+        if(side === 'left'){
           selectionBox.css('text-align', 'left');
         }
-        else if(side == 'right') {
+        else if(side === 'right') {
           selectionBox.css('text-align', 'right');
         }
         else {
@@ -451,7 +451,7 @@
               selectionSpecForm.getValue();
               const checkAtoms = stateManager.checkAtoms(selectionFormControl.value);
 
-              if(Object.keys(selectionFormControl.value).length == 0){
+              if(Object.keys(selectionFormControl.value).length === 0){
                 alertBox.error('Please enter some input');
               }
               else{
@@ -472,7 +472,7 @@
 
           function removeSelf(selection){
             const selectionToRemove = selectionObjects.find((sel)=>{
-              if(selection == sel){
+              if(selection === sel){
                 console.log('Selection found', selection);
                 return true;
               }
@@ -482,9 +482,9 @@
           }
 
           submit.ui.on('click', ()=>{
-            if(controls.editMode == false){
+            if(controls.editMode === false){
               if(allControl.value){
-                var id = stateManager.addSelection({});
+                const id = stateManager.addSelection({});
                 finalizeSelection(id);
                 _editingForm = false;
               }
@@ -495,12 +495,12 @@
             }
             else {
               if(allControl.value){
-                var id = sid
+                const id = sid
                 stateManager.addSelection({}, id);
                 finalizeSelection(id);
               }
               else{
-                var id = sid;
+                const id = sid;
                 checkAndAddSelection(id);
               }
             }
@@ -521,7 +521,7 @@
 
 
           boundingBox.on('keyup', (e)=>{
-            if(e.key == 'Enter'){
+            if(e.key === 'Enter'){
               submit.ui.trigger('click');
             }
           });
@@ -534,7 +534,7 @@
            */
           this.setProperty = function(id, specs){            
             // check for all selection
-            if(Object.keys(specs).length == 0){
+            if(Object.keys(specs).length === 0){
               allCheckBox.setValue(true)
             }else{
               selectionSpecForm.setValue(specs);
@@ -594,10 +594,8 @@
           // Search selection with id 
           const selectionUI = selections.children(`[data-id=${ id }]`);
 
-          if(selectionUI.length != 0) {
-            
-          }
-          else {
+          
+          if(selectionUI.length === 0) {
             selection = new Selection();
             selection.setProperty(id, selSpec);
             selections.append(selection.ui);
@@ -657,10 +655,10 @@
         showArea.append(addArea);
 
         // CSS
-        if(side == 'left'){
+        if(side === 'left'){
           styleBox.css('text-align', 'left');
         }
-        else if(side == 'right') {
+        else if(side === 'right') {
           styleBox.css('text-align', 'right');
         }
         else {
