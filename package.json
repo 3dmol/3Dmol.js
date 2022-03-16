@@ -17,7 +17,6 @@
   "devDependencies": {
     "@babel/plugin-transform-typescript": "^7.16.8",
     "@babel/preset-env": "^7.16.11",
-
     "del": "^6.0.0",
     "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",
@@ -47,8 +46,7 @@
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py",
-    "coverage:glcheck": "npx nyc report --reporter text --reporter html --report-dir ./tests/glcheck/coverage",
-    "prepare": "npm run build"
+    "coverage:glcheck": "npx nyc report --reporter text --reporter html --report-dir ./tests/glcheck/coverage"
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
