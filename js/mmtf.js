@@ -1,7 +1,7 @@
 (function (global, factory) {
   (factory((global['MMTF'] = global.MMTF || {})));
 
-}(global, function (exports) { 'use strict';
+}(window, function (exports) { 'use strict';
 
 
   /**
