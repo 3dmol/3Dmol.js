@@ -1830,71 +1830,71 @@ export {};
         * 
         * @param  {Object} parent jquery object
         * @param  {Object} child  jquery object
-        * @param  {String} x_type 'left|right'
-        * @param  {String} y_type 'top|bottom'
-        * @param  {Number} x_offset Offset x values in pixels
-        * @param  {Number} y_offset Offset y values in pixels 
+        * @param  {String} xType 'left|right'
+        * @param  {String} yType 'top|bottom'
+        * @param  {Number} xOffset Offset x values in pixels
+        * @param  {Number} yOffset Offset y values in pixels 
         */
-      function setLocation(parent, child, x_type='left', y_type='top', x_offset=0, y_offset=0){
+      function setLocation(parent, child, xType='left', yType='top', xOffset=0, yOffset=0){
 
         // p_ stands for parent
         child.css('z-index', 99);
 
 
-        const p_position = parent.position();
-        const p_width = getWidth(parent);
-        const p_height = getHeight(parent);
+        const pPosition = parent.position();
+        const pWidth = getWidth(parent);
+        const pHeight = getHeight(parent);
 
         // c_ stand for child
-        const c_width = child.outerWidth(); // includes padding and margin
-        const c_height = child.outerHeight(); // includes padding and margin
+        const cWidth = child.outerWidth(); // includes padding and margin
+        const cHeight = child.outerHeight(); // includes padding and margin
 
         let padding = parseInt(parent.css('padding').replace('px', ''));
         padding = (padding) || 0;
-        const p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
-        const p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
+        const pTop = getTop(parent) + parseInt(parent.css('margin-top').replace('px',''));
+        const pLeft = getLeft(parent) + parseInt(parent.css('margin-left').replace('px',''));
 
 
         // Setting position
-        const c_position = {
+        const cPosition = {
           left: 0,
           top: 0
         };
 
-        if(x_type == 'left'){
-          c_position.left = padding + x_offset;
+        if(xType === 'left'){
+          cPosition.left = padding + xOffset;
         }
-        else if(x_type == 'center'){
-          c_position.left = p_width/2 - c_width/2 + x_offset;
+        else if(xType === 'center'){
+          cPosition.left = pWidth/2 - cWidth/2 + xOffset;
         }
-        else if(x_type == 'right'){
-          c_position.left = p_width  - c_width - padding + x_offset;
-        }
-        else {
-          c_position.left = x_offset + padding;
-        }
-
-        if(y_type == 'top'){
-          c_position.top = y_offset + padding;
-        }
-        else if(y_type == 'center'){
-          c_position.top = p_height/2 - c_height/2 + y_offset;
-        }
-        else if(y_type == 'bottom'){
-          c_position.top = p_height - c_height - y_offset - padding;
+        else if(xType === 'right'){
+          cPosition.left = pWidth  - cWidth - padding + xOffset;
         }
         else {
-          c_position.top = y_offset + padding;
+          cPosition.left = xOffset + padding;
         }
 
-        setPosition(child, c_position.left, c_position.top);
+        if(yType === 'top'){
+          cPosition.top = yOffset + padding;
+        }
+        else if(yType === 'center'){
+          cPosition.top = pHeight/2 - cHeight/2 + yOffset;
+        }
+        else if(yType === 'bottom'){
+          cPosition.top = pHeight - cHeight - yOffset - padding;
+        }
+        else {
+          cPosition.top = yOffset + padding;
+        }
+
+        setPosition(child, cPosition.left, cPosition.top);
       }
 
       // Copied from glviewer.js
       function getRect(container) {
         const div = container[0];
         let rect = div.getBoundingClientRect();
-        if(rect.width == 0 && rect.height == 0 && div.style.display === 'none' ) {
+        if(rect.width === 0 && rect.height === 0 && div.style.display === 'none' ) {
           const oldpos = div.style.position;
           const oldvis = div.style.visibility;
           div.style.display = 'block';
@@ -1964,8 +1964,8 @@ export {};
         // content
         this.setSVG = function(svg){
           innerButton.empty();
-          const formatted_content = $(svg);
-          innerButton.append(formatted_content);
+          const formattedContent = $(svg);
+          innerButton.append(formattedContent);
 
         }
 
@@ -1984,7 +1984,7 @@ export {};
           button.attr('title', tooltipText);
         }
 
-        if(hoverable == 'true'){
+        if(hoverable === 'true'){
           button.on('mouseenter',
             ()=>{
               button.css('box-shadow', '0px 0px 3px black');
