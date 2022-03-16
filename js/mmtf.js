@@ -1,6 +1,6 @@
 (function (global, factory) {
-  (factory((global['MMTF'] = global.MMTF || {})));
-}(this, function (exports) { 'use strict';
+  (factory((global.MMTF = global.MMTF || {})));
+}(this, (exports) => { 
 
   /**
    * @file utf8-utils
@@ -13,47 +13,47 @@
 
   // Encode string as utf8 into dataview at offset
   function utf8Write(view, offset, string) {
-    var byteLength = view.byteLength;
-    for(var i = 0, l = string.length; i < l; i++) {
-      var codePoint = string.charCodeAt(i);
+    const {byteLength} = view;
+    for(let i = 0, l = string.length; i < l; i++) {
+      const codePoint = string.charCodeAt(i);
 
       // One byte of UTF-8
       if (codePoint < 0x80) {
-        view.setUint8(offset++, codePoint >>> 0 & 0x7f | 0x00);
+        view.setUint8(offset+=1, codePoint >>> 0 & 0x7f | 0x00);
         continue;
       }
 
       // Two bytes of UTF-8
       if (codePoint < 0x800) {
-        view.setUint8(offset++, codePoint >>> 6 & 0x1f | 0xc0);
-        view.setUint8(offset++, codePoint >>> 0 & 0x3f | 0x80);
+        view.setUint8(offset+=1, codePoint >>> 6 & 0x1f | 0xc0);
+        view.setUint8(offset+=1, codePoint >>> 0 & 0x3f | 0x80);
         continue;
       }
 
       // Three bytes of UTF-8.
       if (codePoint < 0x10000) {
-        view.setUint8(offset++, codePoint >>> 12 & 0x0f | 0xe0);
-        view.setUint8(offset++, codePoint >>> 6  & 0x3f | 0x80);
-        view.setUint8(offset++, codePoint >>> 0  & 0x3f | 0x80);
+        view.setUint8(offset+=1, codePoint >>> 12 & 0x0f | 0xe0);
+        view.setUint8(offset+=1, codePoint >>> 6  & 0x3f | 0x80);
+        view.setUint8(offset+=1, codePoint >>> 0  & 0x3f | 0x80);
         continue;
       }
 
       // Four bytes of UTF-8
       if (codePoint < 0x110000) {
-        view.setUint8(offset++, codePoint >>> 18 & 0x07 | 0xf0);
-        view.setUint8(offset++, codePoint >>> 12 & 0x3f | 0x80);
-        view.setUint8(offset++, codePoint >>> 6  & 0x3f | 0x80);
-        view.setUint8(offset++, codePoint >>> 0  & 0x3f | 0x80);
+        view.setUint8(offset+=1, codePoint >>> 18 & 0x07 | 0xf0);
+        view.setUint8(offset+=1, codePoint >>> 12 & 0x3f | 0x80);
+        view.setUint8(offset+=1, codePoint >>> 6  & 0x3f | 0x80);
+        view.setUint8(offset+=1, codePoint >>> 0  & 0x3f | 0x80);
         continue;
       }
-      throw new Error("bad codepoint " + codePoint);
+      throw new Error(`bad codepoint ${  codePoint}`);
     }
   }
 
   function utf8ByteCount(string) {
-    var count = 0;
-    for(var i = 0, l = string.length; i < l; i++) {
-      var codePoint = string.charCodeAt(i);
+    let count = 0;
+    for(let i = 0, l = string.length; i < l; i++) {
+      const codePoint = string.charCodeAt(i);
       if (codePoint < 0x80) {
         count += 1;
         continue;
@@ -70,7 +70,7 @@
         count += 4;
         continue;
       }
-      throw new Error("bad codepoint " + codePoint);
+      throw new Error(`bad codepoint ${  codePoint}`);
     }
     return count;
   }
@@ -83,11 +83,11 @@
    * @return {Integer} number of bytes written into view
    */
   function encode$1(value, view, offset) {
-    var type = typeof value;
+    const type = typeof value;
 
     // Strings Bytes
     if (type === "string") {
-      var length = utf8ByteCount(value);
+      const length = utf8ByteCount(value);
       // fix str
       if (length < 0x20) {
         view.setUint8(offset, length | 0xa0);
@@ -118,8 +118,8 @@
     }
 
     if (value instanceof Uint8Array) {
-      var length = value.byteLength;
-      var bytes = new Uint8Array(view.buffer);
+      const length = value.byteLength;
+      const bytes = new Uint8Array(view.buffer);
       // bin 8
       if (length < 0x100) {
         view.setUint8(offset, 0xc4);
@@ -145,7 +145,7 @@
 
     if (type === "number") {
       if (!isFinite(value)) {
-          throw new Error("Number not finite: " + value);
+          throw new Error(`Number not finite: ${  value}`);
       }
 
       // Floating point
@@ -180,7 +180,7 @@
           view.setUint32(offset + 1, value);
           return 5;
         }
-        throw new Error("Number too big 0x" + value.toString(16));
+        throw new Error(`Number too big 0x${  value.toString(16)}`);
       }
       // negative fixnum
       if (value >= -0x20) {
@@ -205,7 +205,7 @@
         view.setInt32(offset + 1, value);
         return 5;
       }
-      throw new Error("Number too small -0x" + (-value).toString(16).substr(1));
+      throw new Error(`Number too small -0x${  (-value).toString(16).substr(1)}`);
     }
 
     // null
@@ -222,18 +222,18 @@
 
     // Container Types
     if (type === "object") {
-      var length, size = 0;
-      var isArray = Array.isArray(value);
+      let length; let size = 0;
+      const isArray = Array.isArray(value);
 
       if (isArray) {
         length = value.length;
       }
       else {
-        var keys = Object.keys(value);
+        const keys = Object.keys(value);
         length = keys.length;
       }
 
-      var size;
+      // var size;
       if (length < 0x10) {
         view.setUint8(offset, length | (isArray ? 0x90 : 0x80));
         size = 1;
@@ -250,13 +250,13 @@
       }
 
       if (isArray) {
-        for (var i = 0; i < length; i++) {
+        for (let i = 0; i < length; i++) {
           size += encode$1(value[i], view, offset + size);
         }
       }
       else {
-        for (var i = 0; i < length; i++) {
-          var key = keys[i];
+        for (let i = 0; i < length; i++) {
+          const key = keys[i];
           size += encode$1(key, view, offset + size);
           size += encode$1(value[key], view, offset + size);
         }
@@ -264,15 +264,15 @@
 
       return size;
     }
-    throw new Error("Unknown type " + type);
+    throw new Error(`Unknown type ${  type}`);
   }
 
   function encodedSize(value) {
-    var type = typeof value;
+    const type = typeof value;
 
     // Raw Bytes
     if (type === "string") {
-      var length = utf8ByteCount(value);
+      const length = utf8ByteCount(value);
       if (length < 0x20) {
         return 1 + length;
       }
@@ -288,7 +288,7 @@
     }
 
     if (value instanceof Uint8Array) {
-      var length = value.byteLength;
+      const length = value.byteLength;
       if (length < 0x100) {
         return 2 + length;
       }
@@ -315,7 +315,7 @@
         if (value < 0x10000) return 3;
         // uint 32
         if (value < 0x100000000) return 5;
-        throw new Error("Number too big 0x" + value.toString(16));
+        throw new Error(`Number too big 0x${  value.toString(16)}`);
       }
       // negative fixnum
       if (value >= -0x20) return 1;
@@ -325,7 +325,7 @@
       if (value >= -0x8000) return 3;
       // int 32
       if (value >= -0x80000000) return 5;
-      throw new Error("Number too small -0x" + value.toString(16).substr(1));
+      throw new Error(`Number too small -0x${  value.toString(16).substr(1)}`);
     }
 
     // Boolean, null
@@ -333,18 +333,18 @@
 
     // Container Types
     if (type === "object") {
-      var length, size = 0;
+      let length; let size = 0;
       if (Array.isArray(value)) {
         length = value.length;
-        for (var i = 0; i < length; i++) {
+        for (let i = 0; i < length; i++) {
           size += encodedSize(value[i]);
         }
       }
       else {
-        var keys = Object.keys(value);
+        const keys = Object.keys(value);
         length = keys.length;
-        for (var i = 0; i < length; i++) {
-          var key = keys[i];
+        for (let i = 0; i < length; i++) {
+          const key = keys[i];
           size += encodedSize(key) + encodedSize(value[key]);
         }
       }
@@ -357,14 +357,14 @@
       if (length < 0x100000000) {
         return 5 + size;
       }
-      throw new Error("Array or object too long 0x" + length.toString(16));
+      throw new Error(`Array or object too long 0x${  length.toString(16)}`);
     }
-    throw new Error("Unknown type " + type);
+    throw new Error(`Unknown type ${  type}`);
   }
 
   function encodeMsgpack(value) {
-    var buffer = new ArrayBuffer(encodedSize(value));
-    var view = new DataView(buffer);
+    const buffer = new ArrayBuffer(encodedSize(value));
+    const view = new DataView(buffer);
     encode$1(value, view, 0);
     return new Uint8Array(buffer);
   }
@@ -376,7 +376,7 @@
    */
 
 
-  var PassThroughFields = [
+  const PassThroughFields = [
       "mmtfVersion", "mmtfProducer",
       "unitCell", "spaceGroup", "structureId", "title",
       "depositionDate", "releaseDate",
@@ -386,7 +386,7 @@
       "groupsPerChain", "chainsPerModel",
   ];
 
-  var EncodedFields = [
+  const EncodedFields = [
   	// required
       "xCoordList", "yCoordList", "zCoordList",
       "groupIdList", "groupTypeList",
@@ -398,7 +398,7 @@
       "bondAtomList", "bondOrderList"
   ];
 
-  var AllFields = PassThroughFields.concat( EncodedFields );
+  const AllFields = PassThroughFields.concat( EncodedFields );
 
   /**
    * @file mmtf-utils
@@ -467,9 +467,9 @@
    * @return {Int16Array} copy of the input array data
    */
   function decodeInt16( bytes, output ){
-      var n = bytes.length / 2;
+      const n = bytes.length / 2;
       if( !output ) output = new Int16Array( n );
-      for( var i = 0, i2 = 0; i < n; ++i, i2 += 2 ){
+      for( let i = 0, i2 = 0; i < n; ++i, i2 += 2 ){
           output[ i ] = bytes[ i2 ] << 8 ^ bytes[ i2 + 1 ] << 0;
       }
       return output;
@@ -482,10 +482,10 @@
    * @return {ArrayBuffer} big endian buffer
    */
   function encodeInt16( array, output ){
-      var n = array.length;
+      const n = array.length;
       if( !output ) output = new Uint8Array( 2 * n );
-      var dv = getDataView( output );
-      for( var i = 0; i < n; ++i ){
+      const dv = getDataView( output );
+      for( let i = 0; i < n; ++i ){
           dv.setInt16( 2 * i, array[ i ] );
       }
       return getUint8View( output );
@@ -499,9 +499,9 @@
    * @return {Int32Array} copy of the input array data
    */
   function decodeInt32( bytes, output ){
-      var n = bytes.length / 4;
+      const n = bytes.length / 4;
       if( !output ) output = new Int32Array( n );
-      for( var i = 0, i4 = 0; i < n; ++i, i4 += 4 ){
+      for( let i = 0, i4 = 0; i < n; ++i, i4 += 4 ){
           output[ i ] = (
               bytes[ i4     ] << 24 ^ bytes[ i4 + 1 ] << 16 ^
               bytes[ i4 + 2 ] <<  8 ^ bytes[ i4 + 3 ] <<  0
@@ -517,21 +517,21 @@
    * @return {ArrayBuffer} big endian buffer
    */
   function encodeInt32( array, output ){
-      var n = array.length;
+      const n = array.length;
       if( !output ) output = new Uint8Array( 4 * n );
-      var dv = getDataView( output );
-      for( var i = 0; i < n; ++i ){
+      const dv = getDataView( output );
+      for( let i = 0; i < n; ++i ){
           dv.setInt32( 4 * i, array[ i ] );
       }
       return getUint8View( output );
   }
 
   function decodeFloat32( bytes, output ){
-      var n = bytes.length;
+      const n = bytes.length;
       if( !output ) output = new Float32Array( n / 4 );
-      var dvOut = getDataView( output );
-      var dvIn = getDataView( bytes );
-      for( var i = 0, i4 = 0, il = n / 4; i < il; ++i, i4 += 4 ){
+      const dvOut = getDataView( output );
+      const dvIn = getDataView( bytes );
+      for( let i = 0, i4 = 0, il = n / 4; i < il; ++i, i4 += 4 ){
           dvOut.setFloat32( i4, dvIn.getFloat32( i4 ), true );
       }
       return output;
@@ -550,10 +550,10 @@
    * @return {Float32Array} decoded array
    */
   function decodeInteger( intArray, divisor, output ){
-      var n = intArray.length;
-      var invDiv = 1/divisor;
+      const n = intArray.length;
+      const invDiv = 1/divisor;
       if( !output ) output = new Float32Array( n );
-      for( var i = 0; i < n; ++i ){
+      for( let i = 0; i < n; ++i ){
           // multiply by inverse of the divisor which is faster then division
           output[ i ] = intArray[ i ] * invDiv;
       }
@@ -561,9 +561,9 @@
   }
 
   function encodeInteger( floatArray, factor, output ){
-      var n = floatArray.length;
+      const n = floatArray.length;
       if( !output ) output = new Int32Array( n );
-      for( var i = 0; i < n; ++i ){
+      for( let i = 0; i < n; ++i ){
           output[ i ] = Math.round( floatArray[ i ] * factor );
       }
       return output;
@@ -582,23 +582,23 @@
    * @return {TypedArray|Array} decoded array
    */
   function decodeRun( array, output ){
-      var i, il;
+      let i; let il;
       if( !output ){
           // calculate the length the decoded array will have
-          var fullLength = 0;
+          let fullLength = 0;
           for( i = 0, il = array.length; i < il; i+=2 ){
               fullLength += array[ i + 1 ];
           }
           // create a new array of the same type of the input array
           output = new array.constructor( fullLength );
       }
-      var dataOffset = 0;
+      let dataOffset = 0;
       for( i = 0, il = array.length; i < il; i+=2 ){
-          var value = array[ i ];  // value to be repeated
-          var length = array[ i + 1 ];  // number of repeats
-          for( var j = 0; j < length; ++j ){
+          const value = array[ i ];  // value to be repeated
+          const length = array[ i + 1 ];  // number of repeats
+          for( let j = 0; j < length; ++j ){
               output[ dataOffset ] = value;
-              ++dataOffset;
+              dataOffset+=1;
           }
       }
       return output;
@@ -606,17 +606,17 @@
 
   function encodeRun( array ){
       if( array.length === 0 ) return new Int32Array();
-      var i, il;
+      let i; let il;
       // calculate output size
-      var fullLength = 2;
+      let fullLength = 2;
       for( i = 1, il = array.length; i < il; ++i ){
           if( array[ i - 1 ] !== array[ i ] ){
               fullLength += 2;
           }
       }
-      var output = new Int32Array( fullLength );
-      var offset = 0;
-      var runLength = 1;
+      const output = new Int32Array( fullLength );
+      let offset = 0;
+      let runLength = 1;
       for( i = 1, il = array.length; i < il; ++i ){
           if( array[ i - 1 ] !== array[ i ] ){
               output[ offset ] = array[ i - 1 ];
@@ -624,7 +624,7 @@
               runLength = 1;
               offset += 2;
           }else{
-              ++runLength;
+              runLength+=1;
           }
       }
       output[ offset ] = array[ array.length - 1 ];
@@ -645,20 +645,20 @@
    * @return {TypedArray|Array} decoded array
    */
   function decodeDelta( array, output ){
-      var n = array.length;
+      const n = array.length;
       if( !output ) output = new array.constructor( n );
       if( n ) output[ 0 ] = array[ 0 ];
-      for( var i = 1; i < n; ++i ){
+      for( let i = 1; i < n; ++i ){
           output[ i ] = array[ i ] + output[ i - 1 ];
       }
       return output;
   }
 
   function encodeDelta( array, output ){
-      var n = array.length;
+      const n = array.length;
       if( !output ) output = new array.constructor( n );
       output[ 0 ] = array[ 0 ];
-      for( var i = 1; i < n; ++i ){
+      for( let i = 1; i < n; ++i ){
           output[ i ] = array[ i ] - array[ i - 1 ];
       }
       return output;
@@ -673,15 +673,15 @@
    * @return {Int32Array}          [description]
    */
   function decodePacking( int16or8, output ){
-      var upperLimit = int16or8 instanceof Int8Array ? 0x7F : 0x7FFF;
-      var lowerLimit = -upperLimit - 1;
-      var n = int16or8.length;
-      var i, j;
+      const upperLimit = int16or8 instanceof Int8Array ? 0x7F : 0x7FFF;
+      const lowerLimit = -upperLimit - 1;
+      const n = int16or8.length;
+      let i; let j;
       if( !output ){
-          var fullLength = 0;
+          let fullLength = 0;
           for( i = 0; i < n; ++i ){
               if( int16or8[ i ] < upperLimit && int16or8[ i ] > lowerLimit ){
-                  ++fullLength;
+                  fullLength+=1;
               }
           }
           output = new Int32Array( fullLength );
@@ -689,15 +689,15 @@
       i = 0;
       j = 0;
       while( i < n ){
-          var value = 0;
+          let value = 0;
           while( int16or8[ i ] === upperLimit || int16or8[ i ] === lowerLimit ){
               value += int16or8[ i ];
-              ++i;
+              i+=1;
           }
           value += int16or8[ i ];
-          ++i;
+          i+=1;
           output[ j ] = value;
-          ++j;
+          j+=1;
       }
       return output;
   }
@@ -709,15 +709,15 @@
    * @return {Int16Array|Int8Array}          [description]
    */
   function encodePacking( intArray, useInt8 ){
-      var upperLimit = useInt8 ? 0x7F : 0x7FFF;
-      var lowerLimit = -upperLimit - 1;
-      var i;
-      var n = intArray.length;
-      var size = 0;
+      const upperLimit = useInt8 ? 0x7F : 0x7FFF;
+      const lowerLimit = -upperLimit - 1;
+      let i;
+      const n = intArray.length;
+      let size = 0;
       for( i = 0; i < n; ++i ){
-          var value = intArray[ i ];
+          const value = intArray[ i ];
           if( value === 0 ){
-              ++size;
+              size+=1;
           }else if( value === upperLimit || value === lowerLimit ){
               size += 2;
           }else if( value > 0) {
@@ -726,25 +726,25 @@
               size += Math.ceil( value / lowerLimit );
           }
       }
-      var output = useInt8 ? new Int8Array( size ) : new Int16Array( size );
-      var j = 0;
+      const output = useInt8 ? new Int8Array( size ) : new Int16Array( size );
+      let j = 0;
       for( i = 0; i < n; ++i ){
-          var value = intArray[ i ];
+          let value = intArray[ i ];
           if( value >= 0) {
               while( value >= upperLimit ){
                   output[ j ] = upperLimit;
-                  ++j;
+                  j+=1;
                   value -= upperLimit;
               }
           }else{
               while( value <= lowerLimit ){
                   output[ j ] = lowerLimit;
-                  ++j;
+                  j+=1;
                   value -= lowerLimit;
               }
           }
           output[ j ] = value;
-          ++j;
+          j+=1;
       }
       return output;
   }
@@ -805,7 +805,7 @@
   }
 
   function decodeIntegerDeltaPacking( int16or8, divisor, output ){
-      var unpacked = decodePacking( int16or8, getInt32View( output ) );
+      const unpacked = decodePacking( int16or8, getInt32View( output ) );
       return decodeIntegerDelta( unpacked, divisor, getFloat32View( unpacked ) );
   }
 
@@ -816,18 +816,18 @@
 
 
   function decodeBytes( bytes ){
-      var dv = getDataView( bytes );
-      var type = dv.getInt32( 0 );
-      var size = dv.getInt32( 4 );
-      var param = bytes.subarray( 8, 12 );
-      var bytes = bytes.subarray( 12 );
+      const dv = getDataView( bytes );
+      const type = dv.getInt32( 0 );
+      const size = dv.getInt32( 4 );
+      const param = bytes.subarray( 8, 12 );
+      bytes = bytes.subarray( 12 );
       return [ type, bytes, size, param ];
   }
 
   function encodeBytes( type, size, param, bytes ){
-      var buffer = new ArrayBuffer( 12 + bytes.byteLength );
-      var out = new Uint8Array( buffer );
-      var dv = new DataView( buffer );
+      const buffer = new ArrayBuffer( 12 + bytes.byteLength );
+      const out = new Uint8Array( buffer );
+      const dv = new DataView( buffer );
       dv.setInt32( 0, type );
       dv.setInt32( 4, size );
       if( param ) out.set( param, 8 );
@@ -836,62 +836,62 @@
   }
 
   function passInt8( int8 ){
-      var size = int8.length;
-      var bytes = getUint8View( int8 );
+      const size = int8.length;
+      const bytes = getUint8View( int8 );
       return encodeBytes( 2, size, undefined, bytes );
   }
 
   function passInt32( int32 ){
-      var size = int32.length;
-      var bytes = encodeInt32( int32 );
+      const size = int32.length;
+      const bytes = encodeInt32( int32 );
       return encodeBytes( 4, size, undefined, bytes );
   }
 
   function passString( stringBytes, length ){
-      var size = stringBytes.length / length;
-      var param = encodeInt32([ length ]);
-      var bytes = getUint8View( stringBytes );
+      const size = stringBytes.length / length;
+      const param = encodeInt32([ length ]);
+      const bytes = getUint8View( stringBytes );
       return encodeBytes( 5, size, param, bytes );
   }
 
   function runChar( charBytes ){
-      var size = charBytes.length;
-      var bytes = encodeInt32( encodeRun( charBytes ) );
+      const size = charBytes.length;
+      const bytes = encodeInt32( encodeRun( charBytes ) );
       return encodeBytes( 6, size, undefined, bytes );
   }
 
   function deltaRun( int32 ){
-      var size = int32.length;
-      var bytes = encodeInt32( encodeDeltaRun( int32 ) );
+      const size = int32.length;
+      const bytes = encodeInt32( encodeDeltaRun( int32 ) );
       return encodeBytes( 8, size, undefined, bytes );
   }
 
   function integerRun( float32, factor ){
-      var size = float32.length;
-      var param = encodeInt32([ factor ]);
-      var bytes = encodeInt32( encodeIntegerRun( float32, factor ) );
+      const size = float32.length;
+      const param = encodeInt32([ factor ]);
+      const bytes = encodeInt32( encodeIntegerRun( float32, factor ) );
       return encodeBytes( 9, size, param, bytes );
   }
 
   function integerDeltaPacking16( float32, factor ){
-      var size = float32.length;
-      var param = encodeInt32([ factor ]);
-      var bytes = encodeInt16( encodeIntegerDeltaPacking( float32, factor ) );
+      const size = float32.length;
+      const param = encodeInt32([ factor ]);
+      const bytes = encodeInt16( encodeIntegerDeltaPacking( float32, factor ) );
       return encodeBytes( 10, size, param, bytes );
   }
 
   function encodeMmtf( inputDict ){
 
-      var outputDict = {};
+      const outputDict = {};
 
       // copy some fields over from the input dict
-      PassThroughFields.forEach( function( name ){
+      PassThroughFields.forEach( ( name )=> {
           if( inputDict[ name ] !== undefined ){
               outputDict[ name ] = inputDict[ name ];
           }
       } );
 
-      //////////////
+      /// ///////////
       // bond data
 
       // encode inter group bond atom indices, i.e. get bytes in big endian order
@@ -904,7 +904,7 @@
           outputDict.bondOrderList = passInt8( inputDict.bondOrderList );
       }
 
-      //////////////
+      /// ///////////
       // atom data
 
       // split-list delta & integer encode x, y, z atom coords
@@ -932,7 +932,7 @@
           outputDict.occupancyList = integerRun( inputDict.occupancyList, 100 );
       }
 
-      ///////////////
+      /// ////////////
       // group data
 
       // run-length & delta encode group numbers
@@ -956,7 +956,7 @@
           outputDict.sequenceIndexList = deltaRun( inputDict.sequenceIndexList );
       }
 
-      ///////////////
+      /// ////////////
       // chain data
 
       // encode chain ids, i.e. get bytes
@@ -993,8 +993,8 @@
     // The MIT License (MIT)
     // Copyright (c) 2013 Tim Caswell <tim@creationix.com>
     // https://github.com/creationix/msgpack-js
-    var offset = 0;
-    var dataView = new DataView(buffer.buffer);
+    let offset = 0;
+    const dataView = new DataView(buffer.buffer);
 
     /**
      * decode all key-value pairs of a map into an object
@@ -1002,9 +1002,9 @@
      * @return {Object} decoded map
      */
     function map(length) {
-      var value = {};
-      for (var i = 0; i < length; i++) {
-        var key = parse();
+      const value = {};
+      for (let i = 0; i < length; i++) {
+        const key = parse();
         value[key] = parse();
       }
       return value;
@@ -1016,7 +1016,7 @@
      * @return {Uint8Array} decoded array
      */
     function bin(length) {
-      var value = buffer.subarray(offset, offset + length);
+      const value = buffer.subarray(offset, offset + length);
       offset += length;
       return value;
     }
@@ -1027,22 +1027,22 @@
      * @return {String} decoded string
      */
     function str(length) {
-      var array = buffer.subarray(offset, offset + length);
+      const array = buffer.subarray(offset, offset + length);
       offset += length;
       // limit number of arguments to String.fromCharCode to something
       // browsers can handle, see http://stackoverflow.com/a/22747272
-      var chunkSize = 0xffff;
+      const chunkSize = 0xffff;
       if(length > chunkSize){
-        var c = [];
-        for(var i = 0; i < array.length; i += chunkSize) {
+        const c = [];
+        for(let i = 0; i < array.length; i += chunkSize) {
           c.push(String.fromCharCode.apply(
             null, array.subarray(i, i + chunkSize)
           ));
         }
         return c.join("");
-      }else{
-        return String.fromCharCode.apply(null, array);
       }
+        return String.fromCharCode.apply(null, array);
+      
     }
 
     /**
@@ -1051,8 +1051,8 @@
      * @return {Array} decoded array
      */
     function array(length) {
-      var value = new Array(length);
-      for (var i = 0; i < length; i++) {
+      const value = new Array(length);
+      for (let i = 0; i < length; i++) {
         value[i] = parse();
       }
       return value;
@@ -1063,50 +1063,50 @@
      * @return {Object|Array|String|Number|Boolean|null} decoded MessagePack data
      */
     function parse() {
-      var type = buffer[offset];
-      var value, length, extType;
+      const type = buffer[offset];
+      let value; let length; let extType;
       // Positive FixInt
       if ((type & 0x80) === 0x00) {
-        offset++;
+        offset+=1;
         return type;
       }
       // FixMap
       if ((type & 0xf0) === 0x80) {
         length = type & 0x0f;
-        offset++;
+        offset+=1;
         return map(length);
       }
       // FixArray
       if ((type & 0xf0) === 0x90) {
         length = type & 0x0f;
-        offset++;
+        offset+=1;
         return array(length);
       }
       // FixStr
       if ((type & 0xe0) === 0xa0) {
         length = type & 0x1f;
-        offset++;
+        offset+=1;
         return str(length);
       }
       // Negative FixInt
       if ((type & 0xe0) === 0xe0) {
         value = dataView.getInt8(offset);
-        offset++;
+        offset+=1;
         return value;
       }
       switch (type) {
       // nil
       case 0xc0:
-        offset++;
+        offset+=1;
         return null;
       // 0xc1: (never used, could be employed for padding)
       // false
       case 0xc2:
-        offset++;
+        offset+=1;
         return false;
       // true
       case 0xc3:
-        offset++;
+        offset+=1;
         return true;
       // bin 8
       case 0xc4:
@@ -1256,9 +1256,11 @@
         length = dataView.getUint32(offset + 1);
         offset += 5;
         return map(length);
+      default:
+        
       }
 
-      throw new Error("Unknown type 0x" + type.toString(16));
+      throw new Error(`Unknown type 0x${  type.toString(16)}`);
     }
 
     // start the recursive parsing
@@ -1408,6 +1410,8 @@
               return decodePacking( decodeInt16( bytes ) );
           case 15:
               return decodePacking( getInt8View( bytes ) );
+          default:
+            
       }
 
   };
@@ -1424,12 +1428,12 @@
   function decodeMmtf( inputDict, params ){
 
       params = params || {};
-      var ignoreFields = params.ignoreFields;
-      var outputDict = {};
+      const {ignoreFields} = params;
+      const outputDict = {};
 
-      AllFields.forEach( function( name ){
-          var ignore = ignoreFields ? ignoreFields.indexOf( name ) !== -1 : false;
-          var data = inputDict[ name ];
+      AllFields.forEach( ( name )=> {
+          const ignore = ignoreFields ? ignoreFields.indexOf( name ) !== -1 : false;
+          const data = inputDict[ name ];
           if( !ignore && data !== undefined ){
               if( data instanceof Uint8Array ){
                   outputDict[ name ] = performDecoding.apply( null, decodeBytes( data ) );
@@ -1547,61 +1551,61 @@
 
       params = params || {};
 
-      var firstModelOnly = params.firstModelOnly;
+      const {firstModelOnly} = params;
 
       // setup callbacks
-      var onModel = eventCallbacks.onModel;
-      var onChain = eventCallbacks.onChain;
-      var onGroup = eventCallbacks.onGroup;
-      var onAtom = eventCallbacks.onAtom;
-      var onBond = eventCallbacks.onBond;
+      const {onModel} = eventCallbacks;
+      const {onChain} = eventCallbacks;
+      const {onGroup} = eventCallbacks;
+      const {onAtom} = eventCallbacks;
+      const {onBond} = eventCallbacks;
 
       // setup index counters
-      var modelIndex = 0;
-      var chainIndex = 0;
-      var groupIndex = 0;
-      var atomIndex = 0;
+      let modelIndex = 0;
+      let chainIndex = 0;
+      let groupIndex = 0;
+      let atomIndex = 0;
 
-      var modelFirstAtomIndex = 0;
-      var modelLastAtomIndex = -1;
+      let modelFirstAtomIndex = 0;
+      let modelLastAtomIndex = -1;
 
       // setup optional fields
-      var chainNameList = mmtfData.chainNameList;
-      var secStructList = mmtfData.secStructList;
-      var insCodeList = mmtfData.insCodeList;
-      var sequenceIndexList = mmtfData.sequenceIndexList;
-      var atomIdList = mmtfData.atomIdList;
-      var bFactorList = mmtfData.bFactorList;
-      var altLocList = mmtfData.altLocList;
-      var occupancyList = mmtfData.occupancyList;
-      var bondAtomList = mmtfData.bondAtomList;
-      var bondOrderList = mmtfData.bondOrderList;
+      const {chainNameList} = mmtfData;
+      const {secStructList} = mmtfData;
+      const {insCodeList} = mmtfData;
+      const {sequenceIndexList} = mmtfData;
+      const {atomIdList} = mmtfData;
+      const {bFactorList} = mmtfData;
+      const {altLocList} = mmtfData;
+      const {occupancyList} = mmtfData;
+      const {bondAtomList} = mmtfData;
+      const {bondOrderList} = mmtfData;
 
       // hoisted loop variables
-      var o, ol, i, j, k, kl;
+      let o; let ol; let i; let j; let k; let kl;
 
       // loop over all models
       for( o = 0, ol = mmtfData.chainsPerModel.length; o < ol; ++o ){
 
           if( firstModelOnly && modelIndex > 0 ) break;
 
-          var modelChainCount = mmtfData.chainsPerModel[ modelIndex ];
+          const modelChainCount = mmtfData.chainsPerModel[ modelIndex ];
 
           if( onModel ){
               onModel({
                   chainCount: modelChainCount,
-                  modelIndex: modelIndex
+                  modelIndex
               });
           }
 
           for( i = 0; i < modelChainCount; ++i ){
 
-              var chainGroupCount = mmtfData.groupsPerChain[ chainIndex ];
+              const chainGroupCount = mmtfData.groupsPerChain[ chainIndex ];
               if( onChain ){
-                  var chainId = fromCharCode(
+                  const chainId = fromCharCode(
                       mmtfData.chainIdList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
                   );
-                  var chainName = null;
+                  let chainName = null;
                   if( chainNameList ){
                       chainName = fromCharCode(
                           chainNameList.subarray( chainIndex * 4, chainIndex * 4 + 4 )
@@ -1609,80 +1613,80 @@
                   }
                   onChain({
                       groupCount: chainGroupCount,
-                      chainIndex: chainIndex,
-                      modelIndex: modelIndex,
-                      chainId: chainId,
-                      chainName: chainName
+                      chainIndex,
+                      modelIndex,
+                      chainId,
+                      chainName
                   });
               }
 
               for( j = 0; j < chainGroupCount; ++j ){
 
-                  var groupData = mmtfData.groupList[ mmtfData.groupTypeList[ groupIndex ] ];
-                  var groupAtomCount = groupData.atomNameList.length;
+                  const groupData = mmtfData.groupList[ mmtfData.groupTypeList[ groupIndex ] ];
+                  const groupAtomCount = groupData.atomNameList.length;
                   if( onGroup ){
-                      var secStruct = null;
+                      let secStruct = null;
                       if( secStructList ){
                           secStruct = secStructList[ groupIndex ];
                       }
-                      var insCode = null;
+                      let insCode = null;
                       if( mmtfData.insCodeList ){
                           insCode = String.fromCharCode( insCodeList[ groupIndex ] );
                       }
-                      var sequenceIndex = null;
+                      let sequenceIndex = null;
                       if( sequenceIndexList ){
                           sequenceIndex = sequenceIndexList[ groupIndex ];
                       }
                       onGroup({
                           atomCount: groupAtomCount,
-                          groupIndex: groupIndex,
-                          chainIndex: chainIndex,
-                          modelIndex: modelIndex,
+                          groupIndex,
+                          chainIndex,
+                          modelIndex,
                           groupId: mmtfData.groupIdList[ groupIndex ],
                           groupType: mmtfData.groupTypeList[ groupIndex ],
                           groupName: groupData.groupName,
                           singleLetterCode: groupData.singleLetterCode,
                           chemCompType: groupData.chemCompType,
-                          secStruct: secStruct,
-                          insCode: insCode,
-                          sequenceIndex: sequenceIndex
+                          secStruct,
+                          insCode,
+                          sequenceIndex
                       });
                   }
 
                   for( k = 0; k < groupAtomCount; ++k ){
 
                       if( onAtom ){
-                          var atomId = null;
+                          let atomId = null;
                           if( atomIdList ){
                               atomId = atomIdList[ atomIndex ];
                           }
-                          var bFactor = null;
+                          let bFactor = null;
                           if( bFactorList ){
                               bFactor = bFactorList[ atomIndex ];
                           }
-                          var altLoc = null;
+                          let altLoc = null;
                           if( altLocList ){
                               altLoc = String.fromCharCode( altLocList[ atomIndex ] );
                           }
-                          var occupancy = null;
+                          let occupancy = null;
                           if( occupancyList ){
                               occupancy = occupancyList[ atomIndex ];
                           }
                           onAtom({
-                              atomIndex: atomIndex,
-                              groupIndex: groupIndex,
-                              chainIndex: chainIndex,
-                              modelIndex: modelIndex,
-                              atomId: atomId,
+                              atomIndex,
+                              groupIndex,
+                              chainIndex,
+                              modelIndex,
+                              atomId,
                               element: groupData.elementList[ k ],
                               atomName: groupData.atomNameList[ k ],
                               formalCharge: groupData.formalChargeList[ k ],
                               xCoord: mmtfData.xCoordList[ atomIndex ],
                               yCoord: mmtfData.yCoordList[ atomIndex ],
                               zCoord: mmtfData.zCoordList[ atomIndex ],
-                              bFactor: bFactor,
-                              altLoc: altLoc,
-                              occupancy: occupancy
+                              bFactor,
+                              altLoc,
+                              occupancy
                           });
                       }
 
@@ -1691,7 +1695,7 @@
 
                   if( onBond ){
                       // intra group bonds
-                      var groupBondAtomList = groupData.bondAtomList;
+                      const groupBondAtomList = groupData.bondAtomList;
                       for( k = 0, kl = groupData.bondOrderList.length; k < kl; ++k ){
                           onBond({
                               atomIndex1: atomIndex - groupAtomCount + groupBondAtomList[ k * 2 ],
@@ -1714,14 +1718,14 @@
               // inter group bonds
               if( bondAtomList ){
                   for( k = 0, kl = bondAtomList.length; k < kl; k += 2 ){
-                      var atomIndex1 = bondAtomList[ k ];
-                      var atomIndex2 = bondAtomList[ k + 1 ];
+                      const atomIndex1 = bondAtomList[ k ];
+                      const atomIndex2 = bondAtomList[ k + 1 ];
                       if( ( atomIndex1 >= modelFirstAtomIndex && atomIndex1 <= modelLastAtomIndex ) ||
                           ( atomIndex2 >= modelFirstAtomIndex && atomIndex2 <= modelLastAtomIndex )
                       ){
                           onBond({
-                              atomIndex1: atomIndex1,
-                              atomIndex2: atomIndex2,
+                              atomIndex1,
+                              atomIndex2,
                               bondOrder: bondOrderList ? bondOrderList[ k / 2 ] : null
                           });
                       }
@@ -1739,28 +1743,28 @@
    * @static
    * @type {String}
    */
-  var version = "v1.0.0";
+  const version = "v1.0.0";
 
   /**
    * Version name
    * @private
    * @type {String}
    */
-  var baseUrl = "http://mmtf.rcsb.org/v1.0/";
+  const baseUrl = "http://mmtf.rcsb.org/v1.0/";
 
   /**
    * URL of the RCSB webservice to obtain MMTF files
    * @static
    * @type {String}
    */
-  var fetchUrl = baseUrl + "full/";
+  const fetchUrl = `${baseUrl  }full/`;
 
   /**
    * URL of the RCSB webservice to obtain reduced MMTF files
    * @static
    * @type {String}
    */
-  var fetchReducedUrl = baseUrl + "reduced/";
+  const fetchReducedUrl = `${baseUrl  }reduced/`;
 
   /**
    * Encode MMTF fields
@@ -1791,7 +1795,7 @@
           binOrDict = new Uint8Array( binOrDict );
       }
 
-      var inputDict;
+      let inputDict;
       if( binOrDict instanceof Uint8Array ){
           // get dict from msgpack
           inputDict = decodeMsgpack( binOrDict );
@@ -1818,10 +1822,10 @@
    * @return {undefined}
    */
   function _fetch( pdbid, baseUrl, onLoad, onError ){
-      var xhr = new XMLHttpRequest();
+      const xhr = new XMLHttpRequest();
       function _onLoad(){
           try{
-              var mmtfData = decode( xhr.response );
+              const mmtfData = decode( xhr.response );
               onLoad( mmtfData );
           }catch( error ){
               onError( error );
