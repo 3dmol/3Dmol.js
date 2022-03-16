@@ -19,6 +19,7 @@
     "@babel/preset-env": "^7.16.11",
 
     "del": "^6.0.0",
+    "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
@@ -31,15 +32,30 @@
     "gulp-shell": "^0.8.0",
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
+<<<<<<< HEAD
     "jest": "^27.5.1",
     "jsdoc": "^3.6.7",
     "jsdom": "^19.0.0",
+=======
+    "jsdoc": "^3.6.10",
+>>>>>>> 335fdfd58caa552be33dc418b9167ef7f9df7798
     "jshint": "^2.13.1"
   },
   "scripts": {
     "build": "gulp",
+<<<<<<< HEAD
     "prepare": "npm run build",
     "test": "npx jest" 
+=======
+    "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
+    "test": "npm run glcheck",
+    "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
+    "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
+    "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
+    "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py",
+    "coverage:glcheck": "npx nyc report --reporter text --reporter html --report-dir ./tests/glcheck/coverage",
+    "prepare": "npm run build"
+>>>>>>> 335fdfd58caa552be33dc418b9167ef7f9df7798
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
@@ -48,7 +64,7 @@
     "jquery": "^3.6.0",
     "netcdfjs": "^1.0.0",
     "pako": "^2.0.4",
-    "yargs-parser": "^20.2.9",
-    "upng-js": "^2.1.0"
+    "upng-js": "^2.1.0",
+    "yargs-parser": "^20.2.9"
   }
 }
