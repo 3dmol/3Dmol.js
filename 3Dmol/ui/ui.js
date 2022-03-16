@@ -1,3 +1,4 @@
+export {};
 /**
  * $3Dmol.UI - UI creates panels in the viewer to assist control of the viewport
  * @constructor 
@@ -785,7 +786,7 @@
             if(validate){
               styleSpecForm.getValue();
               
-              if(Object.keys(styleFormControl.value).length == 0){
+              if(Object.keys(styleFormControl.value).length === 0){
                 
                 alertBox.error('Please enter some value');
               }
@@ -802,14 +803,14 @@
           }
 
           submit.ui.on('click', ()=>{
-            if(controls.editMode == false){
+            if(controls.editMode === false){
               checkAndAddStyle(); 
             }
             else {
               const id = stid
               styleSpecForm.getValue();
 
-              if(Object.keys(styleFormControl.value).length == 0){
+              if(Object.keys(styleFormControl.value).length === 0){
                 alertBox.error('Please enter some value');
               }
               else{
@@ -830,7 +831,7 @@
           });
 
           boundingBox.on('keyup', (e)=>{
-            if(e.key == 'Enter'){
+            if(e.key === 'Enter'){
               submit.ui.trigger('click');
             }
           });
@@ -884,7 +885,7 @@
         const boundingBox = this.ui = $('<div></div>');
         config = config || {}
         const delay = config.delay || 5000;
-        const autohide = (config.autohide == undefined )? true : config.autohide;
+        const autohide = (config.autohide === undefined )? true : config.autohide;
 
         boundingBox.css({
           'font-family' : 'Arial',
@@ -1077,14 +1078,14 @@
 
           propertyMenu.append(propertyTable);
 
-          var labelStyle = {
+          let labelStyle = {
             value : null,
             key : 'Atom Label Style'
           }
           
           const labelStyleHolder = $('<div><div>');
 
-          var labelStyle = $('<div><div>');
+          labelStyle = $('<div><div>');
           labelStyle.text('Style');
           labelStyle.css({
             'display' : 'inline-block',
