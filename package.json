@@ -40,7 +40,7 @@
   "scripts": {
     "build": "gulp",
     "prepare": "npm run build",
-    "jest": "npx jest"
+    "jest": "npx jest",
     "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
     "test": "npm run glcheck && npx jest",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
