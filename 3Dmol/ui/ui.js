@@ -1264,9 +1264,7 @@ export {};
             
             if(validate){
               stateManager.addLabel(addLabelValue);
-            } else {
-
-            }       
+            }   
           });
 
           cross.ui.on('click', ()=>{
@@ -1278,7 +1276,7 @@ export {};
           });
 
           addLabelForm.on('keyup', (e)=>{
-            if(e.key == 'Enter'){
+            if(e.key === 'Enter'){
               tick.ui.trigger('click');
             }
           });
@@ -1304,7 +1302,7 @@ export {};
             }
           });
 
-          if(Object.keys(propsForLabel).length != 0){
+          if(Object.keys(propsForLabel).length !== 0){
             return propsForLabel
           }
           
@@ -1346,7 +1344,7 @@ export {};
           alertBox.ui.hide();
           addLabelMenu.hide();
 
-          if( stateManager.getSelectionList().length == 0){
+          if( stateManager.getSelectionList().length === 0){
             alertBox.message('Please create selections before adding label');
           } else {
             addLabelMenu.show();
@@ -1592,11 +1590,11 @@ export {};
           hintbox.hide();
 
           listSurfaceOf.update = function(control){
-            if(control.value == 'self'){
+            if(control.value === 'self'){
               hintbox.show();
               hintbox.text(surfaceGeneratorDesc.self);
             }
-            else if( control.value == 'all'){
+            else if( control.value === 'all'){
               hintbox.show();
               hintbox.text(surfaceGeneratorDesc.all);
             }
@@ -1724,7 +1722,7 @@ export {};
 
           // Cancel Edit
           cancel.ui.on('click', {}, ()=> {
-            if(toolButtons.editMode == false){
+            if(toolButtons.editMode === false){
               surfaceBox.detach();
               surfaceBox.remove();
               _editingForm = false;
@@ -1736,7 +1734,7 @@ export {};
           });
 
           surfaceBox.on('keyup', (e)=>{
-            if(e.key == 'Enter'){
+            if(e.key === 'Enter'){
               submit.ui.trigger('click');
             }
           });
