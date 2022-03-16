@@ -47,6 +47,7 @@
     "globals":{
         "$3Dmol": "writable",
         "$": false,
-        "console":"writable"
+        "console":"writable",
+        "require":"writable"
     }
 }
