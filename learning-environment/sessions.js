@@ -1,32 +1,32 @@
-var socket = null;
-var session_name = null;
+let socket = null;
+let sessionName = null;
 
-var joinSession = function(name) {
-    session_name = name;
+const joinSession = function(name) {
+    sessionName = name;
     socket.emit('join session event', {
-        name : session_name
+        name : sessionName
     });
 };
 
 // setup socket handlers and session related event handlers
-var initSessions = function() {
-    var initiator = false;
-    var joined = false;
+const initSessions = function() {
+    let initiator = false;
+    let joined = false;
 
-    //webserver needs to have appropriate rules to forward to flask
-    //https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
-    if(window.location.hostname == 'localhost') {
-      //for debugging on localhost go straight to port to avoid having to setup webserver
-      socket = io.connect(window.location.hostname+":5000");
+    // webserver needs to have appropriate rules to forward to flask
+    // https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
+    if(window.location.hostname === 'localhost') {
+      // for debugging on localhost go straight to port to avoid having to setup webserver
+      socket = io.connect(`${window.location.hostname}:5000`);
     } else {
       socket = io.connect(window.location.hostname);
     }
-    socket.on('connect', function() {
+    socket.on('connect', () => {
         socket.send('User has connected!');
     });
 
     // show only the connect button, make sure sidebar is back
-    var resetUpperRight = function() {
+    const resetUpperRight = function() {
         $('#sessionbutton').show();
         $('#sessionconnect').hide();
         $('#sessioncontrol').hide();
@@ -36,27 +36,27 @@ var initSessions = function() {
     };
 
     // open session connection dialog
-    $('#sessionbutton').on('click', function() {
+    $('#sessionbutton').on('click', () => {
         $('#sessionbutton').hide();
         $('#sessionconnect').show();
     });
 
-    var setNumConnections = function(count) {
-        $('#userinfo').html('Users: ' + count)
+    const setNumConnections = function(count) {
+        $('#userinfo').html(`Users: ${  count}`)
     };
     setNumConnections(0);
 
     // close dialog and show sessions button
-    $('#sessionconnectclose').on('click', function() {
+    $('#sessionconnectclose').on('click', () => {
         resetUpperRight();
     });
 
     // as the user types a session name, check for validity
-    $('#session_name_input').on('input', function() {
-        var name = $('#session_name_input').val();
+    $('#session_name_input').on('input', () => {
+        const name = $('#session_name_input').val();
         if (name.length > 0) {
             socket.emit('check session name event', {
-                name : name
+                name
             });
         } else {
             $('#sessionconnectbutton').prop('disabled', true);
@@ -64,9 +64,9 @@ var initSessions = function() {
     });
 
     // update button based on existance of name
-    socket.on('check session name response', function(msg) {
+    socket.on('check session name response', (msg) => {
         $('#sessionconnectbutton').prop('disabled', false);
-        if (msg == 'exists') {
+        if (msg === 'exists') {
             $('#sessionconnectbutton').html("Join");
         } else {
             $('#sessionconnectbutton').html("Create");
@@ -74,47 +74,47 @@ var initSessions = function() {
     });
 
     // handle connecting to a session
-    var connectSession = function() {
-        session_name = $('#session_name_input').val();
-        if ($('#sessionconnectbutton').text() == "Create") {
+    const connectSession = function() {
+        sessionName = $('#session_name_input').val();
+        if ($('#sessionconnectbutton').text() === "Create") {
             socket.emit('create session event', {
-                name : session_name,
+                name : sessionName,
                 state : glviewer.getInternalState(),
                 view : glviewer.getView()
             });
         } else {
             socket.emit('join session event', {
-                name : session_name,
+                name : sessionName,
             });
         }
     };
 
     $('#sessionconnectbutton').on('click', connectSession);
-    $('#session_name_input').on('keyup', function(e) {
-        if (e.keyCode == 13) { // enter key
+    $('#session_name_input').on('keyup', (e) => {
+        if (e.keyCode === 13) { // enter key
             connectSession();
         }
     });
 
     // register change callbacks
-    var viewUpdateCallback = function(new_view) {
+    const viewUpdateCallback = function(newView) {
         socket.emit('viewer view change event', {
-            name : session_name,
-            view : new_view
+            name : sessionName,
+            view : newView
         });
     };
 
-    var stateUpdateCallback = function(new_state) {
+    const stateUpdateCallback = function(newState) {
         socket.emit('viewer state change event', {
-            name : session_name,
-            state : new_state
+            name : sessionName,
+            state : newState
         });
     };
 
-    socket.on('create session response',function(msg) {
+    socket.on('create session response',(msg) => {
         if (msg) {
             console.log("session created successfully")
-            $('.sessionname').html(session_name);
+            $('.sessionname').html(sessionName);
 
             // setup callbacks
             glviewer.setViewChangeCallback(viewUpdateCallback);
@@ -132,13 +132,13 @@ var initSessions = function() {
         }
     });
 
-    socket.on('join session response', function(msg) {
-        if (msg != "0") {
+    socket.on('join session response', (msg) => {
+        if (msg !== "0") {
             joined = msg;
             // close the connection create pane and open the connection
             // monitoring
             // disable the sidebar
-            $('.sessionname').html(session_name);
+            $('.sessionname').html(sessionName);
             $('#sessionbutton').hide();
             $('#sessionconnect').hide();
             $("#menu").hide();
@@ -149,42 +149,42 @@ var initSessions = function() {
             alert("Session Doesn't Exist")
     });
 
-    var deleteSession = function() {
-        if (session_name)
+    const deleteSession = function() {
+        if (sessionName)
             socket.emit('delete session event', {
-                name : session_name
+                name : sessionName
             });
         clearResultLabels();
-        session_name = null;
+        sessionName = null;
     };
 
-    var leaveSession = function() {
-        if (session_name) {
+    const leaveSession = function() {
+        if (sessionName) {
             socket.emit('leave session event', {
-                name : session_name,
+                name : sessionName,
             });
         }
-        session_name = null;
+        sessionName = null;
     };
 
     $('#sessiondestroy').on('click', deleteSession);
     $('#sessionleave').on('click', leaveSession);
 
     // make sure to unregister a session if user closes window
-    $(window).on('beforeunload', function() {
+    $(window).on('beforeunload', () => {
         if (initiator)
             deleteSession();
         else
             leaveSession();
     });
 
-    var sessionEnded = function(reason) {
+    const sessionEnded = function(reason) {
         joined = false;
         resetUpperRight();
         clientFinishQuery();
     };
 
-    socket.on('delete session response', function() {
+    socket.on('delete session response', () => {
         $('#createSession,#joinSession').prop('disabled', false);
         initiator = 0;
         // remove callbacks
@@ -195,116 +195,116 @@ var initSessions = function() {
     });
 
     socket.on('leave session response', sessionEnded);
-    socket.on('disconnect', function(reason) {
-      console.log("disconnect: "+reason);
-      //do NOT end session since we will attempt to reconnect
+    socket.on('disconnect', (reason) => {
+      console.log(`disconnect: ${reason}`);
+      // do NOT end session since we will attempt to reconnect
     });
 
-    socket.on('error: restart connection', function() {
+    socket.on('error: restart connection', () => {
         console.log("error: restart connection");
     });
     
     socket.on('error', (error) => {
-        console.log('error: '+error);
+        console.log(`error: ${error}`);
     });
     
-    socket.on("reconnect", function() {
+    socket.on("reconnect", () => {
       console.log("Reconnected");
       if(initiator) {
-        socket.emit('reconnection', {name: session_name, secret: initiator, sid: null});
+        socket.emit('reconnection', {name: sessionName, secret: initiator, sid: null});
       } else if(joined) {
-        socket.emit('reconnection', {name: session_name, secret: null, sid: joined});        
+        socket.emit('reconnection', {name: sessionName, secret: null, sid: joined});        
       }
     });    
     
-    socket.on("connect_timeout", function() {
+    socket.on("connect_timeout", () => {
       console.log("Connect timeout");
     });    
     
     socket.on('session count', setNumConnections);
 
-    socket.on('viewer view change response', function(new_view) {
+    socket.on('viewer view change response', (newView) => {
         if (!initiator) {
-            glviewer.setView(new_view);
+            glviewer.setView(newView);
         }
     });
 
-    socket.on('viewer state change response', function(new_state) {
+    socket.on('viewer state change response', (newState) => {
         if (!initiator) {
-            glviewer.setInternalState(new_state);
+            glviewer.setInternalState(newState);
         }
     });
 
-    var result_labels = []; // array of labels
+    let resultLabel = []; // array of labels
 
     // remove result labels
-    var clearResultLabels = function() {
-        if (result_labels) {
-            for (let i = 0; i < result_labels.length; i++) {
-                glviewer.removeLabel(result_labels[i]);
+    let clearResultLabels = function() {
+        if (resultLabel) {
+            for (let i = 0; i < resultLabel.length; i++) {
+                glviewer.removeLabel(resultLabel[i]);
             }
-            result_labels = [];
+            resultLabel = [];
         }
     };
 
-    $('#refreshresults').on('click', function() {
+    $('#refreshresults').on('click', () => {
         socket.emit('query fetch', {
-            name : session_name,
+            name : sessionName,
         });
      });
 
-    $('#askbutton').on('click', function() {
-        var val = $('#askbutton').text();
-        if (val[0] == 'Q') { // start a query
+    $('#askbutton').on('click', () => {
+        const val = $('#askbutton').text();
+        if (val[0] === 'Q') { // start a query
             // tell server to query clients
             socket.emit('query start', {
-                name : session_name,
+                name : sessionName,
                 kind : "atoms"
             });
-        } else if (val[0] == 'S') { // show results
+        } else if (val[0] === 'S') { // show results
             $('#askbutton').html('Clear Labels');
             $('#refreshresults').show();            
             socket.emit('query fetch', {
-                name : session_name,
+                name : sessionName,
             });
-        } else if (val[0] == 'C') { // clear results
+        } else if (val[0] === 'C') { // clear results
             socket.emit('query end', {
-                name : session_name,
+                name : sessionName,
             });
         }
     });
 
-    var clientFinishQuery = function () {
+    let clientFinishQuery = function () {
         $('#selectmessage').hide();
         glviewer.setHoverable({},false);
         glviewer.setClickable({},false);
         clearQueryLabels();    
     };
     
-    var clicked_labels = [];
-    var current_hover_label = null;
+    let clickedLabels = [];
+    let currentHoverLabel = null;
     
-    var clearQueryLabels = function() {
-      for(let i = 0; i < clicked_labels.length; i++) {
-          glviewer.removeLabel(clicked_labels[i]);
+    let clearQueryLabels = function() {
+      for(let i = 0; i < clickedLabels.length; i++) {
+          glviewer.removeLabel(clickedLabels[i]);
       }
-      clicked_labels = [];
-      if(current_hover_label) {
-          glviewer.removeLabel(current_hover_label);
-          current_hover_label = null;
+      clickedLabels = [];
+      if(currentHoverLabel) {
+          glviewer.removeLabel(currentHoverLabel);
+          currentHoverLabel = null;
       }
     };
     
-    //return information about what is currently clicked for the server
-    var getClicked = function() {
-        var ret = [];
-        for(let i = 0; i < clicked_labels.length; i++) {
-            let p = clicked_labels[i].stylespec.position;
+    // return information about what is currently clicked for the server
+    const getClicked = function() {
+        const ret = [];
+        for(let i = 0; i < clickedLabels.length; i++) {
+            const p = clickedLabels[i].stylespec.position;
             ret.push([p.x,p.y,p.z]);
         }
         return ret;
     };
-    socket.on('query start response', function() {
+    socket.on('query start response', () => {
         if (initiator) {
             $('#askbutton').html('Show Results');
             $('#responseinfo').html('Responses: 0');
@@ -312,59 +312,59 @@ var initSessions = function() {
             // show message to select atoms, setup callbacks
             $('#selectmessage').show();
             
-            //how to label an atom
-            var atomLabel = function(atom) {
-                var l = '';
-                if(atom.resn) l = atom.resn+":"+atom.atom;
+            // how to label an atom
+            const atomLabel = function(atom) {
+                let l = '';
+                if(atom.resn) l = `${atom.resn}:${atom.atom}`;
                 else if(atom.atom) l = atom.atom;
                 else l = atom.elem;
                 return l;
             };
             
-            glviewer.setHoverable({},true,function(atom,viewer,event,container) {
+            glviewer.setHoverable({},true,(atom,viewer,event,container) => {
                 if(!atom.hoverlabel && !atom.clicklabel) {                    
-                    current_hover_label = atom.hoverlabel = viewer.addLabel(atomLabel(atom),{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.7, fontColor:'white'});
+                    currentHoverLabel = atom.hoverlabel = viewer.addLabel(atomLabel(atom),{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.7, fontColor:'white'});
                 }
             },
-            function(atom) { 
+            (atom) => { 
                 if(atom.hoverlabel) {
-                 current_hover_label = null;
+                 currentHoverLabel = null;
                  glviewer.removeLabel(atom.hoverlabel);
                  delete atom.hoverlabel;
                 }
              }
             );            
             
-            glviewer.setClickable({},true, function(atom, viewer) {
+            glviewer.setClickable({},true, (atom, viewer) => {
                if(atom.clicklabel) {
-                   //already clicked, deselect
-                   let idx = clicked_labels.indexOf(atom.clicklabel);
+                   // already clicked, deselect
+                   const idx = clickedLabels.indexOf(atom.clicklabel);
                    if(idx >= 0) {
-                       clicked_labels.splice(idx,1);
+                       clickedLabels.splice(idx,1);
                    }
                    viewer.removeLabel(atom.clicklabel);
                    delete atom.clicklabel;
-               } else { //select
+               } else { // select
                    atom.clicklabel = viewer.addLabel(atomLabel(atom), {position: atom, backgroundColor: 0x800080, backgroundOpacity: 1.0, fontColor: 'white'});
-                   clicked_labels.push(atom.clicklabel);
+                   clickedLabels.push(atom.clicklabel);
                    if(atom.hoverlabel) {
                        glviewer.removeLabel(atom.hoverlabel);
-                       if(current_hover_label == atom.hoverlabel) current_hover_label = null;
+                       if(currentHoverLabel === atom.hoverlabel) currentHoverLabel = null;
                        delete atom.hoverlabel;
                    }                  
                }
-               //send clicked atoms to server
+               // send clicked atoms to server
                socket.emit('query update', {
-                   name : session_name,
+                   name : sessionName,
                    selected : getClicked()
                });               
             });
             
-            glviewer.render(); //calling render is required to register clickables - should probably fix that
+            glviewer.render(); // calling render is required to register clickables - should probably fix that
         }
     });
 
-    socket.on('query end response', function() {
+    socket.on('query end response', () => {
         if (initiator) {
             $('#askbutton').html('Query Atoms');
             $('#responseinfo').html('');
@@ -379,28 +379,28 @@ var initSessions = function() {
 
     // update number of responses - result is list of {'cnt': N, 'position':
     // (x,y,z}
-    socket.on('query update response', function(result) {
+    socket.on('query update response', (result) => {
         if (initiator) {
-            $('#responseinfo').html('Responses: ' + result);            
+            $('#responseinfo').html(`Responses: ${  result}`);            
         }
     });
     
-    socket.on('query fetch response', function(query_result) {
+    socket.on('query fetch response', (queryResult) => {
             // first clear existing labels
             clearResultLabels();
-            var max = 1;
-            //calc max
-            for (let i = 0; i < query_result.length; i++) {
-              let val = parseInt(query_result[i][1]);
+            let max = 1;
+            // calc max
+            for (let i = 0; i < queryResult.length; i++) {
+              const val = parseInt(queryResult[i][1]);
               if(val > max) max = val;
             }
 
-            for (let i = 0; i < query_result.length; i++) {
-                let pos = query_result[i][0];
-                let p = {x: pos[0], y: pos[1], z: pos[2]};
-                let val = parseInt(query_result[i][1]);                
-                let l = glviewer.addLabel(val, {position : p,backgroundOpacity:0.5+(val/max)*.5});                
-                result_labels.push(l);                
+            for (let i = 0; i < queryResult.length; i++) {
+                const pos = queryResult[i][0];
+                const p = {x: pos[0], y: pos[1], z: pos[2]};
+                const val = parseInt(queryResult[i][1]);                
+                const l = glviewer.addLabel(val, {position : p,backgroundOpacity:0.5+(val/max)*.5});                
+                resultLabel.push(l);                
             }
     });
     
