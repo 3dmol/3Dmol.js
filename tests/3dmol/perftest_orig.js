@@ -1,73 +1,73 @@
-//Test rendering performance for different sized pdb's
+// Test rendering performance for different sized pdb's
 
-//var glviewer = null;
+// var glviewer = null;
 
-$(document).ready(function() {
+$(document).ready(() => {
 
-    glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors, callback : function(viewer) {
+    glviewer = $3Dmol.createViewer("gldiv", {defaultcolors: $3Dmol.rasmolElementColors, callback(viewer) {
         viewer.setBackgroundColor(0xffffff);
     }});
 
-    //starts QUnit tests
+    // starts QUnit tests
     start();
 }); 
 
-var profile = QUnit.urlParams.profilecheck;
-var resultXML = null;
-var resultStr = "";
+const profile = QUnit.urlParams.profilecheck;
+let resultXML = null;
+let resultStr = "";
 
-//QUnit-reporter hook to output test results in XML format
+// QUnit-reporter hook to output test results in XML format
 QUnit.jUnitReport = function(data) {
 
 	resultXML = $.parseXML(data.xml);
 	
-	//Wrap XML result in JQuery object; parse and setup output string
+	// Wrap XML result in JQuery object; parse and setup output string
 	$result = $(resultXML);
 	
 	resultStr += "$3Dmol Performance Tests\n";
-	var runTime = $result.find("testsuites").attr("time");
-	var runDate = $result.find("testsuites").attr("timestamp");
-	resultStr += "Total Test Time: " + runTime + " s\n";
-	resultStr += "Date: " + runDate + "\n\n";
+	const runTime = $result.find("testsuites").attr("time");
+	const runDate = $result.find("testsuites").attr("timestamp");
+	resultStr += `Total Test Time: ${  runTime  } s\n`;
+	resultStr += `Date: ${  runDate  }\n\n`;
 	
 	$result.find("testsuite").each(function(){
-		var moduleName = $(this).attr("name");
-		var moduleTime = $(this).attr("time");
-		resultStr += "\n" + moduleName;
-		//alert(moduleName);
+		const moduleName = $(this).attr("name");
+		const moduleTime = $(this).attr("time");
+		resultStr += `\n${  moduleName}`;
+		// alert(moduleName);
 		$(this).find("testcase").each(function() {
-			var testName = $(this).attr("name");
-			var testTime = $(this).attr("time");
-			resultStr += "\n\t" + testName + ":   " + testTime + " s";
-			//alert(testName);
+			const testName = $(this).attr("name");
+			const testTime = $(this).attr("time");
+			resultStr += `\n\t${  testName  }:   ${  testTime  } s`;
+			// alert(testName);
 		});
-		resultStr += "\n\tTotal:         " + moduleTime + " s\n";
+		resultStr += `\n\tTotal:         ${  moduleTime  } s\n`;
 	});
 	
-	//Set up a link to download test results
+	// Set up a link to download test results
 	$("#qunit-testresult").append("<br><a id='download'>Download</a>");
-	var url = "data:text/plain;charset=utf-8," + encodeURIComponent(resultStr);
+	const url = `data:text/plain;charset=utf-8,${  encodeURIComponent(resultStr)}`;
 	
 	$("#download").attr("download", "webgltest.log");
 	$("#download").attr("href", url);
-	//alert(resultStr);
+	// alert(resultStr);
 
 };
 
-var styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:"spectrum"}}};
+const styleSpec = {"stick":{stick:{}}, "line":{line:{}}, "cross":{cross:{}}, "sphere":{sphere:{}}, "cartoon":{cartoon:{color:"spectrum"}}};
 
 
-//Generic style render testcase
+// Generic style render testcase
 
-var testcase = function(styleType, profile) {
+const testcase = function(styleType, profile) {
     
-    var testName = styleType + " render";
-    var timeName = styleType + " render time: ";
-    var testMsg = styleType + " style set correctly";
-    var styleExpected = styleSpec[styleType];
+    const testName = `${styleType  } render`;
+    const timeName = `${styleType  } render time: `;
+    const testMsg = `${styleType  } style set correctly`;
+    const styleExpected = styleSpec[styleType];
     
-    test(testName, function() {
-        var m = glviewer.getModel(0);
+    test(testName, () => {
+        const m = glviewer.getModel(0);
         console.group(testName);
         console.time(timeName);
         
@@ -83,30 +83,31 @@ var testcase = function(styleType, profile) {
         console.timeEnd(timeName);
         console.groupEnd();
         
-        var styleActual = m.selectedAtoms()[0].style;
+        const styleActual = m.selectedAtoms()[0].style;
         equal(JSON.stringify(styleActual), JSON.stringify(styleExpected), testMsg); 
         
     });
 };
 
 
-var runtests = (function(profile) {
-	for (var style in styleSpec)
-		new testcase(style, profile);
+const runtests = (function(profile) {
+	for (const style in styleSpec){
+		const tc = new testcase(style, profile);
+	}
 });
-//test cases
+// test cases
 
-//TESTS
+// TESTS
 
-//moldata 1
+// moldata 1
 
 QUnit.module( "A. Bovine Calbindin, 637 atoms (1YCR)", {
 	
-	setupOnce: function() {
+	setupOnce() {
 		
 		glviewer.removeAllModels();
 		stop();
-   		$.get("test_structs/1YCR.pdb", function(data) {				
+   		$.get("test_structs/1YCR.pdb", (data) => {				
 	      		glviewer.addModel(data, "pdb");
 	      		glviewer.zoomTo();
 	      		glviewer.render();
@@ -116,23 +117,23 @@ QUnit.module( "A. Bovine Calbindin, 637 atoms (1YCR)", {
 		console.group("Calbindin (637 atoms)");
 	},
 		
-	teardownOnce: function() {		
+	teardownOnce() {		
 		console.groupEnd();
 	}
 	
 });
 
-//new tester("sphere", profile);
+// new tester("sphere", profile);
 runtests(profile);
 
-//moldata 2
+// moldata 2
 
 QUnit.module( "B. Cathodic Hemoglobin, 5,085 atoms (2AA1)", {
 	
-	setupOnce: function() {
+	setupOnce() {
 		glviewer.removeAllModels();
 		stop();
-   		$.get("test_structs/2AA1.pdb", function(data) {				
+   		$.get("test_structs/2AA1.pdb", (data) => {				
 	      		glviewer.addModel(data, "pdb");
 	      		glviewer.zoomTo();
 	      		glviewer.render();
@@ -142,22 +143,22 @@ QUnit.module( "B. Cathodic Hemoglobin, 5,085 atoms (2AA1)", {
    		console.group("Hemoglobin (5,085 atoms)");
 	},
 	
-	teardownOnce: function() {
+	teardownOnce() {
 		console.groupEnd();
 	}
 });
 
 runtests(profile);
 
-//moldata 3
+// moldata 3
 
 QUnit.module( "C. Calicivirus Capsid, 12,362 atoms (3M8L)", {
 	
-	setupOnce: function() {
+	setupOnce() {
 		console.log("Testing third molecule");
 		glviewer.removeAllModels();
 		stop();
-   		$.get("test_structs/3M8L.pdb", function(data) {
+   		$.get("test_structs/3M8L.pdb", (data) => {
 	      		glviewer.addModel(data, "pdb");
 	      		glviewer.zoomTo();
 	      		glviewer.render();
@@ -167,9 +168,9 @@ QUnit.module( "C. Calicivirus Capsid, 12,362 atoms (3M8L)", {
    		console.group("Capsid (12,362 atoms)");
 	},
 		
-	teardownOnce: function() {
+	teardownOnce() {
 		console.groupEnd();
-		//glviewer.removeAllModels();
+		// glviewer.removeAllModels();
 	}
 });
 
@@ -178,11 +179,11 @@ runtests(profile);
 
 QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atoms (1B5S)", {
     
-    setupOnce: function() {
+    setupOnce() {
         
         glviewer.removeAllModels();
         stop();
-        $.get("../../test_structs/1B5S.pdb", function(data) {             
+        $.get("../../test_structs/1B5S.pdb", (data) => {             
                 glviewer.addModel(data, "pdb");
                 glviewer.zoomTo();
                 glviewer.render();
@@ -192,13 +193,13 @@ QUnit.module( "D. Dihydrolipoyl Transacetylase Biological Assembly,  71,820 atom
         console.group("Calbindin (71,820 atoms)");
     },
         
-    teardownOnce: function() {      
+    teardownOnce() {      
         console.groupEnd();
     }
     
 });
 
-//runtests(profile);
+// runtests(profile);
 
 
 
