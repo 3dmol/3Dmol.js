@@ -3,14 +3,17 @@
         "allowJs": true,
         "checkJs": true,
         "strict": true,
-        "module": "ES6",
+        "noImplicitAny": false,
+        "moduleResolution": "node",
+        "target": "es5",
         "lib": [
             "es6",
             "dom"
-        ]
+        ],
+        "outFile": "./tmp/result.js",
     },
     "include": [
-        "3Dmol/**/*.js",
+        "3Dmol/WebGL/index.js",
     ],
     "exclude": [
         "node_modules",

@@ -1,4 +1,3 @@
-
 // A 2 Vector
 /** @constructor */
 export class Vector2 {
@@ -8,7 +7,6 @@ export class Vector2 {
   }
 
   set(x, y) {
-
     this.x = x;
     this.y = y;
 
@@ -16,7 +14,6 @@ export class Vector2 {
   }
 
   subVectors(a, b) {
-
     this.x = a.x - b.x;
     this.y = a.y - b.y;
 
@@ -24,7 +21,6 @@ export class Vector2 {
   }
 
   copy(v) {
-
     this.x = v.x;
     this.y = v.y;
 
@@ -32,7 +28,6 @@ export class Vector2 {
   }
 
   clone() {
-
     return new Vector2(this.x, this.y);
   }
 }

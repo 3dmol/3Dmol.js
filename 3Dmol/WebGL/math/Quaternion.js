@@ -1,13 +1,14 @@
+// @ts-check
+
 export class Quaternion {
   constructor(x, y, z, w) {
     this.x = x || 0;
     this.y = y || 0;
     this.z = z || 0;
-    this.w = (w !== undefined) ? w : 1;
+    this.w = w !== undefined ? w : 1;
   }
 
   set(x, y, z, w) {
-
     this.x = x;
     this.y = y;
     this.z = z;
@@ -17,7 +18,6 @@ export class Quaternion {
   }
 
   copy(q) {
-
     this.x = q.x;
     this.y = q.y;
     this.z = q.z;
@@ -27,7 +27,6 @@ export class Quaternion {
   }
 
   conjugate() {
-
     this.x *= -1;
     this.y *= -1;
     this.z *= -1;
@@ -36,23 +35,20 @@ export class Quaternion {
   }
 
   inverse() {
-
     return this.conjugate().normalize();
   }
 
   length() {
-
-    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z
-      + this.w * this.w);
+    return Math.sqrt(
+      this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w
+    );
   }
 
   lengthxyz() {
-
     return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
   }
 
   normalize() {
-
     var l = this.length();
 
     if (l === 0) {
@@ -70,11 +66,9 @@ export class Quaternion {
     }
 
     return this;
-
   }
 
   multiply(q) {
-
     return this.multiplyQuaternions(this, q);
   }
 
@@ -87,9 +81,14 @@ export class Quaternion {
   }
 
   multiplyQuaternions(a, b) {
-
-    var qax = a.x, qay = a.y, qaz = a.z, qaw = a.w;
-    var qbx = b.x, qby = b.y, qbz = b.z, qbw = b.w;
+    var qax = a.x,
+      qay = a.y,
+      qaz = a.z,
+      qaw = a.w;
+    var qbx = b.x,
+      qby = b.y,
+      qbz = b.z,
+      qbw = b.w;
 
     this.x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
     this.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
@@ -125,5 +124,4 @@ export class Quaternion {
 
     return this;
   }
-};
-
+}

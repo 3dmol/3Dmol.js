@@ -1,8 +1,6 @@
 {
   "name": "3dmol",
-  "source": "3dmol/3dmol.js",
-  "main": "build/3Dmol-min.js",
-  "module": "build/3Dmol-es.js",
+  "main": "build/3dmol-min.js",
   "version": "1.8.0",
   "description": "Object oriented Javascript molecular visualization library",
   "repository": {
@@ -27,11 +25,10 @@
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
     "jsdoc": "^3.6.10",
-    "jshint": "^2.13.1",
-    "parcel": "^2.3.2"
+    "jshint": "^2.13.1"
   },
   "scripts": {
-    "build": "parcel",
+    "build": "npx parcel build && npx gulp build",
     "doc": "gulp doc",
     "lint": "gulp lint",
     "gulp:test": "gulp test",
@@ -52,5 +49,16 @@
     "pako": "^2.0.4",
     "upng-js": "^2.1.0",
     "yargs-parser": "^20.2.9"
+  },
+  "targets": {
+    "main": false,
+    "webgl": {
+      "source": "./3Dmol/WebGL/index.js",
+      "distDir": "./tmp",
+      "outputFormat": "global",
+      "context": "browser",
+      "scopeHoist": true,
+      "optimize": false
+    }
   }
 }
