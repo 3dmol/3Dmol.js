@@ -1,61 +1,61 @@
 /* 
  * QUnit benchmark tests for $3Dmol, GLmol, and JSmol
  */
-//Test rendering performance for different sized pdb's 
+// Test rendering performance for different sized pdb's 
 
-var profile = QUnit.urlParams.profilecheck;
+const profile = QUnit.urlParams.profilecheck;
 
-//QUnit-reporter hook to output test results in XML format
+// QUnit-reporter hook to output test results in XML format
 QUnit.jUnitReport = function(data) {
     
-    var resultXML = $.parseXML(data.xml);
-    //Wrap XML result in JQuery object; parse and setup output string
-    var result = $(resultXML);
+    const resultXML = $.parseXML(data.xml);
+    // Wrap XML result in JQuery object; parse and setup output string
+    const result = $(resultXML);
 
-    var resultStr = "Viewer Performance Tests: Calicivirus Capsid, 12,362 atoms (3M8L)\n";
-    var runTime = result.find("testsuites").attr("time");
-    var runDate = result.find("testsuites").attr("timestamp");
-    resultStr += "Total Test Time: " + runTime + " s\n";
-    resultStr += "Date: " + runDate + "\n\n";
+    let resultStr = "Viewer Performance Tests: Calicivirus Capsid, 12,362 atoms (3M8L)\n";
+    const runTime = result.find("testsuites").attr("time");
+    const runDate = result.find("testsuites").attr("timestamp");
+    resultStr += `Total Test Time: ${  runTime  } s\n`;
+    resultStr += `Date: ${  runDate  }\n\n`;
 
     result.find("testsuite").each(function(){
-        var moduleName = $(this).attr("name");
-        var moduleTime = $(this).attr("time");
-        resultStr += "\n" + moduleName;
-        //alert(moduleName);
+        const moduleName = $(this).attr("name");
+        const moduleTime = $(this).attr("time");
+        resultStr += `\n${  moduleName}`;
+        // alert(moduleName);
         $(this).find("testcase").each(function() {
-            var testName = $(this).attr("name");
-            var testTime = $(this).attr("time");
-            resultStr += "\n\t" + testName + ":   " + testTime + " s";
-            //alert(testName);
+            const testName = $(this).attr("name");
+            const testTime = $(this).attr("time");
+            resultStr += `\n\t${  testName  }:   ${  testTime  } s`;
+            // alert(testName);
         });      
         
-        resultStr += "\n\tTotal:         " + moduleTime + " s\n";
+        resultStr += `\n\tTotal:         ${  moduleTime  } s\n`;
     });
 
-    //Set up a link to download test results
+    // Set up a link to download test results
     $("#qunit-testresult").append("<br><a id='download'>Download</a>");
-    var url = "data:text/plain;charset=utf-8," + encodeURIComponent(resultStr);
+    const url = `data:text/plain;charset=utf-8,${  encodeURIComponent(resultStr)}`;
 
     $("#download").attr("download", "webgltest.log");
     $("#download").attr("href", url);
-    //alert(resultStr);
+    // alert(resultStr);
 
 };
 
 // Style types to test
-var styleSpec = ["line", "stick", "sphere"];
+const styleSpec = ["line", "stick", "sphere"];
 
 // $3Dmol testcase generator
 
-var gen$3DmolTestCase = function(styleType, profile) {
+const gen$3DmolTestCase = function(styleType, profile) {
     
-    var testName = styleType + " render";
-    var timeMsg = styleType + " render time: ";
-    var testMsg = styleType + " style set correctly";
-    var style = {}; style[styleType] = {};
+    const testName = `${styleType  } render`;
+    const timeMsg = `${styleType  } render time: `;
+    const testMsg = `${styleType  } style set correctly`;
+    const style = {}; style[styleType] = {};
     
-    test(testName, function() {
+    test(testName, () => {
         
         viewer.setStyle({}, {cross:{}});
         viewer.render();
@@ -66,17 +66,17 @@ var gen$3DmolTestCase = function(styleType, profile) {
         if (profile)
             console.profile();
         
-        var start = new Date();
+        const start = new Date();
         viewer.setStyle({}, style);           
         viewer.render();
-        var end = new Date();
-        var testTime = end - start;
+        const end = new Date();
+        const testTime = end - start;
         console.timeEnd(timeMsg);
         
         if (profile)
             console.profileEnd();
         
-        console.log(timeMsg + (testTime) + "ms");
+        console.log(`${timeMsg + (testTime)  }ms`);
         console.groupEnd();
         
         QUnit.ok(true, testMsg);
@@ -84,19 +84,19 @@ var gen$3DmolTestCase = function(styleType, profile) {
     });
 };
 
-//GLmol test generator
+// GLmol test generator
 
-var genGLmolTestCase = function(styleType, profile) {
+const genGLmolTestCase = function(styleType, profile) {
     
-    var testName = styleType + " render";
-    var timeName = styleType + " render time: ";
-    var testMsg = styleType + " style set correctly";
+    const testName = `${styleType  } render`;
+    const timeName = `${styleType  } render time: `;
+    const testMsg = `${styleType  } style set correctly`;
     
-    var defineRep = function(style){
+    const defineRep = function(style){
     
         return function() {
-            var all = this.getAllAtoms();
-            var target = this.modelGroup;
+            const all = this.getAllAtoms();
+            const target = this.modelGroup;
 
             if (style === 'stick') 
                 this.drawBondsAsStick(target, all, this.cylinderRadius, this.cylinderRadius, true);
@@ -107,14 +107,14 @@ var genGLmolTestCase = function(styleType, profile) {
             else if (style === 'sphere') 
                 this.drawAtomsAsSphere(target, all, this.sphereRadius);
             else if (style === 'cartoon') {
-                //this.colorChainbow(all);
+                // this.colorChainbow(all);
                 this.drawCartoon(target, all, false, this.thickness);
             }
         }; 
         
     };
     
-    QUnit.test(testName, function() {
+    QUnit.test(testName, () => {
         
         console.group(testName);
         console.time(timeName);
@@ -137,14 +137,14 @@ var genGLmolTestCase = function(styleType, profile) {
     });
 };
 
-//JSmol testcase generator
+// JSmol testcase generator
 
-var genJSmolTestCase = function(styleType, profile) {
+const genJSmolTestCase = function(styleType, profile) {
     
-    var testName = styleType + " render";
-    var timeName = styleType + " render time: ";
-    var testMsg = styleType + " style set correctly";
-    var script = "select *;";
+    const testName = `${styleType  } render`;
+    const timeName = `${styleType  } render time: `;
+    const testMsg = `${styleType  } style set correctly`;
+    let script = "select *;";
     if (styleType === "line") {
         script += "wireframe;";
     }
@@ -157,8 +157,8 @@ var genJSmolTestCase = function(styleType, profile) {
     else if (styleType === "cartoon")
         script += "cartoon only;";
       
-    //Create test case
-    QUnit.test(testName, function() {
+    // Create test case
+    QUnit.test(testName, () => {
 
         console.group(testName);
         console.time(timeName);
@@ -183,16 +183,16 @@ var genJSmolTestCase = function(styleType, profile) {
 // Setup test modules
 
 
-//$3Dmol tests
+// $3Dmol tests
 
 QUnit.module( "$3Dmol Tests", {
 	
-    setupOnce: function() {
+    setupOnce() {
         QUnit.stop();
         $("#viewerdiv").empty();
         viewer = $3Dmol.createViewer("viewerdiv");
         viewer.setBackgroundColor(0xffffff);
-        $.get("test_structs/3M8L.pdb", function(data) {
+        $.get("test_structs/3M8L.pdb", (data) => {
                 viewer.addModel(data, "pdb");
                 viewer.zoomTo();
                 QUnit.start();
@@ -201,22 +201,22 @@ QUnit.module( "$3Dmol Tests", {
         console.group("$3Dmol");
     },
 		
-    teardownOnce: function() {
+    teardownOnce() {
         console.groupEnd();
     }
     
 });
 
 // $3Dmol test cases
-for (var style in styleSpec)
+for (const style in styleSpec)
     gen$3DmolTestCase(styleSpec[style], profile);
 
 
-//GLmol testing module
+// GLmol testing module
 
 QUnit.module( "GLmol Tests", {
 	
-    setupOnce: function() {
+    setupOnce() {
         QUnit.stop();
         $("#viewerdiv").empty();
         
@@ -224,12 +224,12 @@ QUnit.module( "GLmol Tests", {
         viewer.initializeScene();
         viewer.setBackground(0xffffff);
         
-        $.get("test_structs/3M8L.pdb", function(data) {
+        $.get("test_structs/3M8L.pdb", (data) => {
             
             viewer.protein = {sheet: [], helix: [], biomtChains: '', biomtMatrices: [], symMat: [], pdbID: '', title: ''};
             viewer.atoms = [];
             viewer.parsePDB2(data);
-            var all = viewer.getAllAtoms();
+            const all = viewer.getAllAtoms();
             viewer.colorByAtom(all, {});
             viewer.zoomInto(all);
             viewer.drawAsCross(viewer.modelGroup, all, 0.3, true);
@@ -241,19 +241,19 @@ QUnit.module( "GLmol Tests", {
         console.group("GLmol");
     },
 
-    teardownOnce: function() {
+    teardownOnce() {
         console.groupEnd();
-        //glviewer.removeAllModels();
+        // glviewer.removeAllModels();
     }
 });
 
-for (var style in styleSpec)
+for (const style in styleSpec)
     genGLmolTestCase(styleSpec[style], profile);
 
-//JSmol Tests
+// JSmol Tests
 QUnit.module( "JSmol Tests", {
 
-    setupOnce: function() {    
+    setupOnce() {    
         QUnit.stop();
         if (viewer !== undefined && viewer instanceof $3Dmol.GLViewer)
             viewer.removeAllModels();
@@ -264,19 +264,19 @@ QUnit.module( "JSmol Tests", {
         console.log("Filled html");
     },
 
-    teardownOnce: function() {
+    teardownOnce() {
         console.groupEnd();
-        //$("#viewerdiv").empty();
+        // $("#viewerdiv").empty();
     },
     
-    setup: function() {
+    setup() {
         console.log("setting up test...");
-        //Jmol.scriptWait(viewer, "wireframe -0.1; spacefill off; cartoon off; set cartoonFancy true;");       
+        // Jmol.scriptWait(viewer, "wireframe -0.1; spacefill off; cartoon off; set cartoonFancy true;");       
     }
     
 });
 
-for (var style in styleSpec)
+for (const style in styleSpec)
     genJSmolTestCase(styleSpec[style], profile);
 
 
