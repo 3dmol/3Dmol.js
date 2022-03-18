@@ -1,6 +1,6 @@
-$3Dmol.download("pdb:4UAA",viewer,{},function(){
+$3Dmol.download("pdb:4UAA",viewer,{},()=> {
                   
-                  var colorAsSnake = function(atom) {
+                  const colorAsSnake = function(atom) {
                     return atom.resi % 2 ? 'white': 'green'
                   };
 

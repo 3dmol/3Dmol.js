@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:4UND",viewer,{},function(){
+$3Dmol.download("pdb:4UND",viewer,{},()=> {
                   
 
                   viewer.setStyle({chain:'A',within:{distance:10.0,sel:{chain:'B'}}},{sphere:{color:'blue',radius:1.0}});

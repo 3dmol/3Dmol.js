@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:2ABJ",viewer,{},function(){
+$3Dmol.download("pdb:2ABJ",viewer,{},()=> {
                   
                   viewer.setViewStyle({style:"outline"});
                   viewer.setStyle({chain:'A'},{sphere:{hidden:true}});

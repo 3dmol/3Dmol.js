@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:4YCV",viewer,{},function(){
+$3Dmol.download("pdb:4YCV",viewer,{},()=> {
                   
 
                   viewer.setStyle({chain:'A'},{sphere:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});

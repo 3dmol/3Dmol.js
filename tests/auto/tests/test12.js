@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:3VOV",viewer,{},function(){
+$3Dmol.download("pdb:3VOV",viewer,{},()=> {
                   
                   viewer.setStyle({chain:'A'},{cartoon:{color:'spectrum'}});
                   viewer.setStyle({chain:'B'},{cartoon:{style:'trace'}});

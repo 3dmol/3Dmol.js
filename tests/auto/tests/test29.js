@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:4ZD3",viewer,{},function(){
+$3Dmol.download("pdb:4ZD3",viewer,{},()=> {
                   
                   viewer.setViewStyle({style:"outline"});
                   viewer.setStyle({},{cartoon:{}});
