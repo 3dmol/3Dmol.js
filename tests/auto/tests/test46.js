@@ -96,7 +96,7 @@ const $scope = {}
         chgcarObject.data = voldata;
         $scope.MAIN_VIEWER.addIsosurface(voldata , {voxel , isoval: isovalue  , color, opacity , smoothness , alpha});
         $scope.MAIN_VIEWER.render();
-        $scope.done++;
+        $scope.done+=1;
       }).fail((err) => {console.log(err);});
     }
   }
@@ -120,7 +120,7 @@ const $scope = {}
       model.setStyle({}, {sphere:{scale: 0.2}, stick:{radius:0.1}});
       $scope.MAIN_VIEWER.zoomTo();
       $scope.MAIN_VIEWER.render();
-      $scope.done++;
+      $scope.done+=1;
     });
   }
   $scope.renderModels = function() {
