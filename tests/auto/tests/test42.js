@@ -5,7 +5,7 @@
                   const atoms = viewer.selectedAtoms();
                   for(let i = 0; i < atoms.length; i++) {
                     const a = atoms[i];
-                    a.properties.structured = (a.ss == 'h' || a.ss == 's');                    
+                    a.properties.structured = (a.ss === 'h' || a.ss === 's');                    
                   }
                   
                   viewer.setStyle({properties: {structured: true}}, {cartoon: {}});
