@@ -1,10 +1,10 @@
 
-$.get('data/h-bn.cube', function(data){
+$.get('data/h-bn.cube', (data)=> {
     viewer.addModel(data, "cube");
     viewer.setStyle({}, {stick:{}});
     viewer.zoomTo();
-    //$.get('test_structs/benzene-homo.cube', function(data){
-      var voldata = new $3Dmol.VolumeData(data, "cube");
+    // $.get('test_structs/benzene-homo.cube', function(data){
+      const voldata = new $3Dmol.VolumeData(data, "cube");
       if(viewer.hasVolumetricRender()) {
         viewer.addVolumetricRender(voldata, {transferfn: [{color: "blue", opacity: .075, value: 0.1},
                                                                     {color: "blue", opacity: .001, value: 0.01},

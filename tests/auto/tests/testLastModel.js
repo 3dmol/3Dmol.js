@@ -13826,15 +13826,15 @@ _pdbx_struct_assembly_auth_evidence.details                ?
 </textarea>    
 */
 
-var cif1 = $("#cif1").val();
-var cif2 = $("#cif2").val();
+const cif1 = $("#cif1").val();
+const cif2 = $("#cif2").val();
 
 viewer.addModel(cif1, "cif");
 viewer.addModel(cif2, "cif");
 
-//set all
+// set all
 viewer.setStyle({stick:{colorscheme: "greenCarbon"}});
-//set only last model
+// set only last model
 viewer.setStyle({model: -1}, {cartoon: {color: "spectrum"}});
 viewer.zoomTo();
 viewer.render();

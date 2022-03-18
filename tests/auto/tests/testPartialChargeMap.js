@@ -1,4 +1,4 @@
-var mol1=`@<TRIPOS>MOLECULE
+const mol1=`@<TRIPOS>MOLECULE
 *****
  477 0 0 0 0
 SMALL

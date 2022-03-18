@@ -1,4 +1,4 @@
-$.get('../test_structs/multi.cif', function(data){
+$.get('../test_structs/multi.cif', (data)=> {
     viewer.addModelsAsFrames(data,'cif',{'doAssembly':true,'duplicateAssemblyAtoms':true,normalizeAssembly:true});
     viewer.addUnitCell();
     viewer.setStyle({'stick':{'colorscheme':'greenCarbon'}});
