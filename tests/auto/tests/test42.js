@@ -1,10 +1,10 @@
 
-              $3Dmol.download("pdb:4UB9",viewer,{},function(){
+              $3Dmol.download("pdb:4UB9",viewer,{},()=> {
                   
                   
-                  var atoms = viewer.selectedAtoms();
-                  for(var i = 0; i < atoms.length; i++) {
-                    var a = atoms[i];
+                  const atoms = viewer.selectedAtoms();
+                  for(let i = 0; i < atoms.length; i++) {
+                    const a = atoms[i];
                     a.properties.structured = (a.ss == 'h' || a.ss == 's');                    
                   }
                   
