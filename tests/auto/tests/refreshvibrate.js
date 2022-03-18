@@ -1,19 +1,19 @@
-var vib_viewer = viewer;
-vib_viewer.setBackgroundColor(0xffffff);
+const vibViewer = viewer;
+vibViewer.setBackgroundColor(0xffffff);
 
 function refresh(data,N) {
-    vib_viewer.stopAnimate();
-    vib_viewer.removeAllModels();
-    vib_viewer.clear();
-    vib_viewer.addModel(data, "xyz");
-    vib_viewer.vibrate(N, 1, true, {});
-    vib_viewer.animate({'loop': 'forward','reps':1});
-    vib_viewer.setStyle({}, {stick:{}});
-    vib_viewer.zoomTo();
-    vib_viewer.render( );
+    vibViewer.stopAnimate();
+    vibViewer.removeAllModels();
+    vibViewer.clear();
+    vibViewer.addModel(data, "xyz");
+    vibViewer.vibrate(N, 1, true, {});
+    vibViewer.animate({'loop': 'forward','reps':1});
+    vibViewer.setStyle({}, {stick:{}});
+    vibViewer.zoomTo();
+    vibViewer.render( );
 }
 
-var data = `14
+const data = `14
 Aniline
 C -0.7937 1.1602 -0.0235 0.6834 -0.0064 0.0086
 C -1.4336 -0.0793 -0.0360 -0.1263 -0.0441 -0.0018
@@ -32,7 +32,7 @@ H -3.2186 -1.0306 -0.2854 -0.0063 -0.0001 -0.0002`;
 
 refresh(data,40);
 
-var data2 = `14
+const data2 = `14
 Aniline
 C -0.7937 1.1602 -0.0235 -0.0322 -0.0163 -0.0008
 C -1.4336 -0.0793 -0.0360 0.0212 0.0359 0.0003
@@ -49,7 +49,7 @@ H 1.0650 2.2033 0.0088 0.0031 -0.0039 0.0000
 H -3.3166 0.6603 -0.2825 0.0016 -0.0001 0.0002
 H -3.2186 -1.0306 -0.2854 -0.0002 -0.0009 -0.0002`;
 
-setTimeout(function() {
+setTimeout(() => {
  refresh(data2,4); }, 1000);
 
 
