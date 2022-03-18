@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:2EJ0",viewer,{},function(){
+$3Dmol.download("pdb:2EJ0",viewer,{},()=> {
                   
                   viewer.addLabel("Aromatic", {position: {}, backgroundColor: 0x800080, backgroundOpacity: 0.8},{chain:'C'});
                 

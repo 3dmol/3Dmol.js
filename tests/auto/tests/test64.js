@@ -1006,11 +1006,11 @@ ATOM   1001  OXT LEU A 129     -17.993  19.662   8.407  1.00 31.81           O1-
 END
 </textarea>
 */
-            var rec = viewer.addModel($('#rec').val(),'pdb');
+            const rec = viewer.addModel($('#rec').val(),'pdb');
        
             rec.setStyle({sphere:{}});
-            var atoms= viewer.selectedAtoms({});
-            for(var i=0;i<atoms.length;i++){
+            const atoms= viewer.selectedAtoms({});
+            for(let i=0;i<atoms.length;i++){
           
                 viewer.addLabel(atoms[i].elem,{position: atoms[i], backgroundColor: 0x800080, backgroundOpacity: 0.8},null,true);
             }

@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:5TZ8", viewer, {}, function(){
+$3Dmol.download("pdb:5TZ8", viewer, {}, ()=> {
         			
                   viewer.setStyle({chain:'A'}, {cartoon:{arrows:true, opacity:0.8, color:'blue'}});
                   viewer.setStyle({chain:'B'}, {cartoon:{style:"trace",color:"green"}});

@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:4DM7",viewer,{},function(){
+$3Dmol.download("pdb:4DM7",viewer,{},()=> {
                   
                   viewer.addArrow({
                       start: {x:-10.0, y:0.0, z:0.0},
@@ -7,9 +7,9 @@ $3Dmol.download("pdb:4DM7",viewer,{},function(){
                       radiusRadio:1.0,
                       mid:1.0,
                       clickable:true,
-                      callback:function(){
+                      callback(){
                           this.color.setHex(0xFF0000FF);
-                          viewer.render( /*no callback*/);
+                          viewer.render( /* no callback */);
                       }
                   });
                   viewer.setStyle({chain:'A'},{line:{hidden:true}});

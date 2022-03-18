@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:4DM7",viewer,{},function(){
+$3Dmol.download("pdb:4DM7",viewer,{},()=> {
                   viewer.setStyle({or:[{chain:'C'},{chain:'D'}]},{line:{hidden:false,
                                                     colorscheme:'greenCarbon'}});
                   viewer.setStyle({or:[{chain:'A'},{chain:'B'}]},{line:{hidden:false,

@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:1ejg",viewer,{altLoc:'*'},function(){
+$3Dmol.download("pdb:1ejg",viewer,{altLoc:'*'},()=> {
                   
                   viewer.setStyle({stick:{}});
                   viewer.setStyle({altLoc:'B'},{stick:{colorscheme:'greenCarbon'}});
