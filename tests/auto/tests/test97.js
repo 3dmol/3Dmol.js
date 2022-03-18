@@ -1,7 +1,7 @@
 
 
 
-$3Dmol.download("pdb:4uhx", viewer, {}, function() {
+$3Dmol.download("pdb:4uhx", viewer, {}, () => {
     viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity: 0.8, color: "white"});
     viewer.render()
 });

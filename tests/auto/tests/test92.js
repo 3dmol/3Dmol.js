@@ -1,8 +1,8 @@
-          $3Dmol.download("pdb:4UAA",viewer,{},function(){  
+          $3Dmol.download("pdb:4UAA",viewer,{},()=> {  
             viewer.setStyle({},{stick:{}});
-            var resis=viewer.getUniqueValues('resi',{})
-            var sel = {resi:resis[0]}
-            var sel1 = {resi:resis[resis.length-1]}
+            const resis=viewer.getUniqueValues('resi',{})
+            const sel = {resi:resis[0]}
+            const sel1 = {resi:resis[resis.length-1]}
           //  console.log(sel)
           //  console.log(sel1)
                 viewer.addSphere({center:{resi:147},radius:10.0,color:'red'});
@@ -21,7 +21,7 @@
                       radiusRadio:1.0,
                       mid:1.0,
                       clickable:true,
-                      callback:function(){
+                      callback(){
                           this.color.setHex(0xFF0000FF);
                           viewer.render( );
                       }

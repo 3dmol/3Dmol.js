@@ -1,4 +1,4 @@
-$3Dmol.download("cid:5",viewer,{},function(){
+$3Dmol.download("cid:5",viewer,{},()=> {
                   
                   viewer.setStyle({stick:{radius:0.5,singleBonds:true,colorscheme:'greenCarbon',outline:true}});
                   viewer.addLabel("1",{},{index:1});

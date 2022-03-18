@@ -1,4 +1,4 @@
-var $scope = {}
+const $scope = {}
 	
 $scope.MODELS=[];
 
@@ -9,10 +9,10 @@ $scope.init = function() {
 }
 
 $scope.addModelObject = function (name, value) {
-  var model = {};
+  const model = {};
 model.format="vasp";    
   model.name = name;
-  model.value = value? true: false;
+  model.value = !!value;
   $scope.MODELS.push(model);
 }
 
@@ -28,10 +28,10 @@ $scope.render = function() {
 }
 
 $scope.renderModel = function (model) {
-  var modelPath=model.name;
-  var format=model.format;
-  $.get(modelPath,function(data){
-    var model = $scope.MAIN_VIEWER.addModel(data, format);
+  const modelPath=model.name;
+  const {format} = model;
+  $.get(modelPath,(data)=> {
+    const model = $scope.MAIN_VIEWER.addModel(data, format);
   $scope.MAIN_VIEWER.addUnitCell(model);
     model.setStyle({}, {sphere:{scale: 0.2}, stick:{radius:0.1}});	  
     $scope.MAIN_VIEWER.zoomTo();
@@ -41,7 +41,7 @@ $scope.renderModel = function (model) {
 }
 
 $scope.renderModels = function() {
-  $scope.MODELS.forEach(function(model){
+  $scope.MODELS.forEach((model)=> {
     $scope.renderModel(model);
   });
 }
