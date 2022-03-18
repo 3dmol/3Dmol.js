@@ -6,7 +6,6 @@ global.$ = require("jquery");
 global.URL.createObjectURL = function() {};
 let $3Dmol = require("../build/3Dmol-min.js");
 
-console.log($3Dmol.Quaternion);
 test("Test clamp with x being in the range of min and max" , clampInRange);
 test("Test clamp with x being less than min" , clampLessThanMin);
 test("Test clamp with x being greater than max" , clampGreaterThanMax);
