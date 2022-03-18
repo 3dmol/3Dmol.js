@@ -1,4 +1,4 @@
-var freq_data = `14
+const freqData = `14
                         Demo
                         C 1.4503 -0.3344 -0.0999 -0.02 -0.04 0.05
                         C 1.6983 -0.7959 1.1842 -0.33 0.26 0.02
@@ -16,7 +16,7 @@ var freq_data = `14
                         H 3.6193 -2.5617 1.7790 0.27 -0.14 -0.06`
 
 
-viewer.addModel(freq_data, "xyz");
+viewer.addModel(freqData, "xyz");
 viewer.vibrate(10, 0.8, true, null);
 viewer.animate({'loop': 'backAndForth'});
 viewer.setStyle({}, {stick:{}, sphere: {radius: 0.5}});
@@ -26,16 +26,16 @@ viewer.render(/* no callback */ );
 function demonstration(ind) {
   viewer.stopAnimate(); 
   viewer.vibrate(10, 0.8, true, null);
-  //Without the above line, there does not seem to be a problem
-  //However, the amplitude cannot be updated otherwise
+  // Without the above line, there does not seem to be a problem
+  // However, the amplitude cannot be updated otherwise
 
   viewer.animate({'loop': 'backAndForth',reps:1});
 
-  if(ind == 0) {
+  if(ind === 0) {
     viewer.render(); 
     return;
    }
 
-  setTimeout(function() { demonstration(ind-1)}, 100);
+  setTimeout(() => { demonstration(ind-1)}, 100);
 }
-demonstration(11); //Call the above function 10 times in 1 second
+demonstration(11); // Call the above function 10 times in 1 second

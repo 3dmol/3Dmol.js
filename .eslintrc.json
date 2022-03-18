@@ -42,7 +42,8 @@
         "no-bitwise":"off",// error", {"allow":["|=", "&", ">>", "<<", "~", "&=", "|", ">>>"]}],
         "no-unused-expressions":["error", {"allowTernary": true}],
         "array-callback-return":"warn",
-        "import/no-unresolved":["error", {"caseSensitive":false}]
+        "import/no-unresolved":["error", {"caseSensitive":false}],
+        "no-irregular-whitespace":["error", {"skipTemplates":true}]
     },
     "globals":{
         "$3Dmol": "writable",
