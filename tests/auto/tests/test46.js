@@ -84,13 +84,13 @@ const $scope = {}
     const {voxel} = chgcarObject;
     const {format} = chgcarObject;
     const {color} = chgcarObject;
-    const volumetric_path = chgcarObject.name;
+    const volumetricPath = chgcarObject.name;
     if (chgcarObject.data) {
       $scope.MAIN_VIEWER.addIsosurface(chgcarObject.data , {voxel , isoval: isovalue  , color, opacity , smoothness , alpha});
       $scope.MAIN_VIEWER.render();
     } else {
-      // console.log("Loading volumetric_data from "+volumetric_path);
-      $.get(volumetric_path, (data) => {
+      // console.log("Loading volumetric_data from "+volumetricPath);
+      $.get(volumetricPath, (data) => {
         // console.log("Volumetric data received");
         const voldata    = new $3Dmol.VolumeData(data, format);
         chgcarObject.data = voldata;

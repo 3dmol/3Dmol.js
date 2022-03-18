@@ -1258,13 +1258,13 @@ $3Dmol.workerString=function(){self.onmessage=function(b){b=b.data;var c=b.type;
     var voxel      = chgcarObject.voxel;
     var format     = chgcarObject.format;
     var color     = chgcarObject.color;
-    var volumetric_path = chgcarObject.name;
+    var volumetricPath = chgcarObject.name;
     if (chgcarObject.data) {
       $scope.MAIN_VIEWER.addIsosurface(chgcarObject.data , {voxel:voxel , isoval: isovalue  , color: color, opacity:opacity , smoothness:smoothness , alpha: alpha});
       $scope.MAIN_VIEWER.render();
     } else {
-      console.log("Loading volumetric_data from "+volumetric_path);
-      $http.get(volumetric_path).then(function (response) {
+      console.log("Loading volumetric_data from "+volumetricPath);
+      $http.get(volumetricPath).then(function (response) {
         console.log("Volumetric data received");
         var data       = response.data;
         var voldata    = new $3Dmol.VolumeData(data, format);
