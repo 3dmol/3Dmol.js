@@ -49,6 +49,7 @@
         "$3Dmol": "writable",
         "$": false,
         "console":"writable",
-        "require":"writable"
+        "require":"writable",
+        "screen":"writable"
     }
 }
