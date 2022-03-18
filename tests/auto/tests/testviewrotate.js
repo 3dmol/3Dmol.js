@@ -1,4 +1,4 @@
- $3Dmol.download("pdb:4c7j",viewer,{},function(){
+ $3Dmol.download("pdb:4c7j",viewer,{},()=> {
       viewer.setStyle({cartoon:{color:'spectrum',colorscheme:'roygb'}});
       viewer.zoomTo();
       viewer.rotate(90,{x:1,y:1,z:1});

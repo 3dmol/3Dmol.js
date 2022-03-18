@@ -33,8 +33,8 @@ $$$$
         </textarea>
 */
 
-$.get('data/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
-    var voldata = new $3Dmol.VolumeData(data, "cube");
+$.get('data/benzene-homo.cube', (data)=> {  // --iso 0.000001 or 0.1 / data: -0.2->0.2
+    const voldata = new $3Dmol.VolumeData(data, "cube");
     viewer.addVolumetricRender(voldata, {
         transferfn:[
             { color: "#0000ff", opacity: .1, value: -0.1 }, 
@@ -46,7 +46,7 @@ $.get('data/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / data
         // seldist: 1.7
     });
     
-    var rec1 = viewer.addModel($('#benzene').val(), "sdf");
+    const rec1 = viewer.addModel($('#benzene').val(), "sdf");
     rec1.setStyle({stick:{color:'lightgray', opacity:'1.0'}, sphere:{color:'gray', radius: 0.4}});
     viewer.addBox({color: "grey", wireframe: true, corner: {x: -4.774222722929, y: -4.7993401092340005, z: -3.446414440414},
        dimensions: {w: 9.701568631755, h: 9.701568631755, d: 7.05568627764}});
