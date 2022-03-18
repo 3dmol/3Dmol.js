@@ -154,7 +154,7 @@ $(document).ready(()=> {
         if(i === keys.length) {
             // finished
             const endTime = Date.now();
-            $('#summary_list').append(`<li class="totaltime">Total time: ${(endTime-beginTime)/1000}s`+`</p>`);
+            $('#summary_list').append(`<li class="totaltime">Total time: ${(endTime-beginTime)/1000}s</p>`);
             $('#summary_list').append(`<li class="failures">Total failures: ${failures}</p>`);
             
             zip.generateAsync({type:'blob'})
