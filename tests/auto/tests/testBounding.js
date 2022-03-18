@@ -5414,11 +5414,11 @@ END
 */
 
 
-var data = $("#mydata").val();
-var m = viewer.addModel(data, "pdb");
+const data = $("#mydata").val();
+const m = viewer.addModel(data, "pdb");
 m.setStyle({cartoon:{}});
 viewer.zoomTo();
-//adding a sphere within protein should not change bounding box
+// adding a sphere within protein should not change bounding box
 viewer.addSphere({center: {x: 11.725, y: 25.718, z: 0.286}, radius: 1, color: 'red', opacity: 0.5});
 viewer.zoomTo();
 viewer.render();

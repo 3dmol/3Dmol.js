@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:1YCR",viewer,{},function(){
+$3Dmol.download("pdb:1YCR",viewer,{},()=> {
                   
 
                   viewer.setStyle({'cartoon':{}});

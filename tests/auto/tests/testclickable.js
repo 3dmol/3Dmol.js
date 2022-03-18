@@ -57,7 +57,7 @@ H         -0.57470       -7.29915        1.13071
 
 viewer.addModel($('#mol').val(),'xyz');
 viewer.setStyle({'sphere':{radius:0.5},'stick':{}});
-viewer.setClickable({},true,function(atom) {
+viewer.setClickable({},true,(atom) => {
     viewer.removeAllShapes();
     viewer.addSphere({center:atom,radius:1.0,color:'purple',alpha:0.4});
     viewer.render( );
