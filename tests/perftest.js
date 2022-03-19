@@ -1,44 +1,44 @@
 /* 
  * QUnit benchmark tests for $3Dmol, GLmol, and JSmol
  */
-//Test rendering performance for different sized pdb's 
+// Test rendering performance for different sized pdb's 
 
-var profile = QUnit.urlParams.profilecheck;
+const profile = QUnit.urlParams.profilecheck;
 
-var testSuite = testSuite || "3Dmol";
+const testSuite = testSuite || "3Dmol";
 
 // Style types to test
-var styleSpec = ["line", "stick", "sphere", "cartoon"];
+const styleSpec = ["line", "stick", "sphere", "cartoon"];
 
 // $3Dmol testcase generator
 
-var gen$3DmolTestCase = function(styleType) {
+const gen$3DmolTestCase = function(styleType) {
     
-    var testName = styleType + " render";
-    var timeMsg = styleType + " render time: ";
-    var testMsg = styleType + " style set correctly";
-    var style = {}; style[styleType] = {};
+    const testName = `${styleType  } render`;
+    const timeMsg = `${styleType  } render time: `;
+    const testMsg = `${styleType  } style set correctly`;
+    const style = {}; style[styleType] = {};
     
-    QUnit.test(testName, function() {
+    QUnit.test(testName, () => {
         
         viewer.setStyle({}, {cross:{}});
         viewer.render();
         console.group(testName);          
         
-        var start = new Date();
+        const start = new Date();
         
         viewer.setStyle({}, style);           
         viewer.render();
         
-        var end = new Date();
-        var testTime = end - start;
+        const end = new Date();
+        const testTime = end - start;
         
         viewer.rotate(10);
-        var time2 = new Date() - end;
+        const time2 = new Date() - end;
         
         resultTimes[testName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");
-        console.log(timeMsg + (testTime) + "ms; rotate "+time2+"ms");          
+        console.log(`${timeMsg + (testTime)  }ms`);
+        console.log(`${timeMsg + (testTime)  }ms; rotate ${time2}ms`);          
         console.groupEnd();
         
         QUnit.ok(true, testMsg);
@@ -46,20 +46,20 @@ var gen$3DmolTestCase = function(styleType) {
     });
 };
 
-//GLmol test generator
+// GLmol test generator
 
-var genGLmolTestCase = function(styleType, profile) {
+const genGLmolTestCase = function(styleType, profile) {
     
-    var testName = styleType + " render";
-    var timeMsg = styleType + " render time: ";
-    var testMsg = styleType + " style set correctly";
+    const testName = `${styleType  } render`;
+    const timeMsg = `${styleType  } render time: `;
+    const testMsg = `${styleType  } style set correctly`;
     
-    var defineRep = function(style){
-        var all = viewer.getAllAtoms();
+    const defineRep = function(style){
+        const all = viewer.getAllAtoms();
         
         return function() {
-            //var all = this.getAllAtoms();
-            var target = this.modelGroup;
+            // var all = this.getAllAtoms();
+            const target = this.modelGroup;
 
             if (style === 'stick') 
                 this.drawBondsAsStick(target, all, this.cylinderRadius, this.cylinderRadius, true);
@@ -70,7 +70,7 @@ var genGLmolTestCase = function(styleType, profile) {
             else if (style === 'sphere') 
                 this.drawAtomsAsSphere(target, all, this.sphereRadius);
             else if (style === 'cartoon') {
-                //this.colorChainbow(all);
+                // this.colorChainbow(all);
                 this.drawCartoon(target, all, false, this.thickness);
             }
 
@@ -78,27 +78,27 @@ var genGLmolTestCase = function(styleType, profile) {
         
     };
     
-    QUnit.test(testName, function() {
+    QUnit.test(testName, () => {
         
         console.group(testName);
         
-        var view = viewer.getView();
+        const view = viewer.getView();
         viewer.initializeScene();
-        var all = viewer.getAllAtoms();
+        const all = viewer.getAllAtoms();
         viewer.zoomInto(all);
         viewer.defineRepresentation = defineRep(styleType);
         
-        var start = new Date();
-        //Draw appropriate style        
+        const start = new Date();
+        // Draw appropriate style        
         viewer.defineRepresentation();
         viewer.setView(view);        
         viewer.show();     
         
-        var end = new Date();
-        var testTime = end - start;
+        const end = new Date();
+        const testTime = end - start;
         
         resultTimes[testName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");        
+        console.log(`${timeMsg + (testTime)  }ms`);        
         console.groupEnd();
              
         ok(true, testMsg); 
@@ -108,14 +108,14 @@ var genGLmolTestCase = function(styleType, profile) {
 
 };
 
-//JSmol testcase generator
+// JSmol testcase generator
 
-var genJSmolTestCase = function(styleType, profile) {
+const genJSmolTestCase = function(styleType, profile) {
     
-    var testName = styleType + " render";
-    var timeMsg = styleType + " render time: ";
-    var testMsg = styleType + " style set correctly";
-    var script = "";
+    const testName = `${styleType  } render`;
+    const timeMsg = `${styleType  } render time: `;
+    const testMsg = `${styleType  } style set correctly`;
+    let script = "";
     if (styleType === "line") {
         script += "wireframe only;";
     }
@@ -128,24 +128,24 @@ var genJSmolTestCase = function(styleType, profile) {
     else if (styleType === "cartoon")
         script += "set cartoonFancy true; cartoon only;";
       
-    //Create test case
-    QUnit.test(testName, function() {
+    // Create test case
+    QUnit.test(testName, () => {
         
         console.group(testName);
-        var start = new Date();
+        const start = new Date();
         Jmol.scriptWait(viewer, script);
         
         Jmol.scriptWaitOutput(viewer, "refresh;");
         
-        var end = new Date();      
+        const end = new Date();      
         
-        var testTime = end - start;
+        const testTime = end - start;
         
         Jmol.scriptWaitOutput(viewer,"rotate 10; refresh;");
         
-        var time2 = new Date() - end;
+        const time2 = new Date() - end;
         resultTimes[testName] = testTime;
-        console.log(timeMsg + (testTime) + "ms; rotate "+time2+"ms");          
+        console.log(`${timeMsg + (testTime)  }ms; rotate ${time2}ms`);          
         console.groupEnd();
         
         QUnit.ok(true, testMsg); 
@@ -157,25 +157,25 @@ var genJSmolTestCase = function(styleType, profile) {
 // Setup test modules
 
 
-//$3Dmol tests
+// $3Dmol tests
 if (testSuite === '3Dmol') {
     QUnit.module( "$3Dmol Tests", {
 
-        setupOnce: function() {
+        setupOnce() {
             viewer.zoomTo();
             console.group("$3Dmol");
         },
 
-        teardownOnce: function() {
+        teardownOnce() {
             console.groupEnd();
         }
 
     });
 
     // $3Dmol test cases 
-    for (var style in styleSpec)
+    for (const style in styleSpec)
         gen$3DmolTestCase(styleSpec[style], profile);    
-    //surface test
+    // surface test
 /*
     var testName = "SURF render";
     var timeMsg = "surface render time: ";
@@ -204,47 +204,47 @@ if (testSuite === '3Dmol') {
     });
  */   
         
-    //Combo testcase
-	var comboName = "combined";
-    QUnit.test(comboName, function() {
+    // Combo testcase
+	const comboName = "combined";
+    QUnit.test(comboName, () => {
         
         viewer.setStyle({}, {});
         viewer.removeAllSurfaces();
         viewer.render();        
         console.group(comboName);
-        var start = new Date();
+        const start = new Date();
 
         viewer.setStyle({chain: 'A'}, {sphere: {} });
         viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
         viewer.setStyle({chain: 'C'}, {stick: {} });
         viewer.render();
-        //Jmol.scriptWait(viewer, "select chain=A; spacefill; select chain=B; cartoon; color group; wireframe; select chain=C; wireframe 80;");
-        var end = new Date();      
+        // Jmol.scriptWait(viewer, "select chain=A; spacefill; select chain=B; cartoon; color group; wireframe; select chain=C; wireframe 80;");
+        const end = new Date();      
         
-        var testTime = end - start;
+        const testTime = end - start;
         
         resultTimes[comboName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");          
+        console.log(`${timeMsg + (testTime)  }ms`);          
         console.groupEnd();
         
         QUnit.ok(true, testMsg); 
     });
     
-    var rotateName = "rotate";
-    QUnit.test(rotateName, function() {
+    const rotateName = "rotate";
+    QUnit.test(rotateName, () => {
         
 
         console.group(rotateName);
-        var start = new Date();
+        const start = new Date();
         
         viewer.rotate(10);
 
-        var end = new Date();      
+        const end = new Date();      
         
-        var testTime = end - start;
+        const testTime = end - start;
         
         resultTimes[rotateName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");          
+        console.log(`${timeMsg + (testTime)  }ms`);          
         console.groupEnd();
         
         QUnit.ok(true, testMsg); 
@@ -254,46 +254,46 @@ if (testSuite === '3Dmol') {
 
 
 else if (testSuite === "glmol") {
-//GLmol testing module
+// GLmol testing module
 
     QUnit.module( "GLmol Tests", {
 
-        setupOnce: function() {
-            var all = viewer.getAllAtoms();
+        setupOnce() {
+            const all = viewer.getAllAtoms();
             viewer.zoomInto(all);
             console.group("GLmol");
         },
 
-        teardownOnce: function() {
+        teardownOnce() {
             console.groupEnd();
-            //glviewer.removeAllModels();
+            // glviewer.removeAllModels();
         }
     });
 
 //    for (var style in styleSpec)
 //        genGLmolTestCase(styleSpec[style], profile);  
-    var combinedName = "combined";
-    QUnit.test(combinedName, function() {
+    const combinedName = "combined";
+    QUnit.test(combinedName, () => {
         
         console.group(combinedName);
         
-        var view = viewer.getView();
+        const view = viewer.getView();
         viewer.initializeScene();
-        var all = viewer.getAllAtoms();
-		var chainA = [];
-		var chainB = [];
-		var chainC = [];
+        const all = viewer.getAllAtoms();
+		const chainA = [];
+		const chainB = [];
+		const chainC = [];
 		
-		for(var i = 0; i < all.length; i++) {
-			if(viewer.atoms[all[i]].chain == 'A') chainA.push(all[i]);
-			else if(viewer.atoms[all[i]].chain == 'B') chainB.push(all[i]);
-			else if(viewer.atoms[all[i]].chain == 'C') chainC.push(all[i]);
+		for(let i = 0; i < all.length; i++) {
+			if(viewer.atoms[all[i]].chain === 'A') chainA.push(all[i]);
+			else if(viewer.atoms[all[i]].chain === 'B') chainB.push(all[i]);
+			else if(viewer.atoms[all[i]].chain === 'C') chainC.push(all[i]);
 		}
         
-        var start = new Date();
-        //Draw appropriate style        
+        const start = new Date();
+        // Draw appropriate style        
           //      viewer.setStyle({chain: 'A'}, {sphere: {} });
-        //viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
+        // viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
         viewer.drawAtomsAsSphere(viewer.modelGroup, chainA, viewer.sphereRadius);
         viewer.colorChainbow(chainB);
         viewer.drawCartoon(viewer.modelGroup, chainB, false, viewer.thickness);
@@ -302,34 +302,34 @@ else if (testSuite === "glmol") {
         viewer.zoomInto(all);
         viewer.show();     
         
-        var end = new Date();
-        var testTime = end - start;
+        const end = new Date();
+        const testTime = end - start;
         
         resultTimes[combinedName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");        
+        console.log(`${timeMsg + (testTime)  }ms`);        
         console.groupEnd();
              
         QUnit.ok(true, testMsg); 
         
     });
     
-        var rotateName = "rotate";
-    QUnit.test(rotateName, function() {
+        const rotateName = "rotate";
+    QUnit.test(rotateName, () => {
         
         console.group(rotateName);
         
-        var view = viewer.getView();
-        var dx = .1;
-      var dy = 0;
-      var r = Math.sqrt(dx * dx + dy * dy);
+        const view = viewer.getView();
+        const dx = .1;
+      const dy = 0;
+      const r = Math.sqrt(dx * dx + dy * dy);
 
-           var rs = Math.sin(r * Math.PI) / r;
+           const rs = Math.sin(r * Math.PI) / r;
 
 
-        var start = new Date();
-        //Draw appropriate style        
+        const start = new Date();
+        // Draw appropriate style        
           //      viewer.setStyle({chain: 'A'}, {sphere: {} });
-        //viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
+        // viewer.setStyle({chain: 'B'}, {cartoon: {color: 'spectrum'} });
                  viewer.dq.x = Math.cos(r * Math.PI); 
          viewer.dq.y = 0;
          viewer.dq.z =  rs * dx; 
@@ -340,11 +340,11 @@ else if (testSuite === "glmol") {
 
         viewer.show();     
         
-        var end = new Date();
-        var testTime = end - start;
+        const end = new Date();
+        const testTime = end - start;
         
         resultTimes[rotateName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");        
+        console.log(`${timeMsg + (testTime)  }ms`);        
         console.groupEnd();
              
         QUnit.ok(true, testMsg); 
@@ -357,28 +357,28 @@ else if (testSuite === "glmol_surf") {
 
     QUnit.module( "GLmol Surface Test", {
 
-        setupOnce: function() {
-            var all = viewer.getAllAtoms();
+        setupOnce() {
+            const all = viewer.getAllAtoms();
             viewer.zoomInto(all);
             console.group("GLmol");
         },
 
-        teardownOnce: function() {
+        teardownOnce() {
             console.groupEnd();
         }
     });
 
 
-    var testName = "surf render";
-    var timeMsg = "surf render time: ";
-    var testMsg = "surf style set correctly";
+    const testName = "surf render";
+    const timeMsg = "surf render time: ";
+    const testMsg = "surf style set correctly";
     
-    var defineRep = function(){
-        var all = viewer.getAllAtoms();
+    const defineRep = function(){
+        const all = viewer.getAllAtoms();
         
         return function() {
-            //var all = this.getAllAtoms();
-            var target = this.modelGroup;          
+            // var all = this.getAllAtoms();
+            const target = this.modelGroup;          
             this.drawAsCross(target, all, 0.3, true);
 
             
@@ -386,31 +386,31 @@ else if (testSuite === "glmol_surf") {
         
     };
     
-    QUnit.test(testName, function() {
+    QUnit.test(testName, () => {
         
         console.group(testName);
         
-        var view = viewer.getView();
+        const view = viewer.getView();
         viewer.initializeScene();
-        var all = viewer.getAllAtoms();
+        const all = viewer.getAllAtoms();
         viewer.zoomInto(all);
         viewer.defineRepresentation = defineRep();
         
         
-        //Draw appropriate style        
-        //viewer.defineRepresentation();
-        //viewer.drawAsCross(viewer.modelGroup, all, 0.3, true);
-        var start = new Date();
+        // Draw appropriate style        
+        // viewer.defineRepresentation();
+        // viewer.drawAsCross(viewer.modelGroup, all, 0.3, true);
+        const start = new Date();
         viewer.generateMesh(viewer.modelGroup, all, 1, false);
         
         viewer.setView(view);        
         viewer.show();     
         
-        var end = new Date();
-        var testTime = end - start;
+        const end = new Date();
+        const testTime = end - start;
         
         resultTimes[testName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");        
+        console.log(`${timeMsg + (testTime)  }ms`);        
         console.groupEnd();
              
         ok(true, testMsg); 
@@ -421,21 +421,21 @@ else if (testSuite === "glmol_surf") {
 
 else if (testSuite === "jmol") {
     
-    //JSmol Tests
+    // JSmol Tests
     QUnit.module( "Jmol Tests", {
 
-        setupOnce: function() {   
+        setupOnce() {   
             Jmol.scriptWait(viewer, "load test_structs/3M8L.pdb");
-            var end = new Date();
+            const end = new Date();
             
-            resultTimes['initialization'] = end - start;
+            resultTimes.initialization = end - start;
             console.group("JSmol");  
             console.log("starting JSmol tests");
         },
 
-        teardownOnce: function() {
+        teardownOnce() {
             console.groupEnd();
-            //$("#viewerdiv").empty();
+            // $("#viewerdiv").empty();
         }
 
     });
@@ -472,43 +472,43 @@ else if (testSuite === "jmol") {
         
     });
  */   
-    //Combo testcase
-	var comboName = "combined";
-    QUnit.test(comboName, function() {
+    // Combo testcase
+	const comboName = "combined";
+    QUnit.test(comboName, () => {
         
         Jmol.scriptWait(viewer, "select *; wireframe off; cartoon off; spacefill off; isosurface off; refresh;");
         
         console.group(comboName);
-        var start = new Date();
+        const start = new Date();
 
         
         Jmol.scriptWait(viewer, "select chain=A; spacefill; select chain=B; cartoon; color group; wireframe; select chain=C; wireframe 80;");
         Jmol.scriptWaitOutput(viewer,"refresh;");
-        var end = new Date();      
+        const end = new Date();      
         
-        var testTime = end - start;
+        const testTime = end - start;
         
         resultTimes[comboName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");          
+        console.log(`${timeMsg + (testTime)  }ms`);          
         console.groupEnd();
         
         QUnit.ok(true, testMsg); 
     });
     
-    var rotateName = "rotate";
-    QUnit.test(rotateName, function() {
+    const rotateName = "rotate";
+    QUnit.test(rotateName, () => {
         
 
         console.group(rotateName);
-        var start = new Date();
+        const start = new Date();
         
         Jmol.scriptWaitOutput(viewer,"rotate 10; refresh;");
-        var end = new Date();      
+        const end = new Date();      
         
-        var testTime = end - start;
+        const testTime = end - start;
         
         resultTimes[rotateName] = testTime;
-        console.log(timeMsg + (testTime) + "ms");          
+        console.log(`${timeMsg + (testTime)  }ms`);          
         console.groupEnd();
         
         QUnit.ok(true, testMsg); 
