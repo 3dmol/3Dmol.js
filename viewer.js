@@ -197,20 +197,20 @@ const createAttribute = function(name,value,parent){
     return attribute;
 }
 
-const createOtherModelSpec = function(spec,type,selection_index){
+const createOtherModelSpec = function(spec,type,selectionIndex){
     const attributes = $('<ul/>',{
         "class":`${type.toLowerCase()}_attributes`,
     });
-    for(const attribute_index in spec){
-        const attribute=createAttribute(attribute_index,spec[attribute_index],{type,index:selection_index})
+    for(const attributeIndex in spec){
+        const attribute=createAttribute(attributeIndex,spec[attributeIndex],{type,index:selectionIndex})
         if(attribute !== undefined)
             attribute.appendTo(attributes);
     }
 
-    const add_attribute = $('<button/>',{
-        "class":"add_attribute",
+    const addAttribute = $('<button/>',{
+        "class":"addAttribute",
         "text":"Add Attribute",
-        "data-index":selection_index,
+        "data-index":selectionIndex,
         "data-type":type,
         "click":function(){addOtherAttribute(this)},
     }).appendTo(attributes);
@@ -218,39 +218,39 @@ const createOtherModelSpec = function(spec,type,selection_index){
     return attributes;
 }
 
-const createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type,selection_index){
-    const style_spec=$('<li/>',{
-        "class":"style_spec",
+const createStyleSpec = function(styleSpecObject,styleSpecType,modelSpecType,selectionIndex){
+    const styleSpec=$('<li/>',{
+        "class":"styleSpec",
     });
 
     const validNames=$3Dmol.GLModel.validAtomStyleSpecs;
 
-    const style_spec_name = $('<select>',{
-        class:'style_spec_name',
-    }).appendTo(style_spec);
+    const styleSpecName = $('<select>',{
+        class:'styleSpecName',
+    }).appendTo(styleSpec);
 
-    style_spec_name.change(()=> {
-        const obj = query.selections[selection_index].style[style_spec_type];
+    styleSpecName.change(()=> {
+        const obj = query.selections[selectionIndex].style[styleSpecType];
         for(const i in obj){
-            if(!validNames[style_spec_name.val()].validItems.hasOwnProperty(i)){
-                delete query.selections[selection_index].style[style_spec_type][i];
+            if(!validNames[styleSpecName.val()].validItems.hasOwnProperty(i)){
+                delete query.selections[selectionIndex].style[styleSpecType][i];
             }
         }
-        query.selections[selection_index].style[style_spec_name.val()]=query.selections[selection_index].style[style_spec_type];
-        delete query.selections[selection_index].style[style_spec_type];
+        query.selections[selectionIndex].style[styleSpecName.val()]=query.selections[selectionIndex].style[styleSpecType];
+        delete query.selections[selectionIndex].style[styleSpecType];
         buildHTMLTree(query)
         render();
     });
 
     $.each(validNames,(key,value) => {
         if(value.gui){
-            style_spec_name.append($("<option>").attr('value',key).text(key));
+            styleSpecName.append($("<option>").attr('value',key).text(key));
         }
     });
     
-    style_spec_name.val(style_spec_type.toString())
-    if(style_spec_type === ""){
-        const list = query.selections[selection_index].style;
+    styleSpecName.val(styleSpecType.toString())
+    if(styleSpecType === ""){
+        const list = query.selections[selectionIndex].style;
         let index=0
         for(const i in validNames){
             if(validNames[i].gui && list[i] === undefined){
@@ -260,60 +260,60 @@ const createStyleSpec = function(style_spec_object,style_spec_type,model_spec_ty
         }
         if(index === 0)
             return;
-        style_spec_name.val(index)
+        styleSpecName.val(index)
     }
 
     const deleteSelection = $("<span/>",{
         html:"&#x2715;",
         class:"delete_style_spec",
-        "data-index":selection_index,
-        "data-type":model_spec_type,
-        "data-attr":style_spec_type,
+        "data-index":selectionIndex,
+        "data-type":modelSpecType,
+        "data-attr":styleSpecType,
         "click":function(){deleteStyleSpec(this)},
-    }).appendTo(style_spec); 
+    }).appendTo(styleSpec); 
 
-    const style_spec_attributes = $('<ul/>',{
-        class:'style_spec_attributes',
-    }).appendTo(style_spec);
+    const styleSpecAttributes = $('<ul/>',{
+        class:'styleSpecAttributes',
+    }).appendTo(styleSpec);
 
-    for(const attribute_index in style_spec_object){
-        const attribute = createAttribute(attribute_index,style_spec_object[attribute_index],{type:style_spec_type,index:selection_index})
+    for(const attributeIndex in styleSpecObject){
+        const attribute = createAttribute(attributeIndex,styleSpecObject[attributeIndex],{type:styleSpecType,index:selectionIndex})
         if(attribute !== undefined)
-            attribute.appendTo(style_spec_attributes);
+            attribute.appendTo(styleSpecAttributes);
     }
 
-    const add_attribute = $('<button/>',{
-        "class":"add_attribute",
+    const addAttribute = $('<button/>',{
+        "class":"addAttribute",
         "text":"Add Attribute",
-        "data-index":selection_index,
-        "data-type":model_spec_type,
-        "data-styletype":style_spec_type,
+        "data-index":selectionIndex,
+        "data-type":modelSpecType,
+        "data-styletype":styleSpecType,
         "click":function(){addAttribute(this)},
-    }).appendTo(style_spec);
+    }).appendTo(styleSpec);
                         
-    return style_spec;
+    return styleSpec;
 }
 
-const createStyle = function(model_spec_object,model_spec_type,selection_index){
+const createStyle = function(modelSpecObject,modelSpecType,selectionIndex){
     const style=$('<span/>',{
         "class":"style",
     }); 
 
-    const style_specs = $('<ul/>',{
-        "class":'style_specs',
+    const styleSpecs = $('<ul/>',{
+        "class":'styleSpecs',
     }).appendTo(style);
                         
-    for(const attribute_index in model_spec_object){
-        const spec = createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index)
+    for(const attributeIndex in modelSpecObject){
+        const spec = createStyleSpec(modelSpecObject[attributeIndex],attributeIndex,modelSpecType,selectionIndex)
         if(spec!== undefined)
-            spec.appendTo(style_specs);
+            spec.appendTo(styleSpecs);
     }
 
-    const add_style_spec = $('<button/>',{
-        "class":"add_style_spec",
+    const addStyleSpec = $('<button/>',{
+        "class":"addStyleSpec",
         "text":"Add Style Spec",
-        "data-index":selection_index,
-        "data-type":model_spec_type,
+        "data-index":selectionIndex,
+        "data-type":modelSpecType,
         "click":function(){addStyleSpec(this)},
     }).appendTo(style);
 
@@ -326,17 +326,17 @@ const validNames = {
     "labelres":"LabelRes",
 }
 
-const createModelSpecification = function(model_spec_type,model_spec_object,selection_index){
-    let model_specification = null;
-    if(model_spec_type==="style"){
-        model_specification = createStyle(model_spec_object,model_spec_type,selection_index)
-    }else if(model_spec_type==="surface"){
-        model_specification = createOtherModelSpec(model_spec_object,"Surface",selection_index)
-    }else if(model_spec_type==="labelres"){
-        model_specification = createOtherModelSpec(model_spec_object,"LabelRes",selection_index)
+const createModelSpecification = function(modelSpecType,modelSpecObject,selectionIndex){
+    let modelSpecification = null;
+    if(modelSpecType==="style"){
+        modelSpecification = createStyle(modelSpecObject,modelSpecType,selectionIndex)
+    }else if(modelSpecType==="surface"){
+        modelSpecification = createOtherModelSpec(modelSpecObject,"Surface",selectionIndex)
+    }else if(modelSpecType==="labelres"){
+        modelSpecification = createOtherModelSpec(modelSpecObject,"LabelRes",selectionIndex)
     }             
 
-    return model_specification;
+    return modelSpecification;
 }
 // this function creates the selection object
 const createSelection = function(spec,object,index,type){
@@ -346,29 +346,29 @@ const createSelection = function(spec,object,index,type){
     });
 
     const createHeader = function(){
-        const selection_type = $('<p>',{
-            class:'selection_type',
+        const selectionType = $('<p>',{
+            class:'selectionType',
             text:validNames[type],
         }).appendTo(selection);
 
         // add together sub selections
-        const attribute_pairs =[];
+        const attributePairs =[];
         for(const subselection in spec){
             let obj=spec[subselection];
             if(typeof(obj) === 'object' && Object.keys(obj).length === 0)
                 obj = ""; // empty object
-            attribute_pairs.push(`${subselection}:${obj}`);
+            attributePairs.push(`${subselection}:${obj}`);
         }
 
-        let modifier=attribute_pairs.join(";");
+        let modifier=attributePairs.join(";");
         if(modifier === "")
             modifier = "all"
-        const selection_spec=$('<input/>', {
-            class:'selection_spec',
+        const selectionSpec=$('<input/>', {
+            class:'selectionSpec',
             value:modifier,
         }).appendTo(selection); 
 
-        selection_spec.change(()=> {
+        selectionSpec.change(()=> {
             render(type === "surface");
         })
     }
@@ -404,43 +404,43 @@ let buildHTMLTree = function(query){
     document.getElementById("model_type").value = query.file.type
     $("#model_type").change(()=> {
         const val =  $("#model_type").val().toUpperCase();
-        if(prev_type !== val){
+        if(prevType !== val){
             
             render(true);
             run();
         }
-        prev_type = val
+        prevType = val
     })
 
     $("#model_input").attr("value",query.file.path);
     $("#model_input").change(()=> {
         const val =  $("#model_input").val().toUpperCase();
-        if(prev_in !== val){
-            if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
+        if(prevIn !== val){
+            if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!== "pdb"){
                 render(true);
                 run();
                 const width = $("#sidenav").width();
             }else{
-                if(prev_in!== val)
+                if(prevIn!== val)
                     alert("Invalid PDB")
             }
         }
-        prev_in = val;
+        prevIn = val;
     })
     const arr=[]
     // loops through selections and creates a selection tree
-    for(const selection_index in query.selections){
-        const selection_object = query.selections[selection_index];
-        const aug = augmentSelection(selection_object);
+    for(const selectionIndex in query.selections){
+        const selectionObject = query.selections[selectionIndex];
+        const aug = augmentSelection(selectionObject);
 
-        if(selection_object.style !== undefined){
-            arr.push(createSelection(aug,selection_object.style,selection_index,"style"));
+        if(selectionObject.style !== undefined){
+            arr.push(createSelection(aug,selectionObject.style,selectionIndex,"style"));
         }
-        if(selection_object.surface !== undefined){
-            arr.push(createSelection(aug,selection_object.surface,selection_index,"surface"))
+        if(selectionObject.surface !== undefined){
+            arr.push(createSelection(aug,selectionObject.surface,selectionIndex,"surface"))
         }
-        if(selection_object.labelres !== undefined){
-            arr.push(createSelection(aug,selection_object.labelres,selection_index,"labelres"))
+        if(selectionObject.labelres !== undefined){
+            arr.push(createSelection(aug,selectionObject.labelres,selectionIndex,"labelres"))
         }
     }
     for(const i in arr){
@@ -485,13 +485,13 @@ const queryToURL = function(query){
 
     const unpackStyle = function(object){
         const subStyles=[]
-        $.each(object, (sub_style,sub_style_object)=> {
+        $.each(object, (subStyle,subStyleObject)=> {
             let string="";
-            string+=sub_style;
-            if(Object.size(sub_style_object)!==0)
+            string+=subStyle;
+            if(Object.size(subStyleObject)!==0)
                 string+=":";
             const assignments =[]
-            $.each(sub_style_object, (key,value)=> {
+            $.each(subStyleObject, (key,value)=> {
                 assignments.push(`${key}~${value}`);
             });
             string+=assignments.join(",");
@@ -626,12 +626,12 @@ const updateQueryFromHTML = function(){
 
     const updateStyle = function(styl){
         const object={};
-        let list = $(styl).children(".style_specs");
-        list = $(list).children(".style_spec")
+        let list = $(styl).children(".styleSpecs");
+        list = $(list).children(".styleSpec")
         list.each((li)=> {
-            const subtype=$(list[li]).children(".style_spec_name")[0].value;
+            const subtype=$(list[li]).children(".styleSpecName")[0].value;
             object[subtype]={};
-            let otherList =$(list[li]).children(".style_spec_attributes")[0];
+            let otherList =$(list[li]).children(".styleSpecAttributes")[0];
             otherList=$(otherList).children(".attribute")
             otherList.each((li)=> {
                 const tag=object[subtype][$(otherList[li]).children(".attributeName")[0].value]=$(otherList[li]).children(".attributeValue")[0].tagName
@@ -641,8 +641,8 @@ const updateQueryFromHTML = function(){
         return object;
     }
 
-    const updateSelectionElements = function(selection_string){
-        return $3Dmol.specStringToObject(selection_string);
+    const updateSelectionElements = function(selectionString){
+        return $3Dmol.specStringToObject(selectionString);
     }
 
     function arraysEqual(a, b) {
@@ -698,8 +698,8 @@ const updateQueryFromHTML = function(){
             }
 
             const val = getSubObject();
-            const selection_spec = $(listItems[index]).children(".selection_spec")[0].value;
-            const selection = updateSelectionElements(selection_spec);
+            const selectionSpec = $(listItems[index]).children(".selectionSpec")[0].value;
+            const selection = updateSelectionElements(selectionSpec);
             const extended = combine(selection,val)
             selects.push(extended)
         }
@@ -744,12 +744,12 @@ const deleteSelection = function(spec){
 }
 
 const addModelSpec = function(type,selection){
-    let current_selection;
-    current_selection = query.selections[selection.dataset.index]
+    let currentSelection;
+    currentSelection = query.selections[selection.dataset.index]
     
     if(type === "style" || type === "surface" || type === "labelres"){
-        if(current_selection[type]==null)
-            current_selection[type]={};
+        if(currentSelection[type]==null)
+            currentSelection[type]={};
         else
             console.err(`${type} already defined for selection`);// TODO error
                                                                 // handling
@@ -759,10 +759,10 @@ const addModelSpec = function(type,selection){
     render();
 }
 
-let addStyleSpec = function(model_spec){
+const addStyleSpec = function(modelSpec){
     const defaultKey = "";
     const defaultValue = {};
-    query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
+    query.selections[modelSpec.dataset.index][modelSpec.dataset.type][defaultKey]=defaultValue;
     
     buildHTMLTree(query);
     render();
@@ -791,10 +791,10 @@ let deleteOtherAttribute = function(spec){
     render(spec.dataset.type === "surface");
 }
 
-let addAttribute = function(style_spec){
+const addAttribute = function(styleSpec){
     const defaultKey = "";
     const defaultValue = "";
-    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
+    query.selections[styleSpec.dataset.index][styleSpec.dataset.type][styleSpec.dataset.styletype][defaultKey]=defaultValue;
 
     buildHTMLTree(query);
     render();
@@ -851,8 +851,8 @@ const showJoinSession = function(){
 
 let toggle = true;
 let width=420;
-let prev_in = $("#model_input").val();
-let prev_type = $("#model_type").val();
+let prevIn = $("#model_input").val();
+let prevType = $("#model_type").val();
 const toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
@@ -1061,18 +1061,18 @@ $(document).ready(()=> {
     initSessions(); 
     
     run();
-    let start_width;
+    let startWidth;
     $("#sidenav").resizable({
         handles: 'e',
         minWidth: 300,
         maxWidth: 1000,
         start(event,ui){
-            start_width=$("#sidenav").width();
+            startWidth=$("#sidenav").width();
         },
         resize(event,ui){
             glviewer.center();
-            glviewer.translate(($("#sidenav").width()-start_width)/2,0,0,false);
-            start_width=$("#sidenav").width();
+            glviewer.translate(($("#sidenav").width()-startWidth)/2,0,0,false);
+            startWidth=$("#sidenav").width();
         }
     });
     $( "#selection_list" ).sortable({

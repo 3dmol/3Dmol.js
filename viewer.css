@@ -50,7 +50,7 @@ this may change*/
     margin-top:5px;
 }
 
-.add_style_spec{
+.addStyleSpec{
     margin-left:4%;
     width:92%;
     height: 25px;
@@ -63,7 +63,7 @@ this may change*/
     z-index:1;
 }
 
-.add_attribute{
+.addAttribute{
 
     width:92%;
     margin-left:4%;
@@ -140,7 +140,7 @@ select.attributeValue{
 #selections{
 } */
 
-.style_spec{
+.styleSpec{
     color:black;
     margin:5px;
 }
@@ -164,7 +164,7 @@ select.attributeValue{
 
 }
 
-#selection_list li .selection_spec{
+#selection_list li .selectionSpec{
     border-radius:0px;
     height:4%;
     background-color:rgba(0,0,102,.9);
@@ -172,7 +172,7 @@ select.attributeValue{
     padding:10px;
 }
 
-#selection_list li .selection_spec:hover,.delete_attribute:hover{
+#selection_list li .selectionSpec:hover,.delete_attribute:hover{
     background-color:rgba(0,0,102,.5);
 }
 /* selection list element*/
@@ -205,7 +205,7 @@ input{
     margin:0px;
     display:inline;
 }
-.selection_type{
+.selectionType{
     background-color: rgba(0,0,102,.9);
     color:white;
     height:4%;
@@ -218,7 +218,7 @@ input{
     margin-right:5px;
 }
 
-.selection_spec{
+.selectionSpec{
     margin-bottom: 10px;
     border-radius: 15px;
     width:42%;
@@ -300,7 +300,7 @@ select,input{
 }
 
 
-#selection_list li .selection_spec:hover,.delete_attribute:hover{
+#selection_list li .selectionSpec:hover,.delete_attribute:hover{
     background-color:rgba(0,0,102,.5);
 }
 
