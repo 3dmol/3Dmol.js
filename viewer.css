@@ -430,7 +430,7 @@ select,input{
 .rightdialog > .sessionname {
 	display: block; 
 	width: 100%; 
-	//background-color: black;
+	/*background-color: black;*/
 	color: white;
 	padding: 0;
 	border-radius: 15px;
