@@ -575,7 +575,7 @@ const urlToQuery = function(url){
             return string
         }    
         throw new Error(`Illegal url string : ${string}`);
-        
+
     }
 
     let currentSelection = null;
@@ -591,13 +591,14 @@ const urlToQuery = function(url){
         }else if(type === "select"){
             currentSelection = object
             query.selections.push(currentSelection);
-        }else if(type == "style" || type=="surface" || type == "labelres"){
+        }else if(type === "style" || type==="surface" || type === "labelres"){
             if(currentSelection == null){
                 currentSelection = {}
                 query.selections.push(currentSelection)
             }
             currentSelection[type] = object;
-        }else if(type == type){
+        // eslint-disable-next-line no-self-compare
+        }else if(type === type){
             query.file.helper = string;
         }
     }
@@ -646,7 +647,7 @@ const updateQueryFromHTML = function(){
     function arraysEqual(a, b) {
         if (a === b) return true;
         if (a == null || b == null) return false;
-        if (a.length != b.length) return false;
+        if (a.length !== b.length) return false;
 
         for (let i = 0; i < a.length; ++i) {
             if (a[i] !== b[i]) return false;
@@ -661,7 +662,7 @@ const updateQueryFromHTML = function(){
                     return arraysEqual(obj1[key],obj2[key])
                 return false;
             }
-            if(obj2[key]==undefined || obj2[key] != obj1[key])
+            if(obj2[key]===undefined || obj2[key] !== obj1[key])
                 return false;
         }
         return typeof(obj1) == typeof(obj2); // 0 != {}
@@ -677,19 +678,19 @@ const updateQueryFromHTML = function(){
     const selects = [];
     const listItems = $(".selection")
     listItems.each((index,value)=> {
-        if(listItems.hasOwnProperty(index) && listItems[index].id!="spacer"){
+        if(listItems.hasOwnProperty(index) && listItems[index].id!=="spacer"){
             const getSubObject = function(){
                 const attr = $(value);
                 const attribute=attr[0]
                 const type=$(attribute).children()[1].innerHTML.toLowerCase()
 
-                if(type=="style"){
+                if(type==="style"){
                     const style =updateStyle($(attribute).children(".style")[0])
                     return {"style":style}
-                }if(type=="surface"){
+                }if(type==="surface"){
                     const surface = updateOther($(attribute).children(".surface_attributes")[0])
                     return {"surface":surface} 
-                }if(type == "labelres"){
+                }if(type === "labelres"){
                     const labelres = updateOther($(attribute).children(".labelres_attributes")[0])
                     return {"labelres":labelres} 
                 }
@@ -706,10 +707,10 @@ const updateQueryFromHTML = function(){
     query.selections=selects;
 }
 
-var query = urlToQuery(window.location.search.substring(1));
+let query = urlToQuery(window.location.search.substring(1));
 // this function compresses the html object back into a url
-var render = function(surfaceEdited){
-    surfaceEdited = surfaceEdited == undefined ? false : surfaceEdited;
+let render = function(surfaceEdited){
+    surfaceEdited = surfaceEdited === undefined ? false : surfaceEdited;
     // calls update query
     updateQueryFromHTML();
     const url = queryToURL(query);
@@ -721,31 +722,31 @@ var render = function(surfaceEdited){
 }
 // these functions all edit the query object
 const addSelection = function(type){
-    const surface  = type == "surface"
-    if(type == "style")      
+    const surface  = type === "surface"
+    if(type === "style")      
         query.selections.push({"style":{line:{}}})
-    else if(type == "surface")
+    else if(type === "surface")
         query.selections.push({"surface":{}})
-    else if(type == "labelres")
+    else if(type === "labelres")
         query.selections.push({"labelres":{}})
     buildHTMLTree(query);
     render(surface);
 }
 
-var deleteSelection = function(spec){
+let deleteSelection = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type];
-    if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
+    if(query.selections[spec.dataset.index].surface === undefined && query.selections[spec.dataset.index].style === undefined && query.selections[spec.dataset.index].labelres === undefined)
         delete query.selections[spec.dataset.index]
     
     buildHTMLTree(query);
-    render(spec.dataset.type == "surface");
+    render(spec.dataset.type === "surface");
 }
 
 const addModelSpec = function(type,selection){
     let current_selection;
     current_selection = query.selections[selection.dataset.index]
     
-    if(type == "style" || type == "surface" || type == "labelres"){
+    if(type === "style" || type === "surface" || type === "labelres"){
         if(current_selection[type]==null)
             current_selection[type]={};
         else
@@ -757,7 +758,7 @@ const addModelSpec = function(type,selection){
     render();
 }
 
-var addStyleSpec = function(model_spec){
+let addStyleSpec = function(model_spec){
     const defaultKey = "";
     const defaultValue = {};
     query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
@@ -766,14 +767,14 @@ var addStyleSpec = function(model_spec){
     render();
 }
 
-var deleteStyleSpec = function(spec){
+let deleteStyleSpec = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
     
     buildHTMLTree(query);
     render();
 }
 
-var addOtherAttribute= function(spec){
+let addOtherAttribute= function(spec){
     const defaultKey = "";
     const defaultValue = "";
     query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
@@ -782,14 +783,14 @@ var addOtherAttribute= function(spec){
     render();
 }
 
-var deleteOtherAttribute = function(spec){
+let deleteOtherAttribute = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
     
     buildHTMLTree(query);
-    render(spec.dataset.type == "surface");
+    render(spec.dataset.type === "surface");
 }
 
-var addAttribute = function(style_spec){
+let addAttribute = function(style_spec){
     const defaultKey = "";
     const defaultValue = "";
     query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
@@ -798,7 +799,7 @@ var addAttribute = function(style_spec){
     render();
 }
 
-var deleteStyleAttribute = function(spec){
+let deleteStyleAttribute = function(spec){
     delete query.selections[spec.dataset.index].style[spec.dataset.type][spec.dataset.attr]
     buildHTMLTree(query);
     render();
@@ -849,8 +850,8 @@ const showJoinSession = function(){
 
 let toggle = true;
 let width=420;
-var prev_in = $("#model_input").val();
-var prev_type = $("#model_type").val();
+let prev_in = $("#model_input").val();
+let prev_type = $("#model_type").val();
 const toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
@@ -867,12 +868,12 @@ const toggleHide =  function(){
     toggle = !toggle;
 }
 
-var glviewer = null;
+let glviewer = null;
 // http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
 // Process commands, in order, and run on viewer (array of strings split on '&')
-var runcmds = function(cmds, viewer,renderSurface) {
+let runcmds = function(cmds, viewer,renderSurface) {
             console.log("rendering")
-    renderSurface = renderSurface == undefined ? true : renderSurface;
+    renderSurface = renderSurface === undefined ? true : renderSurface;
     if(renderSurface)
         viewer.removeAllSurfaces();
     viewer.removeAllLabels();
@@ -883,22 +884,22 @@ var runcmds = function(cmds, viewer,renderSurface) {
         const cmdname = kv[0];
         const cmdobj = $3Dmol.specStringToObject(kv[1]);
 
-        if (cmdname == 'select')
+        if (cmdname === 'select')
             currentsel = cmdobj;
-        else if (cmdname == 'surface' && renderSurface){
+        else if (cmdname === 'surface' && renderSurface){
             viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
                     currentsel);
-        } else if (cmdname == 'style'){
+        } else if (cmdname === 'style'){
             viewer.setStyle(currentsel, cmdobj);
-        } else if (cmdname == 'addstyle'){
+        } else if (cmdname === 'addstyle'){
             viewer.addStyle(currentsel, cmdobj);
-        } else if (cmdname == 'labelres'){
+        } else if (cmdname === 'labelres'){
             viewer.addResLabels(currentsel, cmdobj);
-        } else if (cmdname == 'colorbyelement'){
+        } else if (cmdname === 'colorbyelement'){
             if (typeof ($3Dmol.elementColors[cmdobj.colorscheme]) != "undefined")
                 viewer.setColorByElement(currentsel,
                         $3Dmol.elementColors[cmdobj.colorscheme]);
-        } else if (cmdname == 'colorbyproperty'){
+        } else if (cmdname === 'colorbyproperty'){
             if (typeof (cmdobj.prop) != "undefined"
                     && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined"){
                 viewer.setColorByProperty(currentsel, cmdobj.prop,
@@ -929,11 +930,11 @@ function run() {
                 glviewer.clear();
             }
 
-            if (src == 'session' || src == 'SESSION') {
+            if (src === 'session' || src === 'SESSION') {
                 // join a session
                 joinSession(data);
             }
-            if (src == 'pdb') {
+            if (src === 'pdb') {
                 console.log(data)
                 data = data.toUpperCase();
                 if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
@@ -942,7 +943,7 @@ function run() {
                 data = `http://files.rcsb.org/view/${  data
                          }.pdb`;
                 type = "pdb";
-            } if (src == 'cif') {
+            } if (src === 'cif') {
                 data = data.toUpperCase();
                 if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                     return;
@@ -950,29 +951,29 @@ function run() {
                 data = `http://files.rcsb.org/view/${  data
                          }.cif`;
                 type = "cif";
-            } else if (src == 'cid') {
+            } else if (src === 'cid') {
                 type = "sdf";
                 data = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${
                          data  }/SDF?record_type=3d`;
-            } else if (src == 'mmtf') {
+            } else if (src === 'mmtf') {
                 data = data.toUpperCase();
                 data = `http://mmtf.rcsb.org/full/${  data  }.mmtf`;
                 type = 'mmtf';
             } else { // url
                 // try to extract extension
                 type = data.substr(data.lastIndexOf('.') + 1);
-                if(type == 'gz') {
+                if(type === 'gz') {
                     const base = data.substr(0,data.lastIndexOf('.'));
                     type = `${base.substr(base.lastIndexOf('.'))  }.gz`;
                 }
             }
-            if (cmds[0] && cmds[0].indexOf('type=') == 0) {
+            if (cmds[0] && cmds[0].indexOf('type=') === 0) {
                 type = cmds[0].split('=')[1];
             }
 
             const start = new Date();
 
-            if (/\.gz$/.test(data) || type == 'mmtf') { // binary
+            if (/\.gz$/.test(data) || type === 'mmtf') { // binary
                                                         // data
                 $.ajax({url:data, 
                     type: "GET",
@@ -1020,7 +1021,7 @@ function run() {
                     $.post("echo.cgi", {
                         'url' : data
                     }, (ret, txt, response) => {
-                        if(src == 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret == "")) {
+                        if(src === 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret === "")) {
                             // really large files aren't available
                             // in pdb format
                             type = 'cif';
