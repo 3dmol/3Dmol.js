@@ -98,7 +98,7 @@ li{
     list-style:none;
 }
 /* attribute styleing*/
-.attribute_name,.attribute_value{
+.attributeName,.attributeValue{
     color:black;
     width:42%;
     height:20px;
@@ -109,14 +109,14 @@ li{
     overflow:hidden;
 }
 
-.attribute_name, select.attribute_value{
+.attributeName, select.attributeValue{
     height:30px;
 }
 
-select.attribute_value{
+select.attributeValue{
     width:46%;
 }
-.attribute_value{
+.attributeValue{
     float:right; 
     height:16px;
 }
@@ -227,7 +227,7 @@ input{
     position:relative;
 }
 
-.delete_selection{
+.deleteSelection{
     float:right;
     position: relative;
     height:4%;
@@ -304,13 +304,13 @@ select,input{
     background-color:rgba(0,0,102,.5);
 }
 
-.delete_selection:hover{
+.deleteSelection:hover{
     background-color:rgba(0,0,102,.5);
     border-radius:5px;
     color:white;
 
 }
-.delete_selection{
+.deleteSelection{
     background-color:rgba(0,0,102,.9);
     border-radius:5px;
     color:white;

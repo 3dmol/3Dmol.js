@@ -60,18 +60,18 @@ const createAttribute = function(name,value,parent){
     if(validNames[name] === undefined && name!=="")
         return undefined
 
-    const attribute_name = $('<select>',{
-        class:'attribute_name',
+    const attributeName = $('<select>',{
+        class:'attributeName',
     }).appendTo(attribute);
-    const obj_type = type;
+    const objType = type;
 
     $.each(validNames,(key,value) => {
         if(value.gui){
-            attribute_name.append($("<option>").attr('value',key).text(key));
+            attributeName.append($("<option>").attr('value',key).text(key));
         }
     });
 
-    attribute_name.val(name.toString())
+    attributeName.val(name.toString())
     if(name.toString() === ""){
         let list;
         if(type === "style")
@@ -90,11 +90,11 @@ const createAttribute = function(name,value,parent){
 
         if(name === undefined)
             return;// all of the attribute names are being used
-        attribute_name.val(index)
+        attributeName.val(index)
     }
 
     // delete button
-    const delete_selection = $("<span/>",{
+    const deleteSelection = $("<span/>",{
         html:"&#x2715;",
         class:"delete_attribute",
         "data-index":parent.index,
@@ -114,7 +114,7 @@ const createAttribute = function(name,value,parent){
         const {type} = validNames[key];
         return type === "boolean" || type === "color" || type === "colorscheme" || validNames[key].validItems!==undefined
     }
-    let attribute_value;
+    let attributeValue;
     if(itemIsDescrete(name) ){
         let validItemsValue;
         if(validNames[name].type !== undefined)
@@ -132,29 +132,29 @@ const createAttribute = function(name,value,parent){
             validItemsValue = validNames[name].validItems;
         }
 
-        const attribute_value = $('<select/>',{
-            class:'attribute_value',
+        const attributeValue = $('<select/>',{
+            class:'attributeValue',
         }).appendTo(attribute);
 
         $.each(validItemsValue,(key,value) => {
-            attribute_value.append($("<option>").attr('value',value).text(value));
+            attributeValue.append($("<option>").attr('value',value).text(value));
         });
 
-        attribute_value.val(value.toString());
+        attributeValue.val(value.toString());
         if(value === ""){
-            attribute_value.val(validItemsValue[0])
+            attributeValue.val(validItemsValue[0])
         } 
     }else{
         if(value === "")
             value = validNames[name].default
-        attribute_value = $('<input/>',{
-            class:'attribute_value',
+        attributeValue = $('<input/>',{
+            class:'attributeValue',
             value,
         }).appendTo(attribute);
     }
-    attribute_name.change(()=> {
+    attributeName.change(()=> {
         let validItemsValue;
-        const {type} = validNames[attribute_name.val()]
+        const {type} = validNames[attributeName.val()]
         if(type==="boolean"){
             validItemsValue = ["false","true"];
         }else if(type === "colorscheme"){
@@ -164,34 +164,34 @@ const createAttribute = function(name,value,parent){
         }else if(type === undefined){
             validItemsValue = validNames[name].validItems;
         }
-        const defa = validNames[attribute_name.val()].default;
+        const defa = validNames[attributeName.val()].default;
         let val;
         if(validItemsValue !== undefined){
             val = validItemsValue[0];
         }else{
             val = defa
         }
-        if(attribute_value.children()[0]!== undefined)
-            attribute_value.children()[0].value = val;
+        if(attributeValue.children()[0]!== undefined)
+            attributeValue.children()[0].value = val;
         else
-            attribute_value.val(val);
-        render(obj_type === "surface");
+            attributeValue.val(val);
+        render(objType === "surface");
     });
-    attribute_value.change(()=> {
-        render(obj_type === "surface");
+    attributeValue.change(()=> {
+        render(objType === "surface");
     });
 
-    if(name!=="" &&attribute_value.prop("tagName") === "INPUT" && validNames[name].type ==="number"){
+    if(name!=="" &&attributeValue.prop("tagName") === "INPUT" && validNames[name].type ==="number"){
         validNames[name].type =="number"
-        attribute_value.attr("type","number")
-        attribute_value.attr("step",validNames[name].step)
-        attribute_value.addClass("spinner")
+        attributeValue.attr("type","number")
+        attributeValue.attr("step",validNames[name].step)
+        attributeValue.addClass("spinner")
         const {max} = validNames[name];
         const {min} = validNames[name];
         if(max !== undefined)
-            attribute_value.attr("max",max);
+            attributeValue.attr("max",max);
         if(min !== undefined)
-            attribute_value.attr("min",min);   
+            attributeValue.attr("min",min);   
     }
     return attribute;
 }
@@ -262,7 +262,7 @@ const createStyleSpec = function(style_spec_object,style_spec_type,model_spec_ty
         style_spec_name.val(index)
     }
 
-    const delete_selection = $("<span/>",{
+    const deleteSelection = $("<span/>",{
         html:"&#x2715;",
         class:"delete_style_spec",
         "data-index":selection_index,
@@ -373,9 +373,9 @@ const createSelection = function(spec,object,index,type){
     }
 
      // delete button
-    const delete_selection = $("<div/>",{
+    const deleteSelection = $("<div/>",{
         html:"&#x2715;",
-        class:"delete_selection",
+        class:"deleteSelection",
         "data-index":index,
         "data-type":"",
         "click":function(){deleteSelection(this);}
@@ -385,7 +385,7 @@ const createSelection = function(spec,object,index,type){
     // check if style exists and if so create the object
     const ret = createModelSpecification(type,object, index);
 
-    delete_selection.attr("data-type",type);
+    deleteSelection.attr("data-type",type);
     ret.appendTo(selection);
 
     return selection;
@@ -618,7 +618,7 @@ const updateQueryFromHTML = function(){
      
         const otherList = $(other).children(".attribute");
         otherList.each((li)=> {
-            object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value
+            object[$(otherList[li]).children(".attributeName")[0].value]=$(otherList[li]).children(".attributeValue")[0].value
         });
         return object;
     }
@@ -633,8 +633,8 @@ const updateQueryFromHTML = function(){
             let otherList =$(list[li]).children(".style_spec_attributes")[0];
             otherList=$(otherList).children(".attribute")
             otherList.each((li)=> {
-                const tag=object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].tagName
-                object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value;
+                const tag=object[subtype][$(otherList[li]).children(".attributeName")[0].value]=$(otherList[li]).children(".attributeValue")[0].tagName
+                object[subtype][$(otherList[li]).children(".attributeName")[0].value]=$(otherList[li]).children(".attributeValue")[0].value;
             });
         });
         return object;
@@ -733,7 +733,7 @@ const addSelection = function(type){
     render(surface);
 }
 
-let deleteSelection = function(spec){
+const deleteSelection = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type];
     if(query.selections[spec.dataset.index].surface === undefined && query.selections[spec.dataset.index].style === undefined && query.selections[spec.dataset.index].labelres === undefined)
         delete query.selections[spec.dataset.index]
