@@ -182,7 +182,8 @@ const createAttribute = function(name,value,parent){
     });
 
     if(name!=="" &&attributeValue.prop("tagName") === "INPUT" && validNames[name].type ==="number"){
-        validNames[name].type =="number"
+        // eslint-disable-next-line no-unused-expressions
+        validNames[name].type ==="number" // can this be commented out?
         attributeValue.attr("type","number")
         attributeValue.attr("step",validNames[name].step)
         attributeValue.addClass("spinner")
