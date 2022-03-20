@@ -575,7 +575,7 @@ const urlToQuery = function(url){
             return string
         }    
         throw new Error(`Illegal url string : ${string}`);
-        return;
+        
     }
 
     let currentSelection = null;
