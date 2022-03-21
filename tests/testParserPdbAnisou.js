@@ -1,20 +1,20 @@
 viewer = $3Dmol.createViewer("#gldiv");
 
-      var data = $("#pdbData").val(); 
-      //console.log(data);
+      const data = $("#pdbData").val(); 
+      // console.log(data);
 
       viewer.setBackgroundColor(0xffffff);
       viewer.addModel(data, "pdb");
       viewer.zoomTo();
       viewer.render();
 
-      var model = viewer.getModel();
-      var atoms = model.selectedAtoms();
-      var html = "";
-      for (var i = 0; i < atoms.length; i++) {
-        var a = atoms[i];
+      const model = viewer.getModel();
+      const atoms = model.selectedAtoms();
+      let html = "";
+      for (let i = 0; i < atoms.length; i++) {
+        const a = atoms[i];
         if ("uMat" in a) {
-          html += a.serial + " " + JSON.stringify(a["uMat"]) + "<br/>";
+          html += `${a.serial  } ${  JSON.stringify(a.uMat)  }<br/>`;
         }
       }
       $("#loadAnisouResultDiv").html(html);
