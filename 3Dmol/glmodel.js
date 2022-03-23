@@ -2500,7 +2500,7 @@ $3Dmol.GLModel = (function() {
             if(molObj !== null && sameObj(colors,lastColors))
                 return; // don't recompute
             lastColors = colors;
-            const atoms = this.selectedAtoms(sel, atoms);
+            atoms = this.selectedAtoms(sel, atoms);
             if(atoms.length > 0)
                 molObj = null; // force rebuild
             for ( let i = 0; i < atoms.length; i++) {
