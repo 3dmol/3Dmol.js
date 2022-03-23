@@ -4,7 +4,7 @@
 
 // TODO: generate normals directly in drawStrip and drawThinStrip
 
-const $3Dmol = $3Dmol || {};
+// const $3Dmol = $3Dmol || {};
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
@@ -1017,7 +1017,8 @@ $3Dmol.drawCartoon = (function() {
         
         // then accumulate points
         curr = undefined;
-        for (let a = 0; a < atoms.length; a++) {
+        let a = 0;
+        for (a = 0; a < atoms.length; a++) {
             next = atoms[a];
 
             const nextresn = next.resn.trim();

@@ -3,7 +3,7 @@
  * quaternion, vector, matrix
  */
 
-const $3Dmol = $3Dmol || {};
+// const $3Dmol = $3Dmol || {};
 $3Dmol.Math = {
 
     clamp(x, min, max) {
