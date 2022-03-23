@@ -2334,8 +2334,9 @@ $3Dmol.Parsers = (function() {
       let atomIndex;
       let count = 0;
       const lines = str.split(/\r?\n|\r/);
+      let sectionList;
       if(lines.length > 0 && lines[0].includes("VERSION")){
-        const sectionList = lines.filter((line)=> 	// store the relevant section lists
+        sectionList = lines.filter((line)=> 	// store the relevant section lists
          line.includes("POINTERS") || line.includes("ATOM_NAME") ||
               line.includes("CHARGE") || line.includes("RADII") || line.includes("BONDS_INC_HYDROGEN") ||
               line.includes("BONDS_WITHOUT_HYDROGEN")

@@ -1,5 +1,5 @@
 // color scheme mappings
-const $3Dmol = $3Dmol || {};
+// const $3Dmol = $3Dmol || {};
 
 /** Color mapping gradients
  * @interface
