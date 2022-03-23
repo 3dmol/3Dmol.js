@@ -3,7 +3,7 @@
 // its serial number.
 // A glmodel knows how to apply the styles on each atom to create a gl object
 
-const $3Dmol = $3Dmol || {};
+// const $3Dmol = $3Dmol || {};
 
 /**
  * GLModel represents a group of related atoms
@@ -2519,7 +2519,7 @@ $3Dmol.GLModel = (function() {
          */
         this.setColorByProperty = function(sel, prop, scheme, range) {
             let i; let a;
-            const atoms = this.selectedAtoms(sel, atoms);
+            atoms = this.selectedAtoms(sel, atoms);
             lastColors = null; // don't bother memoizing
             if(atoms.length > 0)
                 molObj = null; // force rebuild
@@ -2564,7 +2564,7 @@ $3Dmol.GLModel = (function() {
         
          */
         this.setColorByFunction = function(sel, colorfun) {
-            const atoms = this.selectedAtoms(sel, atoms);
+            atoms = this.selectedAtoms(sel, atoms);
             if(typeof(colorfun)!=='function')
                 return;
             lastColors = null; // don't bother memoizing
@@ -2727,7 +2727,7 @@ $3Dmol.GLModel = (function() {
          * @param {LabelSpec} options
          */
         this.addPropertyLabels = function(prop, sel, viewer, style) {
-            const atoms = this.selectedAtoms(sel, atoms);
+            atoms = this.selectedAtoms(sel, atoms);
             const mystyle = $3Dmol.deepCopy(style);
             for(let i = 0; i < atoms.length; i++) {
                 const a = atoms[i];
@@ -2760,7 +2760,7 @@ $3Dmol.GLModel = (function() {
             
             const createdLabels = [];
             const helper = function(model, framenum) {
-                const atoms = model.selectedAtoms(sel, atoms);
+                atoms = model.selectedAtoms(sel, atoms);
                 const bylabel = {};
                 // collect by chain:resn:resi
                 for(let i = 0; i < atoms.length; i++) {

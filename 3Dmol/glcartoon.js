@@ -1268,7 +1268,6 @@ $3Dmol.drawCartoon = (function() {
             $3Dmol.GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, 0.4,
                     $3Dmol.CC.color(baseEndPt.color), 0, 2);
             addBackbonePoints(points, num, !doNotSmoothen, terminalPt,
-                    // eslint-disable-next-line no-undef
                     termOrientPt, prevOrientPt, curr, atoms, a);
             colors.push(nextColor);
         }

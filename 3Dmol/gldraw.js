@@ -1,6 +1,6 @@
 //
 
-const $3Dmol = $3Dmol || {};
+// const $3Dmol = $3Dmol || {};
 
 // define enum values
 /**
