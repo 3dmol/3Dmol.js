@@ -1,0 +1,5 @@
+build
+doc
+/tests
+/3Dmol-doc-template
+/node_modules
