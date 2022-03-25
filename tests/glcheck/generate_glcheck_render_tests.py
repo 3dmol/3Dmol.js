@@ -2,14 +2,12 @@
 
 #outputs all tests to /tests/glcheck/render-tests/<TestName>.html
 
-import sys
+import sys, re
 
-from os import mkdir
+from os import mkdir, symlink
 from os.path import join as pathjoin, exists, abspath
 from posixpath import split
 from shutil import copytree, rmtree
-
-from glcheck_render_tests_blacklist import blacklist
 
 curDir = abspath(split(abspath(__file__))[0]) 
 projectDir = abspath(pathjoin(curDir, "..", ".."))# hardcoded directory paths :-(
@@ -32,11 +30,10 @@ def replace_refs_to_test_structs(srccode: str) -> str:
 
 def preproc_src(string: str) -> str:
     string = replace_refs_to_test_structs(string)
+    #for the most part generate_tests does this, but it is necessary here
+    #to handle code in divs as we aren't using the post-processed versions
+    string = string.replace('viewer.render()','viewer.render(callback)')
     return string
-
-
-
-
 
 
 testsys = generate_tests.TestSystem(projectDir)
@@ -47,39 +44,41 @@ if exists(generationTargetDir):
 
 mkdir(generationTargetDir)
 
-copytree(buildSrcDir, testAssetsDir)
-copytree(dataSrcDir, dataAssetDir)
-copytree(testStructsSrcDir, structAssetDir)
-
-
+symlink(buildSrcDir, testAssetsDir,target_is_directory=True)
+symlink(dataSrcDir, dataAssetDir,target_is_directory=True)
+symlink(testStructsSrcDir, structAssetDir,target_is_directory=True)
 
 
 for file in testsys.files:
     for example in file.examples:
-        if example.name.find("js_") != -1:
-            example.name = example.name[example.name.rfind("js_"):]
-        if example.name in blacklist:
-            continue
+        prescript = '\n'.join([f"<script>{preproc_src(pre)}</script>" for pre in example.prescripts])
         with open(pathjoin(generationTargetDir, f"{example.name}.html"), "w") as f:
             f.write(
 f"""
 <html lang="en">
     <head>
         <title>{example.name}</title>
-        <script src="./assets/3Dmol-min.js"></script>         
+        <script src="./assets/3Dmol.js"></script>         
     </head>
     <body style="margin:0;padding:0">
-        {"".join([f"<script>{preproc_src(pre)}</script>" for pre in example.prescripts])}
+        {prescript}
         {"".join([preproc_src(data) for data in example.datas])}
         {"".join([preproc_src(div) for div in example.divs])}
-        {"<div id='gldiv' style='width: 100vw; height: 100vh; position: relative;'></div><script>var viewer=$3Dmol.createViewer($('#gldiv'));</script>" if not example.divs else ""}
+        {"<div id='gldiv' style='width: 400px; height: 400px; position: relative; '></div>" if not example.divs else ""}
+        {"<script>var viewer=$3Dmol.createViewer($('#gldiv'));</script>" if not example.divs and not re.search(r'create(Stereo)?Viewer', example.script) else ""}
         <script>
-            var callback = function() {{ window.glcheck_renderDone = true;}};
+            var callback = function(viewer) {{ 
+                let v = viewer || $3Dmol.viewers[Object.keys($3Dmol.viewers)[0]];
+                if(v.surfacesFinished() && !v.isAnimated() && !$3Dmol.processing_autoinit) {{
+                    window.glcheck_renderDone = true;
+                }} else {{
+                    setTimeout(callback, 1000, v);
+                }}
+            }};
             {preproc_src(example.script)}
             {
-                "window.glcheck_renderDone = true;" 
-                if example.script.find("callback") == -1 
-                or example.prescripts and example.prescripts.find("callback") == -1 
+                '$(window).on("load",function() {{callback();}});'
+                if example.script.find("callback") == -1 and prescript.find("callback") == -1 
                 else ""
             }
         </script>        

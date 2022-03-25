@@ -1,4 +1,4 @@
-(function() {
+// @ts-check
 /**
  * Color representation. 
  * @typedef ColorSpec
@@ -6,13 +6,17 @@
  * @prop {string} <html color name>
  */
 
+import { getAtomProperty } from "./3dmol";
+import { Gradient } from "./gradients";
+import { Color } from "./WebGL";
+
  /**
  
  * @typedef ColorschemeSpec
  * Built in colorschemes
  *
  * @example //Using a function in order to define the colors. 
-  $3Dmol.download("pdb:4UAA",viewer,{},function(){
+  export const download("pdb:4UAA",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   var colorAsSnake = function(atom) {
                     return atom.resi % 2 ? 'white': 'green'
@@ -34,17 +38,16 @@
  * @prop {string} chain - standard chain colorscheme
  * @prop {string} chainHetatm - chain Hetatm colorscheme
  * @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
- * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorscheme.  Is either a $3Dmol.Gradient object or the name of a built-in gradient (rwb, roygb, sinebow)
+ * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorscheme.  Is either a export const Gradient object or the name of a built-in gradient (rwb, roygb, sinebow)
  * @prop {min} - min value for gradient
  * @prop {max} - max value for gradient
  * @prop {mid} - mid point value for gradient (for rwb)
- * @prop {object} map - map of a certain AtomSpec property to a color of the form `{'prop': 'elem', map:$3Dmol.elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
+ * @prop {object} map - map of a certain AtomSpec property to a color of the form `{'prop': 'elem', map:export const elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
  * @prop {function} colorfunc - Allows the user to provide a function for setting the colorschemes.
  */
  
-})();
 
-var htmlColors = $3Dmol.htmlColors = {
+export const htmlColors = {
     "aliceblue" : 0xF0F8FF,
     "antiquewhite" : 0xFAEBD7,
     "aqua" : 0x00FFFF,
@@ -194,11 +197,13 @@ var htmlColors = $3Dmol.htmlColors = {
     "yellow" : 0xFFFF00,
     "yellowgreen" : 0x9ACD32
 };
-// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
+// in an attempt to reduce memory overhead, cache all export const Colors
 // this makes things a little faster
-$3Dmol.CC = {
+export const CC = {
     rgbRegEx : /rgb(a?)\(\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)/i,
-    cache : {0:new $3Dmol.Color(0)},
+    cache : {
+        // 0:new export const Color(0)
+    },
     color : function color_(hex) {
         // Undefined values default to black
         if(!hex)
@@ -215,11 +220,11 @@ $3Dmol.CC = {
         // numbers and hex strings
         hex = this.getHex(hex);
         if(typeof hex === 'number') {
-            var c = new $3Dmol.Color(hex);
+            var c = new Color(hex);
             this.cache[hex] = c;
             return c;
         } else {
-            // pass through $3Dmol.Color & other objects
+            // pass through export const Color & other objects
             return hex;
         }
     },
@@ -260,30 +265,73 @@ $3Dmol.CC = {
 };
 
 
-$3Dmol.CC = $3Dmol.CC;
-$3Dmol.CC.color = $3Dmol.CC.color;
-
-
 
 
 /** Preset secondary structure color scheme 
  * @struct
  */
-$3Dmol.ssColors = $3Dmol.ssColors || {};
+export const ssColors = {
+    pyMol:{'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00},
+    Jmol:{'h': 0xff0080, 's': 0xffc800, 'c': 0xffffff}
+};
 //names are in helix-sheet-coil order
-$3Dmol.ssColors.pyMol = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
-$3Dmol.ssColors.Jmol = {'h': 0xff0080, 's': 0xffc800, 'c': 0xffffff};
 
+const rasmol = {
+    'H': 0xFFFFFF,
+    'He': 0xFFC0CB,
+    'HE': 0xFFC0CB,
+    'Li': 0xB22222,
+    'LI': 0xB22222,
+    'B': 0x00FF00,
+    'C': 0xC8C8C8,
+    'N': 0x8F8FFF,
+    'O': 0xF00000,
+    'F': 0xDAA520,
+    'Na': 0x0000FF,
+    'NA': 0x0000FF,
+    'Mg': 0x228B22,
+    'MG': 0x228B22,
+    'Al': 0x808090,
+    'AL': 0x808090,
+    'Si': 0xDAA520,
+    'SI': 0xDAA520,
+    'P': 0xFFA500,
+    'S': 0xFFC832,
+    'Cl': 0x00FF00,
+    'CL': 0x00FF00,
+    'Ca': 0x808090,
+    'CA': 0x808090,
+    'Ti': 0x808090,
+    'TI': 0x808090,
+    'Cr': 0x808090,
+    'CR': 0x808090,
+    'Mn': 0x808090,
+    'MN': 0x808090,
+    'Fe': 0xFFA500,
+    'FE': 0xFFA500,
+    'Ni': 0xA52A2A,
+    'NI': 0xA52A2A,
+    'Cu': 0xA52A2A,
+    'CU': 0xA52A2A,
+    'Zn': 0xA52A2A,
+    'ZN': 0xA52A2A,
+    'Br': 0xA52A2A,
+    'BR': 0xA52A2A,
+    'Ag': 0x808090,
+    'AG': 0x808090,
+    'I': 0xA020F0,
+    'Ba': 0xFFA500,
+    'BA': 0xFFA500,
+    'Au': 0xDAA520,
+    'AU': 0xDAA520    
+}
 
-/** Preset element coloring - from individual element colors to entire mappings (e.g. '$3Dmol.elementColors.Jmol' colors atoms with Jmol stylings)
+/** Preset element coloring - from individual element colors to entire mappings (e.g. 'export const elementColors.Jmol' colors atoms with Jmol stylings)
  * @struct
  */
-$3Dmol.elementColors = $3Dmol.elementColors || {};
-
-$3Dmol.elementColors.defaultColor = 0xff1493;
-
-/** @property Jmol-like element colors*/
-$3Dmol.elementColors.Jmol = {
+export const elementColors = {
+    /** @property Jmol-like element colors*/
+    Jmol:{
         'H': 0xFFFFFF,
         'He': 0xD9FFFF,
         'HE': 0xD9FFFF,
@@ -488,256 +536,200 @@ $3Dmol.elementColors.Jmol = {
         'HS': 0xE6002E,
         'Mt': 0xEB0026,
         'MT': 0xEB0026
+    },
+    /** @property rasmol-like element colors */
+    rasmol,
+    defaultColors: {...rasmol}
 };
 
-/** @property rasmol-like element colors */
-$3Dmol.elementColors.rasmol = {
-        'H': 0xFFFFFF,
-        'He': 0xFFC0CB,
-        'HE': 0xFFC0CB,
-        'Li': 0xB22222,
-        'LI': 0xB22222,
-        'B': 0x00FF00,
-        'C': 0xC8C8C8,
-        'N': 0x8F8FFF,
-        'O': 0xF00000,
-        'F': 0xDAA520,
-        'Na': 0x0000FF,
-        'NA': 0x0000FF,
-        'Mg': 0x228B22,
-        'MG': 0x228B22,
-        'Al': 0x808090,
-        'AL': 0x808090,
-        'Si': 0xDAA520,
-        'SI': 0xDAA520,
-        'P': 0xFFA500,
-        'S': 0xFFC832,
-        'Cl': 0x00FF00,
-        'CL': 0x00FF00,
-        'Ca': 0x808090,
-        'CA': 0x808090,
-        'Ti': 0x808090,
-        'TI': 0x808090,
-        'Cr': 0x808090,
-        'CR': 0x808090,
-        'Mn': 0x808090,
-        'MN': 0x808090,
-        'Fe': 0xFFA500,
-        'FE': 0xFFA500,
-        'Ni': 0xA52A2A,
-        'NI': 0xA52A2A,
-        'Cu': 0xA52A2A,
-        'CU': 0xA52A2A,
-        'Zn': 0xA52A2A,
-        'ZN': 0xA52A2A,
-        'Br': 0xA52A2A,
-        'BR': 0xA52A2A,
-        'Ag': 0x808090,
-        'AG': 0x808090,
-        'I': 0xA020F0,
-        'Ba': 0xFFA500,
-        'BA': 0xFFA500,
-        'Au': 0xDAA520,
-        'AU': 0xDAA520    
-};
 
-$3Dmol.elementColors.defaultColors = $3Dmol.elementColors.rasmol;
-
-$3Dmol.elementColors.greenCarbon = $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.greenCarbon.C = 0x00ff00; //bright green
-
-$3Dmol.elementColors.cyanCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.cyanCarbon.C = 0x00ffff;
-
-$3Dmol.elementColors.magentaCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.magentaCarbon.C = 0xff00ff;
-
-$3Dmol.elementColors.yellowCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.yellowCarbon.C = 0xffff00;
-
-$3Dmol.elementColors.whiteCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.whiteCarbon.C = 0xffffff;
-
-$3Dmol.elementColors.orangeCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.orangeCarbon.C = 0xffa500;
-
-$3Dmol.elementColors.purpleCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.purpleCarbon.C = 0x800080;
-
-$3Dmol.elementColors.blueCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.blueCarbon.C = 0x0000ff;
+const greenCarbon =  {...elementColors.defaultColors, C:0x00ff00}
+const cyanCarbon =   {...elementColors.defaultColors, C:0x00ffff}
+const magentaCarbon ={...elementColors.defaultColors, C : 0xff00ff}
+const yellowCarbon = {...elementColors.defaultColors, C:0xffff00}
+const whiteCarbon =   {...elementColors.defaultColors, C:0xffffff}
+const orangeCarbon = {...elementColors.defaultColors, C:0xffa500}
+const purpleCarbon = {...elementColors.defaultColors, C:0x800080}
+const blueCarbon =   {...elementColors.defaultColors, C:0x0000ff}
 
 
-$3Dmol.residues = {};
-
-/** @property standard amino acid color scheme*/
-$3Dmol.residues.amino ={
-'ALA' : 0xC8C8C8,        
-'ARG' : 0x145AFF,              
-'ASN' : 0x00DCDC,              
-'ASP' : 0xE60A0A,             
-'CYS' : 0xE6E600,             
-'GLN' : 0x00DCDC,            
-'GLU' : 0xE60A0A,              
-'GLY' : 0xEBEBEB,        
-'HIS' :  0x8282D2,       
-'ILE' :0x0F820F,             
-'LEU':0x0F820F,              
-'LYS' :0x145AFF,              
-'MET' :0xE6E600,             
-'PHE':0x3232AA,            
-'PRO' :  0xDC9682,    
-'SER': 0xFA9600,           
-'THR': 0xFA9600,          
-'TRP' :   0xB45AB4,    
-'TYR' :0x3232AA,            
-'VAL' :0x0F820F,            
-'ASX'  :0xFF69B4,     
-'GLX'  :0xFF69B4,   
-
-};
+export const residues = {
+    /** @property standard amino acid color scheme*/
+amino:{
+    'ALA' : 0xC8C8C8,        
+    'ARG' : 0x145AFF,              
+    'ASN' : 0x00DCDC,              
+    'ASP' : 0xE60A0A,             
+    'CYS' : 0xE6E600,             
+    'GLN' : 0x00DCDC,            
+    'GLU' : 0xE60A0A,              
+    'GLY' : 0xEBEBEB,        
+    'HIS' :  0x8282D2,       
+    'ILE' :0x0F820F,             
+    'LEU':0x0F820F,              
+    'LYS' :0x145AFF,              
+    'MET' :0xE6E600,             
+    'PHE':0x3232AA,            
+    'PRO' :  0xDC9682,    
+    'SER': 0xFA9600,           
+    'THR': 0xFA9600,          
+    'TRP' :   0xB45AB4,    
+    'TYR' :0x3232AA,            
+    'VAL' :0x0F820F,            
+    'ASX'  :0xFF69B4,     
+    'GLX'  :0xFF69B4,   
+    
+    },
 
 /** @property shapely amino acid color scheme*/
-$3Dmol.residues.shapely ={
-'ALA' : 0x8CFF8C,         
-'ARG' : 0x00007C,              
-'ASN' : 0xFF7C70,              
-'ASP' : 0xA00042,             
-'CYS' : 0xFFFF70,             
-'GLN' : 0xFF4C4C,            
-'GLU' : 0x660000,              
-'GLY' : 0xFFFFFF,        
-'HIS' :  0x7070FF,       
-'ILE' :0x004C00,             
-'LEU':0x455E45,              
-'LYS' :0x4747B8,              
-'MET' :0xB8A042,             
-'PHE':0x534C52,            
-'PRO' :  0x525252,    
-'SER': 0xFF7042,           
-'THR': 0xB84C00,          
-'TRP' :   0x4F4600,    
-'TYR' :0x8C704C,            
-'VAL' :0xFF8CFF,            
-'ASX'  :0xFF00FF,     
-'GLX'  :0xFF00FF,    
-
-};
+shapely:{
+    'ALA' : 0x8CFF8C,         
+    'ARG' : 0x00007C,              
+    'ASN' : 0xFF7C70,              
+    'ASP' : 0xA00042,             
+    'CYS' : 0xFFFF70,             
+    'GLN' : 0xFF4C4C,            
+    'GLU' : 0x660000,              
+    'GLY' : 0xFFFFFF,        
+    'HIS' :  0x7070FF,       
+    'ILE' :0x004C00,             
+    'LEU':0x455E45,              
+    'LYS' :0x4747B8,              
+    'MET' :0xB8A042,             
+    'PHE':0x534C52,            
+    'PRO' :  0x525252,    
+    'SER': 0xFF7042,           
+    'THR': 0xB84C00,          
+    'TRP' :   0x4F4600,    
+    'TYR' :0x8C704C,            
+    'VAL' :0xFF8CFF,            
+    'ASX'  :0xFF00FF,     
+    'GLX'  :0xFF00FF,    
+    
+    },
 
 /** @property nucleic acid color scheme*/
-$3Dmol.residues.nucleic = {
+nucleic: {
     'A':0xA0A0FF,    
     'G':  0xFF7070,    
     'I':  0x80FFFF,    
     'C':  0xFF8C4B,    
     'T':  0xA0FFA0,    
     'U':   0xFF8080
+},
 };
-$3Dmol.chains ={};
+
+
+
+
+export const chains ={
 
 /** @property chain based standard color scheme */
-$3Dmol.chains.atom = {
+atom : {
 
-'A' : 0xC0D0FF,        
-'B' : 0xB0FFB0,              
-'C' : 0xFFC0C8 ,              
-'D' : 0xFFFF80,             
-'E' : 0xFFC0FF,             
-'F' : 0xB0F0F0,            
-'G' : 0xFFD070,              
-'H' : 0xF08080,        
-'I' :  0xF5DEB3,       
-'J' :0x00BFFF,             
-'K':0xCD5C5C ,              
-'L' :0x66CDAA,              
-'M' :0x9ACD32,             
-'N':0xEE82EE ,            
-'O' :  0x00CED1,    
-'P': 0x00FF7F,           
-'Q': 0x3CB371 ,          
-'R' :   0x00008B,    
-'S' :0xBDB76B,            
-'T' :0x006400,            
-'U'  :0x800000,     
-'V'  :0x808000,       
-'W' :0x800080,
-'X' :0x008080 ,
- 'Y':0xB8860B,
- 'Z':0xB22222,
+    'A' : 0xC0D0FF,        
+    'B' : 0xB0FFB0,              
+    'C' : 0xFFC0C8 ,              
+    'D' : 0xFFFF80,             
+    'E' : 0xFFC0FF,             
+    'F' : 0xB0F0F0,            
+    'G' : 0xFFD070,              
+    'H' : 0xF08080,        
+    'I' :  0xF5DEB3,       
+    'J' :0x00BFFF,             
+    'K':0xCD5C5C ,              
+    'L' :0x66CDAA,              
+    'M' :0x9ACD32,             
+    'N':0xEE82EE ,            
+    'O' :  0x00CED1,    
+    'P': 0x00FF7F,           
+    'Q': 0x3CB371 ,          
+    'R' :   0x00008B,    
+    'S' :0xBDB76B,            
+    'T' :0x006400,            
+    'U'  :0x800000,     
+    'V'  :0x808000,       
+    'W' :0x800080,
+    'X' :0x008080 ,
+     'Y':0xB8860B,
+     'Z':0xB22222,
+    },
+    /** @property hetatm color scheme */
+hetatm : {
+
+    'A' : 0x90A0CF,        
+    'B' : 0x80CF98,              
+    'C' : 0xCF90B0 ,              
+    'D' : 0xCFCF70,             
+    'E' : 0xCF90CF,             
+    'F' : 0x80C0C0,            
+    'G' : 0xCFA060,              
+    'H' : 0xC05070,        
+    'I' : 0xC5AE83,       
+    'J' :0x00A7CF,             
+    'K':0xB54C4C ,              
+    'L' :0x56B592,              
+    'M' :0x8AB52A,             
+    'N':0xBE72BE ,            
+    'O' :  0x00B6A1,    
+    'P': 0x00CF6F,           
+    'Q': 0x349B61 ,          
+    'R' :   0x0000BB  ,    
+    'S' :0xA59F5B,            
+    'T' :0x009400,            
+    'U'  :0xB00000,     
+    'V'  :0xB0B000,       
+    'W' :0xB000B0,
+    'X' :0x00B0B0 ,
+     'Y':0xE8B613,
+     'Z':0xC23232,
+    },
 };
 
-/** @property hetatm color scheme */
-$3Dmol.chains.hetatm = {
 
-'A' : 0x90A0CF,        
-'B' : 0x80CF98,              
-'C' : 0xCF90B0 ,              
-'D' : 0xCFCF70,             
-'E' : 0xCF90CF,             
-'F' : 0x80C0C0,            
-'G' : 0xCFA060,              
-'H' : 0xC05070,        
-'I' : 0xC5AE83,       
-'J' :0x00A7CF,             
-'K':0xB54C4C ,              
-'L' :0x56B592,              
-'M' :0x8AB52A,             
-'N':0xBE72BE ,            
-'O' :  0x00B6A1,    
-'P': 0x00CF6F,           
-'Q': 0x349B61 ,          
-'R' :   0x0000BB  ,    
-'S' :0xA59F5B,            
-'T' :0x009400,            
-'U'  :0xB00000,     
-'V'  :0xB0B000,       
-'W' :0xB000B0,
-'X' :0x00B0B0 ,
- 'Y':0xE8B613,
- 'Z':0xC23232,
-};
+
 
 /** @property built in color schemes 
 * The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme */
-$3Dmol.builtinColorSchemes = {
-        'ssPyMol' : {'prop':'ss', map:$3Dmol.ssColors.pyMol},
-        'ssJmol' :{'prop':'ss', map:$3Dmol.ssColors.Jmol},
-        'Jmol' :{'prop':'elem', map:$3Dmol.elementColors.Jmol},
-        'amino' : {'prop':'resn', map:$3Dmol.residues.amino},
-        'shapely' :{'prop':'resn', map:$3Dmol.residues.shapely},
-        'nucleic' :{'prop':'resn', map:$3Dmol.residues.nucleic},
-        'chain' :{'prop':'chain', map:$3Dmol.chains.atom},
-        'rasmol' : {'prop':'elem', map:$3Dmol.elementColors.rasmol},
-        'default' : {'prop': 'elem', map:$3Dmol.elementColors.defaultColors},
-        'greenCarbon': {'prop': 'elem', map:$3Dmol.elementColors.greenCarbon},
-        'chainHetatm' :{'prop':'chain', map:$3Dmol.chains.hetatm},
-        'cyanCarbon' : {'prop':'elem', map:$3Dmol.elementColors.cyanCarbon},
-        'magentaCarbon' : {'prop':'elem', map:$3Dmol.elementColors.magentaCarbon},
-        'purpleCarbon' : {'prop':'elem', map:$3Dmol.elementColors.purpleCarbon},
-        'whiteCarbon' : {'prop':'elem', map:$3Dmol.elementColors.whiteCarbon},
-        'orangeCarbon' : {'prop':'elem', map:$3Dmol.elementColors.orangeCarbon},
-        'yellowCarbon' : {'prop':'elem', map:$3Dmol.elementColors.yellowCarbon},
-        'blueCaron' : {'prop':'elem', map:$3Dmol.elementColors.blueCarbon},
+export const builtinColorSchemes = {
+        'ssPyMol' : {'prop':'ss', map:ssColors.pyMol},
+        'ssJmol' :{'prop':'ss', map:ssColors.Jmol},
+        'Jmol' :{'prop':'elem', map:elementColors.Jmol},
+        'amino' : {'prop':'resn', map:residues.amino},
+        'shapely' :{'prop':'resn', map: residues.shapely},
+        'nucleic' :{'prop':'resn', map: residues.nucleic},
+        'chain' :{'prop':'chain', map: chains.atom},
+        'rasmol' : {'prop':'elem', map: elementColors.rasmol},
+        'default' : {'prop': 'elem',      map: elementColors.defaultColors},
+        'greenCarbon': {'prop': 'elem',   map: elementColors.greenCarbon},
+        'chainHetatm' :{'prop':'chain',   map: chains.hetatm},
+        'cyanCarbon' : {'prop':'elem',    map: elementColors.cyanCarbon},
+        'magentaCarbon' : {'prop':'elem', map: elementColors.magentaCarbon},
+        'purpleCarbon' : {'prop':'elem', map: elementColors.purpleCarbon},
+        'whiteCarbon' : {'prop':'elem',  map: elementColors.whiteCarbon},
+        'orangeCarbon' : {'prop':'elem', map: elementColors.orangeCarbon},
+        'yellowCarbon' : {'prop':'elem', map: elementColors.yellowCarbon},
+        'blueCaron' : {'prop':'elem', map:elementColors.blueCarbon},
 };
 
 /** Return proper color for atom given style
  * @param {AtomSpec} atom
  * @param {AtomStyle} style
- * @return {$3Dmol.Color}
+ * @return {Color}
  */
  
-$3Dmol.getColorFromStyle = function(atom, style) {
+export const getColorFromStyle = function(atom, style) {
     var scheme = style.colorscheme;  
-    if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
-        scheme = $3Dmol.builtinColorSchemes[scheme];
+    if(typeof(builtinColorSchemes[scheme]) != "undefined") {
+        scheme = builtinColorSchemes[scheme];
     } else if(typeof(scheme) == 'string' && scheme.endsWith('Carbon')) {
         //any color you want of carbon
         var ccolor = scheme.substring(0,scheme.lastIndexOf("Carbon")).toLowerCase();
         if(typeof(htmlColors[ccolor]) != "undefined") {
-            var newscheme = $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
+            var newscheme = {...elementColors.defaultColors};
             newscheme.C = htmlColors[ccolor];
-            $3Dmol.builtinColorSchemes[scheme] = {'prop': 'elem', map:newscheme};
-            scheme = $3Dmol.builtinColorSchemes[scheme];
+            builtinColorSchemes[scheme] = {'prop': 'elem', map:newscheme};
+            scheme = builtinColorSchemes[scheme];
         }        
     }
     
@@ -746,9 +738,9 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         color = style.color;
     if(typeof(scheme) != "undefined") {
         var prop, val;
-        if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
+        if(typeof(elementColors[scheme]) != "undefined") {
             //name of builtin colorscheme
-            scheme = $3Dmol.elementColors[scheme];
+            scheme = elementColors[scheme];
             if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
                 color = scheme.map[atom[scheme.prop]];
             }
@@ -760,12 +752,12 @@ $3Dmol.getColorFromStyle = function(atom, style) {
             //apply a property mapping
             prop = scheme.prop;
             var grad = scheme.gradient; //redefining scheme
-            if(typeof($3Dmol.Gradient.builtinGradients[grad]) != "undefined") {
-                grad = new $3Dmol.Gradient.builtinGradients[grad](scheme.min, scheme.max, scheme.mid);
+            if(typeof(Gradient.builtinGradients[grad]) != "undefined") {
+                grad = new Gradient.builtinGradients[grad](scheme.min, scheme.max, scheme.mid);
             }
             
             var range = grad.range() || [-1,1]; //sensible default
-            val = $3Dmol.getAtomProperty(atom, prop);
+            val = getAtomProperty(atom, prop);
             if(val != null) {
                 color = grad.valueToHex(val, range);
             }
@@ -773,7 +765,7 @@ $3Dmol.getColorFromStyle = function(atom, style) {
                 typeof(scheme.map) != 'undefined') {         
             //apply a discrete property mapping
             prop = scheme.prop;
-            val = $3Dmol.getAtomProperty(atom, prop);
+            val = getAtomProperty(atom, prop);
             if( typeof scheme.map[val] != 'undefined' ) {
                 color = scheme.map[val];
             }
@@ -789,6 +781,6 @@ $3Dmol.getColorFromStyle = function(atom, style) {
         color = style.colorfunc(atom);
     }
     
-    var C = $3Dmol.CC.color(color);
+    var C = CC.color(color);
     return C;
 };

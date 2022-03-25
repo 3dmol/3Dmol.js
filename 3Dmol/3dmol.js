@@ -1,3 +1,12 @@
+// @ts-check
+
+import pako from  'pako'
+import 'netcdfjs/dist/netcdfjs'
+import 'jquery'
+import 'upng-js'
+import { GLViewer } from './glviewer';
+import { Geometry, Mesh } from './WebGL';
+import { Gradient } from './gradients';
 
 //This defines the $3Dmol object which is used to create viewers
 //and configure system-wide settings
@@ -5,19 +14,7 @@
 /** 
  * All of the functionality of $3Dmol.js is contained within the
  * $3Dmol global namespace
- * @namespace */
-$3Dmol = (function(window) {
-    
-    var my = window.$3Dmol || {};
-    
-    return my;
-
-})(window);
-
-if ( typeof module === "object" && typeof module.exports === "object" ) { 
-	//for node.js exporting
-	module.exports = $3Dmol; 
-}
+*/
 
 /* The following code "phones home" to register that an ip 
    address has loaded 3Dmol.js.  Being able track this usage
@@ -25,7 +22,7 @@ if ( typeof module === "object" && typeof module.exports === "object" ) {
    leave this code in if you would like to increase the 
    likelihood of 3Dmol.js remaining supported.
 */
-if(!$3Dmol.notrack) {
+if(process && process.env && !process.env.notrack) {
 /* The https traffic is just too much for the current server
  * to handle, so disable for now */
 // $.get("https://3dmol.csb.pitt.edu/track/report.cgi");
@@ -111,11 +108,11 @@ $.ajaxTransport(
     
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
- @function $3Dmol.createViewer
+ @function createViewer
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} config Viewer configuration
  * @param {Object} shared_viewer_resources shared resources between viewers' renderers
- * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
+ * @return {GLViewer} GLViewer, null if unable to instantiate WebGL
  * @example
    var viewer = $3Dmol.createViewer(
      'gldiv', //id of div to create canvas in
@@ -127,7 +124,7 @@ $.ajaxTransport(
  *                        
  */
 
-$3Dmol.createViewer = function(element, config, shared_viewer_resources)
+export const createViewer = function(element, config, shared_viewer_resources)
 {
     if(typeof(element) === "string")
     element = $("#"+element);
@@ -138,7 +135,7 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
     
     //try to create the  viewer
     try {
-        var viewer = new $3Dmol.GLViewer(element, config, shared_viewer_resources);
+        var viewer = new GLViewer(element, config, shared_viewer_resources);
         return viewer;
     }
     catch(e) {
@@ -150,11 +147,11 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
 
 /**
  * Create and initialize an appropriate a grid of viewers that share a WebGL canvas
- @function $3Dmol.createViewerGrid
+ @function createViewerGrid
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {GridSpec} config - grid configuration
  * @param {ViewerGridSpec} viewer_config - Viewer specification to apply to all subviewers
- * @return [[$3Dmol.GLViewer]] 2D array of GLViewers
+ * @return [[GLViewer]] 2D array of GLViewers
  * @example                    
    var viewers = $3Dmol.createViewerGrid(
      'gldiv', //id of div to create canvas in
@@ -194,7 +191,7 @@ $3Dmol.createViewer = function(element, config, shared_viewer_resources)
    });
      
  */
-$3Dmol.createViewerGrid  = function(element,config,viewer_config){
+export const createViewerGrid  = function(element,config,viewer_config){
     if(typeof(element) === "string")
         element = $("#"+element);
     if(!element) return;
@@ -221,7 +218,7 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
           viewer_config.canvas = canvas;
           viewer_config.viewers = viewers;
           viewer_config.control_all = config.control_all;
-          var viewer = $3Dmol.createViewer(element, viewer_config);
+          var viewer = createViewer(element, viewer_config);
           row.push(viewer);
         }
         viewers.unshift(row); //compensate for weird ordering in renderer
@@ -238,18 +235,18 @@ $3Dmol.createViewerGrid  = function(element,config,viewer_config){
  * with a the viewer_3Dmoljs css class indexed by their id (or numerically
  * if they do not have an id).
 */
-$3Dmol.viewers = {};
+export var viewers = {};
 
 /**
  * Download binary data (e.g. a gzipped file) into an array buffer and provide
  * arraybuffer to callback.
- * @function $3Dmol.getbin
+ * @function getbin
  * @param {string} uri - location of data
  * @param {Function} callback - Function to call with arraybuffer as argument.  
  * @param {string} request - type of request
  * @return {Promise}
  */ 
-$3Dmol.getbin = function(uri, callback, request,postdata) {
+export const getbin = function(uri, callback, request,postdata) {
     var promise = new Promise(function(resolve, reject) {
         
         request = (request == undefined)?"GET":request;
@@ -273,10 +270,10 @@ $3Dmol.getbin = function(uri, callback, request,postdata) {
 
 /**
  * Convert a base64 encoded string to a Uint8Array
- * @function $3Dmol.base64ToArray
+ * @function base64ToArray
  * @param {string} base64 encoded string
  */
-$3Dmol.base64ToArray = function(base64) {
+export const base64ToArray = function(base64) {
     var binary_string =  window.atob(base64);
     var len = binary_string.length;
     var bytes = new Uint8Array( len );
@@ -288,15 +285,15 @@ $3Dmol.base64ToArray = function(base64) {
 
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * @function $3Dmol.download
+ * @function download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
- * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @param {GLViewer} viewer - Add new model to existing viewer
  * @param {Object} options - Specify additional options
  *                           format: file format to download, if multiple are available, default format is pdb
  *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
  * @param {Function} callback - Function to call with model as argument after data is loaded.
   
- * @return {$3Dmol.GLModel} GLModel, Promise if callback is not provided
+ * @return {GLModel} GLModel, Promise if callback is not provided
  * @example
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
@@ -305,7 +302,7 @@ $3Dmol.base64ToArray = function(base64) {
        viewer.render(callback);
     });
  */ 
-$3Dmol.download = function(query, viewer, options, callback) {
+export const download = function(query, viewer, options, callback) {
     var type = "";
     var pdbUri = "";
     var mmtfUri = "";
@@ -332,7 +329,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
                 options.noComputeSecondaryStructure = true;
         }
         promise = new Promise(function(resolve) {
-            $3Dmol.getbin(uri)
+            getbin(uri)
             .then(function(ret) {
                 m.addMolData(ret, 'mmtf',options);
                 viewer.zoomTo();
@@ -430,7 +427,7 @@ $3Dmol.download = function(query, viewer, options, callback) {
  * $3Dmol surface types
  * @enum {number}
  */
-$3Dmol.SurfaceType = {
+export const SurfaceType = {
     VDW : 1,
     MS : 2,
     SAS : 3,
@@ -441,11 +438,11 @@ $3Dmol.SurfaceType = {
 //Miscellaneous functions and classes - to be incorporated into $3Dmol proper
 /**
  * 
- * @param {$3Dmol.Geometry} geometry
- * @param {$3Dmol.Mesh} mesh
+ * @param {Geometry} geometry
+ * @param {Mesh} mesh
  * @returns {undefined}
  */
-$3Dmol.mergeGeos = function(geometry, mesh) {
+export const mergeGeos = function(geometry, mesh) {
     
     var meshGeo = mesh.geometry;
     
@@ -456,7 +453,7 @@ $3Dmol.mergeGeos = function(geometry, mesh) {
     
 };
 
-$3Dmol.multiLineString = function(f) {
+export const multiLineString = function(f) {
     return f.toString()
             .replace(/^[^\/]+\/\*!?/, '')
             .replace(/\*\/[^\/]+$/, '');
@@ -465,15 +462,15 @@ $3Dmol.multiLineString = function(f) {
 
 /** 
  * Render surface synchronously if true
- * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @param {boolean} [SyncSurface=false]
  * @type {boolean} */
-$3Dmol.syncSurface = false;
+export var syncSurface = false;
 
 // Internet Explorer refuses to allow webworkers in data blobs.  I can find
 // no way of checking for this feature directly, so must do a browser check
 if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
         window.navigator.userAgent.indexOf('Trident/') >= 0) {
-    $3Dmol.syncSurface = true; // can't use webworkers
+    syncSurface = true; // can't use webworkers
 }
 
 /**
@@ -491,7 +488,7 @@ if(window.navigator.userAgent.indexOf('MSIE ') >= 0 ||
  * @param (String) str
  * @returns {Object}
  */
-$3Dmol.specStringToObject = function(str) {
+export const specStringToObject = function(str) {
     if(typeof(str) === "object") {
         return str; //not string, assume was converted already
     }
@@ -502,7 +499,7 @@ $3Dmol.specStringToObject = function(str) {
     str = str.replace(/%7E/,'~'); //copy/pasting urls sometimes does this
     //convert things that look like numbers into numbers
     var massage = function(val) {
-        if($3Dmol.isNumeric(val)) {
+        if(isNumeric(val)) {
            //hexadecimal does not parse as float
            if(Math.floor(parseFloat(val)) == parseInt(val)) {
               return parseFloat(val);
@@ -562,7 +559,7 @@ $3Dmol.specStringToObject = function(str) {
  * @param {AtomSpec[]} atomlist
  * @return {Array}
  */
-$3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
+export const getExtent = function(atomlist, ignoreSymmetries) {
     var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
     var includeSym = !ignoreSymmetries;
 
@@ -612,7 +609,7 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
 
 //return the value of an atom property prop, or null if non existent
 // looks first in properties, then in the atom itself
-$3Dmol.getAtomProperty = function(atom, prop) {
+export const getAtomProperty = function(atom, prop) {
     var val = null;
     if (atom.properties &&
             typeof (atom.properties[prop]) != "undefined") {
@@ -624,18 +621,18 @@ $3Dmol.getAtomProperty = function(atom, prop) {
 };
 
 /* get the min and max values of the specified property in the provided
-* @function $3Dmol.getPropertyRange
+* @function getPropertyRange
 * @param {AtomSpec[]} atomlist - list of atoms to evaluate
 * @param {string} prop - name of property 
 * @return {Array} - [min, max] values
 */
-$3Dmol.getPropertyRange = function (atomlist, prop) {
+export const getPropertyRange = function (atomlist, prop) {
     var min = Number.POSITIVE_INFINITY;
     var max = Number.NEGATIVE_INFINITY;
 
     for (var i = 0, n = atomlist.length; i < n; i++) {
         var atom = atomlist[i];
-        var val = $3Dmol.getAtomProperty(atom, prop);
+        var val = getAtomProperty(atom, prop);
         
         if(val != null) {
             if (val < min)
@@ -655,33 +652,19 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
     return [ min, max ];
 };
 
-//hackish way to work with requirejs - doesn't actually work yet
-//since we don't use the require optimizer to combine modules
-if(typeof(_3dmol_saved_define) !== 'undefined') {
-    /** When pulling in external sources, disable amd to ensure they
-     * populate the global namespace as expected.  Restore it so code
-     * using amd still works. */
-    /*global _3dmol_saved_define, _3dmol_saved_require, define:true, require:true */
-    define = _3dmol_saved_define;
-    require = _3dmol_saved_require;
-}
-if( typeof(define) === 'function' && define.amd) {
-    define('$3Dmol',[], function() { return $3Dmol; });
-}
-
 /* StereoViewer for stereoscopic viewing
-  @function $3Dmol.createStereoViewer
+  @function createStereoViewer
 * @param {Object | string} element - Either HTML element or string identifier
 * 
 */
 
-$3Dmol.createStereoViewer = function(element) {
+export const createStereoViewer = function(element) {
     var that = this;
     if(typeof(element) === "string")
         element = $("#"+element);
     if(!element) return;
     
-    var viewers = $3Dmol.createViewerGrid(element, {rows: 1, cols: 2, control_all: true});
+    var viewers = createViewerGrid(element, {rows: 1, cols: 2, control_all: true});
     
     this.glviewer1 = viewers[0][0];
     this.glviewer2 = viewers[0][1];
@@ -737,7 +720,7 @@ $3Dmol.createStereoViewer = function(element) {
 };
 
 //simplified version of $.extend
-$3Dmol.extend = function (obj1, src1) {
+export const extend = function (obj1, src1) {
     for (var key in src1) {
         if(src1.hasOwnProperty(key) && src1[key] !== undefined) {
             obj1[key] = src1[key];            
@@ -748,7 +731,7 @@ $3Dmol.extend = function (obj1, src1) {
 
 //deep copy, cannot deal with circular refs; undefined input becomes an empty object
 //https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
-$3Dmol.deepCopy = function(inObject)  {
+export const deepCopy = function(inObject)  {
   let outObject, value, key;
 
   if ( inObject == undefined) {
@@ -764,20 +747,20 @@ $3Dmol.deepCopy = function(inObject)  {
   for (key in inObject) {
     value = inObject[key];
     // Recursively (deep) copy for nested objects, including arrays
-    outObject[key] = $3Dmol.deepCopy(value);
+    outObject[key] = deepCopy(value);
   }
 
   return outObject;
 };
 
-$3Dmol.isNumeric = function( obj ) {
+export const isNumeric = function( obj ) {
 
     var type = typeof( obj );
     return ( type === "number" || type === "string" ) &&
         !isNaN( obj - parseFloat( obj ) );
 };
 
-$3Dmol.isEmptyObject = function( obj ) {
+export const isEmptyObject = function( obj ) {
     var name;
     for ( name in obj ) {
         return false;
@@ -785,7 +768,7 @@ $3Dmol.isEmptyObject = function( obj ) {
     return true;
 };
 
-$3Dmol.makeFunction = function(callback) {
+export const makeFunction = function(callback) {
     //for py3dmol let users provide callback as string
     if (callback && typeof callback === "string") {
     /* jshint ignore:start */
@@ -800,13 +783,13 @@ $3Dmol.makeFunction = function(callback) {
 };
 
 //standardize voldata/volscheme in style
-$3Dmol.adjustVolumeStyle = function(style) {
+export const adjustVolumeStyle = function(style) {
     if(style) {
-        if(style.volformat && !(style.voldata instanceof $3Dmol.VolumeData)) {
-            style.voldata = new $3Dmol.VolumeData(style.voldata, style.volformat);
+        if(style.volformat && !(style.voldata instanceof VolumeData)) {
+            style.voldata = new VolumeData(style.voldata, style.volformat);
         }
         if(style.volscheme) {
-            style.volscheme = $3Dmol.Gradient.getGradient(style.volscheme);
+            style.volscheme = Gradient.getGradient(style.volscheme);
         }
     }
 };

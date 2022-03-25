@@ -1,8 +1,10 @@
+// @ts-check
 
-$3Dmol = $3Dmol || {};
+import { Vector3 } from "./WebGL";
+
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
-$3Dmol.MarchingCubeInitializer = function() {
+const MarchingCubeInitializer = function() {
     
     //Marching cube algorithm - assume data has been pre-treated so isovalue is 0 
     // (i.e. select points greater than 0)
@@ -69,7 +71,7 @@ $3Dmol.MarchingCubeInitializer = function() {
                 i++;
 
             if(transform) {
-                pt = new $3Dmol.Vector3(i,j,k);
+                pt = new Vector3(i,j,k);
                 pt = pt.applyMatrix4(transform);
                 pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
             } else {
@@ -121,6 +123,7 @@ $3Dmol.MarchingCubeInitializer = function() {
                         var val = !!(data[index] & ISDONE);
                         //var val = !!(data[index] > 0);   
                         
+                        // @ts-ignore
                         code |= val << p;                        
                     }
                     
@@ -628,7 +631,7 @@ $3Dmol.MarchingCubeInitializer = function() {
 };
 
 //each webworker needs its own marching cube object
-$3Dmol.MarchingCube  = $3Dmol.MarchingCubeInitializer();    
+export const MarchingCube  = MarchingCubeInitializer();    
 
 
 

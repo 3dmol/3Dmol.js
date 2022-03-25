@@ -1,4 +1,4 @@
-var $3Dmol = $3Dmol || {};
+
 
 //properties for mapping
 

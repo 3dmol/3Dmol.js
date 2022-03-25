@@ -10,8 +10,11 @@
   "author": "David Koes and contributors",
   "homepage": "http://3dmol.csb.pitt.edu",
   "devDependencies": {
+    "@rollup/plugin-multi-entry": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@rollup/plugin-typescript": "^8.3.1",
     "del": "^6.0.0",
-    "glcheck": "^0.3.5",
+    "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
@@ -25,13 +28,15 @@
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
     "jsdoc": "^3.6.10",
-    "jshint": "^2.13.1"
+    "jshint": "^2.13.1",
+    "rollup": "^2.70.1",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "scripts": {
-    "build": "npx parcel build && npx gulp build",
     "doc": "gulp doc",
     "lint": "gulp lint",
     "gulp:test": "gulp test",
+    "build": "npx rollup -c ./rollup.config.js",
     "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
     "test": "npm run glcheck && npm run gulp:test",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",

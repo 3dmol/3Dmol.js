@@ -7,7 +7,7 @@ var setStyles = function(volumedata){
         var sb = viewer.addSurface("SAS", {color:'red'} ,{chain:'B'},null,null, function(sb) {
           viewer.render( /* no callback */);
           viewer.setSurfaceMaterialStyle(sb, {opacity:1.0, voldata: data, volscheme: new $3Dmol.Gradient.RWB(-10,10)});
-          viewer.render( /* no callback */);
+          viewer.render();
         });      
     });
 
@@ -15,5 +15,5 @@ var setStyles = function(volumedata){
 };
 $3Dmol.download("pdb:4DLN",viewer,{},function(){
   $3Dmol.getbin("data/4dln.cube.gz",setStyles);
-  viewer.render(callback);
+  viewer.render( /*no callback*/);
 });

@@ -1,16 +1,22 @@
+// @ts-check
+
+import { CC } from "./colors";
+import { Gradient } from "./gradients";
+import { Color, Sprite, SpriteAlignment, SpriteMaterial, Texture, Vector2, Vector3 } from "./WebGL";
+
 //Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
 
-$3Dmol.LabelCount = 0;
+var LabelCount = 0;
 
 /**
  * Renderable labels
- * @constructor $3Dmol.Label
+ * @constructor Label
  * @param {string} tag - Label text
  * @param {LabelSpec} parameters Label style and font specifications
  */
-$3Dmol.Label = function(text, parameters) {
+export const Label = function(text, parameters) {
 
-    this.id = $3Dmol.LabelCount++;
+    this.id = LabelCount++;
     this.stylespec = parameters || {};
 
     this.canvas = document.createElement('canvas');
@@ -18,14 +24,14 @@ $3Dmol.Label = function(text, parameters) {
     this.canvas.width = 134;
     this.canvas.height = 35;
     this.context = this.canvas.getContext('2d');
-    this.sprite = new $3Dmol.Sprite();
+    this.sprite = new Sprite();
     this.text = text;
     this.frame = this.stylespec.frame;
 };
 
-$3Dmol.Label.prototype = {
+Label.prototype = {
 
-    constructor : $3Dmol.Label,
+    constructor : Label,
 
     getStyle : function () { return this.stylespec; }, 
     
@@ -55,10 +61,10 @@ $3Dmol.Label.prototype = {
             var ret = init;
             if(typeof(style) != 'undefined') {
                 //convet regular colors
-                 if(style instanceof $3Dmol.Color) 
+                 if(style instanceof Color) 
                      ret = style.scaled();
                  else { //hex or name
-                    ret = $3Dmol.CC.color(style);
+                    ret = CC.color(style);
                     if ( typeof(ret.scaled) != 'undefined') {
                         ret = ret.scaled(); //not already scaled to 255
                     }
@@ -73,7 +79,6 @@ $3Dmol.Label.prototype = {
         /**
          * Label type specification
          * @typedef LabelSpec
-         * @struct
          * @prop {string} font - font name, default sans-serif
          * @prop {number} fontSize - height of text, default 18
          * @prop {ColorSpec} fontColor - font color, default white
@@ -83,8 +88,8 @@ $3Dmol.Label.prototype = {
          * @prop {string} borderOpacity - color of border
          * @prop {ColorSpec} backgroundColor - color of background, default black
          * @prop {string} backgroundOpacity - opacity of background, default 1
-         * @prop {$3Dmol.Vector3} position - x,y,z coordinates for label
-         * @prop {$3Dmol.Vector2} screenOffset - x,y _pixel_ offset of label from position
+         * @prop {Vector3} position - x,y,z coordinates for label
+         * @prop {Vector2} screenOffset - x,y _pixel_ offset of label from position
          * @prop {boolean} inFront - always put labels in from of model
          * @prop {boolean} showBackground - show background rounded rectangle, default true
          * @prop {boolean} fixed - sets the label to change with the model when zooming
@@ -141,9 +146,9 @@ $3Dmol.Label.prototype = {
 
             // clear canvas
 
-            var spriteAlignment = style.alignment || $3Dmol.SpriteAlignment.topLeft;
-            if(typeof(spriteAlignment) == 'string' && spriteAlignment in $3Dmol.SpriteAlignment) {
-                spriteAlignment = $3Dmol.SpriteAlignment[spriteAlignment];
+            var spriteAlignment = style.alignment || SpriteAlignment.topLeft;
+            if(typeof(spriteAlignment) == 'string' && spriteAlignment in SpriteAlignment) {
+                spriteAlignment = SpriteAlignment[spriteAlignment];
             }
 
             var bold = "";
@@ -188,7 +193,7 @@ $3Dmol.Label.prototype = {
                     
             if(style.backgroundGradient) {
                let gradient = this.context.createLinearGradient(0,height/2, width,height/2);
-               let g = $3Dmol.Gradient.getGradient(style.backgroundGradient);
+               let g = Gradient.getGradient(style.backgroundGradient);
                let minmax = g.range();
                let min = -1;
                let max = 1;
@@ -227,9 +232,9 @@ $3Dmol.Label.prototype = {
                     fontSize + borderThickness+padding, textWidth);
 
             // canvas contents will be used for a texture
-            var texture = new $3Dmol.Texture(this.canvas);
+            var texture = new Texture(this.canvas);
             texture.needsUpdate = true;
-            this.sprite.material = new $3Dmol.SpriteMaterial({
+            this.sprite.material = new SpriteMaterial({
                 map : texture,
                 useScreenCoordinates : useScreen,
                 alignment : spriteAlignment,

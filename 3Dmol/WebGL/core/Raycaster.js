@@ -256,8 +256,8 @@ export class Raycaster {
   /**
    * @param {any} origin
    * @param {any} direction
-   * @param {number} far
-   * @param {number} near
+   * @param {number} [far]
+   * @param {number} [near]
    */
   constructor(origin, direction, far, near) {
     this.ray = new Ray(origin, direction);

@@ -1,12 +1,11 @@
 //color scheme mappings
-var $3Dmol = $3Dmol || {};
 
 /** Color mapping gradients
  * @interface
  * @param {number} min
  * @param {number} max
  */
-$3Dmol.Gradient = function(/* min, max*/) { };
+export const Gradient = function(/* min, max*/) { };
 
 /**
  * Map value to hex color
@@ -14,13 +13,13 @@ $3Dmol.Gradient = function(/* min, max*/) { };
  * @param {number} range
  * @returns {number}
  */
-$3Dmol.Gradient.valueToHex = function(/*val, range*/) { };
+Gradient.valueToHex = function(/*val, range*/) { };
 //return range used for color mapping, null if none set
-$3Dmol.Gradient.range = function() { };
+Gradient.range = function() { };
 
 
 //if lo > hi, flip, also cap
-$3Dmol.Gradient.normalizeValue = function(lo, hi, val) {
+Gradient.normalizeValue = function(lo, hi, val) {
     if (hi >= lo) {
         if (val < lo) val = lo;
         if (val > hi) val = hi;
@@ -36,16 +35,16 @@ $3Dmol.Gradient.normalizeValue = function(lo, hi, val) {
 };
 
 //return a Gradient object, even if what is specified is descriptive
-$3Dmol.Gradient.getGradient = function(grad) {
-    if (grad instanceof $3Dmol.Gradient) {
+Gradient.getGradient = function(grad) {
+    if (grad instanceof Gradient) {
         return grad;
-    } else if (grad.gradient !== undefined && $3Dmol.Gradient.builtinGradients[grad.gradient]) {
+    } else if (grad.gradient !== undefined && Gradient.builtinGradients[grad.gradient]) {
         let min = grad.min === undefined ? -1 : grad.min;
         let max = grad.max === undefined ? 1 : grad.max;
         if (grad.mid === undefined) {
-            return new $3Dmol.Gradient.builtinGradients[grad.gradient](min, max);
+            return new Gradient.builtinGradients[grad.gradient](min, max);
         } else {
-            return new $3Dmol.Gradient.builtinGradients[grad.gradient](min, max, grad.mid);
+            return new Gradient.builtinGradients[grad.gradient](min, max, grad.mid);
         }
     }
     return grad;
@@ -55,9 +54,9 @@ $3Dmol.Gradient.getGradient = function(grad) {
  * Color scheme red to white to blue, for charges
  * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
- * @implements {$3Dmol.Gradient}
+ * @implements {Gradient}
  */
-$3Dmol.Gradient.RWB = function(min, max, mid) {
+Gradient.RWB = function(min, max, mid) {
 
     var mult = 1.0;
     if (typeof (max) == 'undefined' && Array.isArray(min) && min.length >= 2) {
@@ -81,7 +80,7 @@ $3Dmol.Gradient.RWB = function(min, max, mid) {
         if (val === undefined)
             return 0xffffff;
 
-        var norm = $3Dmol.Gradient.normalizeValue(lo, hi, val);
+        var norm = Gradient.normalizeValue(lo, hi, val);
         lo = norm.lo;
         hi = norm.hi;
         val = norm.val;
@@ -126,9 +125,9 @@ $3Dmol.Gradient.RWB = function(min, max, mid) {
  * rainbow gradient, but without purple to match jmol
  * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
- * @implements {$3Dmol.Gradient}
+ * @implements {Gradient}
  */
-$3Dmol.Gradient.ROYGB = function(min, max) {
+Gradient.ROYGB = function(min, max) {
     var mult = 1.0;
     if (typeof (max) == 'undefined' && Array.isArray(min) && min.length >= 2) {
         //we were passed a single range
@@ -152,7 +151,7 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
         if (typeof (val) == "undefined")
             return 0xffffff;
 
-        var norm = $3Dmol.Gradient.normalizeValue(lo, hi, val);
+        var norm = Gradient.normalizeValue(lo, hi, val);
         lo = norm.lo;
         hi = norm.hi;
         val = norm.val;
@@ -199,9 +198,9 @@ $3Dmol.Gradient.ROYGB = function(min, max) {
  * rainbow gradient with constant saturation, all the way to purple!
  * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
  * @constructor
- * @implements {$3Dmol.Gradient}
+ * @implements {Gradient}
  */
-$3Dmol.Gradient.Sinebow = function(min, max) {
+Gradient.Sinebow = function(min, max) {
     var mult = 1.0;
     if (typeof (max) == 'undefined' && Array.isArray(min) && min.length >= 2) {
         //we were passed a single range
@@ -228,7 +227,7 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
 
         if (typeof (val) == "undefined")
             return 0xffffff;
-        var norm = $3Dmol.Gradient.normalizeValue(lo, hi, val);
+        var norm = Gradient.normalizeValue(lo, hi, val);
         lo = norm.lo;
         hi = norm.hi;
         val = norm.val;
@@ -258,7 +257,7 @@ $3Dmol.Gradient.Sinebow = function(min, max) {
 };
 
 //map from names to gradient constructors
-$3Dmol.Gradient.builtinGradients = {
+Gradient.builtinGradients = {
     'rwb': $3Dmol.Gradient.RWB,
     'RWB':  $3Dmol.Gradient.RWB, 
     'roygb': $3Dmol.Gradient.ROYGB,

@@ -1,35 +1,27 @@
-//
+// @ts-check
 
-var $3Dmol = $3Dmol || {};
+import { Color, Geometry, Vector3 } from "./WebGL";
 
 //define enum values
 /**
  * Enum for cylinder cap styles.
  * @readonly
- * @enum {number} $3Dmol.CAP
+ * @enum {number} CAP
  */
-$3Dmol.CAP = {
+export const CAP = {
     NONE : 0,
     FLAT : 1,
     ROUND : 2
 };
 
-
-/**
- * Lower level utilities for creating WebGL shape geometries.
- * These are not intended for general consumption.
- * @namespace $3Dmol.GLDraw
-  */
-$3Dmol.GLDraw = (function() {
-
-    var draw = {}; // object for exporting functions
+const gldrawConstructor = function() {
 
     // Rotation matrix around z and x axis -
     // according to y basis vector
     // TODO: Try to optimize this (square roots?)
     var getRotationMatrix = function() {
-
-        var d = new $3Dmol.Vector3();
+        console.error(Vector3)
+        var d = new Vector3();
         // var rot = new (9);
 
         return function(dir) {
@@ -101,10 +93,10 @@ $3Dmol.GLDraw = (function() {
         var spacing = N/M;  // 16/4 = 4; if there were 5 subdivs, then 32/4 = 8.
         var j;
 
-        nvecs[0] = new $3Dmol.Vector3(-1, 0, 0);
-        nvecs[spacing] = new $3Dmol.Vector3(0, 0, 1);
-        nvecs[spacing*2] = new $3Dmol.Vector3(1, 0, 0);
-        nvecs[spacing*3] = new $3Dmol.Vector3(0, 0, -1);
+        nvecs[0] = new Vector3(-1, 0, 0);
+        nvecs[spacing] = new Vector3(0, 0, 1);
+        nvecs[spacing*2] = new Vector3(1, 0, 0);
+        nvecs[spacing*3] = new Vector3(0, 0, -1);
 
         for ( i = 3; i <= subdivisions; i ++ ) {
             // eg. i=3, we need to add 2**(3-1) = 4 new vecs. Call it M.
@@ -122,9 +114,9 @@ $3Dmol.GLDraw = (function() {
         }
 
         /*
-         * nvecs[0] = new $3Dmol.Vector3(-1,0,0); nvecs[1] = new
-         * $3Dmol.Vector3(0,0,1); nvecs[2] = new $3Dmol.Vector3(1,0,0);
-         * nvecs[3] = new $3Dmol.Vector3(0,0,-1);
+         * nvecs[0] = new Vector3(-1,0,0); nvecs[1] = new
+         * Vector3(0,0,1); nvecs[2] = new Vector3(1,0,0);
+         * nvecs[3] = new Vector3(0,0,-1);
          */
         return nvecs;
 
@@ -211,7 +203,7 @@ $3Dmol.GLDraw = (function() {
                     if (!polar || x === 0) {
 
                         if (x < widthSegments) {
-                            var vertex = new $3Dmol.Vector3();
+                            var vertex = new Vector3();
                             vertex.x = -radius *
                                     Math.cos(phiStart + u * phiLength) *
                                     Math.sin(thetaStart + v * thetaLength);
@@ -231,12 +223,12 @@ $3Dmol.GLDraw = (function() {
                             if (Math.abs(vertex.z) < 1e-5)
                                 vertex.z = 0;
 
-                            if (cap == $3Dmol.CAP.FLAT) {
-                                n = new $3Dmol.Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
+                            if (cap == CAP.FLAT) {
+                                n = new Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
                                 n.normalize();
                             }
                             else {
-                                n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
+                                n = new Vector3(vertex.x, vertex.y, vertex.z);
                                 n.normalize();
                             }
 
@@ -288,22 +280,22 @@ $3Dmol.GLDraw = (function() {
     var drawnC = 0;
     
     /** Create a cylinder 
-     * @function $3Dmol.GLDraw.drawCylinder
-     * @param {geometry}
+     * @function GLDraw.drawCylinder
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            from
      * @param {Point}
      *            to
-     * @param {float}
+     * @param {number}
      *            radius
-     * @param {$3Dmol.Color}
+     * @param {Color}
      *            color
-     * @param {$3Dmol.CAP} fromCap - 0 for none, 1 for flat, 2 for round
-     * @param {$3Dmol.CAP} toCap = 0 for none, 1 for flat, 2 for round
+     * @param {CAP} fromCap - 0 for none, 1 for flat, 2 for round
+     * @param {CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
-    draw.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
+    this.drawCylinder = function(geo, from, to, radius, color, fromCap, toCap) {
         if (!from || !to)
             return;
         drawnC++;
@@ -587,19 +579,19 @@ $3Dmol.GLDraw = (function() {
 
 
     /** Create a cone 
-     * @function $3Dmol.GLDraw.drawCone
+     * @function GLDraw.drawCone
      * @param {geometry}
      *            geo
      * @param {Point}
      *            from
      * @param {Point}
      *            to
-     * @param {float}
+     * @param {number}
      *            radius
-     * @param {$3Dmol.Color}
+     * @param {Color}
      *            color
      *            */
-    draw.drawCone = function(geo, from, to, radius, color) {
+    this.drawCone = function(geo, from, to, radius, color) {
         if (!from || !to)
             return;
 
@@ -632,7 +624,7 @@ $3Dmol.GLDraw = (function() {
         var faceArray = geoGroup.faceArray;
         
         offset = start*3;
-        var ndir = new $3Dmol.Vector3(dir[0],dir[1],dir[2]).normalize();
+        var ndir = new Vector3(dir[0],dir[1],dir[2]).normalize();
         //base point first vertex
         vertexArray[offset] = from.x;
         vertexArray[offset+1] = from.y;
@@ -750,7 +742,7 @@ $3Dmol.GLDraw = (function() {
                     vertex.z = radius * Math.sin(phiStart + u * phiLength) *
                             Math.sin(thetaStart + v * thetaLength);
 
-                    var n = new $3Dmol.Vector3(vertex.x, vertex.y, vertex.z);
+                    var n = new Vector3(vertex.x, vertex.y, vertex.z);
                     n.normalize();
 
                     obj.vertices.push(vertex);
@@ -771,17 +763,17 @@ $3Dmol.GLDraw = (function() {
     };
 
     /** Create a sphere.
-     * @function $3Dmol.GLDraw.drawSphere
-     * @param {geometry}
+     * @function GLDraw.drawSphere
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            pos
-     * @param {float}
+     * @param {number}
      *            radius
-     * @param {$3Dmol.Color}
+     * @param {Color}
      *            color
      */
-    draw.drawSphere = function(geo, pos, radius, color) {
+    this.drawSphere = function(geo, pos, radius, color) {
 
         var x, y;
         var vobj = sphereVertexCache.getVerticesForRadius(radius);
@@ -941,6 +933,10 @@ $3Dmol.GLDraw = (function() {
 
     };
 
-    return draw;
-
-})();
+}
+/**
+ * Lower level utilities for creating WebGL shape geometries.
+ * These are not intended for general consumption.
+ * @namespace GLDraw
+  */
+ export const GLDraw = new gldrawConstructor();

@@ -1,9 +1,14 @@
+// @ts-check
+
+import { base64ToArray } from "./3dmol";
+import { conversionMatrix3, Matrix3, Vector3, Matrix4 } from "./WebGL";
+
 /**
- * $3Dmol.Parsers stores functions for parsing molecular data. They all take a string of molecular data
+ * Parsers stores functions for parsing molecular data. They all take a string of molecular data
  * and options. The default behavior is to only read the first model in the case of multimodel files, and
  * all parsers return a list of atom list(s)
  * 
- * $3Dmol.Parsers.<ext> corresponds to the parsers for files with extension ext
+ * Parsers.<ext> corresponds to the parsers for files with extension ext
  */
  
  
@@ -29,7 +34,7 @@
   * @prop {boolean} assignBonds - for formats without explicit bonds (e.g. PDB, xyz) infer bonding (default true). 
   */
   
-$3Dmol.Parsers = (function() {
+export const Parsers = (function() {
     var parsers = {};
 
     //Covalent radii
@@ -171,10 +176,13 @@ $3Dmol.Parsers = (function() {
             {x: 1, y: 1, z: 1}
         ];
         for (let x in grid) {
+            // @ts-ignore
             x = parseInt(x);
             for (let y in grid[x]) {
+                // @ts-ignore
                 y = parseInt(y);
                 for (let z in grid[x][y]) {
+                    // @ts-ignore
                     z = parseInt(z);
                     let points = grid[x][y][z];
 
@@ -481,22 +489,23 @@ $3Dmol.Parsers = (function() {
             //compute the centroid, calculate any adjustment needed to get it in [0,1],
             //convert the adjustment to a cartesian translation, and then add it to
             //the symmetry matrix
-            let conversionMatrix = $3Dmol.conversionMatrix3(cryst.a, cryst.b, cryst.c, 
+            let conversionMatrix = conversionMatrix3(cryst.a, cryst.b, cryst.c, 
                                             cryst.alpha, cryst.beta, cryst.gamma);
-            let toFrac = new $3Dmol.Matrix3();
+            let toFrac = new Matrix3();
             toFrac.getInverse3(conversionMatrix);
             
             for (t = 0; t < copyMatrices.length; t++) {
                 //transform with the symmetry, and then back to fractional coordinates
-                let center = new $3Dmol.Vector3(0,0,0);
+                let center = new Vector3(0,0,0);
                 for (n = 0; n < end; n++) {
-                    let xyz = new $3Dmol.Vector3(atoms[n].x,atoms[n].y,atoms[n].z);
+                    let xyz = new Vector3(atoms[n].x,atoms[n].y,atoms[n].z);
                     xyz.applyMatrix4(copyMatrices[t]);
                     xyz.applyMatrix3(toFrac);
                     //figure out 
                     center.add(xyz);
                 }
                 center.divideScalar(end); 
+                // @ts-ignore
                 center = [center.x,center.y,center.z];
                 let adjustment = [0.0, 0.0, 0.0];
                 for(let i = 0; i < 3; i++) {
@@ -510,9 +519,12 @@ $3Dmol.Parsers = (function() {
                     }
                 }
                 //convert adjustment to non-fractional
-                adjustment = new $3Dmol.Vector3(adjustment[0],adjustment[1],adjustment[2]);
+                // @ts-ignore
+                adjustment = new Vector3(adjustment[0],adjustment[1],adjustment[2]);
+                // @ts-ignore
                 adjustment.applyMatrix3(conversionMatrix);
                 //modify symmetry matrix to include translation
+                // @ts-ignore
                 if(copyMatrices[t].isNearlyIdentity() && adjustment.lengthSq() > 0.001) {
                     modifiedIdentity = t; //keep track of which matrix was identity
                 }
@@ -525,7 +537,7 @@ $3Dmol.Parsers = (function() {
             }
             for (t = 0; t < copyMatrices.length; t++) {
                 if (!copyMatrices[t].isNearlyIdentity() && modifiedIdentity != t) {
-                    let xyz = new $3Dmol.Vector3();
+                    let xyz = new Vector3();
                     for (n = 0; n < end; n++) {
                         var bondsArr = [];
                         for (l = 0; l < atoms[n].bonds.length; l++) {
@@ -555,7 +567,7 @@ $3Dmol.Parsers = (function() {
             }
             if(modifiedIdentity >= 0) {
                 //after applying the other transformations, apply this one in place
-                let xyz = new $3Dmol.Vector3();
+                let xyz = new Vector3();
                 for (n = 0; n < end; n++) {
                     xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
                     xyz.applyMatrix4(copyMatrices[modifiedIdentity]);
@@ -572,7 +584,7 @@ $3Dmol.Parsers = (function() {
                 var symmetries = [];
                 for (l = 0; l < copyMatrices.length; l++) {
                     if (!copyMatrices[l].isNearlyIdentity()) {
-                        var newXYZ = new $3Dmol.Vector3();
+                        var newXYZ = new Vector3();
                         newXYZ.set(atoms[t].x, atoms[t].y, atoms[t].z);
                         newXYZ.applyMatrix4(copyMatrices[l]);
                         symmetries.push(newXYZ);
@@ -610,19 +622,24 @@ $3Dmol.Parsers = (function() {
         return atoms;
       }
 
+      // @ts-ignore
       lattice.xVec = new Float32Array(lines[2].replace(/^\s+/, "").split(/\s+/));
+      // @ts-ignore
       lattice.yVec = new Float32Array(lines[3].replace(/^\s+/, "").split(/\s+/));
+      // @ts-ignore
       lattice.zVec = new Float32Array(lines[4].replace(/^\s+/, "").split(/\s+/));
 
-      var matrix = new $3Dmol.Matrix3(
+      var matrix = new Matrix3(
           lattice.xVec[0], lattice.xVec[1], lattice.xVec[2],
           lattice.yVec[0], lattice.yVec[1], lattice.yVec[2],
           lattice.zVec[0], lattice.zVec[1], lattice.zVec[2]
       );
       
       matrix.multiplyScalar(lattice.length);
+      // @ts-ignore
       atoms.modelData = [{symmetries:[], cryst:{matrix:matrix}}];  
       var atomSymbols=lines[5].replace(/\s+/, "").replace(/\s+$/,"").split(/\s+/);
+      // @ts-ignore
       var atomSpeciesNumber=new Int16Array(lines[6].replace(/^\s+/, "").split(/\s+/));
       var vaspMode=lines[7].replace(/\s+/, "");
 
@@ -651,6 +668,7 @@ $3Dmol.Parsers = (function() {
         var atomSymbol = atomSymbols[i];
        for (var j = 0, atomLen = atomSpeciesNumber[i]; j < atomLen; j++) {
 
+        // @ts-ignore
         var coords = new Float32Array(lines[atomCounter + j].replace(/^\s+/, "").split(/\s+/));
 
         var atom={};
@@ -683,6 +701,7 @@ $3Dmol.Parsers = (function() {
      *            options
      */
     parsers.cube = parsers.CUBE = function(str, options) {
+        // @ts-ignore
         options = options || {};
         var atoms = [[]];
         var lines = str.split(/\r?\n/);
@@ -696,7 +715,7 @@ $3Dmol.Parsers = (function() {
         var natoms = Math.abs(parseFloat(lineArr[0]));
 
         let cryst = {};
-        var origin = cryst.origin = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+        var origin = cryst.origin = new Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]));
 
         lineArr = lines[3].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
@@ -709,42 +728,47 @@ $3Dmol.Parsers = (function() {
         // always assume bohr: openbabel source code
         // always assume angstrom: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
         // we are going to go with n<0 means angstrom - note this is just the first n
+        // @ts-ignore
         var convFactor = (lineArr[0] > 0) ? 0.529177 : 1;
         origin.multiplyScalar(convFactor);
 
+        // @ts-ignore
         var nX = Math.abs(lineArr[0]);
-        var xVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+        var xVec = new Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]))
                 .multiplyScalar(convFactor);
     
         lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        // @ts-ignore
         var nY = Math.abs(lineArr[0]);
-        var yVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+        var yVec = new Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]))
                 .multiplyScalar(convFactor);
     
         lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+        // @ts-ignore
         var nZ = Math.abs(lineArr[0]);
-        var zVec = new $3Dmol.Vector3(parseFloat(lineArr[1]),
+        var zVec = new Vector3(parseFloat(lineArr[1]),
                 parseFloat(lineArr[2]), parseFloat(lineArr[3]))
                 .multiplyScalar(convFactor);
 
         cryst.size = {x:nX, y:nY, z:nZ};
-        cryst.unit = new $3Dmol.Vector3(xVec.x, yVec.y, zVec.z);
+        cryst.unit = new Vector3(xVec.x, yVec.y, zVec.z);
     
         if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
                 || zVec.y != 0) {
             //need a transformation matrix
-            cryst.matrix4 =  new $3Dmol.Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
+            cryst.matrix4 =  new Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0,0,0,1);
             // include translation in matrix
-            let t = new $3Dmol.Matrix4().makeTranslation(origin.x, origin.y, origin.z);
+            let t = new Matrix4().makeTranslation(origin.x, origin.y, origin.z);
             cryst.matrix4 = cryst.matrix4.multiplyMatrices(t,cryst.matrix4);
             cryst.matrix = cryst.matrix4.matrix3FromTopLeft();
             // all translation and scaling done by matrix, so reset origin and unit
-            cryst.origin = new $3Dmol.Vector3(0,0,0);
-            cryst.unit = new $3Dmol.Vector3(1,1,1);
+            cryst.origin = new Vector3(0,0,0);
+            cryst.unit = new Vector3(1,1,1);
         }
 
+        // @ts-ignore
         atoms.modelData = [{cryst:cryst}];
 
 
@@ -788,6 +812,7 @@ $3Dmol.Parsers = (function() {
      *            options
      */
     parsers.xyz = parsers.XYZ = function(str, options) {
+        // @ts-ignore
         options = options || {};
         var atoms = [[]];
         var assignbonds = options.assignBonds === undefined ? true : options.assignBonds;
@@ -804,12 +829,14 @@ $3Dmol.Parsers = (function() {
             var lattice_re = /Lattice\s*=\s*["\{\}]([^"\{\}]+)["\{\}]\s*/gi;
             var lattice_match = lattice_re.exec(lines[1]);
             if ((lattice_match != null) && (lattice_match.length > 1)) {
+                // @ts-ignore
                 var lattice = new Float32Array(lattice_match[1].split(/\s+/));
-                var matrix = new $3Dmol.Matrix3(
+                var matrix = new Matrix3(
                     lattice[0], lattice[3], lattice[6],
                     lattice[1], lattice[4], lattice[7],
                     lattice[2], lattice[5], lattice[8]
                 );
+                // @ts-ignore
                 atoms.modelData = [{cryst:{matrix:matrix}}];
             }
 
@@ -1140,15 +1167,17 @@ $3Dmol.Parsers = (function() {
      *            options
      */
     parsers.mcif = parsers.cif = function(str, options) {
+        // @ts-ignore
         options = options || {};
         var atoms = [];
         var noAssembly = !options.doAssembly; // don't assemble by default
+        // @ts-ignore
         var modelData = atoms.modelData = [];
         var assignbonds = options.assignBonds === undefined ? true : options.assignBonds;
 
         //coordinate conversion
         var fractionalToCartesian = function(cmat, x, y, z) {
-            return new $3Dmol.Vector3(x,y,z).applyMatrix3(cmat);
+            return new Vector3(x,y,z).applyMatrix3(cmat);
         };
             
         // Used to handle quotes correctly
@@ -1215,6 +1244,7 @@ $3Dmol.Parsers = (function() {
                         // files consistent.
                         var dot = line.split(/\s/)[0].indexOf('.');
                         if (dot > -1) {
+                            // @ts-ignore
                             line[dot] = '_';
                             line = line.substr(0,dot) + '_' + line.substr(dot + 1);
                         }
@@ -1312,7 +1342,7 @@ $3Dmol.Parsers = (function() {
                 var beta_deg = parseFloat(mmCIF._cell_angle_beta) || 90;
                 var gamma_deg = parseFloat(mmCIF._cell_angle_gamma) || 90;
                 
-                conversionMatrix = $3Dmol.conversionMatrix3(a,b,c,alpha_deg,beta_deg,gamma_deg);                
+                conversionMatrix = conversionMatrix3(a,b,c,alpha_deg,beta_deg,gamma_deg);                
                 modelData[modelData.length-1].cryst = {'a' : a, 'b' : b, 'c' : c, 'alpha' : alpha_deg, 'beta' : beta_deg, 'gamma' : gamma_deg};
             }
 
@@ -1371,7 +1401,7 @@ $3Dmol.Parsers = (function() {
                     var matrix33 = parseFloat(mmCIF['_pdbx_struct_oper_list_matrix[3][3]'][i]);
                     var vector3 = parseFloat(mmCIF['_pdbx_struct_oper_list_vector[3]'][i]);
 
-                    var matrix = new $3Dmol.Matrix4(matrix11, matrix12, matrix13, vector1,
+                    var matrix = new Matrix4(matrix11, matrix12, matrix13, vector1,
                                                     matrix21, matrix22, matrix23, vector2,
                                                     matrix31, matrix32, matrix33, vector3);
                     modelData[modelData.length-1].symmetries.push(matrix);
@@ -1404,7 +1434,7 @@ $3Dmol.Parsers = (function() {
                         function(val){
                             return val.replace(/-/g,"+-");
                         });
-                    let matrix = new $3Dmol.Matrix4(0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1);
+                    let matrix = new Matrix4(0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1);
                     for (let coord = 0; coord < 3; coord++) {
                         var terms = componentStrings[coord].split('+');
                         for (let t = 0; t < terms.length; t++) {
@@ -1427,9 +1457,10 @@ $3Dmol.Parsers = (function() {
                         }
                     }
                     var conversionMatrix4 = conversionMatrix.getMatrix4();
-                    var conversionInverse = (new $3Dmol.Matrix4()).getInverse(conversionMatrix4, true);
-                    matrix = (new $3Dmol.Matrix4()).multiplyMatrices(matrix, conversionInverse);
-                    matrix = (new $3Dmol.Matrix4()).multiplyMatrices(conversionMatrix4, matrix);
+                    // @ts-ignore
+                    var conversionInverse = (new Matrix4()).getInverse(conversionMatrix4, true);
+                    matrix = (new Matrix4()).multiplyMatrices(matrix, conversionInverse);
+                    matrix = (new Matrix4()).multiplyMatrices(conversionMatrix4, matrix);
                     modelData[modelData.length-1].symmetries.push(matrix);
                 }
             }
@@ -1438,6 +1469,7 @@ $3Dmol.Parsers = (function() {
             if(assignbonds) assignBonds(atoms[i]);
             computeSecondaryStructure(atoms[i]);
             processSymmetries(modelData[i].symmetries, atoms[i], options, modelData[i].cryst);
+            // @ts-ignore
             if(options.duplicateAssemblyAtoms && !options.dontConnectDuplicatedAtoms && assignbonds) assignBonds(atoms[i]);
         }
 
@@ -1624,6 +1656,7 @@ $3Dmol.Parsers = (function() {
         var atom;
         var remainingLines = [];
 
+        // @ts-ignore
         var hasStruct = false;
         var serialToIndex = []; // map from pdb serial to index in atoms
         var line;
@@ -1632,6 +1665,7 @@ $3Dmol.Parsers = (function() {
         for (let i = 0; i < lines.length; i++) {
             line = lines[i].replace(/^\s*/, ''); // remove indent
             var recordName = line.substr(0, 6);
+            // @ts-ignore
             var startChain, startResi, endChain, endResi;
             
             if(recordName.indexOf("END") == 0) {
@@ -1769,7 +1803,7 @@ $3Dmol.Parsers = (function() {
             } else if ((!noAssembly) && (recordName == 'REMARK')
                     && (line.substr(13, 5) == 'BIOMT')) {
                 var n;
-                var matrix = new $3Dmol.Matrix4(); 
+                var matrix = new Matrix4(); 
                 for (n = 1; n <= 3; n++) {
                     line = lines[i].replace(/^\s*/, '');
                     if (parseInt(line.substr(18, 1)) == n) { // check for all
@@ -1817,6 +1851,7 @@ $3Dmol.Parsers = (function() {
                     var uMat = {u11:parseInt(vals[0]), u22:parseInt(vals[1]), u33:parseInt(vals[2]), 
                         u12:parseInt(vals[3]), u13:parseInt(vals[4]), u23:parseInt(vals[5])};
     
+                    // @ts-ignore
                     anisouAtom.uMat = uMat;
                 }
             }
@@ -1845,7 +1880,9 @@ $3Dmol.Parsers = (function() {
                     var code = sslookup[atom.chain][atom.resi];
                     atom.ss = code[0];
                     if(code.length > 1) {
+                        // @ts-ignore
                         if(code[1] == '1') atom.ssbegin = true;
+                        // @ts-ignore
                         else if(code[1] == '2') atom.ssend = true;
                     }
                 }
@@ -1870,9 +1907,11 @@ $3Dmol.Parsers = (function() {
      *            (do not compute ss), altLoc (which alternate location to select, if present; '*' to load all)
      */
     parsers.pdb = parsers.PDB = parsers.pdbqt = parsers.PDBQT = function(str, options) {
+        // @ts-ignore
         options = options || {};
         var atoms = []; //a separate list for each model
         var sslookup = {}; //stores SHEET and HELIX info, which is shared across models
+        // @ts-ignore
         atoms.modelData = [];
         var lines = str.split(/\r?\n|\r/);
         while(lines.length > 0) {
@@ -1897,6 +1936,7 @@ $3Dmol.Parsers = (function() {
                     atoms[0].push(atom);
                 }
             } else  {
+                // @ts-ignore
                 atoms.modelData.push(modelData);
                 atoms.push(modelatoms);
             }
@@ -1922,6 +1962,7 @@ $3Dmol.Parsers = (function() {
 
         var atoms = [[]];
         var computeStruct = !options.noSecondaryStructure;
+        // @ts-ignore
         atoms.modelData = [{symmetries:[]}];
         var serialToIndex = []; // map from pdb serial to index in atoms
         var lines = str.split(/\r?\n|\r/);
@@ -2066,15 +2107,18 @@ $3Dmol.Parsers = (function() {
         
         if(typeof(bindata) == "string") {
             //assume base64 encoded
-            bindata = $3Dmol.base64ToArray(bindata);
+            bindata = base64ToArray(bindata);
         }
         
+        // @ts-ignore
         var mmtfData = MMTF.decode( bindata );       
         
         var atoms = [[]];
+        // @ts-ignore
         var modelData = atoms.modelData = [];
         
         // setup index counters
+        // @ts-ignore
         var modelIndex = 0;
         var chainIndex = 0;
         var groupIndex = 0;
@@ -2102,7 +2146,7 @@ $3Dmol.Parsers = (function() {
         if(!noAssembly && mmtfData.bioAssemblyList && mmtfData.bioAssemblyList.length > 0) {
             var transforms = mmtfData.bioAssemblyList[assemblyIndex].transformList;
             for(i = 0, n = transforms.length; i < n; i++) {
-                var matrix = new $3Dmol.Matrix4(transforms[i].matrix);
+                var matrix = new Matrix4(transforms[i].matrix);
                 matrix.transpose();
                 symmetries.push(matrix);
             }
@@ -2162,10 +2206,12 @@ $3Dmol.Parsers = (function() {
                             secStructEnd = true;
                         }
                     }
+                    // @ts-ignore
                     var insCode = null;
                     if( mmtfData.insCodeList ){
                         insCode = String.fromCharCode( insCodeList[ groupIndex ] );
                     }
+                    // @ts-ignore
                     var sequenceIndex = null;
                     if( sequenceIndexList ){
                         sequenceIndex = sequenceIndexList[ groupIndex ];
@@ -2351,6 +2397,7 @@ $3Dmol.Parsers = (function() {
         col = getColEleSize(index);
         var noOfCol = col[0];
         for (let i = 0; i < atomCount/col[0]; i++){
+          // @ts-ignore
           if (i == parseInt(atomCount/col[0]))
             noOfCol = atomCount % col[0];
             for(let j=0; j < noOfCol; j++){
@@ -2376,9 +2423,11 @@ $3Dmol.Parsers = (function() {
           count = 0;
           noOfCol = col[0];
           for (let i = 0; i < atomCount/col[0]; i++){
+            // @ts-ignore
             if (i == parseInt(atomCount/col[0]))
               noOfCol = atomCount % col[0];
             for(let j = 0; j < noOfCol; j++){
+              // @ts-ignore
               atoms[count].properties.charge = parseFloat(lines[index+1].slice(col[1]*j, col[1]*(j+1)));	
               count++;
             }
@@ -2391,9 +2440,11 @@ $3Dmol.Parsers = (function() {
           count = 0;
           noOfCol = col[0];
           for (let i = 0; i < atomCount/col[0]; i++){
+            // @ts-ignore
             if (i == parseInt(atomCount/col[0]))
               noOfCol = atomCount % col[0];
             for(let j = 0; j < noOfCol; j++){
+              // @ts-ignore
               atoms[count].properties.radii = parseFloat(lines[index+1].slice(col[1]*j, col[1]*(j+1)));
               count++;
             }
@@ -2411,9 +2462,11 @@ $3Dmol.Parsers = (function() {
               noOfCol = atomCount % col[0];	
             for (let j = 0; j < noOfCol; j++){
               if (count%3 == 0){
+                // @ts-ignore
                 atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3);
               }
               else if (count%3 == 1){
+                // @ts-ignore
                 atoms[atomIndex].bonds.push(parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3));
               }
               count++;
@@ -2432,9 +2485,11 @@ $3Dmol.Parsers = (function() {
               noOfCol = atomCount % col[0];	
             for (let j = 0; j < noOfCol; j++){
               if (count%3 == 0){
+                // @ts-ignore
                 atomIndex = parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3);
               }
               else if (count%3 == 1){
+                // @ts-ignore
                 atoms[atomIndex].bonds.push(parseInt(lines[index].slice(col[1]*j, col[1]*(j+1))/3));
               }
               count++;
@@ -2519,6 +2574,7 @@ $3Dmol.Parsers = (function() {
                     for(var b = 0; b < 3; b++) {
                         box[b] = parseFloat(box[b])*10.0;
                     }
+                    // @ts-ignore
                     allatoms.box = box;
                 }
             }
