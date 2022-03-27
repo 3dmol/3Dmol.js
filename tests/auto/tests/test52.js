@@ -1,5 +1,5 @@
 
-       $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},(m) => {
+       $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
         m.setStyle({chain:'A'},{'cartoon':{color:'spectrum'}});
         m.setStyle({chain:'C'},{'cartoon':{style:'trace',color:'blue'}});
         m.setStyle({chain:'E'},{'cartoon':{tubes:true,arrows:true,color:'green',opacity:0.75}});

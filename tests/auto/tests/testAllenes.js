@@ -1,4 +1,4 @@
-const mol1=`11535
+var mol1=`11535
   -OEChem-08011811583D
 
  10  9  0     0  0  0  0  0  0999 V2000
@@ -117,7 +117,7 @@ M  END
 
 $$$$
 `
-const mol2 = `M0001
+var mol2 = `M0001
   Spartan 08011809273D
 
   7  6  0  0  0  0  0  0  0  0999 V2000
@@ -138,16 +138,16 @@ M  END
 $$$$
 `   
    
-   const viewers = $3Dmol.createViewerGrid(
-     'gldiv', // id of div to create canvas in
+   var viewers = $3Dmol.createViewerGrid(
+     'gldiv', //id of div to create canvas in
      {
        rows: 2,
        cols: 1,
-       controlAll: true  // mouse controls all viewers
+       control_all: true  //mouse controls all viewers
      }
    );
    
-     let viewer = viewers[0][0];
+     var viewer = viewers[0][0];
      viewer.addModel(mol1,'sdf');
      viewer.setStyle({stick:{}});
      viewer.zoomTo();

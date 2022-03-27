@@ -9,7 +9,7 @@
     throw new Error('undefined QUnit object');
   }
 
-  const _module = QUnit.module;
+  var _module = QUnit.module;
   if (typeof _module !== 'function') {
     throw new Error('QUnit.module should be a function');
   }
@@ -26,8 +26,8 @@
       }
 
       if (typeof config.setupOnce === 'function') {
-        let _setupOnceRan = false;
-        const _setup = typeof config.setup === 'function' ?
+        var _setupOnceRan = false;
+        var _setup = typeof config.setup === 'function' ?
           config.setup : null;
 
         config.setup = function () {
@@ -53,14 +53,14 @@
       function isLastTestInModule() {
         if (QUnit.config && Array.isArray(QUnit.config.queue)) {
           return QUnit.config.queue.length === 1;
-        } 
+        } else {
           // we cannot determine if the test is the last one in this module
           return false;
-        
+        }
       }
 
       if (typeof config.teardownOnce === 'function') {
-        const _teardown = typeof config.teardown === 'function' ?
+        var _teardown = typeof config.teardown === 'function' ?
           config.teardown : null;
 
         config.teardown = function () {

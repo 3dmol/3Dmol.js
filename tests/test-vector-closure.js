@@ -1,4 +1,4 @@
-const $3Dmol = {};
+var $3Dmol = {};
 
 /** @constructor */
 $3Dmol.Vector3 = function(x, y, z) {
@@ -11,7 +11,7 @@ $3Dmol.Vector3.prototype =  {
     
     constructor : Vector3,
     
-    set(x, y, z) {
+    set : function(x, y, z) {
         
         this.x = x;
         this.y = y;
@@ -20,7 +20,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    copy(v) {
+    copy : function(v) {
         
         this.x = v.x;
         this.y = v.y;
@@ -29,7 +29,7 @@ $3Dmol.Vector3.prototype =  {
         return this;  
     },
     
-    add(v) {
+    add : function(v) {
         
         this.x += v.x;
         this.y += v.y;
@@ -38,7 +38,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    addVectors(a, b) {
+    addVectors : function(a, b) {
         
         this.x = a.x + b.x;
         this.y = a.y + b.y;
@@ -47,7 +47,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    sub(v) {
+    sub : function(v) {
         
         this.x -= v.x;
         this.y -= v.y;
@@ -56,7 +56,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    subVectors(a, b) {
+    subVectors : function(a, b) {
         
         this.x = a.x - b.x;
         this.y = a.y - b.y;
@@ -65,7 +65,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    multiplyScalar(s) {
+    multiplyScalar : function(s) {
         
         this.x *= s;
         this.y *= s;
@@ -74,7 +74,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    divideScalar(s) {
+    divideScalar : function(s) {
         
         if (s !== 0) {
             this.x /= s;
@@ -92,23 +92,23 @@ $3Dmol.Vector3.prototype =  {
     },
     
 
-    distanceTo(v) {
+    distanceTo: function(v) {
         return Math.sqrt(this.distanceToSquared(v));
     },
 
-    distanceToSquared(v) {
-        const dx = this.x - v.x;
-        const dy = this.y - v.y;
-        const dz = this.z - v.z;
+    distanceToSquared: function(v) {
+        var dx = this.x - v.x;
+        var dy = this.y - v.y;
+        var dz = this.z - v.z;
 
         return dx * dx + dy * dy + dz * dz;
     },
     
-    applyMatrix4(m) {
+    applyMatrix4 : function(m) {
     
-        const {x} = this; const {y} = this; const {z} = this;
+        var x = this.x, y = this.y, z = this.z;
         
-        const e = m.elements;
+        var e = m.elements;
         
         this.x = e[0]*x + e[4]*y + e[8]*z + e[12];
         this.y = e[1]*x + e[5]*y + e[9]*z + e[13];
@@ -117,14 +117,14 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    applyProjection(m) {
+    applyProjection : function(m) {
         
-        // input: $3Dmol.Matrix4 projection matrix
+        //input: $3Dmol.Matrix4 projection matrix
         
-        const {x} = this; const {y} = this; const {z} = this;
+        var x = this.x, y = this.y, z = this.z;
         
-        const e = m.elements;
-        const d = ( e[3]*x + e[7]*y + e[11]*z + e[15]);
+        var e = m.elements;
+        var d = ( e[3]*x + e[7]*y + e[11]*z + e[15]);
         
         this.x = (e[0]*x + e[4]*y + e[8]*z + e[12]) / d;
         this.y = (e[1]*x + e[5]*y + e[9]*z + e[13]) / d;
@@ -133,23 +133,23 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    applyQuaternion(q) { 
+    applyQuaternion : function(q) { 
         
-        const {x} = this;
-        const {y} = this;
-        const {z} = this;
+        var x = this.x;
+        var y = this.y;
+        var z = this.z;
         
-        const qx = q.x;
-        const qy = q.y;
-        const qz = q.z;
-        const qw = q.w;
+        var qx = q.x;
+        var qy = q.y;
+        var qz = q.z;
+        var qw = q.w;
         
         // calculate quaternion * vector
         
-        const ix = qw * x + qy * z - qz * y;
-        const iy = qw * y + qz * x - qx * z;
-        const iz = qw * z + qx * y - qy * x;
-        const iw = -qw * x - qy * y - qz * z;
+        var ix = qw * x + qy * z - qz * y;
+        var iy = qw * y + qz * x - qx * z;
+        var iz = qw * z + qx * y - qy * x;
+        var iw = -qw * x - qy * y - qz * z;
         
         // calculate result * inverse quaternion
         
@@ -160,34 +160,34 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    negate() {
+    negate : function() {
         
         return this.multiplyScalar(-1);
     },
     
-    dot(v) {
+    dot : function(v) {
         
         return this.x * v.x + this.y * v.y + this.z * v.z;
     },
     
-    length() {
+    length : function() {
         
         return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
     },
     
-    lengthSq() {
+    lengthSq : function() {
     
         return (this.x*this.x + this.y*this.y + this.z*this.z);
     },
     
-    normalize() {
+    normalize : function() {
         
         return this.divideScalar( this.length() );
     },
     
-    cross (v) {
+    cross : function (v) {
         
-        const {x} = this; const {y} = this; const {z} = this;
+        var x = this.x, y = this.y, z = this.z;
         
         this.x = y * v.z - z * v.y;
         this.y = z * v.x - x * v.z;
@@ -196,7 +196,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    crossVectors(a, b) {
+    crossVectors : function(a, b) {
         
         this.x = a.y * b.z - a.z * b.y;
         this.y = a.z * b.x - a.x * b.z;
@@ -205,7 +205,7 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
     
-    getPositionFromMatrix(m) {
+    getPositionFromMatrix : function(m) {
         
         this.x = m.elements[12];
         this.y = m.elements[13];
@@ -214,14 +214,14 @@ $3Dmol.Vector3.prototype =  {
         return this;
     },
 
-    setEulerFromRotationMatrix (m, order) {
+    setEulerFromRotationMatrix : function (m, order) {
 
         // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
 
-        const te = m.elements;
-        const m11 = te[0]; const m12 = te[4]; const m13 = te[8];
-        const m21 = te[1]; const m22 = te[5]; const m23 = te[9];
-        const m31 = te[2]; const m32 = te[6]; const m33 = te[10];
+        var te = m.elements;
+        var m11 = te[0], m12 = te[4], m13 = te[8];
+        var m21 = te[1], m22 = te[5], m23 = te[9];
+        var m31 = te[2], m32 = te[6], m33 = te[10];
 
         if ( order === undefined || order === 'XYZ' ) {
 
@@ -241,14 +241,14 @@ $3Dmol.Vector3.prototype =  {
         }
         
         else {
-            console.error(`Error with vector's setEulerFromRotationMatrix: Unknown order: ${  order}`);
+            console.error("Error with vector's setEulerFromRotationMatrix: Unknown order: " + order);
         }
         
         return this;
 
     },
     
-    clone() {
+    clone : function() {
         return new $3Dmol.Vector3(this.x, this.y, this.z);
     }
     

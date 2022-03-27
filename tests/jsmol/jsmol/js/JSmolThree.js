@@ -23,13 +23,13 @@ if ( ! self.Int32Array ) {
 
 ( function () {
 
-	let lastTime = 0;
-	const vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+	var lastTime = 0;
+	var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
 
-	for ( let x = 0; x < vendors.length && !window.requestAnimationFrame; ++ x ) {
+	for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++ x ) {
 
-		window.requestAnimationFrame = window[ `${vendors[ x ]  }RequestAnimationFrame` ];
-		window.cancelAnimationFrame = window[ `${vendors[ x ]  }CancelAnimationFrame` ] || window[ `${vendors[ x ]  }CancelRequestAnimationFrame` ];
+		window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+		window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
 
 	}
 
@@ -37,8 +37,8 @@ if ( ! self.Int32Array ) {
 
 		window.requestAnimationFrame = function ( callback, element ) {
 
-			const currTime = Date.now(); const timeToCall = Math.max( 0, 16 - ( currTime - lastTime ) );
-			const id = window.setTimeout( () => { callback( currTime + timeToCall ); }, timeToCall );
+			var currTime = Date.now(), timeToCall = Math.max( 0, 16 - ( currTime - lastTime ) );
+			var id = window.setTimeout( function() { callback( currTime + timeToCall ); }, timeToCall );
 			lastTime = currTime + timeToCall;
 			return id;
 
@@ -98,7 +98,7 @@ THREE.Clock.prototype.getElapsedTime = function () {
 
 THREE.Clock.prototype.getDelta = function () {
 
-	let diff = 0;
+	var diff = 0;
 
 	if ( this.autoStart && ! this.running ) {
 
@@ -108,7 +108,7 @@ THREE.Clock.prototype.getDelta = function () {
 
 	if ( this.running ) {
 
-		const newTime = Date.now();
+		var newTime = Date.now();
 		diff = 0.001 * ( newTime - this.oldTime );
 		this.oldTime = newTime;
 
@@ -135,7 +135,7 @@ THREE.Color.prototype = {
 
 	r: 1, g: 1, b: 1,
 
-	copy ( color ) {
+	copy: function ( color ) {
 
 		this.r = color.r;
 		this.g = color.g;
@@ -145,7 +145,7 @@ THREE.Color.prototype = {
 
 	},
 
-	copyGammaToLinear ( color ) {
+	copyGammaToLinear: function ( color ) {
 
 		this.r = color.r * color.r;
 		this.g = color.g * color.g;
@@ -155,7 +155,7 @@ THREE.Color.prototype = {
 
 	},
 
-	copyLinearToGamma ( color ) {
+	copyLinearToGamma: function ( color ) {
 
 		this.r = Math.sqrt( color.r );
 		this.g = Math.sqrt( color.g );
@@ -165,9 +165,9 @@ THREE.Color.prototype = {
 
 	},
 
-	convertGammaToLinear () {
+	convertGammaToLinear: function () {
 
-		const {r} = this; const {g} = this; const {b} = this;
+		var r = this.r, g = this.g, b = this.b;
 
 		this.r = r * r;
 		this.g = g * g;
@@ -177,7 +177,7 @@ THREE.Color.prototype = {
 
 	},
 
-	convertLinearToGamma () {
+	convertLinearToGamma: function () {
 
 		this.r = Math.sqrt( this.r );
 		this.g = Math.sqrt( this.g );
@@ -187,7 +187,7 @@ THREE.Color.prototype = {
 
 	},
 
-	setRGB ( r, g, b ) {
+	setRGB: function ( r, g, b ) {
 
 		this.r = r;
 		this.g = g;
@@ -197,12 +197,12 @@ THREE.Color.prototype = {
 
 	},
 
-	setHSV ( h, s, v ) {
+	setHSV: function ( h, s, v ) {
 
 		// based on MochiKit implementation by Bob Ippolito
 		// h,s,v ranges are < 0.0 - 1.0 >
 
-		let i; let f; let p; let q; let t;
+		var i, f, p, q, t;
 
 		if ( v === 0 ) {
 
@@ -234,7 +234,7 @@ THREE.Color.prototype = {
 
 	},
 
-	setHex ( hex ) {
+	setHex: function ( hex ) {
 
 		hex = Math.floor( hex );
 
@@ -246,7 +246,7 @@ THREE.Color.prototype = {
 
 	},
 
-	lerpSelf ( color, alpha ) {
+	lerpSelf: function ( color, alpha ) {
 
 		this.r += ( color.r - this.r ) * alpha;
 		this.g += ( color.g - this.g ) * alpha;
@@ -256,19 +256,19 @@ THREE.Color.prototype = {
 
 	},
 
-	getHex () {
+	getHex: function () {
 
 		return Math.floor( this.r * 255 ) << 16 ^ Math.floor( this.g * 255 ) << 8 ^ Math.floor( this.b * 255 );
 
 	},
 
-	getContextStyle () {
+	getContextStyle: function () {
 
-		return `rgb(${  Math.floor( this.r * 255 )  },${  Math.floor( this.g * 255 )  },${  Math.floor( this.b * 255 )  })`;
+		return 'rgb(' + Math.floor( this.r * 255 ) + ',' + Math.floor( this.g * 255 ) + ',' + Math.floor( this.b * 255 ) + ')';
 
 	},
 
-	clone () {
+	clone: function () {
 
 		return new THREE.Color().setRGB( this.r, this.g, this.b );
 
@@ -293,7 +293,7 @@ THREE.Vector2.prototype = {
 
 	constructor: THREE.Vector2,
 
-	set ( x, y ) {
+	set: function ( x, y ) {
 
 		this.x = x;
 		this.y = y;
@@ -302,7 +302,7 @@ THREE.Vector2.prototype = {
 
 	},
 
-	copy ( v ) {
+	copy: function ( v ) {
 
 		this.x = v.x;
 		this.y = v.y;
@@ -311,7 +311,7 @@ THREE.Vector2.prototype = {
 
 	},
 
-	add ( a, b ) {
+	add: function ( a, b ) {
 
 		this.x = a.x + b.x;
 		this.y = a.y + b.y;
@@ -320,7 +320,7 @@ THREE.Vector2.prototype = {
 
 	},
 
-	addSelf ( v ) {
+	addSelf: function ( v ) {
 
 		this.x += v.x;
 		this.y += v.y;
@@ -329,7 +329,7 @@ THREE.Vector2.prototype = {
 
 	},
 
-	sub ( a, b ) {
+	sub: function ( a, b ) {
 
 		this.x = a.x - b.x;
 		this.y = a.y - b.y;
@@ -338,7 +338,7 @@ THREE.Vector2.prototype = {
 
 	},
 
-	subSelf ( v ) {
+	subSelf: function ( v ) {
 
 		this.x -= v.x;
 		this.y -= v.y;
@@ -347,7 +347,7 @@ THREE.Vector2.prototype = {
 
 	},
 
-	multiplyScalar ( s ) {
+	multiplyScalar: function ( s ) {
 
 		this.x *= s;
 		this.y *= s;
@@ -356,7 +356,7 @@ THREE.Vector2.prototype = {
 
 	},
 
-	divideScalar ( s ) {
+	divideScalar: function ( s ) {
 
 		if ( s ) {
 
@@ -373,56 +373,56 @@ THREE.Vector2.prototype = {
 
 	},
 
-	negate() {
+	negate: function() {
 
 		return this.multiplyScalar( - 1 );
 
 	},
 
-	dot ( v ) {
+	dot: function ( v ) {
 
 		return this.x * v.x + this.y * v.y;
 
 	},
 
-	lengthSq () {
+	lengthSq: function () {
 
 		return this.x * this.x + this.y * this.y;
 
 	},
 
-	length () {
+	length: function () {
 
 		return Math.sqrt( this.lengthSq() );
 
 	},
 
-	normalize () {
+	normalize: function () {
 
 		return this.divideScalar( this.length() );
 
 	},
 
-	distanceTo ( v ) {
+	distanceTo: function ( v ) {
 
 		return Math.sqrt( this.distanceToSquared( v ) );
 
 	},
 
-	distanceToSquared ( v ) {
+	distanceToSquared: function ( v ) {
 
-		const dx = this.x - v.x; const dy = this.y - v.y;
+		var dx = this.x - v.x, dy = this.y - v.y;
 		return dx * dx + dy * dy;
 
 	},
 
-	setLength ( l ) {
+	setLength: function ( l ) {
 
 		return this.normalize().multiplyScalar( l );
 
 	},
 
-	lerpSelf ( v, alpha ) {
+	lerpSelf: function ( v, alpha ) {
 
 		this.x += ( v.x - this.x ) * alpha;
 		this.y += ( v.y - this.y ) * alpha;
@@ -431,19 +431,19 @@ THREE.Vector2.prototype = {
 
 	},
 
-	equals( v ) {
+	equals: function( v ) {
 
 		return ( ( v.x === this.x ) && ( v.y === this.y ) );
 
 	},
 
-	isZero () {
+	isZero: function () {
 
 		return ( this.lengthSq() < 0.0001 /* almostZero */ );
 
 	},
 
-	clone () {
+	clone: function () {
 
 		return new THREE.Vector2( this.x, this.y );
 
@@ -471,7 +471,7 @@ THREE.Vector3.prototype = {
 
 	constructor: THREE.Vector3,
 
-	set ( x, y, z ) {
+	set: function ( x, y, z ) {
 
 		this.x = x;
 		this.y = y;
@@ -481,7 +481,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	setX ( x ) {
+	setX: function ( x ) {
 
 		this.x = x;
 
@@ -489,7 +489,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	setY ( y ) {
+	setY: function ( y ) {
 
 		this.y = y;
 
@@ -497,7 +497,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	setZ ( z ) {
+	setZ: function ( z ) {
 
 		this.z = z;
 
@@ -505,7 +505,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	copy ( v ) {
+	copy: function ( v ) {
 
 		this.x = v.x;
 		this.y = v.y;
@@ -515,7 +515,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	add ( a, b ) {
+	add: function ( a, b ) {
 
 		this.x = a.x + b.x;
 		this.y = a.y + b.y;
@@ -525,7 +525,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	addSelf ( v ) {
+	addSelf: function ( v ) {
 
 		this.x += v.x;
 		this.y += v.y;
@@ -535,7 +535,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	addScalar ( s ) {
+	addScalar: function ( s ) {
 
 		this.x += s;
 		this.y += s;
@@ -545,7 +545,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	sub ( a, b ) {
+	sub: function ( a, b ) {
 
 		this.x = a.x - b.x;
 		this.y = a.y - b.y;
@@ -555,7 +555,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	subSelf ( v ) {
+	subSelf: function ( v ) {
 
 		this.x -= v.x;
 		this.y -= v.y;
@@ -565,7 +565,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	multiply ( a, b ) {
+	multiply: function ( a, b ) {
 
 		this.x = a.x * b.x;
 		this.y = a.y * b.y;
@@ -575,7 +575,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	multiplySelf ( v ) {
+	multiplySelf: function ( v ) {
 
 		this.x *= v.x;
 		this.y *= v.y;
@@ -585,7 +585,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	multiplyScalar ( s ) {
+	multiplyScalar: function ( s ) {
 
 		this.x *= s;
 		this.y *= s;
@@ -595,7 +595,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	divideSelf ( v ) {
+	divideSelf: function ( v ) {
 
 		this.x /= v.x;
 		this.y /= v.y;
@@ -605,7 +605,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	divideScalar ( s ) {
+	divideScalar: function ( s ) {
 
 		if ( s ) {
 
@@ -626,49 +626,49 @@ THREE.Vector3.prototype = {
 	},
 
 
-	negate() {
+	negate: function() {
 
 		return this.multiplyScalar( - 1 );
 
 	},
 
-	dot ( v ) {
+	dot: function ( v ) {
 
 		return this.x * v.x + this.y * v.y + this.z * v.z;
 
 	},
 
-	lengthSq () {
+	lengthSq: function () {
 
 		return this.x * this.x + this.y * this.y + this.z * this.z;
 
 	},
 
-	length () {
+	length: function () {
 
 		return Math.sqrt( this.lengthSq() );
 
 	},
 
-	lengthManhattan () {
+	lengthManhattan: function () {
 
 		return Math.abs( this.x ) + Math.abs( this.y ) + Math.abs( this.z );
 
 	},
 
-	normalize () {
+	normalize: function () {
 
 		return this.divideScalar( this.length() );
 
 	},
 
-	setLength ( l ) {
+	setLength: function ( l ) {
 
 		return this.normalize().multiplyScalar( l );
 
 	},
 
-	lerpSelf ( v, alpha ) {
+	lerpSelf: function ( v, alpha ) {
 
 		this.x += ( v.x - this.x ) * alpha;
 		this.y += ( v.y - this.y ) * alpha;
@@ -678,7 +678,7 @@ THREE.Vector3.prototype = {
 
 	},
 
-	cross ( a, b ) {
+	cross: function ( a, b ) {
 
 		this.x = a.y * b.z - a.z * b.y;
 		this.y = a.z * b.x - a.x * b.z;
@@ -688,9 +688,9 @@ THREE.Vector3.prototype = {
 
 	},
 
-	crossSelf ( v ) {
+	crossSelf: function ( v ) {
 
-		const {x} = this; const {y} = this; const {z} = this;
+		var x = this.x, y = this.y, z = this.z;
 
 		this.x = y * v.z - z * v.y;
 		this.y = z * v.x - x * v.z;
@@ -700,19 +700,19 @@ THREE.Vector3.prototype = {
 
 	},
 
-	distanceTo ( v ) {
+	distanceTo: function ( v ) {
 
 		return Math.sqrt( this.distanceToSquared( v ) );
 
 	},
 
-	distanceToSquared ( v ) {
+	distanceToSquared: function ( v ) {
 
 		return new THREE.Vector3().sub( this, v ).lengthSq();
 
 	},
 
-	getPositionFromMatrix ( m ) {
+	getPositionFromMatrix: function ( m ) {
 
 		this.x = m.elements[12];
 		this.y = m.elements[13];
@@ -722,19 +722,19 @@ THREE.Vector3.prototype = {
 
 	},
 
-	getRotationFromMatrix ( m, scale ) {
+	getRotationFromMatrix: function ( m, scale ) {
 
-		const sx = scale ? scale.x : 1;
-		const sy = scale ? scale.y : 1;
-		const sz = scale ? scale.z : 1;
+		var sx = scale ? scale.x : 1;
+		var sy = scale ? scale.y : 1;
+		var sz = scale ? scale.z : 1;
 
-		const m11 = m.elements[0] / sx; const m12 = m.elements[4] / sy; const m13 = m.elements[8] / sz;
-		const m21 = m.elements[1] / sx; const m22 = m.elements[5] / sy; const m23 = m.elements[9] / sz;
-		const m33 = m.elements[10] / sz;
+		var m11 = m.elements[0] / sx, m12 = m.elements[4] / sy, m13 = m.elements[8] / sz;
+		var m21 = m.elements[1] / sx, m22 = m.elements[5] / sy, m23 = m.elements[9] / sz;
+		var m33 = m.elements[10] / sz;
 
 		this.y = Math.asin( m13 );
 
-		const cosY = Math.cos( this.y );
+		var cosY = Math.cos( this.y );
 
 		if ( Math.abs( cosY ) > 0.00001 ) {
 
@@ -805,11 +805,11 @@ THREE.Vector3.prototype = {
 
 	*/
 
-	getScaleFromMatrix ( m ) {
+	getScaleFromMatrix: function ( m ) {
 
-		const sx = this.set( m.elements[0], m.elements[1], m.elements[2] ).length();
-		const sy = this.set( m.elements[4], m.elements[5], m.elements[6] ).length();
-		const sz = this.set( m.elements[8], m.elements[9], m.elements[10] ).length();
+		var sx = this.set( m.elements[0], m.elements[1], m.elements[2] ).length();
+		var sy = this.set( m.elements[4], m.elements[5], m.elements[6] ).length();
+		var sz = this.set( m.elements[8], m.elements[9], m.elements[10] ).length();
 
 		this.x = sx;
 		this.y = sy;
@@ -817,19 +817,19 @@ THREE.Vector3.prototype = {
 
 	},
 
-	equals ( v ) {
+	equals: function ( v ) {
 
 		return ( ( v.x === this.x ) && ( v.y === this.y ) && ( v.z === this.z ) );
 
 	},
 
-	isZero () {
+	isZero: function () {
 
 		return ( this.lengthSq() < 0.0001 /* almostZero */ );
 
 	},
 
-	clone () {
+	clone: function () {
 
 		return new THREE.Vector3( this.x, this.y, this.z );
 
@@ -857,7 +857,7 @@ THREE.Vector4.prototype = {
 
 	constructor: THREE.Vector4,
 
-	set ( x, y, z, w ) {
+	set: function ( x, y, z, w ) {
 
 		this.x = x;
 		this.y = y;
@@ -868,7 +868,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	copy ( v ) {
+	copy: function ( v ) {
 
 		this.x = v.x;
 		this.y = v.y;
@@ -879,7 +879,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	add ( a, b ) {
+	add: function ( a, b ) {
 
 		this.x = a.x + b.x;
 		this.y = a.y + b.y;
@@ -890,7 +890,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	addSelf ( v ) {
+	addSelf: function ( v ) {
 
 		this.x += v.x;
 		this.y += v.y;
@@ -901,7 +901,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	sub ( a, b ) {
+	sub: function ( a, b ) {
 
 		this.x = a.x - b.x;
 		this.y = a.y - b.y;
@@ -912,7 +912,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	subSelf ( v ) {
+	subSelf: function ( v ) {
 
 		this.x -= v.x;
 		this.y -= v.y;
@@ -923,7 +923,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	multiplyScalar ( s ) {
+	multiplyScalar: function ( s ) {
 
 		this.x *= s;
 		this.y *= s;
@@ -934,7 +934,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	divideScalar ( s ) {
+	divideScalar: function ( s ) {
 
 		if ( s ) {
 
@@ -957,43 +957,43 @@ THREE.Vector4.prototype = {
 	},
 
 
-	negate() {
+	negate: function() {
 
 		return this.multiplyScalar( -1 );
 
 	},
 
-	dot ( v ) {
+	dot: function ( v ) {
 
 		return this.x * v.x + this.y * v.y + this.z * v.z + this.w * v.w;
 
 	},
 
-	lengthSq () {
+	lengthSq: function () {
 
 		return this.dot( this );
 
 	},
 
-	length () {
+	length: function () {
 
 		return Math.sqrt( this.lengthSq() );
 
 	},
 
-	normalize () {
+	normalize: function () {
 
 		return this.divideScalar( this.length() );
 
 	},
 
-	setLength ( l ) {
+	setLength: function ( l ) {
 
 		return this.normalize().multiplyScalar( l );
 
 	},
 
-	lerpSelf ( v, alpha ) {
+	lerpSelf: function ( v, alpha ) {
 
 		this.x += ( v.x - this.x ) * alpha;
 		this.y += ( v.y - this.y ) * alpha;
@@ -1004,7 +1004,7 @@ THREE.Vector4.prototype = {
 
 	},
 
-	clone () {
+	clone: function () {
 
 		return new THREE.Vector4( this.x, this.y, this.z, this.w );
 
@@ -1033,13 +1033,13 @@ THREE.Frustum = function ( ) {
 
 THREE.Frustum.prototype.setFromMatrix = function ( m ) {
 
-	let i; let plane; const {planes} = this;
+	var i, plane, planes = this.planes;
 
-	const me = m.elements;
-	const me0 = me[0]; const me1 = me[1]; const me2 = me[2]; const me3 = me[3];
-	const me4 = me[4]; const me5 = me[5]; const me6 = me[6]; const me7 = me[7];
-	const me8 = me[8]; const me9 = me[9]; const me10 = me[10]; const me11 = me[11];
-	const me12 = me[12]; const me13 = me[13]; const me14 = me[14]; const me15 = me[15];
+	var me = m.elements;
+	var me0 = me[0], me1 = me[1], me2 = me[2], me3 = me[3];
+	var me4 = me[4], me5 = me[5], me6 = me[6], me7 = me[7];
+	var me8 = me[8], me9 = me[9], me10 = me[10], me11 = me[11];
+	var me12 = me[12], me13 = me[13], me14 = me[14], me15 = me[15];
 
 	planes[ 0 ].set( me3 - me0, me7 - me4, me11 - me8, me15 - me12 );
 	planes[ 1 ].set( me3 + me0, me7 + me4, me11 + me8, me15 + me12 );
@@ -1059,13 +1059,13 @@ THREE.Frustum.prototype.setFromMatrix = function ( m ) {
 
 THREE.Frustum.prototype.contains = function ( object ) {
 
-	let distance;
-	const {planes} = this;
-	const matrix = object.matrixWorld;
-	const me = matrix.elements;
-	const radius = - object.geometry.boundingSphere.radius * matrix.getMaxScaleOnAxis();
+	var distance,
+	planes = this.planes,
+	matrix = object.matrixWorld,
+	me = matrix.elements,
+	radius = - object.geometry.boundingSphere.radius * matrix.getMaxScaleOnAxis();
 
-	for ( let i = 0; i < 6; i ++ ) {
+	for ( var i = 0; i < 6; i ++ ) {
 
 		distance = planes[ i ].x * me[12] + planes[ i ].y * me[13] + planes[ i ].z * me[14] + planes[ i ].w;
 		if ( distance <= radius ) return false;
@@ -1086,7 +1086,7 @@ THREE.Ray = function ( origin, direction ) {
 	this.origin = origin || new THREE.Vector3();
 	this.direction = direction || new THREE.Vector3();
 
-	let precision = 0.0001;
+	var precision = 0.0001;
 
 	this.setPrecision = function ( value ) {
 
@@ -1094,21 +1094,21 @@ THREE.Ray = function ( origin, direction ) {
 
 	};
 
-	let a = new THREE.Vector3();
-	let b = new THREE.Vector3();
-	let c = new THREE.Vector3();
-	let d = new THREE.Vector3();
+	var a = new THREE.Vector3();
+	var b = new THREE.Vector3();
+	var c = new THREE.Vector3();
+	var d = new THREE.Vector3();
 
-	const originCopy = new THREE.Vector3();
-	const directionCopy = new THREE.Vector3();
+	var originCopy = new THREE.Vector3();
+	var directionCopy = new THREE.Vector3();
 
-	let vector = new THREE.Vector3();
-	let normal = new THREE.Vector3();
-	const intersectPoint = new THREE.Vector3()
+	var vector = new THREE.Vector3();
+	var normal = new THREE.Vector3();
+	var intersectPoint = new THREE.Vector3()
 
 	this.intersectObject = function ( object ) {
 
-		let intersect; const intersects = [];
+		var intersect, intersects = [];
 
 		if ( object instanceof THREE.Particle ) {
 
@@ -1122,10 +1122,10 @@ THREE.Ray = function ( origin, direction ) {
 
 			intersect = {
 
-				distance,
+				distance: distance,
 				point: object.position,
 				face: null,
-				object
+				object: object
 
 			};
 
@@ -1136,7 +1136,7 @@ THREE.Ray = function ( origin, direction ) {
 			// Checking boundingSphere
 
 			var distance = distanceFromIntersection( this.origin, this.direction, object.matrixWorld.getPosition() );
-			const scale = THREE.Frustum.__v1.set( object.matrixWorld.getColumnX().length(), object.matrixWorld.getColumnY().length(), object.matrixWorld.getColumnZ().length() );
+			var scale = THREE.Frustum.__v1.set( object.matrixWorld.getColumnX().length(), object.matrixWorld.getColumnY().length(), object.matrixWorld.getColumnZ().length() );
 
 			if ( distance > object.geometry.boundingSphere.radius * Math.max( scale.x, Math.max( scale.y, scale.z ) ) ) {
 
@@ -1146,10 +1146,10 @@ THREE.Ray = function ( origin, direction ) {
 
 			// Checking faces
 
-			let f; let fl; let face; let dot; let scalar;
-			const {geometry} = object;
-			const {vertices} = geometry;
-			let objMatrix;
+			var f, fl, face, dot, scalar,
+			geometry = object.geometry,
+			vertices = geometry.vertices,
+			objMatrix;
 
 			object.matrixRotationWorld.extractRotation( object.matrixWorld );
 
@@ -1197,8 +1197,8 @@ THREE.Ray = function ( origin, direction ) {
 
 								distance: originCopy.distanceTo( intersectPoint ),
 								point: intersectPoint.clone(),
-								face,
-								object
+								face: face,
+								object: object
 
 							};
 
@@ -1219,8 +1219,8 @@ THREE.Ray = function ( origin, direction ) {
 
 								distance: originCopy.distanceTo( intersectPoint ),
 								point: intersectPoint.clone(),
-								face,
-								object
+								face: face,
+								object: object
 
 							};
 
@@ -1242,22 +1242,22 @@ THREE.Ray = function ( origin, direction ) {
 
 	this.intersectObjects = function ( objects ) {
 
-		const intersects = [];
+		var intersects = [];
 
-		for ( let i = 0, l = objects.length; i < l; i ++ ) {
+		for ( var i = 0, l = objects.length; i < l; i ++ ) {
 
 			Array.prototype.push.apply( intersects, this.intersectObject( objects[ i ] ) );
 
 		}
 
-		intersects.sort( ( a, b ) => a.distance - b.distance );
+		intersects.sort( function ( a, b ) { return a.distance - b.distance; } );
 
 		return intersects;
 
 	};
 
-	const v0 = new THREE.Vector3(); const v1 = new THREE.Vector3(); const v2 = new THREE.Vector3();
-	let dot; let intersect; let distance;
+	var v0 = new THREE.Vector3(), v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+	var dot, intersect, distance;
 
 	function distanceFromIntersection( origin, direction, position ) {
 
@@ -1273,7 +1273,7 @@ THREE.Ray = function ( origin, direction ) {
 
 	// http://www.blackpawn.com/texts/pointinpoly/default.html
 
-	let dot00; let dot01; let dot02; let dot11; let dot12; let invDenom; let u; let v;
+	var dot00, dot01, dot02, dot11, dot12, invDenom, u, v;
 
 	function pointInFace3( p, a, b, c ) {
 
@@ -1302,8 +1302,8 @@ THREE.Ray = function ( origin, direction ) {
 
 THREE.Rectangle = function () {
 
-	let _left; let _top; let _right; let _bottom;
-	let _width; let _height; let _isEmpty = true;
+	var _left, _top, _right, _bottom,
+	_width, _height, _isEmpty = true;
 
 	function resize() {
 
@@ -1500,7 +1500,7 @@ THREE.Math = {
 
 	// Clamp value to range <a, b>
 
-	clamp ( x, a, b ) {
+	clamp: function ( x, a, b ) {
 
 		return ( x < a ) ? a : ( ( x > b ) ? b : x );
 
@@ -1508,7 +1508,7 @@ THREE.Math = {
 
 	// Clamp value to range <a, inf)
 
-	clampBottom ( x, a ) {
+	clampBottom: function ( x, a ) {
 
 		return x < a ? a : x;
 
@@ -1516,7 +1516,7 @@ THREE.Math = {
 
 	// Linear mapping from range <a1, a2> to range <b1, b2>
 
-	mapLinear ( x, a1, a2, b1, b2 ) {
+	mapLinear: function ( x, a1, a2, b1, b2 ) {
 
 		return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );
 
@@ -1525,7 +1525,7 @@ THREE.Math = {
 	// Random float from <0, 1> with 16 bits of randomness
 	// (standard Math.random() creates repetitive patterns when applied over larger space)
 
-	random16 () {
+	random16: function () {
 
 		return ( 65280 * Math.random() + 255 * Math.random() ) / 65535;
 
@@ -1533,7 +1533,7 @@ THREE.Math = {
 
 	// Random integer from <low, high> interval
 
-	randInt ( low, high ) {
+	randInt: function ( low, high ) {
 
 		return low + Math.floor( Math.random() * ( high - low + 1 ) );
 
@@ -1541,7 +1541,7 @@ THREE.Math = {
 
 	// Random float from <low, high> interval
 
-	randFloat ( low, high ) {
+	randFloat: function ( low, high ) {
 
 		return low + Math.random() * ( high - low );
 
@@ -1549,13 +1549,13 @@ THREE.Math = {
 
 	// Random float from <-range/2, range/2> interval
 
-	randFloatSpread ( range ) {
+	randFloatSpread: function ( range ) {
 
 		return range * ( 0.5 - Math.random() );
 
 	},
 
-	sign ( x ) {
+	sign: function ( x ) {
 
 		return ( x < 0 ) ? -1 : ( ( x > 0 ) ? 1 : 0 );
 
@@ -1576,24 +1576,24 @@ THREE.Matrix3.prototype = {
 
 	constructor: THREE.Matrix3,
 
-	getInverse ( matrix ) {
+	getInverse: function ( matrix ) {
 
 		// input: THREE.Matrix4
 		// ( based on http://code.google.com/p/webgl-mjs/ )
 
-				const me = matrix.elements;
+				var me = matrix.elements;
 				
-		const a11 =   me[10] * me[5] - me[6] * me[9];
-		const a21 = - me[10] * me[1] + me[2] * me[9];
-		const a31 =   me[6] * me[1] - me[2] * me[5];
-		const a12 = - me[10] * me[4] + me[6] * me[8];
-		const a22 =   me[10] * me[0] - me[2] * me[8];
-		const a32 = - me[6] * me[0] + me[2] * me[4];
-		const a13 =   me[9] * me[4] - me[5] * me[8];
-		const a23 = - me[9] * me[0] + me[1] * me[8];
-		const a33 =   me[5] * me[0] - me[1] * me[4];
+		var a11 =   me[10] * me[5] - me[6] * me[9];
+		var a21 = - me[10] * me[1] + me[2] * me[9];
+		var a31 =   me[6] * me[1] - me[2] * me[5];
+		var a12 = - me[10] * me[4] + me[6] * me[8];
+		var a22 =   me[10] * me[0] - me[2] * me[8];
+		var a32 = - me[6] * me[0] + me[2] * me[4];
+		var a13 =   me[9] * me[4] - me[5] * me[8];
+		var a23 = - me[9] * me[0] + me[1] * me[8];
+		var a33 =   me[5] * me[0] - me[1] * me[4];
 
-		const det = me[0] * a11 + me[1] * a12 + me[2] * a13;
+		var det = me[0] * a11 + me[1] * a12 + me[2] * a13;
 
 		// no inverse
 
@@ -1603,9 +1603,9 @@ THREE.Matrix3.prototype = {
 
 		}
 
-		const idet = 1.0 / det;
+		var idet = 1.0 / det;
 
-		const m = this.elements;
+		var m = this.elements;
 
 		m[ 0 ] = idet * a11; m[ 1 ] = idet * a21; m[ 2 ] = idet * a31;
 		m[ 3 ] = idet * a12; m[ 4 ] = idet * a22; m[ 5 ] = idet * a32;
@@ -1616,9 +1616,9 @@ THREE.Matrix3.prototype = {
 	},
 
 	
-	transpose () {
+	transpose: function () {
 
-		let tmp; const m = this.elements;
+		var tmp, m = this.elements;
 
 		tmp = m[1]; m[1] = m[3]; m[3] = tmp;
 		tmp = m[2]; m[2] = m[6]; m[6] = tmp;
@@ -1629,9 +1629,9 @@ THREE.Matrix3.prototype = {
 	},
 	
 
-	transposeIntoArray ( r ) {
+	transposeIntoArray: function ( r ) {
 
-		const {m} = this;
+		var m = this.m;
 
 		r[ 0 ] = m[ 0 ];
 		r[ 1 ] = m[ 3 ];
@@ -1679,9 +1679,9 @@ THREE.Matrix4.prototype = {
 
 	constructor: THREE.Matrix4,
 
-	set ( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 ) {
+	set: function ( n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
 		te[0] = n11; te[4] = n12; te[8] = n13; te[12] = n14;
 		te[1] = n21; te[5] = n22; te[9] = n23; te[13] = n24;
@@ -1692,7 +1692,7 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	identity () {
+	identity: function () {
 
 		this.set(
 
@@ -1707,9 +1707,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	copy ( m ) {
+	copy: function ( m ) {
 
-		const me = m.elements;
+		var me = m.elements;
 
 		this.set(
 
@@ -1724,13 +1724,13 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	lookAt ( eye, target, up ) {
+	lookAt: function ( eye, target, up ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
-		const x = THREE.Matrix4.__v1;
-		const y = THREE.Matrix4.__v2;
-		const z = THREE.Matrix4.__v3;
+		var x = THREE.Matrix4.__v1;
+		var y = THREE.Matrix4.__v2;
+		var z = THREE.Matrix4.__v3;
 
 		z.sub( eye, target ).normalize();
 
@@ -1760,21 +1760,21 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	multiply ( a, b ) {
+	multiply: function ( a, b ) {
 
-		const ae = a.elements;
-		const be = b.elements;
-		const te = this.elements;
+		var ae = a.elements;
+		var be = b.elements;
+		var te = this.elements;
 
-		const a11 = ae[0]; const a12 = ae[4]; const a13 = ae[8]; const a14 = ae[12];
-		const a21 = ae[1]; const a22 = ae[5]; const a23 = ae[9]; const a24 = ae[13];
-		const a31 = ae[2]; const a32 = ae[6]; const a33 = ae[10]; const a34 = ae[14];
-		const a41 = ae[3]; const a42 = ae[7]; const a43 = ae[11]; const a44 = ae[15];
+		var a11 = ae[0], a12 = ae[4], a13 = ae[8], a14 = ae[12];
+		var a21 = ae[1], a22 = ae[5], a23 = ae[9], a24 = ae[13];
+		var a31 = ae[2], a32 = ae[6], a33 = ae[10], a34 = ae[14];
+		var a41 = ae[3], a42 = ae[7], a43 = ae[11], a44 = ae[15];
 
-		const b11 = be[0]; const b12 = be[4]; const b13 = be[8]; const b14 = be[12];
-		const b21 = be[1]; const b22 = be[5]; const b23 = be[9]; const b24 = be[13];
-		const b31 = be[2]; const b32 = be[6]; const b33 = be[10]; const b34 = be[14];
-		const b41 = be[3]; const b42 = be[7]; const b43 = be[11]; const b44 = be[15];
+		var b11 = be[0], b12 = be[4], b13 = be[8], b14 = be[12];
+		var b21 = be[1], b22 = be[5], b23 = be[9], b24 = be[13];
+		var b31 = be[2], b32 = be[6], b33 = be[10], b34 = be[14];
+		var b41 = be[3], b42 = be[7], b43 = be[11], b44 = be[15];
 
 		te[0] = a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41;
 		te[4] = a11 * b12 + a12 * b22 + a13 * b32 + a14 * b42;
@@ -1800,15 +1800,15 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	multiplySelf ( m ) {
+	multiplySelf: function ( m ) {
 
 		return this.multiply( this, m );
 
 	},
 
-	multiplyToArray ( a, b, r ) {
+	multiplyToArray: function ( a, b, r ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
 		this.multiply( a, b );
 
@@ -1821,9 +1821,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	multiplyScalar ( s ) {
+	multiplyScalar: function ( s ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
 		te[0] *= s; te[4] *= s; te[8] *= s; te[12] *= s;
 		te[1] *= s; te[5] *= s; te[9] *= s; te[13] *= s;
@@ -1834,12 +1834,12 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	multiplyVector3 ( v ) {
+	multiplyVector3: function ( v ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
-		const vx = v.x; const vy = v.y; const vz = v.z;
-		const d = 1 / ( te[3] * vx + te[7] * vy + te[11] * vz + te[15] );
+		var vx = v.x, vy = v.y, vz = v.z;
+		var d = 1 / ( te[3] * vx + te[7] * vy + te[11] * vz + te[15] );
 
 		v.x = ( te[0] * vx + te[4] * vy + te[8] * vz + te[12] ) * d;
 		v.y = ( te[1] * vx + te[5] * vy + te[9] * vz + te[13] ) * d;
@@ -1849,10 +1849,10 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	multiplyVector4 ( v ) {
+	multiplyVector4: function ( v ) {
 
-		const te = this.elements;
-		const vx = v.x; const vy = v.y; const vz = v.z; const vw = v.w;
+		var te = this.elements;
+		var vx = v.x, vy = v.y, vz = v.z, vw = v.w;
 
 		v.x = te[0] * vx + te[4] * vy + te[8] * vz + te[12] * vw;
 		v.y = te[1] * vx + te[5] * vy + te[9] * vz + te[13] * vw;
@@ -1863,10 +1863,10 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	rotateAxis ( v ) {
+	rotateAxis: function ( v ) {
 
-		const te = this.elements;
-		const vx = v.x; const vy = v.y; const vz = v.z;
+		var te = this.elements;
+		var vx = v.x, vy = v.y, vz = v.z;
 
 		v.x = vx * te[0] + vy * te[4] + vz * te[8];
 		v.y = vx * te[1] + vy * te[5] + vz * te[9];
@@ -1878,10 +1878,10 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	crossVector ( a ) {
+	crossVector: function ( a ) {
 
-		const te = this.elements;
-		const v = new THREE.Vector4();
+		var te = this.elements;
+		var v = new THREE.Vector4();
 
 		v.x = te[0] * a.x + te[4] * a.y + te[8] * a.z + te[12] * a.w;
 		v.y = te[1] * a.x + te[5] * a.y + te[9] * a.z + te[13] * a.w;
@@ -1893,17 +1893,17 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	determinant () {
+	determinant: function () {
 
-		const te = this.elements;
+		var te = this.elements;
 
-		const n11 = te[0]; const n12 = te[4]; const n13 = te[8]; const n14 = te[12];
-		const n21 = te[1]; const n22 = te[5]; const n23 = te[9]; const n24 = te[13];
-		const n31 = te[2]; const n32 = te[6]; const n33 = te[10]; const n34 = te[14];
-		const n41 = te[3]; const n42 = te[7]; const n43 = te[11]; const n44 = te[15];
+		var n11 = te[0], n12 = te[4], n13 = te[8], n14 = te[12];
+		var n21 = te[1], n22 = te[5], n23 = te[9], n24 = te[13];
+		var n31 = te[2], n32 = te[6], n33 = te[10], n34 = te[14];
+		var n41 = te[3], n42 = te[7], n43 = te[11], n44 = te[15];
 
-		// TODO: make this more efficient
-		// ( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
+		//TODO: make this more efficient
+		//( based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm )
 
 		return (
 			n14 * n23 * n32 * n41-
@@ -1939,10 +1939,10 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	transpose () {
+	transpose: function () {
 
-		const te = this.elements;
-		let tmp;
+		var te = this.elements;
+		var tmp;
 
 		tmp = te[1]; te[1] = te[4]; te[4] = tmp;
 		tmp = te[2]; te[2] = te[8]; te[8] = tmp;
@@ -1956,9 +1956,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	flattenToArray ( flat ) {
+	flattenToArray: function ( flat ) {
 
-		const te = this.elements;
+		var te = this.elements;
 		flat[ 0 ] = te[0]; flat[ 1 ] = te[1]; flat[ 2 ] = te[2]; flat[ 3 ] = te[3];
 		flat[ 4 ] = te[4]; flat[ 5 ] = te[5]; flat[ 6 ] = te[6]; flat[ 7 ] = te[7];
 		flat[ 8 ]  = te[8]; flat[ 9 ]  = te[9]; flat[ 10 ] = te[10]; flat[ 11 ] = te[11];
@@ -1968,9 +1968,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	flattenToArrayOffset( flat, offset ) {
+	flattenToArrayOffset: function( flat, offset ) {
 
-		const te = this.elements;
+		var te = this.elements;
 		flat[ offset ] = te[0];
 		flat[ offset + 1 ] = te[1];
 		flat[ offset + 2 ] = te[2];
@@ -1995,16 +1995,16 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	getPosition () {
+	getPosition: function () {
 
-		const te = this.elements;
+		var te = this.elements;
 		return THREE.Matrix4.__v1.set( te[12], te[13], te[14] );
 
 	},
 
-	setPosition ( v ) {
+	setPosition: function ( v ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
 		te[12] = v.x;
 		te[13] = v.y;
@@ -2014,37 +2014,37 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	getColumnX () {
+	getColumnX: function () {
 
-		const te = this.elements;
+		var te = this.elements;
 		return THREE.Matrix4.__v1.set( te[0], te[1], te[2] );
 
 	},
 
-	getColumnY () {
+	getColumnY: function () {
 
-		const te = this.elements;
+		var te = this.elements;
 		return THREE.Matrix4.__v1.set( te[4], te[5], te[6] );
 
 	},
 
-	getColumnZ() {
+	getColumnZ: function() {
 
-		const te = this.elements;
+		var te = this.elements;
 		return THREE.Matrix4.__v1.set( te[8], te[9], te[10] );
 
 	},
 
-	getInverse ( m ) {
+	getInverse: function ( m ) {
 
 		// based on http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
-		const te = this.elements;
-		const me = m.elements;
+		var te = this.elements;
+		var me = m.elements;
 
-		const n11 = me[0]; const n12 = me[4]; const n13 = me[8]; const n14 = me[12];
-		const n21 = me[1]; const n22 = me[5]; const n23 = me[9]; const n24 = me[13];
-		const n31 = me[2]; const n32 = me[6]; const n33 = me[10]; const n34 = me[14];
-		const n41 = me[3]; const n42 = me[7]; const n43 = me[11]; const n44 = me[15];
+		var n11 = me[0], n12 = me[4], n13 = me[8], n14 = me[12];
+		var n21 = me[1], n22 = me[5], n23 = me[9], n24 = me[13];
+		var n31 = me[2], n32 = me[6], n33 = me[10], n34 = me[14];
+		var n41 = me[3], n42 = me[7], n43 = me[11], n44 = me[15];
 
 		te[0] = n23*n34*n42 - n24*n33*n42 + n24*n32*n43 - n22*n34*n43 - n23*n32*n44 + n22*n33*n44;
 		te[4] = n14*n33*n42 - n13*n34*n42 - n14*n32*n43 + n12*n34*n43 + n13*n32*n44 - n12*n33*n44;
@@ -2068,20 +2068,20 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	setRotationFromEuler( v, order ) {
+	setRotationFromEuler: function( v, order ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
-		const {x} = v; const {y} = v; const {z} = v;
-		const a = Math.cos( x ); const b = Math.sin( x );
-		const c = Math.cos( y ); const d = Math.sin( y );
-		const e = Math.cos( z ); const f = Math.sin( z );
+		var x = v.x, y = v.y, z = v.z;
+		var a = Math.cos( x ), b = Math.sin( x );
+		var c = Math.cos( y ), d = Math.sin( y );
+		var e = Math.cos( z ), f = Math.sin( z );
 
 		switch ( order ) {
 
 			case 'YXZ':
 
-				var ce = c * e; var cf = c * f; var de = d * e; var df = d * f;
+				var ce = c * e, cf = c * f, de = d * e, df = d * f;
 
 				te[0] = ce + df * b;
 				te[4] = de * b - cf;
@@ -2098,7 +2098,7 @@ THREE.Matrix4.prototype = {
 
 			case 'ZXY':
 
-				var ce = c * e; var cf = c * f; var de = d * e; var df = d * f;
+				var ce = c * e, cf = c * f, de = d * e, df = d * f;
 
 				te[0] = ce - df * b;
 				te[4] = - a * f;
@@ -2115,7 +2115,7 @@ THREE.Matrix4.prototype = {
 
 			case 'ZYX':
 
-				var ae = a * e; var af = a * f; var be = b * e; var bf = b * f;
+				var ae = a * e, af = a * f, be = b * e, bf = b * f;
 
 				te[0] = c * e;
 				te[4] = be * d - af;
@@ -2132,7 +2132,7 @@ THREE.Matrix4.prototype = {
 
 			case 'YZX':
 
-				var ac = a * c; var ad = a * d; var bc = b * c; var bd = b * d;
+				var ac = a * c, ad = a * d, bc = b * c, bd = b * d;
 
 				te[0] = c * e;
 				te[4] = bd - ac * f;
@@ -2149,7 +2149,7 @@ THREE.Matrix4.prototype = {
 
 			case 'XZY':
 
-				var ac = a * c; var ad = a * d; var bc = b * c; var bd = b * d;
+				var ac = a * c, ad = a * d, bc = b * c, bd = b * d;
 
 				te[0] = c * e;
 				te[4] = - f;
@@ -2166,7 +2166,7 @@ THREE.Matrix4.prototype = {
 
 			default: // 'XYZ'
 
-				var ae = a * e; var af = a * f; var be = b * e; var bf = b * f;
+				var ae = a * e, af = a * f, be = b * e, bf = b * f;
 
 				te[0] = c * e;
 				te[4] = - c * f;
@@ -2188,15 +2188,15 @@ THREE.Matrix4.prototype = {
 	},
 
 
-	setRotationFromQuaternion( q ) {
+	setRotationFromQuaternion: function( q ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
-		const {x} = q; const {y} = q; const {z} = q; const {w} = q;
-		const x2 = x + x; const y2 = y + y; const z2 = z + z;
-		const xx = x * x2; const xy = x * y2; const xz = x * z2;
-		const yy = y * y2; const yz = y * z2; const zz = z * z2;
-		const wx = w * x2; const wy = w * y2; const wz = w * z2;
+		var x = q.x, y = q.y, z = q.z, w = q.w;
+		var x2 = x + x, y2 = y + y, z2 = z + z;
+		var xx = x * x2, xy = x * y2, xz = x * z2;
+		var yy = y * y2, yz = y * z2, zz = z * z2;
+		var wx = w * x2, wy = w * y2, wz = w * z2;
 
 		te[0] = 1 - ( yy + zz );
 		te[4] = xy - wz;
@@ -2214,11 +2214,11 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	compose ( translation, rotation, scale ) {
+	compose: function ( translation, rotation, scale ) {
 
-		const te = this.elements;
-		const mRotation = THREE.Matrix4.__m1;
-		const mScale = THREE.Matrix4.__m2;
+		var te = this.elements;
+		var mRotation = THREE.Matrix4.__m1;
+		var mScale = THREE.Matrix4.__m2;
 
 		mRotation.identity();
 		mRotation.setRotationFromQuaternion( rotation );
@@ -2235,14 +2235,14 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	decompose ( translation, rotation, scale ) {
+	decompose: function ( translation, rotation, scale ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
 		// grab the axis vectors
-		const x = THREE.Matrix4.__v1;
-		const y = THREE.Matrix4.__v2;
-		const z = THREE.Matrix4.__v3;
+		var x = THREE.Matrix4.__v1;
+		var y = THREE.Matrix4.__v2;
+		var z = THREE.Matrix4.__v3;
 
 		x.set( te[0], te[1], te[2] );
 		y.set( te[4], te[5], te[6] );
@@ -2262,7 +2262,7 @@ THREE.Matrix4.prototype = {
 
 		// scale the rotation part
 
-		const matrix = THREE.Matrix4.__m1;
+		var matrix = THREE.Matrix4.__m1;
 
 		matrix.copy( this );
 
@@ -2284,10 +2284,10 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	extractPosition ( m ) {
+	extractPosition: function ( m ) {
 
-		const te = this.elements;
-		const me = m.elements;
+		var te = this.elements;
+		var me = m.elements;
 
 		te[12] = me[12];
 		te[13] = me[13];
@@ -2297,16 +2297,16 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	extractRotation ( m ) {
+	extractRotation: function ( m ) {
 
-		const te = this.elements;
-		const me = m.elements;
+		var te = this.elements;
+		var me = m.elements;
 
-		const vector = THREE.Matrix4.__v1;
+		var vector = THREE.Matrix4.__v1;
 
-		const scaleX = 1 / vector.set( me[0], me[1], me[2] ).length();
-		const scaleY = 1 / vector.set( me[4], me[5], me[6] ).length();
-		const scaleZ = 1 / vector.set( me[8], me[9], me[10] ).length();
+		var scaleX = 1 / vector.set( me[0], me[1], me[2] ).length();
+		var scaleY = 1 / vector.set( me[4], me[5], me[6] ).length();
+		var scaleZ = 1 / vector.set( me[8], me[9], me[10] ).length();
 
 		te[0] = me[0] * scaleX;
 		te[1] = me[1] * scaleX;
@@ -2326,10 +2326,10 @@ THREE.Matrix4.prototype = {
 
 	//
 
-	translate ( v ) {
+	translate: function ( v ) {
 
-		const te = this.elements;
-		const {x} = v; const {y} = v; const {z} = v;
+		var te = this.elements;
+		var x = v.x, y = v.y, z = v.z;
 
 		te[12] = te[0] * x + te[4] * y + te[8] * z + te[12];
 		te[13] = te[1] * x + te[5] * y + te[9] * z + te[13];
@@ -2340,19 +2340,19 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	rotateX ( angle ) {
+	rotateX: function ( angle ) {
 
-		const te = this.elements;
-		const m12 = te[4];
-		const m22 = te[5];
-		const m32 = te[6];
-		const m42 = te[7];
-		const m13 = te[8];
-		const m23 = te[9];
-		const m33 = te[10];
-		const m43 = te[11];
-		const c = Math.cos( angle );
-		const s = Math.sin( angle );
+		var te = this.elements;
+		var m12 = te[4];
+		var m22 = te[5];
+		var m32 = te[6];
+		var m42 = te[7];
+		var m13 = te[8];
+		var m23 = te[9];
+		var m33 = te[10];
+		var m43 = te[11];
+		var c = Math.cos( angle );
+		var s = Math.sin( angle );
 
 		te[4] = c * m12 + s * m13;
 		te[5] = c * m22 + s * m23;
@@ -2368,19 +2368,19 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	rotateY ( angle ) {
+	rotateY: function ( angle ) {
 
-		const te = this.elements;
-		const m11 = te[0];
-		const m21 = te[1];
-		const m31 = te[2];
-		const m41 = te[3];
-		const m13 = te[8];
-		const m23 = te[9];
-		const m33 = te[10];
-		const m43 = te[11];
-		const c = Math.cos( angle );
-		const s = Math.sin( angle );
+		var te = this.elements;
+		var m11 = te[0];
+		var m21 = te[1];
+		var m31 = te[2];
+		var m41 = te[3];
+		var m13 = te[8];
+		var m23 = te[9];
+		var m33 = te[10];
+		var m43 = te[11];
+		var c = Math.cos( angle );
+		var s = Math.sin( angle );
 
 		te[0] = c * m11 - s * m13;
 		te[1] = c * m21 - s * m23;
@@ -2396,19 +2396,19 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	rotateZ ( angle ) {
+	rotateZ: function ( angle ) {
 
-		const te = this.elements;
-		const m11 = te[0];
-		const m21 = te[1];
-		const m31 = te[2];
-		const m41 = te[3];
-		const m12 = te[4];
-		const m22 = te[5];
-		const m32 = te[6];
-		const m42 = te[7];
-		const c = Math.cos( angle );
-		const s = Math.sin( angle );
+		var te = this.elements;
+		var m11 = te[0];
+		var m21 = te[1];
+		var m31 = te[2];
+		var m41 = te[3];
+		var m12 = te[4];
+		var m22 = te[5];
+		var m32 = te[6];
+		var m42 = te[7];
+		var c = Math.cos( angle );
+		var s = Math.sin( angle );
 
 		te[0] = c * m11 + s * m12;
 		te[1] = c * m21 + s * m22;
@@ -2424,9 +2424,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	rotateByAxis ( axis, angle ) {
+	rotateByAxis: function ( axis, angle ) {
 
-		const te = this.elements;
+		var te = this.elements;
 
 		// optimize by checking axis
 
@@ -2434,48 +2434,48 @@ THREE.Matrix4.prototype = {
 
 			return this.rotateX( angle );
 
-		} if ( axis.x === 0 && axis.y === 1 && axis.z === 0 ) {
+		} else if ( axis.x === 0 && axis.y === 1 && axis.z === 0 ) {
 
 			return this.rotateY( angle );
 
-		} if ( axis.x === 0 && axis.y === 0 && axis.z === 1 ) {
+		} else if ( axis.x === 0 && axis.y === 0 && axis.z === 1 ) {
 
 			return this.rotateZ( angle );
 
 		}
 
-		let {x} = axis; let {y} = axis; let {z} = axis;
-		const n = Math.sqrt(x * x + y * y + z * z);
+		var x = axis.x, y = axis.y, z = axis.z;
+		var n = Math.sqrt(x * x + y * y + z * z);
 
 		x /= n;
 		y /= n;
 		z /= n;
 
-		const xx = x * x; const yy = y * y; const zz = z * z;
-		const c = Math.cos( angle );
-		const s = Math.sin( angle );
-		const oneMinusCosine = 1 - c;
-		const xy = x * y * oneMinusCosine;
-		const xz = x * z * oneMinusCosine;
-		const yz = y * z * oneMinusCosine;
-		const xs = x * s;
-		const ys = y * s;
-		const zs = z * s;
+		var xx = x * x, yy = y * y, zz = z * z;
+		var c = Math.cos( angle );
+		var s = Math.sin( angle );
+		var oneMinusCosine = 1 - c;
+		var xy = x * y * oneMinusCosine;
+		var xz = x * z * oneMinusCosine;
+		var yz = y * z * oneMinusCosine;
+		var xs = x * s;
+		var ys = y * s;
+		var zs = z * s;
 
-		const r11 = xx + (1 - xx) * c;
-		const r21 = xy + zs;
-		const r31 = xz - ys;
-		const r12 = xy - zs;
-		const r22 = yy + (1 - yy) * c;
-		const r32 = yz + xs;
-		const r13 = xz + ys;
-		const r23 = yz - xs;
-		const r33 = zz + (1 - zz) * c;
+		var r11 = xx + (1 - xx) * c;
+		var r21 = xy + zs;
+		var r31 = xz - ys;
+		var r12 = xy - zs;
+		var r22 = yy + (1 - yy) * c;
+		var r32 = yz + xs;
+		var r13 = xz + ys;
+		var r23 = yz - xs;
+		var r33 = zz + (1 - zz) * c;
 
-		const m11 = te[0]; const m21 = te[1]; const m31 = te[2]; const m41 = te[3];
-		const m12 = te[4]; const m22 = te[5]; const m32 = te[6]; const m42 = te[7];
-		const m13 = te[8]; const m23 = te[9]; const m33 = te[10]; const m43 = te[11];
-		const m14 = te[12]; const m24 = te[13]; const m34 = te[14]; const m44 = te[15];
+		var m11 = te[0], m21 = te[1], m31 = te[2], m41 = te[3];
+		var m12 = te[4], m22 = te[5], m32 = te[6], m42 = te[7];
+		var m13 = te[8], m23 = te[9], m33 = te[10], m43 = te[11];
+		var m14 = te[12], m24 = te[13], m34 = te[14], m44 = te[15];
 
 		te[0] = r11 * m11 + r21 * m12 + r31 * m13;
 		te[1] = r11 * m21 + r21 * m22 + r31 * m23;
@@ -2496,10 +2496,10 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	scale ( v ) {
+	scale: function ( v ) {
 
-		const te = this.elements;
-		const {x} = v; const {y} = v; const {z} = v;
+		var te = this.elements;
+		var x = v.x, y = v.y, z = v.z;
 
 		te[0] *= x; te[4] *= y; te[8] *= z;
 		te[1] *= x; te[5] *= y; te[9] *= z;
@@ -2510,13 +2510,13 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	getMaxScaleOnAxis () {
+	getMaxScaleOnAxis: function () {
 
-		const te = this.elements;
+		var te = this.elements;
 
-		const scaleXSq =  te[0] * te[0] + te[1] * te[1] + te[2] * te[2];
-		const scaleYSq =  te[4] * te[4] + te[5] * te[5] + te[6] * te[6];
-		const scaleZSq =  te[8] * te[8] + te[9] * te[9] + te[10] * te[10];
+		var scaleXSq =  te[0] * te[0] + te[1] * te[1] + te[2] * te[2];
+		var scaleYSq =  te[4] * te[4] + te[5] * te[5] + te[6] * te[6];
+		var scaleZSq =  te[8] * te[8] + te[9] * te[9] + te[10] * te[10];
 
 		return Math.sqrt( Math.max( scaleXSq, Math.max( scaleYSq, scaleZSq ) ) );
 
@@ -2524,7 +2524,7 @@ THREE.Matrix4.prototype = {
 
 	//
 
-	makeTranslation ( x, y, z ) {
+	makeTranslation: function ( x, y, z ) {
 
 		this.set(
 
@@ -2539,9 +2539,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	makeRotationX ( theta ) {
+	makeRotationX: function ( theta ) {
 
-		const c = Math.cos( theta ); const s = Math.sin( theta );
+		var c = Math.cos( theta ), s = Math.sin( theta );
 
 		this.set(
 
@@ -2556,9 +2556,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	makeRotationY ( theta ) {
+	makeRotationY: function ( theta ) {
 
-		const c = Math.cos( theta ); const s = Math.sin( theta );
+		var c = Math.cos( theta ), s = Math.sin( theta );
 
 		this.set(
 
@@ -2573,9 +2573,9 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	makeRotationZ ( theta ) {
+	makeRotationZ: function ( theta ) {
 
-		const c = Math.cos( theta ); const s = Math.sin( theta );
+		var c = Math.cos( theta ), s = Math.sin( theta );
 
 		this.set(
 
@@ -2590,15 +2590,15 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	makeRotationAxis ( axis, angle ) {
+	makeRotationAxis: function ( axis, angle ) {
 
 		// Based on http://www.gamedev.net/reference/articles/article1199.asp
 
-		const c = Math.cos( angle );
-		const s = Math.sin( angle );
-		const t = 1 - c;
-		const {x} = axis; const {y} = axis; const {z} = axis;
-		const tx = t * x; const ty = t * y;
+		var c = Math.cos( angle );
+		var s = Math.sin( angle );
+		var t = 1 - c;
+		var x = axis.x, y = axis.y, z = axis.z;
+		var tx = t * x, ty = t * y;
 
 		this.set(
 
@@ -2613,7 +2613,7 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	makeScale ( x, y, z ) {
+	makeScale: function ( x, y, z ) {
 
 		this.set(
 
@@ -2628,16 +2628,16 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	makeFrustum ( left, right, bottom, top, near, far ) {
+	makeFrustum: function ( left, right, bottom, top, near, far ) {
 
-		const te = this.elements;
-		const x = 2 * near / ( right - left );
-		const y = 2 * near / ( top - bottom );
+		var te = this.elements;
+		var x = 2 * near / ( right - left );
+		var y = 2 * near / ( top - bottom );
 
-		const a = ( right + left ) / ( right - left );
-		const b = ( top + bottom ) / ( top - bottom );
-		const c = - ( far + near ) / ( far - near );
-		const d = - 2 * far * near / ( far - near );
+		var a = ( right + left ) / ( right - left );
+		var b = ( top + bottom ) / ( top - bottom );
+		var c = - ( far + near ) / ( far - near );
+		var d = - 2 * far * near / ( far - near );
 
 		te[0] = x;  te[4] = 0;  te[8] = a;   te[12] = 0;
 		te[1] = 0;  te[5] = y;  te[9] = b;   te[13] = 0;
@@ -2648,27 +2648,27 @@ THREE.Matrix4.prototype = {
 
 	},
 
-	makePerspective ( fov, aspect, near, far ) {
+	makePerspective: function ( fov, aspect, near, far ) {
 
-		const ymax = near * Math.tan( fov * Math.PI / 360 );
-		const ymin = - ymax;
-		const xmin = ymin * aspect;
-		const xmax = ymax * aspect;
+		var ymax = near * Math.tan( fov * Math.PI / 360 );
+		var ymin = - ymax;
+		var xmin = ymin * aspect;
+		var xmax = ymax * aspect;
 
 		return this.makeFrustum( xmin, xmax, ymin, ymax, near, far );
 
 	},
 
-	makeOrthographic ( left, right, top, bottom, near, far ) {
+	makeOrthographic: function ( left, right, top, bottom, near, far ) {
 
-		const te = this.elements;
-		const w = right - left;
-		const h = top - bottom;
-		const p = far - near;
+		var te = this.elements;
+		var w = right - left;
+		var h = top - bottom;
+		var p = far - near;
 
-		const x = ( right + left ) / w;
-		const y = ( top + bottom ) / h;
-		const z = ( far + near ) / p;
+		var x = ( right + left ) / w;
+		var y = ( top + bottom ) / h;
+		var z = ( far + near ) / p;
 
 		te[0] = 2 / w; te[4] = 0;     te[8] = 0;      te[12] = -x;
 		te[1] = 0;     te[5] = 2 / h; te[9] = 0;      te[13] = -y;
@@ -2680,9 +2680,9 @@ THREE.Matrix4.prototype = {
 	},
 
 
-	clone () {
+	clone: function () {
 
-		const te = this.elements;
+		var te = this.elements;
 
 		return new THREE.Matrix4(
 
@@ -2761,7 +2761,7 @@ THREE.Object3D.prototype = {
 
 	constructor: THREE.Object3D,
 
-	applyMatrix ( matrix ) {
+	applyMatrix: function ( matrix ) {
 
 		this.matrix.multiply( matrix, this.matrix );
 
@@ -2771,32 +2771,32 @@ THREE.Object3D.prototype = {
 
 	},
 
-	translate ( distance, axis ) {
+	translate: function ( distance, axis ) {
 
 		this.matrix.rotateAxis( axis );
 		this.position.addSelf( axis.multiplyScalar( distance ) );
 
 	},
 
-	translateX ( distance ) {
+	translateX: function ( distance ) {
 
 		this.translate( distance, this._vector.set( 1, 0, 0 ) );
 
 	},
 
-	translateY ( distance ) {
+	translateY: function ( distance ) {
 
 		this.translate( distance, this._vector.set( 0, 1, 0 ) );
 
 	},
 
-	translateZ ( distance ) {
+	translateZ: function ( distance ) {
 
 		this.translate( distance, this._vector.set( 0, 0, 1 ) );
 
 	},
 
-	lookAt ( vector ) {
+	lookAt: function ( vector ) {
 
 		// TODO: Add hierarchy support.
 
@@ -2810,7 +2810,7 @@ THREE.Object3D.prototype = {
 
 	},
 
-	add ( object ) {
+	add: function ( object ) {
 
 		if ( object === this ) {
 
@@ -2832,7 +2832,7 @@ THREE.Object3D.prototype = {
 
 			// add to scene
 
-			let scene = this;
+			var scene = this;
 
 			while ( scene.parent !== undefined ) {
 
@@ -2850,9 +2850,9 @@ THREE.Object3D.prototype = {
 
 	},
 
-	remove ( object ) {
+	remove: function ( object ) {
 
-		const index = this.children.indexOf( object );
+		var index = this.children.indexOf( object );
 
 		if ( index !== - 1 ) {
 
@@ -2861,7 +2861,7 @@ THREE.Object3D.prototype = {
 
 			// remove from scene
 
-			let scene = this;
+			var scene = this;
 
 			while ( scene.parent !== undefined ) {
 
@@ -2879,9 +2879,9 @@ THREE.Object3D.prototype = {
 
 	},
 
-	getChildByName ( name, recursive ) {
+	getChildByName: function ( name, recursive ) {
 
-		let c; let cl; let child;
+		var c, cl, child;
 
 		for ( c = 0, cl = this.children.length; c < cl; c ++ ) {
 
@@ -2911,7 +2911,7 @@ THREE.Object3D.prototype = {
 
 	},
 
-	updateMatrix () {
+	updateMatrix: function () {
 
 		this.matrix.setPosition( this.position );
 
@@ -2936,7 +2936,7 @@ THREE.Object3D.prototype = {
 
 	},
 
-	updateMatrixWorld ( force ) {
+	updateMatrixWorld: function ( force ) {
 
 		this.matrixAutoUpdate && this.updateMatrix();
 
@@ -2962,7 +2962,7 @@ THREE.Object3D.prototype = {
 
 		// update children
 
-		for ( let i = 0, l = this.children.length; i < l; i ++ ) {
+		for ( var i = 0, l = this.children.length; i < l; i ++ ) {
 
 			this.children[ i ].updateMatrixWorld( force );
 
@@ -2981,26 +2981,26 @@ THREE.Object3DCount = 0;
 
 THREE.Projector = function() {
 
-	let _object; let _objectCount; const _objectPool = [];
-	let _vertex; let _vertexCount; const _vertexPool = [];
-	let _face; let _face3Count; const _face3Pool = []; let _face4Count; const _face4Pool = [];
-	let _line; let _lineCount; const _linePool = [];
-	let _particle; let _particleCount; const _particlePool = [];
+	var _object, _objectCount, _objectPool = [],
+	_vertex, _vertexCount, _vertexPool = [],
+	_face, _face3Count, _face3Pool = [], _face4Count, _face4Pool = [],
+	_line, _lineCount, _linePool = [],
+	_particle, _particleCount, _particlePool = [],
 
-	let _renderData = { objects: [], sprites: [], lights: [], elements: [] };
+	_renderData = { objects: [], sprites: [], lights: [], elements: [] },
 
-	const _vector3 = new THREE.Vector3();
-	const _vector4 = new THREE.Vector4();
+	_vector3 = new THREE.Vector3(),
+	_vector4 = new THREE.Vector4(),
 
-	const _projScreenMatrix = new THREE.Matrix4();
-	const _projScreenobjectMatrixWorld = new THREE.Matrix4();
+	_projScreenMatrix = new THREE.Matrix4(),
+	_projScreenobjectMatrixWorld = new THREE.Matrix4(),
 
-	const _frustum = new THREE.Frustum();
+	_frustum = new THREE.Frustum(),
 
-	const _clippedVertex1PositionScreen = new THREE.Vector4();
-	const _clippedVertex2PositionScreen = new THREE.Vector4();
+	_clippedVertex1PositionScreen = new THREE.Vector4(),
+	_clippedVertex2PositionScreen = new THREE.Vector4(),
 
-	let _face3VertexNormals;
+	_face3VertexNormals;
 
 	this.projectVector = function ( vector, camera ) {
 
@@ -3026,7 +3026,7 @@ THREE.Projector = function() {
 
 	this.pickingRay = function ( vector, camera ) {
 
-		let end; let ray; let t;
+		var end, ray, t;
 
 		// set two vectors with opposing z values
 		vector.z = -1.0;
@@ -3077,13 +3077,13 @@ THREE.Projector = function() {
 
 				_renderData.sprites.push( _object );
 
-											          } */ else if ( object instanceof THREE.Light ) {
+											          }*/ else if ( object instanceof THREE.Light ) {
 
 				_renderData.lights.push( object );
 
 			}
 
-			for ( let c = 0, cl = object.children.length; c < cl; c ++ ) {
+			for ( var c = 0, cl = object.children.length; c < cl; c ++ ) {
 
 				projectObject( object.children[ c ] );
 
@@ -3101,12 +3101,12 @@ THREE.Projector = function() {
 
 	this.projectScene = function ( scene, camera, sort ) {
 
-		const {near} = camera; const {far} = camera; let visible = false;
-		let o; let ol; let v; let vl; let f; let fl; let n; let nl; let c; let cl; let u; let ul; let object;
-		let objectMatrixWorld; let objectMatrixWorldRotation;
-		let geometry; let geometryMaterials; let vertices; let vertex; let vertexPositionScreen;
-		let faces; let face; let faceVertexNormals; let normal; let faceVertexUvs; let uvs;
-		let v1; let v2; let v3; let v4;
+		var near = camera.near, far = camera.far, visible = false,
+		o, ol, v, vl, f, fl, n, nl, c, cl, u, ul, object,
+		objectMatrixWorld, objectMatrixWorldRotation,
+		geometry, geometryMaterials, vertices, vertex, vertexPositionScreen,
+		faces, face, faceVertexNormals, normal, faceVertexUvs, uvs,
+		v1, v2, v3, v4;
 
 		_face3Count = 0;
 		_face4Count = 0;
@@ -3295,7 +3295,7 @@ THREE.Projector = function() {
 				_projScreenobjectMatrixWorld.multiplyVector4( v1.positionScreen );
 
 				// Handle LineStrip and LinePieces
-				const step = object.type === THREE.LinePieces ? 2 : 1;
+				var step = object.type === THREE.LinePieces ? 2 : 1;
 
 				for ( v = 1, vl = vertices.length; v < vl; v ++ ) {
 
@@ -3379,7 +3379,7 @@ THREE.Projector = function() {
 
 	function getNextObjectInPool() {
 
-		const object = _objectPool[ _objectCount ] = _objectPool[ _objectCount ] || new THREE.RenderableObject();
+		var object = _objectPool[ _objectCount ] = _objectPool[ _objectCount ] || new THREE.RenderableObject();
 
 		_objectCount ++;
 
@@ -3389,7 +3389,7 @@ THREE.Projector = function() {
 
 	function getNextVertexInPool() {
 
-		const vertex = _vertexPool[ _vertexCount ] = _vertexPool[ _vertexCount ] || new THREE.RenderableVertex();
+		var vertex = _vertexPool[ _vertexCount ] = _vertexPool[ _vertexCount ] || new THREE.RenderableVertex();
 
 		_vertexCount ++;
 
@@ -3399,7 +3399,7 @@ THREE.Projector = function() {
 
 	function getNextFace3InPool() {
 
-		const face = _face3Pool[ _face3Count ] = _face3Pool[ _face3Count ] || new THREE.RenderableFace3();
+		var face = _face3Pool[ _face3Count ] = _face3Pool[ _face3Count ] || new THREE.RenderableFace3();
 
 		_face3Count ++;
 
@@ -3409,7 +3409,7 @@ THREE.Projector = function() {
 
 	function getNextFace4InPool() {
 
-		const face = _face4Pool[ _face4Count ] = _face4Pool[ _face4Count ] || new THREE.RenderableFace4();
+		var face = _face4Pool[ _face4Count ] = _face4Pool[ _face4Count ] || new THREE.RenderableFace4();
 
 		_face4Count ++;
 
@@ -3419,7 +3419,7 @@ THREE.Projector = function() {
 
 	function getNextLineInPool() {
 
-		const line = _linePool[ _lineCount ] = _linePool[ _lineCount ] || new THREE.RenderableLine();
+		var line = _linePool[ _lineCount ] = _linePool[ _lineCount ] || new THREE.RenderableLine();
 
 		_lineCount ++;
 
@@ -3429,7 +3429,7 @@ THREE.Projector = function() {
 
 	function getNextParticleInPool() {
 
-		const particle = _particlePool[ _particleCount ] = _particlePool[ _particleCount ] || new THREE.RenderableParticle();
+		var particle = _particlePool[ _particleCount ] = _particlePool[ _particleCount ] || new THREE.RenderableParticle();
 		_particleCount ++;
 		return particle;
 
@@ -3445,26 +3445,26 @@ THREE.Projector = function() {
 
 	function clipLine( s1, s2 ) {
 
-		let alpha1 = 0; let alpha2 = 1;
+		var alpha1 = 0, alpha2 = 1,
 
 		// Calculate the boundary coordinate of each vertex for the near and far clip planes,
 		// Z = -1 and Z = +1, respectively.
-		const bc1near =  s1.z + s1.w;
-		const bc2near =  s2.z + s2.w;
-		const bc1far =  - s1.z + s1.w;
-		const bc2far =  - s2.z + s2.w;
+		bc1near =  s1.z + s1.w,
+		bc2near =  s2.z + s2.w,
+		bc1far =  - s1.z + s1.w,
+		bc2far =  - s2.z + s2.w;
 
 		if ( bc1near >= 0 && bc2near >= 0 && bc1far >= 0 && bc2far >= 0 ) {
 
 			// Both vertices lie entirely within all clip planes.
 			return true;
 
-		} if ( ( bc1near < 0 && bc2near < 0) || (bc1far < 0 && bc2far < 0 ) ) {
+		} else if ( ( bc1near < 0 && bc2near < 0) || (bc1far < 0 && bc2far < 0 ) ) {
 
 			// Both vertices lie entirely outside one of the clip planes.
 			return false;
 
-		} 
+		} else {
 
 			// The line segment spans at least one clip plane.
 
@@ -3499,7 +3499,7 @@ THREE.Projector = function() {
 				//  to leave the check here for future usage if other clip planes are added.)
 				return false;
 
-			} 
+			} else {
 
 				// Update the s1 and s2 vertices to match the clipped line segment.
 				s1.lerpSelf( s2, alpha1 );
@@ -3507,9 +3507,9 @@ THREE.Projector = function() {
 
 				return true;
 
-			
+			}
 
-		
+		}
 
 	}
 
@@ -3532,7 +3532,7 @@ THREE.Quaternion.prototype = {
 
 	constructor: THREE.Quaternion,
 
-	set ( x, y, z, w ) {
+	set: function ( x, y, z, w ) {
 
 		this.x = x;
 		this.y = y;
@@ -3543,7 +3543,7 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	copy ( q ) {
+	copy: function ( q ) {
 
 		this.x = q.x;
 		this.y = q.y;
@@ -3554,22 +3554,22 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	setFromEuler ( vector ) {
+	setFromEuler: function ( vector ) {
 
-		const c = Math.PI / 360; // 0.5 * Math.PI / 360, // 0.5 is an optimization
-		const x = vector.x * c;
-		const y = vector.y * c;
-		const z = vector.z * c;
+		var c = Math.PI / 360, // 0.5 * Math.PI / 360, // 0.5 is an optimization
+		x = vector.x * c,
+		y = vector.y * c,
+		z = vector.z * c,
 
-		const c1 = Math.cos( y  );
-		const s1 = Math.sin( y  );
-		const c2 = Math.cos( -z );
-		const s2 = Math.sin( -z );
-		const c3 = Math.cos( x  );
-		const s3 = Math.sin( x  );
+		c1 = Math.cos( y  ),
+		s1 = Math.sin( y  ),
+		c2 = Math.cos( -z ),
+		s2 = Math.sin( -z ),
+		c3 = Math.cos( x  ),
+		s3 = Math.sin( x  ),
 
-		const c1c2 = c1 * c2;
-		const s1s2 = s1 * s2;
+		c1c2 = c1 * c2,
+		s1s2 = s1 * s2;
 
 		this.w = c1c2 * c3  - s1s2 * s3;
 			this.x = c1c2 * s3  + s1s2 * c3;
@@ -3580,13 +3580,13 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	setFromAxisAngle ( axis, angle ) {
+	setFromAxisAngle: function ( axis, angle ) {
 
 		// from http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
 		// axis have to be normalized
 
-		const halfAngle = angle / 2;
-			const s = Math.sin( halfAngle );
+		var halfAngle = angle / 2,
+			s = Math.sin( halfAngle );
 
 		this.x = axis.x * s;
 		this.y = axis.y * s;
@@ -3597,7 +3597,7 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	setFromRotationMatrix ( m ) {
+	setFromRotationMatrix: function ( m ) {
 
 		// Adapted from: http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
 
@@ -3607,7 +3607,7 @@ THREE.Quaternion.prototype = {
 
 		}
 
-		const absQ = m.determinant()**(1.0 / 3.0);
+		var absQ = Math.pow( m.determinant(), 1.0 / 3.0 );
 		this.w = Math.sqrt( Math.max( 0, absQ + m.elements[0] + m.elements[5] + m.elements[10] ) ) / 2;
 		this.x = Math.sqrt( Math.max( 0, absQ + m.elements[0] - m.elements[5] - m.elements[10] ) ) / 2;
 		this.y = Math.sqrt( Math.max( 0, absQ - m.elements[0] + m.elements[5] - m.elements[10] ) ) / 2;
@@ -3621,7 +3621,7 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	calculateW () {
+	calculateW : function () {
 
 		this.w = - Math.sqrt( Math.abs( 1.0 - this.x * this.x - this.y * this.y - this.z * this.z ) );
 
@@ -3629,7 +3629,7 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	inverse () {
+	inverse: function () {
 
 		this.x *= -1;
 		this.y *= -1;
@@ -3639,15 +3639,15 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	length () {
+	length: function () {
 
 		return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w );
 
 	},
 
-	normalize () {
+	normalize: function () {
 
-		let l = Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w );
+		var l = Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w );
 
 		if ( l === 0 ) {
 
@@ -3660,10 +3660,10 @@ THREE.Quaternion.prototype = {
 
 			l = 1 / l;
 
-			this.x *= l;
-			this.y *= l;
-			this.z *= l;
-			this.w *= l;
+			this.x = this.x * l;
+			this.y = this.y * l;
+			this.z = this.z * l;
+			this.w = this.w * l;
 
 		}
 
@@ -3671,7 +3671,7 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	multiply ( a, b ) {
+	multiply: function ( a, b ) {
 
 		// from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
 
@@ -3684,10 +3684,10 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	multiplySelf ( b ) {
+	multiplySelf: function ( b ) {
 
-		const qax = this.x; const qay = this.y; const qaz = this.z; const qaw = this.w;
-		const qbx = b.x; const qby = b.y; const qbz = b.z; const qbw = b.w;
+		var qax = this.x, qay = this.y, qaz = this.z, qaw = this.w,
+		qbx = b.x, qby = b.y, qbz = b.z, qbw = b.w;
 
 		this.x = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
 		this.y = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
@@ -3698,19 +3698,19 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	multiplyVector3 ( vector, dest ) {
+	multiplyVector3: function ( vector, dest ) {
 
 		if ( !dest ) { dest = vector; }
 
-		const {x} = vector; const  {y} = vector; const  {z} = vector;
-			const qx   = this.x; const qy = this.y; const qz = this.z; const qw = this.w;
+		var x    = vector.x,  y  = vector.y,  z  = vector.z,
+			qx   = this.x, qy = this.y, qz = this.z, qw = this.w;
 
 		// calculate quat * vector
 
-		const ix =  qw * x + qy * z - qz * y;
-			const iy =  qw * y + qz * x - qx * z;
-			const iz =  qw * z + qx * y - qy * x;
-			const iw = -qx * x - qy * y - qz * z;
+		var ix =  qw * x + qy * z - qz * y,
+			iy =  qw * y + qz * x - qx * z,
+			iz =  qw * z + qx * y - qy * x,
+			iw = -qx * x - qy * y - qz * z;
 
 		// calculate result * inverse quat
 
@@ -3722,7 +3722,7 @@ THREE.Quaternion.prototype = {
 
 	},
 
-	clone () {
+	clone: function () {
 
 		return new THREE.Quaternion( this.x, this.y, this.z, this.w );
 
@@ -3734,7 +3734,7 @@ THREE.Quaternion.slerp = function ( qa, qb, qm, t ) {
 
 	// http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
 
-	let cosHalfTheta = qa.w * qb.w + qa.x * qb.x + qa.y * qb.y + qa.z * qb.z;
+	var cosHalfTheta = qa.w * qb.w + qa.x * qb.x + qa.y * qb.y + qa.z * qb.z;
 
 	if (cosHalfTheta < 0) {
 		qm.w = -qb.w; qm.x = -qb.x; qm.y = -qb.y; qm.z = -qb.z;
@@ -3750,8 +3750,8 @@ THREE.Quaternion.slerp = function ( qa, qb, qm, t ) {
 
 	}
 
-	const halfTheta = Math.acos( cosHalfTheta );
-	const sinHalfTheta = Math.sqrt( 1.0 - cosHalfTheta * cosHalfTheta );
+	var halfTheta = Math.acos( cosHalfTheta ),
+	sinHalfTheta = Math.sqrt( 1.0 - cosHalfTheta * cosHalfTheta );
 
 	if ( Math.abs( sinHalfTheta ) < 0.001 ) {
 
@@ -3764,8 +3764,8 @@ THREE.Quaternion.slerp = function ( qa, qb, qm, t ) {
 
 	}
 
-	const ratioA = Math.sin( ( 1 - t ) * halfTheta ) / sinHalfTheta;
-	const ratioB = Math.sin( t * halfTheta ) / sinHalfTheta;
+	var ratioA = Math.sin( ( 1 - t ) * halfTheta ) / sinHalfTheta,
+	ratioB = Math.sin( t * halfTheta ) / sinHalfTheta;
 
 	qm.w = ( qa.w * ratioA + qm.w * ratioB );
 	qm.x = ( qa.x * ratioA + qm.x * ratioB );
@@ -3813,9 +3813,9 @@ THREE.Face3.prototype = {
 
 	constructor: THREE.Face3,
 
-	clone () {
+	clone: function () {
 
-		const face = new THREE.Face3( this.a, this.b, this.c );
+		var face = new THREE.Face3( this.a, this.b, this.c );
 
 		face.normal.copy( this.normal );
 		face.color.copy( this.color );
@@ -3823,7 +3823,7 @@ THREE.Face3.prototype = {
 
 		face.materialIndex = this.materialIndex;
 
-		let i; let il;
+		var i, il;
 		for ( i = 0, il = this.vertexNormals.length; i < il; i ++ ) face.vertexNormals[ i ] = this.vertexNormals[ i ].clone();
 		for ( i = 0, il = this.vertexColors.length; i < il; i ++ ) face.vertexColors[ i ] = this.vertexColors[ i ].clone();
 		for ( i = 0, il = this.vertexTangents.length; i < il; i ++ ) face.vertexTangents[ i ] = this.vertexTangents[ i ].clone();
@@ -3863,9 +3863,9 @@ THREE.Face4.prototype = {
 
 	constructor: THREE.Face4,
 
-	clone () {
+	clone: function () {
 
-		const face = new THREE.Face4( this.a, this.b, this.c, this.d );
+		var face = new THREE.Face4( this.a, this.b, this.c, this.d );
 
 		face.normal.copy( this.normal );
 		face.color.copy( this.color );
@@ -3873,7 +3873,7 @@ THREE.Face4.prototype = {
 
 		face.materialIndex = this.materialIndex;
 
-		let i; let il;
+		var i, il;
 		for ( i = 0, il = this.vertexNormals.length; i < il; i ++ ) face.vertexNormals[ i ] = this.vertexNormals[ i ].clone();
 		for ( i = 0, il = this.vertexColors.length; i < il; i ++ ) face.vertexColors[ i ] = this.vertexColors[ i ].clone();
 		for ( i = 0, il = this.vertexTangents.length; i < il; i ++ ) face.vertexTangents[ i ] = this.vertexTangents[ i ].clone();
@@ -3898,7 +3898,7 @@ THREE.UV.prototype = {
 
 	constructor: THREE.UV,
 
-	set ( u, v ) {
+	set: function ( u, v ) {
 
 		this.u = u;
 		this.v = v;
@@ -3907,7 +3907,7 @@ THREE.UV.prototype = {
 
 	},
 
-	copy ( uv ) {
+	copy: function ( uv ) {
 
 		this.u = uv.u;
 		this.v = uv.v;
@@ -3916,7 +3916,7 @@ THREE.UV.prototype = {
 
 	},
 
-	lerpSelf ( uv, alpha ) {
+	lerpSelf: function ( uv, alpha ) {
 
 		this.u += ( uv.u - this.u ) * alpha;
 		this.v += ( uv.v - this.v ) * alpha;
@@ -3925,7 +3925,7 @@ THREE.UV.prototype = {
 
 	},
 
-	clone () {
+	clone: function () {
 
 		return new THREE.UV( this.u, this.v );
 
@@ -3974,14 +3974,14 @@ THREE.Geometry.prototype = {
 
 	constructor : THREE.Geometry,
 
-	applyMatrix ( matrix ) {
+	applyMatrix: function ( matrix ) {
 
-		const matrixRotation = new THREE.Matrix4();
+		var matrixRotation = new THREE.Matrix4();
 		matrixRotation.extractRotation( matrix );
 
 		for ( var i = 0, il = this.vertices.length; i < il; i ++ ) {
 
-			const vertex = this.vertices[ i ];
+			var vertex = this.vertices[ i ];
 
 			matrix.multiplyVector3( vertex );
 
@@ -3989,11 +3989,11 @@ THREE.Geometry.prototype = {
 
 		for ( var i = 0, il = this.faces.length; i < il; i ++ ) {
 
-			const face = this.faces[ i ];
+			var face = this.faces[ i ];
 
 			matrixRotation.multiplyVector3( face.normal );
 
-			for ( let j = 0, jl = face.vertexNormals.length; j < jl; j ++ ) {
+			for ( var j = 0, jl = face.vertexNormals.length; j < jl; j ++ ) {
 
 				matrixRotation.multiplyVector3( face.vertexNormals[ j ] );
 
@@ -4005,9 +4005,9 @@ THREE.Geometry.prototype = {
 
 	},
 
-	computeCentroids () {
+	computeCentroids: function () {
 
-		let f; let fl; let face;
+		var f, fl, face;
 
 		for ( f = 0, fl = this.faces.length; f < fl; f ++ ) {
 
@@ -4035,10 +4035,10 @@ THREE.Geometry.prototype = {
 
 	},
 
-	computeFaceNormals () {
+	computeFaceNormals: function () {
 
-		let n; let nl; let v; let vl; let vertex; let f; let fl; let face; let vA; let vB; let vC;
-		const cb = new THREE.Vector3(); const ab = new THREE.Vector3();
+		var n, nl, v, vl, vertex, f, fl, face, vA, vB, vC,
+		cb = new THREE.Vector3(), ab = new THREE.Vector3();
 
 		for ( f = 0, fl = this.faces.length; f < fl; f ++ ) {
 
@@ -4064,9 +4064,9 @@ THREE.Geometry.prototype = {
 
 	},
 
-	computeVertexNormals () {
+	computeVertexNormals: function () {
 
-		let v; let vl; let f; let fl; let face; let vertices;
+		var v, vl, f, fl, face, vertices;
 
 		// create internal buffers for reuse when calling this method repeatedly
 		// (otherwise memory allocation / deallocation every frame is big resource hog)
@@ -4160,9 +4160,9 @@ THREE.Geometry.prototype = {
 
 	},
 
-	computeMorphNormals () {
+	computeMorphNormals: function () {
 
-		let i; let il; let f; let fl; let face;
+		var i, il, f, fl, face;
 
 		// save original normals
 		// - create temp variables on first access
@@ -4202,7 +4202,7 @@ THREE.Geometry.prototype = {
 
 		// use temp geometry to compute face and vertex normals for each morph
 
-		const tmpGeo = new THREE.Geometry();
+		var tmpGeo = new THREE.Geometry();
 		tmpGeo.faces = this.faces;
 
 		for ( i = 0, il = this.morphTargets.length; i < il; i ++ ) {
@@ -4215,10 +4215,10 @@ THREE.Geometry.prototype = {
 				this.morphNormals[ i ].faceNormals = [];
 				this.morphNormals[ i ].vertexNormals = [];
 
-				const dstNormalsFace = this.morphNormals[ i ].faceNormals;
-				const dstNormalsVertex = this.morphNormals[ i ].vertexNormals;
+				var dstNormalsFace = this.morphNormals[ i ].faceNormals;
+				var dstNormalsVertex = this.morphNormals[ i ].vertexNormals;
 
-				var faceNormal; var vertexNormals;
+				var faceNormal, vertexNormals;
 
 				for ( f = 0, fl = this.faces.length; f < fl; f ++ ) {
 
@@ -4243,7 +4243,7 @@ THREE.Geometry.prototype = {
 
 			}
 
-			const morphNormals = this.morphNormals[ i ];
+			var morphNormals = this.morphNormals[ i ];
 
 			// set vertices to morph target
 
@@ -4256,7 +4256,7 @@ THREE.Geometry.prototype = {
 
 			// store morph normals
 
-			var faceNormal; var vertexNormals;
+			var faceNormal, vertexNormals;
 
 			for ( f = 0, fl = this.faces.length; f < fl; f ++ ) {
 
@@ -4299,19 +4299,19 @@ THREE.Geometry.prototype = {
 
 	},
 
-	computeTangents () {
+	computeTangents: function () {
 
 		// based on http://www.terathon.com/code/tangent.html
 		// tangents go to vertices
 
-		let f; let fl; let v; let vl; let i; let il; let vertexIndex;
-			let face; let uv; let vA; let vB; let vC; let uvA; let uvB; let uvC;
-			let x1; let x2; let y1; let y2; let z1; let z2;
-			let s1; let s2; let t1; let t2; let r; let t; let test;
-			const tan1 = []; const tan2 = [];
-			const sdir = new THREE.Vector3(); const tdir = new THREE.Vector3();
-			const tmp = new THREE.Vector3(); const tmp2 = new THREE.Vector3();
-			const n = new THREE.Vector3(); let w;
+		var f, fl, v, vl, i, il, vertexIndex,
+			face, uv, vA, vB, vC, uvA, uvB, uvC,
+			x1, x2, y1, y2, z1, z2,
+			s1, s2, t1, t2, r, t, test,
+			tan1 = [], tan2 = [],
+			sdir = new THREE.Vector3(), tdir = new THREE.Vector3(),
+			tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3(),
+			n = new THREE.Vector3(), w;
 
 		for ( v = 0, vl = this.vertices.length; v < vl; v ++ ) {
 
@@ -4378,7 +4378,7 @@ THREE.Geometry.prototype = {
 
 		}
 
-		const faceIndex = [ 'a', 'b', 'c', 'd' ];
+		var faceIndex = [ 'a', 'b', 'c', 'd' ];
 
 		for ( f = 0, fl = this.faces.length; f < fl; f ++ ) {
 
@@ -4413,7 +4413,7 @@ THREE.Geometry.prototype = {
 
 	},
 
-	computeBoundingBox () {
+	computeBoundingBox: function () {
 
 		if ( ! this.boundingBox ) {
 
@@ -4423,15 +4423,15 @@ THREE.Geometry.prototype = {
 
 		if ( this.vertices.length > 0 ) {
 
-			let position; const firstPosition = this.vertices[ 0 ];
+			var position, firstPosition = this.vertices[ 0 ];
 
 			this.boundingBox.min.copy( firstPosition );
 			this.boundingBox.max.copy( firstPosition );
 
-			const {min} = this.boundingBox;
-				const {max} = this.boundingBox;
+			var min = this.boundingBox.min,
+				max = this.boundingBox.max;
 
-			for ( let v = 1, vl = this.vertices.length; v < vl; v ++ ) {
+			for ( var v = 1, vl = this.vertices.length; v < vl; v ++ ) {
 
 				position = this.vertices[ v ];
 
@@ -4476,13 +4476,13 @@ THREE.Geometry.prototype = {
 
 	},
 
-	computeBoundingSphere () {
+	computeBoundingSphere: function () {
 
 		if ( ! this.boundingSphere ) this.boundingSphere = { radius: 0 };
 
-		let radius; let maxRadius = 0;
+		var radius, maxRadius = 0;
 
-		for ( let v = 0, vl = this.vertices.length; v < vl; v ++ ) {
+		for ( var v = 0, vl = this.vertices.length; v < vl; v ++ ) {
 
 			radius = this.vertices[ v ].length();
 			if ( radius > maxRadius ) maxRadius = radius;
@@ -4499,16 +4499,16 @@ THREE.Geometry.prototype = {
 	 * and faces' vertices are updated.
 	 */
 
-	mergeVertices() {
+	mergeVertices: function() {
 
-		const verticesMap = {}; // Hashmap for looking up vertice by position coordinates (and making sure they are unique)
-		const unique = []; const changes = [];
+		var verticesMap = {}; // Hashmap for looking up vertice by position coordinates (and making sure they are unique)
+		var unique = [], changes = [];
 
-		let v; let key;
-		const precisionPoints = 4; // number of decimal points, eg. 4 for epsilon of 0.0001
-		const precision = 10**precisionPoints;
-		let i; let il; let face;
-		const abcd = 'abcd'; let o; let k; let j; let jl; let u;
+		var v, key;
+		var precisionPoints = 4; // number of decimal points, eg. 4 for epsilon of 0.0001
+		var precision = Math.pow( 10, precisionPoints );
+		var i,il, face;
+		var abcd = 'abcd', o, k, j, jl, u;
 
 		for ( i = 0, il = this.vertices.length; i < il; i ++ ) {
 
@@ -4523,7 +4523,7 @@ THREE.Geometry.prototype = {
 
 			} else {
 
-				// console.log('Duplicate vertex found. ', i, ' could be using ', verticesMap[key]);
+				//console.log('Duplicate vertex found. ', i, ' could be using ', verticesMap[key]);
 				changes[ i ] = changes[ verticesMap[ key ] ];
 
 			}
@@ -4572,7 +4572,7 @@ THREE.Geometry.prototype = {
 		}
 
 		// Use unique set of vertices
-		const diff = this.vertices.length - unique.length;
+		var diff = this.vertices.length - unique.length;
 		this.vertices = unique;
 		return diff;
 
@@ -4593,15 +4593,15 @@ THREE.Spline = function ( points ) {
 
 	this.points = points;
 
-	const c = []; const v3 = { x: 0, y: 0, z: 0 };
-	let point; let intPoint; let weight; let w2; let w3;
-	let pa; let pb; let pc; let pd;
+	var c = [], v3 = { x: 0, y: 0, z: 0 },
+	point, intPoint, weight, w2, w3,
+	pa, pb, pc, pd;
 
 	this.initFromArray = function( a ) {
 
 		this.points = [];
 
-		for ( let i = 0; i < a.length; i++ ) {
+		for ( var i = 0; i < a.length; i++ ) {
 
 			this.points[ i ] = { x: a[ i ][ 0 ], y: a[ i ][ 1 ], z: a[ i ][ 2 ] };
 
@@ -4638,8 +4638,8 @@ THREE.Spline = function ( points ) {
 
 	this.getControlPointsArray = function () {
 
-		let i; let p; const l = this.points.length;
-			const coords = [];
+		var i, p, l = this.points.length,
+			coords = [];
 
 		for ( i = 0; i < l; i ++ ) {
 
@@ -4656,12 +4656,12 @@ THREE.Spline = function ( points ) {
 
 	this.getLength = function ( nSubDivisions ) {
 
-		let i; let index; let nSamples; let position;
-			let point = 0; let intPoint = 0; let oldIntPoint = 0;
-			const oldPosition = new THREE.Vector3();
-			const tmpVec = new THREE.Vector3();
-			const chunkLengths = [];
-			let totalLength = 0;
+		var i, index, nSamples, position,
+			point = 0, intPoint = 0, oldIntPoint = 0,
+			oldPosition = new THREE.Vector3(),
+			tmpVec = new THREE.Vector3(),
+			chunkLengths = [],
+			totalLength = 0;
 
 		// first point has 0 length
 
@@ -4706,20 +4706,20 @@ THREE.Spline = function ( points ) {
 
 	this.reparametrizeByArcLength = function ( samplingCoef ) {
 
-		let i; let j;
-			let index; let indexCurrent; let indexNext;
-			let linearDistance; let realDistance;
-			let sampling; let position;
-			const newpoints = [];
-			const tmpVec = new THREE.Vector3();
-			const sl = this.getLength();
+		var i, j,
+			index, indexCurrent, indexNext,
+			linearDistance, realDistance,
+			sampling, position,
+			newpoints = [],
+			tmpVec = new THREE.Vector3(),
+			sl = this.getLength();
 
 		newpoints.push( tmpVec.copy( this.points[ 0 ] ).clone() );
 
 		for ( i = 1; i < this.points.length; i++ ) {
 
-			// tmpVec.copy( this.points[ i - 1 ] );
-			// linearDistance = tmpVec.distanceTo( this.points[ i ] );
+			//tmpVec.copy( this.points[ i - 1 ] );
+			//linearDistance = tmpVec.distanceTo( this.points[ i ] );
 
 			realDistance = sl.chunks[ i ] - sl.chunks[ i - 1 ];
 
@@ -4749,8 +4749,8 @@ THREE.Spline = function ( points ) {
 
 	function interpolate( p0, p1, p2, p3, t, t2, t3 ) {
 
-		const v0 = ( p2 - p0 ) * 0.5;
-			const v1 = ( p3 - p1 ) * 0.5;
+		var v0 = ( p2 - p0 ) * 0.5,
+			v1 = ( p3 - p1 ) * 0.5;
 
 		return ( 2 * ( p1 - p2 ) + v0 + v1 ) * t3 + ( - 3 * ( p1 - p2 ) - 2 * v0 - v1 ) * t2 + v0 * t + p1;
 
@@ -4910,13 +4910,13 @@ THREE.PerspectiveCamera.prototype.updateProjectionMatrix = function () {
 
 	if ( this.fullWidth ) {
 
-		const aspect = this.fullWidth / this.fullHeight;
-		const top = Math.tan( this.fov * Math.PI / 360 ) * this.near;
-		const bottom = -top;
-		const left = aspect * bottom;
-		const right = aspect * top;
-		const width = Math.abs( right - left );
-		const height = Math.abs( top - bottom );
+		var aspect = this.fullWidth / this.fullHeight;
+		var top = Math.tan( this.fov * Math.PI / 360 ) * this.near;
+		var bottom = -top;
+		var left = aspect * bottom;
+		var right = aspect * top;
+		var width = Math.abs( right - left );
+		var height = Math.abs( top - bottom );
 
 		this.projectionMatrix.makeFrustum(
 			left + this.x * width / this.fullWidth,
@@ -5169,12 +5169,12 @@ THREE.OneMinusDstAlphaFactor = 207;
 
 // custom blending source factors
 
-// THREE.ZeroFactor = 200;
-// THREE.OneFactor = 201;
-// THREE.SrcAlphaFactor = 204;
-// THREE.OneMinusSrcAlphaFactor = 205;
-// THREE.DstAlphaFactor = 206;
-// THREE.OneMinusDstAlphaFactor = 207;
+//THREE.ZeroFactor = 200;
+//THREE.OneFactor = 201;
+//THREE.SrcAlphaFactor = 204;
+//THREE.OneMinusSrcAlphaFactor = 205;
+//THREE.DstAlphaFactor = 206;
+//THREE.OneMinusDstAlphaFactor = 207;
 THREE.DstColorFactor = 208;
 THREE.OneMinusDstColorFactor = 209;
 THREE.SrcAlphaSaturateFactor = 210;
@@ -5659,9 +5659,9 @@ THREE.Texture.prototype = {
 
 	constructor: THREE.Texture,
 
-	clone () {
+	clone: function () {
 
-		const clonedTexture = new THREE.Texture( this.image, this.mapping, this.wrapS, this.wrapT, this.magFilter, this.minFilter, this.format, this.type );
+		var clonedTexture = new THREE.Texture( this.image, this.mapping, this.wrapS, this.wrapT, this.magFilter, this.minFilter, this.format, this.type );
 
 		clonedTexture.offset.copy( this.offset );
 		clonedTexture.repeat.copy( this.repeat );
@@ -5727,7 +5727,7 @@ THREE.DataTexture = function ( data, width, height, format, type, mapping, wrapS
 
 	THREE.Texture.call( this, null, mapping, wrapS, wrapT, magFilter, minFilter, format, type );
 
-	this.image = { data, width, height };
+	this.image = { data: data, width: width, height: height };
 
 };
 
@@ -5736,7 +5736,7 @@ THREE.DataTexture.prototype.constructor = THREE.DataTexture;
 
 THREE.DataTexture.prototype.clone = function () {
 
-	const clonedTexture = new THREE.DataTexture( this.image.data,  this.image.width, this.image.height, this.format, this.type, this.mapping, this.wrapS, this.wrapT, this.magFilter, this.minFilter );
+	var clonedTexture = new THREE.DataTexture( this.image.data,  this.image.width, this.image.height, this.format, this.type, this.mapping, this.wrapS, this.wrapT, this.magFilter, this.minFilter );
 
 	clonedTexture.offset.copy( this.offset );
 	clonedTexture.repeat.copy( this.repeat );
@@ -5855,7 +5855,7 @@ THREE.Mesh = function ( geometry, material ) {
 			this.morphTargetInfluences = [];
 			this.morphTargetDictionary = {};
 
-			for( let m = 0; m < this.geometry.morphTargets.length; m ++ ) {
+			for( var m = 0; m < this.geometry.morphTargets.length; m ++ ) {
 
 				this.morphTargetInfluences.push( 0 );
 				this.morphTargetDictionary[ this.geometry.morphTargets[ m ].name ] = m;
@@ -5884,7 +5884,7 @@ THREE.Mesh.prototype.getMorphTargetIndexByName = function( name ) {
 		return this.morphTargetDictionary[ name ];
 	}
 
-	console.log( `THREE.Mesh.getMorphTargetIndexByName: morph target ${  name  } does not exist. Returning 0.` );
+	console.log( "THREE.Mesh.getMorphTargetIndexByName: morph target " + name + " does not exist. Returning 0." );
 	return 0;
 
 }
@@ -5941,7 +5941,7 @@ THREE.LOD.prototype.addLevel = function ( object3D, visibleAtDistance ) {
 
 	}
 
-	this.LODs.splice( l, 0, { visibleAtDistance, object3D } );
+	this.LODs.splice( l, 0, { visibleAtDistance: visibleAtDistance, object3D: object3D } );
 	this.add( object3D );
 
 };
@@ -5952,8 +5952,8 @@ THREE.LOD.prototype.update = function ( camera ) {
 
 		camera.matrixWorldInverse.getInverse( camera.matrixWorld );
 
-		const inverse  = camera.matrixWorldInverse;
-		const distance = -( inverse.elements[2] * this.matrixWorld.elements[12] + inverse.elements[6] * this.matrixWorld.elements[13] + inverse.elements[10] * this.matrixWorld.elements[14] + inverse.elements[14] );
+		var inverse  = camera.matrixWorldInverse;
+		var distance = -( inverse.elements[2] * this.matrixWorld.elements[12] + inverse.elements[6] * this.matrixWorld.elements[13] + inverse.elements[10] * this.matrixWorld.elements[14] + inverse.elements[14] );
 
 		this.LODs[ 0 ].object3D.visible = true;
 
@@ -6087,7 +6087,7 @@ THREE.Scene.prototype.__addObject = function ( object ) {
 
 		}
 
-	} else if ( !( object instanceof THREE.Camera/* || object instanceof THREE.Bone */ ) ) {
+	} else if ( !( object instanceof THREE.Camera/* || object instanceof THREE.Bone*/ ) ) {
 
 		if ( this.__objects.indexOf( object ) === - 1 ) {
 
@@ -6096,7 +6096,7 @@ THREE.Scene.prototype.__addObject = function ( object ) {
 
 			// check if previously removed
 
-			const i = this.__objectsRemoved.indexOf( object );
+			var i = this.__objectsRemoved.indexOf( object );
 
 			if ( i !== -1 ) {
 
@@ -6108,7 +6108,7 @@ THREE.Scene.prototype.__addObject = function ( object ) {
 
 	}
 
-	for ( let c = 0; c < object.children.length; c ++ ) {
+	for ( var c = 0; c < object.children.length; c ++ ) {
 
 		this.__addObject( object.children[ c ] );
 
@@ -6139,7 +6139,7 @@ THREE.Scene.prototype.__removeObject = function ( object ) {
 
 			// check if previously added
 
-			const ai = this.__objectsAdded.indexOf( object );
+			var ai = this.__objectsAdded.indexOf( object );
 
 			if ( ai !== -1 ) {
 
@@ -6151,7 +6151,7 @@ THREE.Scene.prototype.__removeObject = function ( object ) {
 
 	}
 
-	for ( let c = 0; c < object.children.length; c ++ ) {
+	for ( var c = 0; c < object.children.length; c ++ ) {
 
 		this.__removeObject( object.children[ c ] );
 
@@ -7032,7 +7032,7 @@ THREE.ShaderChunk = {
 
 					"float specularNormalization = ( shininess + 2.0001 ) / 8.0;",
 
-					// "dirSpecular += specular * directionalLightColor[ i ] * dirSpecularWeight * dirDiffuseWeight * specularNormalization * fresnel;",
+					//"dirSpecular += specular * directionalLightColor[ i ] * dirSpecularWeight * dirDiffuseWeight * specularNormalization * fresnel;",
 
 					"vec3 schlick = specular + vec3( 1.0 - specular ) * pow( 1.0 - dot( dirVector, dirHalfVector ), 5.0 );",
 					"dirSpecular += schlick * directionalLightColor[ i ] * dirSpecularWeight * dirDiffuseWeight * specularNormalization;",
@@ -7408,7 +7408,7 @@ THREE.ShaderChunk = {
 
 							// spot with multiple shadows has the same color as single shadow spot
 
-							// "shadowColor = min( shadowColor, vec3( shadowDarkness[ i ] ) );",
+							//"shadowColor = min( shadowColor, vec3( shadowDarkness[ i ] ) );",
 
 					"#endif",
 
@@ -7498,16 +7498,16 @@ THREE.ShaderChunk = {
 
 		"#endif"
 
-	].join("\n") // BH,
+	].join("\n") //BH,
 
 
 };
 
 THREE.UniformsUtils = {
 
-	merge ( uniforms ) {
+	merge: function ( uniforms ) {
 
-		let u; let p; let tmp; const merged = {};
+		var u, p, tmp, merged = {};
 
 		for ( u = 0; u < uniforms.length; u++ ) {
 
@@ -7525,17 +7525,17 @@ THREE.UniformsUtils = {
 
 	},
 
-	clone ( uniformsSrc ) {
+	clone: function ( uniforms_src ) {
 
-		let u; let p; let parameter; let parameter_src; const uniforms_dst = {};
+		var u, p, parameter, parameter_src, uniforms_dst = {};
 
-		for ( u in uniformsSrc ) {
+		for ( u in uniforms_src ) {
 
 			uniforms_dst[ u ] = {};
 
-			for ( p in uniformsSrc[ u ] ) {
+			for ( p in uniforms_src[ u ] ) {
 
-				parameter_src = uniformsSrc[ u ][ p ];
+				parameter_src = uniforms_src[ u ][ p ];
 
 				if ( parameter_src instanceof THREE.Color ||
 					 parameter_src instanceof THREE.Vector2 ||
@@ -7729,34 +7729,34 @@ THREE.ShaderLib = {
 
 		uniforms: THREE.UniformsUtils.merge( [
 
-			THREE.UniformsLib.common,
-			THREE.UniformsLib.fog,
-			THREE.UniformsLib.shadowmap
+			THREE.UniformsLib[ "common" ],
+			THREE.UniformsLib[ "fog" ],
+			THREE.UniformsLib[ "shadowmap" ]
 
 		] ),
 
 		vertexShader: [
 
-			THREE.ShaderChunk.map_pars_vertex,
-			THREE.ShaderChunk.lightmap_pars_vertex,
-			THREE.ShaderChunk.envmap_pars_vertex,
-			THREE.ShaderChunk.color_pars_vertex,
-			THREE.ShaderChunk.skinning_pars_vertex,
-			THREE.ShaderChunk.morphtarget_pars_vertex,
-			THREE.ShaderChunk.shadowmap_pars_vertex,
+			THREE.ShaderChunk[ "map_pars_vertex" ],
+			THREE.ShaderChunk[ "lightmap_pars_vertex" ],
+			THREE.ShaderChunk[ "envmap_pars_vertex" ],
+			THREE.ShaderChunk[ "color_pars_vertex" ],
+			THREE.ShaderChunk[ "skinning_pars_vertex" ],
+			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
+			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main() {",
 
 				"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 
-				THREE.ShaderChunk.map_vertex,
-				THREE.ShaderChunk.lightmap_vertex,
-				THREE.ShaderChunk.envmap_vertex,
-				THREE.ShaderChunk.color_vertex,
-				THREE.ShaderChunk.skinning_vertex,
-				THREE.ShaderChunk.morphtarget_vertex,
-				THREE.ShaderChunk.default_vertex,
-				THREE.ShaderChunk.shadowmap_vertex,
+				THREE.ShaderChunk[ "map_vertex" ],
+				THREE.ShaderChunk[ "lightmap_vertex" ],
+				THREE.ShaderChunk[ "envmap_vertex" ],
+				THREE.ShaderChunk[ "color_vertex" ],
+				THREE.ShaderChunk[ "skinning_vertex" ],
+				THREE.ShaderChunk[ "morphtarget_vertex" ],
+				THREE.ShaderChunk[ "default_vertex" ],
+				THREE.ShaderChunk[ "shadowmap_vertex" ],
 
 			"}"
 
@@ -7767,27 +7767,27 @@ THREE.ShaderLib = {
 			"uniform vec3 diffuse;",
 			"uniform float opacity;",
 
-			THREE.ShaderChunk.color_pars_fragment,
-			THREE.ShaderChunk.map_pars_fragment,
-			THREE.ShaderChunk.lightmap_pars_fragment,
-			THREE.ShaderChunk.envmap_pars_fragment,
-			THREE.ShaderChunk.fog_pars_fragment,
-			THREE.ShaderChunk.shadowmap_pars_fragment,
+			THREE.ShaderChunk[ "color_pars_fragment" ],
+			THREE.ShaderChunk[ "map_pars_fragment" ],
+			THREE.ShaderChunk[ "lightmap_pars_fragment" ],
+			THREE.ShaderChunk[ "envmap_pars_fragment" ],
+			THREE.ShaderChunk[ "fog_pars_fragment" ],
+			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 
 			"void main() {",
 
 				"gl_FragColor = vec4( diffuse, opacity );",
 
-				THREE.ShaderChunk.map_fragment,
-				THREE.ShaderChunk.alphatest_fragment,
-				THREE.ShaderChunk.lightmap_fragment,
-				THREE.ShaderChunk.color_fragment,
-				THREE.ShaderChunk.envmap_fragment,
-				THREE.ShaderChunk.shadowmap_fragment,
+				THREE.ShaderChunk[ "map_fragment" ],
+				THREE.ShaderChunk[ "alphatest_fragment" ],
+				THREE.ShaderChunk[ "lightmap_fragment" ],
+				THREE.ShaderChunk[ "color_fragment" ],
+				THREE.ShaderChunk[ "envmap_fragment" ],
+				THREE.ShaderChunk[ "shadowmap_fragment" ],
 
-				THREE.ShaderChunk.linear_to_gamma_fragment,
+				THREE.ShaderChunk[ "linear_to_gamma_fragment" ],
 
-				THREE.ShaderChunk.fog_fragment,
+				THREE.ShaderChunk[ "fog_fragment" ],
 
 			"}"
 
@@ -7799,10 +7799,10 @@ THREE.ShaderLib = {
 
 		uniforms: THREE.UniformsUtils.merge( [
 
-			THREE.UniformsLib.common,
-			THREE.UniformsLib.fog,
-			THREE.UniformsLib.lights,
-			THREE.UniformsLib.shadowmap,
+			THREE.UniformsLib[ "common" ],
+			THREE.UniformsLib[ "fog" ],
+			THREE.UniformsLib[ "lights" ],
+			THREE.UniformsLib[ "shadowmap" ],
 
 			{
 				"ambient"  : { type: "c", value: new THREE.Color( 0xffffff ) },
@@ -7822,25 +7822,25 @@ THREE.ShaderLib = {
 
 			"#endif",
 
-			THREE.ShaderChunk.map_pars_vertex,
-			THREE.ShaderChunk.lightmap_pars_vertex,
-			THREE.ShaderChunk.envmap_pars_vertex,
-			THREE.ShaderChunk.lights_lambert_pars_vertex,
-			THREE.ShaderChunk.color_pars_vertex,
-			THREE.ShaderChunk.skinning_pars_vertex,
-			THREE.ShaderChunk.morphtarget_pars_vertex,
-			THREE.ShaderChunk.shadowmap_pars_vertex,
+			THREE.ShaderChunk[ "map_pars_vertex" ],
+			THREE.ShaderChunk[ "lightmap_pars_vertex" ],
+			THREE.ShaderChunk[ "envmap_pars_vertex" ],
+			THREE.ShaderChunk[ "lights_lambert_pars_vertex" ],
+			THREE.ShaderChunk[ "color_pars_vertex" ],
+			THREE.ShaderChunk[ "skinning_pars_vertex" ],
+			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
+			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main() {",
 
 				"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 
-				THREE.ShaderChunk.map_vertex,
-				THREE.ShaderChunk.lightmap_vertex,
-				THREE.ShaderChunk.envmap_vertex,
-				THREE.ShaderChunk.color_vertex,
+				THREE.ShaderChunk[ "map_vertex" ],
+				THREE.ShaderChunk[ "lightmap_vertex" ],
+				THREE.ShaderChunk[ "envmap_vertex" ],
+				THREE.ShaderChunk[ "color_vertex" ],
 
-				THREE.ShaderChunk.morphnormal_vertex,
+				THREE.ShaderChunk[ "morphnormal_vertex" ],
 
 				"#ifndef USE_ENVMAP",
 
@@ -7848,11 +7848,11 @@ THREE.ShaderLib = {
 
 				"#endif",
 
-				THREE.ShaderChunk.lights_lambert_vertex,
-				THREE.ShaderChunk.skinning_vertex,
-				THREE.ShaderChunk.morphtarget_vertex,
-				THREE.ShaderChunk.default_vertex,
-				THREE.ShaderChunk.shadowmap_vertex,
+				THREE.ShaderChunk[ "lights_lambert_vertex" ],
+				THREE.ShaderChunk[ "skinning_vertex" ],
+				THREE.ShaderChunk[ "morphtarget_vertex" ],
+				THREE.ShaderChunk[ "default_vertex" ],
+				THREE.ShaderChunk[ "shadowmap_vertex" ],
 
 
 			"}"
@@ -7871,24 +7871,24 @@ THREE.ShaderLib = {
 
 			"#endif",
 
-			THREE.ShaderChunk.color_pars_fragment,
-			THREE.ShaderChunk.map_pars_fragment,
-			THREE.ShaderChunk.lightmap_pars_fragment,
-			THREE.ShaderChunk.envmap_pars_fragment,
-			THREE.ShaderChunk.fog_pars_fragment,
-			THREE.ShaderChunk.shadowmap_pars_fragment,
+			THREE.ShaderChunk[ "color_pars_fragment" ],
+			THREE.ShaderChunk[ "map_pars_fragment" ],
+			THREE.ShaderChunk[ "lightmap_pars_fragment" ],
+			THREE.ShaderChunk[ "envmap_pars_fragment" ],
+			THREE.ShaderChunk[ "fog_pars_fragment" ],
+			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 
 			"void main() {",
 
 				"gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
 
-				THREE.ShaderChunk.map_fragment,
-				THREE.ShaderChunk.alphatest_fragment,
+				THREE.ShaderChunk[ "map_fragment" ],
+				THREE.ShaderChunk[ "alphatest_fragment" ],
 
 				"#ifdef DOUBLE_SIDED",
 
-					// "float isFront = float( gl_FrontFacing );",
-					// "gl_FragColor.xyz *= isFront * vLightFront + ( 1.0 - isFront ) * vLightBack;",
+					//"float isFront = float( gl_FrontFacing );",
+					//"gl_FragColor.xyz *= isFront * vLightFront + ( 1.0 - isFront ) * vLightBack;",
 
 					"if ( gl_FrontFacing )",
 						"gl_FragColor.xyz *= vLightFront;",
@@ -7901,14 +7901,14 @@ THREE.ShaderLib = {
 
 				"#endif",
 
-				THREE.ShaderChunk.lightmap_fragment,
-				THREE.ShaderChunk.color_fragment,
-				THREE.ShaderChunk.envmap_fragment,
-				THREE.ShaderChunk.shadowmap_fragment,
+				THREE.ShaderChunk[ "lightmap_fragment" ],
+				THREE.ShaderChunk[ "color_fragment" ],
+				THREE.ShaderChunk[ "envmap_fragment" ],
+				THREE.ShaderChunk[ "shadowmap_fragment" ],
 
-				THREE.ShaderChunk.linear_to_gamma_fragment,
+				THREE.ShaderChunk[ "linear_to_gamma_fragment" ],
 
-				THREE.ShaderChunk.fog_fragment,
+				THREE.ShaderChunk[ "fog_fragment" ],
 
 			"}"
 
@@ -7920,10 +7920,10 @@ THREE.ShaderLib = {
 
 		uniforms: THREE.UniformsUtils.merge( [
 
-			THREE.UniformsLib.common,
-			THREE.UniformsLib.fog,
-			THREE.UniformsLib.lights,
-			THREE.UniformsLib.shadowmap,
+			THREE.UniformsLib[ "common" ],
+			THREE.UniformsLib[ "fog" ],
+			THREE.UniformsLib[ "lights" ],
+			THREE.UniformsLib[ "shadowmap" ],
 
 			{
 				"ambient"  : { type: "c", value: new THREE.Color( 0xffffff ) },
@@ -7940,23 +7940,23 @@ THREE.ShaderLib = {
 			"varying vec3 vViewPosition;",
 			"varying vec3 vNormal;",
 
-			THREE.ShaderChunk.map_pars_vertex,
-			THREE.ShaderChunk.lightmap_pars_vertex,
-			THREE.ShaderChunk.envmap_pars_vertex,
-			THREE.ShaderChunk.lights_phong_pars_vertex,
-			THREE.ShaderChunk.color_pars_vertex,
-			THREE.ShaderChunk.skinning_pars_vertex,
-			THREE.ShaderChunk.morphtarget_pars_vertex,
-			THREE.ShaderChunk.shadowmap_pars_vertex,
+			THREE.ShaderChunk[ "map_pars_vertex" ],
+			THREE.ShaderChunk[ "lightmap_pars_vertex" ],
+			THREE.ShaderChunk[ "envmap_pars_vertex" ],
+			THREE.ShaderChunk[ "lights_phong_pars_vertex" ],
+			THREE.ShaderChunk[ "color_pars_vertex" ],
+			THREE.ShaderChunk[ "skinning_pars_vertex" ],
+			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
+			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main() {",
 
 				"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 
-				THREE.ShaderChunk.map_vertex,
-				THREE.ShaderChunk.lightmap_vertex,
-				THREE.ShaderChunk.envmap_vertex,
-				THREE.ShaderChunk.color_vertex,
+				THREE.ShaderChunk[ "map_vertex" ],
+				THREE.ShaderChunk[ "lightmap_vertex" ],
+				THREE.ShaderChunk[ "envmap_vertex" ],
+				THREE.ShaderChunk[ "color_vertex" ],
 
 				"#ifndef USE_ENVMAP",
 
@@ -7966,15 +7966,15 @@ THREE.ShaderLib = {
 
 				"vViewPosition = -mvPosition.xyz;",
 
-				THREE.ShaderChunk.morphnormal_vertex,
+				THREE.ShaderChunk[ "morphnormal_vertex" ],
 
 				"vNormal = transformedNormal;",
 
-				THREE.ShaderChunk.lights_phong_vertex,
-				THREE.ShaderChunk.skinning_vertex,
-				THREE.ShaderChunk.morphtarget_vertex,
-				THREE.ShaderChunk.default_vertex,
-				THREE.ShaderChunk.shadowmap_vertex,
+				THREE.ShaderChunk[ "lights_phong_vertex" ],
+				THREE.ShaderChunk[ "skinning_vertex" ],
+				THREE.ShaderChunk[ "morphtarget_vertex" ],
+				THREE.ShaderChunk[ "default_vertex" ],
+				THREE.ShaderChunk[ "shadowmap_vertex" ],
 
 			"}"
 
@@ -7990,31 +7990,31 @@ THREE.ShaderLib = {
 			"uniform vec3 specular;",
 			"uniform float shininess;",
 
-			THREE.ShaderChunk.color_pars_fragment,
-			THREE.ShaderChunk.map_pars_fragment,
-			THREE.ShaderChunk.lightmap_pars_fragment,
-			THREE.ShaderChunk.envmap_pars_fragment,
-			THREE.ShaderChunk.fog_pars_fragment,
-			THREE.ShaderChunk.lights_phong_pars_fragment,
-			THREE.ShaderChunk.shadowmap_pars_fragment,
+			THREE.ShaderChunk[ "color_pars_fragment" ],
+			THREE.ShaderChunk[ "map_pars_fragment" ],
+			THREE.ShaderChunk[ "lightmap_pars_fragment" ],
+			THREE.ShaderChunk[ "envmap_pars_fragment" ],
+			THREE.ShaderChunk[ "fog_pars_fragment" ],
+			THREE.ShaderChunk[ "lights_phong_pars_fragment" ],
+			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 
 			"void main() {",
 
 				"gl_FragColor = vec4( vec3 ( 1.0 ), opacity );",
 
-				THREE.ShaderChunk.map_fragment,
-				THREE.ShaderChunk.alphatest_fragment,
+				THREE.ShaderChunk[ "map_fragment" ],
+				THREE.ShaderChunk[ "alphatest_fragment" ],
 
-				THREE.ShaderChunk.lights_phong_fragment,
+				THREE.ShaderChunk[ "lights_phong_fragment" ],
 
-				THREE.ShaderChunk.lightmap_fragment,
-				THREE.ShaderChunk.color_fragment,
-				THREE.ShaderChunk.envmap_fragment,
-				THREE.ShaderChunk.shadowmap_fragment,
+				THREE.ShaderChunk[ "lightmap_fragment" ],
+				THREE.ShaderChunk[ "color_fragment" ],
+				THREE.ShaderChunk[ "envmap_fragment" ],
+				THREE.ShaderChunk[ "shadowmap_fragment" ],
 
-				THREE.ShaderChunk.linear_to_gamma_fragment,
+				THREE.ShaderChunk[ "linear_to_gamma_fragment" ],
 
-				THREE.ShaderChunk.fog_fragment,
+				THREE.ShaderChunk[ "fog_fragment" ],
 
 			"}"
 
@@ -8026,8 +8026,8 @@ THREE.ShaderLib = {
 
 		uniforms:  THREE.UniformsUtils.merge( [
 
-			THREE.UniformsLib.particle,
-			THREE.UniformsLib.shadowmap
+			THREE.UniformsLib[ "particle" ],
+			THREE.UniformsLib[ "shadowmap" ]
 
 		] ),
 
@@ -8036,12 +8036,12 @@ THREE.ShaderLib = {
 			"uniform float size;",
 			"uniform float scale;",
 
-			THREE.ShaderChunk.color_pars_vertex,
-			THREE.ShaderChunk.shadowmap_pars_vertex,
+			THREE.ShaderChunk[ "color_pars_vertex" ],
+			THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 			"void main() {",
 
-				THREE.ShaderChunk.color_vertex,
+				THREE.ShaderChunk[ "color_vertex" ],
 
 				"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 
@@ -8053,7 +8053,7 @@ THREE.ShaderLib = {
 
 				"gl_Position = projectionMatrix * mvPosition;",
 
-				THREE.ShaderChunk.shadowmap_vertex,
+				THREE.ShaderChunk[ "shadowmap_vertex" ],
 
 			"}"
 
@@ -8064,20 +8064,20 @@ THREE.ShaderLib = {
 			"uniform vec3 psColor;",
 			"uniform float opacity;",
 
-			THREE.ShaderChunk.color_pars_fragment,
-			THREE.ShaderChunk.map_particle_pars_fragment,
-			THREE.ShaderChunk.fog_pars_fragment,
-			THREE.ShaderChunk.shadowmap_pars_fragment,
+			THREE.ShaderChunk[ "color_pars_fragment" ],
+			THREE.ShaderChunk[ "map_particle_pars_fragment" ],
+			THREE.ShaderChunk[ "fog_pars_fragment" ],
+			THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
 
 			"void main() {",
 
 				"gl_FragColor = vec4( psColor, opacity );",
 
-				THREE.ShaderChunk.map_particle_fragment,
-				THREE.ShaderChunk.alphatest_fragment,
-				THREE.ShaderChunk.color_fragment,
-				THREE.ShaderChunk.shadowmap_fragment,
-				THREE.ShaderChunk.fog_fragment,
+				THREE.ShaderChunk[ "map_particle_fragment" ],
+				THREE.ShaderChunk[ "alphatest_fragment" ],
+				THREE.ShaderChunk[ "color_fragment" ],
+				THREE.ShaderChunk[ "shadowmap_fragment" ],
+				THREE.ShaderChunk[ "fog_fragment" ],
 
 			"}"
 
@@ -8099,14 +8099,14 @@ THREE.ShaderLib = {
 
 		vertexShader: [
 
-			THREE.ShaderChunk.morphtarget_pars_vertex,
+			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
 
 			"void main() {",
 
 				"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
 
-				THREE.ShaderChunk.morphtarget_vertex,
-				THREE.ShaderChunk.default_vertex,
+				THREE.ShaderChunk[ "morphtarget_vertex" ],
+				THREE.ShaderChunk[ "default_vertex" ],
 
 			"}"
 
@@ -8128,10 +8128,10 @@ THREE.ShaderLib = {
 
 				"gl_FragData[ 0 ] = pack_depth( gl_FragCoord.z );",
 
-				// "gl_FragData[ 0 ] = pack_depth( gl_FragCoord.z / gl_FragCoord.w );",
-				// "float z = ( ( gl_FragCoord.z / gl_FragCoord.w ) - 3.0 ) / ( 4000.0 - 3.0 );",
-				// "gl_FragData[ 0 ] = pack_depth( z );",
-				// "gl_FragData[ 0 ] = vec4( z, z, z, 1.0 );",
+				//"gl_FragData[ 0 ] = pack_depth( gl_FragCoord.z / gl_FragCoord.w );",
+				//"float z = ( ( gl_FragCoord.z / gl_FragCoord.w ) - 3.0 ) / ( 4000.0 - 3.0 );",
+				//"gl_FragData[ 0 ] = pack_depth( z );",
+				//"gl_FragData[ 0 ] = vec4( z, z, z, 1.0 );",
 
 			"}"
 
@@ -8152,7 +8152,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	parameters = parameters || {};
 
-	/* var */ _canvas = parameters.canvas !== undefined ? parameters.canvas : document.createElement( 'canvas' ),
+	/*var*/ _canvas = parameters.canvas !== undefined ? parameters.canvas : document.createElement( 'canvas' ),
 
 	_precision = parameters.precision !== undefined ? parameters.precision : 'highp',
 
@@ -8240,66 +8240,66 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	// internal properties
 
-	const _this = this;
+	var _this = this,
 
-	let _gl;
+	_gl,
 
-	const _programs = [];
+	_programs = [],
 
 	// internal state cache
 
-	let _currentProgram = null;
-	let _currentFramebuffer = null;
-	let _currentMaterialId = -1;
-	let _currentGeometryGroupHash = null;
-	let _currentCamera = null;
-	let _geometryGroupCounter = 0;
+	_currentProgram = null,
+	_currentFramebuffer = null,
+	_currentMaterialId = -1,
+	_currentGeometryGroupHash = null,
+	_currentCamera = null,
+	_geometryGroupCounter = 0,
 
 	// GL state cache
 
-	let _oldDoubleSided = -1;
-	let _oldFlipSided = -1;
+	_oldDoubleSided = -1,
+	_oldFlipSided = -1,
 
-	let _oldBlending = -1;
+	_oldBlending = -1,
 
-	let _oldBlendEquation = -1;
-	let _oldBlendSrc = -1;
-	let _oldBlendDst = -1;
+	_oldBlendEquation = -1,
+	_oldBlendSrc = -1,
+	_oldBlendDst = -1,
 
-	let _oldDepthTest = -1;
-	let _oldDepthWrite = -1;
+	_oldDepthTest = -1,
+	_oldDepthWrite = -1,
 
-	let _oldPolygonOffset = null;
-	let _oldPolygonOffsetFactor = null;
-	let _oldPolygonOffsetUnits = null;
+	_oldPolygonOffset = null,
+	_oldPolygonOffsetFactor = null,
+	_oldPolygonOffsetUnits = null,
 
-	let _oldLineWidth = null;
+	_oldLineWidth = null,
 
-	let _viewportX = 0;
-	let _viewportY = 0;
-	let _viewportWidth = 0;
-	let _viewportHeight = 0;
-	let _currentWidth = 0;
-	let _currentHeight = 0;
+	_viewportX = 0,
+	_viewportY = 0,
+	_viewportWidth = 0,
+	_viewportHeight = 0,
+	_currentWidth = 0,
+	_currentHeight = 0,
 
 	// frustum
 
-	const _frustum = new THREE.Frustum();
+	_frustum = new THREE.Frustum(),
 
 	 // camera matrices cache
 
-	const _projScreenMatrix = new THREE.Matrix4();
-	const _projScreenMatrixPS = new THREE.Matrix4();
+	_projScreenMatrix = new THREE.Matrix4(),
+	_projScreenMatrixPS = new THREE.Matrix4(),
 
-	const _vector3 = new THREE.Vector4();
+	_vector3 = new THREE.Vector4(),
 
 	// light arrays cache
 
-	const _direction = new THREE.Vector3();
+	_direction = new THREE.Vector3(),
 
-	let _lightsNeedUpdate = true;
+	_lightsNeedUpdate = true,
 
-	const _lights = {
+	_lights = {
 
 		ambient: [ 0, 0, 0 ],
 		directional: { length: 0, colors: new Array(), positions: new Array() },
@@ -8318,9 +8318,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	// GPU capabilities
 
-	const _maxVertexTextures = _gl.getParameter( _gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS );
-	const _maxTextureSize = _gl.getParameter( _gl.MAX_TEXTURE_SIZE );
-	const _maxCubemapSize = _gl.getParameter( _gl.MAX_CUBE_MAP_TEXTURE_SIZE );
+	var _maxVertexTextures = _gl.getParameter( _gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS ),
+	_maxTextureSize = _gl.getParameter( _gl.MAX_TEXTURE_SIZE ),
+	_maxCubemapSize = _gl.getParameter( _gl.MAX_CUBE_MAP_TEXTURE_SIZE );
 
 	// API
 
@@ -8403,7 +8403,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	this.clear = function ( color, depth, stencil ) {
 
-		let bits = 0;
+		var bits = 0;
 
 		if ( color === undefined || color ) bits |= _gl.COLOR_BUFFER_BIT;
 		if ( depth === undefined || depth ) bits |= _gl.DEPTH_BUFFER_BIT;
@@ -8453,13 +8453,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( object instanceof THREE.Mesh ) {
 
-			for ( const g in object.geometry.geometryGroups ) {
+			for ( var g in object.geometry.geometryGroups ) {
 
 				deleteMeshBuffers( object.geometry.geometryGroups[ g ] );
 
 			}
 
-		} /* else if ( object instanceof THREE.Ribbon ) {
+		} /*else if ( object instanceof THREE.Ribbon ) {
 
 			deleteRibbonBuffers( object.geometry );
 
@@ -8467,11 +8467,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			deleteLineBuffers( object.geometry );
 
-		} /* else if ( object instanceof THREE.ParticleSystem ) {
+		} /*else if ( object instanceof THREE.ParticleSystem ) {
 
 			deleteParticleBuffers( object.geometry );
 
-											  } */
+											  }*/
 
 	};
 
@@ -8494,7 +8494,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( renderTarget instanceof THREE.WebGLRenderTargetCube ) {
 
-			for ( let i = 0; i < 6; i ++ ) {
+			for ( var i = 0; i < 6; i ++ ) {
 
 				_gl.deleteFramebuffer( renderTarget.__webglFramebuffer[ i ] );
 				_gl.deleteRenderbuffer( renderTarget.__webglRenderbuffer[ i ] );
@@ -8576,7 +8576,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		geometryGroup.__webglFaceBuffer = _gl.createBuffer();
 		geometryGroup.__webglLineBuffer = _gl.createBuffer();
 
-		let m; let ml;
+		var m, ml;
 
 		if ( geometryGroup.numMorphTargets ) {
 
@@ -8652,7 +8652,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		_gl.deleteBuffer( geometryGroup.__webglFaceBuffer );
 		_gl.deleteBuffer( geometryGroup.__webglLineBuffer );
 
-		let m; let ml;
+		var m, ml;
 
 		if ( geometryGroup.numMorphTargets ) {
 
@@ -8677,7 +8677,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( geometryGroup.__webglCustomAttributesList ) {
 
-			for ( const id in geometryGroup.__webglCustomAttributesList ) {
+			for ( var id in geometryGroup.__webglCustomAttributesList ) {
 
 				_gl.deleteBuffer( geometryGroup.__webglCustomAttributesList[ id ].buffer );
 
@@ -8693,9 +8693,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function initCustomAttributes ( geometry, object ) {
 
-		const nvertices = geometry.vertices.length;
+		var nvertices = geometry.vertices.length;
 
-		const {material} = object;
+		var material = object.material;
 
 		if ( material.attributes ) {
 
@@ -8705,15 +8705,15 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-			for ( const a in material.attributes ) {
+			for ( var a in material.attributes ) {
 
-				const attribute = material.attributes[ a ];
+				var attribute = material.attributes[ a ];
 
 				if( !attribute.__webglInitialized || attribute.createUniqueBuffers ) {
 
 					attribute.__webglInitialized = true;
 
-					let size = 1;		// "f" and "i"
+					var size = 1;		// "f" and "i"
 
 					if ( attribute.type === "v2" ) size = 2;
 					else if ( attribute.type === "v3" ) size = 3;
@@ -8741,7 +8741,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function initParticleBuffers ( geometry, object ) {
 
-		const nvertices = geometry.vertices.length;
+		var nvertices = geometry.vertices.length;
 
 		geometry.__vertexArray = new Float32Array( nvertices * 3 );
 		geometry.__colorArray = new Float32Array( nvertices * 3 );
@@ -8756,7 +8756,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function initLineBuffers ( geometry, object ) {
 
-		const nvertices = geometry.vertices.length;
+		var nvertices = geometry.vertices.length;
 
 		geometry.__vertexArray = new Float32Array( nvertices * 3 );
 		geometry.__colorArray = new Float32Array( nvertices * 3 );
@@ -8769,7 +8769,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function initRibbonBuffers ( geometry ) {
 
-		const nvertices = geometry.vertices.length;
+		var nvertices = geometry.vertices.length;
 
 		geometry.__vertexArray = new Float32Array( nvertices * 3 );
 		geometry.__colorArray = new Float32Array( nvertices * 3 );
@@ -8780,21 +8780,21 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function initMeshBuffers ( geometryGroup, object ) {
 
-		const {geometry} = object;
-			const {faces3} = geometryGroup;
-			const {faces4} = geometryGroup;
+		var geometry = object.geometry,
+			faces3 = geometryGroup.faces3,
+			faces4 = geometryGroup.faces4,
 
-			const nvertices = faces3.length * 3 + faces4.length * 4;
-			const ntris     = faces3.length * 1 + faces4.length * 2;
-			const nlines    = faces3.length * 3 + faces4.length * 4;
+			nvertices = faces3.length * 3 + faces4.length * 4,
+			ntris     = faces3.length * 1 + faces4.length * 2,
+			nlines    = faces3.length * 3 + faces4.length * 4,
 
-			const material = getBufferMaterial( object, geometryGroup );
+			material = getBufferMaterial( object, geometryGroup ),
 
-			const uvType = bufferGuessUVType( material );
-			const normalType = bufferGuessNormalType( material );
-			const vertexColorType = bufferGuessVertexColorType( material );
+			uvType = bufferGuessUVType( material ),
+			normalType = bufferGuessNormalType( material ),
+			vertexColorType = bufferGuessVertexColorType( material );
 
-		// console.log( "uvType", uvType, "normalType", normalType, "vertexColorType", vertexColorType, object, geometryGroup, material );
+		//console.log( "uvType", uvType, "normalType", normalType, "vertexColorType", vertexColorType, object, geometryGroup, material );
 
 		geometryGroup.__vertexArray = new Float32Array( nvertices * 3 );
 
@@ -8844,7 +8844,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		geometryGroup.__faceArray = new Uint16Array( ntris * 3 );
 		geometryGroup.__lineArray = new Uint16Array( nlines * 2 );
 
-		let m; let ml;
+		var m, ml;
 
 		if ( geometryGroup.numMorphTargets ) {
 
@@ -8884,16 +8884,16 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-			for ( const a in material.attributes ) {
+			for ( var a in material.attributes ) {
 
 				// Do a shallow copy of the attribute object so different geometryGroup chunks use different
 				// attribute buffers which are correctly indexed in the setMeshBuffers function
 
-				const originalAttribute = material.attributes[ a ];
+				var originalAttribute = material.attributes[ a ];
 
-				const attribute = {};
+				var attribute = {};
 
-				for ( const property in originalAttribute ) {
+				for ( var property in originalAttribute ) {
 
 					attribute[ property ] = originalAttribute[ property ];
 
@@ -8903,7 +8903,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 					attribute.__webglInitialized = true;
 
-					let size = 1;		// "f" and "i"
+					var size = 1;		// "f" and "i"
 
 					if( attribute.type === "v2" ) size = 2;
 					else if( attribute.type === "v3" ) size = 3;
@@ -8938,7 +8938,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			return object.material;
 
-		} if ( geometryGroup.materialIndex >= 0 ) {
+		} else if ( geometryGroup.materialIndex >= 0 ) {
 
 			return object.geometry.materials[ geometryGroup.materialIndex ];
 
@@ -8966,11 +8966,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			return THREE.SmoothShading;
 
-		} 
+		} else {
 
 			return THREE.FlatShading;
 
-		
+		}
 
 	};
 
@@ -9004,27 +9004,27 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function setParticleBuffers ( geometry, hint, object ) {
 
-		let v; let c; let vertex; let offset; let index; let color;
+		var v, c, vertex, offset, index, color,
 
-		const {vertices} = geometry;
-		const vl = vertices.length;
+		vertices = geometry.vertices,
+		vl = vertices.length,
 
-		const {colors} = geometry;
-		const cl = colors.length;
+		colors = geometry.colors,
+		cl = colors.length,
 
-		const vertexArray = geometry.__vertexArray;
-		const colorArray = geometry.__colorArray;
+		vertexArray = geometry.__vertexArray,
+		colorArray = geometry.__colorArray,
 
-		const sortArray = geometry.__sortArray;
+		sortArray = geometry.__sortArray,
 
-		const dirtyVertices = geometry.verticesNeedUpdate;
-		const dirtyElements = geometry.elementsNeedUpdate;
-		const dirtyColors = geometry.colorsNeedUpdate;
+		dirtyVertices = geometry.verticesNeedUpdate,
+		dirtyElements = geometry.elementsNeedUpdate,
+		dirtyColors = geometry.colorsNeedUpdate,
 
-		const customAttributes = geometry.__webglCustomAttributesList;
-		let i; let il;
-		let a; let ca; let cal; let value;
-		let customAttribute;
+		customAttributes = geometry.__webglCustomAttributesList,
+		i, il,
+		a, ca, cal, value,
+		customAttribute;
 
 		if ( object.sortParticles ) {
 
@@ -9042,7 +9042,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-			sortArray.sort( ( a, b ) => b[ 0 ] - a[ 0 ] );
+			sortArray.sort( function( a, b ) { return b[ 0 ] - a[ 0 ]; } );
 
 			for ( v = 0; v < vl; v ++ ) {
 
@@ -9326,24 +9326,24 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function setLineBuffers ( geometry, hint ) {
 
-		let v; let c; let vertex; let offset; let color;
+		var v, c, vertex, offset, color,
 
-		const {vertices} = geometry;
-		const {colors} = geometry;
-		const vl = vertices.length;
-		const cl = colors.length;
+		vertices = geometry.vertices,
+		colors = geometry.colors,
+		vl = vertices.length,
+		cl = colors.length,
 
-		const vertexArray = geometry.__vertexArray;
-		const colorArray = geometry.__colorArray;
+		vertexArray = geometry.__vertexArray,
+		colorArray = geometry.__colorArray,
 
-		const dirtyVertices = geometry.verticesNeedUpdate;
-		const dirtyColors = geometry.colorsNeedUpdate;
+		dirtyVertices = geometry.verticesNeedUpdate,
+		dirtyColors = geometry.colorsNeedUpdate,
 
-		const customAttributes = geometry.__webglCustomAttributesList;
+		customAttributes = geometry.__webglCustomAttributesList,
 
-		let i; let il;
-		let a; let ca; let cal; let value;
-		let customAttribute;
+		i, il,
+		a, ca, cal, value,
+		customAttribute;
 
 		if ( dirtyVertices ) {
 
@@ -9480,18 +9480,18 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function setRibbonBuffers ( geometry, hint ) {
 
-		let v; let c; let vertex; let offset; let color;
+		var v, c, vertex, offset, color,
 
-		const {vertices} = geometry;
-		const {colors} = geometry;
-		const vl = vertices.length;
-		const cl = colors.length;
+		vertices = geometry.vertices,
+		colors = geometry.colors,
+		vl = vertices.length,
+		cl = colors.length,
 
-		const vertexArray = geometry.__vertexArray;
-		const colorArray = geometry.__colorArray;
+		vertexArray = geometry.__vertexArray,
+		colorArray = geometry.__colorArray,
 
-		const dirtyVertices = geometry.verticesNeedUpdate;
-		const dirtyColors = geometry.colorsNeedUpdate;
+		dirtyVertices = geometry.verticesNeedUpdate,
+		dirtyColors = geometry.colorsNeedUpdate;
 
 		if ( dirtyVertices ) {
 
@@ -9542,93 +9542,93 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		const normalType = bufferGuessNormalType( material );
-		const vertexColorType = bufferGuessVertexColorType( material );
-		const uvType = bufferGuessUVType( material );
+		var normalType = bufferGuessNormalType( material ),
+		vertexColorType = bufferGuessVertexColorType( material ),
+		uvType = bufferGuessUVType( material ),
 
-		const needsSmoothNormals = ( normalType === THREE.SmoothShading );
+		needsSmoothNormals = ( normalType === THREE.SmoothShading );
 
-		let f; let fl; let fi; let face;
-		let vertexNormals; let faceNormal; let normal;
-		let vertexColors; let faceColor;
-		let vertexTangents;
-		let uv; let uv2; let v1; let v2; let v3; let v4; let t1; let t2; let t3; let t4; let n1; let n2; let n3; let n4;
-		let c1; let c2; let c3; let c4;
-		let sw1; let sw2; let sw3; let sw4;
-		let si1; let si2; let si3; let si4;
-		let sa1; let sa2; let sa3; let sa4;
-		let sb1; let sb2; let sb3; let sb4;
-		let m; let ml; let i; let il;
-		let vn; let uvi; let uv2i;
-		let vk; let vkl; let vka;
-		let nka; let chf; let faceVertexNormals;
-		let a;
+		var f, fl, fi, face,
+		vertexNormals, faceNormal, normal,
+		vertexColors, faceColor,
+		vertexTangents,
+		uv, uv2, v1, v2, v3, v4, t1, t2, t3, t4, n1, n2, n3, n4,
+		c1, c2, c3, c4,
+		sw1, sw2, sw3, sw4,
+		si1, si2, si3, si4,
+		sa1, sa2, sa3, sa4,
+		sb1, sb2, sb3, sb4,
+		m, ml, i, il,
+		vn, uvi, uv2i,
+		vk, vkl, vka,
+		nka, chf, faceVertexNormals,
+		a,
 
-		let vertexIndex = 0;
+		vertexIndex = 0,
 
-		let offset = 0;
-		let offset_uv = 0;
-		let offset_uv2 = 0;
-		let offset_face = 0;
-		let offset_normal = 0;
-		let offset_tangent = 0;
-		let offset_line = 0;
-		let offset_color = 0;
-		let offset_skin = 0;
-		let offset_morphTarget = 0;
-		let offset_custom = 0;
-		let offset_customSrc = 0;
+		offset = 0,
+		offset_uv = 0,
+		offset_uv2 = 0,
+		offset_face = 0,
+		offset_normal = 0,
+		offset_tangent = 0,
+		offset_line = 0,
+		offset_color = 0,
+		offset_skin = 0,
+		offset_morphTarget = 0,
+		offset_custom = 0,
+		offset_customSrc = 0,
 
-		let value;
+		value,
 
-		const vertexArray = geometryGroup.__vertexArray;
-		const uvArray = geometryGroup.__uvArray;
-		const uv2Array = geometryGroup.__uv2Array;
-		const normalArray = geometryGroup.__normalArray;
-		const tangentArray = geometryGroup.__tangentArray;
-		const colorArray = geometryGroup.__colorArray;
+		vertexArray = geometryGroup.__vertexArray,
+		uvArray = geometryGroup.__uvArray,
+		uv2Array = geometryGroup.__uv2Array,
+		normalArray = geometryGroup.__normalArray,
+		tangentArray = geometryGroup.__tangentArray,
+		colorArray = geometryGroup.__colorArray,
 
-		const skinVertexAArray = geometryGroup.__skinVertexAArray;
-		const skinVertexBArray = geometryGroup.__skinVertexBArray;
-		const skinIndexArray = geometryGroup.__skinIndexArray;
-		const skinWeightArray = geometryGroup.__skinWeightArray;
+		skinVertexAArray = geometryGroup.__skinVertexAArray,
+		skinVertexBArray = geometryGroup.__skinVertexBArray,
+		skinIndexArray = geometryGroup.__skinIndexArray,
+		skinWeightArray = geometryGroup.__skinWeightArray,
 
-		const morphTargetsArrays = geometryGroup.__morphTargetsArrays;
-		const morphNormalsArrays = geometryGroup.__morphNormalsArrays;
+		morphTargetsArrays = geometryGroup.__morphTargetsArrays,
+		morphNormalsArrays = geometryGroup.__morphNormalsArrays,
 
-		const customAttributes = geometryGroup.__webglCustomAttributesList;
-		let customAttribute;
+		customAttributes = geometryGroup.__webglCustomAttributesList,
+		customAttribute,
 
-		const faceArray = geometryGroup.__faceArray;
-		const lineArray = geometryGroup.__lineArray;
+		faceArray = geometryGroup.__faceArray,
+		lineArray = geometryGroup.__lineArray,
 
-		const {geometry} = object; // this is shared for all chunks
+		geometry = object.geometry, // this is shared for all chunks
 
-		const dirtyVertices = geometry.verticesNeedUpdate;
-		const dirtyElements = geometry.elementsNeedUpdate;
-		const dirtyUvs = geometry.uvsNeedUpdate;
-		const dirtyNormals = geometry.normalsNeedUpdate;
-		const dirtyTangents = geometry.tangetsNeedUpdate;
-		const dirtyColors = geometry.colorsNeedUpdate;
-		const dirtyMorphTargets = geometry.morphTargetsNeedUpdate;
+		dirtyVertices = geometry.verticesNeedUpdate,
+		dirtyElements = geometry.elementsNeedUpdate,
+		dirtyUvs = geometry.uvsNeedUpdate,
+		dirtyNormals = geometry.normalsNeedUpdate,
+		dirtyTangents = geometry.tangetsNeedUpdate,
+		dirtyColors = geometry.colorsNeedUpdate,
+		dirtyMorphTargets = geometry.morphTargetsNeedUpdate,
 
-		const {vertices} = geometry;
-		const chunk_faces3 = geometryGroup.faces3;
-		const chunk_faces4 = geometryGroup.faces4;
-		const obj_faces = geometry.faces;
+		vertices = geometry.vertices,
+		chunk_faces3 = geometryGroup.faces3,
+		chunk_faces4 = geometryGroup.faces4,
+		obj_faces = geometry.faces,
 
-		const obj_uvs  = geometry.faceVertexUvs[ 0 ];
-		const obj_uvs2 = geometry.faceVertexUvs[ 1 ];
+		obj_uvs  = geometry.faceVertexUvs[ 0 ],
+		obj_uvs2 = geometry.faceVertexUvs[ 1 ],
 
-		const obj_colors = geometry.colors;
+		obj_colors = geometry.colors,
 
-		const obj_skinVerticesA = geometry.skinVerticesA;
-		const obj_skinVerticesB = geometry.skinVerticesB;
-		const obj_skinIndices = geometry.skinIndices;
-		const obj_skinWeights = geometry.skinWeights;
+		obj_skinVerticesA = geometry.skinVerticesA,
+		obj_skinVerticesB = geometry.skinVerticesB,
+		obj_skinIndices = geometry.skinIndices,
+		obj_skinWeights = geometry.skinWeights,
 
-		const {morphTargets} = geometry;
-		const {morphNormals} = geometry;
+		morphTargets = geometry.morphTargets,
+		morphNormals = geometry.morphNormals;
 
 		if ( dirtyVertices ) {
 
@@ -10977,10 +10977,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if ( shading === THREE.FlatShading ) {
 
-				let nx; let ny; let nz;
-					let nax; let nbx; let ncx; let nay; let nby; let ncy; let naz; let nbz; let ncz;
-					let normalArray;
-					let i; const il = object.count * 3;
+				var nx, ny, nz,
+					nax, nbx, ncx, nay, nby, ncy, naz, nbz, ncz,
+					normalArray,
+					i, il = object.count * 3;
 
 				for( i = 0; i < il; i += 9 ) {
 
@@ -11034,15 +11034,15 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( material.visible === false ) return;
 
-		let program; let attributes; let linewidth; let primitives; let a; let attribute;
+		var program, attributes, linewidth, primitives, a, attribute;
 
 		program = setProgram( camera, lights, fog, material, object );
 
 		attributes = program.attributes;
 
-		let updateBuffers = false;
-			const wireframeBit = material.wireframe ? 1 : 0;
-			const geometryGroupHash = ( geometryGroup.id * 0xffffff ) + ( program.id * 2 ) + wireframeBit;
+		var updateBuffers = false,
+			wireframeBit = material.wireframe ? 1 : 0,
+			geometryGroupHash = ( geometryGroup.id * 0xffffff ) + ( program.id * 2 ) + wireframeBit;
 
 		if ( geometryGroupHash !== _currentGeometryGroupHash ) {
 
@@ -11055,9 +11055,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( object instanceof THREE.Mesh ) {
 
-			const {offsets} = geometryGroup;
+			var offsets = geometryGroup.offsets;
 
-			for ( let i = 0, il = offsets.length; i < il; ++ i ) {
+			for ( var i = 0, il = offsets.length; i < il; ++ i ) {
 
 				if ( updateBuffers ) {
 
@@ -11126,15 +11126,15 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( material.visible === false ) return;
 
-		let program; let attributes; let linewidth; let primitives; let a; let attribute; let i; let il;
+		var program, attributes, linewidth, primitives, a, attribute, i, il;
 
 		program = setProgram( camera, lights, fog, material, object );
 
 		attributes = program.attributes;
 
-		let updateBuffers = false;
-			const wireframeBit = material.wireframe ? 1 : 0;
-			const geometryGroupHash = ( geometryGroup.id * 0xffffff ) + ( program.id * 2 ) + wireframeBit;
+		var updateBuffers = false,
+			wireframeBit = material.wireframe ? 1 : 0,
+			geometryGroupHash = ( geometryGroup.id * 0xffffff ) + ( program.id * 2 ) + wireframeBit;
 
 		if ( geometryGroupHash !== _currentGeometryGroupHash ) {
 
@@ -11312,7 +11312,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		// render particles
 
-		} /* else if ( object instanceof THREE.ParticleSystem ) {
+		} /*else if ( object instanceof THREE.ParticleSystem ) {
 
 			_gl.drawArrays( _gl.POINTS, 0, geometryGroup.__webglParticleCount );
 
@@ -11327,7 +11327,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			_this.info.render.calls ++;
 
-											  } */
+											  }*/
 
 	};
 
@@ -11335,7 +11335,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		// set base
 
-		const {attributes} = material.program;
+		var attributes = material.program.attributes;
 
 		if ( object.morphTargetBase !== - 1 ) {
 
@@ -11354,18 +11354,18 @@ THREE.WebGLRenderer = function ( parameters ) {
 			// set forced order
 
 			var m = 0;
-			const order = object.morphTargetForcedOrder;
+			var order = object.morphTargetForcedOrder;
 			var influences = object.morphTargetInfluences;
 
 			while ( m < material.numSupportedMorphTargets && m < order.length ) {
 
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglMorphTargetsBuffers[ order[ m ] ] );
-				_gl.vertexAttribPointer( attributes[ `morphTarget${  m}` ], 3, _gl.FLOAT, false, 0, 0 );
+				_gl.vertexAttribPointer( attributes[ "morphTarget" + m ], 3, _gl.FLOAT, false, 0, 0 );
 
 				if ( material.morphNormals ) {
 
 					_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglMorphNormalsBuffers[ order[ m ] ] );
-					_gl.vertexAttribPointer( attributes[ `morphNormal${  m}` ], 3, _gl.FLOAT, false, 0, 0 );
+					_gl.vertexAttribPointer( attributes[ "morphNormal" + m ], 3, _gl.FLOAT, false, 0, 0 );
 
 				}
 
@@ -11378,11 +11378,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			// find most influencing
 
-			const used = [];
-			let candidateInfluence = - 1;
-			let candidate = 0;
+			var used = [];
+			var candidateInfluence = - 1;
+			var candidate = 0;
 			var influences = object.morphTargetInfluences;
-			let i; const il = influences.length;
+			var i, il = influences.length;
 			var m = 0;
 
 			if ( object.morphTargetBase !== - 1 ) {
@@ -11405,12 +11405,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 				}
 
 				_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglMorphTargetsBuffers[ candidate ] );
-				_gl.vertexAttribPointer( attributes[ `morphTarget${  m}` ], 3, _gl.FLOAT, false, 0, 0 );
+				_gl.vertexAttribPointer( attributes[ "morphTarget" + m ], 3, _gl.FLOAT, false, 0, 0 );
 
 				if ( material.morphNormals ) {
 
 					_gl.bindBuffer( _gl.ARRAY_BUFFER, geometryGroup.__webglMorphNormalsBuffers[ candidate ] );
-					_gl.vertexAttribPointer( attributes[ `morphNormal${  m}` ], 3, _gl.FLOAT, false, 0, 0 );
+					_gl.vertexAttribPointer( attributes[ "morphNormal" + m ], 3, _gl.FLOAT, false, 0, 0 );
 
 				}
 
@@ -11445,13 +11445,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	this.render = function ( scene, camera, renderTarget, forceClear ) {
 
-		let i; let il;
+		var i, il,
 
-		let webglObject; let object;
-		let renderList;
+		webglObject, object,
+		renderList,
 
-		const lights = scene.__lights;
-		const {fog} = scene;
+		lights = scene.__lights,
+		fog = scene.fog;
 
 		// reset caching for this frame
 
@@ -11520,7 +11520,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				if ( ! ( object instanceof THREE.Mesh || object instanceof THREE.ParticleSystem ) || ! ( object.frustumCulled ) || _frustum.contains( object ) ) {
 
-					// object.matrixWorld.flattenToArray( object._objectMatrixArray );
+					//object.matrixWorld.flattenToArray( object._objectMatrixArray );
 
 					setupMatrices( object, camera );
 
@@ -11586,7 +11586,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( scene.overrideMaterial ) {
 
-			const material = scene.overrideMaterial;
+			var material = scene.overrideMaterial;
 
 			this.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
 			this.setDepthTest( material.depthTest );
@@ -11638,7 +11638,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( ! plugins.length ) return;
 
-		for ( let i = 0, il = plugins.length; i < il; i ++ ) {
+		for ( var i = 0, il = plugins.length; i < il; i ++ ) {
 
 			// reset state for plugin (to start from clean slate)
 
@@ -11678,7 +11678,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function renderObjects ( renderList, reverse, materialType, camera, lights, fog, useBlending, overrideMaterial ) {
 
-		let webglObject; let object; let buffer; let material; let start; let end; let delta;
+		var webglObject, object, buffer, material, start, end, delta;
 
 		if ( reverse ) {
 
@@ -11693,7 +11693,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 			delta = 1;
 		}
 
-		for ( let i = start; i !== end; i += delta ) {
+		for ( var i = start; i !== end; i += delta ) {
 
 			webglObject = renderList[ i ];
 
@@ -11740,9 +11740,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function renderObjectsImmediate ( renderList, materialType, camera, lights, fog, useBlending, overrideMaterial ) {
 
-		let webglObject; let object; let material; let program;
+		var webglObject, object, material, program;
 
-		for ( let i = 0, il = renderList.length; i < il; i ++ ) {
+		for ( var i = 0, il = renderList.length; i < il; i ++ ) {
 
 			webglObject = renderList[ i ];
 			object = webglObject.object;
@@ -11777,7 +11777,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	this.renderImmediateObject = function ( camera, lights, fog, material, object ) {
 
-		const program = setProgram( camera, lights, fog, material, object );
+		var program = setProgram( camera, lights, fog, material, object );
 
 		_currentGeometryGroupHash = -1;
 
@@ -11789,7 +11789,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		} else {
 
-			object.render( ( object ) => { _this.renderBufferImmediate( object, program, material.shading ); } );
+			object.render( function( object ) { _this.renderBufferImmediate( object, program, material.shading ); } );
 
 		}
 
@@ -11797,8 +11797,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function unrollImmediateBufferMaterial ( globject ) {
 
-		const {object} = globject;
-			const {material} = object;
+		var object = globject.object,
+			material = object.material;
 
 		if ( material.transparent ) {
 
@@ -11816,9 +11816,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function unrollBufferMaterial ( globject ) {
 
-		const {object} = globject;
-			const {buffer} = globject;
-			let material; let materialIndex; let meshMaterial;
+		var object = globject.object,
+			buffer = globject.buffer,
+			material, materialIndex, meshMaterial;
 
 		meshMaterial = object.material;
 
@@ -11872,12 +11872,12 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function sortFacesByMaterial ( geometry ) {
 
-		let f; let fl; let face; let materialIndex; let vertices;
-			let materialHash; let groupHash;
-			const hash_map = {};
+		var f, fl, face, materialIndex, vertices,
+			materialHash, groupHash,
+			hash_map = {};
 
-		const numMorphTargets = geometry.morphTargets.length;
-		const numMorphNormals = geometry.morphNormals.length;
+		var numMorphTargets = geometry.morphTargets.length;
+		var numMorphNormals = geometry.morphNormals.length;
 
 		geometry.geometryGroups = {};
 
@@ -11894,7 +11894,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-			groupHash = `${hash_map[ materialHash ].hash  }_${  hash_map[ materialHash ].counter}`;
+			groupHash = hash_map[ materialHash ].hash + '_' + hash_map[ materialHash ].counter;
 
 			if ( geometry.geometryGroups[ groupHash ] === undefined ) {
 
@@ -11907,7 +11907,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 			if ( geometry.geometryGroups[ groupHash ].vertices + vertices > 65535 ) {
 
 				hash_map[ materialHash ].counter += 1;
-				groupHash = `${hash_map[ materialHash ].hash  }_${  hash_map[ materialHash ].counter}`;
+				groupHash = hash_map[ materialHash ].hash + '_' + hash_map[ materialHash ].counter;
 
 				if ( geometry.geometryGroups[ groupHash ] === undefined ) {
 
@@ -11933,7 +11933,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		geometry.geometryGroupsList = [];
 
-		for ( const g in geometry.geometryGroups ) {
+		for ( var g in geometry.geometryGroups ) {
 
 			geometry.geometryGroups[ g ].id = _geometryGroupCounter ++;
 
@@ -11972,7 +11972,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		// update must be called after objects adding / removal
 
-		for ( let o = 0, ol = scene.__webglObjects.length; o < ol; o ++ ) {
+		for ( var o = 0, ol = scene.__webglObjects.length; o < ol; o ++ ) {
 
 			updateObject( scene.__webglObjects[ o ].object );
 
@@ -11984,7 +11984,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function addObject ( object, scene ) {
 
-		let g; let geometry; let geometryGroup;
+		var g, geometry, geometryGroup;
 
 		if ( ! object.__webglInit ) {
 
@@ -11993,11 +11993,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 			object._modelViewMatrix = new THREE.Matrix4();
 			object._normalMatrix = new THREE.Matrix3();
 
-			// object._normalMatrixArray = new Float32Array( 9 );
-			// object._modelViewMatrixArray = new Float32Array( 16 );
-			// object._objectMatrixArray = new Float32Array( 16 );
+			//object._normalMatrixArray = new Float32Array( 9 );
+			//object._modelViewMatrixArray = new Float32Array( 16 );
+			//object._objectMatrixArray = new Float32Array( 16 );
 
-			// object.matrixWorld.flattenToArray( object._objectMatrixArray );
+			//object.matrixWorld.flattenToArray( object._objectMatrixArray );
 
 			if ( object instanceof THREE.Mesh ) {
 
@@ -12038,7 +12038,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				}
 
-			} /* else if ( object instanceof THREE.Ribbon ) {
+			} /*else if ( object instanceof THREE.Ribbon ) {
 
 				geometry = object.geometry;
 
@@ -12106,14 +12106,14 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				}
 
-			} else if ( // object instanceof THREE.Ribbon ||
-						object instanceof THREE.Line /* ||
-											                                                         object instanceof THREE.ParticleSystem */ ) {
+			} else if ( //object instanceof THREE.Ribbon ||
+						object instanceof THREE.Line /*||
+											                                                         object instanceof THREE.ParticleSystem*/ ) {
 
 				geometry = object.geometry;
 				addBuffer( scene.__webglObjects, geometry, object );
 
-			} /* else if ( object instanceof THREE.ImmediateRenderObject || object.immediateRenderCallback ) {
+			} /*else if ( object instanceof THREE.ImmediateRenderObject || object.immediateRenderCallback ) {
 
 				addBufferImmediate( scene.__webglObjectsImmediate, object );
 
@@ -12125,7 +12125,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				scene.__webglFlares.push( object );
 
-											          } */
+											          }*/
 
 			object.__webglActive = true;
 
@@ -12137,8 +12137,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		objlist.push(
 			{
-				buffer,
-				object,
+				buffer: buffer,
+				object: object,
 				opaque: null,
 				transparent: null
 			}
@@ -12150,7 +12150,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		objlist.push(
 			{
-				object,
+				object: object,
 				opaque: null,
 				transparent: null
 			}
@@ -12162,8 +12162,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function updateObject ( object ) {
 
-		const {geometry} = object;
-			let geometryGroup; let customAttributesDirty; let material;
+		var geometry = object.geometry,
+			geometryGroup, customAttributesDirty, material;
 
 		if ( object instanceof THREE.Mesh ) {
 
@@ -12190,7 +12190,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				// check all geometry groups
 
-				for( let i = 0, il = geometry.geometryGroupsList.length; i < il; i ++ ) {
+				for( var i = 0, il = geometry.geometryGroupsList.length; i < il; i ++ ) {
 
 					geometryGroup = geometry.geometryGroupsList[ i ];
 
@@ -12220,7 +12220,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			}
 
-		} /* else if ( object instanceof THREE.Ribbon ) {
+		} /*else if ( object instanceof THREE.Ribbon ) {
 
 			if ( geometry.verticesNeedUpdate || geometry.colorsNeedUpdate ) {
 
@@ -12273,7 +12273,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function areCustomAttributesDirty ( material ) {
 
-		for ( const a in material.attributes ) {
+		for ( var a in material.attributes ) {
 
 			if ( material.attributes[ a ].needsUpdate ) return true;
 
@@ -12285,7 +12285,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function clearCustomAttributes ( material ) {
 
-		for ( const a in material.attributes ) {
+		for ( var a in material.attributes ) {
 
 			material.attributes[ a ].needsUpdate = false;
 
@@ -12304,7 +12304,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			removeInstances( scene.__webglObjects, object );
 
-		} /* else if ( object instanceof THREE.Sprite ) {
+		} /*else if ( object instanceof THREE.Sprite ) {
 
 			removeInstancesDirect( scene.__webglSprites, object );
 
@@ -12316,7 +12316,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			removeInstances( scene.__webglObjectsImmediate, object );
 
-											  } */
+											  }*/
 
 		object.__webglActive = false;
 
@@ -12324,7 +12324,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function removeInstances ( objlist, object ) {
 
-		for ( let o = objlist.length - 1; o >= 0; o -- ) {
+		for ( var o = objlist.length - 1; o >= 0; o -- ) {
 
 			if ( objlist[ o ].object === object ) {
 
@@ -12338,7 +12338,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function removeInstancesDirect ( objlist, object ) {
 
-		for ( let o = objlist.length - 1; o >= 0; o -- ) {
+		for ( var o = objlist.length - 1; o >= 0; o -- ) {
 
 			if ( objlist[ o ] === object ) {
 
@@ -12354,7 +12354,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	this.initMaterial = function ( material, lights, fog, object ) {
 
-		let u; let a; let identifiers; let i; let parameters; let maxLightCount; let maxBones; let maxShadows; let shaderID;
+		var u, a, identifiers, i, parameters, maxLightCount, maxBones, maxShadows, shaderID;
 
 		if ( material instanceof THREE.MeshDepthMaterial ) {
 
@@ -12409,13 +12409,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			vertexColors: material.vertexColors,
 
-			fog,
+			fog: fog,
 			useFog: material.fog,
 
 			sizeAttenuation: material.sizeAttenuation,
 
 			skinning: material.skinning,
-			maxBones,
+			maxBones: maxBones,
 
 			morphTargets: material.morphTargets,
 			morphNormals: material.morphNormals,
@@ -12426,7 +12426,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 			maxPointLights: maxLightCount.point,
 			maxSpotLights: maxLightCount.spot,
 
-			maxShadows,
+			maxShadows: maxShadows,
 			shadowMapEnabled: this.shadowMapEnabled && object.receiveShadow,
 			shadowMapSoft: this.shadowMapSoft,
 			shadowMapDebug: this.shadowMapDebug,
@@ -12442,7 +12442,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		material.program = buildProgram( shaderID, material.fragmentShader, material.vertexShader, material.uniforms, material.attributes, parameters );
 
-		const {attributes} = material.program;
+		var attributes = material.program.attributes;
 
 		if ( attributes.position >= 0 ) _gl.enableVertexAttribArray( attributes.position );
 		if ( attributes.color >= 0 ) _gl.enableVertexAttribArray( attributes.color );
@@ -12474,7 +12474,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			material.numSupportedMorphTargets = 0;
 
-			var id; var base = "morphTarget";
+			var id, base = "morphTarget";
 
 			for ( i = 0; i < this.maxMorphTargets; i ++ ) {
 
@@ -12495,7 +12495,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			material.numSupportedMorphNormals = 0;
 
-			var id; var base = "morphNormal";
+			var id, base = "morphNormal";
 
 			for ( i = 0; i < this.maxMorphNormals; i ++ ) {
 
@@ -12545,7 +12545,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				object.__webglMorphTargetInfluences = new Float32Array( _this.maxMorphTargets );
 
-				for ( let i = 0, il = _this.maxMorphTargets; i < il; i ++ ) {
+				for ( var i = 0, il = _this.maxMorphTargets; i < il; i ++ ) {
 
 					object.__webglMorphTargetInfluences[ i ] = 0;
 
@@ -12555,11 +12555,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		let refreshMaterial = false;
+		var refreshMaterial = false;
 
-		const {program} = material;
-			const pUniform = program.uniforms;
-			const mUniform = material.uniforms;
+		var program = material.program,
+			p_uniforms = program.uniforms,
+			m_uniforms = material.uniforms;
 
 		if ( program !== _currentProgram ) {
 
@@ -12579,7 +12579,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( refreshMaterial || camera !== _currentCamera ) {
 
-			_gl.uniformMatrix4fv( pUniform.projectionMatrix, false, camera._projectionMatrixArray );
+			_gl.uniformMatrix4fv( p_uniforms.projectionMatrix, false, camera._projectionMatrixArray );
 
 			if ( camera !== _currentCamera ) _currentCamera = camera;
 
@@ -12591,7 +12591,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if ( fog && material.fog ) {
 
-				refreshUniformsFog( mUniform, fog );
+				refreshUniformsFog( m_uniforms, fog );
 
 			}
 
@@ -12606,7 +12606,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				}
 
-				refreshUniformsLights( mUniform, _lights );
+				refreshUniformsLights( m_uniforms, _lights );
 
 			}
 
@@ -12614,7 +12614,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 				 material instanceof THREE.MeshLambertMaterial ||
 				 material instanceof THREE.MeshPhongMaterial ) {
 
-				refreshUniformsCommon( mUniform, material );
+				refreshUniformsCommon( m_uniforms, material );
 
 			}
 
@@ -12622,35 +12622,35 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if ( material instanceof THREE.LineBasicMaterial ) {
 
-				refreshUniformsLine( mUniform, material );
+				refreshUniformsLine( m_uniforms, material );
 
 			} else if ( material instanceof THREE.ParticleBasicMaterial ) {
 
-				refreshUniformsParticle( mUniform, material );
+				refreshUniformsParticle( m_uniforms, material );
 
 			} else if ( material instanceof THREE.MeshPhongMaterial ) {
 
-				refreshUniformsPhong( mUniform, material );
+				refreshUniformsPhong( m_uniforms, material );
 
 			} else if ( material instanceof THREE.MeshLambertMaterial ) {
 
-				refreshUniformsLambert( mUniform, material );
+				refreshUniformsLambert( m_uniforms, material );
 
 			} else if ( material instanceof THREE.MeshDepthMaterial ) {
 
-				mUniform.mNear.value = camera.near;
-				mUniform.mFar.value = camera.far;
-				mUniform.opacity.value = material.opacity;
+				m_uniforms.mNear.value = camera.near;
+				m_uniforms.mFar.value = camera.far;
+				m_uniforms.opacity.value = material.opacity;
 
 			} else if ( material instanceof THREE.MeshNormalMaterial ) {
 
-				mUniform.opacity.value = material.opacity;
+				m_uniforms.opacity.value = material.opacity;
 
 			}
 
 			if ( object.receiveShadow && ! material._shadowPass ) {
 
-				refreshUniformsShadow( mUniform, lights );
+				refreshUniformsShadow( m_uniforms, lights );
 
 			}
 
@@ -12665,10 +12665,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 				 material instanceof THREE.MeshPhongMaterial ||
 				 material.envMap ) {
 
-				if ( pUniform.cameraPosition !== null ) {
+				if ( p_uniforms.cameraPosition !== null ) {
 
-					const position = camera.matrixWorld.getPosition();
-					_gl.uniform3f( pUniform.cameraPosition, position.x, position.y, position.z );
+					var position = camera.matrixWorld.getPosition();
+					_gl.uniform3f( p_uniforms.cameraPosition, position.x, position.y, position.z );
 
 				}
 
@@ -12679,9 +12679,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 				 material instanceof THREE.ShaderMaterial ||
 				 material.skinning ) {
 
-				if ( pUniform.viewMatrix !== null ) {
+				if ( p_uniforms.viewMatrix !== null ) {
 
-					_gl.uniformMatrix4fv( pUniform.viewMatrix, false, camera._viewMatrixArray );
+					_gl.uniformMatrix4fv( p_uniforms.viewMatrix, false, camera._viewMatrixArray );
 
 				}
 
@@ -12689,17 +12689,17 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			if ( material.skinning ) {
 
-				_gl.uniformMatrix4fv( pUniform.boneGlobalMatrices, false, object.boneMatrices );
+				_gl.uniformMatrix4fv( p_uniforms.boneGlobalMatrices, false, object.boneMatrices );
 
 			}
 
 		}
 
-		loadUniformsMatrices( pUniform, object );
+		loadUniformsMatrices( p_uniforms, object );
 
-		if ( pUniform.objectMatrix !== null ) {
+		if ( p_uniforms.objectMatrix !== null ) {
 
-			_gl.uniformMatrix4fv( pUniform.objectMatrix, false, object.matrixWorld.elements );
+			_gl.uniformMatrix4fv( p_uniforms.objectMatrix, false, object.matrixWorld.elements );
 
 		}
 
@@ -12738,7 +12738,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( _this.gammaInput ) {
 
-			// uniforms.reflectivity.value = material.reflectivity * material.reflectivity;
+			//uniforms.reflectivity.value = material.reflectivity * material.reflectivity;
 			uniforms.reflectivity.value = material.reflectivity;
 
 		} else {
@@ -12860,11 +12860,11 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		if ( uniforms.shadowMatrix ) {
 
-			let j = 0;
+			var j = 0;
 
-			for ( let i = 0, il = lights.length; i < il; i ++ ) {
+			for ( var i = 0, il = lights.length; i < il; i ++ ) {
 
-				const light = lights[ i ];
+				var light = lights[ i ];
 
 				if ( ! light.castShadow ) continue;
 
@@ -12904,7 +12904,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function loadUniformsGeneric ( program, uniforms ) {
 
-		let uniform; let value; let type; let location; let texture; let i; let il; let j; let jl; let offset;
+		var uniform, value, type, location, texture, i, il, j, jl, offset;
 
 		for ( j = 0, jl = uniforms.length; j < jl; j ++ ) {
 
@@ -13132,33 +13132,33 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function setupLights ( program, lights ) {
 
-		let l; let ll; let light; let n;
-		let r = 0; let g = 0; let b = 0;
-		let color; let position; let intensity; let distance;
+		var l, ll, light, n,
+		r = 0, g = 0, b = 0,
+		color, position, intensity, distance,
 
-		const zlights = _lights;
+		zlights = _lights,
 
-		const dcolors = zlights.directional.colors;
-		const dpositions = zlights.directional.positions;
+		dcolors = zlights.directional.colors,
+		dpositions = zlights.directional.positions,
 
-		const pcolors = zlights.point.colors;
-		const ppositions = zlights.point.positions;
-		const pdistances = zlights.point.distances;
+		pcolors = zlights.point.colors,
+		ppositions = zlights.point.positions,
+		pdistances = zlights.point.distances,
 
-		const scolors = zlights.spot.colors;
-		const spositions = zlights.spot.positions;
-		const sdistances = zlights.spot.distances;
-		const sdirections = zlights.spot.directions;
-		const sangles = zlights.spot.angles;
-		const sexponents = zlights.spot.exponents;
+		scolors = zlights.spot.colors,
+		spositions = zlights.spot.positions,
+		sdistances = zlights.spot.distances,
+		sdirections = zlights.spot.directions,
+		sangles = zlights.spot.angles,
+		sexponents = zlights.spot.exponents,
 
-		let dlength = 0;
-		let plength = 0;
-		let slength = 0;
+		dlength = 0,
+		plength = 0,
+		slength = 0,
 
-		let doffset = 0;
-		let poffset = 0;
-		let soffset = 0;
+		doffset = 0,
+		poffset = 0,
+		soffset = 0;
 
 		for ( l = 0, ll = lights.length; l < ll; l ++ ) {
 
@@ -13541,8 +13541,8 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function buildProgram ( shaderID, fragmentShader, vertexShader, uniforms, attributes, parameters ) {
 
-		let p; let pl; let program; let code;
-		const chunks = [];
+		var p, pl, program, code;
+		var chunks = [];
 
 		// Generate code
 
@@ -13580,15 +13580,15 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		// console.log( "building new program " );
+		//console.log( "building new program " );
 
 		//
 
 		program = _gl.createProgram();
 
-		const prefixVertex = [
+		var prefix_vertex = [
 
-			`precision ${  _precision  } float;`,
+			"precision " + _precision + " float;",
 
 			( _maxVertexTextures > 0 ) ? "#define VERTEX_TEXTURES" : "",
 
@@ -13596,13 +13596,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 			_this.gammaOutput ? "#define GAMMA_OUTPUT" : "",
 			_this.physicallyBasedShading ? "#define PHYSICALLY_BASED_SHADING" : "",
 
-			`#define MAX_DIR_LIGHTS ${  parameters.maxDirLights}`,
-			`#define MAX_POINT_LIGHTS ${  parameters.maxPointLights}`,
-			`#define MAX_SPOT_LIGHTS ${  parameters.maxSpotLights}`,
+			"#define MAX_DIR_LIGHTS " + parameters.maxDirLights,
+			"#define MAX_POINT_LIGHTS " + parameters.maxPointLights,
+			"#define MAX_SPOT_LIGHTS " + parameters.maxSpotLights,
 
-			`#define MAX_SHADOWS ${  parameters.maxShadows}`,
+			"#define MAX_SHADOWS " + parameters.maxShadows,
 
-			`#define MAX_BONES ${  parameters.maxBones}`,
+			"#define MAX_BONES " + parameters.maxBones,
 
 			parameters.map ? "#define USE_MAP" : "",
 			parameters.envMap ? "#define USE_ENVMAP" : "",
@@ -13678,17 +13678,17 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		].join("\n");
 
-		const prefixFragment = [
+		var prefix_fragment = [
 
-			`precision ${  _precision  } float;`,
+			"precision " + _precision + " float;",
 
-			`#define MAX_DIR_LIGHTS ${  parameters.maxDirLights}`,
-			`#define MAX_POINT_LIGHTS ${  parameters.maxPointLights}`,
-			`#define MAX_SPOT_LIGHTS ${  parameters.maxSpotLights}`,
+			"#define MAX_DIR_LIGHTS " + parameters.maxDirLights,
+			"#define MAX_POINT_LIGHTS " + parameters.maxPointLights,
+			"#define MAX_SPOT_LIGHTS " + parameters.maxSpotLights,
 
-			`#define MAX_SHADOWS ${  parameters.maxShadows}`,
+			"#define MAX_SHADOWS " + parameters.maxShadows,
 
-			parameters.alphaTest ? `#define ALPHATEST ${  parameters.alphaTest}`: "",
+			parameters.alphaTest ? "#define ALPHATEST " + parameters.alphaTest: "",
 
 			_this.gammaInput ? "#define GAMMA_INPUT" : "",
 			_this.gammaOutput ? "#define GAMMA_OUTPUT" : "",
@@ -13718,24 +13718,24 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		].join("\n");
 
-		_gl.attachShader( program, getShader( "fragment", prefixFragment + fragmentShader ) );
-		_gl.attachShader( program, getShader( "vertex", prefixVertex + vertexShader ) );
+		_gl.attachShader( program, getShader( "fragment", prefix_fragment + fragmentShader ) );
+		_gl.attachShader( program, getShader( "vertex", prefix_vertex + vertexShader ) );
 
 		_gl.linkProgram( program );
 
 		if ( !_gl.getProgramParameter( program, _gl.LINK_STATUS ) ) {
 
-			console.error( `Could not initialise shader\n` + `VALIDATE_STATUS: ${  _gl.getProgramParameter( program, _gl.VALIDATE_STATUS )  }, gl error [${  _gl.getError()  }]` );
+			console.error( "Could not initialise shader\n" + "VALIDATE_STATUS: " + _gl.getProgramParameter( program, _gl.VALIDATE_STATUS ) + ", gl error [" + _gl.getError() + "]" );
 
 		}
 
-		// console.log( prefixFragment + fragmentShader );
-		// console.log( prefixVertex + vertexShader );
+		//console.log( prefix_fragment + fragmentShader );
+		//console.log( prefix_vertex + vertexShader );
 
 		program.uniforms = {};
 		program.attributes = {};
 
-		let identifiers; let u; let a; let i;
+		var identifiers, u, a, i;
 
 		// cache uniform locations
 
@@ -13765,13 +13765,13 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		for ( i = 0; i < parameters.maxMorphTargets; i ++ ) {
 
-			identifiers.push( `morphTarget${  i}` );
+			identifiers.push( "morphTarget" + i );
 
 		}
 
 		for ( i = 0; i < parameters.maxMorphNormals; i ++ ) {
 
-			identifiers.push( `morphNormal${  i}` );
+			identifiers.push( "morphNormal" + i );
 
 		}
 
@@ -13785,7 +13785,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		program.id = _programs.length;
 
-		_programs.push( { program, code } );
+		_programs.push( { program: program, code: code } );
 
 		_this.info.memory.programs = _programs.length;
 
@@ -13797,7 +13797,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function cacheUniformLocations ( program, identifiers ) {
 
-		let i; let l; let id;
+		var i, l, id;
 
 		for( i = 0, l = identifiers.length; i < l; i ++ ) {
 
@@ -13810,7 +13810,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function cacheAttributeLocations ( program, identifiers ) {
 
-		let i; let l; let id;
+		var i, l, id;
 
 		for( i = 0, l = identifiers.length; i < l; i ++ ) {
 
@@ -13823,7 +13823,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function getShader ( type, string ) {
 
-		let shader;
+		var shader;
 
 		if ( type === "fragment" ) {
 
@@ -13899,10 +13899,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			_gl.pixelStorei( _gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha );
 
-			const {image} = texture;
-			const isImagePowerOfTwo = isPowerOfTwo( image.width ) && isPowerOfTwo( image.height );
-			const glFormat = paramThreeToGL( texture.format );
-			const glType = paramThreeToGL( texture.type );
+			var image = texture.image,
+			isImagePowerOfTwo = isPowerOfTwo( image.width ) && isPowerOfTwo( image.height ),
+			glFormat = paramThreeToGL( texture.format ),
+			glType = paramThreeToGL( texture.type );
 
 			setTextureParameters( _gl.TEXTURE_2D, texture, isImagePowerOfTwo );
 
@@ -13942,15 +13942,15 @@ THREE.WebGLRenderer = function ( parameters ) {
 		// Warning: Scaling through the canvas will only work with images that use
 		// premultiplied alpha.
 
-		const maxDimension = Math.max( image.width, image.height );
-		const newWidth = Math.floor( image.width * maxSize / maxDimension );
-		const newHeight = Math.floor( image.height * maxSize / maxDimension );
+		var maxDimension = Math.max( image.width, image.height );
+		var newWidth = Math.floor( image.width * maxSize / maxDimension );
+		var newHeight = Math.floor( image.height * maxSize / maxDimension );
 
-		const canvas = document.createElement( 'canvas' );
+		var canvas = document.createElement( 'canvas' );
 		canvas.width = newWidth;
 		canvas.height = newHeight;
 
-		const ctx = canvas.getContext( "2d" );
+		var ctx = canvas.getContext( "2d" );
 		ctx.drawImage( image, 0, 0, image.width, image.height, 0, 0, newWidth, newHeight );
 
 		return canvas;
@@ -13972,7 +13972,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 				_gl.activeTexture( _gl.TEXTURE0 + slot );
 				_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, texture.image.__webglTextureCube );
 
-				const cubeImage = [];
+				var cubeImage = [];
 
 				for ( var i = 0; i < 6; i ++ ) {
 
@@ -13988,10 +13988,10 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 				}
 
-				const image = cubeImage[ 0 ];
-				const isImagePowerOfTwo = isPowerOfTwo( image.width ) && isPowerOfTwo( image.height );
-				const glFormat = paramThreeToGL( texture.format );
-				const glType = paramThreeToGL( texture.type );
+				var image = cubeImage[ 0 ],
+				isImagePowerOfTwo = isPowerOfTwo( image.width ) && isPowerOfTwo( image.height ),
+				glFormat = paramThreeToGL( texture.format ),
+				glType = paramThreeToGL( texture.type );
 
 				setTextureParameters( _gl.TEXTURE_CUBE_MAP, texture, isImagePowerOfTwo );
 
@@ -14064,7 +14064,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	this.setRenderTarget = function ( renderTarget ) {
 
-		const isCube = ( renderTarget instanceof THREE.WebGLRenderTargetCube );
+		var isCube = ( renderTarget instanceof THREE.WebGLRenderTargetCube );
 
 		if ( renderTarget && ! renderTarget.__webglFramebuffer ) {
 
@@ -14075,9 +14075,9 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 			// Setup texture, create render and frame buffers
 
-			const isTargetPowerOfTwo = isPowerOfTwo( renderTarget.width ) && isPowerOfTwo( renderTarget.height );
-				const glFormat = paramThreeToGL( renderTarget.format );
-				const glType = paramThreeToGL( renderTarget.type );
+			var isTargetPowerOfTwo = isPowerOfTwo( renderTarget.width ) && isPowerOfTwo( renderTarget.height ),
+				glFormat = paramThreeToGL( renderTarget.format ),
+				glType = paramThreeToGL( renderTarget.type );
 
 			if ( isCube ) {
 
@@ -14087,7 +14087,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 				_gl.bindTexture( _gl.TEXTURE_CUBE_MAP, renderTarget.__webglTexture );
 				setTextureParameters( _gl.TEXTURE_CUBE_MAP, renderTarget, isTargetPowerOfTwo );
 
-				for ( let i = 0; i < 6; i ++ ) {
+				for ( var i = 0; i < 6; i ++ ) {
 
 					renderTarget.__webglFramebuffer[ i ] = _gl.createFramebuffer();
 					renderTarget.__webglRenderbuffer[ i ] = _gl.createRenderbuffer();
@@ -14135,7 +14135,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 		}
 
-		let framebuffer; let width; let height; let vx; let vy;
+		var framebuffer, width, height, vx, vy;
 
 		if ( renderTarget ) {
 
@@ -14287,7 +14287,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 		//  - limit here is ANGLE's 254 max uniform vectors
 		//    (up to 54 should be safe)
 
-		const maxBones = 50;
+		var maxBones = 50;
 
 /*		if ( object !== undefined && object instanceof THREE.SkinnedMesh ) {
 
@@ -14301,7 +14301,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function allocateLights ( lights ) {
 
-		let l; let ll; let light; let dirLights; let pointLights; let spotLights; let maxDirLights; let maxPointLights; let maxSpotLights;
+		var l, ll, light, dirLights, pointLights, spotLights, maxDirLights, maxPointLights, maxSpotLights;
 
 		dirLights = pointLights = spotLights = maxDirLights = maxPointLights = maxSpotLights = 0;
 
@@ -14337,7 +14337,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function allocateShadows ( lights ) {
 
-		let l; let ll; let light; let maxShadows = 0;
+		var l, ll, light, maxShadows = 0;
 
 		for ( l = 0, ll = lights.length; l < ll; l++ ) {
 
@@ -14358,7 +14358,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 
 	function initGL () {
 
-		/* var */ gl = null;
+		/*var*/ gl = null;
 
 		try {
 			if ( ! ( gl = _canvas.getContext( 'experimental-webgl', { alpha: _alpha, premultipliedAlpha: _premultipliedAlpha, antialias: _antialias, stencil: _stencil, preserveDrawingBuffer: _preserveDrawingBuffer } ) ) ) {
@@ -14410,7 +14410,7 @@ THREE.WebGLRenderer = function ( parameters ) {
 	this.addPrePlugin( this.shadowMapPlugin );
 
 	this.addPostPlugin( new THREE.SpritePlugin() );
-	this.addPostPlugin( new THREE.LensFlarePlugin() ); */
+	this.addPostPlugin( new THREE.LensFlarePlugin() );*/
 
 };
 /**
@@ -14445,7 +14445,7 @@ THREE.WebGLRenderTarget = function ( width, height, options ) {
 
 THREE.WebGLRenderTarget.prototype.clone = function() {
 
-	const tmp = new THREE.WebGLRenderTarget( this.width, this.height );
+	var tmp = new THREE.WebGLRenderTarget( this.width, this.height );
 
 	tmp.wrapS = this.wrapS;
 	tmp.wrapT = this.wrapT;
@@ -14578,24 +14578,24 @@ THREE.GeometryUtils = {
 
 	// Merge two geometries or geometry and geometry from object (using object's transform)
 
-	merge ( geometry1, object2 /* mesh | geometry */ ) {
+	merge: function ( geometry1, object2 /* mesh | geometry */ ) {
 
-		let matrix; let matrixRotation;
-		const vertexOffset = geometry1.vertices.length;
-		const uvPosition = geometry1.faceVertexUvs[ 0 ].length;
-		const geometry2 = object2 instanceof THREE.Mesh ? object2.geometry : object2;
-		const vertices1 = geometry1.vertices;
-		const vertices2 = geometry2.vertices;
-		const faces1 = geometry1.faces;
-		const faces2 = geometry2.faces;
-		const uvs1 = geometry1.faceVertexUvs[ 0 ];
-		const uvs2 = geometry2.faceVertexUvs[ 0 ];
+		var matrix, matrixRotation,
+		vertexOffset = geometry1.vertices.length,
+		uvPosition = geometry1.faceVertexUvs[ 0 ].length,
+		geometry2 = object2 instanceof THREE.Mesh ? object2.geometry : object2,
+		vertices1 = geometry1.vertices,
+		vertices2 = geometry2.vertices,
+		faces1 = geometry1.faces,
+		faces2 = geometry2.faces,
+		uvs1 = geometry1.faceVertexUvs[ 0 ],
+		uvs2 = geometry2.faceVertexUvs[ 0 ];
 
-		const geo1MaterialsMap = {};
+		var geo1MaterialsMap = {};
 
 		for ( var i = 0; i < geometry1.materials.length; i ++ ) {
 
-			const {id} = geometry1.materials[ i ];
+			var id = geometry1.materials[ i ].id;
 
 			geo1MaterialsMap[ id ] = i;
 
@@ -14615,9 +14615,9 @@ THREE.GeometryUtils = {
 
 		for ( var i = 0, il = vertices2.length; i < il; i ++ ) {
 
-			const vertex = vertices2[ i ];
+			var vertex = vertices2[ i ];
 
-			const vertexCopy = vertex.clone();
+			var vertexCopy = vertex.clone();
 
 			if ( matrix ) matrix.multiplyVector3( vertexCopy );
 
@@ -14629,9 +14629,9 @@ THREE.GeometryUtils = {
 
 		for ( i = 0, il = faces2.length; i < il; i ++ ) {
 
-			const face = faces2[ i ]; var faceCopy; var normal; var color;
-			const faceVertexNormals = face.vertexNormals;
-			const faceVertexColors = face.vertexColors;
+			var face = faces2[ i ], faceCopy, normal, color,
+			faceVertexNormals = face.vertexNormals,
+			faceVertexColors = face.vertexColors;
 
 			if ( face instanceof THREE.Face3 ) {
 
@@ -14668,10 +14668,10 @@ THREE.GeometryUtils = {
 
 			if ( face.materialIndex !== undefined ) {
 
-				const material2 = geometry2.materials[ face.materialIndex ];
-				const materialId2 = material2.id;
+				var material2 = geometry2.materials[ face.materialIndex ];
+				var materialId2 = material2.id;
 
-				let materialIndex = geo1MaterialsMap[ materialId2 ];
+				var materialIndex = geo1MaterialsMap[ materialId2 ];
 
 				if ( materialIndex === undefined ) {
 
@@ -14697,7 +14697,7 @@ THREE.GeometryUtils = {
 
 		for ( i = 0, il = uvs2.length; i < il; i ++ ) {
 
-			const uv = uvs2[ i ]; const uvCopy = [];
+			var uv = uvs2[ i ], uvCopy = [];
 
 			for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
 
@@ -14711,15 +14711,15 @@ THREE.GeometryUtils = {
 
 	},
 
-	clone ( geometry ) {
+	clone: function ( geometry ) {
 
-		const cloneGeo = new THREE.Geometry();
+		var cloneGeo = new THREE.Geometry();
 
-		let i; let il;
+		var i, il;
 
-		const {vertices} = geometry;
-			const {faces} = geometry;
-			const uvs = geometry.faceVertexUvs[ 0 ];
+		var vertices = geometry.vertices,
+			faces = geometry.faces,
+			uvs = geometry.faceVertexUvs[ 0 ];
 
 		// materials
 
@@ -14733,7 +14733,7 @@ THREE.GeometryUtils = {
 
 		for ( i = 0, il = vertices.length; i < il; i ++ ) {
 
-			const vertex = vertices[ i ];
+			var vertex = vertices[ i ];
 
 			cloneGeo.vertices.push( vertex.clone() );
 
@@ -14743,7 +14743,7 @@ THREE.GeometryUtils = {
 
 		for ( i = 0, il = faces.length; i < il; i ++ ) {
 
-			const face = faces[ i ];
+			var face = faces[ i ];
 
 			cloneGeo.faces.push( face.clone() );
 
@@ -14753,9 +14753,9 @@ THREE.GeometryUtils = {
 
 		for ( i = 0, il = uvs.length; i < il; i ++ ) {
 
-			const uv = uvs[ i ]; const uvCopy = [];
+			var uv = uvs[ i ], uvCopy = [];
 
-			for ( let j = 0, jl = uv.length; j < jl; j ++ ) {
+			for ( var j = 0, jl = uv.length; j < jl; j ++ ) {
 
 				uvCopy.push( new THREE.UV( uv[ j ].u, uv[ j ].v ) );
 
@@ -14773,11 +14773,11 @@ THREE.GeometryUtils = {
 	// 	(uniform distribution)
 	// 	http://www.cgafaq.info/wiki/Random_Point_In_Triangle
 
-	randomPointInTriangle ( vectorA, vectorB, vectorC ) {
+	randomPointInTriangle: function ( vectorA, vectorB, vectorC ) {
 
-		let a; let b; let c;
-			const point = new THREE.Vector3();
-			const tmp = THREE.GeometryUtils.__v1;
+		var a, b, c,
+			point = new THREE.Vector3(),
+			tmp = THREE.GeometryUtils.__v1;
 
 		a = THREE.GeometryUtils.random();
 		b = THREE.GeometryUtils.random();
@@ -14811,9 +14811,9 @@ THREE.GeometryUtils = {
 	// Get random point in face (triangle / quad)
 	// (uniform distribution)
 
-	randomPointInFace ( face, geometry, useCachedAreas ) {
+	randomPointInFace: function ( face, geometry, useCachedAreas ) {
 
-		let vA; let vB; let vC; let vD;
+		var vA, vB, vC, vD;
 
 		if ( face instanceof THREE.Face3 ) {
 
@@ -14823,14 +14823,14 @@ THREE.GeometryUtils = {
 
 			return THREE.GeometryUtils.randomPointInTriangle( vA, vB, vC );
 
-		} if ( face instanceof THREE.Face4 ) {
+		} else if ( face instanceof THREE.Face4 ) {
 
 			vA = geometry.vertices[ face.a ];
 			vB = geometry.vertices[ face.b ];
 			vC = geometry.vertices[ face.c ];
 			vD = geometry.vertices[ face.d ];
 
-			let area1; let area2;
+			var area1, area2;
 
 			if ( useCachedAreas ) {
 
@@ -14856,17 +14856,17 @@ THREE.GeometryUtils = {
 
 			}
 
-			const r = THREE.GeometryUtils.random() * ( area1 + area2 );
+			var r = THREE.GeometryUtils.random() * ( area1 + area2 );
 
 			if ( r < area1 ) {
 
 				return THREE.GeometryUtils.randomPointInTriangle( vA, vB, vD );
 
-			} 
+			} else {
 
 				return THREE.GeometryUtils.randomPointInTriangle( vB, vC, vD );
 
-			
+			}
 
 		}
 
@@ -14878,15 +14878,15 @@ THREE.GeometryUtils = {
 	//  - find corresponding place in area array by binary search
 	//	- get random point in face
 
-	randomPointsInGeometry ( geometry, n ) {
+	randomPointsInGeometry: function ( geometry, n ) {
 
-		let face; let i;
-			const {faces} = geometry;
-			const {vertices} = geometry;
-			const il = faces.length;
-			let totalArea = 0;
-			const cumulativeAreas = [];
-			let vA; let vB; let vC; let vD;
+		var face, i,
+			faces = geometry.faces,
+			vertices = geometry.vertices,
+			il = faces.length,
+			totalArea = 0,
+			cumulativeAreas = [],
+			vA, vB, vC, vD;
 
 		// precompute face areas
 
@@ -14934,35 +14934,35 @@ THREE.GeometryUtils = {
 				if ( end < start )
 					return start;
 
-				const mid = start + Math.floor( ( end - start ) / 2 );
+				var mid = start + Math.floor( ( end - start ) / 2 );
 
 				if ( cumulativeAreas[ mid ] > value ) {
 
 					return binarySearch( start, mid - 1 );
 
-				} if ( cumulativeAreas[ mid ] < value ) {
+				} else if ( cumulativeAreas[ mid ] < value ) {
 
 					return binarySearch( mid + 1, end );
 
-				} 
+				} else {
 
 					return mid;
 
-				
+				}
 
 			}
 
-			const result = binarySearch( 0, cumulativeAreas.length - 1 )
+			var result = binarySearch( 0, cumulativeAreas.length - 1 )
 			return result;
 
 		}
 
 		// pick random face weighted by face area
 
-		let r; let index;
-			const result = [];
+		var r, index,
+			result = [];
 
-		const stats = {};
+		var stats = {};
 
 		for ( i = 0; i < n; i ++ ) {
 
@@ -14991,10 +14991,10 @@ THREE.GeometryUtils = {
 	// Get triangle area (by Heron's formula)
 	// 	http://en.wikipedia.org/wiki/Heron%27s_formula
 
-	triangleArea ( vectorA, vectorB, vectorC ) {
+	triangleArea: function ( vectorA, vectorB, vectorC ) {
 
-		let s; let a; let b; let c;
-			const tmp = THREE.GeometryUtils.__v1;
+		var s, a, b, c,
+			tmp = THREE.GeometryUtils.__v1;
 
 		tmp.sub( vectorA, vectorB );
 		a = tmp.length();
@@ -15013,13 +15013,13 @@ THREE.GeometryUtils = {
 
 	// Center geometry so that 0,0,0 is in center of bounding box
 
-	center ( geometry ) {
+	center: function ( geometry ) {
 
 		geometry.computeBoundingBox();
 
-		const bb = geometry.boundingBox;
+		var bb = geometry.boundingBox;
 
-		const offset = new THREE.Vector3();
+		var offset = new THREE.Vector3();
 
 		offset.add( bb.min, bb.max );
 		offset.multiplyScalar( -0.5 );
@@ -15034,15 +15034,15 @@ THREE.GeometryUtils = {
 	// Normalize UVs to be from <0,1>
 	// (for now just the first set of UVs)
 
-	normalizeUVs ( geometry ) {
+	normalizeUVs: function ( geometry ) {
 
-		const uvSet = geometry.faceVertexUvs[ 0 ];
+		var uvSet = geometry.faceVertexUvs[ 0 ];
 
-		for ( let i = 0, il = uvSet.length; i < il; i ++ ) {
+		for ( var i = 0, il = uvSet.length; i < il; i ++ ) {
 
-			const uvs = uvSet[ i ];
+			var uvs = uvSet[ i ];
 
-			for ( let j = 0, jl = uvs.length; j < jl; j ++ ) {
+			for ( var j = 0, jl = uvs.length; j < jl; j ++ ) {
 
 				// texture repeat
 
@@ -15055,13 +15055,13 @@ THREE.GeometryUtils = {
 
 	},
 
-	triangulateQuads ( geometry ) {
+	triangulateQuads: function ( geometry ) {
 
-		let i; let il; let j; let jl;
+		var i, il, j, jl;
 
-		const faces = [];
-		const faceUvs = [];
-		const faceVertexUvs = [];
+		var faces = [];
+		var faceUvs = [];
+		var faceVertexUvs = [];
 
 		for ( i = 0, il = geometry.faceUvs.length; i < il; i ++ ) {
 
@@ -15077,17 +15077,17 @@ THREE.GeometryUtils = {
 
 		for ( i = 0, il = geometry.faces.length; i < il; i ++ ) {
 
-			const face = geometry.faces[ i ];
+			var face = geometry.faces[ i ];
 
 			if ( face instanceof THREE.Face4 ) {
 
-				const {a} = face;
-				const {b} = face;
-				const {c} = face;
-				const {d} = face;
+				var a = face.a;
+				var b = face.b;
+				var c = face.c;
+				var d = face.d;
 
-				const triA = new THREE.Face3();
-				const triB = new THREE.Face3();
+				var triA = new THREE.Face3();
+				var triB = new THREE.Face3();
 
 				triA.color.copy( face.color );
 				triB.color.copy( face.color );
@@ -15121,15 +15121,15 @@ THREE.GeometryUtils = {
 
 					if ( geometry.faceVertexUvs[ j ].length ) {
 
-						const uvs = geometry.faceVertexUvs[ j ][ i ];
+						var uvs = geometry.faceVertexUvs[ j ][ i ];
 
-						const uvA = uvs[ 0 ];
-						const uvB = uvs[ 1 ];
-						const uvC = uvs[ 2 ];
-						const uvD = uvs[ 3 ];
+						var uvA = uvs[ 0 ];
+						var uvB = uvs[ 1 ];
+						var uvC = uvs[ 2 ];
+						var uvD = uvs[ 3 ];
 
-						const uvsTriA = [ uvA.clone(), uvB.clone(), uvD.clone() ];
-						const uvsTriB = [ uvB.clone(), uvC.clone(), uvD.clone() ];
+						var uvsTriA = [ uvA.clone(), uvB.clone(), uvD.clone() ];
+						var uvsTriB = [ uvB.clone(), uvC.clone(), uvD.clone() ];
 
 						faceVertexUvs[ j ].push( uvsTriA, uvsTriB );
 
@@ -15141,7 +15141,7 @@ THREE.GeometryUtils = {
 
 					if ( geometry.faceUvs[ j ].length ) {
 
-						const faceUv = geometry.faceUvs[ j ][ i ];
+						var faceUv = geometry.faceUvs[ j ][ i ];
 
 						faceUvs[ j ].push( faceUv, faceUv );
 
@@ -15184,27 +15184,27 @@ THREE.GeometryUtils = {
 	// Make all faces use unique vertices
 	// so that each face can be separated from others
 
-	explode( geometry ) {
+	explode: function( geometry ) {
 
-		const vertices = [];
+		var vertices = [];
 
-		for ( let i = 0, il = geometry.faces.length; i < il; i ++ ) {
+		for ( var i = 0, il = geometry.faces.length; i < il; i ++ ) {
 
-			const n = vertices.length;
+			var n = vertices.length;
 
-			const face = geometry.faces[ i ];
+			var face = geometry.faces[ i ];
 
 			if ( face instanceof THREE.Face4 ) {
 
-				var {a} = face;
-				var {b} = face;
-				var {c} = face;
-				const {d} = face;
+				var a = face.a;
+				var b = face.b;
+				var c = face.c;
+				var d = face.d;
 
 				var va = geometry.vertices[ a ];
 				var vb = geometry.vertices[ b ];
 				var vc = geometry.vertices[ c ];
-				const vd = geometry.vertices[ d ];
+				var vd = geometry.vertices[ d ];
 
 				vertices.push( va.clone() );
 				vertices.push( vb.clone() );
@@ -15218,9 +15218,9 @@ THREE.GeometryUtils = {
 
 			} else {
 
-				var {a} = face;
-				var {b} = face;
-				var {c} = face;
+				var a = face.a;
+				var b = face.b;
+				var c = face.c;
 
 				var va = geometry.vertices[ a ];
 				var vb = geometry.vertices[ b ];
@@ -15246,22 +15246,22 @@ THREE.GeometryUtils = {
 	// Break faces with edges longer than maxEdgeLength
 	// - not recursive
 
-	tessellate ( geometry, maxEdgeLength ) {
+	tessellate: function ( geometry, maxEdgeLength ) {
 
-		let i; let il; let face;
-		let a; let b; let c; let d;
-		let va; let vb; let vc; let vd;
-		let dab; let dbc; let dac; let dcd; let dad;
-		let m; let m1; let m2;
-		let vm; let vm1; let vm2;
-		let vnm; let vnm1; let vnm2;
-		let vcm; let vcm1; let vcm2;
-		let triA; let triB;
-		let quadA; let quadB;
-		let edge;
+		var i, il, face,
+		a, b, c, d,
+		va, vb, vc, vd,
+		dab, dbc, dac, dcd, dad,
+		m, m1, m2,
+		vm, vm1, vm2,
+		vnm, vnm1, vnm2,
+		vcm, vcm1, vcm2,
+		triA, triB,
+		quadA, quadB,
+		edge;
 
-		const faces = [];
-		const faceVertexUvs = [];
+		var faces = [];
+		var faceVertexUvs = [];
 
 		for ( i = 0, il = geometry.faceVertexUvs.length; i < il; i ++ ) {
 
@@ -15410,7 +15410,7 @@ THREE.GeometryUtils = {
 					faces.push( triA, triB );
 					geometry.vertices.push( vm );
 
-					var j; var jl; var uvs; var uvA; var uvB; var uvC; var uvM; var uvsTriA; var uvsTriB;
+					var j, jl, uvs, uvA, uvB, uvC, uvM, uvsTriA, uvsTriB;
 
 					for ( j = 0, jl = geometry.faceVertexUvs.length; j < jl; j ++ ) {
 
@@ -15606,7 +15606,7 @@ THREE.GeometryUtils = {
 					faces.push( quadA, quadB );
 					geometry.vertices.push( vm1, vm2 );
 
-					var j; var jl; var uvs; var uvA; var uvB; var uvC; var uvD; var uvM1; var uvM2; var uvsQuadA; var uvsQuadB;
+					var j, jl, uvs, uvA, uvB, uvC, uvD, uvM1, uvM2, uvsQuadA, uvsQuadB;
 
 					for ( j = 0, jl = geometry.faceVertexUvs.length; j < jl; j ++ ) {
 
@@ -15688,9 +15688,9 @@ THREE.ImageUtils = {
 
 	crossOrigin: 'anonymous',
 
-	loadTexture ( path, mapping, callback ) {
+	loadTexture: function ( path, mapping, callback ) {
 
-		const image = new Image(); const texture = new THREE.Texture( image, mapping );
+		var image = new Image(), texture = new THREE.Texture( image, mapping );
 
 		image.onload = function () { texture.needsUpdate = true; if ( callback ) callback( this ); };
 		image.crossOrigin = this.crossOrigin;
@@ -15700,9 +15700,9 @@ THREE.ImageUtils = {
 
 	},
 
-	loadTextureCube ( array, mapping, callback ) {
+	loadTextureCube: function ( array, mapping, callback ) {
 
-		let i; let l; const images = []; const texture = new THREE.Texture( images, mapping );
+		var i, l, images = [], texture = new THREE.Texture( images, mapping );
 
 		images.loadCount = 0;
 
@@ -15726,56 +15726,56 @@ THREE.ImageUtils = {
 
 	},
 
-	getNormalMap ( image, depth ) {
+	getNormalMap: function ( image, depth ) {
 
 		// Adapted from http://www.paulbrunt.co.uk/lab/heightnormal/
 
-		const cross = function ( a, b ) {
+		var cross = function ( a, b ) {
 
 			return [ a[ 1 ] * b[ 2 ] - a[ 2 ] * b[ 1 ], a[ 2 ] * b[ 0 ] - a[ 0 ] * b[ 2 ], a[ 0 ] * b[ 1 ] - a[ 1 ] * b[ 0 ] ];
 
 		}
 
-		const subtract = function ( a, b ) {
+		var subtract = function ( a, b ) {
 
 			return [ a[ 0 ] - b[ 0 ], a[ 1 ] - b[ 1 ], a[ 2 ] - b[ 2 ] ];
 
 		}
 
-		const normalize = function ( a ) {
+		var normalize = function ( a ) {
 
-			const l = Math.sqrt( a[ 0 ] * a[ 0 ] + a[ 1 ] * a[ 1 ] + a[ 2 ] * a[ 2 ] );
+			var l = Math.sqrt( a[ 0 ] * a[ 0 ] + a[ 1 ] * a[ 1 ] + a[ 2 ] * a[ 2 ] );
 			return [ a[ 0 ] / l, a[ 1 ] / l, a[ 2 ] / l ];
 
 		}
 
-		depth |= 1;
+		depth = depth | 1;
 
-		const {width} = image;
-		const {height} = image;
+		var width = image.width;
+		var height = image.height;
 
-		const canvas = document.createElement( 'canvas' );
+		var canvas = document.createElement( 'canvas' );
 		canvas.width = width;
 		canvas.height = height;
 
-		const context = canvas.getContext( '2d' );
+		var context = canvas.getContext( '2d' );
 		context.drawImage( image, 0, 0 );
 
-		const {data} = context.getImageData( 0, 0, width, height );
-		const imageData = context.createImageData( width, height );
-		const output = imageData.data;
+		var data = context.getImageData( 0, 0, width, height ).data;
+		var imageData = context.createImageData( width, height );
+		var output = imageData.data;
 
-		for ( let x = 0; x < width; x ++ ) {
+		for ( var x = 0; x < width; x ++ ) {
 
-			for ( let y = 0; y < height; y ++ ) {
+			for ( var y = 0; y < height; y ++ ) {
 
-				const ly = y - 1 < 0 ? 0 : y - 1;
-				const uy = y + 1 > height - 1 ? height - 1 : y + 1;
-				const lx = x - 1 < 0 ? 0 : x - 1;
-				const ux = x + 1 > width - 1 ? width - 1 : x + 1;
+				var ly = y - 1 < 0 ? 0 : y - 1;
+				var uy = y + 1 > height - 1 ? height - 1 : y + 1;
+				var lx = x - 1 < 0 ? 0 : x - 1;
+				var ux = x + 1 > width - 1 ? width - 1 : x + 1;
 
-				const points = [];
-				const origin = [ 0, 0, data[ ( y * width + x ) * 4 ] / 255 * depth ];
+				var points = [];
+				var origin = [ 0, 0, data[ ( y * width + x ) * 4 ] / 255 * depth ];
 				points.push( [ - 1, 0, data[ ( y * width + lx ) * 4 ] / 255 * depth ] );
 				points.push( [ - 1, - 1, data[ ( ly * width + lx ) * 4 ] / 255 * depth ] );
 				points.push( [ 0, - 1, data[ ( ly * width + x ) * 4 ] / 255 * depth ] );
@@ -15785,20 +15785,20 @@ THREE.ImageUtils = {
 				points.push( [ 0, 1, data[ ( uy * width + x ) * 4 ] / 255 * depth ] );
 				points.push( [ - 1, 1, data[ ( uy * width + lx ) * 4 ] / 255 * depth ] );
 
-				const normals = [];
-				const num_points = points.length;
+				var normals = [];
+				var num_points = points.length;
 
 				for ( var i = 0; i < num_points; i ++ ) {
 
-					let v1 = points[ i ];
-					let v2 = points[ ( i + 1 ) % num_points ];
+					var v1 = points[ i ];
+					var v2 = points[ ( i + 1 ) % num_points ];
 					v1 = subtract( v1, origin );
 					v2 = subtract( v2, origin );
 					normals.push( normalize( cross( v1, v2 ) ) );
 
 				}
 
-				const normal = [ 0, 0, 0 ];
+				var normal = [ 0, 0, 0 ];
 
 				for ( var i = 0; i < normals.length; i ++ ) {
 
@@ -15812,7 +15812,7 @@ THREE.ImageUtils = {
 				normal[ 1 ] /= normals.length;
 				normal[ 2 ] /= normals.length;
 
-				const idx = ( y * width + x ) * 4;
+				var idx = ( y * width + x ) * 4;
 
 				output[ idx ] = ( ( normal[ 0 ] + 1.0 ) / 2.0 * 255 ) | 0;
 				output[ idx + 1 ] = ( ( normal[ 1 ] + 1.0 / 2.0 ) * 255 ) | 0;
@@ -15829,16 +15829,16 @@ THREE.ImageUtils = {
 
 	},
 
-	generateDataTexture ( width, height, color ) {
+	generateDataTexture: function ( width, height, color ) {
 
-		const size = width * height;
-		const data = new Uint8Array( 3 * size );
+		var size = width * height;
+		var data = new Uint8Array( 3 * size );
 
-		const r = Math.floor( color.r * 255 );
-		const g = Math.floor( color.g * 255 );
-		const b = Math.floor( color.b * 255 );
+		var r = Math.floor( color.r * 255 );
+		var g = Math.floor( color.g * 255 );
+		var b = Math.floor( color.b * 255 );
 
-		for ( let i = 0; i < size; i ++ ) {
+		for ( var i = 0; i < size; i ++ ) {
 
 			data[ i * 3 ] 	  = r;
 			data[ i * 3 + 1 ] = g;
@@ -15846,7 +15846,7 @@ THREE.ImageUtils = {
 
 		}
 
-		const texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat );
+		var texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat );
 		texture.needsUpdate = true;
 
 		return texture;
@@ -15860,15 +15860,15 @@ THREE.ImageUtils = {
 
 THREE.SceneUtils = {
 
-	showHierarchy ( root, visible ) {
+	showHierarchy : function ( root, visible ) {
 
-		THREE.SceneUtils.traverseHierarchy( root, ( node ) => { node.visible = visible; } );
+		THREE.SceneUtils.traverseHierarchy( root, function( node ) { node.visible = visible; } );
 
 	},
 
-	traverseHierarchy ( root, callback ) {
+	traverseHierarchy : function ( root, callback ) {
 
-		let n; let i; const l = root.children.length;
+		var n, i, l = root.children.length;
 
 		for ( i = 0; i < l; i ++ ) {
 
@@ -15882,14 +15882,14 @@ THREE.SceneUtils = {
 
 	},
 
-	createMultiMaterialObject ( geometry, materials ) {
+	createMultiMaterialObject : function ( geometry, materials ) {
 
-		let i; const il = materials.length;
-			const group = new THREE.Object3D();
+		var i, il = materials.length,
+			group = new THREE.Object3D();
 
 		for ( i = 0; i < il; i ++ ) {
 
-			const object = new THREE.Mesh( geometry, materials[ i ] );
+			var object = new THREE.Mesh( geometry, materials[ i ] );
 			group.add( object );
 
 		}
@@ -15898,14 +15898,14 @@ THREE.SceneUtils = {
 
 	},
 
-	cloneObject ( source ) {
+	cloneObject: function ( source ) {
 
-		let object;
+		var object;
 
 		// subclass specific properties
 		// (must process in order from more specific subclasses to more abstract classes)
 
-		/* if ( source instanceof THREE.MorphAnimMesh ) {
+		/*if ( source instanceof THREE.MorphAnimMesh ) {
 
 			object = new THREE.MorphAnimMesh( source.geometry, source.material );
 
@@ -15923,7 +15923,7 @@ THREE.SceneUtils = {
 
 			object = new THREE.SkinnedMesh( source.geometry, source.material );
 
-											  }else */ 
+											  }else*/ 
 								if ( source instanceof THREE.Mesh ) {
 
 			object = new THREE.Mesh( source.geometry, source.material );
@@ -15970,13 +15970,13 @@ THREE.SceneUtils = {
 
 			object = new THREE.LOD();
 
-		} /* else if ( source instanceof THREE.MarchingCubes ) {
+		} /*else if ( source instanceof THREE.MarchingCubes ) {
 
 			object = new THREE.MarchingCubes( source.resolution, source.material );
 			object.field.set( source.field );
 			object.isolation = source.isolation;
 
-											  } */ else if ( source instanceof THREE.Object3D ) {
+											  }*/ else if ( source instanceof THREE.Object3D ) {
 
 			object = new THREE.Object3D();
 
@@ -16034,7 +16034,7 @@ THREE.SceneUtils = {
 
 		for ( var i = 0; i < source.children.length; i ++ ) {
 
-			const child = THREE.SceneUtils.cloneObject( source.children[ i ] );
+			var child = THREE.SceneUtils.cloneObject( source.children[ i ] );
 			object.children[ i ] = child;
 
 			child.parent = object;
@@ -16047,7 +16047,7 @@ THREE.SceneUtils = {
 
 			for ( var i = 0; i < source.LODs.length; i ++ ) {
 
-				const lod = source.LODs[ i ];
+				var lod = source.LODs[ i ];
 				object.LODs[ i ] = { visibleAtDistance: lod.visibleAtDistance, object3D: object.children[ i ] };
 
 			}
@@ -16058,7 +16058,7 @@ THREE.SceneUtils = {
 
 	},
 
-	detach ( child, parent, scene ) {
+	detach : function ( child, parent, scene ) {
 
 		child.applyMatrix( parent.matrixWorld );
 		parent.remove( child );
@@ -16066,9 +16066,9 @@ THREE.SceneUtils = {
 
 	},
 
-	attach ( child, scene, parent ) {
+	attach: function ( child, scene, parent ) {
 
-		const matrixWorldInverse = new THREE.Matrix4();
+		var matrixWorldInverse = new THREE.Matrix4();
 		matrixWorldInverse.getInverse( parent.matrixWorld );
 		child.applyMatrix( matrixWorldInverse );
 
@@ -16182,9 +16182,9 @@ THREE.ShaderUtils = {
 
 			uniforms: THREE.UniformsUtils.merge( [
 
-				THREE.UniformsLib.fog,
-				THREE.UniformsLib.lights,
-				THREE.UniformsLib.shadowmap,
+				THREE.UniformsLib[ "fog" ],
+				THREE.UniformsLib[ "lights" ],
+				THREE.UniformsLib[ "shadowmap" ],
 
 				{
 
@@ -16268,8 +16268,8 @@ THREE.ShaderUtils = {
 
 				"varying vec3 vViewPosition;",
 
-				THREE.ShaderChunk.shadowmap_pars_fragment,
-				THREE.ShaderChunk.fog_pars_fragment,
+				THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
+				THREE.ShaderChunk[ "fog_pars_fragment" ],
 
 				"void main() {",
 
@@ -16470,9 +16470,9 @@ THREE.ShaderUtils = {
 
 					"}",
 
-					THREE.ShaderChunk.shadowmap_fragment,
-					THREE.ShaderChunk.linear_to_gamma_fragment,
-					THREE.ShaderChunk.fog_fragment,
+					THREE.ShaderChunk[ "shadowmap_fragment" ],
+					THREE.ShaderChunk[ "linear_to_gamma_fragment" ],
+					THREE.ShaderChunk[ "fog_fragment" ],
 
 				"}"
 
@@ -16509,7 +16509,7 @@ THREE.ShaderUtils = {
 
 				"varying vec3 vViewPosition;",
 
-				THREE.ShaderChunk.shadowmap_pars_vertex,
+				THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
 
 				"void main() {",
 
@@ -16561,7 +16561,7 @@ THREE.ShaderUtils = {
 
 					"#endif",
 
-					THREE.ShaderChunk.shadowmap_vertex,
+					THREE.ShaderChunk[ "shadowmap_vertex" ],
 
 				"}"
 
@@ -16658,13 +16658,13 @@ THREE.BufferGeometry.prototype = {
 
 	// for compatibility
 
-	computeBoundingBox () {
+	computeBoundingBox: function () {
 
 	},
 
 	// for compatibility
 
-	computeBoundingSphere () {
+	computeBoundingSphere: function () {
 
 	}
 
@@ -16680,12 +16680,12 @@ THREE.CubeGeometry = function ( width, height, depth, segmentsWidth, segmentsHei
 
 	THREE.Geometry.call( this );
 
-	const scope = this;
-	const width_half = width / 2;
-	const height_half = height / 2;
-	const depth_half = depth / 2;
+	var scope = this,
+	width_half = width / 2,
+	height_half = height / 2,
+	depth_half = depth / 2;
 
-	let mpx; let mpy; let mpz; let mnx; let mny; let mnz;
+	var mpx, mpy, mpz, mnx, mny, mnz;
 
 	if ( materials !== undefined ) {
 
@@ -16697,7 +16697,7 @@ THREE.CubeGeometry = function ( width, height, depth, segmentsWidth, segmentsHei
 
 			this.materials = [];
 
-			for ( let i = 0; i < 6; i ++ ) {
+			for ( var i = 0; i < 6; i ++ ) {
 
 				this.materials.push( materials );
 
@@ -16717,7 +16717,7 @@ THREE.CubeGeometry = function ( width, height, depth, segmentsWidth, segmentsHei
 
 	if ( sides != undefined ) {
 
-		for ( const s in sides ) {
+		for ( var s in sides ) {
 
 			if ( this.sides[ s ] !== undefined ) {
 
@@ -16738,12 +16738,12 @@ THREE.CubeGeometry = function ( width, height, depth, segmentsWidth, segmentsHei
 
 	function buildPlane( u, v, udir, vdir, width, height, depth, material ) {
 
-		let w; let ix; let iy;
-		let gridX = segmentsWidth || 1;
-		let gridY = segmentsHeight || 1;
-		const width_half = width / 2;
-		const height_half = height / 2;
-		const offset = scope.vertices.length;
+		var w, ix, iy,
+		gridX = segmentsWidth || 1,
+		gridY = segmentsHeight || 1,
+		width_half = width / 2,
+		height_half = height / 2,
+		offset = scope.vertices.length;
 
 		if ( ( u === 'x' && v === 'y' ) || ( u === 'y' && v === 'x' ) ) {
 
@@ -16761,11 +16761,11 @@ THREE.CubeGeometry = function ( width, height, depth, segmentsWidth, segmentsHei
 
 		}
 
-		const gridX1 = gridX + 1;
-		const gridY1 = gridY + 1;
-		const segment_width = width / gridX;
-		const segment_height = height / gridY;
-		const normal = new THREE.Vector3();
+		var gridX1 = gridX + 1,
+		gridY1 = gridY + 1,
+		segment_width = width / gridX,
+		segment_height = height / gridY,
+		normal = new THREE.Vector3();
 
 		normal[ w ] = depth > 0 ? 1 : - 1;
 
@@ -16773,7 +16773,7 @@ THREE.CubeGeometry = function ( width, height, depth, segmentsWidth, segmentsHei
 
 			for ( ix = 0; ix < gridX1; ix ++ ) {
 
-				const vector = new THREE.Vector3();
+				var vector = new THREE.Vector3();
 				vector[ u ] = ( ix * segment_width - width_half ) * udir;
 				vector[ v ] = ( iy * segment_height - height_half ) * vdir;
 				vector[ w ] = depth;
@@ -16788,12 +16788,12 @@ THREE.CubeGeometry = function ( width, height, depth, segmentsWidth, segmentsHei
 
 			for ( ix = 0; ix < gridX; ix++ ) {
 
-				const a = ix + gridX1 * iy;
-				const b = ix + gridX1 * ( iy + 1 );
-				const c = ( ix + 1 ) + gridX1 * ( iy + 1 );
-				const d = ( ix + 1 ) + gridX1 * iy;
+				var a = ix + gridX1 * iy;
+				var b = ix + gridX1 * ( iy + 1 );
+				var c = ( ix + 1 ) + gridX1 * ( iy + 1 );
+				var d = ( ix + 1 ) + gridX1 * iy;
 
-				const face = new THREE.Face4( a + offset, b + offset, c + offset, d + offset );
+				var face = new THREE.Face4( a + offset, b + offset, c + offset, d + offset );
 				face.normal.copy( normal );
 				face.vertexNormals.push( normal.clone(), normal.clone(), normal.clone(), normal.clone() );
 				face.materialIndex = material;
@@ -16831,25 +16831,25 @@ THREE.CylinderGeometry = function ( radiusTop, radiusBottom, height, segmentsRad
 	radiusBottom = radiusBottom !== undefined ? radiusBottom : 20;
 	height = height !== undefined ? height : 100;
 
-	const heightHalf = height / 2;
-	const segmentsX = segmentsRadius || 8;
-	const segmentsY = segmentsHeight || 1;
+	var heightHalf = height / 2;
+	var segmentsX = segmentsRadius || 8;
+	var segmentsY = segmentsHeight || 1;
 
-	let x; let y; const vertices = []; const uvs = [];
+	var x, y, vertices = [], uvs = [];
 
 	for ( y = 0; y <= segmentsY; y ++ ) {
 
-		const verticesRow = [];
-		const uvsRow = [];
+		var verticesRow = [];
+		var uvsRow = [];
 
-		const v = y / segmentsY;
-		const radius = v * ( radiusBottom - radiusTop ) + radiusTop;
+		var v = y / segmentsY;
+		var radius = v * ( radiusBottom - radiusTop ) + radiusTop;
 
 		for ( x = 0; x <= segmentsX; x ++ ) {
 
-			const u = x / segmentsX;
+			var u = x / segmentsX;
 
-			const vertex = new THREE.Vector3();
+			var vertex = new THREE.Vector3();
 			vertex.x = radius * Math.sin( u * Math.PI * 2 );
 			vertex.y = - v * height + heightHalf;
 			vertex.z = radius * Math.cos( u * Math.PI * 2 );
@@ -16866,8 +16866,8 @@ THREE.CylinderGeometry = function ( radiusTop, radiusBottom, height, segmentsRad
 
 	}
 
-	const tanTheta = ( radiusBottom - radiusTop ) / height;
-	let na; let nb;
+	var tanTheta = ( radiusBottom - radiusTop ) / height;
+	var na, nb;
 
 	for ( x = 0; x < segmentsX; x ++ ) {
 
@@ -16891,17 +16891,17 @@ THREE.CylinderGeometry = function ( radiusTop, radiusBottom, height, segmentsRad
 			var v1 = vertices[ y ][ x ];
 			var v2 = vertices[ y + 1 ][ x ];
 			var v3 = vertices[ y + 1 ][ x + 1 ];
-			const v4 = vertices[ y ][ x + 1 ];
+			var v4 = vertices[ y ][ x + 1 ];
 
 			var n1 = na.clone();
 			var n2 = na.clone();
 			var n3 = nb.clone();
-			const n4 = nb.clone();
+			var n4 = nb.clone();
 
 			var uv1 = uvs[ y ][ x ].clone();
 			var uv2 = uvs[ y + 1 ][ x ].clone();
 			var uv3 = uvs[ y + 1 ][ x + 1 ].clone();
-			const uv4 = uvs[ y ][ x + 1 ].clone();
+			var uv4 = uvs[ y ][ x + 1 ].clone();
 
 			this.faces.push( new THREE.Face4( v1, v2, v3, v4, [ n1, n2, n3, n4 ] ) );
 			this.faceVertexUvs[ 0 ].push( [ uv1, uv2, uv3, uv4 ] );
@@ -16979,23 +16979,23 @@ THREE.PlaneGeometry = function ( width, depth, segmentsWidth, segmentsDepth ) {
 
 	THREE.Geometry.call( this );
 
-	let ix; let iz;
-	const width_half = width / 2;
-	const depth_half = depth / 2;
-	const gridX = segmentsWidth || 1;
-	const gridZ = segmentsDepth || 1;
-	const gridX1 = gridX + 1;
-	const gridZ1 = gridZ + 1;
-	const segment_width = width / gridX;
-	const segment_depth = depth / gridZ;
-	const normal = new THREE.Vector3( 0, 1, 0 );
+	var ix, iz,
+	width_half = width / 2,
+	depth_half = depth / 2,
+	gridX = segmentsWidth || 1,
+	gridZ = segmentsDepth || 1,
+	gridX1 = gridX + 1,
+	gridZ1 = gridZ + 1,
+	segment_width = width / gridX,
+	segment_depth = depth / gridZ,
+	normal = new THREE.Vector3( 0, 1, 0 );
 
 	for ( iz = 0; iz < gridZ1; iz ++ ) {
 
 		for ( ix = 0; ix < gridX1; ix ++ ) {
 
-			const x = ix * segment_width - width_half;
-			const z = iz * segment_depth - depth_half;
+			var x = ix * segment_width - width_half;
+			var z = iz * segment_depth - depth_half;
 
 			this.vertices.push( new THREE.Vector3( x, 0, z ) );
 
@@ -17007,12 +17007,12 @@ THREE.PlaneGeometry = function ( width, depth, segmentsWidth, segmentsDepth ) {
 
 		for ( ix = 0; ix < gridX; ix ++ ) {
 
-			const a = ix + gridX1 * iz;
-			const b = ix + gridX1 * ( iz + 1 );
-			const c = ( ix + 1 ) + gridX1 * ( iz + 1 );
-			const d = ( ix + 1 ) + gridX1 * iz;
+			var a = ix + gridX1 * iz;
+			var b = ix + gridX1 * ( iz + 1 );
+			var c = ( ix + 1 ) + gridX1 * ( iz + 1 );
+			var d = ( ix + 1 ) + gridX1 * iz;
 
-			const face = new THREE.Face4( a, b, c, d );
+			var face = new THREE.Face4( a, b, c, d );
 			face.normal.copy( normal );
 			face.vertexNormals.push( normal.clone(), normal.clone(), normal.clone(), normal.clone() );
 
@@ -17050,22 +17050,22 @@ THREE.SphereGeometry = function ( radius, segmentsWidth, segmentsHeight, phiStar
 	thetaStart = thetaStart !== undefined ? thetaStart : 0;
 	thetaLength = thetaLength !== undefined ? thetaLength : Math.PI;
 
-	const segmentsX = Math.max( 3, Math.floor( segmentsWidth ) || 8 );
-	const segmentsY = Math.max( 2, Math.floor( segmentsHeight ) || 6 );
+	var segmentsX = Math.max( 3, Math.floor( segmentsWidth ) || 8 );
+	var segmentsY = Math.max( 2, Math.floor( segmentsHeight ) || 6 );
 
-	let x; let y; const vertices = []; const uvs = [];
+	var x, y, vertices = [], uvs = [];
 
 	for ( y = 0; y <= segmentsY; y ++ ) {
 
-		const verticesRow = [];
-		const uvsRow = [];
+		var verticesRow = [];
+		var uvsRow = [];
 
 		for ( x = 0; x <= segmentsX; x ++ ) {
 
-			const u = x / segmentsX;
-			const v = y / segmentsY;
+			var u = x / segmentsX;
+			var v = y / segmentsY;
 
-			const vertex = new THREE.Vector3();
+			var vertex = new THREE.Vector3();
 			vertex.x = - radius * Math.cos( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
 			vertex.y = radius * Math.cos( thetaStart + v * thetaLength );
 			vertex.z = radius * Math.sin( phiStart + u * phiLength ) * Math.sin( thetaStart + v * thetaLength );
@@ -17086,20 +17086,20 @@ THREE.SphereGeometry = function ( radius, segmentsWidth, segmentsHeight, phiStar
 
 		for ( x = 0; x < segmentsX; x ++ ) {
 
-			const v1 = vertices[ y ][ x + 1 ];
-			const v2 = vertices[ y ][ x ];
-			const v3 = vertices[ y + 1 ][ x ];
-			const v4 = vertices[ y + 1 ][ x + 1 ];
+			var v1 = vertices[ y ][ x + 1 ];
+			var v2 = vertices[ y ][ x ];
+			var v3 = vertices[ y + 1 ][ x ];
+			var v4 = vertices[ y + 1 ][ x + 1 ];
 
-			const n1 = this.vertices[ v1 ].clone().normalize();
-			const n2 = this.vertices[ v2 ].clone().normalize();
-			const n3 = this.vertices[ v3 ].clone().normalize();
-			const n4 = this.vertices[ v4 ].clone().normalize();
+			var n1 = this.vertices[ v1 ].clone().normalize();
+			var n2 = this.vertices[ v2 ].clone().normalize();
+			var n3 = this.vertices[ v3 ].clone().normalize();
+			var n4 = this.vertices[ v4 ].clone().normalize();
 
-			const uv1 = uvs[ y ][ x + 1 ].clone();
-			const uv2 = uvs[ y ][ x ].clone();
-			const uv3 = uvs[ y + 1 ][ x ].clone();
-			const uv4 = uvs[ y + 1 ][ x + 1 ].clone();
+			var uv1 = uvs[ y ][ x + 1 ].clone();
+			var uv2 = uvs[ y ][ x ].clone();
+			var uv3 = uvs[ y + 1 ][ x ].clone();
+			var uv4 = uvs[ y + 1 ][ x + 1 ].clone();
 
 			if ( Math.abs( this.vertices[ v1 ].y ) == radius ) {
 
@@ -17125,7 +17125,7 @@ THREE.SphereGeometry = function ( radius, segmentsWidth, segmentsHeight, phiStar
 	this.computeCentroids();
 	this.computeFaceNormals();
 
-	this.boundingSphere = { radius };
+	this.boundingSphere = { radius: radius };
 
 };
 
@@ -17143,7 +17143,7 @@ THREE.PolyhedronGeometry = function ( vertices, faces, radius, detail ) {
 	radius = radius || 1;
 	detail = detail || 0;
 
-	const that = this;
+	var that = this;
 
 	for ( var i = 0, l = vertices.length; i < l; i ++ ) {
 
@@ -17151,7 +17151,7 @@ THREE.PolyhedronGeometry = function ( vertices, faces, radius, detail ) {
 
 	}
 
-	const midpoints = []; const p = this.vertices;
+	var midpoints = [], p = this.vertices;
 
 	for ( var i = 0, l = faces.length; i < l; i ++ ) {
 
@@ -17174,12 +17174,12 @@ THREE.PolyhedronGeometry = function ( vertices, faces, radius, detail ) {
 	 */
 	function prepare( vector ) {
 
-		const vertex = vector.normalize().clone();
+		var vertex = vector.normalize().clone();
 		vertex.index = that.vertices.push( vertex ) - 1;
 
 		// Texture coords are equivalent to map coords, calculate angle and convert to fraction of a circle.
-		const u = azimuth( vector ) / 2 / Math.PI + 0.5;
-		const v = inclination( vector ) / Math.PI + 0.5;
+		var u = azimuth( vector ) / 2 / Math.PI + 0.5;
+		var v = inclination( vector ) / Math.PI + 0.5;
 		vertex.uv = new THREE.UV( u, v );
 
 		return vertex;
@@ -17193,12 +17193,12 @@ THREE.PolyhedronGeometry = function ( vertices, faces, radius, detail ) {
 
 		if ( detail < 1 ) {
 
-			const face = new THREE.Face3( v1.index, v2.index, v3.index, [ v1.clone(), v2.clone(), v3.clone() ] );
+			var face = new THREE.Face3( v1.index, v2.index, v3.index, [ v1.clone(), v2.clone(), v3.clone() ] );
 			face.centroid.addSelf( v1 ).addSelf( v2 ).addSelf( v3 ).divideScalar( 3 );
 			face.normal = face.centroid.clone().normalize();
 			that.faces.push( face );
 
-			const azi = azimuth( face.centroid );
+			var azi = azimuth( face.centroid );
 			that.faceVertexUvs[ 0 ].push( [ 
 				correctUV( v1.uv, v1, azi ),
 				correctUV( v2.uv, v2, azi ),
@@ -17223,7 +17223,7 @@ THREE.PolyhedronGeometry = function ( vertices, faces, radius, detail ) {
 
 		if ( !midpoints[ v1.index ] ) midpoints[ v1.index ] = [];
 		if ( !midpoints[ v2.index ] ) midpoints[ v2.index ] = [];
-		let mid = midpoints[ v1.index ][ v2.index ];
+		var mid = midpoints[ v1.index ][ v2.index ];
 		if ( mid === undefined ) {
 			// generate mean point and project to surface with prepare()
 			midpoints[ v1.index ][ v2.index ] = midpoints[ v2.index ][ v1.index ] = mid = prepare( 
@@ -17265,7 +17265,7 @@ THREE.PolyhedronGeometry = function ( vertices, faces, radius, detail ) {
 
 	this.computeCentroids();
 
-	this.boundingSphere = { radius };
+	this.boundingSphere = { radius: radius };
 
 };
 
@@ -17277,15 +17277,15 @@ THREE.PolyhedronGeometry.prototype.constructor = THREE.PolyhedronGeometry;
 
 THREE.IcosahedronGeometry = function ( radius, detail ) {
 
-	const t = ( 1 + Math.sqrt( 5 ) ) / 2;
+	var t = ( 1 + Math.sqrt( 5 ) ) / 2;
 
-	const vertices = [
+	var vertices = [
 		[ -1,  t,  0 ], [  1, t, 0 ], [ -1, -t,  0 ], [  1, -t,  0 ],
 		[  0, -1,  t ], [  0, 1, t ], [  0, -1, -t ], [  0,  1, -t ],
 		[  t,  0, -1 ], [  t, 0, 1 ], [ -t,  0, -1 ], [ -t,  0,  1 ]
 	];
 
-	const faces = [
+	var faces = [
 		[ 0, 11,  5 ], [ 0,  5,  1 ], [  0,  1,  7 ], [  0,  7, 10 ], [  0, 10, 11 ],
 		[ 1,  5,  9 ], [ 5, 11,  4 ], [ 11, 10,  2 ], [ 10,  7,  6 ], [  7,  1,  8 ],
 		[ 3,  9,  4 ], [ 3,  4,  2 ], [  3,  2,  6 ], [  3,  6,  8 ], [  3,  8,  9 ],
