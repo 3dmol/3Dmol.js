@@ -23,13 +23,11 @@
     "gulp-concat": "^2.6.1",
     "gulp-jsdoc3": "^3.0.0",
     "gulp-jshint": "^2.1.0",
-    "gulp-merge": "^0.1.1",
     "gulp-rename": "^2.0.0",
     "gulp-shell": "^0.8.0",
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
     "jsdoc": "^3.6.10",
-    "jshint": "^2.13.1",
     "prettier": "^2.5.1"
   },
   "scripts": {
