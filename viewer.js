@@ -1,13 +1,13 @@
 
-// removes style,labelres, and surface from a copy of the selection object and returns it
-const augmentSelection = function(selection){
-    const copiedObject = jQuery.extend(true,{}, selection);// deep copy
+//removes style,labelres, and surface from a copy of the selection object and returns it
+var augmentSelection = function(selection){
+    var copiedObject = jQuery.extend(true,{}, selection);// deep copy
         
-    if(copiedObject.style!==undefined){
+    if(copiedObject.style!=undefined){
         delete copiedObject.style;
-    }if(copiedObject.labelres!==undefined){
+    }if(copiedObject.labelres!=undefined){
         delete copiedObject.labelres;
-    }if(copiedObject.surface!==undefined){
+    }if(copiedObject.surface!=undefined){
         delete copiedObject.surface;
     }
 
@@ -15,86 +15,86 @@ const augmentSelection = function(selection){
 }
 
 // removes eveyrhting but style,surface, and labelres
-const removeAllButValid = function(object){
-    const copy = jQuery.extend(true,{},object);
-    for(const i in object){
-        if(i!== "surface" || i!== "labelres" || i!== "style")
+var removeAllButValid = function(object){
+    var copy = jQuery.extend(true,{},object);
+    for(var i in object){
+        if(i!= "surface" || i!= "labelres" || i!= "style")
             delete copy[i]
     }
     return copy;
 }
 
 Object.size = function(obj) {
-    let size = 0; let key;
+    var size = 0, key;
     for (key in obj) {
-        if (obj.hasOwnProperty(key)) size+=1;
+        if (obj.hasOwnProperty(key)) size++;
     }
     return size;
 };
 
-const createAttribute = function(name,value,parent){
-    const attribute = $('<li/>',{
+var createAttribute = function(name,value,parent){
+    var attribute = $('<li/>',{
         class:'attribute'
     });
     
-    let other=false;
-    let validNames;
-    let type;
-    if(parent.type === "line"  || parent.type === "stick" || parent.type=== "cross" || parent.type === "sphere" || parent.type === "cartoon"){
+    var other=false;
+    var validNames;
+    var type;
+    if(parent.type == "line"  || parent.type == "stick" || parent.type== "cross" || parent.type == "sphere" || parent.type == "cartoon"){
         type = "style";
         validNames=$3Dmol.GLModel.validAtomStyleSpecs[parent.type].validItems;
         other=false;
-    }else if(parent.type.toLowerCase() === "surface"){
+    }else if(parent.type.toLowerCase() == "surface"){
         type = "surface";
         validNames = $3Dmol.GLModel.validSurfaceSpecs;
         other=true;
-    }else if(parent.type.toLowerCase() === "labelres"){
+    }else if(parent.type.toLowerCase() == "labelres"){
         type = "labelres";
         validNames =$3Dmol.GLModel.validLabelResSpecs;
         other=true;
-    }else if(name !== ""){
+    }else if(name != ""){
         // undefined name
         return undefined;
     }
 
-    if(validNames[name] === undefined && name!=="")
+    if(validNames[name] == undefined && name!="")
         return undefined
 
-    const attributeName = $('<select>',{
-        class:'attributeName',
+    var attribute_name = $('<select>',{
+        class:'attribute_name',
     }).appendTo(attribute);
-    const objType = type;
+    var obj_type = type;
 
-    $.each(validNames,(key,value) => {
+    $.each(validNames,function(key,value) {
         if(value.gui){
-            attributeName.append($("<option>").attr('value',key).text(key));
+            attribute_name.append($("<option>").attr('value',key).text(key));
         }
     });
 
-    attributeName.val(name.toString())
-    if(name.toString() === ""){
-        let list;
-        if(type === "style")
+    attribute_name.val(name.toString())
+    if(name.toString() == ""){
+        var list;
+        if(type == "style")
             list = query.selections[parent.index][type][parent.type];
         else
             list = query.selections[parent.index][type];
 
-        let index;
-        for(const i in validNames){
-            if(validNames[i].gui && list[i] === undefined){
+        var index;
+        for(var i in validNames){
+            if(validNames[i].gui && list[i] == undefined){
                 index = i;
                 break;
             }
         }
         name = index;
 
-        if(name === undefined)
+        if(name == undefined)
             return;// all of the attribute names are being used
-        attributeName.val(index)
+        attribute_name.val(index)
     }
 
     // delete button
-    const deleteSelection = $("<span/>",{
+    var delete_selection = $("<span/>",{
         html:"&#x2715;",
         class:"delete_attribute",
         "data-index":parent.index,
@@ -108,109 +108,108 @@ const createAttribute = function(name,value,parent){
         }
     }).appendTo(attribute); 
 
-    const itemIsDescrete = function(key){
-        if(key === "")
+    var itemIsDescrete = function(key){
+        if(key == "")
             return false;
-        const {type} = validNames[key];
-        return type === "boolean" || type === "color" || type === "colorscheme" || validNames[key].validItems!==undefined
+        var type = validNames[key].type;
+        return type == "boolean" || type == "color" || type == "colorscheme" || validNames[key].validItems!=undefined
     }
-    let attributeValue;
+    var attribute_value;
     if(itemIsDescrete(name) ){
-        let validItemsValue;
-        if(validNames[name].type !== undefined)
-            type = validNames[name].type.toLowerCase();
+        var validItemsValue;
+        if(validNames[name].type != undefined)
+            var type = validNames[name].type.toLowerCase();
         else
-            type = undefined
-        if(type==="boolean"){
+            var type = undefined
+        if(type=="boolean"){
             validItemsValue = ["false","true"];
-        }else if(type === "colorscheme"){
+        }else if(type == "colorscheme"){
             validItemsValue =  Object.keys($3Dmol.builtinColorSchemes).concat(['greenCarbon','cyanCarbon','yellowCarbon','whiteCarbon','magentaCarbon']);
-        }else if(type === "color"){
+        }else if(type == "color"){
             validItemsValue =  Object.keys($3Dmol.htmlColors);
-            if(parent.type === 'cartoon') validItemsValue.unshift('spectrum');            
-        }else if(type === undefined){
+            if(parent.type == 'cartoon') validItemsValue.unshift('spectrum');            
+        }else if(type == undefined){
             validItemsValue = validNames[name].validItems;
         }
 
-        const attributeValue = $('<select/>',{
-            class:'attributeValue',
+        var attribute_value = $('<select/>',{
+            class:'attribute_value',
         }).appendTo(attribute);
 
-        $.each(validItemsValue,(key,value) => {
-            attributeValue.append($("<option>").attr('value',value).text(value));
+        $.each(validItemsValue,function(key,value) {
+            attribute_value.append($("<option>").attr('value',value).text(value));
         });
 
-        attributeValue.val(value.toString());
-        if(value === ""){
-            attributeValue.val(validItemsValue[0])
+        attribute_value.val(value.toString());
+        if(value == ""){
+            attribute_value.val(validItemsValue[0])
         } 
     }else{
-        if(value === "")
+        if(value == "")
             value = validNames[name].default
-        attributeValue = $('<input/>',{
-            class:'attributeValue',
-            value,
+        attribute_value = $('<input/>',{
+            class:'attribute_value',
+            value:value,
         }).appendTo(attribute);
     }
-    attributeName.change(()=> {
-        let validItemsValue;
-        const {type} = validNames[attributeName.val()]
-        if(type==="boolean"){
+    attribute_name.change(function(){
+        var validItemsValue;
+        var type = validNames[attribute_name.val()].type
+        if(type=="boolean"){
             validItemsValue = ["false","true"];
-        }else if(type === "colorscheme"){
+        }else if(type == "colorscheme"){
             validItemsValue =  $3Dmol.GLModel.validColorschemeSpecs;
-        }else if(type === "color"){
+        }else if(type == "color"){
             validItemsValue =  $3Dmol.GLModel.validColorSpecs;
-        }else if(type === undefined){
+        }else if(type == undefined){
             validItemsValue = validNames[name].validItems;
         }
-        const defa = validNames[attributeName.val()].default;
-        let val;
-        if(validItemsValue !== undefined){
+        var defa = validNames[attribute_name.val()].default;
+        var val;
+        if(validItemsValue != undefined){
             val = validItemsValue[0];
         }else{
             val = defa
         }
-        if(attributeValue.children()[0]!== undefined)
-            attributeValue.children()[0].value = val;
+        if(attribute_value.children()[0]!= undefined)
+            attribute_value.children()[0].value = val;
         else
-            attributeValue.val(val);
-        render(objType === "surface");
+            attribute_value.val(val);
+        render(obj_type == "surface");
     });
-    attributeValue.change(()=> {
-        render(objType === "surface");
+    attribute_value.change(function(){
+        render(obj_type == "surface");
     });
 
-    if(name!=="" &&attributeValue.prop("tagName") === "INPUT" && validNames[name].type ==="number"){
-        // eslint-disable-next-line no-unused-expressions
-        validNames[name].type ==="number" // can this be commented out?
-        attributeValue.attr("type","number")
-        attributeValue.attr("step",validNames[name].step)
-        attributeValue.addClass("spinner")
-        const {max} = validNames[name];
-        const {min} = validNames[name];
-        if(max !== undefined)
-            attributeValue.attr("max",max);
-        if(min !== undefined)
-            attributeValue.attr("min",min);   
+    if(name!="" &&attribute_value.prop("tagName") == "INPUT" && validNames[name].type =="number"){
+        validNames[name].type =="number"
+        attribute_value.attr("type","number")
+        attribute_value.attr("step",validNames[name].step)
+        attribute_value.addClass("spinner")
+        var max = validNames[name].max;
+        var min = validNames[name].min;
+        if(max != undefined)
+            attribute_value.attr("max",max);
+        if(min != undefined)
+            attribute_value.attr("min",min);   
     }
     return attribute;
 }
 
-const createOtherModelSpec = function(spec,type,selectionIndex){
-    const attributes = $('<ul/>',{
-        "class":`${type.toLowerCase()}_attributes`,
+var createOtherModelSpec = function(spec,type,selection_index){
+    var attributes = $('<ul/>',{
+        "class":type.toLowerCase()+'_attributes',
     });
-    for(const attributeIndex in spec){
-        const attribute=createAttribute(attributeIndex,spec[attributeIndex],{type,index:selectionIndex})
-        if(attribute !== undefined)
+    for(var attribute_index in spec){
+        var attribute=createAttribute(attribute_index,spec[attribute_index],{type:type,index:selection_index})
+        if(attribute != undefined)
             attribute.appendTo(attributes);
     }
 
-    const addAttribute = $('<button/>',{
-        "class":"addAttribute",
+    var add_attribute = $('<button/>',{
+        "class":"add_attribute",
         "text":"Add Attribute",
-        "data-index":selectionIndex,
+        "data-index":selection_index,
         "data-type":type,
         "click":function(){addOtherAttribute(this)},
     }).appendTo(attributes);
@@ -218,165 +217,165 @@ const createOtherModelSpec = function(spec,type,selectionIndex){
     return attributes;
 }
 
-const createStyleSpec = function(styleSpecObject,styleSpecType,modelSpecType,selectionIndex){
-    const styleSpec=$('<li/>',{
-        "class":"styleSpec",
+var createStyleSpec = function(style_spec_object,style_spec_type,model_spec_type,selection_index){
+    var style_spec=$('<li/>',{
+        "class":"style_spec",
     });
 
-    const validNames=$3Dmol.GLModel.validAtomStyleSpecs;
+    var validNames=$3Dmol.GLModel.validAtomStyleSpecs;
 
-    const styleSpecName = $('<select>',{
-        class:'styleSpecName',
-    }).appendTo(styleSpec);
+    var style_spec_name = $('<select>',{
+        class:'style_spec_name',
+    }).appendTo(style_spec);
 
-    styleSpecName.change(()=> {
-        const obj = query.selections[selectionIndex].style[styleSpecType];
-        for(const i in obj){
-            if(!validNames[styleSpecName.val()].validItems.hasOwnProperty(i)){
-                delete query.selections[selectionIndex].style[styleSpecType][i];
+    style_spec_name.change(function(){
+        var obj = query.selections[selection_index]["style"][style_spec_type];
+        for(var i in obj){
+            if(!validNames[style_spec_name.val()].validItems.hasOwnProperty(i)){
+                delete query.selections[selection_index]["style"][style_spec_type][i];
             }
         }
-        query.selections[selectionIndex].style[styleSpecName.val()]=query.selections[selectionIndex].style[styleSpecType];
-        delete query.selections[selectionIndex].style[styleSpecType];
+        query.selections[selection_index]["style"][style_spec_name.val()]=query.selections[selection_index]["style"][style_spec_type];
+        delete query.selections[selection_index]["style"][style_spec_type];
         buildHTMLTree(query)
         render();
     });
 
-    $.each(validNames,(key,value) => {
+    $.each(validNames,function(key,value) {
         if(value.gui){
-            styleSpecName.append($("<option>").attr('value',key).text(key));
+            style_spec_name.append($("<option>").attr('value',key).text(key));
         }
     });
     
-    styleSpecName.val(styleSpecType.toString())
-    if(styleSpecType === ""){
-        const list = query.selections[selectionIndex].style;
-        let index=0
-        for(const i in validNames){
-            if(validNames[i].gui && list[i] === undefined){
+    style_spec_name.val(style_spec_type.toString())
+    if(style_spec_type == ""){
+        var list = query.selections[selection_index].style;
+        var index=0
+        for(var i in validNames){
+            if(validNames[i].gui && list[i] == undefined){
                 index = i;
                 break;
             }
         }
-        if(index === 0)
+        if(index == 0)
             return;
-        styleSpecName.val(index)
+        style_spec_name.val(index)
     }
 
-    const deleteSelection = $("<span/>",{
+    var delete_selection = $("<span/>",{
         html:"&#x2715;",
         class:"delete_style_spec",
-        "data-index":selectionIndex,
-        "data-type":modelSpecType,
-        "data-attr":styleSpecType,
+        "data-index":selection_index,
+        "data-type":model_spec_type,
+        "data-attr":style_spec_type,
         "click":function(){deleteStyleSpec(this)},
-    }).appendTo(styleSpec); 
+    }).appendTo(style_spec); 
 
-    const styleSpecAttributes = $('<ul/>',{
-        class:'styleSpecAttributes',
-    }).appendTo(styleSpec);
+    var style_spec_attributes = $('<ul/>',{
+        class:'style_spec_attributes',
+    }).appendTo(style_spec);
 
-    for(const attributeIndex in styleSpecObject){
-        const attribute = createAttribute(attributeIndex,styleSpecObject[attributeIndex],{type:styleSpecType,index:selectionIndex})
-        if(attribute !== undefined)
-            attribute.appendTo(styleSpecAttributes);
+    for(var attribute_index in style_spec_object){
+        var attribute = createAttribute(attribute_index,style_spec_object[attribute_index],{type:style_spec_type,index:selection_index})
+        if(attribute != undefined)
+            attribute.appendTo(style_spec_attributes);
     }
 
-    const addAttribute = $('<button/>',{
-        "class":"addAttribute",
+    var add_attribute = $('<button/>',{
+        "class":"add_attribute",
         "text":"Add Attribute",
-        "data-index":selectionIndex,
-        "data-type":modelSpecType,
-        "data-styletype":styleSpecType,
+        "data-index":selection_index,
+        "data-type":model_spec_type,
+        "data-styletype":style_spec_type,
         "click":function(){addAttribute(this)},
-    }).appendTo(styleSpec);
+    }).appendTo(style_spec);
                         
-    return styleSpec;
+    return style_spec;
 }
 
-const createStyle = function(modelSpecObject,modelSpecType,selectionIndex){
-    const style=$('<span/>',{
+var createStyle = function(model_spec_object,model_spec_type,selection_index){
+    var style=$('<span/>',{
         "class":"style",
     }); 
 
-    const styleSpecs = $('<ul/>',{
-        "class":'styleSpecs',
+    var style_specs = $('<ul/>',{
+        "class":'style_specs',
     }).appendTo(style);
                         
-    for(const attributeIndex in modelSpecObject){
-        const spec = createStyleSpec(modelSpecObject[attributeIndex],attributeIndex,modelSpecType,selectionIndex)
-        if(spec!== undefined)
-            spec.appendTo(styleSpecs);
+    for(var attribute_index in model_spec_object){
+        var spec = createStyleSpec(model_spec_object[attribute_index],attribute_index,model_spec_type,selection_index)
+        if(spec!= undefined)
+            spec.appendTo(style_specs);
     }
 
-    const addStyleSpec = $('<button/>',{
-        "class":"addStyleSpec",
+    var add_style_spec = $('<button/>',{
+        "class":"add_style_spec",
         "text":"Add Style Spec",
-        "data-index":selectionIndex,
-        "data-type":modelSpecType,
+        "data-index":selection_index,
+        "data-type":model_spec_type,
         "click":function(){addStyleSpec(this)},
     }).appendTo(style);
 
     return style; 
 }
 
-const validNames = {
+var validNames = {
     "style":"Style",
     "surface":"Surface",
     "labelres":"LabelRes",
 }
 
-const createModelSpecification = function(modelSpecType,modelSpecObject,selectionIndex){
-    let modelSpecification = null;
-    if(modelSpecType==="style"){
-        modelSpecification = createStyle(modelSpecObject,modelSpecType,selectionIndex)
-    }else if(modelSpecType==="surface"){
-        modelSpecification = createOtherModelSpec(modelSpecObject,"Surface",selectionIndex)
-    }else if(modelSpecType==="labelres"){
-        modelSpecification = createOtherModelSpec(modelSpecObject,"LabelRes",selectionIndex)
+var createModelSpecification = function(model_spec_type,model_spec_object,selection_index){
+    var model_specification = null;
+    if(model_spec_type=="style"){
+        model_specification = createStyle(model_spec_object,model_spec_type,selection_index)
+    }else if(model_spec_type=="surface"){
+        model_specification = createOtherModelSpec(model_spec_object,"Surface",selection_index)
+    }else if(model_spec_type=="labelres"){
+        model_specification = createOtherModelSpec(model_spec_object,"LabelRes",selection_index)
     }             
 
-    return modelSpecification;
+    return model_specification;
 }
 // this function creates the selection object
-const createSelection = function(spec,object,index,type){
+var createSelection = function(spec,object,index,type){
     // creates container
-    const selection = $("<li/>",{
+    var selection = $("<li/>",{
         class:"selection"
     });
 
-    const createHeader = function(){
-        const selectionType = $('<p>',{
-            class:'selectionType',
+    var createHeader = function(){
+        var selection_type = $('<p>',{
+            class:'selection_type',
             text:validNames[type],
         }).appendTo(selection);
 
         // add together sub selections
-        const attributePairs =[];
-        for(const subselection in spec){
-            let obj=spec[subselection];
+        var attribute_pairs =[];
+        for(var subselection in spec){
+            var obj=spec[subselection];
             if(typeof(obj) === 'object' && Object.keys(obj).length === 0)
                 obj = ""; // empty object
-            attributePairs.push(`${subselection}:${obj}`);
+            attribute_pairs.push(subselection+":"+obj);
         }
 
-        let modifier=attributePairs.join(";");
-        if(modifier === "")
+        var modifier=attribute_pairs.join(";");
+        if(modifier == "")
             modifier = "all"
-        const selectionSpec=$('<input/>', {
-            class:'selectionSpec',
+        var selection_spec=$('<input/>', {
+            class:'selection_spec',
             value:modifier,
         }).appendTo(selection); 
 
-        selectionSpec.change(()=> {
-            render(type === "surface");
+        selection_spec.change(function(){
+            render(type == "surface");
         })
     }
 
      // delete button
-    const deleteSelection = $("<div/>",{
+    var delete_selection = $("<div/>",{
         html:"&#x2715;",
-        class:"deleteSelection",
+        class:"delete_selection",
         "data-index":index,
         "data-type":"",
         "click":function(){deleteSelection(this);}
@@ -384,9 +383,9 @@ const createSelection = function(spec,object,index,type){
 
     createHeader()    
     // check if style exists and if so create the object
-    const ret = createModelSpecification(type,object, index);
+    var ret = createModelSpecification(type,object, index);
 
-    deleteSelection.attr("data-type",type);
+    delete_selection.attr("data-type",type);
     ret.appendTo(selection);
 
     return selection;
@@ -395,104 +394,104 @@ const createSelection = function(spec,object,index,type){
  * builds an html tree that goes inside of the selection portion of the viewer
  * page
  */
-let buildHTMLTree = function(query){
+var buildHTMLTree = function(query){
     // get parent object for the html tree
-    const parent = $('#selection_list');
+    var parent = $('#selection_list');
     parent.text("");
     // list file type and path
     // $("#model_type").attr("value",query.file.type);
     document.getElementById("model_type").value = query.file.type
-    $("#model_type").change(()=> {
-        const val =  $("#model_type").val().toUpperCase();
-        if(prevType !== val){
+    $("#model_type").change(function(){
+        var val =  $("#model_type").val().toUpperCase();
+        if(prev_type != val){
             
             render(true);
             run();
         }
-        prevType = val
+        prev_type = val
     })
 
     $("#model_input").attr("value",query.file.path);
-    $("#model_input").change(()=> {
-        const val =  $("#model_input").val().toUpperCase();
-        if(prevIn !== val){
-            if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!== "pdb"){
+    $("#model_input").change(function(){
+        var val =  $("#model_input").val().toUpperCase();
+        if(prev_in != val){
+            if(val.match(/^[1-9][A-Za-z0-9]{3}$/) || $("#model_type").val().toLowerCase()!= "pdb"){
                 render(true);
                 run();
-                const width = $("#sidenav").width();
+                var width = $("#sidenav").width();
             }else{
-                if(prevIn!== val)
+                if(prev_in!= val)
                     alert("Invalid PDB")
             }
         }
-        prevIn = val;
+        prev_in = val;
     })
-    const arr=[]
+    var arr=[]
     // loops through selections and creates a selection tree
-    for(const selectionIndex in query.selections){
-        const selectionObject = query.selections[selectionIndex];
-        const aug = augmentSelection(selectionObject);
+    for(var selection_index in query.selections){
+        var selection_object = query.selections[selection_index];
+        var aug = augmentSelection(selection_object);
 
-        if(selectionObject.style !== undefined){
-            arr.push(createSelection(aug,selectionObject.style,selectionIndex,"style"));
+        if(selection_object.style != undefined){
+            arr.push(createSelection(aug,selection_object.style,selection_index,"style"));
         }
-        if(selectionObject.surface !== undefined){
-            arr.push(createSelection(aug,selectionObject.surface,selectionIndex,"surface"))
+        if(selection_object.surface != undefined){
+            arr.push(createSelection(aug,selection_object.surface,selection_index,"surface"))
         }
-        if(selectionObject.labelres !== undefined){
-            arr.push(createSelection(aug,selectionObject.labelres,selectionIndex,"labelres"))
+        if(selection_object.labelres != undefined){
+            arr.push(createSelection(aug,selection_object.labelres,selection_index,"labelres"))
         }
     }
-    for(const i in arr){
-        if(arr[i]!== undefined)
+    for(var i in arr){
+        if(arr[i]!= undefined)
             parent.append(arr[i])
     }
 }
 // takes the queyr object and creates a url for it
-const queryToURL = function(query){
+var queryToURL = function(query){
 
-    const isSame = function(obj1,obj2){
-        for(const key in obj1){
+    var isSame = function(obj1,obj2){
+        for(var key in obj1){
             if(Array.isArray(obj1[key])){
                 if(Array.isArray(obj2[key]))
                     return arraysEqual(obj1[key],obj2[key])
                 return false;
             }
-            if(obj2[key]===undefined || obj2[key] !== obj1[key])
+            if(obj2[key]==undefined || obj2[key] != obj1[key])
                 return false;
         }
         return typeof(obj1) == typeof(obj2); // {} != 0
     }
-    const url = "";
+    var url = "";
     // unpacks everything except for style which has multiple layers
-    const unpackOther = function (object){
+    var unpackOther = function (object){
         
 
-        const objs =[]
-        $.each(object, (key,value)=> {
+        var objs =[]
+        $.each(object, function(key,value){
             if(isSame(value,{}))
                 value = ""
             // array values
             if(Array.isArray(value)){
                 // sperate by commas
-                objs.push(`${key}:${value.join(",")}`);
+                objs.push(key+":"+value.join(","));
             }else{
-                objs.push(`${key}:${value}`);
+                objs.push(key+":"+value);
             }
         });
         return objs.join(";");
     }
 
-    const unpackStyle = function(object){
-        const subStyles=[]
-        $.each(object, (subStyle,subStyleObject)=> {
-            let string="";
-            string+=subStyle;
-            if(Object.size(subStyleObject)!==0)
+    var unpackStyle = function(object){
+        var subStyles=[]
+        $.each(object, function(sub_style,sub_style_object){
+            var string="";
+            string+=sub_style;
+            if(Object.size(sub_style_object)!=0)
                 string+=":";
-            const assignments =[]
-            $.each(subStyleObject, (key,value)=> {
-                assignments.push(`${key}~${value}`);
+            var assignments =[]
+            $.each(sub_style_object, function(key,value){
+                assignments.push(key+"~"+value);
             });
             string+=assignments.join(",");
             subStyles.push(string)
@@ -501,33 +500,33 @@ const queryToURL = function(query){
         return subStyles.join(";");
     }
 
-    const unpackSelection = function(object){
-        const copiedObject = jQuery.extend(true,{}, object)
-        const objs=[];
-        const string="";
+    var unpackSelection = function(object){
+        var copiedObject = jQuery.extend(true,{}, object)
+        var objs=[];
+        var string="";
 
-        for(const obj in object){
-            if(obj === "style"){
-                objs.push(`style=${unpackStyle(object.style)}`)
-            }else if(obj === "labelres" || obj === "surface"){
-                objs.push(`${obj}=${unpackOther(object[obj])}`)
+        for(var obj in object){
+            if(obj == "style"){
+                objs.push("style="+unpackStyle(object.style))
+            }else if(obj == "labelres" || obj == "surface"){
+                objs.push(obj+"="+unpackOther(object[obj]))
             }
         }
-        const unpacked =unpackOther(augmentSelection(object));
-        let select=`select=${ unpacked}`
-        if(select === "select=")
+        var unpacked =unpackOther(augmentSelection(object));
+        var select="select="+ unpacked
+        if(select == "select=")
             select = "select=all"
         objs.unshift(select);// prepend
         return objs.join("&");
     }
 
-    const objects = [];
-    let str = `${query.file.type}=${query.file.path}`;
-    if(query.file.helper !== "")
-        str+=`&type=${query.file.helper}`
+    var objects = [];
+    var str = query.file.type+"="+query.file.path;
+    if(query.file.helper != "")
+        str+="&type="+query.file.helper
     objects.push(str);
 
-    for(const selection in query.selections){
+    for(var selection in query.selections){
         objects.push(unpackSelection(query.selections[selection]))
     }
 
@@ -540,66 +539,65 @@ function File(path,type){
     this.helper="";
 }
 
-const Query = function(){
+var Query = function(){
     this.selections = [];
     this.file = new File();
 }
 
 function setURL(urlPath){
-    window.history.pushState('page2',"Title", `viewer.html?${urlPath}`);
+    window.history.pushState('page2',"Title", "viewer.html?"+urlPath);
 }
 // this function will look through the dictionaries defined in glmodel and
 // validate if the types are correct and return a dictionary with flags for the
 // types that are incorecct
 
-let count = 0;
+var count = 0;
 // takes the search url string and makes a query object for it
-const urlToQuery = function(url){
+var urlToQuery = function(url){
     // url= decodeURIComponent(url)
-    if(url === "" || url.startsWith('session=') || url.startsWith('SESSION='))
+    if(url == "" || url.startsWith('session=') || url.startsWith('SESSION='))
         return new Query();
     
-    const query = new Query();
-    const tokens = url.split("&");
+    var query = new Query();
+    var tokens = url.split("&");
     // still using indexOf because otherwise i would need to check to see if the
     // first substring in the string is "select" and check to see if the string
     // isnt to small
     function stringType(string){
-        if(string ===  "select")
+        if(string ==  "select")
             return "select"
-        if(string ==="pdb" || string === "cid" || string === "url")
+        else if(string =="pdb" || string == "cid" || string == "url")
             return "file"
-        if(string === "style" || string === "surface" || string === "labelres"){
-            count+=1;
+        else if(string == "style" || string == "surface" || string == "labelres"){
+            count++;
             return string;
-        }if(string === "type"){
+        }else if(string == "type"){
             return string
         }    
-        throw new Error(`Illegal url string : ${string}`);
-
+        throw "Illegal url string : "+string;
+        return;
     }
 
-    let currentSelection = null;
-    for(const token in tokens){
-	const uri = decodeURIComponent(tokens[token]);
-	const i = uri.indexOf('=');
-	const left = uri.slice(0,i);
-        const type = stringType(left);// left side of first equals
-        const string = uri.slice(i+1);// right side of equals
-        const object = $3Dmol.specStringToObject(string);
-        if(type === "file"){
+    var currentSelection = null;
+    for(var token in tokens){
+	var uri = decodeURIComponent(tokens[token]);
+	var i = uri.indexOf('=');
+	var left = uri.slice(0,i);
+        var type = stringType(left);// left side of first equals
+        var string = uri.slice(i+1);// right side of equals
+        var object = $3Dmol.specStringToObject(string);
+        if(type == "file"){
             query.file = new File(string,left);
-        }else if(type === "select"){
+        }else if(type == "select"){
             currentSelection = object
             query.selections.push(currentSelection);
-        }else if(type === "style" || type==="surface" || type === "labelres"){
+        }else if(type == "style" || type=="surface" || type == "labelres"){
             if(currentSelection == null){
                 currentSelection = {}
                 query.selections.push(currentSelection)
             }
             currentSelection[type] = object;
-        // eslint-disable-next-line no-self-compare
-        }else if(type === type){
+        }else if(type == type){
             query.file.helper = string;
         }
     }
@@ -608,99 +606,99 @@ const urlToQuery = function(url){
     return query;
 }
 
-const updateQueryFromHTML = function(){
+var updateQueryFromHTML = function(){
     // File/PDB/URL updating
     query.file.path= $("#model_input").val(); 
     query.file.type=$("#model_type").val();
 
    
-    const updateOther = function(other){
-        const object={};
+    var updateOther = function(other){
+        var object={};
      
-        const otherList = $(other).children(".attribute");
-        otherList.each((li)=> {
-            object[$(otherList[li]).children(".attributeName")[0].value]=$(otherList[li]).children(".attributeValue")[0].value
+        var otherList = $(other).children(".attribute");
+        otherList.each(function(li){
+            object[$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value
         });
         return object;
     }
 
-    const updateStyle = function(styl){
-        const object={};
-        let list = $(styl).children(".styleSpecs");
-        list = $(list).children(".styleSpec")
-        list.each((li)=> {
-            const subtype=$(list[li]).children(".styleSpecName")[0].value;
+    var updateStyle = function(styl){
+        var object={};
+        var list = $(styl).children(".style_specs");
+        list = $(list).children(".style_spec")
+        list.each(function(li){
+            var subtype=$(list[li]).children(".style_spec_name")[0].value;
             object[subtype]={};
-            let otherList =$(list[li]).children(".styleSpecAttributes")[0];
+            var otherList =$(list[li]).children(".style_spec_attributes")[0];
             otherList=$(otherList).children(".attribute")
-            otherList.each((li)=> {
-                const tag=object[subtype][$(otherList[li]).children(".attributeName")[0].value]=$(otherList[li]).children(".attributeValue")[0].tagName
-                object[subtype][$(otherList[li]).children(".attributeName")[0].value]=$(otherList[li]).children(".attributeValue")[0].value;
+            otherList.each(function(li){
+                var tag=object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].tagName
+                object[subtype][$(otherList[li]).children(".attribute_name")[0].value]=$(otherList[li]).children(".attribute_value")[0].value;
             });
         });
         return object;
     }
 
-    const updateSelectionElements = function(selectionString){
-        return $3Dmol.specStringToObject(selectionString);
+    var updateSelectionElements = function(selection_string){
+        return $3Dmol.specStringToObject(selection_string);
     }
 
     function arraysEqual(a, b) {
         if (a === b) return true;
         if (a == null || b == null) return false;
-        if (a.length !== b.length) return false;
+        if (a.length != b.length) return false;
 
-        for (let i = 0; i < a.length; ++i) {
+        for (var i = 0; i < a.length; ++i) {
             if (a[i] !== b[i]) return false;
         }
         return true;
     }
 
-    const isSame = function(obj1,obj2){
-        for(const key in obj1){
+    var isSame = function(obj1,obj2){
+        for(var key in obj1){
             if(Array.isArray(obj1[key])){
                 if(Array.isArray(obj2[key]))
                     return arraysEqual(obj1[key],obj2[key])
                 return false;
             }
-            if(obj2[key]===undefined || obj2[key] !== obj1[key])
+            if(obj2[key]==undefined || obj2[key] != obj1[key])
                 return false;
         }
         return typeof(obj1) == typeof(obj2); // 0 != {}
     }
 
     function combine(obj1, src1) {
-        for (const key in src1) {
+        for (var key in src1) {
             if (src1.hasOwnProperty(key)) obj1[key] = src1[key];
         }   
         return obj1;
     }      
 
-    const selects = [];
-    const listItems = $(".selection")
-    listItems.each((index,value)=> {
-        if(listItems.hasOwnProperty(index) && listItems[index].id!=="spacer"){
-            const getSubObject = function(){
-                const attr = $(value);
-                const attribute=attr[0]
-                const type=$(attribute).children()[1].innerHTML.toLowerCase()
+    var selects = [];
+    var listItems = $(".selection")
+    listItems.each(function(index,value){
+        if(listItems.hasOwnProperty(index) && listItems[index].id!="spacer"){
+            var getSubObject = function(){
+                var attr = $(value);
+                var attribute=attr[0]
+                var type=$(attribute).children()[1].innerHTML.toLowerCase()
 
-                if(type==="style"){
-                    const style =updateStyle($(attribute).children(".style")[0])
+                if(type=="style"){
+                    var style =updateStyle($(attribute).children(".style")[0])
                     return {"style":style}
-                }if(type==="surface"){
-                    const surface = updateOther($(attribute).children(".surface_attributes")[0])
+                }else if(type=="surface"){
+                    var surface = updateOther($(attribute).children(".surface_attributes")[0])
                     return {"surface":surface} 
-                }if(type === "labelres"){
-                    const labelres = updateOther($(attribute).children(".labelres_attributes")[0])
+                }else if(type == "labelres"){
+                    var labelres = updateOther($(attribute).children(".labelres_attributes")[0])
                     return {"labelres":labelres} 
                 }
             }
 
-            const val = getSubObject();
-            const selectionSpec = $(listItems[index]).children(".selectionSpec")[0].value;
-            const selection = updateSelectionElements(selectionSpec);
-            const extended = combine(selection,val)
+            var val = getSubObject();
+            var selection_spec = $(listItems[index]).children(".selection_spec")[0].value;
+            var selection = updateSelectionElements(selection_spec);
+            var extended = combine(selection,val)
             selects.push(extended)
         }
     });
@@ -708,13 +706,13 @@ const updateQueryFromHTML = function(){
     query.selections=selects;
 }
 
-let query = urlToQuery(window.location.search.substring(1));
+var query = urlToQuery(window.location.search.substring(1));
 // this function compresses the html object back into a url
-let render = function(surfaceEdited){
-    surfaceEdited = surfaceEdited === undefined ? false : surfaceEdited;
+var render = function(surfaceEdited){
+    surfaceEdited = surfaceEdited == undefined ? false : surfaceEdited;
     // calls update query
     updateQueryFromHTML();
-    const url = queryToURL(query);
+    var url = queryToURL(query);
     setURL(url);
     buildHTMLTree(query);
     glviewer.setStyle({},{line:{}});
@@ -722,36 +720,36 @@ let render = function(surfaceEdited){
     glviewer.render();
 }
 // these functions all edit the query object
-const addSelection = function(type){
-    const surface  = type === "surface"
-    if(type === "style")      
+var addSelection = function(type){
+    var surface  = type == "surface"
+    if(type == "style")      
         query.selections.push({"style":{line:{}}})
-    else if(type === "surface")
+    else if(type == "surface")
         query.selections.push({"surface":{}})
-    else if(type === "labelres")
+    else if(type == "labelres")
         query.selections.push({"labelres":{}})
     buildHTMLTree(query);
     render(surface);
 }
 
-const deleteSelection = function(spec){
+var deleteSelection = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type];
-    if(query.selections[spec.dataset.index].surface === undefined && query.selections[spec.dataset.index].style === undefined && query.selections[spec.dataset.index].labelres === undefined)
+    if(query.selections[spec.dataset.index].surface == undefined && query.selections[spec.dataset.index].style == undefined && query.selections[spec.dataset.index].labelres == undefined)
         delete query.selections[spec.dataset.index]
     
     buildHTMLTree(query);
-    render(spec.dataset.type === "surface");
+    render(spec.dataset.type == "surface");
 }
 
-const addModelSpec = function(type,selection){
-    let currentSelection;
-    currentSelection = query.selections[selection.dataset.index]
+var addModelSpec = function(type,selection){
+    var current_selection;
+    current_selection = query.selections[selection.dataset.index]
     
-    if(type === "style" || type === "surface" || type === "labelres"){
-        if(currentSelection[type]==null)
-            currentSelection[type]={};
+    if(type == "style" || type == "surface" || type == "labelres"){
+        if(current_selection[type]==null)
+            current_selection[type]={};
         else
-            console.err(`${type} already defined for selection`);// TODO error
+            console.err(type+" already defined for selection");// TODO error
                                                                 // handling
     }
     
@@ -759,68 +757,68 @@ const addModelSpec = function(type,selection){
     render();
 }
 
-const addStyleSpec = function(modelSpec){
-    const defaultKey = "";
-    const defaultValue = {};
-    query.selections[modelSpec.dataset.index][modelSpec.dataset.type][defaultKey]=defaultValue;
+var addStyleSpec = function(model_spec){
+    var defaultKey = "";
+    var defaultValue = {};
+    query.selections[model_spec.dataset.index][model_spec.dataset.type][defaultKey]=defaultValue;
     
     buildHTMLTree(query);
     render();
 }
 
-let deleteStyleSpec = function(spec){
+var deleteStyleSpec = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
     
     buildHTMLTree(query);
     render();
 }
 
-let addOtherAttribute= function(spec){
-    const defaultKey = "";
-    const defaultValue = "";
+var addOtherAttribute= function(spec){
+    var defaultKey = "";
+    var defaultValue = "";
     query.selections[spec.dataset.index][spec.dataset.type.toLowerCase()][defaultKey]=defaultValue;
     
     buildHTMLTree(query);
     render();
 }
 
-let deleteOtherAttribute = function(spec){
+var deleteOtherAttribute = function(spec){
     delete query.selections[spec.dataset.index][spec.dataset.type][spec.dataset.attr]
     
     buildHTMLTree(query);
-    render(spec.dataset.type === "surface");
+    render(spec.dataset.type == "surface");
 }
 
-const addAttribute = function(styleSpec){
-    const defaultKey = "";
-    const defaultValue = "";
-    query.selections[styleSpec.dataset.index][styleSpec.dataset.type][styleSpec.dataset.styletype][defaultKey]=defaultValue;
+var addAttribute = function(style_spec){
+    var defaultKey = "";
+    var defaultValue = "";
+    query.selections[style_spec.dataset.index][style_spec.dataset.type][style_spec.dataset.styletype][defaultKey]=defaultValue;
 
     buildHTMLTree(query);
     render();
 }
 
-let deleteStyleAttribute = function(spec){
-    delete query.selections[spec.dataset.index].style[spec.dataset.type][spec.dataset.attr]
+var deleteStyleAttribute = function(spec){
+    delete query.selections[spec.dataset.index]["style"][spec.dataset.type][spec.dataset.attr]
     buildHTMLTree(query);
     render();
 }
 // this function reads the form changes and upates the query accordingly
-const center = function(){
+var center = function(){
     glviewer.center({},1000,true);
 }
 
-const vrml = function() {
-    const filename = "3dmol.wrl";
-    const text = glviewer.exportVRML();
-    const blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+var vrml = function() {
+    var filename = "3dmol.wrl";
+    var text = glviewer.exportVRML();
+    var blob = new Blob([text], {type: "text/plain;charset=utf-8"});
     saveAs(blob, filename);
 }
-const savePng = function() {
-    const filename = "3dmol.png";
-    const text = glviewer.pngURI();
-    const ImgData = text;
-    const link = document.createElement('a');
+var savePng = function() {
+    var filename = "3dmol.png";
+    var text = glviewer.pngURI();
+    var ImgData = text;
+    var link = document.createElement('a');
     link.href = ImgData;
     link.download = filename;
     document.body.appendChild(link);
@@ -828,11 +826,11 @@ const savePng = function() {
     document.body.removeChild(link);
 }
 // initializes the sidebar based on the given url
-const initSide = function(url){
-    const list = document.createElement('ul')
+var initSide = function(url){
+    var list = document.createElement('ul')
     document.getElementById('container').appendChild(list);
     // updating on back button
-    $(window).on('popstate', () => {
+    $(window).on('popstate', function() {
         query = urlToQuery(window.location.search.substring(1));
         buildHTMLTree(query);
         render(true);
@@ -840,23 +838,23 @@ const initSide = function(url){
 
     buildHTMLTree(query);
 }
-const showCreateSession = function(){
+var showCreateSession = function(){
     $('#session_list2').hide();
     $('#session_list1').toggle();
 }
-const showJoinSession = function(){
+var showJoinSession = function(){
     $('#session_list1').hide();
   $('#session_list2').toggle();
 }
 
-let toggle = true;
-let width=420;
-let prevIn = $("#model_input").val();
-let prevType = $("#model_type").val();
-const toggleHide =  function(){
+var toggle = true;
+var width=420;
+var prev_in = $("#model_input").val();
+var prev_type = $("#model_type").val();
+var toggleHide =  function(){
     if(toggle){        
         $("#menu").css("display","none");
-        $("#sidenav").css("width",`${width}px`);
+        $("#sidenav").css("width",width+"px");
         $('#createSession,#joinSession,#addStyle,#addSurface,#addLabelRes,#centerModel,#savePng,#vrmlExport').css("display","inline")
         glviewer.translate(width/2,0,400,false);
     }else{
@@ -869,38 +867,38 @@ const toggleHide =  function(){
     toggle = !toggle;
 }
 
-let glviewer = null;
+var glviewer = null;
 // http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
 // Process commands, in order, and run on viewer (array of strings split on '&')
-let runcmds = function(cmds, viewer,renderSurface) {
+var runcmds = function(cmds, viewer,renderSurface) {
             console.log("rendering")
-    renderSurface = renderSurface === undefined ? true : renderSurface;
+    renderSurface = renderSurface == undefined ? true : renderSurface;
     if(renderSurface)
         viewer.removeAllSurfaces();
     viewer.removeAllLabels();
-    let currentsel = {};
+    var currentsel = {};
 
-    for (let i = 0; i < cmds.length; i++) {
-        const kv = cmds[i].split('=');
-        const cmdname = kv[0];
-        const cmdobj = $3Dmol.specStringToObject(kv[1]);
+    for (var i = 0; i < cmds.length; i++) {
+        var kv = cmds[i].split('=');
+        var cmdname = kv[0];
+        var cmdobj = $3Dmol.specStringToObject(kv[1]);
 
-        if (cmdname === 'select')
+        if (cmdname == 'select')
             currentsel = cmdobj;
-        else if (cmdname === 'surface' && renderSurface){
+        else if (cmdname == 'surface' && renderSurface){
             viewer.addSurface($3Dmol.SurfaceType.VDW, cmdobj, currentsel,
                     currentsel);
-        } else if (cmdname === 'style'){
+        } else if (cmdname == 'style'){
             viewer.setStyle(currentsel, cmdobj);
-        } else if (cmdname === 'addstyle'){
+        } else if (cmdname == 'addstyle'){
             viewer.addStyle(currentsel, cmdobj);
-        } else if (cmdname === 'labelres'){
+        } else if (cmdname == 'labelres'){
             viewer.addResLabels(currentsel, cmdobj);
-        } else if (cmdname === 'colorbyelement'){
+        } else if (cmdname == 'colorbyelement'){
             if (typeof ($3Dmol.elementColors[cmdobj.colorscheme]) != "undefined")
                 viewer.setColorByElement(currentsel,
                         $3Dmol.elementColors[cmdobj.colorscheme]);
-        } else if (cmdname === 'colorbyproperty'){
+        } else if (cmdname == 'colorbyproperty'){
             if (typeof (cmdobj.prop) != "undefined"
                     && typeof ($3Dmol.Gradient[cmdobj.scheme]) != "undefined"){
                 viewer.setColorByProperty(currentsel, cmdobj.prop,
@@ -913,14 +911,14 @@ let runcmds = function(cmds, viewer,renderSurface) {
 };
 function run() {
         try {
-            let url = window.location.search.substr(1);
+            var url = window.location.search.substr(1);
             url= decodeURIComponent(url)
-            const cmds = url.split("&");
-            const first = cmds.splice(0, 1)[0];
-            const pos = first.indexOf('=');
-            const src = first.substring(0, pos); let data = first
+            var cmds = url.split("&");
+            var first = cmds.splice(0, 1)[0];
+            var pos = first.indexOf('=');
+            var src = first.substring(0, pos), data = first
                     .substring(pos + 1);
-            let type = "pdb";
+            var type = "pdb";
 
             if(glviewer === null) {
                 glviewer = $3Dmol.createViewer("gldiv", {
@@ -931,66 +929,66 @@ function run() {
                 glviewer.clear();
             }
 
-            if (src === 'session' || src === 'SESSION') {
+            if (src == 'session' || src == 'SESSION') {
                 // join a session
                 joinSession(data);
             }
-            if (src === 'pdb') {
+            if (src == 'pdb') {
                 console.log(data)
                 data = data.toUpperCase();
                 if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                     return;
                 }
-                data = `http://files.rcsb.org/view/${  data
-                         }.pdb`;
+                data = "http://files.rcsb.org/view/" + data
+                        + ".pdb";
                 type = "pdb";
-            } if (src === 'cif') {
+            } if (src == 'cif') {
                 data = data.toUpperCase();
                 if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                     return;
                 }
-                data = `http://files.rcsb.org/view/${  data
-                         }.cif`;
+                data = "http://files.rcsb.org/view/" + data
+                        + ".cif";
                 type = "cif";
-            } else if (src === 'cid') {
+            } else if (src == 'cid') {
                 type = "sdf";
-                data = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${
-                         data  }/SDF?record_type=3d`;
-            } else if (src === 'mmtf') {
+                data = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/"
+                        + data + "/SDF?record_type=3d";
+            } else if (src == 'mmtf') {
                 data = data.toUpperCase();
-                data = `http://mmtf.rcsb.org/full/${  data  }.mmtf`;
+                data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
                 type = 'mmtf';
             } else { // url
                 // try to extract extension
                 type = data.substr(data.lastIndexOf('.') + 1);
-                if(type === 'gz') {
-                    const base = data.substr(0,data.lastIndexOf('.'));
-                    type = `${base.substr(base.lastIndexOf('.'))  }.gz`;
+                if(type == 'gz') {
+                    var base = data.substr(0,data.lastIndexOf('.'));
+                    type = base.substr(base.lastIndexOf('.')) + '.gz';
                 }
             }
-            if (cmds[0] && cmds[0].indexOf('type=') === 0) {
+            if (cmds[0] && cmds[0].indexOf('type=') == 0) {
                 type = cmds[0].split('=')[1];
             }
 
-            const start = new Date();
+            var start = new Date();
 
-            if (/\.gz$/.test(data) || type === 'mmtf') { // binary
+            if (/\.gz$/.test(data) || type == 'mmtf') { // binary
                                                         // data
                 $.ajax({url:data, 
                     type: "GET",
                     dataType: "binary",
                     responseType: "arraybuffer",
                     processData: false,
-                    success(ret, txt, response) {
-                        console.log(`mtf fetch ${  +new Date() - start  }ms`);
-                        const time = new Date();
+                    success: function(ret, txt, response) {
+                        console.log("mtf fetch " + (+new Date() - start) + "ms");
+                        var time = new Date();
                         glviewer.addModel(ret, type);
                         runcmds(cmds, glviewer);
                         glviewer.zoomTo();
                         glviewer.render();
-                        console.log(`mtf load ${  +new Date() - time  }ms`);
+                        console.log("mtf load " + (+new Date() - time) + "ms");
 
-                }}).fail(() => {
+                }}).fail(function() {
                     // if couldn't get url natively, go through echo
                     // server
                     $.ajax({ url:"echo.cgi", 
@@ -998,7 +996,7 @@ function run() {
                         processData: false,
                         responseType: "arraybuffer",
                         dataType: "binary",
-                        success(ret, txt, response) {
+                        success: function(ret, txt, response) {
 
                         glviewer.addModel(ret, type);
                         runcmds(cmds, glviewer);
@@ -1007,29 +1005,29 @@ function run() {
                     }})
                 });
             } else {
-                $.get(data, (ret, txt, response) => {
-                    console.log(`alt fetch ${  +new Date() - start  }ms`);
-                    const time = new Date();
+                $.get(data, function(ret, txt, response) {
+                    console.log("alt fetch " + (+new Date() - start) + "ms");
+                    var time = new Date();
                     glviewer.addModel(ret, type);
                     runcmds(cmds, glviewer);
                     glviewer.zoomTo();
                     glviewer.render();
-                    console.log(`alt load ${  +new Date() - time  }ms`);
+                    console.log("alt load " + (+new Date() - time) + "ms");
 
-                }).fail(() => {
+                }).fail(function() {
                     // if couldn't get url natively, go through echo
                     // server
                     $.post("echo.cgi", {
                         'url' : data
-                    }, (ret, txt, response) => {
-                        if(src === 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret === "")) {
+                    }, function(ret, txt, response) {
+                        if(src == 'pdb' && (ret.search("We're sorry, but the requested") >= 0 || ret == "")) {
                             // really large files aren't available
                             // in pdb format
                             type = 'cif';
                             data = data.replace(/pdb$/,'cif');
                             $.post("echo.cgi",{
                                 'url' : data
-                            }, (ret, txt, response) => {
+                            }, function(ret, txt, response) {
 
                                 glviewer.addModel(ret, type);
                                 runcmds(cmds, glviewer);
@@ -1049,35 +1047,35 @@ function run() {
 
         catch (e) {
             console
-                    .error(`Could not instantiate viewer from supplied url: '${
-                             e  }'`);
+                    .error("Could not instantiate viewer from supplied url: '"
+                            + e + "'");
             window.location = "http://get.webgl.org";
 
         }
 }
 
-$(document).ready(()=> {
-    const url=window.location.href.substring(window.location.href.indexOf("?")+1);
+$(document).ready(function(){
+    var url=window.location.href.substring(window.location.href.indexOf("?")+1);
     initSessions(); 
     
     run();
-    let startWidth;
+    var start_width;
     $("#sidenav").resizable({
         handles: 'e',
         minWidth: 300,
         maxWidth: 1000,
-        start(event,ui){
-            startWidth=$("#sidenav").width();
+        start:function(event,ui){
+            start_width=$("#sidenav").width();
         },
-        resize(event,ui){
+        resize:function(event,ui){
             glviewer.center();
-            glviewer.translate(($("#sidenav").width()-startWidth)/2,0,0,false);
-            startWidth=$("#sidenav").width();
+            glviewer.translate(($("#sidenav").width()-start_width)/2,0,0,false);
+            start_width=$("#sidenav").width();
         }
     });
     $( "#selection_list" ).sortable({
       items: ".selection:not(#spacer)",
-      update (event, ui) {
+      update:  function (event, ui) {
             render(true);
         },
     });// $("#selection_list").accordion();

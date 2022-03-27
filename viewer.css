@@ -50,7 +50,7 @@ this may change*/
     margin-top:5px;
 }
 
-.addStyleSpec{
+.add_style_spec{
     margin-left:4%;
     width:92%;
     height: 25px;
@@ -63,7 +63,7 @@ this may change*/
     z-index:1;
 }
 
-.addAttribute{
+.add_attribute{
 
     width:92%;
     margin-left:4%;
@@ -98,7 +98,7 @@ li{
     list-style:none;
 }
 /* attribute styleing*/
-.attributeName,.attributeValue{
+.attribute_name,.attribute_value{
     color:black;
     width:42%;
     height:20px;
@@ -109,14 +109,14 @@ li{
     overflow:hidden;
 }
 
-.attributeName, select.attributeValue{
+.attribute_name, select.attribute_value{
     height:30px;
 }
 
-select.attributeValue{
+select.attribute_value{
     width:46%;
 }
-.attributeValue{
+.attribute_value{
     float:right; 
     height:16px;
 }
@@ -140,7 +140,7 @@ select.attributeValue{
 #selections{
 } */
 
-.styleSpec{
+.style_spec{
     color:black;
     margin:5px;
 }
@@ -164,7 +164,7 @@ select.attributeValue{
 
 }
 
-#selection_list li .selectionSpec{
+#selection_list li .selection_spec{
     border-radius:0px;
     height:4%;
     background-color:rgba(0,0,102,.9);
@@ -172,7 +172,7 @@ select.attributeValue{
     padding:10px;
 }
 
-#selection_list li .selectionSpec:hover,.delete_attribute:hover{
+#selection_list li .selection_spec:hover,.delete_attribute:hover{
     background-color:rgba(0,0,102,.5);
 }
 /* selection list element*/
@@ -205,7 +205,7 @@ input{
     margin:0px;
     display:inline;
 }
-.selectionType{
+.selection_type{
     background-color: rgba(0,0,102,.9);
     color:white;
     height:4%;
@@ -218,7 +218,7 @@ input{
     margin-right:5px;
 }
 
-.selectionSpec{
+.selection_spec{
     margin-bottom: 10px;
     border-radius: 15px;
     width:42%;
@@ -227,7 +227,7 @@ input{
     position:relative;
 }
 
-.deleteSelection{
+.delete_selection{
     float:right;
     position: relative;
     height:4%;
@@ -300,17 +300,17 @@ select,input{
 }
 
 
-#selection_list li .selectionSpec:hover,.delete_attribute:hover{
+#selection_list li .selection_spec:hover,.delete_attribute:hover{
     background-color:rgba(0,0,102,.5);
 }
 
-.deleteSelection:hover{
+.delete_selection:hover{
     background-color:rgba(0,0,102,.5);
     border-radius:5px;
     color:white;
 
 }
-.deleteSelection{
+.delete_selection{
     background-color:rgba(0,0,102,.9);
     border-radius:5px;
     color:white;
@@ -430,7 +430,7 @@ select,input{
 .rightdialog > .sessionname {
 	display: block; 
 	width: 100%; 
-	/*background-color: black;*/
+	//background-color: black;
 	color: white;
 	padding: 0;
 	border-radius: 15px;

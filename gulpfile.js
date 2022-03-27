@@ -27,7 +27,7 @@ function doc(cb) {
 }
 
 function check() {
-    return src(coresrc).pipe(jshint({latedef:'nofunc',  esversion:7, laxbreak:true, undef:true, unused:true,
+    return src(coresrc).pipe(jshint({latedef:'nofunc',  esversion:6, laxbreak:true, undef:true, unused:true,
 	    globals: {"$3Dmol":true,
 		    'console':true, //set in webworker
 		    'document':false,
