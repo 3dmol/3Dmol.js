@@ -366,7 +366,7 @@
           removeButton.ui.on('click', function(){
             stateManager.removeSelection(sid);
             boundingBox.detach();
-            delete this;
+            //delete this;
           });
 
           editButton.ui.on('click', function(){
@@ -735,7 +735,7 @@
           removeButton.ui.on('click', { parent: this, stid : stid }, function(e){
             stateManager.removeStyle(sid, stid);
             boundingBox.detach();
-            delete this;
+            //delete this;
           });
 
           editButton.ui.on('click', function(){
@@ -828,7 +828,7 @@
             }
             else {
               boundingBox.detach();
-              delete this;
+              //delete this;
             }
           });
 
