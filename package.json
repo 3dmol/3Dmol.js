@@ -50,8 +50,6 @@
     "jquery": "^3.6.0",
     "netcdfjs": "^1.0.0",
     "pako": "^2.0.4",
-    "taffydb": "^2.7.3",
-    "underscore": "^1.13.2",
     "upng-js": "^2.1.0",
     "yargs-parser": "^20.2.9"
   }
