@@ -1,4 +1,4 @@
-name: glcheck
+name: eslint
 on:
   pull_request:
     branches: [master]
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   
 jobs:
-  glcheck:
+  eslint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
