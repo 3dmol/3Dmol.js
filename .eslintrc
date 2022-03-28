@@ -22,15 +22,11 @@
             }
         ],
         "guard-for-in": "off",
+        "no-continue": "off",
         "no-restricted-syntax": "off",
         "consistent-return": "warn",
         "no-param-reassign": "warn",
-        "no-plusplus": [
-            "error",
-            {
-                "allowForLoopAfterthoughts": true
-            }
-        ],
+        "no-plusplus": "off",
         "no-restricted-globals": "warn",
         "eqeqeq": [
             "error",
@@ -45,7 +41,6 @@
                 "ignoreNonDeclaration": true
             }
         ],
-        "no-continue": "warn",
         "no-redeclare": [
             "error",
             {
@@ -77,11 +72,13 @@
                 "ignoreReadBeforeAssign": true
             }
         ],
+        "camelcase": "warn",
         "no-prototype-builtins": "warn",
         "no-use-before-define": "warn",
         "no-lonely-if": "off",
         "no-underscore-dangle": "warn",
         "no-undef": "warn",
+        "no-console": "off",
         "new-cap": [
             "error",
             {
