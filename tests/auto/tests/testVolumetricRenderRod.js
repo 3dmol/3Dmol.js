@@ -33,8 +33,8 @@ $$$$
         </textarea>
 */
 
-$.get('data/rod.dx', (data)=> {  // --iso 0.000001 or 0.1 / data: -0.2->0.2
-    const voldata = new $3Dmol.VolumeData(data, "dx");
+$.get('data/rod.dx', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
+    var voldata = new $3Dmol.VolumeData(data, "dx");
 
     viewer.addVolumetricRender(voldata, {
       subsamples: 2,
@@ -48,7 +48,7 @@ $.get('data/rod.dx', (data)=> {  // --iso 0.000001 or 0.1 / data: -0.2->0.2
         // seldist: 1.7
     }); 
     
-    const rec1 = viewer.addModel($('#benzene').val(), "sdf");
+    var rec1 = viewer.addModel($('#benzene').val(), "sdf");
     rec1.setStyle({stick:{color:'lightgray', opacity:'1.0'}, sphere:{color:'gray', radius: 0.4}});
     viewer.addBox({color: "grey", wireframe: true, corner: {x: -2, y: -3, z: -5}, 
       dimensions: {w: 4, h: 6, d: 10}});

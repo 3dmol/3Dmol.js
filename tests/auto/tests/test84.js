@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:4UB9",viewer,{},()=> {
+$3Dmol.download("pdb:4UB9",viewer,{},function(){
                   
         viewer.getModel(0).setClickable({}, true, function(){console.log(console.log(this))});
 

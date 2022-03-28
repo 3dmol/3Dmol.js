@@ -1,7 +1,7 @@
 
     $.get("data/Al.lammpstrj",
-        (data)=> {
-                const m = viewer.addModel(data, "lammpstrj");	
+        function (data){
+                var m = viewer.addModel(data, "lammpstrj");	
                 viewer.setStyle({},{sphere:{radius:0.05}});
                 viewer.zoomTo();
                 viewer.zoom(4);

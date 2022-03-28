@@ -33,19 +33,19 @@ $$$$
         </textarea>
 */
 
-$.get('data/solid.cube', (data)=> {  // --iso 0.000001 or 0.1 / data: -0.2->0.2
-    const voldata = new $3Dmol.VolumeData(data, "cube");
+$.get('data/solid.cube', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
+    var voldata = new $3Dmol.VolumeData(data, "cube");
     
     viewer.addVolumetricRender(voldata, {
         transferfn:[
-            { color: "#0000ff", opacity: 0.5, value: -0.2 }, // -0.03
+            { color: "#0000ff", opacity: 0.5, value: -0.2 }, //-0.03
             { color: "#ff00ff", opacity: 0.5, value: 0.2 }, // 1
         ]
         // coords: [{x: 0, y: 0, z: 0}], 
         // seldist: 1.7
     }); 
     
-    const rec1 = viewer.addModel($('#benzene').val(), "sdf");
+    var rec1 = viewer.addModel($('#benzene').val(), "sdf");
     rec1.setStyle({stick:{color:'lightgray', opacity:'1.0'}, sphere:{color:'gray', radius: 0.4}});
     viewer.addBox({color: "grey", wireframe: true, corner: {x: -4.774, y: -4.7993, z: -3.4464}, 
       dimensions: {w: 9.702, h: 9.702, d: 7.055}});

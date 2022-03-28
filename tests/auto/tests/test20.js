@@ -1,4 +1,4 @@
-$3Dmol.download("pdb:4UB9",viewer,{},()=> {
+$3Dmol.download("pdb:4UB9",viewer,{},function(){
                   
 
                   viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});

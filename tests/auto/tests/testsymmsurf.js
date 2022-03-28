@@ -1659,31 +1659,31 @@ END
 </textarea>
 */
 
-const data = $("#pdb_4udv").val(); // this is 4UDV (has 49 syms)
+var data = $("#pdb_4udv").val(); //this is 4UDV (has 49 syms)
 
 viewer.setBackgroundColor(0xffffff);
 
-let model = null; // no symms
-let model1 = null; // green
-let model2 = null; // blue
+var model = null; //no symms
+var model1 = null; //green
+var model2 = null; //blue
 
 model = viewer.addModel(data, "pdb");
 model1 = viewer.addModel(data, "pdb", {doAssembly:true});
 model2 = viewer.addModel(data, "pdb", {doAssembly:true});
 
-const sym = model1.getSymmetries();
-let i;
+var sym = model1.getSymmetries();
+var i;
 for (i = 0; i < sym.length; i++) {
     sym.splice(i, 1);
 }
 model1.setSymmetries(sym);
 
 
-const sym2 = model2.getSymmetries();
+var sym2 = model2.getSymmetries();
 for (i = 1; i < sym2.length; i++) {
     sym2.splice(i,1);
 }
-// sym2.splice(0, 1); //take out id
+//sym2.splice(0, 1); //take out id
 model2.setSymmetries(sym2);
 
 viewer.addSurface($3Dmol.SurfaceType.VDW, {color: '0x003594', opacity:1}, {model: model1});

@@ -33,12 +33,12 @@ $$$$
         </textarea>
 */
 
-$.get('data/middle.dx', (data)=> {  // --iso 0.000001 or 0.1 / data: -0.2->0.2
-    const voldata = new $3Dmol.VolumeData(data, "dx");
+$.get('data/middle.dx', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
+    var voldata = new $3Dmol.VolumeData(data, "dx");
 
     viewer.addVolumetricRender(voldata, {
         transferfn:[
-            { color: "#0000ff", opacity: 0.0, value:  0 }, // -0.03
+            { color: "#0000ff", opacity: 0.0, value:  0 }, //-0.03
             { color: "#ff00ff", opacity: .1, value: 1 }, // 1
         ],
 
@@ -46,7 +46,7 @@ $.get('data/middle.dx', (data)=> {  // --iso 0.000001 or 0.1 / data: -0.2->0.2
         // seldist: 1.7
     }); 
     
-    const rec1 = viewer.addModel($('#benzene').val(), "sdf");
+    var rec1 = viewer.addModel($('#benzene').val(), "sdf");
     rec1.setStyle({stick:{color:'lightgray', opacity:'1.0'}, sphere:{color:'gray', radius: 0.4}});
     viewer.addBox({color: "grey", wireframe: true, corner: {x: -2.5, y: -2.5, z: -2.5}, 
       dimensions: {w: 5, h: 5, d: 5}});

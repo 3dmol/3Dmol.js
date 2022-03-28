@@ -1,4 +1,4 @@
-const mol1=`53245668
+var mol1=`53245668
   -OEChem-10301915483D
 
  28 28  0     1  0  0  0  0  0999 V2000
@@ -296,9 +296,9 @@ M  END
 
 $$$$
 `   
-   // make sure using HTMLElement works
+   //make sure using HTMLElement works
    const container = document.getElementById('gldiv');
-   const viewer = $3Dmol.createViewer(
+   var viewer = $3Dmol.createViewer(
      container
    );
    

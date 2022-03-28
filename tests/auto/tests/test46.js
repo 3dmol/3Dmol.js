@@ -1,10 +1,10 @@
-const $scope = {}
+var $scope = {}
  $scope.volumetricFilesPath="chgcar.list";
 
   $scope.CHGCARS=[];
   $scope.MODELS=[];
 
-  $scope.done = 0; // for testing.. don't call test callback until finished
+  $scope.done = 0; //for testing.. don't call test callback until finished
 
   $scope.init = function() {
     $scope.MAIN_VIEWER=viewer;
@@ -14,19 +14,19 @@ const $scope = {}
   }
 
   $scope.addModelObject = function (name, value) {
-    const model = {};
-      // this would suit me
+    var model = {};
+      //this would suit me
       model.format="vasp";
     
     model.name = name;
-    model.value = !!value;
+    model.value = value? true: false;
     $scope.MODELS.push(model);
   }
 
   $scope.addChgcarObject = function(name) {
-    const chgcarObject={};
-    const format = name.match(/\..*/);
-      chgcarObject.format="vasp"; // It suits my needs
+    var chgcarObject={};
+    var format = name.match(/\..*/);
+      chgcarObject.format="vasp"; //It suits my needs
     
     chgcarObject.name = name;
     chgcarObject.data = false;
@@ -41,14 +41,14 @@ const $scope = {}
   }
 
   $scope.getChgcarNames = function() {
-    // console.log("Reading chgcars from  "+$scope.volumetricFilesPath);
-    $.get($scope.volumetricFilesPath, (data)=> {
-      // console.log(data);
+    //console.log("Reading chgcars from  "+$scope.volumetricFilesPath);
+    $.get($scope.volumetricFilesPath, function(data){
+      //console.log(data);
       data = data.split(/[\n\r]/);
-      data.forEach((name)=> {
+      data.forEach(function(name){
         if (name) {
           $scope.addChgcarObject(name);
-          // console.log($scope.CHGCARS);
+          //console.log($scope.CHGCARS);
         }
       });
     });
@@ -56,7 +56,7 @@ const $scope = {}
 
 
   $scope.clear = function() {
-    // console.log("Clearing..");
+    //console.log("Clearing..");
     $scope.MAIN_VIEWER.clear();
   }
 
@@ -77,33 +77,33 @@ const $scope = {}
   }
 
   $scope.renderVolumetricData = function (chgcarObject) {
-    const {isovalue} = chgcarObject;
-    const {opacity} = chgcarObject;
-    const {alpha} = chgcarObject;
-    const {smoothness} = chgcarObject;
-    const {voxel} = chgcarObject;
-    const {format} = chgcarObject;
-    const {color} = chgcarObject;
-    const volumetricPath = chgcarObject.name;
+    var isovalue   = chgcarObject.isovalue;
+    var opacity    = chgcarObject.opacity;
+    var alpha      = chgcarObject.alpha;
+    var smoothness = chgcarObject.smoothness;
+    var voxel      = chgcarObject.voxel;
+    var format     = chgcarObject.format;
+    var color     = chgcarObject.color;
+    var volumetric_path = chgcarObject.name;
     if (chgcarObject.data) {
-      $scope.MAIN_VIEWER.addIsosurface(chgcarObject.data , {voxel , isoval: isovalue  , color, opacity , smoothness , alpha});
+      $scope.MAIN_VIEWER.addIsosurface(chgcarObject.data , {voxel:voxel , isoval: isovalue  , color: color, opacity:opacity , smoothness:smoothness , alpha: alpha});
       $scope.MAIN_VIEWER.render();
     } else {
-      // console.log("Loading volumetric_data from "+volumetricPath);
-      $.get(volumetricPath, (data) => {
-        // console.log("Volumetric data received");
-        const voldata    = new $3Dmol.VolumeData(data, format);
+      //console.log("Loading volumetric_data from "+volumetric_path);
+      $.get(volumetric_path, function (data) {
+        //console.log("Volumetric data received");
+        var voldata    = new $3Dmol.VolumeData(data, format);
         chgcarObject.data = voldata;
-        $scope.MAIN_VIEWER.addIsosurface(voldata , {voxel , isoval: isovalue  , color, opacity , smoothness , alpha});
+        $scope.MAIN_VIEWER.addIsosurface(voldata , {voxel:voxel , isoval: isovalue  , color: color, opacity:opacity , smoothness:smoothness , alpha: alpha});
         $scope.MAIN_VIEWER.render();
-        $scope.done+=1;
-      }).fail((err) => {console.log(err);});
+        $scope.done++;
+      }).fail(function(err) {console.log(err);});
     }
   }
 
   $scope.renderChgcar = function() {
-    // console.log("Rendering Chgcar");
-    $scope.CHGCARS.forEach((chgcarObject, index)=> {
+    //console.log("Rendering Chgcar");
+    $scope.CHGCARS.forEach(function(chgcarObject, index){
       if (chgcarObject.value) {
         $scope.renderVolumetricData(chgcarObject);
       }
@@ -112,19 +112,19 @@ const $scope = {}
   }
 
   $scope.renderModel = function (model) {
-    const modelPath=model.name;
-    const {format} = model;
-    $.get(modelPath,(data)=> {
-      // console.log("Structural data received");
-      const model = $scope.MAIN_VIEWER.addModel(data, format);
+    var modelPath=model.name;
+    var format=model.format;
+    $.get(modelPath,function(data){
+      //console.log("Structural data received");
+      var model = $scope.MAIN_VIEWER.addModel(data, format);
       model.setStyle({}, {sphere:{scale: 0.2}, stick:{radius:0.1}});
       $scope.MAIN_VIEWER.zoomTo();
       $scope.MAIN_VIEWER.render();
-      $scope.done+=1;
+      $scope.done++;
     });
   }
   $scope.renderModels = function() {
-    $scope.MODELS.forEach((model)=> {
+    $scope.MODELS.forEach(function(model){
       $scope.renderModel(model);
     });
   }
