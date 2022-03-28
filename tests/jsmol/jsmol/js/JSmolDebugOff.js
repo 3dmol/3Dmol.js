@@ -1,1 +1,0 @@
-Jmol._debugCode = false;

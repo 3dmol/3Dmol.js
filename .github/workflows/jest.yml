@@ -1,0 +1,19 @@
+name: Jest
+
+on: 
+  push:
+    branches: [master]
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  jest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - run: npm install
+      - run: npx jest ./*\\.test.js --passWithNoTests

@@ -8,7 +8,15 @@
   },
   "author": "David Koes and contributors",
   "homepage": "http://3dmol.csb.pitt.edu",
+  "jest": {
+    "testRegex": [
+      "./*\\.test.js",
+      "./*\\.test.ts"
+    ]
+  },
   "devDependencies": {
+    "@babel/plugin-transform-typescript": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
     "del": "^6.0.0",
     "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -26,6 +34,7 @@
     "gulp-shell": "^0.8.0",
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
+    "jest": "^27.5.1",
     "jsdoc": "^3.6.10",
     "prettier": "^2.6.1"
   },
@@ -33,14 +42,15 @@
     "build": "gulp",
     "check": "npx eslint .",
     "format": "npx eslint . --fix",
+    "prepare": "npm run build",
+    "jest": "npx jest",
     "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
-    "test": "npm run glcheck",
+    "test": "npm run check && npx jest && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py",
-    "coverage:glcheck": "npx nyc report --reporter text --reporter html --report-dir ./tests/glcheck/coverage",
-    "prepare": "npm run build"
+    "coverage:glcheck": "npx nyc report --reporter text --reporter html --report-dir ./tests/glcheck/coverage"
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",

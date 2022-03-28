@@ -1,3 +1,4 @@
+/* eslint-disable vars-on-top */
 /* eslint-disable eqeqeq */
 /**
  * $3Dmol.Parsers stores functions for parsing molecular data. They all take a string of molecular data
@@ -1113,7 +1114,7 @@ $3Dmol.Parsers = (function () {
         for (let j = 0; j < temp[i].length; j++) {
           const a = temp[i][j];
           for (let k = 0; k < a.bonds.length; k++) {
-            a.bonds[k] = a.bonds[k] + offset;
+            a.bonds[k] += offset;
           }
           a.index = atoms[0].length;
           a.serial = atoms[0].length;
@@ -1544,7 +1545,7 @@ $3Dmol.Parsers = (function () {
           ? mmCIF._atom_site_id.length
           : mmCIF._atom_site_label.length;
 
-      var conversionMatrix;
+      let conversionMatrix;
       if (mmCIF._cell_length_a !== undefined) {
         const a = parseFloat(mmCIF._cell_length_a);
         const b = parseFloat(mmCIF._cell_length_b);
@@ -2040,7 +2041,7 @@ $3Dmol.Parsers = (function () {
         }
         sslookup[startChain][endResi] = 'h2';
       } else if (!noAssembly && recordName == 'REMARK' && line.substr(13, 5) == 'BIOMT') {
-        var n;
+        let n;
         const matrix = new $3Dmol.Matrix4();
         for (n = 1; n <= 3; n++) {
           line = lines[i].replace(/^\s*/, '');
@@ -2220,7 +2221,7 @@ $3Dmol.Parsers = (function () {
         // I would have liked to split based solely on whitespace, but
         // it seems that there is no guarantee that all the fields will
         // be filled out (e.g. the chain) so this doesn't work
-        var hetflag;
+        let hetflag;
         const serial = parseInt(line.substr(6, 5));
         const atom = line.substr(12, 4).replace(/ /g, '');
         const resn = line.substr(17, 3).trim();
@@ -2611,6 +2612,7 @@ $3Dmol.Parsers = (function () {
     let count = 0;
     const lines = str.split(/\r?\n|\r/);
     if (lines.length > 0 && lines[0].includes('VERSION')) {
+      // eslint-disable-next-line no-var
       var sectionList = lines.filter(
         (
           line // store the relevant section lists
@@ -2733,6 +2735,7 @@ $3Dmol.Parsers = (function () {
     }
 
     function getIndex(section) {
+      // eslint-disable-next-line block-scoped-var
       let index = lines.indexOf(sectionList.filter(line => line.includes(section))[0]); // returns the index of the line containing FLAG POINTERS
       if (Number.isInteger(index) && index > 0) {
         while (!lines[index].includes('FORMAT'))

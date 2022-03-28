@@ -5,7 +5,8 @@
  * All of the functionality of $3Dmol.js is contained within the
  * $3Dmol global namespace
  * @namespace */
-$3Dmol = (function threeDeeMollContructor(window) {
+// eslint-disable-next-line no-var
+var $3Dmol = (function threeDeeMollContructor(window) {
   const my = window.$3Dmol || {};
 
   return my;
