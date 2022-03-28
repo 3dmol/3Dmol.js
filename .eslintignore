@@ -4,3 +4,6 @@ doc
 /tests
 /3Dmol-doc-template
 /node_modules
+/learning-environment
+viewer.js
+/js

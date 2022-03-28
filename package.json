@@ -10,7 +10,7 @@
   "homepage": "http://3dmol.csb.pitt.edu",
   "devDependencies": {
     "del": "^6.0.0",
-    "eslint": "^8.9.0",
+    "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.4.0",
     "eslint-plugin-import": "^2.25.4",
@@ -27,10 +27,12 @@
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
     "jsdoc": "^3.6.10",
-    "prettier": "^2.5.1"
+    "prettier": "^2.6.1"
   },
   "scripts": {
     "build": "gulp",
+    "check": "npx eslint .",
+    "format": "npx eslint . --fix",
     "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
     "test": "npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
