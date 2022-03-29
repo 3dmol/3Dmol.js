@@ -9,20 +9,20 @@ $3Dmol.UI.Form = (function () {
      * @param {Object} outerControl Reference object to store the value
      */
     Form.Color = function (outerControl) {
-        var redDot = $('<div></div>');
+        const redDot = $('<div></div>');
         redDot.height(10);
         redDot.width(10);
         redDot.css('border-radius', '50%');
         redDot.css('background', 'red');
         redDot.css('margin-right', '3px');
 
-        var blueDot = redDot.clone();
+        const blueDot = redDot.clone();
         blueDot.css('background', 'blue');
 
-        var greenDot = redDot.clone();
+        const greenDot = redDot.clone();
         greenDot.css('background', 'green');
 
-        var control = this.control = {
+        const control = this.control = {
             R: {
                 value: 0,
                 min: 0,
@@ -43,17 +43,17 @@ $3Dmol.UI.Form = (function () {
             },
         };
 
-        var surroundingBox = this.ui = $('<div></div>')
-        var boundingBox = $('<div></div>');
+        const surroundingBox = this.ui = $('<div></div>')
+        const boundingBox = $('<div></div>');
 
         surroundingBox.append(boundingBox);
 
-        var spectrumControl = {
+        const spectrumControl = {
             key: 'Spectrum',
             value: null
         }
 
-        var spectrum = new Form.Checkbox(spectrumControl);
+        const spectrum = new Form.Checkbox(spectrumControl);
 
         boundingBox.append(spectrum.ui);
 
@@ -62,14 +62,14 @@ $3Dmol.UI.Form = (function () {
         })
 
 
-        var RValue = new Form.Slider(control.R);
-        var GValue = new Form.Slider(control.G);
-        var BValue = new Form.Slider(control.B);
+        const RValue = new Form.Slider(control.R);
+        const GValue = new Form.Slider(control.G);
+        const BValue = new Form.Slider(control.B);
 
-        var sliders = $('<div></div>');
+        const sliders = $('<div></div>');
         sliders.append(RValue.ui, GValue.ui, BValue.ui);
 
-        var color = $('<div></div>');
+        const color = $('<div></div>');
 
         boundingBox.append(sliders);
         boundingBox.append(color);
@@ -93,10 +93,10 @@ $3Dmol.UI.Form = (function () {
         color.css('border-radius', '500px');
 
         this.update = function (control) {};
-        var self = this;
+        const self = this;
         // Functionality
         function updatePreview(c) {
-            var c = `rgb(${control.R.value}, ${control.G.value}, ${control.B.value})`;
+            c = `rgb(${control.R.value}, ${control.G.value}, ${control.B.value})`;
             color.css('background', c);
             outerControl.value = c;
             self.update(control);
@@ -128,7 +128,7 @@ $3Dmol.UI.Form = (function () {
 
         this.setValue = function (colorValue) {
 
-            if (colorValue == 'spectrum') {
+            if (colorValue === 'spectrum') {
                 spectrum.setValue(true);
                 spectrum.update(spectrumControl);
                 sliders.hide();
@@ -154,19 +154,19 @@ $3Dmol.UI.Form = (function () {
         // var label = $('<div></div>');
         // label.text(control.key);
 
-        var surroundingBox = this.ui = $('<div></div>');
-        var boundingBox = $('<div></div>');
-        var itemList = listElements;
+        const surroundingBox = this.ui = $('<div></div>');
+        const boundingBox = $('<div></div>');
+        let itemList = listElements;
         // surroundingBox.append(label);
         surroundingBox.append(boundingBox);
 
-        var select = $('<select></select>');
+        const select = $('<select></select>');
         select.css($3Dmol.defaultCSS.ListInput.select);
 
         boundingBox.append(select);
 
-        var showAlertBox = this.showAlertBox = true;
-        var failMessage = $('<div></div>');
+        const showAlertBox = this.showAlertBox = true;
+        const failMessage = $('<div></div>');
         failMessage.text('Please select some value');
         failMessage.css({
             'color': 'crimson',
@@ -186,43 +186,42 @@ $3Dmol.UI.Form = (function () {
             event.data.parent.update(control);
         });
 
-        this.getValue = () => {
-            return control;
-        }
+        this.getValue = () => control
 
         // this.preventAlertBox = function(){
         //     show
         // }
 
         this.validate = function () {
-            if (control.value == 'select' || control.value == null) {
+            if (control.value === 'select' || control.value == null) {
+                // eslint-disable-next-line no-unused-expressions
                 (this.showAlertBox) ? failMessage.show(): null;
                 select.css({
                     'box-shadow': '0px 0px 2px red'
                 });
                 return false;
-            } else {
+            } 
                 failMessage.hide();
                 boundingBox.css({
                     'box-shadow': 'none'
                 });
                 return true;
-            }
+            
         }
 
         this.setValue = function (val) {
-            if (listElements.indexOf(val) != -1) {
+            if (listElements.indexOf(val) !== -1) {
                 select.empty();
-                var defaultOption = $('<option></option>');
+                const defaultOption = $('<option></option>');
                 defaultOption.text('select');
 
                 itemList.forEach((item) => {
-                    var option = $('<option></option>');
+                    const option = $('<option></option>');
                     option.text(item);
                     option.attr('value', item);
                     select.append(option);
 
-                    if (val == item) {
+                    if (val === item) {
                         option.prop('selected', true);
                     }
                 });
@@ -236,7 +235,7 @@ $3Dmol.UI.Form = (function () {
         this.updateList = function (newList) {
             select.empty();
 
-            var defaultOption = $('<option></option>');
+            const defaultOption = $('<option></option>');
             defaultOption.text('select');
             defaultOption.attr('value', 'select');
 
@@ -244,7 +243,7 @@ $3Dmol.UI.Form = (function () {
 
             itemList = newList;
             itemList.forEach((item) => {
-                var option = $('<option></option>');
+                const option = $('<option></option>');
                 option.text(item);
                 option.attr('value', item);
                 select.append(option);
@@ -260,22 +259,22 @@ $3Dmol.UI.Form = (function () {
      * @param {Object} control Reference object to store the value
      */
     Form.Input = function (control) {
-        var surroundingBox = this.ui = $('<div></div>');
-        var boundingBox = $('<div></div>');
+        const surroundingBox = this.ui = $('<div></div>');
+        const boundingBox = $('<div></div>');
         // surroundingBox.append(label);
         surroundingBox.append(boundingBox);
 
-        var validationType = this.validationType = 'text';
+        let validationType = this.validationType = 'text';
 
         surroundingBox.css({
             'width': '100%',
             'box-sizing': 'border-box'
         })
 
-        var input = this.domElement = $('<input type="text">');
+        const input = this.domElement = $('<input type="text">');
         boundingBox.append(input);
 
-        var alertBox = $('<div></div>');
+        const alertBox = $('<div></div>');
         alertBox.css({
             'border': '1px solid darkred',
             'border-radius': '3px',
@@ -289,7 +288,7 @@ $3Dmol.UI.Form = (function () {
             'background': 'lightcoral'
         });
 
-        var alertMessage = {
+        const alertMessage = {
             'invalid-input': 'Invalid input please check the value entered',
         }
 
@@ -312,15 +311,15 @@ $3Dmol.UI.Form = (function () {
 
         input.on('change', {
             parent: this,
-            control: control
+            control
         }, (event) => {
             inputString = input.val();
 
-            if (inputString[inputString.length - 1] == ',') {
+            if (inputString[inputString.length - 1] === ',') {
                 inputString = inputString.slice(0, -1);
             }
 
-            if (validationType == 'range') {
+            if (validationType === 'range') {
                 control.value = inputString.split(',');
             } else {
                 control.value = inputString;
@@ -330,26 +329,24 @@ $3Dmol.UI.Form = (function () {
             event.data.parent.update(control);
         });
 
-        var selectedText = null;
+        let selectedText = null;
 
         input.on('select', (e) => {
             selectedText = input.val().substring(e.target.selectionStart, e.target.selectionEnd);
         });
 
 
-        this.getValue = () => {
-            return control;
-        }
+        this.getValue = () => control
 
-        var error = this.error = function (msg) {
+        const error = this.error = function (msg) {
             alertBox.show();
             alertBox.text(msg)
         }
 
         this.setValue = function (val) {
 
-            if (validationType == 'range') {
-                var text = val.join(',');
+            if (validationType === 'range') {
+                const text = val.join(',');
                 input.val(text);
             } else {
                 input.val(val);
@@ -361,59 +358,58 @@ $3Dmol.UI.Form = (function () {
 
 
         function checkInputFloat() {
-            var inputString = input.val();
+            const inputString = input.val();
 
-            var dots = inputString.match(/\./g) || [];
-            var checkString = inputString.replaceAll(/\./g, '').replaceAll(/[0-9]/g, '');
+            const dots = inputString.match(/\./g) || [];
+            const checkString = inputString.replaceAll(/\./g, '').replaceAll(/[0-9]/g, '');
 
             if (dots.length > 1) {
                 return false
             };
 
-            if (checkString != '') return false;
+            if (checkString !== '') return false;
 
             if (isNaN(parseFloat(inputString))) {
                 return false;
-            } else {
+            } 
                 return true;
-            }
+            
         }
 
         function checkInputNumber() {
-            var inputString = input.val();
+            const inputString = input.val();
 
-            var checkString = inputString.replaceAll(/[0-9]/g, '');
+            const checkString = inputString.replaceAll(/[0-9]/g, '');
 
-            if (checkString != '') return false;
+            if (checkString !== '') return false;
 
             if (isNaN(parseInt(inputString))) {
                 return false;
-            } else {
+            } 
                 return true;
-            }
+            
         }
 
         // Parse Input Range Functions
 
         // Checks only number, comma and hyphen present
         function checkRangeTokens(inputString) {
-            var finalString = inputString.replaceAll(',', '').replaceAll('-', '').replaceAll(/[0-9]/g, '').replaceAll(' ', '');;
+            const finalString = inputString.replaceAll(',', '').replaceAll('-', '').replaceAll(/[0-9]/g, '').replaceAll(' ', '');;
 
-            if (finalString == '')
+            if (finalString === '')
                 return true;
-            else
-                return false;
+            return false;
         }
 
         function checkList(inputString, submit = false) {
             inputString = inputString.replaceAll(' ', '');
 
-            if (inputString[inputString.length - 1] == ',') {
+            if (inputString[inputString.length - 1] === ',') {
                 inputString = inputString.slice(0, -1);
             }
 
 
-            var rangeList = inputString.split(',');
+            const rangeList = inputString.split(',');
 
             // If dublicate comma return false;
             if (/,,/g.exec(inputString)) return false;
@@ -421,73 +417,66 @@ $3Dmol.UI.Form = (function () {
             // If first element not a number return false;
             if (isNaN(parseInt(rangeList[0]))) return false;
 
-            var validRangeList = rangeList.map((rangeInput) => {
-                return checkRangeInput(rangeInput);
-            });
+            const validRangeList = rangeList.map((rangeInput) => checkRangeInput(rangeInput));
 
-            return validRangeList.find((e) => {
-                return e == false
-            }) == undefined ? true : false;
+            return validRangeList.find((e) => e === false) === undefined;
         }
 
         function checkRangeInput(inputString, submit = false) {
-            var rangeInputs = inputString.split('-');
+            const rangeInputs = inputString.split('-');
             if (rangeInputs.length > 2) {
                 return false;
-            } else {
-                if (rangeInputs.length == 0) {
+            } 
+                if (rangeInputs.length === 0) {
                     return true;
-                } else if (rangeInputs.length == 1) {
+                } if (rangeInputs.length === 1) {
                     if (isNaN(parseInt(rangeInputs[0])))
                         return false;
-                    else
-                        return true;
-                } else if (rangeInputs.length == 2) {
+                    return true;
+                } if (rangeInputs.length === 2) {
                     if (isNaN(parseInt(rangeInputs[0])) || isNaN(parseInt(rangeInputs[1])))
                         return false;
-                    else
-                        return true;
-                } else
-                    return false;
-            }
+                    return true;
+                } return false;
+            
         }
 
-        var checkInput = this.checkInput = function () {
-            var inputString = input.val();
+        const checkInput = this.checkInput = function () {
+            const inputString = input.val();
 
-            if (validationType == 'number') {
+            if (validationType === 'number') {
                 if (checkInputNumber()) {
                     alertBox.hide();
                     return true;
-                } else {
+                } 
                     error(alertMessage['invalid-input']);
                     return false;
-                }
-            } else if (validationType == 'float') {
+                
+            } if (validationType === 'float') {
                 if (checkInputFloat()) {
                     alertBox.hide();
                     return true;
-                } else {
+                } 
                     error(alertMessage['invalid-input']);
                     return false;
-                }
-            } else if (validationType == 'range') {
+                
+            } if (validationType === 'range') {
                 if (checkRangeTokens(inputString)) {
                     if (checkList(inputString)) {
                         alertBox.hide();
                         return true;
-                    } else {
+                    } 
                         error(alertMessage['invalid-input']);
                         return false;
-                    }
-                } else {
+                    
+                } 
                     error(alertMessage['invalid-input']);
                     return false;
-                }
+                
 
-            } else {
+            } 
                 return true;
-            }
+            
         }
 
         this.validateOnlyNumber = function (floatType = false) {
@@ -497,7 +486,7 @@ $3Dmol.UI.Form = (function () {
                 validationType = 'number';
             }
 
-            input.on('keydown keyup paste cut', function (event) {
+            input.on('keydown keyup paste cut', (event) => {
                 checkInput();
             });
         }
@@ -513,19 +502,19 @@ $3Dmol.UI.Form = (function () {
         }
 
         this.isEmpty = function () {
-            if (control.value == "") {
+            if (control.value === "") {
                 return true;
             }
         }
 
         this.validate = function () {
-            if ((control.active == true && control.value != null && control.value != "" && checkInput()) || (control.active == false)) {
+            if ((control.active === true && control.value != null && control.value !== "" && checkInput()) || (control.active === false)) {
                 input.css('box-shadow', 'none');
                 return true
-            } else {
+            } 
                 input.css('box-shadow', '0px 0px 2px red');
                 return false;
-            }
+            
         }
 
         // CSS 
@@ -541,16 +530,16 @@ $3Dmol.UI.Form = (function () {
      * @param {Object} control Reference object to store the value
      */
     Form.Checkbox = function (control) {
-        var label = $('<div></div>');
+        const label = $('<div></div>');
         label.text(control.key);
         label.css($3Dmol.defaultCSS.TextDefault);
 
-        var surroundingBox = this.ui = $('<div></div>');
-        var boundingBox = $('<div></div>');
+        const surroundingBox = this.ui = $('<div></div>');
+        const boundingBox = $('<div></div>');
         surroundingBox.append(boundingBox);
         surroundingBox.append(label);
 
-        var checkbox = $('<input type="checkbox" />');
+        const checkbox = $('<input type="checkbox" />');
         boundingBox.append(checkbox);
 
         this.click = () => {};
@@ -559,9 +548,7 @@ $3Dmol.UI.Form = (function () {
 
         }
 
-        this.getValue = () => {
-            return control;
-        }
+        this.getValue = () => control
 
         checkbox.on('click', {
             parent: this
@@ -591,22 +578,22 @@ $3Dmol.UI.Form = (function () {
      * @param {Object} control Reference object to store the value
      */
     Form.Slider = function (control, style = {}) {
-        var surroundingBox = this.ui = $('<div></div>');
+        const surroundingBox = this.ui = $('<div></div>');
 
-        var boundingBox = $('<div></div>');
+        const boundingBox = $('<div></div>');
         surroundingBox.append(boundingBox);
 
         boundingBox.css('display', 'flex');
-        var slide = this.slide = $('<input type="range">');
+        const slide = this.slide = $('<input type="range">');
         slide.css('width', '100%');
 
-        var min = control.min || 0;
-        var max = control.max || 100;
-        var step = control.step || 1;
-        var defaultValue = control.default || min;
-        var labelContent = control.label || '';
+        const min = control.min || 0;
+        const max = control.max || 100;
+        const step = control.step || 1;
+        const defaultValue = control.default || min;
+        const labelContent = control.label || '';
 
-        var label = $('<div></div>');
+        const label = $('<div></div>');
         label.append(labelContent);
         boundingBox.append(label);
 
@@ -617,15 +604,13 @@ $3Dmol.UI.Form = (function () {
         control.value = defaultValue;
         boundingBox.append(slide);
 
-        var setValue = false;
+        let setValue = false;
 
         this.update = function (control) {
 
         };
 
-        this.getValue = () => {
-            return control;
-        }
+        this.getValue = () => control
 
         slide.on('mousedown', () => {
             setValue = true;
@@ -672,15 +657,13 @@ $3Dmol.UI.Form = (function () {
     Form.EmptyElement = function (control) {
         this.ui = $('<div></div>');
 
-        var update = () => {};
+        let update = () => {};
 
         this.onUpdate = (callback) => {
             update = callback;
         }
 
-        this.getValue = () => {
-            return control;
-        }
+        this.getValue = () => control
 
         this.validate = function () {
             return true;
@@ -700,9 +683,9 @@ $3Dmol.UI.Form = (function () {
      */
     function Form(specs, mainControl) {
         specs = specs || {};
-        var boundingBox = this.ui = $('<div></div>');
+        const boundingBox = this.ui = $('<div></div>');
 
-        var heading = $('<div></div>');
+        const heading = $('<div></div>');
         heading.text(mainControl.key);
 
         // Styling heading 
@@ -718,23 +701,23 @@ $3Dmol.UI.Form = (function () {
         boundingBox.append(heading);
         boundingBox.addClass('form');
 
-        var inputs = this.inputs = [];
+        const inputs = this.inputs = [];
         // body.append(boundingBox);
 
-        var keys = Object.keys(specs);
+        const keys = Object.keys(specs);
         keys.forEach((key) => {
             if (specs[key].gui) {
-                var prop = new Property(key, specs[key].type);
+                const prop = new Property(key, specs[key].type);
                 inputs.push(prop);
                 boundingBox.append(prop.ui);
             }
 
         });
-        var self = this;
+        const self = this;
 
         this.update = function () {}
 
-        var update = (control) => {
+        const update = (control) => {
 
         };
 
@@ -747,7 +730,7 @@ $3Dmol.UI.Form = (function () {
             mainControl.value = {};
 
             inputs.forEach((input) => {
-                var inputValue = input.getValue();
+                const inputValue = input.getValue();
 
                 if (inputValue.active) {
                     mainControl.value[inputValue.key] = inputValue.value;
@@ -757,35 +740,35 @@ $3Dmol.UI.Form = (function () {
             return mainControl;
         }
 
-        var updateValues = function (inputControl) {
+        const updateValues = function (inputControl) {
             mainControl.value[inputControl.key] = control.value;
             update(mainControl);
         }
 
         this.validate = function () {
-            var validations = inputs.map((i) => {
+            const validations = inputs.map((i) => {
 
                 if (i.active.getValue().value) {
                     return i.placeholder.validate();
-                } else {
+                } 
                     return true;
-                }
+                
             });
 
 
-            if (validations.find(e => e == false) == undefined)
+            if (validations.find(e => e === false) === undefined)
                 return true;
-            else {
+            
                 return false;
-            }
+            
 
         }
 
         this.setValue = function (val) {
-            var keys = Object.keys(val);
-            for (var i = 0; i < keys.length; i++) {
-                var input = inputs.find((e) => {
-                    if (e.control.key == keys[i])
+            const keys = Object.keys(val);
+            for (let i = 0; i < keys.length; i++) {
+                const input = inputs.find((e) => {
+                    if (e.control.key === keys[i])
                         return e;
                 });
 
@@ -799,7 +782,7 @@ $3Dmol.UI.Form = (function () {
 
             // mainControl.value = val;
             this.update(mainControl);
-            var v = this.getValue();
+            const v = this.getValue();
 
         }
 
@@ -808,30 +791,30 @@ $3Dmol.UI.Form = (function () {
         }
 
         function Property(key, type) {
-            var control = this.control = {
+            const control = this.control = {
                 value: null,
-                type: type,
-                key: key,
+                type,
+                key,
                 active: false
             };
-            var boundingBox = this.ui = $('<div></div>');
+            const boundingBox = this.ui = $('<div></div>');
             this.placeholder = {
                 ui: $('<div></div>')
             }; // default value for ui element 
             this.active = new Form.Checkbox({
                 value: false,
-                key: key
+                key
             });
 
 
-            if (specs[key].type == 'string' || specs[key].type == 'element') {
+            if (specs[key].type === 'string' || specs[key].type === 'element') {
                 this.placeholder = new Form.Input(control);
                 this.placeholder.ui.attr('type', 'text');
-            } else if (specs[key].type == 'number') {
+            } else if (specs[key].type === 'number') {
 
-                var slider = false;
+                let slider = false;
 
-                if (specs[key].min != undefined && specs[key].max != undefined && specs[key].default != undefined) {
+                if (specs[key].min !== undefined && specs[key].max !== undefined && specs[key].default !== undefined) {
                     slider = true;
                 }
 
@@ -847,33 +830,33 @@ $3Dmol.UI.Form = (function () {
                     this.placeholder.ui.attr('type', 'text');
                     this.placeholder.validateOnlyNumber(specs[key].floatType);
                 }
-            } else if (specs[key].type == 'array_range') {
+            } else if (specs[key].type === 'array_range') {
                 this.placeholder = new Form.Input(control);
                 this.placeholder.ui.attr('type', 'text');
                 this.placeholder.validateInputRange();
-            } else if (specs[key].type == 'color') {
+            } else if (specs[key].type === 'color') {
                 this.placeholder = new Form.Color(control);
                 if (specs[key].spectrum) {
                     this.placeholder.enableSpectrum();
                 }
 
-            } else if (specs[key].type == 'boolean') {
+            } else if (specs[key].type === 'boolean') {
                 this.placeholder = new Form.Checkbox(control);
 
-            } else if (specs[key].type == 'properties') {
+            } else if (specs[key].type === 'properties') {
                 this.placeholder = new Form.Input(control);
                 this.placeholder.ui.attr('type', 'text');
 
-            } else if (specs[key].type == 'colorscheme') {
+            } else if (specs[key].type === 'colorscheme') {
                 this.placeholder = new Form.ListInput(control, Object.keys($3Dmol.builtinColorSchemes));
                 this.placeholder.ui.attr('type', 'text');
 
-            } else if (specs[key].type == undefined) {
+            } else if (specs[key].type === undefined) {
                 if (specs[key].validItems) {
                     this.placeholder = new Form.ListInput(control, specs[key].validItems);
                 }
 
-            } else if (specs[key].type == 'form') {
+            } else if (specs[key].type === 'form') {
                 this.placeholder = new Form(specs[key].validItems, control);
                 this.placeholder.ui.append($('<div></div>').css($3Dmol.defaultCSS.LinkBreak));
             } else {
@@ -885,15 +868,14 @@ $3Dmol.UI.Form = (function () {
 
                 if (this.placeholder.getValue)
                     return this.placeholder.getValue();
-                else
-                    return null;
+                return null;
             }
 
 
             // Adding active control for the property
-            var placeholder = this.placeholder;
+            const {placeholder} = this;
 
-            if (type != 'boolean') {
+            if (type !== 'boolean') {
                 placeholder.ui.hide();
                 boundingBox.append(this.active.ui);
                 this.active.update = function (c) {

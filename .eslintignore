@@ -1,0 +1,9 @@
+build
+doc
+/gulpfile.js
+/tests
+/3Dmol-doc-template
+/node_modules
+/learning-environment
+viewer.js
+/js

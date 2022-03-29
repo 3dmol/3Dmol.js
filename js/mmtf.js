@@ -1,6 +1,9 @@
 (function (global, factory) {
+  global = global || window;
   (factory((global['MMTF'] = global.MMTF || {})));
-}(window, function (exports) { 'use strict';
+
+}(this, function (exports) { 'use strict';
+
 
   /**
    * @file utf8-utils

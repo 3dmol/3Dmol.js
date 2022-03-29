@@ -28,7 +28,7 @@
  * @prop lowerZoomLimit
  * @prop upperZoomLimit
  * @prop {boolean} antialias
- * @prop {boolean} control_all
+ * @prop {boolean} controlAll
  * @prop {boolean} orthographic
  * @prop {boolean} disableFog - Disable fog, default to false
  */
@@ -38,7 +38,7 @@
  * @typedef ViewerGridSpec
  * @prop {number} rows - number of rows in grid
  * @prop {number} cols - number of columns in grid
- * @prop {boolean} control_all - if true, mouse events are linked
+ * @prop {boolean} controlAll - if true, mouse events are linked
  */
 
 /**
@@ -198,7 +198,7 @@
  * @prop {list} transferfn - list of objects containing @color, @opacity and @value properties to specify color per voxel data value
  * @prop {number} subsamples - number of times to sample each voxel approximately (default 5)
  */
-    //TODO: implement pruning of data, should start with box
+    // TODO: implement pruning of data, should start with box
     // @prop {list} coords - coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates
     // @prop {number} seldist - distance around coords to include data [default = 2.0]
 

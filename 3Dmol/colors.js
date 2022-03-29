@@ -44,7 +44,8 @@
  
 })();
 
-var htmlColors = $3Dmol.htmlColors = {
+// eslint-disable-next-line no-multi-assign
+const htmlColors = $3Dmol.htmlColors = {
     "aliceblue" : 0xF0F8FF,
     "antiquewhite" : 0xFAEBD7,
     "aqua" : 0x00FFFF,
@@ -208,45 +209,45 @@ $3Dmol.CC = {
             return this.cache[hex];
         }
         // arrays
-        else if(hex && hex.constructor === Array) {
+        if(hex && hex.constructor === Array) {
             // parse elements recursively
             return hex.map(color_,this);
         }
         // numbers and hex strings
         hex = this.getHex(hex);
         if(typeof hex === 'number') {
-            var c = new $3Dmol.Color(hex);
+            const c = new $3Dmol.Color(hex);
             this.cache[hex] = c;
             return c;
-        } else {
+        } 
             // pass through $3Dmol.Color & other objects
             return hex;
-        }
+        
     },
  
-    getHex : function(hex) {
+    getHex(hex) {
         if (!isNaN(parseInt(hex)))
             return parseInt(hex);        
-        else if (typeof(hex) === 'string') {
+        if (typeof(hex) === 'string') {
             hex = hex.trim();
             
-            if(hex.length == 4 && hex[0] == '#') {
-                hex = '#' + hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3]; //expand to full hex number
+            if(hex.length === 4 && hex[0] === '#') {
+                hex = `#${  hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`; // expand to full hex number
             }
             
-            if(hex.length == 7 && hex[0] == '#') {
+            if(hex.length === 7 && hex[0] === '#') {
                 return parseInt(hex.substring(1),16);
             } 
             
-            let m = this.rgbRegEx.exec(hex);
+            const m = this.rgbRegEx.exec(hex);
             if(m) {
-                if(m[1] != "") {
+                if(m[1] !== "") {
                     console.log("WARNING: Opacity value in rgba ignored.  Specify separately as opacity attribute.");
                 }
                 let ret = 0;
                 for(let i = 2; i < 5; i++) {
                     ret *= 256;
-                    let val = m[i].endsWith("%") ? 255*parseFloat(m[i])/100 : parseFloat(m[i]);
+                    const val = m[i].endsWith("%") ? 255*parseFloat(m[i])/100 : parseFloat(m[i]);
                     ret += Math.round(val);
                 }
                 return ret;
@@ -270,7 +271,7 @@ $3Dmol.CC.color = $3Dmol.CC.color;
  * @struct
  */
 $3Dmol.ssColors = $3Dmol.ssColors || {};
-//names are in helix-sheet-coil order
+// names are in helix-sheet-coil order
 $3Dmol.ssColors.pyMol = {'h': 0xff0000, 's':  0xffff00, 'c': 0x00ff00};
 $3Dmol.ssColors.Jmol = {'h': 0xff0080, 's': 0xffc800, 'c': 0xffffff};
 
@@ -282,7 +283,7 @@ $3Dmol.elementColors = $3Dmol.elementColors || {};
 
 $3Dmol.elementColors.defaultColor = 0xff1493;
 
-/** @property Jmol-like element colors*/
+/** @property Jmol-like element colors */
 $3Dmol.elementColors.Jmol = {
         'H': 0xFFFFFF,
         'He': 0xD9FFFF,
@@ -544,7 +545,7 @@ $3Dmol.elementColors.rasmol = {
 $3Dmol.elementColors.defaultColors = $3Dmol.elementColors.rasmol;
 
 $3Dmol.elementColors.greenCarbon = $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
-$3Dmol.elementColors.greenCarbon.C = 0x00ff00; //bright green
+$3Dmol.elementColors.greenCarbon.C = 0x00ff00; // bright green
 
 $3Dmol.elementColors.cyanCarbon =  $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
 $3Dmol.elementColors.cyanCarbon.C = 0x00ffff;
@@ -570,7 +571,7 @@ $3Dmol.elementColors.blueCarbon.C = 0x0000ff;
 
 $3Dmol.residues = {};
 
-/** @property standard amino acid color scheme*/
+/** @property standard amino acid color scheme */
 $3Dmol.residues.amino ={
 'ALA' : 0xC8C8C8,        
 'ARG' : 0x145AFF,              
@@ -597,7 +598,7 @@ $3Dmol.residues.amino ={
 
 };
 
-/** @property shapely amino acid color scheme*/
+/** @property shapely amino acid color scheme */
 $3Dmol.residues.shapely ={
 'ALA' : 0x8CFF8C,         
 'ARG' : 0x00007C,              
@@ -624,7 +625,7 @@ $3Dmol.residues.shapely ={
 
 };
 
-/** @property nucleic acid color scheme*/
+/** @property nucleic acid color scheme */
 $3Dmol.residues.nucleic = {
     'A':0xA0A0FF,    
     'G':  0xFF7070,    
@@ -727,68 +728,68 @@ $3Dmol.builtinColorSchemes = {
  */
  
 $3Dmol.getColorFromStyle = function(atom, style) {
-    var scheme = style.colorscheme;  
+    let scheme = style.colorscheme;  
     if(typeof($3Dmol.builtinColorSchemes[scheme]) != "undefined") {
         scheme = $3Dmol.builtinColorSchemes[scheme];
     } else if(typeof(scheme) == 'string' && scheme.endsWith('Carbon')) {
-        //any color you want of carbon
-        var ccolor = scheme.substring(0,scheme.lastIndexOf("Carbon")).toLowerCase();
+        // any color you want of carbon
+        const ccolor = scheme.substring(0,scheme.lastIndexOf("Carbon")).toLowerCase();
         if(typeof(htmlColors[ccolor]) != "undefined") {
-            var newscheme = $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
+            const newscheme = $3Dmol.extend({},$3Dmol.elementColors.defaultColors);
             newscheme.C = htmlColors[ccolor];
             $3Dmol.builtinColorSchemes[scheme] = {'prop': 'elem', map:newscheme};
             scheme = $3Dmol.builtinColorSchemes[scheme];
         }        
     }
     
-    var color = atom.color;
-    if (typeof (style.color) != "undefined" && style.color != "spectrum")
+    let {color} = atom;
+    if (typeof (style.color) != "undefined" && style.color !== "spectrum")
         color = style.color;
     if(typeof(scheme) != "undefined") {
-        var prop, val;
+        let prop; let val;
         if(typeof($3Dmol.elementColors[scheme]) != "undefined") {
-            //name of builtin colorscheme
+            // name of builtin colorscheme
             scheme = $3Dmol.elementColors[scheme];
             if(typeof(scheme[atom[scheme.prop]]) != "undefined") {
                 color = scheme.map[atom[scheme.prop]];
             }
         } else if(typeof(scheme[atom[scheme.prop]]) != 'undefined') {
-            //actual color scheme provided
+            // actual color scheme provided
             color = scheme.map[atom[scheme.prop]];
         } else if(typeof(scheme.prop) != 'undefined' &&
                 typeof(scheme.gradient) != 'undefined') {         
-            //apply a property mapping
+            // apply a property mapping
             prop = scheme.prop;
-            var grad = scheme.gradient; //redefining scheme
+            let grad = scheme.gradient; // redefining scheme
             if(typeof($3Dmol.Gradient.builtinGradients[grad]) != "undefined") {
                 grad = new $3Dmol.Gradient.builtinGradients[grad](scheme.min, scheme.max, scheme.mid);
             }
             
-            var range = grad.range() || [-1,1]; //sensible default
+            const range = grad.range() || [-1,1]; // sensible default
             val = $3Dmol.getAtomProperty(atom, prop);
             if(val != null) {
                 color = grad.valueToHex(val, range);
             }
         } else if(typeof(scheme.prop) != 'undefined' &&
                 typeof(scheme.map) != 'undefined') {         
-            //apply a discrete property mapping
+            // apply a discrete property mapping
             prop = scheme.prop;
             val = $3Dmol.getAtomProperty(atom, prop);
             if( typeof scheme.map[val] != 'undefined' ) {
                 color = scheme.map[val];
             }
         } else if(typeof(style.colorscheme[atom.elem]) != 'undefined') {
-            //actual color scheme provided
+            // actual color scheme provided
             color = style.colorscheme[atom.elem];
         } else {
-            console.log("Could not interpret colorscheme "+scheme);
+            console.log(`Could not interpret colorscheme ${scheme}`);
         } 
     } 
     else if(typeof(style.colorfunc) != "undefined") {
-        //this is a user provided function for turning an atom into a color
+        // this is a user provided function for turning an atom into a color
         color = style.colorfunc(atom);
     }
     
-    var C = $3Dmol.CC.color(color);
+    const C = $3Dmol.CC.color(color);
     return C;
 };
