@@ -262,9 +262,17 @@ $3Dmol.autoload=function(viewer,callback){
             }            
         });                      
     }};
-    
-document.addEventListener('DOMContentLoaded', function() {
-    $3Dmol.autoload();    
-});
+   
+
+//if domcontent has already load
+if (document.readyState === "interactive") {
+    $(document).ready(function() {
+        $3Dmol.autoload();
+    });
+} else {
+    document.addEventListener('DOMContentLoaded', function() {
+        $3Dmol.autoload();    
+    });
+}
     
  
