@@ -953,8 +953,8 @@ function mat4Tests()
 	function mat4MakePerspective()
 	{
 		let mat4 = new $3Dmol.Matrix4(...range(1, 16));
-		mat4 = mat4.makeFrustum(90, 1, 2, 3);
-		expect([...mat4.elements]).toEqual([NaN, 0, 0, 0, 0, NaN, 0, 0, -1.0224719047546387, 5, NaN, -1, 0, 0, NaN, 0]);
+		mat4 = mat4.makePerspective(90, 1, 2, 3);
+		expect([...mat4.elements]).toEqual([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -5, -1, 0, 0, -12, 0]);
 	}
 	function mat4MakeOrthographic()
 	{
