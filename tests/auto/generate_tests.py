@@ -34,7 +34,10 @@ def script_string(typedef,text):
 class Example():
     def __init__(self,name,text):
         self.name=name.replace(".","_")
-        self.name=self.name.replace("/","_")
+        if os.name == "nt":
+            self.name = self.name.replace("\\", "_")
+        else:
+            self.name=self.name.replace("/","_")
         self.name=self.name.replace("_3Dmol_","")
         self.name=self.name.replace("___","")
         self.name=self.name.replace("_tests_","")
