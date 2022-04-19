@@ -65,6 +65,7 @@ symlink(testStructsSrcDir, structAssetDir,target_is_directory=True)
 
 for file in testsys.files:
     for example in file.examples:
+        print(example.name)
         prescript = '\n'.join([f"<script>{preproc_src(pre)}</script>" for pre in example.prescripts])
         with open(pathjoin(generationTargetDir, f"{example.name}.html"), "w") as f:
             f.write(
