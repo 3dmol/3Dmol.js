@@ -9,7 +9,7 @@ from os.path import join as pathjoin, exists, abspath
 from posixpath import split
 from shutil import copytree, rmtree
 
-curDir = abspath(split(abspath(__file__))[0]) 
+curDir = abspath(split(abspath(__file__))[0])
 projectDir = abspath(pathjoin(curDir, "..", ".."))# hardcoded directory paths :-(
 testSrcDir = pathjoin(projectDir, 'tests', "auto")
 buildSrcDir = pathjoin(projectDir, 'build')
@@ -19,6 +19,18 @@ testStructsSrcDir = pathjoin(projectDir, "tests", "test_structs")
 testAssetsDir = pathjoin(generationTargetDir, "assets")
 dataAssetDir = pathjoin(generationTargetDir, "data")
 structAssetDir = pathjoin(generationTargetDir, "structs")
+print("--------------Path printouts---------------")
+print(curDir)
+print(projectDir)
+print(testSrcDir)
+print(buildSrcDir)
+print(generationTargetDir)
+print(dataSrcDir)
+print(testStructsSrcDir)
+print(testAssetsDir)
+print(dataAssetDir)
+print(structAssetDir)
+print("-----------------End path printouts--------------")
 
 sys.path.append(testSrcDir) # this line lets you import python files from the /tests/auto directory
 import generate_tests
