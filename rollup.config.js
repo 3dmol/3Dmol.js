@@ -14,7 +14,7 @@ export default {
         {
             file: "build/3Dmol-min.js",
             name: "$3Dmol",
-            format: "iife",
+            format: "umd",
             sourcemap: true,
             plugins: [terser()],
         },
