@@ -4,12 +4,14 @@
 
 import sys, re
 
-from os import mkdir, symlink
+from os import mkdir, symlink, name
 from os.path import join as pathjoin, exists, abspath
 from posixpath import split
 from shutil import copytree, rmtree
 
 curDir = abspath(split(abspath(__file__))[0])
+if name == 'nt':
+    curDir = curDir + "\\tests\\glcheck"
 projectDir = abspath(pathjoin(curDir, "..", ".."))# hardcoded directory paths :-(
 testSrcDir = pathjoin(projectDir, 'tests', "auto")
 buildSrcDir = pathjoin(projectDir, 'build')
