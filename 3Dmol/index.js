@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import "./effects/binaryPlusAjaxExtension"
 import "./effects/autoloadEffect";
+import $ from "jquery"
 import {CC, elementColors, htmlColors} from './colors';
 import drawCartoon from './drawCartoon';
 import GLDraw from './GLDraw';
@@ -87,7 +88,10 @@ import {
   square,
 } from './WebGL/math';
 import EventDispatcher from './WebGL/core/EventDispatcher';
+import createViewerGrid from "./util/createViewerGrid";
+import createViewer from "./util/createViewer";
 
+globalThis.$ = $;
 export default {
   Color,
   GLViewer,
@@ -177,6 +181,8 @@ export default {
     degToRad,
     square,
   },
-  EventDispatcher
+  EventDispatcher,
+  createViewer,
+  createViewerGrid
 };
 
