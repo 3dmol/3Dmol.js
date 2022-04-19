@@ -1,4 +1,6 @@
-$3Dmol.Events = (function(){
+import $ from "jquery"
+
+const Events = (function(){
   
     this.on = function(eventName, callback){
       $(document).on(eventName, (event)=>{
@@ -11,3 +13,5 @@ $3Dmol.Events = (function(){
     }
   
 });
+
+export default Events;

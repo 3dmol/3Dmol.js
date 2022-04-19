@@ -1,13 +1,11 @@
-// @ts-check
+import Color from './core/Color';
+
 /*
  * Fog Class
  */
-
-import { Color } from "./core";
-
-export class Fog {
+export default class Fog {
   constructor(hex, near, far) {
-    this.name = "";
+    this.name = '';
 
     this.color = new Color(hex);
 

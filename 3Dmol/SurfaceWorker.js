@@ -1,7 +1,11 @@
-// Hackish way to create webworker (independent of $3Dmol namespace) within minified file
-$3Dmol.workerString = function(){
+// @ts-nocheck
+import { MarchingCubeInitializer } from "./MarchingCube";
+import ProteinSurface from "./ProteinSurface4";
 
-    self.onmessage = function(oEvent) {
+// Hackish way to create webworker (independent of $3Dmol namespace) within minified file
+let workerStringBody = (function(){
+
+    self.onmessage = (function(oEvent) {
         const obj = oEvent.data;
         const {type} = obj;
         if (type < 0) // sending atom data, initialize
@@ -23,16 +27,13 @@ $3Dmol.workerString = function(){
             const VandF = ps.getFacesAndVertices(obj.atomsToShow);
             self.postMessage(VandF);
         }
-    };
+    });
     
-}.toString().replace(/(^.*?\{|\}$)/g, "");
+}).toString().replace(/(^.*?\{|\}$)/g, "");
 
 // NOTE: variable replacement is simplified
 // (See: http://stackoverflow.com/questions/1661197/what-characters-are-valid-for-javascript-variable-names)
-$3Dmol.workerString += `; var ProteinSurface=${  $3Dmol.ProteinSurface.toString().replace(/[a-zA-Z_$]{1}[0-9a-zA-Z_$]*.MarchingCube./g, "MarchingCube.")}`;
-$3Dmol.workerString += `,MarchingCube=(${$3Dmol.MarchingCubeInitializer.toString() })();`;
-
-$3Dmol.SurfaceWorker = window.URL ? window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'})) : {postMessage(){}};
-
-$3Dmol.workerString = $3Dmol.workerString;
-$3Dmol.SurfaceWorker = $3Dmol.SurfaceWorker;
+workerStringBody += `; var ProteinSurface=${  ProteinSurface.toString().replace(/[a-zA-Z_$]{1}[0-9a-zA-Z_$]*.MarchingCube./g, "MarchingCube.")}`;
+workerStringBody += `,MarchingCube=(${MarchingCubeInitializer.toString() })();`;
+export const workerString = `${workerStringBody}`;
+export const SurfaceWorker = (window.URL && window.URL.createObjectURL) ? window.URL.createObjectURL(new Blob([workerString],{type: 'text/javascript'})) : {postMessage(){}};

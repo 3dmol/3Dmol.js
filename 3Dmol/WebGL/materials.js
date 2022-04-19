@@ -1,17 +1,76 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable max-classes-per-file */
+import Color from './core/Color';
+import EventDispatcher from './core/EventDispatcher';
+import {Vector2, Vector3} from './math';
+
+// sides
+export const FrontSide = 0;
+export const BackSide = 1;
+export const DoubleSide = 2;
+
+// shading
+export const NoShading = 0;
+export const FlatShading = 1;
+export const SmoothShading = 2;
+
+// colors
+export const NoColors = 0;
+export const FaceColors = 1;
+export const VertexColors = 2;
+
+// Texture constants
+// TODO: Which of these do I need (since I only use textures to display label sprites) ?
+export const MultiplyOperation = 0;
+export const MixOperation = 1;
+export const AddOperation = 2;
+
+// mapping modes
+
+export function UVMapping() {}
+
+// wrapping modes
+export const ClampToEdgeWrapping = 1001;
+
+// Filters
+export const LinearFilter = 1006;
+export const NearestFilter = 1007;
+export const LinearMipMapLinearFilter = 1008;
+
+// Data types
+export const UnsignedByteType = 1009;
+export const FloatType = 1010;
+
+// Pixel formats
+export const RGBAFormat = 1021;
+export const RFormat = 1022;
+export const R32Format = 1023;
+
+// eslint-disable-next-line import/no-mutable-exports
+export let MaterialIdCount = 0;
+
 /**
  * Line and Mesh material types
  * @constructor
  */
-$3Dmol.Material = function () {
+/**
+ * Line and Mesh material types
+ * @constructor
+ */
+export class Material extends EventDispatcher {
+  overdraw;
+  voldata;
+  volscheme;
 
-    $3Dmol.EventDispatcher.call( this );
+  constructor() {
+    super();
 
-    this.id = $3Dmol.MaterialIdCount +=1;
+    this.id = MaterialIdCount += 1;
 
     this.name = '';
 
     // TODO: Which of these instance variables can I remove??
-    this.side = $3Dmol.FrontSide;
+    this.side = FrontSide;
 
     this.opacity = 1;
     this.transparent = false;
@@ -30,56 +89,38 @@ $3Dmol.Material = function () {
     this.visible = true;
 
     this.needsUpdate = true;
+  }
 
-};
+  setValues(values) {
+    if (values === undefined) return;
 
+    for (const key in values) {
+      const newValue = values[key];
 
-$3Dmol.Material.prototype.setValues = function ( values ) {
+      if (newValue === undefined) {
+        console.warn(`Material: '${key}' parameter is undefined.`);
+        continue;
+      }
 
-    if ( values === undefined ) return;
+      if (key in this) {
+        const currentValue = this[key];
 
-    for ( const key in values ) {
-
-        const newValue = values[ key ];
-
-        if ( newValue === undefined ) {
-
-            console.warn( `$3Dmol.Material: '${  key  }' parameter is undefined.` );
-            continue;
-
+        if (currentValue instanceof Color && newValue instanceof Color) {
+          currentValue.copy(newValue);
+        } else if (currentValue instanceof Color) {
+          currentValue.set(newValue);
+        } else if (currentValue instanceof Vector3 && newValue instanceof Vector3) {
+          currentValue.copy(newValue);
+        } else {
+          this[key] = newValue;
         }
-
-        if ( key in this ) {
-
-            const currentValue = this[ key ];
-
-            if ( currentValue instanceof $3Dmol.Color && newValue instanceof $3Dmol.Color ) {
-
-                currentValue.copy( newValue );
-
-            } else if ( currentValue instanceof $3Dmol.Color ) {
-
-                currentValue.set( newValue );
-
-            } else if ( currentValue instanceof $3Dmol.Vector3 && newValue instanceof $3Dmol.Vector3 ) {
-
-                currentValue.copy( newValue );
-
-            } else {
-
-                this[ key ] = newValue;
-
-            }
-
-        }
-
+      }
     }
+  }
 
-};
-// TODO: might want to look into blending equations
-$3Dmol.Material.prototype.clone = function ( material ) {
-
-    if ( material === undefined ) material = new $3Dmol.Material();
+  // TODO: might want to look into blending equations
+  clone(material) {
+    if (material === undefined) material = new Material();
 
     material.name = this.name;
 
@@ -103,24 +144,22 @@ $3Dmol.Material.prototype.clone = function ( material ) {
     material.visible = this.visible;
 
     return material;
+  }
 
-};
-
-$3Dmol.Material.prototype.dispose = function () {
-
-    this.dispatchEvent( { type: 'dispose' } );
-
-};
-
-$3Dmol.MaterialIdCount = 0;
+  dispose() {
+    this.dispatchEvent({type: 'dispose'});
+  }
+}
 
 // Line basic material
 /** @constructor */
-$3Dmol.LineBasicMaterial = function(parameters) {
+// Line basic material
+/** @constructor */
+export class LineBasicMaterial extends Material {
+  constructor(parameters) {
+    super();
 
-    $3Dmol.Material.call(this);
-
-    this.color = new $3Dmol.Color(0xffffff);
+    this.color = new Color(0xffffff);
 
     this.linewidth = 1;
     this.linecap = 'round';
@@ -129,36 +168,41 @@ $3Dmol.LineBasicMaterial = function(parameters) {
     this.vertexColors = false;
 
     this.fog = true;
-    this.shaderID = "basic";
+    this.shaderID = 'basic';
     this.setValues(parameters);
+  }
 
-};
+  clone() {
+    const material = new LineBasicMaterial();
 
-$3Dmol.LineBasicMaterial.prototype = Object.create($3Dmol.Material.prototype);
-
-$3Dmol.LineBasicMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.LineBasicMaterial();
-
-    $3Dmol.Material.prototype.clone.call(this, material);
+    Material.prototype.clone.call(this, material);
 
     material.color.copy(this.color);
     return material;
-};
+  }
+}
 
 // Mesh Lambert material
 /** @constructor */
-$3Dmol.MeshLambertMaterial = function(parameters) {
+// Mesh Lambert material
+/** @constructor */
+export class MeshLambertMaterial extends Material {
+  combine;
 
-    $3Dmol.Material.call(this);
+  morphTargets;
 
-    this.color = new $3Dmol.Color(0xffffff);
-    this.ambient = new $3Dmol.Color(0xfffff);
-    this.emissive = new $3Dmol.Color(0x000000);
+  morphNormals;
+
+  constructor(parameters) {
+    super();
+
+    this.color = new Color(0xffffff);
+    this.ambient = new Color(0xfffff);
+    this.emissive = new Color(0x000000);
 
     // TODO: Which of these instance variables do I really need?
     this.wrapAround = false;
-    this.wrapRGB = new $3Dmol.Vector3(1,1,1);
+    this.wrapRGB = new Vector3(1, 1, 1);
 
     this.map = null;
 
@@ -177,23 +221,19 @@ $3Dmol.MeshLambertMaterial = function(parameters) {
     this.wireframeLinecap = 'round';
     this.wireframeLinejoin = 'round';
 
-    this.shading = $3Dmol.SmoothShading;
-    this.shaderID = "lambert";
-    this.vertexColors = $3Dmol.NoColors;
+    this.shading = SmoothShading;
+    this.shaderID = 'lambert';
+    this.vertexColors = NoColors;
 
     this.skinning = false;
 
     this.setValues(parameters);
+  }
 
-};
+  clone(material) {
+    if (typeof material === 'undefined') material = new MeshLambertMaterial();
 
-$3Dmol.MeshLambertMaterial.prototype = Object.create($3Dmol.Material.prototype);
-
-$3Dmol.MeshLambertMaterial.prototype.clone = function(material) {
-
-    if ( typeof material === "undefined" ) material = new $3Dmol.MeshLambertMaterial();
-
-    $3Dmol.Material.prototype.clone.call(this, material);
+    Material.prototype.clone.call(this, material);
 
     material.color.copy(this.color);
     material.ambient.copy(this.ambient);
@@ -224,244 +264,74 @@ $3Dmol.MeshLambertMaterial.prototype.clone = function(material) {
     material.morphNormals = this.morphNormals;
 
     return material;
-
-};
+  }
+}
 
 // Double sided Mesh Lambert material
 /** @constructor */
-$3Dmol.MeshDoubleLambertMaterial = function(parameters) {
+// Double sided Mesh Lambert material
+/** @constructor */
+export class MeshDoubleLambertMaterial extends MeshLambertMaterial {
+  outline;
 
-    $3Dmol.MeshLambertMaterial.call(this, parameters);
+  constructor(parameters) {
+    super(parameters);
 
-    this.shaderID = "lambertdouble";
-    this.side = $3Dmol.DoubleSide;
+    this.shaderID = 'lambertdouble';
+    this.side = DoubleSide;
+  }
 
-};
+  clone() {
+    const material = new MeshDoubleLambertMaterial();
 
-$3Dmol.MeshDoubleLambertMaterial.prototype = Object.create($3Dmol.MeshLambertMaterial.prototype);
-
-$3Dmol.MeshDoubleLambertMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.MeshDoubleLambertMaterial();
-
-    $3Dmol.MeshLambertMaterial.prototype.clone.call(this, material);
+    MeshLambertMaterial.prototype.clone.call(this, material);
 
     return material;
-
-};
+  }
+}
 
 // Outlined Mesh Lamert material
-/** @constructor */
-$3Dmol.MeshOutlineMaterial = function(parameters) {
-    $3Dmol.Material.call(this);
+export class MeshOutlineMaterial extends Material {
+  constructor(parameters) {
+    super();
     parameters = parameters || {};
     this.fog = true;
-    this.shaderID = "outline";
-    this.wireframe=false;
-    this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
-    this.outlineWidth= parameters.width || 0.1;
-    this.outlinePushback= parameters.pushback || 1.0;
+    this.shaderID = 'outline';
+    this.wireframe = false;
+    this.outlineColor = parameters.color || new Color(0.0, 0.0, 0.0);
+    this.outlineWidth = parameters.width || 0.1;
+    this.outlinePushback = parameters.pushback || 1.0;
+  }
 
-};
-
-$3Dmol.MeshOutlineMaterial.prototype = Object.create($3Dmol.Material.prototype);
-
-$3Dmol.MeshOutlineMaterial.prototype.clone = function(material) {
-    if ( typeof material === "undefined" ) material = new $3Dmol.MeshOutlineMaterial();
-    $3Dmol.Material.prototype.clone.call(this, material);
+  clone(material) {
+    if (typeof material === 'undefined') material = new MeshOutlineMaterial();
+    Material.prototype.clone.call(this, material);
     material.fog = this.fog;
     material.shaderID = this.shaderID;
     material.wireframe = this.wireframe;
     return material;
-};
-
+  }
+}
 
 // Imposter material
-/** @constructor */
-$3Dmol.ImposterMaterial = function(parameters) {
+export class ImposterMaterial extends Material {
+  combine;
 
-  $3Dmol.Material.call(this);
+  morphTargets;
 
-  this.color = new $3Dmol.Color(0xffffff);
-  this.ambient = new $3Dmol.Color(0xfffff);
-  this.emissive = new $3Dmol.Color(0x000000);
-  this.imposter = true;
+  morphNormals;
 
-  // TODO: Which of these instance variables do I really need?
-  this.wrapAround = false;
-  this.wrapRGB = new $3Dmol.Vector3(1,1,1);
+  constructor(parameters) {
+    super();
 
-  this.map = null;
-
-  this.lightMap = null;
-
-  this.specularMap = null;
-
-  this.envMap = null;
-  this.reflectivity = 1;
-  this.refractionRatio = 0.98;
-
-  this.fog = true;
-
-  this.wireframe = false;
-  this.wireframeLinewidth = 1;
-  this.wireframeLinecap = 'round';
-  this.wireframeLinejoin = 'round';
-
-  this.shading = $3Dmol.SmoothShading;
-  this.shaderID = null;
-  this.vertexColors = $3Dmol.NoColors;
-
-  this.skinning = false;
-
-  this.setValues(parameters);
-
-};
-
-$3Dmol.ImposterMaterial.prototype = Object.create($3Dmol.Material.prototype);
-
-$3Dmol.ImposterMaterial.prototype.clone = function() {
-
-  const material = new $3Dmol.ImposterMaterial();
-
-  $3Dmol.Material.prototype.clone.call(this, material);
-
-  material.color.copy(this.color);
-  material.ambient.copy(this.ambient);
-  material.emissive.copy(this.emissive);
-
-  material.wrapAround = this.wrapAround;
-  material.wrapRGB.copy(this.wrapRGB);
-
-  material.map = this.map;
-
-  material.lightMap = this.lightMap;
-
-  material.specularMap = this.specularMap;
-
-  material.envMap = this.envMap;
-  material.combine = this.combine;
-  material.reflectivity = this.reflectivity;
-  material.refractionRatio = this.refractionRatio;
-
-  material.fog = this.fog;
-
-  material.shading = this.shading;
-  material.shaderID = this.shaderID;
-  material.vertexColors = this.vertexColors;
-
-  material.skinning = this.skinning;
-  material.morphTargets = this.morphTargets;
-  material.morphNormals = this.morphNormals;
-
-  return material;
-
-};
-
-
-$3Dmol.SphereImposterMaterial = function(parameters) {
-
-    $3Dmol.ImposterMaterial.call(this);
-
-    this.shaderID = "sphereimposter";
-    this.setValues(parameters);
-
-};
-
-$3Dmol.SphereImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
-
-$3Dmol.SphereImposterMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.SphereImposterMaterial();
-    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
-    return material;
-};
-
-
-$3Dmol.SphereImposterOutlineMaterial = function(parameters) {
-
-    $3Dmol.ImposterMaterial.call(this);
-    parameters = parameters || {};
-
-    this.shaderID = "sphereimposteroutline";
-    this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
-    this.outlineWidth= parameters.width || 0.1;
-    this.outlinePushback= parameters.pushback || 1.0;
-
-    this.setValues(parameters);
-
-};
-
-$3Dmol.SphereImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
-
-$3Dmol.SphereImposterOutlineMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.SphereImposterOutlineMaterial();
-    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
-    material.outlineColor = this.outlineColor;
-    material.outlineWidth = this.outlineWidth;
-    material.outlinePushback = this.outlinePushback;
-    return material;
-};
-
-
-$3Dmol.StickImposterMaterial = function(parameters) {
-
-    $3Dmol.ImposterMaterial.call(this);
-
-    this.shaderID = "stickimposter";
-    this.setValues(parameters);
-
-};
-
-$3Dmol.StickImposterMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
-
-$3Dmol.StickImposterMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.StickImposterMaterial();
-    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
-    return material;
-};
-
-
-$3Dmol.StickImposterOutlineMaterial = function(parameters) {
-
-    $3Dmol.ImposterMaterial.call(this);
-    parameters = parameters || {};
-
-    this.shaderID = "stickimposteroutline";
-    this.outlineColor= parameters.color || new $3Dmol.Color(0.0,0.0,0.0);
-    this.outlineWidth= parameters.width || 0.1;
-    this.outlinePushback= parameters.pushback || 1.0;
-
-    this.setValues(parameters);
-
-};
-
-$3Dmol.StickImposterOutlineMaterial.prototype = Object.create($3Dmol.ImposterMaterial.prototype);
-
-$3Dmol.StickImposterOutlineMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.StickImposterOutlineMaterial();
-    $3Dmol.ImposterMaterial.prototype.clone.call(this, material);
-    material.outlineColor = this.outlineColor;
-    material.outlineWidth = this.outlineWidth;
-    material.outlinePushback = this.outlinePushback;
-    return material;
-};
-
-
-$3Dmol.InstancedMaterial = function(parameters) {
-
-    $3Dmol.Material.call(this);
-
-    this.color = new $3Dmol.Color(0xffffff);
-    this.ambient = new $3Dmol.Color(0xfffff);
-    this.emissive = new $3Dmol.Color(0x000000);
+    this.color = new Color(0xffffff);
+    this.ambient = new Color(0xfffff);
+    this.emissive = new Color(0x000000);
+    this.imposter = true;
 
     // TODO: Which of these instance variables do I really need?
     this.wrapAround = false;
-    this.wrapRGB = new $3Dmol.Vector3(1,1,1);
+    this.wrapRGB = new Vector3(1, 1, 1);
 
     this.map = null;
 
@@ -480,25 +350,178 @@ $3Dmol.InstancedMaterial = function(parameters) {
     this.wireframeLinecap = 'round';
     this.wireframeLinejoin = 'round';
 
-    this.shading = $3Dmol.SmoothShading;
-    this.shaderID = "instanced";
-    this.vertexColors = $3Dmol.NoColors;
+    this.shading = SmoothShading;
+    this.shaderID = null;
+    this.vertexColors = NoColors;
+
+    this.skinning = false;
+
+    this.setValues(parameters);
+  }
+
+  clone(mat) {
+    const material = mat || new ImposterMaterial();
+
+    Material.prototype.clone.call(this, material);
+
+    material.color.copy(this.color);
+    material.ambient.copy(this.ambient);
+    material.emissive.copy(this.emissive);
+
+    material.wrapAround = this.wrapAround;
+    material.wrapRGB.copy(this.wrapRGB);
+
+    material.map = this.map;
+
+    material.lightMap = this.lightMap;
+
+    material.specularMap = this.specularMap;
+
+    material.envMap = this.envMap;
+    material.combine = this.combine;
+    material.reflectivity = this.reflectivity;
+    material.refractionRatio = this.refractionRatio;
+
+    material.fog = this.fog;
+
+    material.shading = this.shading;
+    material.shaderID = this.shaderID;
+    material.vertexColors = this.vertexColors;
+
+    material.skinning = this.skinning;
+    material.morphTargets = this.morphTargets;
+    material.morphNormals = this.morphNormals;
+
+    return material;
+  }
+}
+
+export class SphereImposterMaterial extends ImposterMaterial {
+  constructor(parameters) {
+    super();
+
+    this.shaderID = 'sphereimposter';
+    this.setValues(parameters);
+  }
+
+  clone(mat) {
+    const material = mat || new SphereImposterMaterial();
+    ImposterMaterial.prototype.clone.call(this, material);
+    return material;
+  }
+}
+
+export class SphereImposterOutlineMaterial extends ImposterMaterial {
+  constructor(parameters) {
+    super();
+    parameters = parameters || {};
+
+    this.shaderID = 'sphereimposteroutline';
+    this.outlineColor = parameters.color || new Color(0.0, 0.0, 0.0);
+    this.outlineWidth = parameters.width || 0.1;
+    this.outlinePushback = parameters.pushback || 1.0;
+
+    this.setValues(parameters);
+  }
+
+  clone() {
+    const material = new SphereImposterOutlineMaterial();
+    ImposterMaterial.prototype.clone.call(this, material);
+    material.outlineColor = this.outlineColor;
+    material.outlineWidth = this.outlineWidth;
+    material.outlinePushback = this.outlinePushback;
+    return material;
+  }
+}
+
+export class StickImposterMaterial extends ImposterMaterial {
+  constructor(parameters) {
+    super();
+
+    this.shaderID = 'stickimposter';
+    this.setValues(parameters);
+  }
+
+  clone() {
+    const material = new StickImposterMaterial();
+    ImposterMaterial.prototype.clone.call(this, material);
+    return material;
+  }
+}
+
+export class StickImposterOutlineMaterial extends ImposterMaterial {
+  constructor(parameters) {
+    super();
+    parameters = parameters || {};
+
+    this.shaderID = 'stickimposteroutline';
+    this.outlineColor = parameters.color || new Color(0.0, 0.0, 0.0);
+    this.outlineWidth = parameters.width || 0.1;
+    this.outlinePushback = parameters.pushback || 1.0;
+
+    this.setValues(parameters);
+  }
+
+  clone() {
+    const material = new StickImposterOutlineMaterial();
+    ImposterMaterial.prototype.clone.call(this, material);
+    material.outlineColor = this.outlineColor;
+    material.outlineWidth = this.outlineWidth;
+    material.outlinePushback = this.outlinePushback;
+    return material;
+  }
+}
+
+export class InstancedMaterial extends Material {
+  combine;
+
+  morphTargets;
+
+  morphNormals;
+
+  constructor(parameters) {
+    super();
+
+    this.color = new Color(0xffffff);
+    this.ambient = new Color(0xfffff);
+    this.emissive = new Color(0x000000);
+
+    // TODO: Which of these instance variables do I really need?
+    this.wrapAround = false;
+    this.wrapRGB = new Vector3(1, 1, 1);
+
+    this.map = null;
+
+    this.lightMap = null;
+
+    this.specularMap = null;
+
+    this.envMap = null;
+    this.reflectivity = 1;
+    this.refractionRatio = 0.98;
+
+    this.fog = true;
+
+    this.wireframe = false;
+    this.wireframeLinewidth = 1;
+    this.wireframeLinecap = 'round';
+    this.wireframeLinejoin = 'round';
+
+    this.shading = SmoothShading;
+    this.shaderID = 'instanced';
+    this.vertexColors = NoColors;
 
     this.skinning = false;
 
     this.sphere = null;
 
     this.setValues(parameters);
+  }
 
-};
+  clone() {
+    const material = new InstancedMaterial();
 
-$3Dmol.InstancedMaterial.prototype = Object.create($3Dmol.Material.prototype);
-
-$3Dmol.InstancedMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.InstancedMaterial();
-
-    $3Dmol.Material.prototype.clone.call(this, material);
+    Material.prototype.clone.call(this, material);
 
     material.color.copy(this.color);
     material.ambient.copy(this.ambient);
@@ -530,21 +553,19 @@ $3Dmol.InstancedMaterial.prototype.clone = function() {
 
     material.sphere = this.sphere;
 
-  return material;
-
-};
-
+    return material;
+  }
+}
 
 // Volumetric material
-/** @constructor */
-$3Dmol.VolumetricMaterial = function(parameters) {
-
-    $3Dmol.Material.call(this);
+export class VolumetricMaterial extends Material {
+  constructor(parameters) {
+    super();
 
     this.transparent = false;
     this.volumetric = true;
 
-    this.color = new $3Dmol.Color(0xffffff);
+    this.color = new Color(0xffffff);
     this.transferfn = null;
     this.map = null;
     this.volumetric = true;
@@ -557,65 +578,153 @@ $3Dmol.VolumetricMaterial = function(parameters) {
     this.subsamples = 5.0;
 
     // this.fog = true; // TODO: to integrate the new shader with the fog stuff
-
-    this.shaderID = "volumetric";
-    this.side = $3Dmol.FrontSide;
+    this.shaderID = 'volumetric';
+    this.side = FrontSide;
 
     this.setValues(parameters);
-};
+  }
 
-$3Dmol.VolumetricMaterial.prototype = Object.create($3Dmol.Material.prototype);
+  clone() {
+    const material = Object.assign(new VolumetricMaterial(), this);
 
-$3Dmol.VolumetricMaterial.prototype.clone = function() {
-
-    const material = Object.assign(new $3Dmol.VolumetricMaterial(),this);
-
-    $3Dmol.Material.prototype.clone.call(this, material);
+    Material.prototype.clone.call(this, material);
     return material;
+  }
+}
 
-};
+// Texture
+// eslint-disable-next-line import/no-mutable-exports
+export let TextureIdCount = 0;
+// We really only create textures from 2d rendering contexts (to display text labels)
+// edit: we can now create 3dtextures using volumetric data
+export class Texture extends EventDispatcher {
+  constructor(image, is3D) {
+    super();
+
+    this.id = TextureIdCount += 1;
+
+    this.name = '';
+
+    this.image = image;
+
+    this.mapping = new UVMapping();
+
+    this.wrapS = ClampToEdgeWrapping;
+    this.wrapT = ClampToEdgeWrapping;
+
+    this.anisotropy = 1;
+
+    if (is3D) {
+      this.format = RFormat;
+      this.type = FloatType;
+
+      this.premultiplyAlpha = false;
+      this.flipY = false;
+
+      this.unpackAlignment = 1;
+
+      this.magFilter = NearestFilter;
+      this.minFilter = NearestFilter;
+    } else {
+      this.format = RGBAFormat;
+      this.type = UnsignedByteType;
+
+      this.offset = new Vector2(0, 0);
+      this.repeat = new Vector2(1, 1);
+
+      this.premultiplyAlpha = false;
+      this.flipY = true;
+      this.unpackAlignment = 4;
+
+      this.magFilter = LinearFilter;
+      this.minFilter = LinearMipMapLinearFilter;
+    }
+
+    this.needsUpdate = false;
+    this.onUpdate = null;
+  }
+
+  clone(tex) {
+    const texture = tex || new Texture();
+
+    texture.image = this.image;
+
+    texture.mapping = this.mapping;
+
+    texture.wrapS = this.wrapS;
+    texture.wrapT = this.wrapT;
+
+    texture.magFilter = this.magFilter;
+    texture.minFilter = this.minFilter;
+
+    texture.anisotropy = this.anisotropy;
+
+    texture.format = this.format;
+    texture.type = this.type;
+
+    texture.offset.copy(this.offset);
+    texture.repeat.copy(this.repeat);
+
+    texture.premultiplyAlpha = this.premultiplyAlpha;
+    texture.flipY = this.flipY;
+    texture.unpackAlignment = this.unpackAlignment;
+
+    return texture;
+  }
+
+  dispose() {
+    this.dispatchEvent({type: 'dispose'});
+  }
+}
+
+// Alignment for Sprites
+
+export const SpriteAlignment = {};
+SpriteAlignment.topLeft = new Vector2(1, -1);
+SpriteAlignment.topCenter = new Vector2(0, -1);
+SpriteAlignment.topRight = new Vector2(-1, -1);
+SpriteAlignment.centerLeft = new Vector2(1, 0);
+SpriteAlignment.center = new Vector2(0, 0);
+SpriteAlignment.centerRight = new Vector2(-1, 0);
+SpriteAlignment.bottomLeft = new Vector2(1, 1);
+SpriteAlignment.bottomCenter = new Vector2(0, 1);
+SpriteAlignment.bottomRight = new Vector2(-1, 1);
 
 // Sprite material
-/** @constructor */
-$3Dmol.SpriteMaterial = function(parameters) {
+export class SpriteMaterial extends Material {
+  scaleByViewport;
 
-    $3Dmol.Material.call(this);
+  constructor(parameters) {
+    super();
 
-    this.color = new $3Dmol.Color(0xffffff);
-    this.map = new $3Dmol.Texture();
+    this.color = new Color(0xffffff);
+    this.map = new Texture();
 
     this.useScreenCoordinates = true;
     this.depthTest = !this.useScreenCoordinates;
     this.sizeAttenuation = !this.useScreenCoordinates;
     this.screenOffset = this.screenOffset;
     this.scaleByViewPort = !this.sizeAttenuation;
-    this.alignment = $3Dmol.SpriteAlignment.center.clone();
+    this.alignment = SpriteAlignment.center.clone();
 
     this.fog = false; // use scene fog
 
-    this.uvOffset = new $3Dmol.Vector2(0, 0);
-    this.uvScale = new $3Dmol.Vector2(1, 1);
+    this.uvOffset = new Vector2(0, 0);
+    this.uvScale = new Vector2(1, 1);
 
     this.setValues(parameters);
 
     parameters = parameters || {};
 
-    if (parameters.depthTest === undefined)
-        this.depthTest = !this.useScreenCoordinates;
-    if (parameters.sizeAttenuation === undefined)
-        this.sizeAttenuation = !this.useScreenCoordinates;
-    if (parameters.scaleByViewPort === undefined)
-        this.scaleByViewPort = !this.sizeAttenuation;
+    if (parameters.depthTest === undefined) this.depthTest = !this.useScreenCoordinates;
+    if (parameters.sizeAttenuation === undefined) this.sizeAttenuation = !this.useScreenCoordinates;
+    if (parameters.scaleByViewPort === undefined) this.scaleByViewPort = !this.sizeAttenuation;
+  }
 
-};
+  clone() {
+    const material = new SpriteMaterial();
 
-$3Dmol.SpriteMaterial.prototype = Object.create($3Dmol.Material.prototype);
-
-$3Dmol.SpriteMaterial.prototype.clone = function() {
-
-    const material = new $3Dmol.SpriteMaterial();
-
-    $3Dmol.Material.prototype.clone.call(this, material);
+    Material.prototype.clone.call(this, material);
 
     material.color.copy(this.color);
     material.map = this.map;
@@ -629,161 +738,7 @@ $3Dmol.SpriteMaterial.prototype.clone = function() {
     material.uvOffset.copy(this.uvOffset);
 
     return material;
-
-};
-
-// Alignment for Sprites
-
-$3Dmol.SpriteAlignment = {};
-$3Dmol.SpriteAlignment.topLeft = new $3Dmol.Vector2(1, -1);
-$3Dmol.SpriteAlignment.topCenter = new $3Dmol.Vector2(0, -1);
-$3Dmol.SpriteAlignment.topRight = new $3Dmol.Vector2(-1, -1);
-$3Dmol.SpriteAlignment.centerLeft = new $3Dmol.Vector2(1, 0);
-$3Dmol.SpriteAlignment.center = new $3Dmol.Vector2(0, 0);
-$3Dmol.SpriteAlignment.centerRight = new $3Dmol.Vector2(-1, 0);
-$3Dmol.SpriteAlignment.bottomLeft = new $3Dmol.Vector2(1, 1);
-$3Dmol.SpriteAlignment.bottomCenter = new $3Dmol.Vector2(0, 1);
-$3Dmol.SpriteAlignment.bottomRight = new $3Dmol.Vector2(-1, 1);
+  }
+}
 
 
-// Texture
-// We really only create textures from 2d rendering contexts (to display text labels)
-// edit: we can now create 3dtextures using volumetric data
-/** @constructor */
-$3Dmol.Texture = function(image, is3D) {
-
-    $3Dmol.EventDispatcher.call(this);
-
-    this.id = $3Dmol.TextureIdCount+=1;
-
-    this.name = "";
-
-    this.image = image;
-
-    this.mapping = new $3Dmol.UVMapping();
-
-    this.wrapS = $3Dmol.ClampToEdgeWrapping;
-    this.wrapT = $3Dmol.ClampToEdgeWrapping;
-
-    this.anisotropy = 1;
-
-    if (is3D){
-        this.format = $3Dmol.RFormat;
-        this.type = $3Dmol.FloatType;
-
-        this.premultiplyAlpha = false;
-        this.flipY = false;
-
-        this.unpackAlignment = 1;
-
-        this.magFilter = $3Dmol.NearestFilter;
-        this.minFilter = $3Dmol.NearestFilter;
-    } else {
-        this.format = $3Dmol.RGBAFormat;
-        this.type = $3Dmol.UnsignedByteType;
-
-        this.offset = new $3Dmol.Vector2(0, 0);
-        this.repeat = new $3Dmol.Vector2(1, 1);
-
-        this.premultiplyAlpha = false;
-        this.flipY = true;
-        this.unpackAlignment = 4;
-
-        this.magFilter = $3Dmol.LinearFilter;
-        this.minFilter = $3Dmol.LinearMipMapLinearFilter;
-
-    }
-
-
-    this.needsUpdate = false;
-    this.onUpdate = null;
-
-};
-
-$3Dmol.Texture.prototype = {
-
-    constructor : $3Dmol.Texture,
-
-    clone(texture) {
-
-        if (texture === undefined)
-            texture = new $3Dmol.Texture();
-
-        texture.image = this.image;
-
-        texture.mapping = this.mapping;
-
-        texture.wrapS = this.wrapS;
-        texture.wrapT = this.wrapT;
-
-        texture.magFilter = this.magFilter;
-        texture.minFilter = this.minFilter;
-
-        texture.anisotropy = this.anisotropy;
-
-        texture.format = this.format;
-        texture.type = this.type;
-
-        texture.offset.copy(this.offset);
-        texture.repeat.copy(this.repeat);
-
-        texture.premultiplyAlpha = this.premultiplyAlpha;
-        texture.flipY = this.flipY;
-        texture.unpackAlignment = this.unpackAlignment;
-
-        return texture;
-
-    },
-
-    dispose() {
-
-        this.dispatchEvent( {type: 'dispose'});
-
-    }
-
-};
-
-$3Dmol.TextureIdCount = 0;
-
-
-// sides
-$3Dmol.FrontSide = 0;
-$3Dmol.BackSide = 1;
-$3Dmol.DoubleSide = 2;
-
-// shading
-$3Dmol.NoShading = 0;
-$3Dmol.FlatShading = 1;
-$3Dmol.SmoothShading = 2;
-
-// colors
-$3Dmol.NoColors = 0;
-$3Dmol.FaceColors = 1;
-$3Dmol.VertexColors = 2;
-
-// Texture constants
-// TODO: Which of these do I need (since I only use textures to display label sprites) ?
-$3Dmol.MultiplyOperation = 0;
-$3Dmol.MixOperation = 1;
-$3Dmol.AddOperation = 2;
-
-// mapping modes
-
-$3Dmol.UVMapping = function() {};
-
-// wrapping modes
-$3Dmol.ClampToEdgeWrapping = 1001;
-
-// Filters
-$3Dmol.LinearFilter = 1006;
-$3Dmol.NearestFilter = 1007;
-$3Dmol.LinearMipMapLinearFilter = 1008;
-
-// Data types
-$3Dmol.UnsignedByteType = 1009;
-$3Dmol.FloatType = 1010;
-
-// Pixel formats
-$3Dmol.RGBAFormat = 1021;
-$3Dmol.RFormat = 1022;
-$3Dmol.R32Format = 1023;

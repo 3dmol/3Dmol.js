@@ -1,16 +1,24 @@
+import $ from 'jquery';
+import SurfaceType from '../enum/SurfaceType';
+import GLModel from '../GLModel';
+import editingForm from '../singletons/editingForm';
+import {labelStyles} from './defaultValues';
+import Form from './Form';
+import Icons from './Icons';
+
 /**
- * $3Dmol.UI - UI creates panels in the viewer to assist control of the viewport
+ * UI - UI creates panels in the viewer to assist control of the viewport
  * @constructor
- * @param {$3Dmol.StateManager} stateManager StateManager is required to have interaction between glviewer and the ui.
+ * @param {import("./StateManager").default} stateManager StateManager is required to have interaction between glviewer and the ui.
  * @param {Object} config Loads the user defined parameters to generate the ui
  * @param {Object} parentElement Refers the parent division used to hold the canvas for 3Dmol.js
  */
-$3Dmol.UI = (function () {
+const UI = (function () {
   function UI(stateManager, config, parentElement) {
     config = config || {};
 
     // Extract the viewer and then render it
-    const icons = new $3Dmol.UI.Icons();
+    const icons = new Icons();
     const body = $('body');
 
     const mainParent = $(parentElement[0]);
@@ -18,55 +26,15 @@ $3Dmol.UI = (function () {
     const HEIGHT = config.height;
     const WIDTH = config.width;
     const uiElements = (this.tools = generateUI(config));
-
-    /**
-     * Creates all the jquery object of different UI features
-     * @param  {Object} config
-     */
-    function generateUI(config) {
-      const modelToolBar = new ModelToolbar();
-      mainParent.append(modelToolBar.ui);
-      setLocation(mainParent, modelToolBar.ui, 'left', 'top');
-      // modelToolBar.updateInputLength();
-
-      const contextMenu = new ContextMenu();
-      mainParent.append(contextMenu.ui);
-      setPosition(contextMenu.ui, 100, 100);
-
-      const surfaceMenu = new SurfaceMenu();
-      mainParent.append(surfaceMenu.ui);
-      setLocation(mainParent, surfaceMenu.ui, 'right', 'top', 0, modelToolBar.ui.height() + 5);
-
-      const selectionBox = new SelectionBox(icons.select);
-      mainParent.append(selectionBox.ui);
-      setLocation(mainParent, selectionBox.ui, 'left', 'top', 0, modelToolBar.ui.height() + 5);
-
-      // Fixing Context Menu Behaviour
-      selectionBox.ui.on('mousedown', () => {
-        stateManager.exitContextMenu();
-      });
-
-      surfaceMenu.ui.on('mousedown', () => {
-        stateManager.exitContextMenu();
-      });
-
-      return {
-        modelToolBar,
-        selectionBox,
-        contextMenu,
-        surfaceMenu,
-      };
-    }
-
     /**
      * Resize the panel with respect to the new viewport
      *
-     * @function $3Dmol.UI#resize
+     * @function UI#resize
      */
     this.resize = function () {
-      const {selectionBox} = this.tools;
-      const {surfaceMenu} = this.tools;
-      const {modelToolBar} = this.tools;
+      const selectionBox = this.tools.selectionBox;
+      const surfaceMenu = this.tools.surfaceMenu;
+      const modelToolBar = this.tools.modelToolBar;
       const HEIGHT = mainParent.height();
 
       setLocation(mainParent, modelToolBar.ui, 'left', 'top');
@@ -78,7 +46,94 @@ $3Dmol.UI = (function () {
     };
 
     /**
-     * ModelToolbar is part of $3Dmol.UI to edit or change the model loaded into the viewer
+     * button - generates button with the given markup as contents
+     * @param {String} svg SVG markup string that contains the content of the button
+     * @param {Number} height Height of the content
+     * @param {Object} [config] Various properties to define the button
+     *
+     */
+    function button(svg, height, config) {
+      config = config || {};
+      const borderRadius = config.bfr * height || height / 4; // body radius factor
+      const bgColor = config.backgroundColor || 'rgb(177, 194, 203)';
+      const color = config.color || 'black';
+      const hoverable = config.hoverable || 'true';
+      const tooltipText = config.tooltip || null;
+
+      // Button instance
+      this.ui = $('<div></div>');
+      const innerButton = $('<div></div>');
+      this.ui.append(innerButton);
+
+      // CSS
+      this.ui.css('box-sizing', 'border-box');
+      this.ui.css('display', 'inline-block');
+      this.ui.css('margin', '3px');
+      this.ui.css('height', height);
+      this.ui.css('width', height);
+      this.ui.css('border-radius', `${borderRadius}px`);
+
+      //  button.css('padding', '3px');
+      this.ui.css('color', color);
+      this.ui.css('background', bgColor);
+
+      innerButton.css('display', 'flex');
+      innerButton.css('justify-content', 'center');
+      innerButton.css('align-items', 'center');
+      innerButton.css('padding', '2px');
+
+      // content
+      this.setSVG = function (svg) {
+        innerButton.empty();
+        const formatted_content = $(svg);
+        innerButton.append(formatted_content);
+      };
+
+      this.setSVG(svg);
+
+      // Hover
+
+      // Setting up tool tip
+      this.ui.css({
+        position: 'relative',
+      });
+
+      // setting up tool tip
+      if (tooltipText !== null) {
+        this.ui.attr('title', tooltipText);
+      }
+
+      if (hoverable === 'true') {
+        this.ui
+          .on('mouseenter', () => {
+            this.ui.css('box-shadow', '0px 0px 3px black');
+          })
+          .on('mouseleave', () => {
+            this.ui.css('box-shadow', 'none');
+          });
+
+        const longPressTime = 0;
+        const mouseX = 0;
+        const mouseY = 0;
+
+        // click
+        this.ui.on('mousedown', e => {
+          this.ui.css('box-shadow', '0px 0px 1px black');
+        });
+
+        this.ui.on('mouseup', () => {
+          this.ui.css('box-shadow', '0px 0px 3px black');
+        });
+
+        this.ui.on('mousemove', e => {
+          // mouseX = e.clientX;
+          // mouseY = e.clientY;
+        });
+      }
+    }
+
+    /**
+     * ModelToolbar is part of UI to edit or change the model loaded into the viewer
      *
      * @function ModelToolbar
      */
@@ -90,7 +145,7 @@ $3Dmol.UI = (function () {
         'min-width': '150px',
       });
 
-      const modelButton = new button(icons.molecule, 20, {tooltip: 'Toggle Model Selection Bar'});
+      const modelButton = new button(Icons.molecule, 20, {tooltip: 'Toggle Model Selection Bar'});
       boundingBox.append(modelButton.ui);
 
       modelButton.ui.css({
@@ -138,7 +193,7 @@ $3Dmol.UI = (function () {
 
       currentModelBox.append(currentModel);
 
-      const changeButton = new button(icons.change, 16, {
+      const changeButton = new button(Icons.change, 16, {
         tooltip: 'Change Model',
         backgroundColor: 'white',
         bfr: 0.5,
@@ -156,7 +211,7 @@ $3Dmol.UI = (function () {
       surroundingBox.append(formBox);
 
       const dbs = 'pdb,mmtf,cid'.split(',');
-      const list = (this.list = new $3Dmol.UI.Form.ListInput(control.urlType, dbs));
+      const list = (this.list = new Form.ListInput(control.urlType, dbs));
       list.showAlertBox = false;
 
       list.ui.css({
@@ -165,7 +220,7 @@ $3Dmol.UI = (function () {
 
       formBox.append(list.ui);
 
-      const input = (this.url = new $3Dmol.UI.Form.Input(control.url));
+      const input = (this.url = new Form.Input(control.url));
       formBox.append(input.ui);
 
       input.ui.css({
@@ -175,7 +230,7 @@ $3Dmol.UI = (function () {
 
       // input.setWidth(125);
 
-      const submitButton = new button(icons.tick, 16, {
+      const submitButton = new button(Icons.tick, 16, {
         bfr: 0.5,
         backgroundColor: 'lightgreen',
         tooltip: 'Add Model',
@@ -234,13 +289,13 @@ $3Dmol.UI = (function () {
      * on the viewport
      *
      * @function SelectionBox
-     * @param {$3Dmol.UI.Icons} icon takes the svg code for the icon that is to be used to display
+     * @param {string} icon takes the svg code for the icon that is to be used to display
      * selection box
      * @return {Object}  Jquery element of div
      */
     function SelectionBox(icon, side = 'left') {
       const selectionBox = (this.ui = $('<div></div>'));
-      _editingForm = false;
+      editingForm.isEditing = false;
       const selectionObjects = [];
 
       const selections = $('<div></div>');
@@ -250,7 +305,7 @@ $3Dmol.UI = (function () {
 
       const showArea = $('<div></div>');
       const addArea = $('<div></div>');
-      const plusButton = new button(icons.plus, 20, {tooltip: 'Add New Selection'});
+      const plusButton = new button(Icons.plus, 20, {tooltip: 'Add New Selection'});
       plusButton.ui.css('margin', '0px');
 
       const hideButton = new button(icon, 20, {tooltip: 'Toggle Selection Menu'});
@@ -348,13 +403,13 @@ $3Dmol.UI = (function () {
         header.hide();
         controls.editMode = false;
 
-        const removeButton = new button(icons.minus, 16, {
+        const removeButton = new button(Icons.minus, 16, {
           bfr: 0.5,
           backgroundColor: '#f06f6f',
           tooltip: 'Remove Selection',
         });
-        const editButton = new button(icons.pencil, 16, {tooltip: 'Edit Selection'});
-        const visibleButton = new button(icons.visible, 16, {tooltip: 'Show / Hide Selection'});
+        const editButton = new button(Icons.pencil, 16, {tooltip: 'Edit Selection'});
+        const visibleButton = new button(Icons.visible, 16, {tooltip: 'Show / Hide Selection'});
 
         controls.append(removeButton.ui);
         controls.append(editButton.ui);
@@ -380,10 +435,10 @@ $3Dmol.UI = (function () {
           stateManager.toggleHide(sid);
           if (hidden) {
             hidden = false;
-            visibleButton.setSVG(icons.visible);
+            visibleButton.setSVG(Icons.visible);
           } else {
             hidden = true;
-            visibleButton.setSVG(icons.invisible);
+            visibleButton.setSVG(Icons.invisible);
           }
         });
 
@@ -406,27 +461,30 @@ $3Dmol.UI = (function () {
           active: true,
         });
 
-        const allCheckBox = new $3Dmol.UI.Form.Checkbox(allControl);
+        const allCheckBox = new Form.Checkbox(allControl);
         parameters.append(allCheckBox.ui);
 
-        const selectionFormControl = (this.selectionValue = {
+        /** @type {{key: string; value: any; active:boolean}} */
+        const selectionFormControl  = {
           key: 'Selection Spec',
           value: null,
           active: true,
-        });
+        };
 
-        const selectionSpecForm = new $3Dmol.UI.Form(
-          $3Dmol.GLModel.validAtomSelectionSpecs,
+        this.selectionValue = selectionFormControl
+
+        const selectionSpecForm = new Form(
+          GLModel.validAtomSelectionSpecs,
           selectionFormControl
         );
         parameters.append(selectionSpecForm.ui);
 
         const submitControls = $('<div></div>');
-        const submit = new button(icons.tick, 16, {
+        const submit = new button(Icons.tick, 16, {
           backgroundColor: 'lightgreen',
           tooltip: 'Submit',
         });
-        const cancel = new button(icons.cross, 16, {
+        const cancel = new button(Icons.cross, 16, {
           backgroundColor: 'lightcoral',
           tooltip: 'Cancel',
         });
@@ -466,7 +524,7 @@ $3Dmol.UI = (function () {
               if (checkAtoms) {
                 const id = stateManager.addSelection(selectionFormControl.value, sid);
                 finalizeSelection(id);
-                if (sid == null) _editingForm = false;
+                if (sid === null) editingForm.isEditing = false;
               } else {
                 alertBox.error('No atom selected');
               }
@@ -492,7 +550,7 @@ $3Dmol.UI = (function () {
             if (allControl.value) {
               const id = stateManager.addSelection({});
               finalizeSelection(id);
-              _editingForm = false;
+              editingForm.isEditing = false;
             } else {
               checkAndAddSelection();
             }
@@ -516,7 +574,7 @@ $3Dmol.UI = (function () {
           } else {
             boundingBox.detach();
             removeSelf(self);
-            _editingForm = false;
+            editingForm.isEditing = false;
           }
         });
 
@@ -528,7 +586,7 @@ $3Dmol.UI = (function () {
 
         /**
          * @function Selection#setProperty
-         * @param {string} id Id of the selection created in StateManager
+         * @param {string|null} id Id of the selection created in StateManager
          * @param {Object} specs Defination of the selection that will be used to set default
          * values in the form
          */
@@ -548,9 +606,9 @@ $3Dmol.UI = (function () {
          * Adds style to the given selection
          *
          * @function Selection#addStyle
-         * @param {String} selId Id of the selection to inititate the StyleBox
-         * @param {String} styleId Id of the style that is created through StateManager
-         * @param {AtomStyleSpecs} styleSpecs
+         * @param {string|null} selId Id of the selection to inititate the StyleBox
+         * @param {string|null} styleId Id of the style that is created through StateManager
+         * @param {import("../specs").AtomStyleSpec} styleSpecs
          */
         this.addStyle = function (selId, styleId, styleSpecs) {
           styleBox.addStyle(selId, styleId, styleSpecs);
@@ -558,10 +616,10 @@ $3Dmol.UI = (function () {
       }
 
       plusButton.ui.on('click', () => {
-        if (!_editingForm) {
+        if (!editingForm.isEditing) {
           const newSelection = new Selection();
           selections.append(newSelection.ui);
-          _editingForm = true;
+          editingForm.isEditing = true;
         } else {
           alertBox.warning('Please complete the previous form');
         }
@@ -572,17 +630,17 @@ $3Dmol.UI = (function () {
        */
       this.empty = function () {
         selections.empty();
-        _editingForm = false;
+        editingForm.isEditing = false;
       };
 
       /**
        * Adds or create new selection card
        *
        * @function SelectionBox#editSelection
-       * @param {String} id Id created in StateManager and passed down to this function during call
-       * @param {AtomSelectionSpec} selSpec Selection spec that is used to generate the selection form
-       * @param {String} styleId Id of style created in StateManager
-       * @param {AtomStyleSpecs} styleSpec Style spec if specified add the selection to the current selection
+       * @param {string|null} id Id created in StateManager and passed down to this function during call
+       * @param {import("../specs").AtomSelectionSpec} selSpec Selection spec that is used to generate the selection form
+       * @param {string|null} styleId Id of style created in StateManager
+       * @param {import("../specs").AtomStyleSpec} [styleSpec] Style spec if specified add the selection to the current selection
        */
       this.editSelection = function (id, selSpec, styleId, styleSpec) {
         // if selection does not exist create new
@@ -591,14 +649,14 @@ $3Dmol.UI = (function () {
 
         // Search selection with id
         const selectionUI = selections.children(`[data-id=${id}]`);
-
-        if (selectionUI.length === 0) {
+        let selection;
+        if (!(selectionUI.length !== 0)) {
           selection = new Selection();
           selection.setProperty(id, selSpec);
           selections.append(selection.ui);
         }
 
-        if (styleId != null) {
+        if (styleId !== null && selection && styleSpec) {
           selection.addStyle(id, styleId, styleSpec);
         }
       };
@@ -612,12 +670,12 @@ $3Dmol.UI = (function () {
      * Creates StyleBox for listing out different styles inside the selection
      *
      * @function StyleBox
-     * @param {String} selId Id of the selection for which the style box is created
-     * @param {String} side Alignment of text inside the box
+     * @param {String} [selId] Id of the selection for which the style box is created
+     * @param {String} [side] Alignment of text inside the box
      */
     function StyleBox(selId, side = 'left') {
       const styleBox = (this.ui = $('<div></div>'));
-      _editingForm = false;
+      editingForm.isEditing = false;
       let sid = (this.sid = selId); // selection id
 
       this.setSid = function (id) {
@@ -632,7 +690,7 @@ $3Dmol.UI = (function () {
       const showArea = $('<div></div>');
       const addArea = $('<div></div>');
       addArea.css('text-align', 'center');
-      const plusButton = new button(icons.plus, 20, {tooltip: 'Add New Style'});
+      const plusButton = new button(Icons.plus, 20, {tooltip: 'Add New Style'});
       plusButton.ui.css('margin', '0px');
 
       this.selectionObjects = [];
@@ -676,7 +734,7 @@ $3Dmol.UI = (function () {
       /**
        * Style card to define the value of the style
        *
-       * @param {string} sid Id of the selction for which the style box is created
+       * @param {string|null} sid Id of the selction for which the style box is created
        * and this stye will be added under that selection
        */
       function Style(sid) {
@@ -711,13 +769,13 @@ $3Dmol.UI = (function () {
         header.hide();
         controls.editMode = false;
 
-        const removeButton = new button(icons.minus, 16, {
+        const removeButton = new button(Icons.minus, 16, {
           bfr: 0.5,
           backgroundColor: '#f06f6f',
           tooltip: 'Remove Style',
         });
-        const editButton = new button(icons.pencil, 16, {tooltip: 'Edit Style'});
-        const visibleButton = new button(icons.visible, 16, {tooltip: 'Show / Hide Style'});
+        const editButton = new button(Icons.pencil, 16, {tooltip: 'Edit Style'});
+        const visibleButton = new button(Icons.visible, 16, {tooltip: 'Show / Hide Style'});
 
         controls.append(removeButton.ui);
         controls.append(editButton.ui);
@@ -741,31 +799,30 @@ $3Dmol.UI = (function () {
           stateManager.toggleHideStyle(sid, stid);
           if (hidden) {
             hidden = false;
-            visibleButton.setSVG(icons.visible);
+            visibleButton.setSVG(Icons.visible);
           } else {
             hidden = true;
-            visibleButton.setSVG(icons.invisible);
+            visibleButton.setSVG(Icons.invisible);
           }
         });
 
-        const styleFormControl = (this.selectionValue = {
+        /** @type {{key: string; value: any; active:boolean}} */
+        const styleFormControl = {
           key: 'Style Spec',
           value: null,
           active: true,
-        });
+        };
+        this.selectionValue = styleFormControl;
 
-        const styleSpecForm = new $3Dmol.UI.Form(
-          $3Dmol.GLModel.validAtomStyleSpecs,
-          styleFormControl
-        );
+        const styleSpecForm = new Form(GLModel.validAtomStyleSpecs, styleFormControl);
         parameters.append(styleSpecForm.ui);
 
         const submitControls = $('<div></div>');
-        const submit = new button(icons.tick, 16, {
+        const submit = new button(Icons.tick, 16, {
           backgroundColor: 'lightgreen',
           tooltip: 'Submit',
         });
-        const cancel = new button(icons.cross, 16, {
+        const cancel = new button(Icons.cross, 16, {
           backgroundColor: 'lightcoral',
           tooltip: 'Cancel',
         });
@@ -794,7 +851,7 @@ $3Dmol.UI = (function () {
             } else {
               const id = stateManager.addStyle(styleFormControl.value, sid, stid);
               finalizeStyle(id);
-              if (stid == null) _editingForm = false;
+              if (stid === null) editingForm.isEditing = false;
             }
           } else {
             alertBox.error('Invalid Input');
@@ -833,8 +890,8 @@ $3Dmol.UI = (function () {
 
         /**
          * @function Style#updateStyle
-         * @param {String} styleId Id of the style created by StateManager
-         * @param {AtomStyleSpecs} styleSpec Specs for defining the style and setting default values
+         * @param {string|null} styleId Id of the style created by StateManager
+         * @param {import("../specs").AtomStyleSpec} styleSpec Specs for defining the style and setting default values
          */
         this.updateStyle = function (styleId, styleSpec) {
           styleSpecForm.setValue(styleSpec);
@@ -844,10 +901,10 @@ $3Dmol.UI = (function () {
       }
 
       plusButton.ui.on('click', () => {
-        if (!_editingForm) {
-          const newStyle = new Style(sid);
+        if (!editingForm.isEditing) {
+          const newStyle = new Style((/** @type {string} */(sid)));
           styles.append(newStyle.ui);
-          _editingForm = true;
+          editingForm.isEditing = true;
         } else {
           alertBox.warning('Please complete editing the current form');
         }
@@ -855,9 +912,9 @@ $3Dmol.UI = (function () {
 
       /**
        * @function StyleBox#addStyle
-       * @param {String} selectionId Id of the selection for which styles will be created
-       * @param {String} styleId Id of the style part of the selection
-       * @param {AtomStyleSpecs} styleSpecs Style specs that will be used to create
+       * @param {string|null} selectionId Id of the selection for which styles will be created
+       * @param {string|null} styleId Id of the style part of the selection
+       * @param {import("../specs").AtomStyleSpec} styleSpecs Style specs that will be used to create
        * style for the specified selection and set default values in the Style card
        */
       this.addStyle = function (selectionId, styleId, styleSpecs) {
@@ -871,7 +928,7 @@ $3Dmol.UI = (function () {
      * Add alert messages to different panels
      *
      * @function AlertBox
-     * @param {Object} config Configuraiton for alert box display
+     * @param {Object} [config] Configuraiton for alert box display
      */
     function AlertBox(config) {
       const boundingBox = (this.ui = $('<div></div>'));
@@ -998,12 +1055,12 @@ $3Dmol.UI = (function () {
       removeLabelMenu.hide();
 
       // Label Property List
-      const propertyKeys = Object.keys($3Dmol.GLModel.validAtomSpecs);
+      const propertyKeys = Object.keys(GLModel.validAtomSpecs);
       const propertyList = [];
       let propertyObjectList = [];
 
       propertyKeys.forEach(prop => {
-        const propObj = $3Dmol.GLModel.validAtomSpecs;
+        const propObj = GLModel.validAtomSpecs;
         if (propObj[prop].prop === true) {
           propertyList.push(prop);
         }
@@ -1032,7 +1089,7 @@ $3Dmol.UI = (function () {
         this.key = key;
         this.value = value;
 
-        const checkbox = new $3Dmol.UI.Form.Checkbox(propLabelValue);
+        const checkbox = new Form.Checkbox(propLabelValue);
         const checkboxHolder = $('<td></td>');
         checkboxHolder.append(checkbox.ui);
         const keyHolder = $('<td></td>');
@@ -1043,7 +1100,7 @@ $3Dmol.UI = (function () {
 
         keyHolder.text(key);
 
-        if (typeof value == 'number') {
+        if (typeof value === 'number') {
           valueHolder.text(value.toFixed(2));
         } else {
           valueHolder.text(value.replace(/\^/g, ''));
@@ -1053,7 +1110,7 @@ $3Dmol.UI = (function () {
       }
 
       /**
-       * @param {AtomSpec} atom Value of different property of the atom, if the atom has prop : true
+       * @param {import("../specs").AtomSpec} atom Value of different property of the atom, if the atom has prop : true
        * then that option is made visible in the context menu
        */
       function setProperties(atom) {
@@ -1087,10 +1144,7 @@ $3Dmol.UI = (function () {
           'margin-left': '6px',
         });
 
-        const stylesForLabel = new $3Dmol.UI.Form.ListInput(
-          labelStyle,
-          Object.keys($3Dmol.labelStyles)
-        );
+        const stylesForLabel = new Form.ListInput(labelStyle, Object.keys(labelStyles));
         stylesForLabel.ui.css({
           display: 'inline-block',
         });
@@ -1100,11 +1154,11 @@ $3Dmol.UI = (function () {
         labelStyleHolder.append(labelStyle, stylesForLabel.ui);
         propertyMenu.append(labelStyleHolder);
 
-        const submit = new button(icons.tick, 18, {
+        const submit = new button(Icons.tick, 18, {
           backgroundColor: 'lightgreen',
           tooltip: 'Submit',
         });
-        const cancel = new button(icons.cross, 18, {
+        const cancel = new button(Icons.cross, 18, {
           backgroundColor: 'lightcoral',
           tooltip: 'Cancel',
         });
@@ -1122,7 +1176,7 @@ $3Dmol.UI = (function () {
           const props = processPropertyList();
           const labelStyleValidation = stylesForLabel.validate();
 
-          if (props != null) {
+          if (props !== null) {
             if (labelStyleValidation) {
               stateManager.addAtomLabel(props, atom, stylesForLabel.getValue().value);
               stateManager.exitContextMenu(false);
@@ -1210,9 +1264,9 @@ $3Dmol.UI = (function () {
           },
         };
         const formModifierControl = $('<div></div>');
-        const removeButton = new button(icons.minus, 16);
-        const tick = new button(icons.tick, 16, {backgroundColor: 'lightgreen', tooltip: 'Submit'});
-        const cross = new button(icons.cross, 16, {
+        const removeButton = new button(Icons.minus, 16);
+        const tick = new button(Icons.tick, 16, {backgroundColor: 'lightgreen', tooltip: 'Submit'});
+        const cross = new button(Icons.cross, 16, {
           backgroundColor: 'lightcoral',
           tooltip: 'Cancel',
         });
@@ -1222,7 +1276,7 @@ $3Dmol.UI = (function () {
 
         const addLabelTextBox = $('<div></div>');
         const lt = $('<div></div>').text('Label Text');
-        const addLabelTextInput = new $3Dmol.UI.Form.Input(addLabelValue.text);
+        const addLabelTextInput = new Form.Input(addLabelValue.text);
         addLabelTextBox.append(lt, addLabelTextInput.ui);
         const width = 126; // editMenu.innerWidth()*0.8;
         addLabelTextInput.setWidth(width);
@@ -1230,9 +1284,9 @@ $3Dmol.UI = (function () {
 
         const addLabelStyleBox = $('<div></div>');
         const ls = $('<div></div>').text('Label Style');
-        const addLabelStyleInput = new $3Dmol.UI.Form.ListInput(
+        const addLabelStyleInput = new Form.ListInput(
           addLabelValue.style,
-          Object.keys($3Dmol.labelStyles)
+          Object.keys(labelStyles)
         );
         addLabelStyleInput.setValue('milk');
         addLabelStyleBox.append(ls, addLabelStyleInput.ui);
@@ -1242,10 +1296,7 @@ $3Dmol.UI = (function () {
 
         const addLabelSelectionBox = $('<div></div>');
         const lsl = $('<div></div>').text('Label Selection');
-        const addLabelSelectionInput = new $3Dmol.UI.Form.ListInput(
-          addLabelValue.sel,
-          selectionList
-        );
+        const addLabelSelectionInput = new Form.ListInput(addLabelValue.sel, selectionList);
         addLabelSelectionBox.append(lsl, addLabelSelectionInput.ui);
         addLabelForm.append(addLabelSelectionBox);
 
@@ -1305,7 +1356,6 @@ $3Dmol.UI = (function () {
         if (Object.keys(propsForLabel).length !== 0) {
           return propsForLabel;
         }
-
         return null;
       }
 
@@ -1325,7 +1375,7 @@ $3Dmol.UI = (function () {
        *
        * @param {Number} x x coordinate of the mouse
        * @param {Number} y y coordinate of the mouse in the viewport in pixels
-       * @param {AtomSpec} atom Value of the atoms that is selected
+       * @param {import("../specs").AtomSpec} atom Value of the atoms that is selected
        * @param {Boolean} atomExist if atom label is previously added it is set true else false
        */
       this.show = function (x, y, atom, atomExist) {
@@ -1363,13 +1413,13 @@ $3Dmol.UI = (function () {
        * Hides the context menu and if needed process the propertyMenu
        *
        * @function ContextMenu#hide
-       * @param {Boolean} processContextMenu If true then submission of the property to add label is executed
+       * @param {Boolean} [processContextMenu] If true then submission of the property to add label is executed
        */
 
-      this.hide = function (processContextMenu) {
+      this.hide = (processContextMenu) => {
         if (processContextMenu) {
           const propsForLabel = processPropertyList();
-          if (propsForLabel != null) {
+          if (propsForLabel !== null) {
             stateManager.addAtomLabel(propsForLabel, this.atom);
           }
         }
@@ -1403,16 +1453,15 @@ $3Dmol.UI = (function () {
      */
     function SurfaceMenu() {
       const boundingBox = (this.ui = $('<div></div>'));
-      let _editingForm = false;
+      editingForm.isEditing = false;
       // Selection Layout
 
       boundingBox.css({
         position: 'absolute',
         width: '140px',
-        'text-align': 'right',
       });
 
-      const surfaceButton = new button(icons.surface, 20, {tooltip: 'Toggle Surface Menu'});
+      const surfaceButton = new button(Icons.surface, 20, {tooltip: 'Toggle Surface Menu'});
 
       boundingBox.append(surfaceButton.ui);
 
@@ -1443,7 +1492,7 @@ $3Dmol.UI = (function () {
       displayBox.append(alertBox.ui);
 
       const addArea = $('<div></div>');
-      const addButton = new button(icons.plus, 20, {tooltip: 'Add New Surface'});
+      const addButton = new button(Icons.plus, 20, {tooltip: 'Add New Surface'});
       addArea.append(addButton.ui);
       displayBox.append(addArea);
       displayBox.hide();
@@ -1499,8 +1548,8 @@ $3Dmol.UI = (function () {
         // Control Buttons
         const toolButtons = $('<div></div>');
 
-        const editButton = new button(icons.pencil, 16, {tooltip: 'Edit Surface'});
-        const removeButton = new button(icons.minus, 16, {bfr: 0.5, backgroundColor: '#f06f6f'});
+        const editButton = new button(Icons.pencil, 16, {tooltip: 'Edit Surface'});
+        const removeButton = new button(Icons.minus, 16, {bfr: 0.5, backgroundColor: '#f06f6f'});
 
         toolButtons.append(removeButton.ui);
         toolButtons.append(editButton.ui);
@@ -1535,25 +1584,19 @@ $3Dmol.UI = (function () {
         labelSurfaceType.text('Surface Type');
         labelSurfaceType.css(defaultTextStyle);
 
-        const listSurfaceType = new $3Dmol.UI.Form.ListInput(
-          control.surfaceType,
-          Object.keys($3Dmol.SurfaceType)
-        );
+        const listSurfaceType = new Form.ListInput(control.surfaceType, Object.keys(SurfaceType));
 
         surfaceType.append(labelSurfaceType, listSurfaceType.ui);
         surfacePropertyBox.append(surfaceType);
 
-        listSurfaceType.setValue(Object.keys($3Dmol.SurfaceType)[0]);
+        listSurfaceType.setValue(Object.keys(SurfaceType)[0]);
         // Surface Style
         const surfaceStyle = $('<div></div>');
 
         const labelSurfaceStyle = $('<div></div>');
         // labelSurfaceStyle.text('Surface Style');
 
-        const formSurfaceStyle = new $3Dmol.UI.Form(
-          $3Dmol.GLModel.validSurfaceSpecs,
-          control.surfaceStyle
-        );
+        const formSurfaceStyle = new Form(GLModel.validSurfaceSpecs, control.surfaceStyle);
 
         surfaceStyle.append(labelSurfaceStyle, formSurfaceStyle.ui);
         surfacePropertyBox.append(surfaceStyle);
@@ -1571,10 +1614,7 @@ $3Dmol.UI = (function () {
           all: 'All the atoms will be used to generate the surface',
         };
 
-        const listSurfaceOf = new $3Dmol.UI.Form.ListInput(
-          control.surfaceOf,
-          surfaceGeneratorAtomType
-        );
+        const listSurfaceOf = new Form.ListInput(control.surfaceOf, surfaceGeneratorAtomType);
 
         const hintbox = $('<div></div>');
         hintbox.css({
@@ -1616,10 +1656,7 @@ $3Dmol.UI = (function () {
         labelSurfaceFor.text('Show Atoms');
         labelSurfaceFor.css(defaultTextStyle);
 
-        const listSurfaceFor = new $3Dmol.UI.Form.ListInput(
-          control.surfaceFor,
-          selectionListElement
-        );
+        const listSurfaceFor = new Form.ListInput(control.surfaceFor, selectionListElement);
         listSurfaceFor.setValue('all');
 
         surfaceFor.append(labelSurfaceFor, listSurfaceFor.ui);
@@ -1630,11 +1667,11 @@ $3Dmol.UI = (function () {
 
         // Control Button
         const controlButton = $('<div></div>');
-        const submit = new button(icons.tick, 16, {
+        const submit = new button(Icons.tick, 16, {
           backgroundColor: 'lightgreen',
           tooltip: 'Submit',
         });
-        const cancel = new button(icons.cross, 16, {
+        const cancel = new button(Icons.cross, 16, {
           backgroundColor: 'lightcoral',
           tooltip: 'Cancel',
         });
@@ -1652,7 +1689,7 @@ $3Dmol.UI = (function () {
         editButton.ui.on('click', () => {
           surfacePropertyBox.toggle();
 
-          // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode == true;
+          // After creation of the surface box all the changes will be edit to the surfaces so on first submit toolButtons.editMode === true;
         });
 
         // Form Validation
@@ -1713,8 +1750,9 @@ $3Dmol.UI = (function () {
 
               finalize(id);
 
+              // @ts-ignore ignore this conversion as it is abusing the jquery this type
               surfaces.push(this);
-              _editingForm = false;
+              editingForm.isEditing = false;
             } else {
               formSurfaceStyle.getValue();
               control.id = surfaceBox.data('surf-id');
@@ -1732,7 +1770,7 @@ $3Dmol.UI = (function () {
           if (toolButtons.editMode === false) {
             surfaceBox.detach();
             surfaceBox.remove();
-            _editingForm = false;
+            editingForm.isEditing = false;
           } else {
             surfacePropertyBox.hide();
             toolButtons.editMode = false;
@@ -1771,10 +1809,10 @@ $3Dmol.UI = (function () {
       // Surface addition
 
       addButton.ui.on('click', {surfaces: this}, e => {
-        if (!_editingForm) {
+        if (!editingForm.isEditing) {
           const newSurface = new Surface();
           newSurfaceSpace.append(newSurface.ui);
-          _editingForm = true;
+          editingForm.isEditing = true;
         } else {
           alertBox.warning('Please complete the previous form first');
         }
@@ -1791,7 +1829,7 @@ $3Dmol.UI = (function () {
 
       this.empty = function () {
         newSurfaceSpace.empty();
-        _editingForm = false;
+        editingForm.isEditing = false;
       };
 
       /**
@@ -1810,13 +1848,52 @@ $3Dmol.UI = (function () {
     }
 
     /**
+     * Creates all the jquery object of different UI features
+     * @param  {Object} config
+     */
+    function generateUI(config) {
+      const modelToolBar = new ModelToolbar();
+      mainParent.append(modelToolBar.ui);
+      setLocation(mainParent, modelToolBar.ui, 'left', 'top');
+      // modelToolBar.updateInputLength();
+
+      const contextMenu = new ContextMenu();
+      mainParent.append(contextMenu.ui);
+      setPosition(contextMenu.ui, 100, 100);
+
+      const surfaceMenu = new SurfaceMenu();
+      mainParent.append(surfaceMenu.ui);
+      setLocation(mainParent, surfaceMenu.ui, 'right', 'top', 0, modelToolBar.ui.height() + 5);
+
+      const selectionBox = new SelectionBox(Icons.select);
+      mainParent.append(selectionBox.ui);
+      setLocation(mainParent, selectionBox.ui, 'left', 'top', 0, modelToolBar.ui.height() + 5);
+
+      // Fixing Context Menu Behaviour
+      selectionBox.ui.on('mousedown', () => {
+        stateManager.exitContextMenu();
+      });
+
+      surfaceMenu.ui.on('mousedown', () => {
+        stateManager.exitContextMenu();
+      });
+
+      return {
+        modelToolBar,
+        selectionBox,
+        contextMenu,
+        surfaceMenu,
+      };
+    }
+
+    /**
      * Sets the css position property left and top for the element
      *
      * @function setPosition
      *
-     * @param {object} jquery html element
-     * @param {number} left : css left property
-     * @param {number} top : css top peroperty
+     * @param {object} ele - jquery html element
+     * @param {number} left - css left property
+     * @param {number} top - css top peroperty
      */
     function setPosition(ele, left, top) {
       ele.css('left', left);
@@ -1830,55 +1907,62 @@ $3Dmol.UI = (function () {
      *
      * @param  {Object} parent jquery object
      * @param  {Object} child  jquery object
-     * @param  {String} xType 'left|right'
-     * @param  {String} yType 'top|bottom'
-     * @param  {Number} xOffset Offset x values in pixels
-     * @param  {Number} yOffset Offset y values in pixels
+     * @param  {String} x_type 'left|right'
+     * @param  {String} y_type 'top|bottom'
+     * @param  {Number} x_offset Offset x values in pixels
+     * @param  {Number} y_offset Offset y values in pixels
      */
-    function setLocation(parent, child, xType = 'left', yType = 'top', xOffset = 0, yOffset = 0) {
+    function setLocation(
+      parent,
+      child,
+      x_type = 'left',
+      y_type = 'top',
+      x_offset = 0,
+      y_offset = 0
+    ) {
       // p_ stands for parent
       child.css('z-index', 99);
 
-      const pPosition = parent.position();
-      const pWidth = getWidth(parent);
-      const pHeight = getHeight(parent);
+      const p_position = parent.position();
+      const p_width = getWidth(parent);
+      const p_height = getHeight(parent);
 
       // c_ stand for child
-      const cWidth = child.outerWidth(); // includes padding and margin
-      const cHeight = child.outerHeight(); // includes padding and margin
+      const c_width = child.outerWidth(); // includes padding and margin
+      const c_height = child.outerHeight(); // includes padding and margin
 
       let padding = parseInt(parent.css('padding').replace('px', ''));
       padding = padding || 0;
-      const pTop = getTop(parent) + parseInt(parent.css('margin-top').replace('px', ''));
-      const pLeft = getLeft(parent) + parseInt(parent.css('margin-left').replace('px', ''));
+      const p_top = getTop(parent) + parseInt(parent.css('margin-top').replace('px', ''));
+      const p_left = getLeft(parent) + parseInt(parent.css('margin-left').replace('px', ''));
 
       // Setting position
-      const cPosition = {
+      const c_position = {
         left: 0,
         top: 0,
       };
 
-      if (xType === 'left') {
-        cPosition.left = padding + xOffset;
-      } else if (xType === 'center') {
-        cPosition.left = pWidth / 2 - cWidth / 2 + xOffset;
-      } else if (xType === 'right') {
-        cPosition.left = pWidth - cWidth - padding + xOffset;
+      if (x_type === 'left') {
+        c_position.left = padding + x_offset;
+      } else if (x_type === 'center') {
+        c_position.left = p_width / 2 - c_width / 2 + x_offset;
+      } else if (x_type === 'right') {
+        c_position.left = p_width - c_width - padding + x_offset;
       } else {
-        cPosition.left = xOffset + padding;
+        c_position.left = x_offset + padding;
       }
 
-      if (yType === 'top') {
-        cPosition.top = yOffset + padding;
-      } else if (yType === 'center') {
-        cPosition.top = pHeight / 2 - cHeight / 2 + yOffset;
-      } else if (yType === 'bottom') {
-        cPosition.top = pHeight - cHeight - yOffset - padding;
+      if (y_type === 'top') {
+        c_position.top = y_offset + padding;
+      } else if (y_type === 'center') {
+        c_position.top = p_height / 2 - c_height / 2 + y_offset;
+      } else if (y_type === 'bottom') {
+        c_position.top = p_height - c_height - y_offset - padding;
       } else {
-        cPosition.top = yOffset + padding;
+        c_position.top = y_offset + padding;
       }
 
-      setPosition(child, cPosition.left, cPosition.top);
+      setPosition(child, c_position.left, c_position.top);
     }
 
     // Copied from glviewer.js
@@ -1914,94 +1998,11 @@ $3Dmol.UI = (function () {
     function getWidth(container) {
       return getRect(container).width;
     }
-
-    /**
-     * button - generates button with the given markup as contents
-     * @param {String} svg SVG markup string that contains the content of the button
-     * @param {Number} height Height of the content
-     * @param {Object} config Various properties to define the button
-     *
-     */
-    function button(svg, height, config) {
-      config = config || {};
-      const borderRadius = config.bfr * height || height / 4; // body radius factor
-      const bgColor = config.backgroundColor || 'rgb(177, 194, 203)';
-      const color = config.color || 'black';
-      const hoverable = config.hoverable || 'true';
-      const tooltipText = config.tooltip || null;
-
-      // Button instance
-      const button = (this.ui = $('<div></div>'));
-      const innerButton = $('<div></div>');
-      button.append(innerButton);
-
-      // CSS
-      button.css('box-sizing', 'border-box');
-      button.css('display', 'inline-block');
-      button.css('margin', '3px');
-      button.css('height', height);
-      button.css('width', height);
-      button.css('border-radius', `${borderRadius}px`);
-
-      //  button.css('padding', '3px');
-      button.css('color', color);
-      button.css('background', bgColor);
-
-      innerButton.css('display', 'flex');
-      innerButton.css('justify-content', 'center');
-      innerButton.css('align-items', 'center');
-      innerButton.css('padding', '2px');
-
-      // content
-      this.setSVG = function (svg) {
-        innerButton.empty();
-        const formattedContent = $(svg);
-        innerButton.append(formattedContent);
-      };
-
-      this.setSVG(svg);
-
-      // Hover
-
-      // Setting up tool tip
-      button.css({
-        position: 'relative',
-      });
-
-      // setting up tool tip
-      if (tooltipText != null) {
-        button.attr('title', tooltipText);
-      }
-
-      if (hoverable === 'true') {
-        button
-          .on('mouseenter', () => {
-            button.css('box-shadow', '0px 0px 3px black');
-          })
-          .on('mouseleave', () => {
-            button.css('box-shadow', 'none');
-          });
-
-        const longPressTime = 0;
-        const mouseX = 0;
-        const mouseY = 0;
-
-        // click
-        button.on('mousedown', e => {
-          button.css('box-shadow', '0px 0px 1px black');
-        });
-
-        button.on('mouseup', () => {
-          button.css('box-shadow', '0px 0px 3px black');
-        });
-
-        button.on('mousemove', e => {
-          // mouseX = e.clientX;
-          // mouseY = e.clientY;
-        });
-      }
-    }
   }
+
+  UI.Form = Form;
 
   return UI;
 })();
+
+export default UI;

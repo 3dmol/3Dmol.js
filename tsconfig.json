@@ -13,9 +13,10 @@
         "outFile": "./tmp/result.js",
     },
     "include": [
-        "3Dmol/WebGL/index.js",
+        "3Dmol",
     ],
     "exclude": [
         "node_modules",
+        "tmp"
     ]
 }

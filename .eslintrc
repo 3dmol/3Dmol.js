@@ -25,7 +25,7 @@
         "no-continue": "off",
         "no-restricted-syntax": "off",
         "consistent-return": "warn",
-        "no-param-reassign": "warn",
+        "no-param-reassign": "off",
         "no-plusplus": "off",
         "no-restricted-globals": "warn",
         "eqeqeq": [
@@ -48,9 +48,16 @@
             }
         ],
         "no-unused-vars": "warn",
-        "prefer-destructuring": "warn",
+        "prefer-destructuring": "off",
         "prefer-spread": "warn",
         "prefer-rest-params": "warn",
+        "lines-between-class-members": [
+            "warn",
+            "always",
+            {
+                "exceptAfterSingleLine": true
+            }
+        ],
         "no-unreachable-loop": [
             "error",
             {

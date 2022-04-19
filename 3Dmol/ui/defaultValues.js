@@ -1,4 +1,6 @@
-$3Dmol.labelStyles = {
+import { htmlColors } from "../colors";
+
+export const labelStyles = {
   purple : {
     backgroundColor: 0x800080, 
     backgroundOpacity: 0.8
@@ -7,50 +9,50 @@ $3Dmol.labelStyles = {
   milk : {
     font : 'Arial',
     fontSize: 12,
-    fontColor: $3Dmol.htmlColors.black,
+    fontColor: htmlColors.black,
     borderThickness: 1,
-    borderColor: $3Dmol.htmlColors.azure,
-    backgroundColor: $3Dmol.htmlColors.aliceblue,
+    borderColor: htmlColors.azure,
+    backgroundColor: htmlColors.aliceblue,
     backgroundOpacity: 0.9
   },
 
   blue : {
     font : 'Arial',
     fontSize: 12,
-    fontColor: $3Dmol.htmlColors.aliceblue,
+    fontColor: htmlColors.aliceblue,
     borderThickness: 1,
-    borderColor: $3Dmol.htmlColors.darkviolet,
-    backgroundColor: $3Dmol.htmlColors.darkblue,
+    borderColor: htmlColors.darkviolet,
+    backgroundColor: htmlColors.darkblue,
     backgroundOpacity: 0.9
   },
 
   chocolate : {
     font : 'Arial',
     fontSize: 12,
-    fontColor: $3Dmol.htmlColors.aliceblue,
+    fontColor: htmlColors.aliceblue,
     borderThickness: 1,
-    borderColor: $3Dmol.htmlColors.brown,
-    backgroundColor: $3Dmol.htmlColors.chocolate,
+    borderColor: htmlColors.brown,
+    backgroundColor: htmlColors.chocolate,
     backgroundOpacity: 0.9
   },
 
   lime : {
     font : 'Arial',
     fontSize: 12,
-    fontColor: $3Dmol.htmlColors.black,
+    fontColor: htmlColors.black,
     borderThickness: 1,
-    borderColor: $3Dmol.htmlColors.lightgreen,
-    backgroundColor: $3Dmol.htmlColors.lime,
+    borderColor: htmlColors.lightgreen,
+    backgroundColor: htmlColors.lime,
     backgroundOpacity: 0.9
   },
 
   rose : {
     font : 'Arial',
     fontSize: 12,
-    fontColor: $3Dmol.htmlColors.black,
+    fontColor: htmlColors.black,
     borderThickness: 1,
-    borderColor: $3Dmol.htmlColors.mintcream,
-    backgroundColor: $3Dmol.htmlColors.mistyrose,
+    borderColor: htmlColors.mintcream,
+    backgroundColor: htmlColors.mistyrose,
     backgroundOpacity: 0.9
   },
 
@@ -58,18 +60,18 @@ $3Dmol.labelStyles = {
 
     font : 'Arial',
     fontSize: 12,
-    fontColor: $3Dmol.htmlColors.black,
+    fontColor: htmlColors.black,
     borderThickness: 1,
-    borderColor: $3Dmol.htmlColors.orange,
-    backgroundColor: $3Dmol.htmlColors.yellow,
+    borderColor: htmlColors.orange,
+    backgroundColor: htmlColors.yellow,
     backgroundOpacity: 0.9
   },
 
 };
 
-$3Dmol.longPressDuration = 1500;
+export const longPressDuration = 1500;
 
-$3Dmol.defaultCSS = {
+export const defaultCSS = {
   ListInput : {
     select : {
       'width' : 'auto',

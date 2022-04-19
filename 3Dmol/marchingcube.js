@@ -1,8 +1,9 @@
-
-$3Dmol = $3Dmol || {};
 // Encapsulate marching cube algorithm for isosurface generation
+
+import { Vector3 } from "./WebGL/math";
+
 // (currently used by protein surface rendering and generic volumetric data reading)
-$3Dmol.MarchingCubeInitializer = function() {
+export function MarchingCubeInitializer() {
     
     // Marching cube algorithm - assume data has been pre-treated so isovalue is 0 
     // (i.e. select points greater than 0)
@@ -20,7 +21,7 @@ $3Dmol.MarchingCubeInitializer = function() {
     let edgeTable; let edgeTable2;
     let triTable; let triTable2;
     
-    my.march = function(data, verts, faces, spec) {
+    my.march = function march(data, verts, faces, spec) {
 
         const fulltable = !!(spec.fulltable);
         const origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
@@ -50,7 +51,7 @@ $3Dmol.MarchingCubeInitializer = function() {
         // create (or retrieve) a vertex at the appropriate point for
         // the edge (p1,p2)
         
-        const getVertex = function(i, j, k, code, p1, p2) {
+        const getVertex = function getVertex(i, j, k, code, p1, p2) {
             let pt = {x:0,y:0,z:0};
             const val1 = !!(code & (1 << p1));
             const val2 = !!(code & (1 << p2));
@@ -69,7 +70,7 @@ $3Dmol.MarchingCubeInitializer = function() {
                 i+=1;
 
             if(transform) {
-                pt = new $3Dmol.Vector3(i,j,k);
+                pt = new Vector3(i,j,k);
                 pt = pt.applyMatrix4(transform);
                 pt = {x: pt.x, y: pt.y, z: pt.z}; // remove vector gunk
             } else {
@@ -121,6 +122,7 @@ $3Dmol.MarchingCubeInitializer = function() {
                         const val = !!(data[index] & ISDONE);
                         // var val = !!(data[index] > 0);   
                         
+                        // @ts-ignore
                         code |= val << p;                        
                     }
                     
@@ -184,7 +186,7 @@ $3Dmol.MarchingCubeInitializer = function() {
         
     };
 
-    my.laplacianSmooth = function(numiter, verts, faces) {
+    my.laplacianSmooth = function laplacianSmooth(numiter, verts, faces) {
             const tps = new Array(verts.length);
             let i; let il; let j; let jl; let k;
             for (i = 0, il = verts.length; i < il; i++)
@@ -628,7 +630,7 @@ $3Dmol.MarchingCubeInitializer = function() {
 };
 
 // each webworker needs its own marching cube object
-$3Dmol.MarchingCube  = $3Dmol.MarchingCubeInitializer();    
+export default MarchingCubeInitializer();    
 
 
 

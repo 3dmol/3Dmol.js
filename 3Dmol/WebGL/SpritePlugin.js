@@ -1,22 +1,15 @@
-// @ts-check
-//Render plugins go here
+/* eslint-disable no-underscore-dangle */
 
-import { Scene } from "./core";
-import { Material, SpriteMaterial } from "./materials";
-import { Camera, Sprite } from "./objects";
-import { Renderer } from "./Renderer";
-import { ShaderLib } from "./ShaderUtils";
+import {ShaderLib} from './shaders';
 
-/**
- * @param {{ z: number; id: number; }} a
- * @param {{ z: number; id: number; }} b
- */
+// Render plugins go here
+
 function painterSortStable(a, b) {
   if (a.z !== b.z) {
     return b.z - a.z;
-  } else {
-    return b.id - a.id;
   }
+
+  return b.id - a.id;
 }
 
 /**
@@ -24,447 +17,299 @@ function painterSortStable(a, b) {
  * @this {SpritePlugin}
  */
 
-export class SpritePlugin {
-  /**
-   * @type {WebGLRenderingContext}
-   */
-  _gl;
-  /**
-   * @type {Renderer}
-   */
-  _renderer;
-  /**
-   * @type {string}
-   */
-  _precision="";
+/**
+ * Sprite render plugin
+ * @this {SpritePlugin}
+ */
+export default class SpritePlugin {
+  constructor() {
+    let _gl;
+    let _renderer;
+    let _precision;
+    const _sprite = {};
 
-  _sprite = {};
+    function createProgram(shader, precision) {
+      const program = _gl.createProgram();
 
-  /**
-   * @param {Renderer} renderer
-   */
-   constructor(renderer) {
-    if (!renderer._gl) throw new Error("gl context not found");
-    this._gl = renderer._gl;
-    this._renderer = renderer;
+      const fragmentShader = _gl.createShader(_gl.FRAGMENT_SHADER);
+      const vertexShader = _gl.createShader(_gl.VERTEX_SHADER);
 
-    this._precision = renderer.getPrecision();
+      const prefix = `precision ${precision} float;\n`;
 
-    this._sprite.vertices = new Float32Array(8 + 8);
-    this._sprite.faces = new Uint16Array(6);
+      _gl.shaderSource(fragmentShader, prefix + shader.fragmentShader);
+      _gl.shaderSource(vertexShader, prefix + shader.vertexShader);
 
-    var i = 0;
+      _gl.compileShader(fragmentShader);
+      _gl.compileShader(vertexShader);
 
-    this._sprite.vertices[i++] = -1;
-    this._sprite.vertices[i++] = -1; // vertex 0
-    this._sprite.vertices[i++] = 0;
-    this._sprite.vertices[i++] = 0; // uv 0
-
-    this._sprite.vertices[i++] = 1;
-    this._sprite.vertices[i++] = -1; // vertex 1
-    this._sprite.vertices[i++] = 1;
-    this._sprite.vertices[i++] = 0; // uv 1
-
-    this._sprite.vertices[i++] = 1;
-    this._sprite.vertices[i++] = 1; // vertex 2
-    this._sprite.vertices[i++] = 1;
-    this._sprite.vertices[i++] = 1; // uv 2
-
-    this._sprite.vertices[i++] = -1;
-    this._sprite.vertices[i++] = 1; // vertex 3
-    this._sprite.vertices[i++] = 0;
-    this._sprite.vertices[i++] = 1; // uv 3
-
-    i = 0;
-
-    this._sprite.faces[i++] = 0;
-    this._sprite.faces[i++] = 1;
-    this._sprite.faces[i++] = 2;
-    this._sprite.faces[i++] = 0;
-    this._sprite.faces[i++] = 2;
-    this._sprite.faces[i++] = 3;
-
-    this._sprite.vertexBuffer = this._gl.createBuffer();
-    this._sprite.elementBuffer = this._gl.createBuffer();
-
-    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._sprite.vertexBuffer);
-    this._gl.bufferData(
-      this._gl.ARRAY_BUFFER,
-      this._sprite.vertices,
-      this._gl.STATIC_DRAW
-    );
-
-    this._gl.bindBuffer(
-      this._gl.ELEMENT_ARRAY_BUFFER,
-      this._sprite.elementBuffer
-    );
-    this._gl.bufferData(
-      this._gl.ELEMENT_ARRAY_BUFFER,
-      this._sprite.faces,
-      this._gl.STATIC_DRAW
-    );
-
-    this._sprite.program = this.createProgram(
-      ShaderLib.sprite,
-      this._precision
-    );
-    if (!this._sprite.program) throw new Error("shader program created");
-
-    this._sprite.attributes = {};
-    this._sprite.uniforms = {};
-
-    this._sprite.attributes.position = this._gl.getAttribLocation(
-      this._sprite.program,
-      "position"
-    );
-    this._sprite.attributes.uv = this._gl.getAttribLocation(
-      this._sprite.program,
-      "uv"
-    );
-
-    this._sprite.uniforms.uvOffset = this._gl.getUniformLocation(
-      this._sprite.program,
-      "uvOffset"
-    );
-    this._sprite.uniforms.uvScale = this._gl.getUniformLocation(
-      this._sprite.program,
-      "uvScale"
-    );
-
-    this._sprite.uniforms.rotation = this._gl.getUniformLocation(
-      this._sprite.program,
-      "rotation"
-    );
-    this._sprite.uniforms.scale = this._gl.getUniformLocation(
-      this._sprite.program,
-      "scale"
-    );
-    this._sprite.uniforms.alignment = this._gl.getUniformLocation(
-      this._sprite.program,
-      "alignment"
-    );
-
-    this._sprite.uniforms.color = this._gl.getUniformLocation(
-      this._sprite.program,
-      "color"
-    );
-    this._sprite.uniforms.map = this._gl.getUniformLocation(
-      this._sprite.program,
-      "map"
-    );
-    this._sprite.uniforms.opacity = this._gl.getUniformLocation(
-      this._sprite.program,
-      "opacity"
-    );
-
-    this._sprite.uniforms.useScreenCoordinates = this._gl.getUniformLocation(
-      this._sprite.program,
-      "useScreenCoordinates"
-    );
-    this._sprite.uniforms.screenPosition = this._gl.getUniformLocation(
-      this._sprite.program,
-      "screenPosition"
-    );
-    this._sprite.uniforms.modelViewMatrix = this._gl.getUniformLocation(
-      this._sprite.program,
-      "modelViewMatrix"
-    );
-    this._sprite.uniforms.projectionMatrix = this._gl.getUniformLocation(
-      this._sprite.program,
-      "projectionMatrix"
-    );
-
-    this._sprite.uniforms.fogType = this._gl.getUniformLocation(
-      this._sprite.program,
-      "fogType"
-    );
-    this._sprite.uniforms.fogDensity = this._gl.getUniformLocation(
-      this._sprite.program,
-      "fogDensity"
-    );
-    this._sprite.uniforms.fogNear = this._gl.getUniformLocation(
-      this._sprite.program,
-      "fogNear"
-    );
-    this._sprite.uniforms.fogFar = this._gl.getUniformLocation(
-      this._sprite.program,
-      "fogFar"
-    );
-    this._sprite.uniforms.fogColor = this._gl.getUniformLocation(
-      this._sprite.program,
-      "fogColor"
-    );
-
-    this._sprite.uniforms.alphaTest = this._gl.getUniformLocation(
-      this._sprite.program,
-      "alphaTest"
-    );
-  }
-
-  /**
-   * @param {Scene} scene
-   * @param {Camera} camera
-   * @param {number} viewportWidth
-   * @param {number} viewportHeight
-   * @param {boolean} inFront
-   */
-  render(scene, camera, viewportWidth, viewportHeight, inFront) {
-    /**
-     * @type {any[]}
-     */
-    let sprites = [];
-    scene.__webglSprites.forEach((/** @type {{ material: { depthTest: boolean; }; }} */ sprite) => {
-      //depthTest is false for inFront labels
-      if (inFront && sprite.material.depthTest == false) {
-        sprites.push(sprite);
-      } else if (!inFront && sprite.material.depthTest) {
-        sprites.push(sprite);
+      if (
+        !_gl.getShaderParameter(fragmentShader, _gl.COMPILE_STATUS) ||
+        !_gl.getShaderParameter(vertexShader, _gl.COMPILE_STATUS)
+      ) {
+        console.error(_gl.getShaderInfoLog(fragmentShader));
+        console.error('could not initialize shader');
+        return null;
       }
-    });
 
-    let nSprites = sprites.length;
+      _gl.attachShader(program, fragmentShader);
+      _gl.attachShader(program, vertexShader);
 
-    if (!nSprites) return;
+      _gl.linkProgram(program);
 
-    var attributes = this._sprite.attributes,
-      uniforms = this._sprite.uniforms;
+      if (!_gl.getProgramParameter(program, _gl.LINK_STATUS))
+        console.error('Could not initialize shader');
 
-    var halfViewportWidth = viewportWidth * 0.5,
-      halfViewportHeight = viewportHeight * 0.5;
+      return program;
+    }
 
-    // setup gl
+    this.init = function init(renderer) {
+      _gl = renderer.context;
+      _renderer = renderer;
 
-    this._gl.useProgram(this._sprite.program);
+      _precision = renderer.getPrecision();
 
-    this._gl.enableVertexAttribArray(attributes.position);
-    this._gl.enableVertexAttribArray(attributes.uv);
+      _sprite.vertices = new Float32Array(8 + 8);
+      _sprite.faces = new Uint16Array(6);
 
-    this._gl.disable(this._gl.CULL_FACE);
-    this._gl.enable(this._gl.BLEND);
+      let i = 0;
 
-    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._sprite.vertexBuffer);
-    this._gl.vertexAttribPointer(
-      attributes.position,
-      2,
-      this._gl.FLOAT,
-      false,
-      2 * 8,
-      0
-    );
-    this._gl.vertexAttribPointer(
-      attributes.uv,
-      2,
-      this._gl.FLOAT,
-      false,
-      2 * 8,
-      8
-    );
+      _sprite.vertices[i++] = -1;
+      _sprite.vertices[i++] = -1; // vertex 0
+      _sprite.vertices[i++] = 0;
+      _sprite.vertices[i++] = 0; // uv 0
 
-    this._gl.bindBuffer(
-      this._gl.ELEMENT_ARRAY_BUFFER,
-      this._sprite.elementBuffer
-    );
+      _sprite.vertices[i++] = 1;
+      _sprite.vertices[i++] = -1; // vertex 1
+      _sprite.vertices[i++] = 1;
+      _sprite.vertices[i++] = 0; // uv 1
 
-    this._gl.uniformMatrix4fv(
-      uniforms.projectionMatrix,
-      false,
-      camera.projectionMatrix.elements
-    );
+      _sprite.vertices[i++] = 1;
+      _sprite.vertices[i++] = 1; // vertex 2
+      _sprite.vertices[i++] = 1;
+      _sprite.vertices[i++] = 1; // uv 2
 
-    this._gl.activeTexture(this._gl.TEXTURE0);
-    this._gl.uniform1i(uniforms.map, 0);
+      _sprite.vertices[i++] = -1;
+      _sprite.vertices[i++] = 1; // vertex 3
+      _sprite.vertices[i++] = 0;
+      _sprite.vertices[i++] = 1; // uv 3
 
-    var oldFogType = 0;
-    var sceneFogType = 0;
-    var fog = scene.fog;
+      i = 0;
 
-    if (fog) {
-      this._gl.uniform3f(
-        uniforms.fogColor,
-        fog.color.r,
-        fog.color.g,
-        fog.color.b
+      _sprite.faces[i++] = 0;
+      _sprite.faces[i++] = 1;
+      _sprite.faces[i++] = 2;
+      _sprite.faces[i++] = 0;
+      _sprite.faces[i++] = 2;
+      _sprite.faces[i++] = 3;
+
+      _sprite.vertexBuffer = _gl.createBuffer();
+      _sprite.elementBuffer = _gl.createBuffer();
+
+      _gl.bindBuffer(_gl.ARRAY_BUFFER, _sprite.vertexBuffer);
+      _gl.bufferData(_gl.ARRAY_BUFFER, _sprite.vertices, _gl.STATIC_DRAW);
+
+      _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, _sprite.elementBuffer);
+      _gl.bufferData(_gl.ELEMENT_ARRAY_BUFFER, _sprite.faces, _gl.STATIC_DRAW);
+
+      _sprite.program = createProgram(ShaderLib.sprite, _precision);
+
+      _sprite.attributes = {};
+      _sprite.uniforms = {};
+
+      _sprite.attributes.position = _gl.getAttribLocation(_sprite.program, 'position');
+      _sprite.attributes.uv = _gl.getAttribLocation(_sprite.program, 'uv');
+
+      _sprite.uniforms.uvOffset = _gl.getUniformLocation(_sprite.program, 'uvOffset');
+      _sprite.uniforms.uvScale = _gl.getUniformLocation(_sprite.program, 'uvScale');
+
+      _sprite.uniforms.rotation = _gl.getUniformLocation(_sprite.program, 'rotation');
+      _sprite.uniforms.scale = _gl.getUniformLocation(_sprite.program, 'scale');
+      _sprite.uniforms.alignment = _gl.getUniformLocation(_sprite.program, 'alignment');
+
+      _sprite.uniforms.color = _gl.getUniformLocation(_sprite.program, 'color');
+      _sprite.uniforms.map = _gl.getUniformLocation(_sprite.program, 'map');
+      _sprite.uniforms.opacity = _gl.getUniformLocation(_sprite.program, 'opacity');
+
+      _sprite.uniforms.useScreenCoordinates = _gl.getUniformLocation(
+        _sprite.program,
+        'useScreenCoordinates'
+      );
+      _sprite.uniforms.screenPosition = _gl.getUniformLocation(_sprite.program, 'screenPosition');
+      _sprite.uniforms.modelViewMatrix = _gl.getUniformLocation(_sprite.program, 'modelViewMatrix');
+      _sprite.uniforms.projectionMatrix = _gl.getUniformLocation(
+        _sprite.program,
+        'projectionMatrix'
       );
 
-      this._gl.uniform1f(uniforms.fogNear, fog.near);
-      this._gl.uniform1f(uniforms.fogFar, fog.far);
+      _sprite.uniforms.fogType = _gl.getUniformLocation(_sprite.program, 'fogType');
+      _sprite.uniforms.fogDensity = _gl.getUniformLocation(_sprite.program, 'fogDensity');
+      _sprite.uniforms.fogNear = _gl.getUniformLocation(_sprite.program, 'fogNear');
+      _sprite.uniforms.fogFar = _gl.getUniformLocation(_sprite.program, 'fogFar');
+      _sprite.uniforms.fogColor = _gl.getUniformLocation(_sprite.program, 'fogColor');
 
-      this._gl.uniform1i(uniforms.fogType, 1);
-      oldFogType = 1;
-      sceneFogType = 1;
-    } else {
-      this._gl.uniform1i(uniforms.fogType, 0);
-      oldFogType = 0;
-      sceneFogType = 0;
-    }
+      _sprite.uniforms.alphaTest = _gl.getUniformLocation(_sprite.program, 'alphaTest');
+    };
 
-    // update positions and sort
+    this.render = function render(scene, camera, viewportWidth, viewportHeight, inFront) {
+      const sprites = [];
+      scene.__webglSprites.forEach(sprite => {
+        // depthTest is false for inFront labels
+        if (inFront && sprite.material.depthTest === false) {
+          sprites.push(sprite);
+        } else if (!inFront && sprite.material.depthTest) {
+          sprites.push(sprite);
+        }
+      });
 
-    var i,
-      sprite,
-      material,
-      size,
-      fogType,
-      scale = [];
+      const nSprites = sprites.length;
 
-    for (i = 0; i < nSprites; i++) {
-      sprite = sprites[i];
-      material = sprite.material;
-      if (material.depthTest == false && !inFront) continue;
+      if (!nSprites) return;
 
-      if (!sprite.visible || material.opacity === 0) continue;
+      const {attributes} = _sprite;
+      const {uniforms} = _sprite;
 
-      if (!material.useScreenCoordinates) {
-        sprite._modelViewMatrix.multiplyMatrices(
-          camera.matrixWorldInverse,
-          sprite.matrixWorld
-        );
-        sprite.z = -sprite._modelViewMatrix.elements[14];
+      const halfViewportWidth = viewportWidth * 0.5;
+      const halfViewportHeight = viewportHeight * 0.5;
+
+      // setup gl
+      _gl.useProgram(_sprite.program);
+
+      _gl.enableVertexAttribArray(attributes.position);
+      _gl.enableVertexAttribArray(attributes.uv);
+
+      _gl.disable(_gl.CULL_FACE);
+      _gl.enable(_gl.BLEND);
+
+      _gl.bindBuffer(_gl.ARRAY_BUFFER, _sprite.vertexBuffer);
+      _gl.vertexAttribPointer(attributes.position, 2, _gl.FLOAT, false, 2 * 8, 0);
+      _gl.vertexAttribPointer(attributes.uv, 2, _gl.FLOAT, false, 2 * 8, 8);
+
+      _gl.bindBuffer(_gl.ELEMENT_ARRAY_BUFFER, _sprite.elementBuffer);
+
+      _gl.uniformMatrix4fv(uniforms.projectionMatrix, false, camera.projectionMatrix.elements);
+
+      _gl.activeTexture(_gl.TEXTURE0);
+      _gl.uniform1i(uniforms.map, 0);
+
+      let oldFogType = 0;
+      let sceneFogType = 0;
+      const {fog} = scene;
+
+      if (fog) {
+        _gl.uniform3f(uniforms.fogColor, fog.color.r, fog.color.g, fog.color.b);
+
+        _gl.uniform1f(uniforms.fogNear, fog.near);
+        _gl.uniform1f(uniforms.fogFar, fog.far);
+
+        _gl.uniform1i(uniforms.fogType, 1);
+        oldFogType = 1;
+        sceneFogType = 1;
       } else {
-        sprite.z = -sprite.position.z;
+        _gl.uniform1i(uniforms.fogType, 0);
+        oldFogType = 0;
+        sceneFogType = 0;
       }
-    }
 
-    sprites.sort(painterSortStable);
+      // update positions and sort
+      let i;
+      let sprite;
+      let material;
+      let size;
+      let fogType;
+      const scale = [];
 
-    // render all sprites
-    for (i = 0; i < nSprites; i++) {
-      sprite = sprites[i];
-      material = sprite.material;
+      for (i = 0; i < nSprites; i++) {
+        sprite = sprites[i];
+        material = sprite.material;
+        if (material.depthTest === false && !inFront) continue;
 
-      if (!sprite.visible || material.opacity === 0) continue;
+        if (!sprite.visible || material.opacity === 0) continue;
 
-      if (material.map && material.map.image && material.map.image.width) {
-        this._gl.uniform1f(uniforms.alphaTest, material.alphaTest);
-        var w = material.map.image.width;
-        var h = material.map.image.height;
-
-        scale[0] = (w * this._renderer.devicePixelRatio) / viewportWidth;
-        scale[1] = (h * this._renderer.devicePixelRatio) / viewportHeight;
-
-        if (material.useScreenCoordinates === true) {
-          this._gl.uniform1i(uniforms.useScreenCoordinates, 1);
-          this._gl.uniform3f(
-            uniforms.screenPosition,
-            (sprite.position.x * this._renderer.devicePixelRatio -
-              halfViewportWidth) /
-              halfViewportWidth,
-            (halfViewportHeight -
-              sprite.position.y * this._renderer.devicePixelRatio) /
-              halfViewportHeight,
-            Math.max(0, Math.min(1, sprite.position.z))
-          );
+        if (!material.useScreenCoordinates) {
+          sprite._modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, sprite.matrixWorld);
+          sprite.z = -sprite._modelViewMatrix.elements[14];
         } else {
-          this._gl.uniform1i(uniforms.useScreenCoordinates, 0);
-          this._gl.uniformMatrix4fv(
-            uniforms.modelViewMatrix,
-            false,
-            sprite._modelViewMatrix.elements
-          );
+          sprite.z = -sprite.position.z;
         }
-
-        if (scene.fog && material.fog) {
-          fogType = sceneFogType;
-        } else {
-          fogType = 0;
-        }
-
-        if (oldFogType !== fogType) {
-          this._gl.uniform1i(uniforms.fogType, fogType);
-          oldFogType = fogType;
-        }
-
-        size = 1 / (material.scaleByViewport ? viewportHeight : 1);
-
-        scale[0] *= size * sprite.scale.x;
-        scale[1] *= size * sprite.scale.y;
-
-        let alignx = material.alignment.x,
-          aligny = material.alignment.y;
-        if (material.screenOffset) {
-          //adjust alignment offset by screenOffset adjusted to sprite coords
-          alignx += (2.0 * material.screenOffset.x) / w;
-          aligny += (2.0 * material.screenOffset.y) / h;
-        }
-
-        this._gl.uniform2f(
-          uniforms.uvScale,
-          material.uvScale.x,
-          material.uvScale.y
-        );
-        this._gl.uniform2f(
-          uniforms.uvOffset,
-          material.uvOffset.x,
-          material.uvOffset.y
-        );
-        this._gl.uniform2f(uniforms.alignment, alignx, aligny);
-
-        this._gl.uniform1f(uniforms.opacity, material.opacity);
-        this._gl.uniform3f(
-          uniforms.color,
-          material.color.r,
-          material.color.g,
-          material.color.b
-        );
-
-        this._gl.uniform1f(uniforms.rotation, sprite.rotation);
-        this._gl.uniform2fv(uniforms.scale, scale);
-
-        //this._renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
-        this._renderer.setDepthTest(material.depthTest);
-        this._renderer.setDepthWrite(material.depthWrite);
-        this._renderer.setTexture(material.map, 0);
-
-        this._gl.drawElements(
-          this._gl.TRIANGLES,
-          6,
-          this._gl.UNSIGNED_SHORT,
-          0
-        );
       }
-    }
 
-    // restore gl
-    this._gl.enable(this._gl.CULL_FACE);
-  }
+      sprites.sort(painterSortStable);
 
-  /**
-   * @param {{ fragmentShader: any; vertexShader: any; uniforms?: {}; }} shader
-   * @param {string} precision
-   */
-  createProgram(shader, precision) {
-    var program = this._gl.createProgram();
+      // render all sprites
+      for (i = 0; i < nSprites; i++) {
+        sprite = sprites[i];
+        material = sprite.material;
 
-    var fragmentShader = this._gl.createShader(this._gl.FRAGMENT_SHADER);
-    var vertexShader = this._gl.createShader(this._gl.VERTEX_SHADER);
+        if (!sprite.visible || material.opacity === 0) continue;
 
-    var prefix = "precision " + precision + " float;\n";
+        if (material.map && material.map.image && material.map.image.width) {
+          _gl.uniform1f(uniforms.alphaTest, material.alphaTest);
+          const w = material.map.image.width;
+          const h = material.map.image.height;
 
-    if (!vertexShader || !fragmentShader || !program) throw new Error("failed to initialize shader program")
+          scale[0] = (w * _renderer.devicePixelRatio) / viewportWidth;
+          scale[1] = (h * _renderer.devicePixelRatio) / viewportHeight;
 
-    this._gl.shaderSource(fragmentShader, prefix + shader.fragmentShader);
-    this._gl.shaderSource(vertexShader, prefix + shader.vertexShader);
+          if (material.useScreenCoordinates === true) {
+            _gl.uniform1i(uniforms.useScreenCoordinates, 1);
+            _gl.uniform3f(
+              uniforms.screenPosition,
+              (sprite.position.x * _renderer.devicePixelRatio - halfViewportWidth) /
+                halfViewportWidth,
+              (halfViewportHeight - sprite.position.y * _renderer.devicePixelRatio) /
+                halfViewportHeight,
+              Math.max(0, Math.min(1, sprite.position.z))
+            );
+          } else {
+            _gl.uniform1i(uniforms.useScreenCoordinates, 0);
+            _gl.uniformMatrix4fv(uniforms.modelViewMatrix, false, sprite._modelViewMatrix.elements);
+          }
 
-    this._gl.compileShader(fragmentShader);
-    this._gl.compileShader(vertexShader);
+          if (scene.fog && material.fog) {
+            fogType = sceneFogType;
+          } else {
+            fogType = 0;
+          }
 
-    if (
-      !this._gl.getShaderParameter(fragmentShader, this._gl.COMPILE_STATUS) ||
-      !this._gl.getShaderParameter(vertexShader, this._gl.COMPILE_STATUS)
-    ) {
-      console.error(this._gl.getShaderInfoLog(fragmentShader));
-      console.error("could not initialize shader");
-      return null;
-    }
+          if (oldFogType !== fogType) {
+            _gl.uniform1i(uniforms.fogType, fogType);
+            oldFogType = fogType;
+          }
 
-    this._gl.attachShader(program, fragmentShader);
-    this._gl.attachShader(program, vertexShader);
+          size = 1 / (material.scaleByViewport ? viewportHeight : 1);
 
-    this._gl.linkProgram(program);
+          scale[0] *= size * sprite.scale.x;
+          scale[1] *= size * sprite.scale.y;
 
-    if (!this._gl.getProgramParameter(program, this._gl.LINK_STATUS))
-      console.error("Could not initialize shader");
+          let alignx = material.alignment.x;
+          let aligny = material.alignment.y;
+          if (material.screenOffset) {
+            // adjust alignment offset by screenOffset adjusted to sprite coords
+            alignx += (2.0 * material.screenOffset.x) / w;
+            aligny += (2.0 * material.screenOffset.y) / h;
+          }
 
-    return program;
+          _gl.uniform2f(uniforms.uvScale, material.uvScale.x, material.uvScale.y);
+          _gl.uniform2f(uniforms.uvOffset, material.uvOffset.x, material.uvOffset.y);
+          _gl.uniform2f(uniforms.alignment, alignx, aligny);
+
+          _gl.uniform1f(uniforms.opacity, material.opacity);
+          _gl.uniform3f(uniforms.color, material.color.r, material.color.g, material.color.b);
+
+          _gl.uniform1f(uniforms.rotation, sprite.rotation);
+          _gl.uniform2fv(uniforms.scale, scale);
+
+          // _renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
+          _renderer.setDepthTest(material.depthTest);
+          _renderer.setDepthWrite(material.depthWrite);
+          _renderer.setTexture(material.map, 0);
+
+          _gl.drawElements(_gl.TRIANGLES, 6, _gl.UNSIGNED_SHORT, 0);
+        }
+      }
+
+      // restore gl
+      _gl.enable(_gl.CULL_FACE);
+    };
   }
 }
