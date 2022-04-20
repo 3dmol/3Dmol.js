@@ -90,6 +90,8 @@ import {
 import EventDispatcher from './WebGL/core/EventDispatcher';
 import createViewerGrid from "./util/createViewerGrid";
 import createViewer from "./util/createViewer";
+import Viewers from "./singletons/Viewers";
+import download from "./util/download";
 
 globalThis.$ = $;
 export default {
@@ -181,8 +183,12 @@ export default {
     degToRad,
     square,
   },
+  square,
+  conversionMatrix3,
   EventDispatcher,
   createViewer,
-  createViewerGrid
+  createViewerGrid,
+  viewers: Viewers,
+  download,
 };
 

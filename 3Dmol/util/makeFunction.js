@@ -1,7 +1,7 @@
 /**
  * 
- * @param {string|Function} callback
- * @returns {Function|null}
+ * @param {string | null | import("../specs").AnyFunc} [callback]
+ * @returns {import("../specs").AnyFunc|null}
  */
 export default function makeFunction (callback) {
   // for py3dmol let users provide callback as string

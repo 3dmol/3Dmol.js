@@ -44,7 +44,6 @@ const ISDONE = 2;
 /** @const */
 const ISBOUND = 4;
 const probeRadius = 1.4;
-const defaultScaleFactor = 2;
 const vdwRadii = {
   H: 1.2,
   Li: 1.82,
@@ -94,6 +93,7 @@ class PointGrid {
 }
 
 export default class ProteinSurface {
+  static defaultScaleFactor = 2;
   ptranx = 0;
   ptrany = 0;
   ptranz = 0;
@@ -149,7 +149,7 @@ export default class ProteinSurface {
     new Int32Array([-1, -1, -1]),
   ];
 
-  scaleFactor = defaultScaleFactor; // 2 is .5A grid; if this is made user configurable,
+  scaleFactor = ProteinSurface.defaultScaleFactor; // 2 is .5A grid; if this is made user configurable,
 
 
   boundPoint;
@@ -213,7 +213,7 @@ export default class ProteinSurface {
   initparm(extent, btype, volume) {
     if (volume > 1000000)
       // heuristical decrease resolution to avoid large memory consumption
-      this.scaleFactor = defaultScaleFactor / 2;
+      this.scaleFactor = ProteinSurface.defaultScaleFactor / 2;
 
     const margin = (1 / this.scaleFactor) * 5.5; // need margin to avoid
 

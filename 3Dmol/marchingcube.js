@@ -24,7 +24,7 @@ export function MarchingCubeInitializer() {
     my.march = function march(data, verts, faces, spec) {
 
         const fulltable = !!(spec.fulltable);
-        const origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
+        const origin = (spec.origin && spec.origin.x) ? spec.origin : {x:0, y:0, z:0};
         const voxel = !!(spec.voxel);
         const transform = spec.matrix; // if this is set, it overrides origin and unitCube
         

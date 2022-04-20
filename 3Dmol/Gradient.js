@@ -25,10 +25,10 @@ export default class Gradient {
 
   // return range used for color mapping, null if none set
   /**
-   * @returns {number[]}
+   * @returns {number[]|null}
    */
   range() {
-    return [0, 0];
+    return null;
   }
 
   // if lo > hi, flip, also cap
@@ -46,7 +46,11 @@ export default class Gradient {
     return {lo: hi, hi: lo, val};
   }
 
-  // return a Gradient object, even if what is specified is descriptive
+  /**
+   * return a Gradient object, even if what is specified is descriptive
+   * @param {Gradient|{gradient?: keyof Gradient.builtinGradients; min?: number; max?:number; mid?:number}} grad
+   * @returns {Gradient}
+   */
   static getGradient(grad) {
     if (grad instanceof Gradient) {
       return grad;
@@ -59,6 +63,7 @@ export default class Gradient {
       }
       return new Gradient.builtinGradients[grad.gradient](min, max, grad.mid);
     }
+    // @ts-ignore
     return grad;
   }
 
@@ -126,12 +131,15 @@ export default class Gradient {
       return 0xffffff;
     }
 
-    // return range used for color mapping, null if none set
+    /**
+     * return range used for color mapping, null if none set
+     * @returns {number[]|null}
+     */
     range() {
       if (typeof this.min != 'undefined' && typeof this.max != 'undefined') {
         return /** @type {number[]} */ ([this.min, this.max]);
       }
-      return [0, 0];
+      return null;
     }
   };
 
@@ -202,12 +210,15 @@ export default class Gradient {
       return color;
     }
 
-    // return range used for color mapping, null if none set
+    /**
+     * return range used for color mapping, null if none set
+     * @returns {number[]|null}
+     */
     range() {
       if (typeof this.min != 'undefined' && typeof this.max != 'undefined') {
         return [this.min, this.max];
       }
-      return [0, 0];
+      return null;
     }
   };
 
@@ -265,12 +276,15 @@ export default class Gradient {
       return 0x10000 * Math.floor(r) + 0x100 * Math.floor(b) + 0x1 * Math.floor(g);
     }
 
-    // return range used for color mapping, null if none set
+    /**
+     * return range used for color mapping, null if none set
+     * @returns {number[]|null}
+     */
     range() {
       if (typeof this.min != 'undefined' && typeof this.max != 'undefined') {
         return [this.min, this.max];
       }
-      return [0, 0];
+      return null;
     }
   };
 

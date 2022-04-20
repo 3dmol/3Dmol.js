@@ -32,8 +32,8 @@ export default function createViewer(element, config, sharedViewerResources) {
     const viewer = new GLViewer(el, cfg, svr);
     return viewer;
   } catch (e) {
-    // throw `error creating viewer: ${e}`;
-    throw new Error('error creating viewer');
+    console.trace(e);
+    throw new Error(`error creating viewer: ${e}`);
   }
 
   // return null;

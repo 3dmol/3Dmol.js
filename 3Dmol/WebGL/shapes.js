@@ -1,52 +1,52 @@
+/* eslint-disable no-underscore-dangle */
 // Intersection sphere and box shapes.
-
 import {Vector3} from './math';
 
 // Intersection sphere for sphere, stick render
-/** @constructor */
-export function Sphere(center, radius) {
-  this.center = center !== undefined ? center : new Vector3();
-  this.radius = radius !== undefined ? radius : 0;
-}
-
-Sphere.prototype = {
-  constructor: Sphere,
+export class Sphere {
+  /** @type {{min: import('../specs').Vector3Like, max: import('../specs').Vector3Like}|undefined} */
+  box;
+  /**
+   * 
+   * @param {Vector3} [center] 
+   * @param {number} [radius] 
+   */
+  constructor(center, radius) {
+    this.center = center !== undefined ? center : new Vector3();
+    this.radius = radius !== undefined ? radius : 0;
+  }
 
   set(center, radius) {
     this.center.copy(center);
     this.radius = radius;
-
     return this;
-  },
+  }
 
   copy(sphere) {
     this.center.copy(sphere.center);
     this.radius = sphere.radius;
-
     return this;
-  },
+  }
 
   applyMatrix4(matrix) {
     this.center.applyMatrix4(matrix);
     this.radius *= matrix.getMaxScaleOnAxis();
-
     return this;
-  },
+  }
 
   translate(offset) {
     this.center.add(offset);
-
     return this;
-  },
+  }
 
   equals(sphere) {
     return sphere.center.equals(this.center) && sphere.radius === this.radius;
-  },
+  }
 
   clone() {
     return new Sphere().copy(this);
-  },
-};
+  }
+}
 
 // Bounding cylinder for stick render
 /** @constructor */

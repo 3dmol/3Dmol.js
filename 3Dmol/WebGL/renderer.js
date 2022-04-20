@@ -77,7 +77,6 @@ export default class Renderer {
     };
 
     // internal properties
-    this.this = this;
     this._programs = [];
     this._programsCounter = 0;
     this._webglversion = 1;

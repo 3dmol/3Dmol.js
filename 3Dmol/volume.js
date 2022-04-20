@@ -679,6 +679,11 @@ export class GLVolumetricRender {
   /** @type {number|undefined} */
   shapePosition;
 
+  // uninitialized members
+  clickable;
+  hoverable;
+  frame;
+
   /**
    * @param {VolumeData} data
    * @param {import('./specs').VolumetricRendererSpec} spec

@@ -135,6 +135,7 @@ export default class GLViewer {
   /** @type {Array<GLModel>} */
   models = []; // atomistic molecular models
   surfaces = {};
+  /** @type {Array<GLShape|GLVolumetricRender>} */
   shapes = []; // Generic shapes
   labels = [];
   fixed_labels = [];
@@ -152,7 +153,7 @@ export default class GLViewer {
   glDOM;
   _stateManager;
   callback;
-  /** @type {any} */
+  /** @type {null|{hover_callback: import('./specs').AnyFunc | null; unhover_callback:import('./specs').AnyFunc| null}} */
   current_hover = null;
   /** @type {number | undefined} */
   hoverDuration = 500;
@@ -236,6 +237,7 @@ export default class GLViewer {
       containerWidth: this.WIDTH || 1,
       containerHeight: this.HEIGHT || 1,
     });
+    if (!this.renderer) throw new Error('Could not create renderer');
     this.renderer.domElement.style.width = '100%';
     this.renderer.domElement.style.height = '100%';
     this.renderer.domElement.style.padding = '0';
@@ -267,25 +269,7 @@ export default class GLViewer {
     this.scene.fog.color = CC.color(this.bgColor);
 
     // this event is bound to the body element, not the container
-    $('body').on('mouseup touchend', ev => {
-      // handle touch
-      this.touchHold = false;
-
-      // handle selection
-      if (this.isDragging && this.scene) {
-        // saw mousedown, haven't moved
-        const x = getX(ev);
-        const y = getY(ev);
-        if (x == this.mouseStartX && y == this.mouseStartY) {
-          const offset = this.canvasOffset();
-          const mouseX = ((x - offset.left) / this.WIDTH) * 2 - 1;
-          const mouseY = -((y - offset.top) / this.HEIGHT) * 2 + 1;
-          this.handleClickSelection(mouseX, mouseY, ev);
-        }
-      }
-
-      this.isDragging = false;
-    });
+    $('body').on('mouseup touchend', this.onMouseUp.bind(this));
 
     // eslint-disable-next-line no-underscore-dangle
     this._stateManager = new StateManager(this, this.config); // Creates the UI state management tool
@@ -297,10 +281,10 @@ export default class GLViewer {
       this.setViewStyle(this.config);
     }
 
-    $(window).resize(this.resize);
+    $(window).resize(this.resize.bind(this));
 
     if (typeof window.ResizeObserver !== 'undefined') {
-      const divwatcher = new window.ResizeObserver(this.resize);
+      const divwatcher = new window.ResizeObserver(this.resize.bind(this));
       divwatcher.observe(this.container[0]);
     }
 
@@ -357,6 +341,26 @@ export default class GLViewer {
     this.ui.initiateUI = () => {
       this._stateManager.initiateUI();
     };
+  }
+
+  onMouseUp(ev) {
+    // handle touch
+    this.touchHold = false;
+
+    // handle selection
+    if (this.isDragging && this.scene) {
+      // saw mousedown, haven't moved
+      const x = getX(ev);
+      const y = getY(ev);
+      if (x == this.mouseStartX && y == this.mouseStartY) {
+        const offset = this.canvasOffset();
+        const mouseX = ((x - offset.left) / this.WIDTH) * 2 - 1;
+        const mouseY = -((y - offset.top) / this.HEIGHT) * 2 + 1;
+        this.handleClickSelection(mouseX, mouseY, ev);
+      }
+    }
+
+    this.isDragging = false;
   }
 
   /**
@@ -435,21 +439,21 @@ export default class GLViewer {
   }
 
   /**
-           * Set lower and upper limit stops for zoom.
-           *
-           * @function GLViewer#setZoomLimits
-           * @param {number} lower - limit on zoom in (positive number).  Default 0.
-           * @param {number} upper - limit on zoom out (positive number).  Default infinite.
-           * @example
-            $.get("data/set1_122_complex.mol2", function(moldata) {
-                  var m = viewer.addModel(moldata);
-                  viewer.setStyle({stick:{colorscheme:"Jmol"}});
-                  viewer.setZoomLimits(100,200);
-                  viewer.zoomTo();
-                  viewer.zoom(10); //will not zoom all the way
-                  viewer.render();
-              });
-          */
+   * Set lower and upper limit stops for zoom.
+   *
+   * @function GLViewer#setZoomLimits
+   * @param {number} lower - limit on zoom in (positive number).  Default 0.
+   * @param {number} upper - limit on zoom out (positive number).  Default infinite.
+   * @example
+    $.get("data/set1_122_complex.mol2", function(moldata) {
+          var m = viewer.addModel(moldata);
+          viewer.setStyle({stick:{colorscheme:"Jmol"}});
+          viewer.setZoomLimits(100,200);
+          viewer.zoomTo();
+          viewer.zoom(10); //will not zoom all the way
+          viewer.render();
+      });
+  */
   setZoomLimits(lower, upper) {
     if (typeof lower !== 'undefined') this.config.lowerZoomLimit = lower;
     if (upper) this.config.upperZoomLimit = upper;
@@ -728,7 +732,7 @@ export default class GLViewer {
       if (typeof this.current_hover.unhover_callback != 'function') {
         this.current_hover.unhover_callback = makeFunction(this.current_hover.unhover_callback);
       }
-      this.current_hover.unhover_callback(this.current_hover, this, event, this.container);
+      if (this.current_hover.unhover_callback) this.current_hover.unhover_callback(this.current_hover, this, event, this.container);
     }
     this.current_hover = selected;
 
@@ -1131,11 +1135,11 @@ export default class GLViewer {
 
     if (!this.nomouse) {
       // user can request that the mouse handlers not be installed
-      this.glDOM.on('mousedown touchstart', this._handleMouseDown);
-      this.glDOM.on('wheel', this._handleMouseScroll);
-      this.glDOM.on('mousemove touchmove', this._handleMouseMove);
+      this.glDOM.on('mousedown touchstart', this._handleMouseDown.bind(this));
+      this.glDOM.on('wheel', this._handleMouseScroll.bind(this));
+      this.glDOM.on('mousemove touchmove', this._handleMouseMove.bind(this));
 
-      this.glDOM.on('contextmenu', this._handleContextMenu);
+      this.glDOM.on('contextmenu', this._handleContextMenu.bind(this));
     }
   }
 
@@ -1644,7 +1648,7 @@ export default class GLViewer {
           this.shapes[i].frame < 0 ||
           this.shapes[i].frame == this.viewer_frame
         ) {
-          this.shapes[i].globj(this.modelGroup, exts);
+          this.shapes[i].globj(this.modelGroup);
         } else {
           // should not be displayed in current frame
           this.shapes[i].removegl(this.modelGroup);
@@ -4330,7 +4334,8 @@ export default class GLViewer {
 
     style = style || {};
     mat = GLViewer.getMatWithStyle(style);
-    const surfobj = {};
+    /** @type {Array<any> & {style?:any;atomsel?:any;allsel?:any;focus?:any;}} */
+    const surfobj = [];
     // save this.configuration of surface
     surfobj.style = style;
     surfobj.atomsel = atomsel;

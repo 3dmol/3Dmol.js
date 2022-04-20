@@ -7,6 +7,8 @@ import { VolumeData } from "./volume";
 import Color from "./WebGL/core/Color";
 import { Vector2, Vector3 } from "./WebGL/math";
 
+export type AnyFunc = (...args:any[]|undefined[]) => any
+
 export type ColorSpec = Color | string | number;
 
 /**
@@ -60,7 +62,7 @@ export type ColorSchemeSpec = Partial<{
   mid: ColorSpec;
   max: ColorSpec;
   map: any;
-  colorfunc: any;
+  colorfunc: AnyFunc;
   colorscheme: string | ColorSchemeSpec;
   color: ColorSpec;
 }>;
@@ -258,7 +260,7 @@ export type IsoSurfaceSpec = Partial<{
   volscheme: Gradient;
   volformat: string;
   clickable: boolean;
-  callback: (e: any) => any;
+  callback: AnyFunc;
   coords: Array<Vector3Like>;
   selectedRegion: Array<Vector3Like>;
   hoverable: boolean;
@@ -283,15 +285,15 @@ export type ShapeSpec = Partial<{
   hidden: boolean;
   linewidth: number;
   clickable: boolean;
-  callback: Function | string
+  callback: AnyFunc| string
   frame: number;
   voldata: VolumeData;
   volscheme: Gradient;
   hoverable: boolean;
   opacity: number;
   side: number;
-  hover_callback: Function | string
-  unhover_callback: Function | string
+  hover_callback: AnyFunc | string
+  unhover_callback: () => AnyFunc | string
 }>;
 
 /** Specification for adding custom shape. Extends {@link ShapeSpec}. */

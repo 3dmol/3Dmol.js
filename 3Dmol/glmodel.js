@@ -1292,7 +1292,7 @@ export default class GLModel {
    * @function GLModel#setClickable
    * @param {import('./specs').AtomSelectionSpec} sel - atom selection to apply clickable settings to
    * @param {boolean} clickable - whether click-handling is enabled for the selection
-   * @param {function|string} callbackSrc - function called when an atom in the selection is clicked
+   * @param {import('./specs').AnyFunc|string} callbackSrc - function called when an atom in the selection is clicked
    */
   setClickable(sel, clickable, callbackSrc) {
     // report to console if this is not a valid selector
@@ -1328,8 +1328,8 @@ export default class GLModel {
    * @function GLModel#setHoverable
    * @param {import('./specs').AtomSelectionSpec} sel - atom selection to apply hoverable settings to
    * @param {boolean} hoverable - whether hover-handling is enabled for the selection
-   * @param {Function | string} hoverCallbackSrc - function called when an atom in the selection is hovered over
-   * @param {Function | string} unhoverCallbackSrc - function called when the mouse moves out of the hover area
+   * @param {import('./specs').AnyFunc | string} hoverCallbackSrc - function called when an atom in the selection is hovered over
+   * @param {import('./specs').AnyFunc | string} unhoverCallbackSrc - function called when the mouse moves out of the hover area
    */
   setHoverable(sel, hoverable, hoverCallbackSrc, unhoverCallbackSrc) {
     let s;
@@ -1589,16 +1589,16 @@ export default class GLModel {
   }
 
   /** @function hide
-                       * Don't show this model in future renderings. Keep all styles and state
-                       * so it can be efficiencly shown again.
-                       * @example
-                          download("pdb:3ucr",viewer,{},function(){
-                          viewer.setStyle({},{stick:{}});
-                          viewer.getModel().hide();
-                          viewer.render();
-                          });
-                       * @function GLModel#hide
-                       */
+   * Don't show this model in future renderings. Keep all styles and state
+   * so it can be efficiencly shown again.
+   * @example
+      $3Dmol.download("pdb:3ucr",viewer,{},function(){
+      viewer.setStyle({},{stick:{}});
+      viewer.getModel().hide();
+      viewer.render();
+      });
+   * @function GLModel#hide
+   */
   hide() {
     this.hidden = true;
     if (this.renderedMolObj) this.renderedMolObj.setVisible(false);
