@@ -1,9 +1,9 @@
 /**
- * 
+ *
  * @param {string | null | import("../specs").AnyFunc} [callback]
  * @returns {import("../specs").AnyFunc|null}
  */
-export default function makeFunction (callback) {
+export default function makeFunction(callback) {
   // for py3dmol let users provide callback as string
   if (callback && typeof callback == 'string') {
     // eslint-disable-next-line no-eval
@@ -14,6 +14,4 @@ export default function makeFunction (callback) {
     return callback;
   }
   return null;
-};
-
-
+}

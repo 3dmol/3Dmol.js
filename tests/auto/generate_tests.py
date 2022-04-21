@@ -38,6 +38,9 @@ class Example():
         self.name=self.name.replace("_3Dmol_","")
         self.name=self.name.replace("___","")
         self.name=self.name.replace("_tests_","")
+        self.name=self.name.replace("{Object}","")
+        self.name=self.name.replace("module","")
+        self.name=self.name.replace(":","")
         if self.name.startswith('3'): self.name = '_'+self.name
         self.text=self.parse(text)
     

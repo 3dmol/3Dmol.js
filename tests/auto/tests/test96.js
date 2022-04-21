@@ -1,6 +1,6 @@
 
 
-    var viewer = new $3Dmol.createStereoViewer("gldiv");
+    var viewer = $3Dmol.createStereoViewer("gldiv");
 
     $.get("data/TC5b.prmtop",
         function(data) {

@@ -1,8 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import MarchingCube from "./MarchingCube";
-/* 
-  There are many // @ts-ignore's in this file because the data arrays are nullable
-*/
+import MarchingCube from './MarchingCube';
 /*  ProteinSurface.js by biochem_fan
 
 Ported and modified for Javascript based on EDTSurf,
@@ -36,64 +33,64 @@ if (typeof console === 'undefined') {
   };
 }
 
-// constants for vpbits bitmasks
-/** @const */
-const INOUT = 1;
-/** @const */
-const ISDONE = 2;
-/** @const */
-const ISBOUND = 4;
-const probeRadius = 1.4;
-const vdwRadii = {
-  H: 1.2,
-  Li: 1.82,
-  Na: 2.27,
-  K: 2.75,
-  C: 1.7,
-  N: 1.55,
-  O: 1.52,
-  F: 1.47,
-  P: 1.8,
-  S: 1.8,
-  CL: 1.75,
-  BR: 1.85,
-  SE: 1.9,
-  ZN: 1.39,
-  CU: 1.4,
-  NI: 1.63,
-  X: 2,
-};
-
-// a little class for 3d array, should really generalize this and
-// use throughout...
-class PointGrid {
-  constructor(length, width, height) {
-    // the standard says this is zero initialized
-    this.data = new Int32Array(length * width * height * 3);
-    this.width = width;
-    this.height = height;
-  }
-
-  // set position x,y,z to pt, which has ix,iy,and iz
-  set(x, y, z, pt) {
-    const index = ((x * this.width + y) * this.height + z) * 3;
-    this.data[index] = pt.ix;
-    this.data[index + 1] = pt.iy;
-    this.data[index + 2] = pt.iz;
-  }
-
-  get(x, y, z) {
-    const index = ((x * this.width + y) * this.height + z) * 3;
-    return {
-      ix: this.data[index],
-      iy: this.data[index + 1],
-      iz: this.data[index + 2],
-    };
-  }
-}
-
 export default class ProteinSurface {
+  // a little class for 3d array, should really generalize this and
+  // use throughout...
+  static PointGrid = class PointGrid {
+    constructor(length, width, height) {
+      // the standard says this is zero initialized
+      this.data = new Int32Array(length * width * height * 3);
+      this.width = width;
+      this.height = height;
+    }
+
+    // set position x,y,z to pt, which has ix,iy,and iz
+    set(x, y, z, pt) {
+      const index = ((x * this.width + y) * this.height + z) * 3;
+      this.data[index] = pt.ix;
+      this.data[index + 1] = pt.iy;
+      this.data[index + 2] = pt.iz;
+    }
+
+    get(x, y, z) {
+      const index = ((x * this.width + y) * this.height + z) * 3;
+      return {
+        ix: this.data[index],
+        iy: this.data[index + 1],
+        iz: this.data[index + 2],
+      };
+    }
+  };
+
   static defaultScaleFactor = 2;
+  // constants for vpbits bitmasks
+  /** @const */
+  static INOUT = 1;
+  /** @const */
+  static ISDONE = 2;
+  /** @const */
+  static ISBOUND = 4;
+  static probeRadius = 1.4;
+  static vdwRadii = {
+    H: 1.2,
+    Li: 1.82,
+    Na: 2.27,
+    K: 2.75,
+    C: 1.7,
+    N: 1.55,
+    O: 1.52,
+    F: 1.47,
+    P: 1.8,
+    S: 1.8,
+    CL: 1.75,
+    BR: 1.85,
+    SE: 1.9,
+    ZN: 1.39,
+    CU: 1.4,
+    NI: 1.63,
+    X: 2,
+  };
+
   ptranx = 0;
   ptrany = 0;
   ptranz = 0;
@@ -151,12 +148,11 @@ export default class ProteinSurface {
 
   scaleFactor = ProteinSurface.defaultScaleFactor; // 2 is .5A grid; if this is made user configurable,
 
-
   boundPoint;
 
   /** @param {import("./specs").AtomSpec} atom */
   static getVDWIndex(atom) {
-    if (!atom.elem || typeof vdwRadii[atom.elem] == 'undefined') {
+    if (!atom.elem || typeof ProteinSurface.vdwRadii[atom.elem] == 'undefined') {
       return 'X';
     }
     return atom.elem;
@@ -233,12 +229,12 @@ export default class ProteinSurface {
       this.pmaxy += margin;
       this.pmaxz += margin;
     } else {
-      this.pminx -= probeRadius + margin;
-      this.pminy -= probeRadius + margin;
-      this.pminz -= probeRadius + margin;
-      this.pmaxx += probeRadius + margin;
-      this.pmaxy += probeRadius + margin;
-      this.pmaxz += probeRadius + margin;
+      this.pminx -= ProteinSurface.probeRadius + margin;
+      this.pminy -= ProteinSurface.probeRadius + margin;
+      this.pminz -= ProteinSurface.probeRadius + margin;
+      this.pmaxx += ProteinSurface.probeRadius + margin;
+      this.pmaxy += ProteinSurface.probeRadius + margin;
+      this.pmaxz += ProteinSurface.probeRadius + margin;
     }
 
     this.pminx = Math.floor(this.pminx * this.scaleFactor) / this.scaleFactor;
@@ -257,7 +253,7 @@ export default class ProteinSurface {
     this.pHeight = Math.ceil(this.scaleFactor * (this.pmaxz - this.pminz)) + 1;
 
     this.boundingatom(btype);
-    this.cutRadius = probeRadius * this.scaleFactor;
+    this.cutRadius = ProteinSurface.probeRadius * this.scaleFactor;
 
     this.vpBits = new Uint8Array(this.pLength * this.pWidth * this.pHeight);
     this.vpDistance = new Float64Array(this.pLength * this.pWidth * this.pHeight); // float 32
@@ -278,11 +274,11 @@ export default class ProteinSurface {
     let tdept;
     let sradius;
 
-    for (const i in vdwRadii) {
-      if (!vdwRadii.hasOwnProperty(i)) continue;
-      const r = vdwRadii[i];
+    for (const i in ProteinSurface.vdwRadii) {
+      if (!ProteinSurface.vdwRadii[i]) continue;
+      const r = ProteinSurface.vdwRadii[i];
       if (!btype) tradius[i] = r * this.scaleFactor + 0.5;
-      else tradius[i] = (r + probeRadius) * this.scaleFactor + 0.5;
+      else tradius[i] = (r + ProteinSurface.probeRadius) * this.scaleFactor + 0.5;
 
       sradius = tradius[i] * tradius[i];
       this.widxz[i] = Math.floor(tradius[i]) + 1;
@@ -306,13 +302,12 @@ export default class ProteinSurface {
     // seqterm,bool
     // atomtype,atom*
     // proseq,bool bcolor)
-    // @ts-ignore
+    if (!this.vpBits || !this.vpDistance || !this.vpAtomID) return;
     for (let i = 0, il = this.vpBits.length; i < il; i++) {
-      // @ts-ignore
       this.vpBits[i] = 0;
-      // @ts-ignore
+
       this.vpDistance[i] = -1.0;
-      // @ts-ignore
+
       this.vpAtomID[i] = -1;
     }
 
@@ -322,8 +317,8 @@ export default class ProteinSurface {
       this.fillAtom(atom, atoms);
     }
 
-    // @ts-ignore
-    for (let i = 0, il = this.vpBits.length; i < il; i++) if (this.vpBits[i] & INOUT) this.vpBits[i] |= ISDONE;
+    for (let i = 0, il = this.vpBits.length; i < il; i++)
+      if (this.vpBits[i] & ProteinSurface.INOUT) this.vpBits[i] |= ProteinSurface.ISDONE;
   }
 
   fillAtom(atom, atoms) {
@@ -376,21 +371,17 @@ export default class ProteinSurface {
                       continue;
                     const index = si * pWH + sj * this.pHeight + sk;
 
-                    // @ts-ignore
-                    if (!(this.vpBits[index] & INOUT)) {
-                      // @ts-ignore
-                      this.vpBits[index] |= INOUT;
-                      // @ts-ignore
+                    if (this.vpBits && this.vpAtomID && !(this.vpBits[index] & ProteinSurface.INOUT)) {
+                      this.vpBits[index] |= ProteinSurface.INOUT;
+
                       this.vpAtomID[index] = atom.serial;
-                    } else {
-                      // @ts-ignore
+                    } else if (this.vpAtomID) {
                       const atom2 = atoms[this.vpAtomID[index]];
                       if (atom2.serial !== atom.serial) {
                         ox = cx + mi - Math.floor(0.5 + this.scaleFactor * (atom2.x + this.ptranx));
                         oy = cy + mj - Math.floor(0.5 + this.scaleFactor * (atom2.y + this.ptrany));
                         oz = cz + mk - Math.floor(0.5 + this.scaleFactor * (atom2.z + this.ptranz));
                         if (mi * mi + mj * mj + mk * mk < ox * ox + oy * oy + oz * oz)
-                          // @ts-ignore
                           this.vpAtomID[index] = atom.serial;
                       }
                     }
@@ -406,8 +397,8 @@ export default class ProteinSurface {
   }
 
   fillvoxelswaals(atoms, atomlist) {
-    // @ts-ignore
-    for (let i = 0, il = this.vpBits.length; i < il; i++) this.vpBits[i] &= ~ISDONE; // not isdone
+    if (!this.vpBits) return;
+    for (let i = 0, il = this.vpBits.length; i < il; i++) this.vpBits[i] &= ~ProteinSurface.ISDONE; // not isdone
 
     for (const i in atomlist) {
       const atom = atoms[atomlist[i]];
@@ -465,21 +456,18 @@ export default class ProteinSurface {
                     )
                       continue;
                     const index = si * pWH + sj * this.pHeight + sk;
-                    // @ts-ignore
-                    if (!(this.vpBits[index] & ISDONE)) {
-                      // @ts-ignore
-                      this.vpBits[index] |= ISDONE;
-                      // @ts-ignore
+
+                    if (this.vpBits && this.vpAtomID && !(this.vpBits[index] & ProteinSurface.ISDONE)) {
+                      this.vpBits[index] |= ProteinSurface.ISDONE;
+
                       this.vpAtomID[index] = atom.serial;
-                    } else {
-                      // @ts-ignore
+                    } else if (this.vpAtomID) {
                       const atom2 = atoms[this.vpAtomID[index]];
                       if (atom2.serial !== atom.serial) {
                         ox = cx + mi - Math.floor(0.5 + this.scaleFactor * (atom2.x + this.ptranx));
                         oy = cy + mj - Math.floor(0.5 + this.scaleFactor * (atom2.y + this.ptrany));
                         oz = cz + mk - Math.floor(0.5 + this.scaleFactor * (atom2.z + this.ptranz));
                         if (mi * mi + mj * mj + mk * mk < ox * ox + oy * oy + oz * oz)
-                          // @ts-ignore
                           this.vpAtomID[index] = atom.serial;
                       }
                     }
@@ -500,8 +488,8 @@ export default class ProteinSurface {
       for (let j = 0; j < this.pHeight; j++) {
         for (let k = 0; k < this.pWidth; k++) {
           const index = i * pWH + k * this.pHeight + j;
-          // @ts-ignore
-          if (this.vpBits[index] & INOUT) {
+
+          if (this.vpBits && this.vpBits[index] & ProteinSurface.INOUT) {
             let ii = 0;
             while (ii < 26) {
               const ti = i + this.nb[ii][0];
@@ -514,11 +502,9 @@ export default class ProteinSurface {
                 tk < this.pWidth &&
                 tj > -1 &&
                 tj < this.pHeight &&
-                // @ts-ignore
-                !(this.vpBits[ti * pWH + tk * this.pHeight + tj] & INOUT)
+                !(this.vpBits[ti * pWH + tk * this.pHeight + tj] & ProteinSurface.INOUT)
               ) {
-                // @ts-ignore
-                this.vpBits[index] |= ISBOUND;
+                this.vpBits[index] |= ProteinSurface.ISBOUND;
                 break;
               } else ii += 1;
             }
@@ -529,13 +515,13 @@ export default class ProteinSurface {
   }
 
   fastdistancemap() {
+    if (!this.vpBits || !this.vpDistance) return;
     let i;
     let j;
     let k;
     let n;
 
-    /** @type {PointGrid|null} */
-    let boundPoint = new PointGrid(this.pLength, this.pWidth, this.pHeight);
+    let boundPoint = new ProteinSurface.PointGrid(this.pLength, this.pWidth, this.pHeight);
     const pWH = this.pWidth * this.pHeight;
     const cutRSq = this.cutRadius * this.cutRadius;
 
@@ -548,12 +534,11 @@ export default class ProteinSurface {
       for (j = 0; j < this.pWidth; j++) {
         for (k = 0; k < this.pHeight; k++) {
           index = i * pWH + j * this.pHeight + k;
-          // @ts-ignore
-          this.vpBits[index] &= ~ISDONE; // isdone = false
-          // @ts-ignore
-          if (this.vpBits[index] & INOUT) {
-            // @ts-ignore
-            if (this.vpBits[index] & ISBOUND) {
+
+          this.vpBits[index] &= ~ProteinSurface.ISDONE; // isdone = false
+
+          if (this.vpBits[index] & ProteinSurface.INOUT) {
+            if (this.vpBits[index] & ProteinSurface.ISBOUND) {
               const triple = {
                 ix: i,
                 iy: j,
@@ -561,12 +546,12 @@ export default class ProteinSurface {
               };
               boundPoint.set(i, j, k, triple);
               inarray.push(triple);
-              // @ts-ignore
+
               this.vpDistance[index] = 0;
-              // @ts-ignore
-              this.vpBits[index] |= ISDONE;
-              // @ts-ignore
-              this.vpBits[index] &= ~ISBOUND;
+
+              this.vpBits[index] |= ProteinSurface.ISDONE;
+
+              this.vpBits[index] &= ~ProteinSurface.ISBOUND;
             }
           }
         }
@@ -578,9 +563,9 @@ export default class ProteinSurface {
       inarray = [];
       for (i = 0, n = outarray.length; i < n; i++) {
         index = pWH * outarray[i].ix + this.pHeight * outarray[i].iy + outarray[i].iz;
-        // @ts-ignore
-        this.vpBits[index] &= ~ISBOUND;
-        // @ts-ignore
+
+        this.vpBits[index] &= ~ProteinSurface.ISBOUND;
+
         if (this.vpDistance[index] <= 1.0404 * cutRSq) {
           inarray.push({
             ix: outarray[i].ix,
@@ -593,6 +578,8 @@ export default class ProteinSurface {
 
     inarray = [];
     outarray = [];
+
+    // @ts-ignore
     boundPoint = null;
 
     let cutsf = this.scaleFactor - 0.5;
@@ -602,25 +589,22 @@ export default class ProteinSurface {
       for (j = 0; j < this.pWidth; j++) {
         for (k = 0; k < this.pHeight; k++) {
           index = i * pWH + j * this.pHeight + k;
-          // @ts-ignore
-          this.vpBits[index] &= ~ISBOUND;
+
+          this.vpBits[index] &= ~ProteinSurface.ISBOUND;
           // ses solid
-          // @ts-ignore
-          if (this.vpBits[index] & INOUT) {
+
+          if (this.vpBits[index] & ProteinSurface.INOUT) {
             if (
-              // @ts-ignore
-              !(this.vpBits[index] & ISDONE) ||
-              // @ts-ignore
-              (this.vpBits[index] & ISDONE && this.vpDistance[index] >= cutoff)
+              !(this.vpBits[index] & ProteinSurface.ISDONE) ||
+              (this.vpBits[index] & ProteinSurface.ISDONE && this.vpDistance[index] >= cutoff)
             ) {
-              // @ts-ignore
-              this.vpBits[index] |= ISBOUND;
+              this.vpBits[index] |= ProteinSurface.ISBOUND;
             }
           }
         }
       }
     }
-  };
+  }
 
   fastoneshell(inarray, boundPoint) {
     // *allocout,voxel2
@@ -668,41 +652,46 @@ export default class ProteinSurface {
         ) {
           index = tnv.ix * pWH + this.pHeight * tnv.iy + tnv.iz;
 
-          // @ts-ignore
-          if (this.vpBits[index] & INOUT && !(this.vpBits[index] & ISDONE)) {
+          if (
+            this.vpBits&& this.vpDistance &&
+            this.vpBits[index] & ProteinSurface.INOUT &&
+            !(this.vpBits[index] & ProteinSurface.ISDONE)
+          ) {
             boundPoint.set(tnv.ix, tnv.iy, tz + this.nb[j][2], bp);
             dx = tnv.ix - bp.ix;
             dy = tnv.iy - bp.iy;
             dz = tnv.iz - bp.iz;
             square = dx * dx + dy * dy + dz * dz;
-            // @ts-ignore
+
             this.vpDistance[index] = square;
-            // @ts-ignore
-            this.vpBits[index] |= ISDONE;
-            // @ts-ignore
-            this.vpBits[index] |= ISBOUND;
+
+            this.vpBits[index] |= ProteinSurface.ISDONE;
+
+            this.vpBits[index] |= ProteinSurface.ISBOUND;
 
             outarray.push({
               ix: tnv.ix,
               iy: tnv.iy,
               iz: tnv.iz,
             });
-          // @ts-ignore
-          } else if (this.vpBits[index] & INOUT && this.vpBits[index] & ISDONE) {
+          } else if (
+            this.vpBits &&
+            this.vpDistance &&
+            this.vpBits[index] & ProteinSurface.INOUT &&
+            this.vpBits[index] & ProteinSurface.ISDONE
+          ) {
             dx = tnv.ix - bp.ix;
             dy = tnv.iy - bp.iy;
             dz = tnv.iz - bp.iz;
             square = dx * dx + dy * dy + dz * dz;
-            // @ts-ignore
+
             if (square < this.vpDistance[index]) {
               boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
 
-              // @ts-ignore
               this.vpDistance[index] = square;
-              // @ts-ignore
-              if (!(this.vpBits[index] & ISBOUND)) {
-                // @ts-ignore
-                this.vpBits[index] |= ISBOUND;
+
+              if (!(this.vpBits[index] & ProteinSurface.ISBOUND)) {
+                this.vpBits[index] |= ProteinSurface.ISBOUND;
                 outarray.push({
                   ix: tnv.ix,
                   iy: tnv.iy,
@@ -737,41 +726,46 @@ export default class ProteinSurface {
         ) {
           index = tnv.ix * pWH + this.pHeight * tnv.iy + tnv.iz;
 
-          // @ts-ignore
-          if (this.vpBits[index] & INOUT && !(this.vpBits[index] & ISDONE)) {
+          if (
+            this.vpBits && this.vpDistance &&
+            this.vpBits[index] & ProteinSurface.INOUT &&
+            !(this.vpBits[index] & ProteinSurface.ISDONE)
+          ) {
             boundPoint.set(tnv.ix, tnv.iy, tz + this.nb[j][2], bp);
 
             dx = tnv.ix - bp.ix;
             dy = tnv.iy - bp.iy;
             dz = tnv.iz - bp.iz;
             square = dx * dx + dy * dy + dz * dz;
-            // @ts-ignore
+
             this.vpDistance[index] = square;
-            // @ts-ignore
-            this.vpBits[index] |= ISDONE;
-            // @ts-ignore
-            this.vpBits[index] |= ISBOUND;
+
+            this.vpBits[index] |= ProteinSurface.ISDONE;
+
+            this.vpBits[index] |= ProteinSurface.ISBOUND;
 
             outarray.push({
               ix: tnv.ix,
               iy: tnv.iy,
               iz: tnv.iz,
             });
-          // @ts-ignore
-          } else if (this.vpBits[index] & INOUT && this.vpBits[index] & ISDONE) {
+          } else if (
+            this.vpBits &&
+            this.vpBits[index] & ProteinSurface.INOUT &&
+            this.vpBits[index] & ProteinSurface.ISDONE
+          ) {
             dx = tnv.ix - bp.ix;
             dy = tnv.iy - bp.iy;
             dz = tnv.iz - bp.iz;
             square = dx * dx + dy * dy + dz * dz;
-            // @ts-ignore
-            if (square < this.vpDistance[index]) {
+
+            if (this.vpDistance && square < this.vpDistance[index]) {
               boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
-              // @ts-ignore
+
               this.vpDistance[index] = square;
-              // @ts-ignore
-              if (!(this.vpBits[index] & ISBOUND)) {
-                // @ts-ignore
-                this.vpBits[index] |= ISBOUND;
+
+              if (!(this.vpBits[index] & ProteinSurface.ISBOUND)) {
+                this.vpBits[index] |= ProteinSurface.ISBOUND;
                 outarray.push({
                   ix: tnv.ix,
                   iy: tnv.iy,
@@ -806,42 +800,46 @@ export default class ProteinSurface {
         ) {
           index = tnv.ix * pWH + this.pHeight * tnv.iy + tnv.iz;
 
-          // @ts-ignore
-          if (this.vpBits[index] & INOUT && !(this.vpBits[index] & ISDONE)) {
+          if (
+            this.vpBits && this.vpDistance &&
+            this.vpBits[index] & ProteinSurface.INOUT &&
+            !(this.vpBits[index] & ProteinSurface.ISDONE)
+          ) {
             boundPoint.set(tnv.ix, tnv.iy, tz + this.nb[j][2], bp);
 
             dx = tnv.ix - bp.ix;
             dy = tnv.iy - bp.iy;
             dz = tnv.iz - bp.iz;
             square = dx * dx + dy * dy + dz * dz;
-            // @ts-ignore
+
             this.vpDistance[index] = square;
-            // @ts-ignore
-            this.vpBits[index] |= ISDONE;
-            // @ts-ignore
-            this.vpBits[index] |= ISBOUND;
+
+            this.vpBits[index] |= ProteinSurface.ISDONE;
+
+            this.vpBits[index] |= ProteinSurface.ISBOUND;
 
             outarray.push({
               ix: tnv.ix,
               iy: tnv.iy,
               iz: tnv.iz,
             });
-          // @ts-ignore
-          } else if (this.vpBits[index] & INOUT && this.vpBits[index] & ISDONE) {
+          } else if (
+            this.vpBits && this.vpDistance &&
+            this.vpBits[index] & ProteinSurface.INOUT &&
+            this.vpBits[index] & ProteinSurface.ISDONE
+          ) {
             dx = tnv.ix - bp.ix;
             dy = tnv.iy - bp.iy;
             dz = tnv.iz - bp.iz;
             square = dx * dx + dy * dy + dz * dz;
-            // @ts-ignore
+
             if (square < this.vpDistance[index]) {
               boundPoint.set(tnv.ix, tnv.iy, tnv.iz, bp);
 
-              // @ts-ignore
               this.vpDistance[index] = square;
-              // @ts-ignore
-              if (!(this.vpBits[index] & ISBOUND)) {
-                // @ts-ignore
-                this.vpBits[index] |= ISBOUND;
+
+              if (!(this.vpBits[index] & ProteinSurface.ISBOUND)) {
+                this.vpBits[index] |= ProteinSurface.ISBOUND;
                 outarray.push({
                   ix: tnv.ix,
                   iy: tnv.iy,
@@ -856,42 +854,52 @@ export default class ProteinSurface {
 
     // console.log("part3", positout);
     return outarray;
-  };
+  }
 
   marchingcubeinit(stype) {
-    // @ts-ignore
-    for (let i = 0, lim = this.vpBits.length; i < lim; i++) {
-      if (stype === 1) {
-        // vdw
-        // @ts-ignore
-        this.vpBits[i] &= ~ISBOUND;
-      } else if (stype === 4) {
-        // ses
-        // @ts-ignore
-        this.vpBits[i] &= ~ISDONE;
-        // @ts-ignore
-        if (this.vpBits[i] & ISBOUND) this.vpBits[i] |= ISDONE;
-        // @ts-ignore
-        this.vpBits[i] &= ~ISBOUND;
-      } else if (stype === 2) {
-        // after vdw
-        // @ts-ignore
-        if (this.vpBits[i] & ISBOUND && this.vpBits[i] & ISDONE) this.vpBits[i] &= ~ISBOUND;
-        // @ts-ignore
-        else if (this.vpBits[i] & ISBOUND && !(this.vpBits[i] & ISDONE)) this.vpBits[i] |= ISDONE;
-      } else if (stype === 3) {
-        // sas
-        // @ts-ignore
-        this.vpBits[i] &= ~ISBOUND;
+    if (this.vpBits) {
+      for (let i = 0, lim = this.vpBits.length; i < lim; i++) {
+        if (stype === 1) {
+          // vdw
+
+          this.vpBits[i] &= ~ProteinSurface.ISBOUND;
+        } else if (stype === 4) {
+          // ses
+
+          this.vpBits[i] &= ~ProteinSurface.ISDONE;
+
+          if (this.vpBits && this.vpBits[i] & ProteinSurface.ISBOUND)
+            this.vpBits[i] |= ProteinSurface.ISDONE;
+
+          this.vpBits[i] &= ~ProteinSurface.ISBOUND;
+        } else if (stype === 2) {
+          // after vdw
+
+          if (
+            this.vpBits &&
+            this.vpBits[i] & ProteinSurface.ISBOUND &&
+            this.vpBits[i] & ProteinSurface.ISDONE
+          )
+            this.vpBits[i] &= ~ProteinSurface.ISBOUND;
+          else if (
+            this.vpBits &&
+            this.vpBits[i] & ProteinSurface.ISBOUND &&
+            !(this.vpBits[i] & ProteinSurface.ISDONE)
+          )
+            this.vpBits[i] |= ProteinSurface.ISDONE;
+        } else if (stype === 3 && this.vpBits) {
+          // sas
+
+          this.vpBits[i] &= ~ProteinSurface.ISBOUND;
+        }
       }
     }
-  };
+  }
 
   marchingcube(stype) {
     this.marchingcubeinit(stype);
     this.verts = [];
     this.faces = [];
-    // @ts-ignore
     MarchingCube.march(this.vpBits, this.verts, this.faces, {
       smooth: 1,
       nX: this.pLength,
@@ -901,11 +909,10 @@ export default class ProteinSurface {
 
     const pWH = this.pWidth * this.pHeight;
     for (let i = 0, vlen = this.verts.length; i < vlen; i++) {
-      // @ts-ignore
-      this.verts[i].atomid = this.vpAtomID[this.verts[i].x * pWH + this.pHeight * this.verts[i].y + this.verts[i].z];
+      if (this.vpAtomID)
+        this.verts[i].atomid =
+          this.vpAtomID[this.verts[i].x * pWH + this.pHeight * this.verts[i].y + this.verts[i].z];
     }
-
-    // @ts-ignore
     MarchingCube.laplacianSmooth(1, this.verts, this.faces);
-  };
+  }
 }

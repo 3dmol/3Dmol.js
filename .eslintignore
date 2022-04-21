@@ -6,5 +6,5 @@ doc
 /node_modules
 /learning-environment
 viewer.js
-/js
+/3Dmol/MMTF.js
 /tmp

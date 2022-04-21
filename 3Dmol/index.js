@@ -2,7 +2,7 @@
 import "./effects/binaryPlusAjaxExtension"
 import "./effects/autoloadEffect";
 import $ from "jquery"
-import {CC, elementColors, htmlColors} from './colors';
+import {CC, elementColors, htmlColors, ssColors} from './colors';
 import drawCartoon from './drawCartoon';
 import GLDraw from './GLDraw';
 import GLModel from './GLModel';
@@ -92,8 +92,15 @@ import createViewerGrid from "./util/createViewerGrid";
 import createViewer from "./util/createViewer";
 import Viewers from "./singletons/Viewers";
 import download from "./util/download";
+import MMTF from "./MMTF";
+import getPropertyRange from "./util/getPropertyRange";
+import SurfaceType from "./enum/SurfaceType";
+import getbin from "./util/getbin";
+import CAP from "./enum/CAP";
+import createStereoViewer from "./util/createStereoViewer";
 
 globalThis.$ = $;
+globalThis.MMTF = MMTF;
 export default {
   Color,
   GLViewer,
@@ -190,5 +197,11 @@ export default {
   createViewerGrid,
   viewers: Viewers,
   download,
+  getPropertyRange,
+  SurfaceType,
+  getbin,
+  ssColors,
+  CAP,
+  createStereoViewer
 };
 

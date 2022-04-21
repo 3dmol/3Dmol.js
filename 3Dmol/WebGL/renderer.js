@@ -1635,7 +1635,7 @@ export default class Renderer {
     if (texture.needsUpdate) {
       if (!texture.__webglInit) {
         texture.__webglInit = true;
-        texture.addEventListener('dispose', this.onTextureDispose);
+        texture.addEventListener('dispose', this.onTextureDispose.bind(this));
         texture.__webglTexture = this._gl.createTexture();
         this.info.memory.textures += 1;
       }

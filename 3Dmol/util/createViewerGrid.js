@@ -5,7 +5,7 @@ import createViewer from "./createViewer";
  @function createViewerGrid
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {import("../specs").GridSpec} config - grid configuration
- * @param {import("../specs").ViewerGridSpec} viewerConfig - Viewer specification to apply to all subviewers
+ * @param {import("../specs").ViewerGridSpec} [viewerConfig] - Viewer specification to apply to all subviewers
  * @return [[GLViewer]] 2D array of GLViewers
  * @example                    
    var viewers = createViewerGrid(

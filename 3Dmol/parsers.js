@@ -11,6 +11,7 @@
 
 import base64ToArray from "./util/base64ToArray";
 import { conversionMatrix3, Matrix3, Matrix4, Vector3 } from "./WebGL/math";
+import MMTF from "./MMTF";
 
 
 
@@ -1431,8 +1432,8 @@ export default (function () {
             // files consistent.
             const dot = line.split(/\s/)[0].indexOf('.');
             if (dot > -1) {
-              line[dot] = '_';
-              line = `${line.substr(0, dot)}_${line.substr(dot + 1)}`;
+              // line[dot] = '_'; I think this is not needed
+              line = `${line.substring(0, dot)}_${line.substring(dot + 1)}`;
             }
           }
         }

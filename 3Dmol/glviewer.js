@@ -9,12 +9,7 @@ import Camera from './WebGL/Camera';
 import {Object3D, Light, Raycaster, Scene, Projection, Geometry} from './WebGL/core';
 import Fog from './WebGL/Fog';
 import {Vector3, Quaternion, Matrix3, Matrix4} from './WebGL/math';
-import {
-  LineBasicMaterial,
-  FrontSide,
-  MeshLambertMaterial,
-  VertexColors,
-} from './WebGL/materials';
+import {LineBasicMaterial, FrontSide, MeshLambertMaterial, VertexColors} from './WebGL/materials';
 import {Line, Mesh} from './WebGL/objects';
 import {elementColors, CC, getColorFromStyle} from './colors';
 import Gradient from './Gradient';
@@ -22,7 +17,7 @@ import GLShape, {splitMesh} from './glshape';
 import makeFunction from './util/makeFunction';
 import getExtent from './util/getExtent';
 import isEmptyObject from './util/isEmptyObject';
-import SurfaceType, { normalizeSurfaceType } from './enum/SurfaceType';
+import SurfaceType, {normalizeSurfaceType} from './enum/SurfaceType';
 import mergeGeos from './util/mergeGeos';
 import SyncSurface from './util/SyncSurface';
 import extend from './util/extend';
@@ -34,7 +29,7 @@ import ProteinSurface from './ProteinSurface4';
 import {VolumeData, GLVolumetricRender} from './volume';
 import StateManager from './ui/StateManager';
 import Viewers from './singletons/Viewers';
-import { SurfaceWorker } from './SurfaceWorker';
+import {SurfaceWorker} from './SurfaceWorker';
 
 // a molecular viewer based on GLMol
 
@@ -732,7 +727,8 @@ export default class GLViewer {
       if (typeof this.current_hover.unhover_callback != 'function') {
         this.current_hover.unhover_callback = makeFunction(this.current_hover.unhover_callback);
       }
-      if (this.current_hover.unhover_callback) this.current_hover.unhover_callback(this.current_hover, this, event, this.container);
+      if (this.current_hover.unhover_callback)
+        this.current_hover.unhover_callback(this.current_hover, this, event, this.container);
     }
     this.current_hover = selected;
 
@@ -1310,8 +1306,8 @@ export default class GLViewer {
    * @return {GLModel|null}
    *
    * @example // Retrieve reference to first GLModel added var m =
-   *    download("pdb:1UBQ",viewer,{},function(m1){
-            download("pdb:1UBI", viewer,{}, function(m2) {
+   *    $3Dmol.download("pdb:1UBQ",viewer,{},function(m1){
+            $3Dmol.download("pdb:1UBI", viewer,{}, function(m2) {
               viewer.zoomTo();
               m1.setStyle({cartoon: {color:'green'}});
               //could use m2 here as well
@@ -1491,7 +1487,7 @@ export default class GLViewer {
    * @param {number} [animationDuration] - an optional parameter that denotes the duration of the rotation animation. Default 0 (no animation)
    * @param {boolean} [fixedPath] - if true animation is constrained to requested motion, overriding updates that happen during the animation
    * @example     
-   *  download('cid:4000', viewer, {}, function() {
+   *  $3Dmol.download('cid:4000', viewer, {}, function() {
         viewer.setStyle({stick:{}});
         viewer.zoomTo();
         viewer.rotate(90,'y',1);
@@ -1537,9 +1533,12 @@ export default class GLViewer {
       let j = 0;
       let k = 0;
 
-      i = rAxis.x * s;
-      j = rAxis.y * s;
-      k = rAxis.z * s;
+      // added rAxis check
+      if (rAxis) {
+        i = rAxis.x * s;
+        j = rAxis.y * s;
+        k = rAxis.z * s;
+      }
 
       return new Quaternion(i, j, k, c).normalize();
     };
@@ -2155,10 +2154,10 @@ export default class GLViewer {
         $.get('data/1fas.pqr', function(data){
             viewer.addModel(data, "pqr");
             $.get("data/1fas.cube",function(volumedata){
-                viewer.addSurface(SurfaceType.VDW, {
+                viewer.addSurface($3Dmol.SurfaceType.VDW, {
                     opacity:0.85,
-                    voldata: new VolumeData(volumedata, "cube"),
-                    volscheme: new Gradient.Sinebow(getPropertyRange(viewer.selectedAtoms(),'charge'))
+                    voldata: new $3Dmol.VolumeData(volumedata, "cube"),
+                    volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'charge'))
                 },{});
             viewer.render();
             });
@@ -2314,7 +2313,7 @@ export default class GLViewer {
    * @param {boolean} [noshow] - if true, do not immediately display label - when adding multiple labels this is more efficient
    * @return {import("./Label").default}
    * @example
-      download("pdb:2EJ0",viewer,{},function(){
+      $3Dmol.download("pdb:2EJ0",viewer,{},function(){
             viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
             viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
                                      borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
@@ -2361,7 +2360,7 @@ export default class GLViewer {
    * @param {boolean} byframe - if true, create labels for every individual frame, not just current
    *
    * * @example
-       download("mmtf:2ll5",viewer,{},function(){
+       $3Dmol.download("mmtf:2ll5",viewer,{},function(){
             viewer.setStyle({stick:{radius:0.15},cartoon:{}});
             viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false, screenOffset: {x:0,y:0}});
             viewer.zoomTo();
@@ -2384,7 +2383,7 @@ export default class GLViewer {
    * @param {Object} style
    *
    * * @example
-       download("cid:5291",viewer,{},function(){
+       $3Dmol.download("cid:5291",viewer,{},function(){
             viewer.setStyle({stick: {radius:.2}});
             viewer.addPropertyLabels("index",{not:{elem:'H'}}, {fontColor:'black',font: 'sans-serif', fontSize: 28, showBackground:false,alignment:'center'});
             viewer.zoomTo();
@@ -2405,7 +2404,7 @@ export default class GLViewer {
    *            label - $3Dmol label
    *
    * @example // Remove labels created in
-   download("pdb:2EJ0",viewer,{},function(){
+   $3Dmol.download("pdb:2EJ0",viewer,{},function(){
             var toremove = viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
             viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
                                      borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
@@ -2433,7 +2432,7 @@ export default class GLViewer {
    *
    * @function GLViewer#removeAllLabels
    *         @example
-  download("pdb:1ubq",viewer,{},function(){
+  $3Dmol.download("pdb:1ubq",viewer,{},function(){
          viewer.addResLabels();
          viewer.setStyle({},{stick:{}});
          viewer.render( ); //show labels
@@ -2621,7 +2620,7 @@ export default class GLViewer {
    * @param {import('./specs').ArrowSpec} spec - Style specification
    * @return {GLShape}
    @example
-    download("pdb:4DM7",viewer,{},function(){
+    $3Dmol.download("pdb:4DM7",viewer,{},function(){
             viewer.setBackgroundColor(0xffffffff);
             viewer.addArrow({
                 start: {x:-10.0, y:0.0, z:0.0},
@@ -2744,7 +2743,7 @@ export default class GLViewer {
    * @param {import('./specs').LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
    * @return {GLShape}
    @example
-   download("pdb:2ABJ",viewer,{},function(){
+   $3Dmol.download("pdb:2ABJ",viewer,{},function(){
             viewer.setViewStyle({style:"outline"});
             viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
             viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
@@ -3105,13 +3104,13 @@ export default class GLViewer {
       var colors = [];
       var r = 20;
       //triangle
-      vertices.push(new Vector3(0,0,0));
-      vertices.push(new Vector3(r,0,0));
-      vertices.push(new Vector3(0,r,0));
+      vertices.push(new $3Dmol.Vector3(0,0,0));
+      vertices.push(new $3Dmol.Vector3(r,0,0));
+      vertices.push(new $3Dmol.Vector3(0,r,0));
   
-      normals.push(new Vector3(0,0,1));
-      normals.push(new Vector3(0,0,1));
-      normals.push(new Vector3(0,0,1));
+      normals.push(new $3Dmol.Vector3(0,0,1));
+      normals.push(new $3Dmol.Vector3(0,0,1));
+      normals.push(new $3Dmol.Vector3(0,0,1));
   
       colors.push({r:1,g:0,b:0});
       colors.push({r:0,g:1,b:0});
@@ -3174,7 +3173,7 @@ export default class GLViewer {
    *
    @example
    $.get('../test_structs/benzene-homo.cube', function(data){
-            var voldata = new VolumeData(data, "cube");
+            var voldata = new $3Dmol.VolumeData(data, "cube");
             viewer.addIsosurface(voldata, {isoval: 0.01,
                                            color: "blue"});
             viewer.addIsosurface(voldata, {isoval: -0.01,
@@ -3395,7 +3394,7 @@ export default class GLViewer {
         $.get('data/1fas.pqr', function(data){
             viewer.addModel(data, "pqr");
             $.get("data/1fas.cube",function(volumedata){
-                viewer.addSurface(SurfaceType.VDW, {opacity:0.85,voldata: new VolumeData(volumedata, "cube"), volscheme: new Gradient.RWB(-10,10)},{});
+                viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
             viewer.render();
             });
             viewer.zoomTo();
@@ -3610,7 +3609,7 @@ export default class GLViewer {
    *
    * @example
       viewer.setBackgroundColor(0xffffffff);
-         download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
+         $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
           m.setStyle({chain:'A'},{'cartoon':{color:'spectrum'}});
           m.setStyle({chain:'C'},{'cartoon':{style:'trace',color:'blue'}});
           m.setStyle({chain:'E'},{'cartoon':{tubes:true,arrows:true,color:'green',opacity:0.75}});
@@ -3639,7 +3638,7 @@ export default class GLViewer {
    * @param {import('./specs').AtomSelectionSpec|import('./specs').AtomStyleSpec} sel - Atom selection specification
    * @param {import('./specs').AtomStyleSpec} style - style spec to add to specified atoms
    * @example
-    download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
+    $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
       viewer.setStyle({cartoon:{}});
       //keep cartoon style, but show thick sticks for chain A
       viewer.addStyle({chain:'A'},{stick:{radius:.5,colorscheme:"magentaCarbon"}});
@@ -3666,7 +3665,7 @@ export default class GLViewer {
    * @param {function} callback - function called when an atom in the selection is clicked
    *
    * @example
-      download("cid:307900",viewer,{},function(){
+      $3Dmol.download("cid:307900",viewer,{},function(){
              viewer.setStyle({},{sphere:{}});
              viewer.setClickable({},true,function(atom,viewer,event,container) {
                  viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'darkgreen', backgroundOpacity: 0.8});
@@ -3688,7 +3687,7 @@ export default class GLViewer {
    * @param {()=>any} unhoverCallback - function called when the mouse moves out of the hover area
    * @returns {GLViewer}
    * @example
-    download("pdb:1ubq",viewer,{},function(){
+    $3Dmol.download("pdb:1ubq",viewer,{},function(){
            viewer.setHoverable({},true,function(atom,viewer,event,container) {
                if(!atom.label) {
                 atom.label = viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'mintcream', fontColor:'black'});
@@ -4015,7 +4014,14 @@ export default class GLViewer {
    * @param {number} vol
    * @return {Object}
    */
-  static generateMeshSyncHelper(surfaceType, expandedExtent, extendedAtoms, atomsToShow, atoms, vol) {
+  static generateMeshSyncHelper(
+    surfaceType,
+    expandedExtent,
+    extendedAtoms,
+    atomsToShow,
+    atoms,
+    vol
+  ) {
     // var time = new Date();
     const ps = new ProteinSurface();
     ps.initparm(expandedExtent, surfaceType !== 1, vol);
@@ -4098,7 +4104,6 @@ export default class GLViewer {
     return ret;
   }
 
-
   /**
    * Add surface representation to atoms
    * @function GLViewer#addSurface
@@ -4108,8 +4113,8 @@ export default class GLViewer {
    * @param {import('./specs').AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
    * @param {import('./specs').AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
    * @param {() => any} surfacecallback - function to be called after setting the surface
-   * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  
-   * Returns surfid immediately if surfacecallback is specified. 
+   * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.
+   * Returns surfid immediately if surfacecallback is specified.
    *  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
    */
   async addSurface(surfaceTypeIn, style, atomsel, allsel, focus, surfacecallback) {
@@ -4268,7 +4273,7 @@ export default class GLViewer {
       const workers = [];
       if (surfaceType < 0) surfaceType = 0; // negative reserved for atom data
       for (let i = 0, il = numWorkers; i < il; i++) {
-        const w = new Worker((/** @type {string} */(SurfaceWorker)));
+        const w = new Worker(/** @type {string} */ (SurfaceWorker));
         workers.push(w);
         w.postMessage({
           type: -1,
@@ -4289,7 +4294,7 @@ export default class GLViewer {
           });
         };
 
-        const rfunction = (event) => {
+        const rfunction = event => {
           const VandFs = splitMesh({
             vertexArr: event.data.vertices,
             faceArr: event.data.faces,
@@ -4412,7 +4417,7 @@ export default class GLViewer {
      });
    */
   setSurfaceMaterialStyle(surf, style) {
-    this.adjustVolumeStyle(style);
+    adjustVolumeStyle(style);
     if (this.surfaces[surf]) {
       const surfArr = this.surfaces[surf];
       surfArr.style = style;
@@ -4440,11 +4445,6 @@ export default class GLViewer {
       }
     }
     return this;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  adjustVolumeStyle(style) {
-    throw new Error('Method not implemented.');
   }
 
   /**

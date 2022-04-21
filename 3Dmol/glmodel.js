@@ -843,8 +843,8 @@ export default class GLModel {
    * @param {boolean} [bothWays] - if true, extend both in positive and negative directions by numFrames
    * @param {import("./GLViewer").default} [viewer] - required if arrowSpec is provided
    * @param {import('./specs').ArrowSpec} [arrowSpec] - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
-   *@example
-    download("pdb:4UAA",viewer,{},function(){
+   * @example
+    $3Dmol.download("pdb:4UAA",viewer,{},function(){
       viewer.setStyle({},{stick:{}});
       viewer.vibrate(10, 1);
       viewer.animate({loop: "forward",reps: 1});
@@ -1013,7 +1013,7 @@ export default class GLModel {
    * @param {any} [from]
    * @return {Array.<Object>}
    * @example
-   *download("pdb:4wwy",viewer,{},function(){
+      $3Dmol.download("pdb:4wwy",viewer,{},function(){
             var atoms = viewer.selectedAtoms({chain:'A'});
             for(var i = 0, n = atoms.length; i < n; i++) {
                atoms[i].b = 0.0;
@@ -1213,16 +1213,16 @@ export default class GLModel {
    * @param {import('./specs').AtomStyleSpec} [style]
    * @param {boolean} [add] - if true, add to current style, don't replace
    @example
-    download("pdb:4UB9",viewer,{},function(){
+    $3Dmol.download("pdb:4UB9",viewer,{},function(){
             viewer.setBackgroundColor(0xffffffff);
-            viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new Gradient.Sinebow(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-            viewer.setStyle({chain:'B'},{line:{colorscheme:{prop:'b',gradient: new Gradient.Sinebow(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-            viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new Gradient.Sinebow(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-            viewer.setStyle({chain:'D'},{cross:{colorscheme:{prop:'b',gradient: new Gradient.RWB(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-            viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new Gradient.RWB(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-            viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new Gradient.RWB(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-            viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new Gradient.ROYGB(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
-            viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new Gradient.ROYGB(getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'B'},{line:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'D'},{cross:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'E'},{cross:{radius:2.0,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'F'},{stick:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.RWB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'G'},{stick:{radius:0.8,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
+            viewer.setStyle({chain:'H'},{stick:{singleBonds:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.ROYGB($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
             viewer.render();
         });
    */
@@ -1240,13 +1240,13 @@ export default class GLModel {
     // report to console if this is not a valid selector
     let s;
     for (s in sel) {
-      if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
+      if (!GLModel.validAtomSelectionSpecs[s]) {
         console.log(`Unknown selector ${s}`);
       }
     }
     // report to console if this is not a valid style
     for (s in style) {
-      if (!GLModel.validAtomStyleSpecs.hasOwnProperty(s)) {
+      if (!GLModel.validAtomStyleSpecs[s]) {
         console.log(`Unknown style ${s}`);
       }
     }
@@ -1271,7 +1271,7 @@ export default class GLModel {
 
         if (!add) selected[i].style = {};
         for (const s in style) {
-          if (style.hasOwnProperty(s)) {
+          if (style[s]) {
             selected[i].style[s] = selected[i].style[s] || {}; // create distinct object for each atom
             Object.assign(selected[i].style[s], style[s]);
           }
@@ -1460,7 +1460,7 @@ export default class GLModel {
    * @param {import('./specs').AtomSelectionSpec} sel - selection object
    * @param {unknown} colorfun - function to be used to set the color
    @example
-    download("pdb:4UAA",viewer,{},function(){
+    $3Dmol.download("pdb:4UAA",viewer,{},function(){
             viewer.setBackgroundColor(0xffffffff);
             var colorAsSnake = function(atom) {
               return atom.resi % 2 ? 'white': 'green'
@@ -1608,7 +1608,7 @@ export default class GLModel {
   /** @function show
    * Unhide a hidden model (see GLModel#hide)
    * @example
-      download("pdb:3ucr",viewer,{},function(){
+      $3Dmol.download("pdb:3ucr",viewer,{},function(){
       viewer.setStyle({},{stick:{}});
       viewer.getModel().hide();
       viewer.render(  )
@@ -1941,7 +1941,7 @@ export default class GLModel {
     let sphereGeometry = null;
     let stickGeometry = null;
     if (options.supportsImposters) {
-      drawSphereFunc = this.drawAtomImposter;
+      drawSphereFunc = this.drawAtomImposter.bind(this);
       sphereGeometry = new Geometry(true);
       sphereGeometry.imposter = true;
       stickGeometry = new Geometry(true, true);
@@ -1950,7 +1950,7 @@ export default class GLModel {
       stickGeometry.sphereGeometry.imposter = true;
       stickGeometry.drawnCaps = {};
     } else if (options.supportsAIA) {
-      drawSphereFunc = this.drawAtomInstanced;
+      drawSphereFunc = this.drawAtomInstanced.bind(this);
       sphereGeometry = new Geometry(false, true, true);
       sphereGeometry.instanced = true;
       stickGeometry = new Geometry(true); // don't actually have instanced sticks
