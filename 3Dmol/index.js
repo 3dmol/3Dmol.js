@@ -98,6 +98,7 @@ import SurfaceType from "./enum/SurfaceType";
 import getbin from "./util/getbin";
 import CAP from "./enum/CAP";
 import createStereoViewer from "./util/createStereoViewer";
+import extend from "./util/extend";
 
 globalThis.$ = $;
 globalThis.MMTF = MMTF;
@@ -202,6 +203,7 @@ export default {
   getbin,
   ssColors,
   CAP,
-  createStereoViewer
+  createStereoViewer,
+  extend
 };
 

@@ -18,6 +18,7 @@ import Color from './WebGL/core/Color';
 import vector3LikeToVector3 from './util/vector3LikeToVector3';
 import MarchingCube from './MarchingCube';
 import subdivideSpline from './util/subdivideSpline';
+import adjustVolumeStyle from './util/adjustVolumeStyle';
 
 // Marching cube, to match with protein surface generation
 const ISDONE = 2;
@@ -769,7 +770,7 @@ export default class GLShape {
     updateFromStyle(this, this.stylespec);
 
     if (newspec.voldata && newspec.volscheme) {
-      GLShape.adjustVolumeStyle(newspec);
+      adjustVolumeStyle(newspec);
 
       // convert volumetric data into colors
       const scheme = newspec.volscheme;

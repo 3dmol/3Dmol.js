@@ -55,6 +55,7 @@ for file in testsys.files:
         with open(pathjoin(generationTargetDir, f"{example.name}.html"), "w") as f:
             f.write(
 f"""
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <title>{example.name}</title>

@@ -372,7 +372,7 @@ function propertyMatches(atomval, val) {
 // as arrays and nested objects with values of the aformentioned
 // types.
 function deepCopyAndCache(selobject, model) {
-  if (typeof selobject != 'object') return selobject;
+  if (typeof selobject != 'object' || selobject === null) return selobject;
   if (selobject.__cache_created) return selobject; // already done
   const copy = {};
   for (const key in selobject) {

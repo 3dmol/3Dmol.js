@@ -205,7 +205,7 @@ export default class GLViewer {
   constructor(element, cfg, svr) {
     // config defaults
     this.config = cfg || {};
-    this.config.defaultcolors = this.config.defaultColors || elementColors.defaultColors;
+    this.config.defaultcolors = this.config.defaultColors || elementColors.Jmol;
     this.config.backgroundColor = this.config.backgroundColor || '#ffffff';
     // this.config.disableFog= this.config.disableFog || false;
     this.bgColor = CC.color(this.config.backgroundColor || 0).getHex();
@@ -1425,13 +1425,13 @@ export default class GLViewer {
         }
 
         if (step < steps.length) {
-          setTimeout(callback, interval);
+          setTimeout(callback.bind(this), interval);
         } else {
           this.decAnim();
         }
         this.show();
       };
-      setTimeout(callback, interval);
+      setTimeout(callback.bind(this), interval);
     } else {
       // relative update
       const delta = {};
@@ -1468,13 +1468,13 @@ export default class GLViewer {
         }
 
         if (step < stepLen) {
-          setTimeout(callback, interval);
+          setTimeout(callback.bind(this), interval);
         } else {
           this.decAnim();
         }
         this.show();
       };
-      setTimeout(callback, interval);
+      setTimeout(callback.bind(this), interval);
     }
   }
 
@@ -1671,10 +1671,10 @@ export default class GLViewer {
 
     for (i in this.surfaces) {
       // this is an object with possible holes
-      if (!this.surfaces.hasOwnProperty(i)) continue;
+      if (!this.surfaces[i]) continue;
       const surfArr = this.surfaces[i];
       for (n = 0; n < surfArr.length; n++) {
-        if (surfArr.hasOwnProperty(n)) {
+        if (surfArr[n]) {
           const {geo} = surfArr[n];
           // async surface generation can cause
           // the geometry to be webgl initialized before it is fully

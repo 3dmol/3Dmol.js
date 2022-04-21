@@ -1,7 +1,7 @@
 {
     "renderTests": "tests/glcheck/render-tests/*.html",
     "renderTestThreshold": 0.96,
-    "renderTimeout": 60000,
+    "renderTimeout": 100000,
     "saveRenderFailures": true,
     "coverageFiles": "tests/glcheck/render-tests/assets/*",
     "referenceImageDir": "tests/glcheck/reference-images",
