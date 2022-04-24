@@ -60,7 +60,7 @@ describe('function CUBE', ()=>{
         }
     });
 
-    test("Atom serial is equal to atom index", ()=>{
+    test("Atom serial is equal to index", ()=>{
         for(let i = 0; i < len; i++){
             expect(atoms[0][i].serial).toBe(i);
         }
@@ -110,11 +110,66 @@ describe('function CUBE', ()=>{
 
 describe('function XYZ', ()=>{
     const data = fs.readFileSync('tests/auto/data/md.xyz', 'utf-8')
+    let atomCount = 17411;
     let atoms = $3Dmol.Parsers.XYZ(data, {}); //assignbonds
     
+    /*
     test("XYZ input", ()=>{
         expect(atoms).toBeDefined();
     });
+    */
+
+    test("Atom is empy when input data has less than or equal to 3 lines.", ()=>{
+        let test_data = '1\nline2';
+        let empty_atom = $3Dmol.Parsers.XYZ(test_data, {});
+        expect(empty_atom).toEqual([[]]); //if lines.length < 3, atoms is empty
+    });
+    
+    test("Atom is empty when the atom count is less than 0", ()=>{ //first line (atom count)
+        let test_data = '0\n20\n30\n';
+        let empty_atom = $3Dmol.Parsers.XYZ(test_data, {});
+        expect(empty_atom).toEqual([[]]);
+    });
+
+    test("Atom is empty when the atom count is not a number.", ()=>{
+        let test_data = 'line1\nline2\nline3\n';
+        let empty_atom = $3Dmol.Parsers.XYZ(test_data, {});
+        expect(empty_atom).toEqual([[]]);
+    });
+
+    test("Atom is empty when input data has less than 'atom count + 2' lines", ()=>{
+        let test_data = '2\nline2\n'; // atom count = 2
+        let empty_atom = $3Dmol.Parsers.XYZ(test_data, {});
+        expect(empty_atom).toEqual([[]]);
+    });
+
+    test("Length of first element in atoms is equal to 17411 (atom count)", ()=>{
+        expect(atoms[0].length).toBe(atomCount); // atom count 
+    });
+
+    test("All atom hetflag are equal to true", ()=>{
+        for(let i = 0; i < atomCount; i++){
+            expect(atoms[0][0].hetflag).toBe(true);
+        }
+    });
+
+    test("Atom serial is equal to index", ()=>{
+        for(let i = 0; i < atomCount; i++){
+            expect(atoms[0][i].serial).toBe(i);
+        }
+    });
+
+    test("Atom with odd index has elem 'H', otherwise 'O'", ()=>{
+        for(let i = 0; i < atomCount; i++){
+            if(i % 2 == 1){ // odd
+                expect(atoms[0][i].elem).toBe('H');
+            }else{
+                expect(atoms[0][i].elem).toBe('O');
+            }
+        }
+    });
+
+
     //may need to test onemol
 
 
