@@ -77,13 +77,13 @@ describe('Function VASP\nInput: CONTCAR', () => {
 });
 
 
-describe('function CUBE', ()=>{ 
+describe('Function CUBE', ()=>{ 
     // CUBE returns 'atoms'
     const data = fs.readFileSync('tests/auto/data/1fas.cube', 'utf-8');
     let atoms = $3Dmol.Parsers.CUBE(data, {});
     let len = atoms[0].length; // 913
 
-    test("Input data has more than or equal to 6 lines", ()=>{
+    test("Atom is not empty", ()=>{
         expect(atoms).not.toEqual([[]]); //if lines.length < 6, atoms is empty
     });
 
@@ -113,15 +113,11 @@ describe('function CUBE', ()=>{
     });
 
     test("Atom 0 is bonded to 8,9,11", ()=>{
-        //for(let i = 0; i < len; i++){
-            expect(atoms[0][0].bonds).toEqual([8,9,11]);
-        //}
+        expect(atoms[0][0].bonds).toEqual([8,9,11]);
     });
     
     test("Bond order of atom 0 is ", ()=>{
-        //for(let i = 0; i < len; i++){
-            expect(atoms[0][0].bondOrder).toEqual([1,1,1]);
-        //}
+        expect(atoms[0][0].bondOrder).toEqual([1,1,1]);
     });
     
     test("Properties of all atoms are empty", ()=>{
@@ -130,22 +126,35 @@ describe('function CUBE', ()=>{
         }
     });
 
-    test("x of atom 0", ()=>{
-        //for(let i = 0; i < len; i++){
-            expect(atoms[0][0].x).toBeCloseTo(46.148);
-        //}
+    test("x of atom [0][0]", ()=>{
+        expect(atoms[0][0].x).toBeCloseTo(46.148);
+        
     });
 
-    test("y of atom 0", ()=>{
-        //for(let i = 0; i < len; i++){
-            expect(atoms[0][0].y).toBeCloseTo(16.581);
-        //}
+    test("y of atom [0][0]", ()=>{
+        expect(atoms[0][0].y).toBeCloseTo(16.581);
     });
 
-    test("z of atom 0", ()=>{
-        //for(let i = 0; i < len; i++){
-            expect(atoms[0][0].z).toBeCloseTo(2.104);
-        //}
+    test("z of atom [0][0]", ()=>{
+        expect(atoms[0][0].z).toBeCloseTo(2.104);
+    });
+
+});
+
+describe('Function CUBE\nassignBonds: false', ()=>{ 
+    const data = fs.readFileSync('tests/auto/data/1fas.cube', 'utf-8');
+    let atoms = $3Dmol.Parsers.CUBE(data, {assignBonds:false});
+
+    test("All bonds are empty when assignBonds is false", ()=>{
+        for(let i = 0; i < atoms[0].length; i++){
+            expect(atoms[0][i].bonds).toEqual([]);
+        }
+    });
+    
+    test("All bondOrder are empty when assignBonds is false", ()=>{
+        for(let i = 0; i < atoms[0].length; i++){
+            expect(atoms[0][i].bondOrder).toEqual([]);
+        }
     });
 
 });
@@ -154,7 +163,6 @@ describe('function CUBE', ()=>{
 /*
 describe('Function XYZ\ninput: md.xyz, options:{}', ()=>{
     const data = fs.readFileSync('tests/auto/data/md.xyz', 'utf-8')
-    //const data = fs.readFileSync('tests/auto/data/h-bn.xyz', 'utf-8')
     let atomCount = 17411;
     let atoms = $3Dmol.Parsers.XYZ(data, {}); //assignbonds
 
@@ -295,15 +303,9 @@ describe('Function XYZ\ninput: h-bn.xyz options: multimodel', ()=>{
         expect(atoms.length).toBe(2);
     });
 
-    //no difference
-    test("Length of atoms[0] ", ()=>{
-        let atoms = $3Dmol.Parsers.XYZ(data, {multimodel:true}); 
-        expect(atoms[0].length).toBe(2);
-    });
-
-    test("Length of atoms [0]", ()=>{
+    test("Length of atoms is 1 when onemol is true", ()=>{
         let atoms = $3Dmol.Parsers.XYZ(data, {multimodel:true, onemol:true}); 
-        expect(atoms[0].length).toBe(2);
+        expect(atoms.length).toBe(1);
     });
 
 });
@@ -314,7 +316,7 @@ describe('Function SDF\nparseV2000', ()=>{
     // undefined keepH
     let atoms = $3Dmol.Parsers.SDF(data, {});
     let atomCount = atoms[0].length;
-
+    /*
     test("Atoms is empty when input data is not greater than 3 lines",()=>{
         let test_data1 = "line1\nline2\nline3";
         let test_atoms1 = $3Dmol.Parsers.SDF(test_data1, {});
@@ -343,6 +345,11 @@ describe('Function SDF\nparseV2000', ()=>{
         let test_data5 = "line1\nline2\nline3\n  1 0 ";// atomCount=0, bondCount=1
         let test_atoms5 = $3Dmol.Parsers.SDF(test_data5, {});
         expect(test_atoms5).toEqual([[]]);
+    });
+    */
+
+    test("Atoms is not empty", () => {
+        expect(atoms).not.toEqual([[]]);
     });
 
     test("Length of atoms is 1", ()=>{
@@ -386,12 +393,7 @@ describe('Function SDF\nparseV2000', ()=>{
         expect(atoms[0][8].elem).toBe(atoms[0][8].atom);
     });
 
-    /*
-    //Elem = C, noH = false 
-    test("Elem of atoms[0][1] is 'C'", ()=>{
-        expect(atoms[0][0].elem).toBe('C');
-    });
-    */
+
 });
 
 // keepH = false; noH = true;
@@ -477,19 +479,19 @@ describe('Function SDF\nparseV2000 options: multimodel', ()=>{
 });
 
 
-describe('function json', ()=>{
+describe('Function json', ()=>{
 
 });
-/*
-describe('function cif', ()=>{
-    const data = fs.readFileSync('tests/auto/data/1jpy.cif', 'utf-8')
+
+describe('Function cif', ()=>{
+    const data = fs.readFileSync('tests/test_structs/multiple.cif', 'utf-8')
     let atoms = $3Dmol.Parsers.cif(data, {});
     
-    test("cif input", ()=>{
+    test("read cif input", ()=>{
         expect(atoms).toBeDefined();
     });
 });
-*/
+
 describe('function MOL2', ()=>{
     const data = fs.readFileSync('tests/test_structs/multiple.mol2', 'utf-8')
     let atoms = $3Dmol.Parsers.MOL2(data, {});
