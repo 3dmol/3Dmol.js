@@ -444,15 +444,15 @@ describe('Function SDF\nparseV2000 options: keepH', ()=>{
         expect(atoms[0][1].properties).toEqual(atoms2[0][1].properties);
     });
 
-    test("x of atoms[0][1] when keepH is false is different from atoms[0][1] when keepH is undefined", ()=>{
+    test("x of atoms[0][1] when keepH is false is the same as atoms[0][1] when keepH is undefined", ()=>{
         expect(atoms[0][1].x).toEqual(atoms2[0][1].x);
     });
 
-    test("y of atoms[0][1] when keepH is false is different from atoms[0][1] when keepH is undefined", ()=>{
+    test("y of atoms[0][1] when keepH is false is the same as atoms[0][1] when keepH is undefined", ()=>{
         expect(atoms[0][1].y).toEqual(atoms2[0][1].y);
     });
 
-    test("z of atoms[0][1] when keepH is false is different from atoms[0][1] when keepH is undefined", ()=>{
+    test("z of atoms[0][1] when keepH is false is the same as atoms[0][1] when keepH is undefined", ()=>{
         expect(atoms[0][1].z).toEqual(atoms2[0][1].z);
     });
     
@@ -463,7 +463,7 @@ describe('Function SDF\nparseV2000 options: multimodel', ()=>{
     const data = fs.readFileSync('tests/test_structs/aromaticsdf.sdf', 'utf-8')
     let atoms = $3Dmol.Parsers.SDF(data, {multimodel:true});
 
-    test("Length of atoms is 2", ()=>{
+    test("Length of atoms is 2 when multimodel is true", ()=>{
         expect(atoms.length).toBe(2);
     });
 
@@ -480,9 +480,10 @@ describe('Function SDF\nparseV2000 options: multimodel', ()=>{
 
 
 describe('Function json', ()=>{
-
+    // const data = '{"m":[{"a":[{"x":85,"y":144},{"x":102.32050807568878,"y":134},{"x":67.67949192431124,"y":134},{"x":85,"y":164}],"b":[{"b":0,"e":1},{"b":0,"e":2},{"b":0,"e":3}]},{"a":[{"x":213,"y":131},{"x":230.32050807568876,"y":121},{"x":247.64101615137753,"y":131},{"x":264.9615242270663,"y":121}],"b":[{"b":0,"e":1},{"b":1,"e":2},{"b":2,"e":3}]}]}'
 });
 
+/*
 describe('Function cif', ()=>{
     const data = fs.readFileSync('tests/test_structs/multiple.cif', 'utf-8')
     let atoms = $3Dmol.Parsers.cif(data, {});
@@ -518,6 +519,7 @@ describe('function PQR', ()=>{
         expect(atoms).toBeDefined();
     });
 });
+*/
 /*
 describe('function MMTF', ()=>{
     const data = fs.readFileSync('tests/auto/data/', 'utf-8')
@@ -527,7 +529,7 @@ describe('function MMTF', ()=>{
         expect(atoms).toBeDefined();
     });
 });
-*/
+
 describe('function PRMTOP', ()=>{
     const data = fs.readFileSync('tests/auto/data/model1.prmtop', 'utf-8')
     let atoms = $3Dmol.Parsers.PRMTOP(data);
@@ -536,6 +538,4 @@ describe('function PRMTOP', ()=>{
         expect(atoms).toBeDefined();
     });
 });
-
-
-
+*/
