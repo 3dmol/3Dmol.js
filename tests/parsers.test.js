@@ -483,14 +483,117 @@ describe('Function json', ()=>{
     // const data = '{"m":[{"a":[{"x":85,"y":144},{"x":102.32050807568878,"y":134},{"x":67.67949192431124,"y":134},{"x":85,"y":164}],"b":[{"b":0,"e":1},{"b":0,"e":2},{"b":0,"e":3}]},{"a":[{"x":213,"y":131},{"x":230.32050807568876,"y":121},{"x":247.64101615137753,"y":131},{"x":264.9615242270663,"y":121}],"b":[{"b":0,"e":1},{"b":1,"e":2},{"b":2,"e":3}]}]}'
 });
 
-/*
-describe('Function cif', ()=>{
+
+describe('Function cif\nInput: multiple.cif', ()=>{
     const data = fs.readFileSync('tests/test_structs/multiple.cif', 'utf-8')
     let atoms = $3Dmol.Parsers.cif(data, {});
     
-    test("read cif input", ()=>{
-        expect(atoms).toBeDefined();
+    test("Atoms is not empty", ()=>{
+        expect(atoms).not.toBe([]);
     });
+    
+    test("Test atoms length", ()=>{
+        expect(atoms.length).toBe(98);
+    });
+
+    test("Every element in atoms has the same length", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            expect(atoms[i].length).toBe(43);
+        }
+    });
+
+    test("Test atoms[0][0] x", ()=>{
+        expect(atoms[0][0].x).toBeCloseTo(5.9063);
+    });
+
+    test("Test atoms[0][0] y", ()=>{
+        expect(atoms[0][0].y).toBeCloseTo(24.9584);
+    });
+
+    test("Test atoms[0][0] z", ()=>{
+        expect(atoms[0][0].z).toBeCloseTo(25.9808);
+    });
+
+    test("All atom chain are undefined", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].chain).not.toBeDefined();
+            }
+        }
+    });
+
+    test("All atom resi are undefined", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].resi).not.toBeDefined();
+            }
+        }
+    });
+
+    test("All atom resn are undefined", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].resn).not.toBeDefined();
+            }
+        }
+    });
+
+    test("All atom hetflag are true", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].hetflag).toBe(true);
+            }
+        }
+    });
+
+    test("All atom atom are undefined", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].atom).not.toBeDefined();
+            }
+        }
+    });
+
+    test("Test atoms[0][0] elem", ()=>{
+        expect(atoms[0][0].elem).toBe('C');
+    });
+
+    test("Test atoms[0][0] bonds", ()=>{
+        expect(atoms[0][0].bonds).toEqual([1,28,5]);
+    });
+
+    test("All atom ss are 'c'", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].ss).toBe('c');
+            }
+        }
+    });
+
+    test("Test atoms serial", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].serial).toBe(j);
+            }
+        }
+    });
+
+    test("Test atoms bondOrder", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].bondOrder).toEqual(Array(atoms[i][j].bonds.length).fill(1));
+            }
+        }
+    });
+
+    test("Test atoms properties", ()=>{
+        for(let i = 0; i < atoms.length; i++){
+            for(let j = 0; j < atoms[0].length; j++){
+                expect(atoms[i][j].properties).toEqual({});
+s            }
+        }
+    });
+
 });
 
 describe('function MOL2', ()=>{
@@ -501,7 +604,7 @@ describe('function MOL2', ()=>{
         expect(atoms).toBeDefined();
     });
 });
-
+/*
 describe('function PDBQT', ()=>{
     const data = fs.readFileSync('tests/test_structs/1B5S.pdb', 'utf-8')
     let atoms = $3Dmol.Parsers.PDBQT(data, {});
