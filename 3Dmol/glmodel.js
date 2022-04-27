@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable eqeqeq */
 // A model is a collection of related atoms.  Bonds are only allowed between
 // atoms in the same model.  An atom is uniquely specified by its model id and
@@ -16,7 +17,7 @@ import getExtent from './util/getExtent';
 import makeFunction from './util/makeFunction';
 import {Object3D, Geometry} from './WebGL/core';
 import Color from './WebGL/core/Color';
-import Parsers from './Parsers';
+import Parsers from './parsers';
 import {
   LineBasicMaterial,
   MeshLambertMaterial,
@@ -353,8 +354,10 @@ function propertyMatches(atomval, val) {
     // support numerical integer ranges, e.g. resi: 3-7
     const match = val.match(/(-?\d+)\s*-\s*(-?\d+)/);
     if (match) {
-      const lo = parseInt(match[1]);
-      const hi = parseInt(match[2]);
+      // eslint-disable-next-line radix
+      const lo = Number.parseInt(match[1]);
+      // eslint-disable-next-line radix
+      const hi = Number.parseInt(match[2]);
       if (match && atomval >= lo && atomval <= hi) {
         return true;
       }
@@ -406,7 +409,7 @@ function deepCopyAndCache(selobject, model) {
 
       if (key == 'and') {
         // get the intersection of two sets
-        const intersect = function (first, other) {
+        const intersect = function intersect(first, other) {
           const result = new Set();
           for (const elem of other) {
             if (first.has(elem)) {
@@ -587,6 +590,7 @@ export default class GLModel {
   atoms = [];
   /** @type {any[] & Partial<{numFrames: any; url:any; origIndex:any; path:any}>} */
   frames = [];
+  /** @type {number[]|null} */
   box = null;
   /** @type {Array<any> | null} */
   atomdfs = null; // depth first search over connected components
@@ -605,6 +609,10 @@ export default class GLModel {
   /** @type {boolean|undefined|{shapes: any[], labels: any[]}} */
   unitCellObjects = undefined;
 
+  /**
+   * @param {number} mid
+   * @param {Record<string, any>} [options]
+   */
   constructor(mid, options) {
     this.id = mid;
     const {defaultColor} = elementColors;
@@ -827,10 +835,10 @@ export default class GLModel {
    * Add atoms as frames of model
    *
    * @function GLModel#addFrame
-   * @param {import('./specs').AtomSpec[]} atoms - atoms to be added
+   * @param {import('./specs').AtomSpec} atom - atoms to be added
    */
-  addFrame(atoms) {
-    this.frames.push(atoms);
+  addFrame(atom) {
+    this.frames.push(atom);
   }
 
   /**
@@ -937,12 +945,13 @@ export default class GLModel {
   /** add atoms to this model from molecular data string
    *
    * @function GLModel#addMolData
-   * @param {string|ArrayBuffer} [data] - atom structure file input data string, for gzipped input use ArrayBuffer
+   * @param {string|Uint8Array} [data] - atom structure file input data string, for gzipped input use ArrayBuffer
    * @param {string} [format] - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
    * @param {import('./specs').ParserOptionsSpec} [options] - format dependent options. Attributes depend on the input format
    */
   addMolData(data, format, options) {
     options = options || {};
+    if (!data) throw new Error("No data provided ot GLModel.addMolData");
     const parsedAtoms = GLModel.parseMolData(data, format, options);
     this.dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
     const mData = parsedAtoms.modelData;
@@ -979,7 +988,7 @@ export default class GLModel {
       } else {
         // add atoms to current frame
         for (let i = 0; i < parsedAtoms.length; i++) {
-          this.addAtoms(parsedAtoms[i]);
+          this.addAtoms(/** @type {import('./specs').AtomSpec[]} */(parsedAtoms[i]));
         }
       }
     }
@@ -1011,7 +1020,7 @@ export default class GLModel {
    * @function GLModel#selectedAtoms
    * @param {import('./specs').AtomSelectionSpec} sel
    * @param {any} [from]
-   * @return {Array.<Object>}
+   * @return {Array<import('./specs').AtomSpec>}
    * @example
       $3Dmol.download("pdb:4wwy",viewer,{},function(){
             var atoms = viewer.selectedAtoms({chain:'A'});
@@ -1238,14 +1247,13 @@ export default class GLModel {
       style = specStringToObject(style);
     }
     // report to console if this is not a valid selector
-    let s;
-    for (s in sel) {
+    for (const s in sel) {
       if (!GLModel.validAtomSelectionSpecs[s]) {
         console.log(`Unknown selector ${s}`);
       }
     }
     // report to console if this is not a valid style
-    for (s in style) {
+    for (const s in style) {
       if (!GLModel.validAtomStyleSpecs[s]) {
         console.log(`Unknown style ${s}`);
       }
@@ -1298,7 +1306,7 @@ export default class GLModel {
     // report to console if this is not a valid selector
     let s;
     for (s in sel) {
-      if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
+      if (!GLModel.validAtomSelectionSpecs[s]) {
         console.log(`Unknown selector ${s}`);
       }
     }
@@ -1334,7 +1342,7 @@ export default class GLModel {
   setHoverable(sel, hoverable, hoverCallbackSrc, unhoverCallbackSrc) {
     let s;
     for (s in sel) {
-      if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
+      if (!GLModel.validAtomSelectionSpecs[s]) {
         console.log(`Unknown selector ${s}`);
       }
     }
@@ -1377,7 +1385,7 @@ export default class GLModel {
   enableContextMenu(sel, contextMenuEnabled) {
     let s;
     for (s in sel) {
-      if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
+      if (!GLModel.validAtomSelectionSpecs[s]) {
         console.log(`Unknown selector ${s}`);
       }
     }
@@ -1403,8 +1411,7 @@ export default class GLModel {
    * @param {Color[]} colors
    */
   setColorByElement(sel, colors) {
-    // eslint-disable-next-line no-var
-    var atoms = this.selectedAtoms(sel, this.atoms);
+    const atoms = this.selectedAtoms(sel, this.atoms);
     if (this.molObj !== null && sameObj(colors, this.lastColors)) return; // don't recompute
     this.lastColors = colors;
 
@@ -1426,8 +1433,7 @@ export default class GLModel {
   setColorByProperty(sel, prop, scheme, range) {
     let i;
     let a;
-    // eslint-disable-next-line no-var
-    var atoms = this.selectedAtoms(sel, this.atoms);
+    const atoms = this.selectedAtoms(sel, this.atoms);
     this.lastColors = null; // don't bother memoizing
     if (atoms.length > 0) this.molObj = null; // force rebuild
 
@@ -1637,12 +1643,13 @@ export default class GLModel {
     const mystyle = deepCopy(style);
     for (let i = 0; i < selectedAtoms.length; i++) {
       const a = selectedAtoms[i];
-      let label = null;
-      if (typeof a[prop] != 'undefined') {
-        label = String(a[prop]);
-      } else if (typeof (a.properties[prop] != 'undefined')) {
-        label = String(a.properties[prop]);
-      }
+      // eslint-disable-next-line no-nested-ternary
+      const label = a[prop] ? `${a[prop]}` : a.properties[prop] ? `${a.properties[prop]}` : '';
+
+      // this was here but typeof(<a boolean expresion>) is always the string "boolean"
+      // } else if (typeof (a.properties[prop] != 'undefined')) {
+      //   label = String(a.properties[prop]);
+      // }
 
       if (label != null) {
         mystyle.position = a;
@@ -1662,16 +1669,22 @@ export default class GLModel {
    * @param {boolean} byframe - if true, create labels for every individual frame, not just current; frames must be loaded already
    */
   addResLabels(sel, viewer, style, byframe) {
-    const created_labels = [];
-    const self = this;
-    const helper = function (model, framenum) {
-      // eslint-disable-next-line no-var
-      var atoms = model.selectedAtoms(sel, self.atoms);
+    /** @type {Array<import("./Label").default>} */
+    const createdLabels = [];
+
+    /**
+     *
+     * @param {GLModel} model
+     * @param {number} [framenum]
+     */
+    const helper = (model, framenum) => {
+      const atoms = model.selectedAtoms(sel, this.atoms);
+      /** @type {Record<string, Record<string, Array<import('./specs').AtomSpec>>>} */
       const bylabel = {};
       // collect by chain:resn:resi
-      for (let i = 0; i < atoms.length; i++) {
-        const a = atoms[i];
-        const c = a.chain;
+      for (const a of atoms) {
+        // added default to avoid undefined
+        const c = a.chain || '';
         const {resn} = a;
         const {resi} = a;
         const label = `${resn}${resi}`;
@@ -1682,26 +1695,20 @@ export default class GLModel {
 
       const mystyle = deepCopy(style);
       // now compute centers of mass
-      for (const c in bylabel) {
-        if (bylabel.hasOwnProperty(c)) {
-          const labels = bylabel[c];
-          for (const label in labels) {
-            if (labels.hasOwnProperty(label)) {
-              const atoms = labels[label];
-              const sum = new Vector3(0, 0, 0);
-              for (let i = 0; i < atoms.length; i++) {
-                const a = atoms[i];
-                sum.x += a.x;
-                sum.y += a.y;
-                sum.z += a.z;
-              }
-              sum.divideScalar(atoms.length);
-              mystyle.position = sum;
-              mystyle.frame = framenum;
-              const l = viewer.addLabel(label, mystyle, undefined, true);
-              created_labels.push(l);
-            }
+      for (const labels of Object.values(bylabel)) {
+        for (const [label, labeledAtoms] of Object.entries(labels)) {
+          const sum = new Vector3(0, 0, 0);
+          for (let i = 0; i < labeledAtoms.length; i++) {
+            const a = labeledAtoms[i];
+            sum.x += a.x;
+            sum.y += a.y;
+            sum.z += a.z;
           }
+          sum.divideScalar(labeledAtoms.length);
+          mystyle.position = sum;
+          mystyle.frame = framenum;
+          const l = viewer.addLabel(label, mystyle, undefined, true);
+          createdLabels.push(l);
         }
       }
     };
@@ -1719,7 +1726,7 @@ export default class GLModel {
     } else {
       helper(this);
     }
-    return created_labels;
+    return createdLabels;
   }
 
   /**
@@ -1738,6 +1745,8 @@ export default class GLModel {
     return new Promise((resolve, reject) => {
       if (!url.startsWith('http')) url = `http://${url}`;
       $.get(`${url}/traj/numframes/${path}`, numFrames => {
+        // not sure if this needs to parse 0x as hex
+        // eslint-disable-next-line radix
         if (!Number.isNaN(Number.parseInt(numFrames))) {
           self.frames.push(this.atoms);
           self.frames.numFrames = numFrames;
@@ -1785,7 +1794,7 @@ export default class GLModel {
       }
     }
     const supportedFormats = {mdcrd: '', inpcrd: '', pdb: '', netcdf: '', array: ''};
-    if (supportedFormats.hasOwnProperty(format)) {
+    if (supportedFormats[format]) {
       this.frames = [];
       const atomCount = this.atoms.length;
       const values = GLModel.parseCrd(str, format);
@@ -2105,7 +2114,7 @@ export default class GLModel {
     // add any line geometries, distinguished by line width
     let linewidth;
     for (i in lineGeometries) {
-      if (lineGeometries.hasOwnProperty(i)) {
+      if (lineGeometries[i]) {
         linewidth = i;
         const lineMaterial = new LineBasicMaterial({
           linewidth,
@@ -2126,7 +2135,7 @@ export default class GLModel {
 
     // add any cross geometries
     for (i in crossGeometries) {
-      if (crossGeometries.hasOwnProperty(i)) {
+      if (crossGeometries[i]) {
         linewidth = i;
         const crossMaterial = new LineBasicMaterial({
           linewidth,
@@ -2174,21 +2183,27 @@ export default class GLModel {
     let atom3;
     let p3;
     let dir2;
-    let self = this;
+    const self = this;
     const p1 = new Vector3(atom.x, atom.y, atom.z);
     const p2 = new Vector3(atom2.x, atom2.y, atom2.z);
     const dir = p2.clone();
     let v = null;
     dir.sub(p1);
 
-    function getGoodCross(atom, atom2) {
+    /**
+     * 
+     * @param {import('./specs').AtomSpec} crossAtom1 
+     * @param {import('./specs').AtomSpec} crossAtom2 
+     * @returns 
+     */
+    function getGoodCross(crossAtom1, crossAtom2) {
       // get vector 2 different neighboring atom
       // find most divergent neighbor
       let bestv = null;
       let bestlen = -1;
-      for (let j = 0, n = atom.bonds.length; j < n; j++) {
-        if (atom.bonds[j] != atom2.index) {
-          j2 = atom.bonds[j];
+      for (let j = 0, n = crossAtom1.bonds.length; j < n; j++) {
+        if (crossAtom1.bonds[j] != crossAtom2.index) {
+          j2 = crossAtom1.bonds[j];
           atom3 = self.atoms[j2];
           p3 = new Vector3(atom3.x, atom3.y, atom3.z);
 
@@ -2260,7 +2275,7 @@ export default class GLModel {
     const visited = new Int8Array(this.atoms.length);
     visited.fill(0);
 
-    const search = function (i, prev, component) {
+    function search(i, prev, component) {
       // add i to component and recursive explore connected atoms
       component.push([i, prev]);
       const atom = self.atoms[i];
@@ -2998,7 +3013,7 @@ export default class GLModel {
    */
   static addAtomSpecs(customAtomSpecs) {
     for (let i = 0; i < customAtomSpecs.length; i++) {
-      if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
+      if (!GLModel.validAtomSelectionSpecs[customAtomSpecs[i]]) {
         GLModel.validAtomSelectionSpecs[customAtomSpecs[i]] = {};
       }
     }
@@ -3026,7 +3041,7 @@ export default class GLModel {
       }
     } else if (format == 'netcdf') {
       const reader = new netcdfjs(data);
-      values = [].concat.apply([], reader.getDataVariable('coordinates'));
+      values = [...reader.getDataVariable('coordinates')];
     } else if (format == 'array' || Array.isArray(data)) {
       return data.flat(2);
     } else {
@@ -3041,6 +3056,13 @@ export default class GLModel {
     return values;
   }
 
+  /**
+   * 
+   * @param {string|Uint8Array} data 
+   * @param {import('./specs').FileFomats|string|undefined} format 
+   * @param {import('./specs').ParserOptionsSpec} options 
+   * @returns {import('./specs').ParserResult}
+   */
   static parseMolData(data, format, options) {
     format = format || '';
     if (!data) return []; // leave an empty model
@@ -3073,7 +3095,7 @@ export default class GLModel {
           format = 'lammpstrj';
         } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
           format = 'sdf'; // could look at line 3
-        } else if (data.match(/^%VERSION\s+\VERSION_STAMP/gm)) {
+        } else if (data.match(/^%VERSION\s+VERSION_STAMP/gm)) {
           format = 'prmtop';
         } else {
           format = 'xyz';

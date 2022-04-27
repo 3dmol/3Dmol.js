@@ -13,7 +13,7 @@ import {LineBasicMaterial, FrontSide, MeshLambertMaterial, VertexColors} from '.
 import {Line, Mesh} from './WebGL/objects';
 import {elementColors, CC, getColorFromStyle} from './colors';
 import Gradient from './Gradient';
-import GLShape, {splitMesh} from './glshape';
+import GLShape, {splitMesh} from './GLShape';
 import makeFunction from './util/makeFunction';
 import getExtent from './util/getExtent';
 import isEmptyObject from './util/isEmptyObject';
@@ -23,13 +23,14 @@ import SyncSurface from './util/SyncSurface';
 import extend from './util/extend';
 import GLModel from './GLModel';
 import getPropertyRange from './util/getPropertyRange';
-import adjustVolumeStyle from './util/adjustVolumeStyle';
 import Label from './Label';
 import ProteinSurface from './ProteinSurface4';
-import {VolumeData, GLVolumetricRender} from './volume';
+import GLVolumetricRender from './GLVolumetricRenderer';
 import StateManager from './ui/StateManager';
 import Viewers from './singletons/Viewers';
 import {SurfaceWorker} from './SurfaceWorker';
+import adjustVolumeStyle from './util/adjustVolumeStyle';
+import VolumeData from './VolumeData';
 
 // a molecular viewer based on GLMol
 
@@ -934,50 +935,49 @@ export default class GLViewer {
    * @function GLViewer#apngURI
    * @return {Promise<any>}
    */
-  apngURI(nframes) {
+  async apngURI(nframes) {
     const viewer = this;
     nframes = nframes || 1;
-    return new Promise(resolve => {
-      let framecnt = 0;
-      const oldcb = this.viewChangeCallback;
-      const bufpromise = [];
-      const delays = [];
-      let lasttime = Date.now();
-      this.viewChangeCallback = function () {
-        delays.push(Date.now() - lasttime);
-        lasttime = Date.now();
-        bufpromise.push(
-          new Promise(resolve => {
-            viewer.getCanvas().toBlob(blob => {
-              if (blob) blob.arrayBuffer().then(resolve);
-            }, 'image/png');
-          })
-        );
-        framecnt += 1;
-        if (framecnt == nframes) {
-          this.viewChangeCallback = oldcb;
+    let framecnt = 0;
+    const oldcb = this.viewChangeCallback;
+    const bufpromise = [];
+    const delays = [];
+    let lasttime = Date.now();
+    this.viewChangeCallback = async function viewChangeCallback() {
+      delays.push(Date.now() - lasttime);
+      lasttime = Date.now();
+      bufpromise.push(
+        new Promise(resolve => {
+          viewer.getCanvas().toBlob(blob => {
+            if (blob) blob.arrayBuffer().then(resolve);
+          }, 'image/png');
+        })
+      );
+      framecnt += 1;
+      if (framecnt == nframes) {
+        this.viewChangeCallback = oldcb;
 
-          Promise.all(bufpromise).then(buffers => {
-            // convert to apng
-            const rgbas = [];
-            // have to convert png to rgba, before creating the apng
-            for (let i = 0; i < buffers.length; i++) {
-              const img = UPNG.decode(buffers[i]);
-              rgbas.push(UPNG.toRGBA8(img)[0]);
-            }
-            const {width} = viewer.getCanvas();
-            const {height} = viewer.getCanvas();
-            const apng = UPNG.encode(rgbas, width, height, 0, delays);
-            const blob = new Blob([apng], {type: 'image/png'});
-            const fr = new FileReader();
-            fr.onload = e => {
-              resolve((e.target || {}).result);
-            };
-            fr.readAsDataURL(blob);
-          });
+        const buffers = await Promise.all(bufpromise);
+        // convert to apng
+        const rgbas = [];
+        // have to convert png to rgba, before creating the apng
+        for (let i = 0; i < buffers.length; i++) {
+          const img = UPNG.decode(buffers[i]);
+          rgbas.push(UPNG.toRGBA8(img)[0]);
         }
-      };
-    });
+        const {width} = viewer.getCanvas();
+        const {height} = viewer.getCanvas();
+        const apng = UPNG.encode(rgbas, width, height, 0, delays);
+        const blob = new Blob([apng], {type: 'image/png'});
+        const fr = new FileReader();
+        return new Promise(resolve => {
+          fr.onload = e => {
+            resolve((e.target || {}).result);
+          };
+          fr.readAsDataURL(blob);
+        });
+      }
+    };
   }
 
   /**
@@ -1386,7 +1386,7 @@ export default class GLViewer {
 
     if (fixed) {
       // precompute path and stick to it
-      let steps = new Array(stepLen);
+      const steps = new Array(stepLen);
       const n = steps.length;
       for (let i = 0; i < n; i++) {
         const frac = (i + 1) / n;
@@ -1526,7 +1526,7 @@ export default class GLViewer {
       rAxis = {x: vaxis.x, y: vaxis.y, z: vaxis.z};
     }
 
-    const qFromAngle = function (rangle) {
+    const qFromAngle = function qFromAngle(rangle) {
       const s = Math.sin(rangle / 2.0);
       const c = Math.cos(rangle / 2.0);
       let i = 0;
@@ -1739,7 +1739,7 @@ export default class GLViewer {
   }
 
   /** @param {import('./specs').AtomSelectionSpec} sel
-   * @return list of models specified by sel
+   * @return {Array<GLModel>} list of models specified by sel
    */
   getModelList(sel) {
     /** @type {GLModel|GLModel[]} */
@@ -1828,7 +1828,7 @@ export default class GLViewer {
     const values = {};
 
     for (const atom in atoms) {
-      if (atoms[atom].hasOwnProperty(attribute)) {
+      if (atoms[atom][attribute]) {
         const value = atoms[atom][attribute];
         values[value] = true;
       }
@@ -2369,7 +2369,7 @@ export default class GLViewer {
    */
   addResLabels(sel, style, byframe) {
     const start = this.labels.length;
-    this.applyToModels('addResLabels', sel, this, style, byframe);
+    this.applyToModels('addResLabels', sel, sel, this, style, byframe);
     this.show();
     return this.labels.slice(start);
   }
@@ -2391,7 +2391,7 @@ export default class GLViewer {
           });
    */
   addPropertyLabels(prop, sel, style) {
-    this.applyToModels('addPropertyLabels', prop, sel, this, style);
+    this.applyToModels('addPropertyLabels', sel, prop, sel, this, style);
     this.show();
     return this;
   }
@@ -2834,13 +2834,9 @@ export default class GLViewer {
         beta = (beta * Math.PI) / 180.0;
         gamma = (gamma * Math.PI) / 180.0;
 
-        let u;
-        let v;
-        let w;
-
-        u = Math.cos(beta);
-        v = (Math.cos(alpha) - Math.cos(beta) * Math.cos(gamma)) / Math.sin(gamma);
-        w = Math.sqrt(Math.max(0, 1 - u * u - v * v));
+        const u = Math.cos(beta);
+        const v = (Math.cos(alpha) - Math.cos(beta) * Math.cos(gamma)) / Math.sin(gamma);
+        const w = Math.sqrt(Math.max(0, 1 - u * u - v * v));
 
         matrix = new Matrix3(
           a,
@@ -3007,7 +3003,7 @@ export default class GLViewer {
     if (cryst) {
       const atoms = model.selectedAtoms({});
       const {matrix} = cryst;
-      const makeoff = function (I) {
+      const makeoff = function makeoff(I) {
         // alternate around zero: 1,-1,2,-2...
         if (I % 2 == 0) return -I / 2;
         return Math.ceil(I / 2);
@@ -3052,21 +3048,18 @@ export default class GLViewer {
     const dir = new Vector3();
     let dash = new Vector3();
     let gap = new Vector3();
-    let length;
-    let dashAmt;
-    let gapAmt;
     const temp = p1.clone();
     let drawn = 0;
 
     dir.subVectors(p2, p1);
-    length = dir.length();
+    const length = dir.length();
     dir.normalize();
     dash = dir.clone();
     gap = dir.clone();
     dash.multiplyScalar(spec.dashLength);
     gap.multiplyScalar(spec.gapLength);
-    dashAmt = dash.length();
-    gapAmt = gap.length();
+    const dashAmt = dash.length();
+    const gapAmt = gap.length();
 
     while (drawn < length) {
       if (drawn + dashAmt > length) {
@@ -3140,7 +3133,7 @@ export default class GLViewer {
    * @param {String} data - Input file contents
    * @param {String} format - Input file format
    * @param {import('./specs').VolumetricRendererSpec} spec - Shape style specification
-   * @return {GLShape|import("./volume").GLVolumetricRender}
+   * @return {GLShape|import("./GLVolumetricRenderer").default}
    *
    * @example
               
@@ -3292,18 +3285,13 @@ export default class GLViewer {
     let interval = 100;
     let loop = 'forward';
     let reps = 0;
-    options = options || {};
-    if (options.interval) {
-      interval = options.interval;
-    }
-    if (options.loop) {
-      loop = options.loop;
-    }
-    if (options.reps) {
-      reps = options.reps;
+    options = {
+      loop,
+      reps,
+      interval,
+      ...options,
     }
     const mostFrames = this.getNumFrames();
-    const that = this;
     let currFrame = 0;
     let inc = 1;
     if (options.step) {
@@ -3320,7 +3308,7 @@ export default class GLViewer {
       if (!this.getCanvas().isConnected && this.renderer.isLost()) {
         // we no longer exist
         this.stopAnimate();
-      } else if (++displayCount == displayMax || !that.isAnimated()) {
+      } else if (++displayCount == displayMax || !this.isAnimated()) {
         clearTimeout(intervalID);
         this.animationTimers.delete(intervalID);
         this.decAnim();
@@ -3333,7 +3321,7 @@ export default class GLViewer {
       }
     };
 
-    const display = direction => {
+    const display = (direction) => {
       time = Date.now();
       if (direction == 'forward') {
         this.setFrame(currFrame).then(() => {
@@ -3456,6 +3444,7 @@ export default class GLViewer {
    * @function GLViewer#addModelsAsFrames
    * @param {string} data - Input data
    * @param {string} format - Input format (see {@link FileFormats})
+   * @param {Record<string, any>} [options]
    * @return {GLModel}
    *
    * @example
@@ -3474,7 +3463,6 @@ export default class GLViewer {
     const m = new GLModel(this.models.length, options.defaultcolors);
     m.addMolData(data, format, options);
     this.models.push(m);
-
     return m;
   }
 
@@ -3560,12 +3548,12 @@ export default class GLViewer {
    */
   exportVRML() {
     const savedmodelGroup = this.modelGroup;
-    this.applyToModels('removegl', this.modelGroup); // cleanup
+    this.applyToModels('removegl', {}, this.modelGroup); // cleanup
     this.modelGroup = new Object3D();
     // rendering with plain mesh
     this.render(null, {supportsImposters: false, supportsAIA: false, regen: true});
     const ret = `#VRML V2.0 utf8\n${this.modelGroup.vrml()}\n`;
-    this.applyToModels('removegl', this.modelGroup); // cleanup
+    this.applyToModels('removegl', {}, this.modelGroup); // cleanup
     this.modelGroup = savedmodelGroup;
     return ret;
   }
@@ -3592,11 +3580,17 @@ export default class GLViewer {
     return m;
   }
 
-  applyToModels(func, sel, value1, value2, value3, value4, value5) {
+  /**
+   * 
+   * @param {keyof GLModel} func 
+   * @param {import('./specs').AtomSelectionSpec} sel 
+   * @param  {any[]} args
+   */
+  applyToModels(func, sel, ...args) {
     // apply func to all models that are selected by sel with value1 and 2
-    const ms = this.getModelList(sel);
-    for (let i = 0; i < ms.length; i++) {
-      ms[i][func](sel, value1, value2, value3, value4, value5);
+    const selected = this.getModelList(sel);
+    for (const model of selected) {
+      model[func](...args);
     }
   }
 
@@ -3628,7 +3622,7 @@ export default class GLViewer {
       sel = {};
     }
 
-    this.applyToModels('setStyle', sel, style, false);
+    this.applyToModels('setStyle', (/** @type {import('./specs').AtomSelectionSpec} */(sel)), sel, style, false);
     return this;
   }
 
@@ -3652,7 +3646,7 @@ export default class GLViewer {
       style = /** @type {import('./specs').AtomStyleSpec} */ (sel);
       sel = {};
     }
-    this.applyToModels('setStyle', sel, style, true);
+    this.applyToModels('setStyle', (/** @type {import('./specs').AtomSelectionSpec} */(sel)), sel, style, true);
     return this;
   }
 
@@ -3732,7 +3726,7 @@ export default class GLViewer {
    * @param {import('./specs').ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
    */
   vibrate(numFrames, amplitude, bothWays, arrowSpec) {
-    this.applyToModels('vibrate', numFrames, amplitude, bothWays, this, arrowSpec);
+    this.applyToModels('vibrate', {}, numFrames, amplitude, bothWays, this, arrowSpec);
     return this;
   }
 
@@ -3743,7 +3737,7 @@ export default class GLViewer {
    * @param {any} scheme
    */
   setColorByProperty(sel, prop, scheme, range) {
-    this.applyToModels('setColorByProperty', sel, prop, scheme, range);
+    this.applyToModels('setColorByProperty', sel, sel, prop, scheme, range);
     return this;
   }
 
@@ -3753,7 +3747,7 @@ export default class GLViewer {
    * @param {any} colors
    */
   setColorByElement(sel, colors) {
-    this.applyToModels('setColorByElement', sel, colors);
+    this.applyToModels('setColorByElement', sel, sel, colors);
     return this;
   }
 

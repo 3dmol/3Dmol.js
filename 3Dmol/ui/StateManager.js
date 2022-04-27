@@ -337,7 +337,7 @@ const StateManager = (function(){
 
       /** @type {string | Array<string>} */
       let labelText = [];
-      for (let key in labelValue){
+      for (const key in labelValue){
         labelText.push(`${key} : ${labelValue[key]}`);
       }
       labelText = labelText.join('\n');

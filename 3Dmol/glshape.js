@@ -9,7 +9,7 @@ import {
 } from './WebGL/materials';
 import {clamp, Vector3} from './WebGL/math';
 import {CC} from './colors';
-import {Geometry, geometryGroup, Object3D} from './WebGL/core';
+import {Geometry, Object3D} from './WebGL/core';
 import makeFunction from './util/makeFunction';
 import extend from './util/extend';
 import {Line, LinePieces, Mesh} from './WebGL/objects';
@@ -76,7 +76,7 @@ function updateColor(geo, colorIn) {
  */
 function drawArrow(shape, geo, spec) {
   const from = vector3LikeToVector3(spec.start);
-  const end = vector3LikeToVector3(spec.end)
+  const end = vector3LikeToVector3(spec.end);
   const {radius} = spec;
   const {radiusRatio} = spec;
   let {mid} = spec;
@@ -151,7 +151,7 @@ function drawArrow(shape, geo, spec) {
     const top = nvecs[i].clone().multiplyScalar(radius).add(to);
     const conebase = nvecs[i]
       .clone()
-      .multiplyScalar((radius||1) * (radiusRatio||1))
+      .multiplyScalar((radius || 1) * (radiusRatio || 1))
       .add(to);
 
     vertexArray[offset] = bottom.x;
@@ -246,7 +246,7 @@ function drawArrow(shape, geo, spec) {
     // face = [t1, t2, t4], [t2, t3, t4];
     // face = [t1, t2, t3, t4];
 
-    let norm = [nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1]];
+    // const norm = [nvecs[i], nvecs[i], nvecs[i + 1], nvecs[i + 1]];
 
     n1 = n2 = nvecs[i];
     n3 = n4 = nvecs[i + 1];
@@ -331,7 +331,7 @@ function drawArrow(shape, geo, spec) {
   // final face
 
   const face = [start + 45, start + 46, start + 1, start, start + 47, start + 2];
-  const norm = [nvecs[15], nvecs[15], nvecs[0], nvecs[0]];
+  // const norm = [nvecs[15], nvecs[15], nvecs[0], nvecs[0]];
 
   faceoffset = geoGroup.faceidx;
   lineoffset = geoGroup.lineidx;
@@ -444,11 +444,11 @@ function drawArrow(shape, geo, spec) {
 // from list of centroids and new points
 /**
  * @param {import('./specs').SphereStyleSpec} sphere
- * @param {Object} components - centroid of all objects in shape
+ * @param {Object} _components - centroid of all objects in shape
  * @param {Array} points - flat array of all points in shape
  * @param {number} numPoints - number of valid poitns in points
  */
-function updateBoundingFromPoints(sphere, components, points, numPoints) {
+function updateBoundingFromPoints(sphere, _components, points, numPoints) {
   sphere.center.set(0, 0, 0);
 
   // previously I weighted each component's center equally, but I think
@@ -549,8 +549,8 @@ function addCustomGeo(shape, geo, mesh, color, clickable) {
   if (clickable) {
     const center = new Vector3(0, 0, 0);
     let cnt = 0;
-    for (let g = 0; g < geo.geometryGroups.length; g++) {
-      center.add(geo.geometryGroups[g].getCentroid());
+    for (let gr = 0; gr < geo.geometryGroups.length; gr++) {
+      center.add(geo.geometryGroups[gr].getCentroid());
       cnt++;
     }
     center.divideScalar(cnt);
@@ -569,7 +569,8 @@ function addCustomGeo(shape, geo, mesh, color, clickable) {
 
   if (normalArr.length < geoGroup.vertices) geoGroup.setNormals();
   else {
-    const normalArray = (geoGroup.normalArray = new Float32Array(geoGroup.vertices * 3));
+    const normalArray = new Float32Array(geoGroup.vertices * 3);
+    geoGroup.normalArray = normalArray;
     let n;
     for (i = 0, il = geoGroup.vertices; i < il; ++i) {
       offset = i * 3;
@@ -582,40 +583,6 @@ function addCustomGeo(shape, geo, mesh, color, clickable) {
 
   geoGroup.setLineIndices();
   geoGroup.lineidx = geoGroup.lineArray.length;
-}
-
-// handles custom shape generation from user supplied arrays
-// May need to generate normal and/or line indices
-/**
- * @param {GLShape} shape
- * @param {import("./WebGL/core").Geometry} geo
- * @param {import('./specs').CustomShapeSpec} customSpec
- */
-function drawCustom(shape, geo, customSpec) {
-  const mesh = customSpec;
-  const {vertexArr} = mesh;
-  const {faceArr} = mesh;
-  if (vertexArr.length === 0 || faceArr.length === 0) {
-    console.warn('Error adding custom shape component: No vertices and/or face indices supplied!');
-  }
-
-  let {color} = customSpec;
-  if (typeof color == 'undefined') {
-    color = shape.color;
-  }
-  color = CC.color(color);
-
-  // var firstgeo = geo.geometryGroups.length;
-  const splits = splitMesh(mesh);
-  for (let i = 0, n = splits.length; i < n; i++) {
-    addCustomGeo(
-      shape,
-      geo,
-      splits[i],
-      splits[i].colorArr ? splits[i].colorArr : color,
-      customSpec.clickable
-    );
-  }
 }
 
 /**
@@ -705,6 +672,40 @@ export function splitMesh(mesh) {
   return slices;
 }
 
+// handles custom shape generation from user supplied arrays
+// May need to generate normal and/or line indices
+/**
+ * @param {GLShape} shape
+ * @param {import("./WebGL/core").Geometry} geo
+ * @param {import('./specs').CustomShapeSpec} customSpec
+ */
+function drawCustom(shape, geo, customSpec) {
+  const mesh = customSpec;
+  const {vertexArr} = mesh;
+  const {faceArr} = mesh;
+  if (vertexArr.length === 0 || faceArr.length === 0) {
+    console.warn('Error adding custom shape component: No vertices and/or face indices supplied!');
+  }
+
+  let {color} = customSpec;
+  if (typeof color == 'undefined') {
+    color = shape.color;
+  }
+  color = CC.color(color);
+
+  // var firstgeo = geo.geometryGroups.length;
+  const splits = splitMesh(mesh);
+  for (let i = 0, n = splits.length; i < n; i++) {
+    addCustomGeo(
+      shape,
+      geo,
+      splits[i],
+      splits[i].colorArr ? splits[i].colorArr : color,
+      customSpec.clickable
+    );
+  }
+}
+
 // eslint-disable-next-line import/no-mutable-exports
 export let ShapeIDCount = 0;
 
@@ -783,10 +784,6 @@ export default class GLShape {
       });
       delete this.color;
     }
-  }
-
-  static adjustVolumeStyle(newspec) {
-    throw new Error('Method not implemented.');
   }
 
   /**
@@ -873,7 +870,12 @@ export default class GLShape {
     // can position using corner OR center
     let c = boxSpec.corner;
     if (c == undefined) {
-      if (boxSpec.center !== undefined && typeof w !== 'number' && typeof h !== 'number' && typeof d !== 'number') {
+      if (
+        boxSpec.center !== undefined &&
+        typeof w !== 'number' &&
+        typeof h !== 'number' &&
+        typeof d !== 'number'
+      ) {
         c = {
           x: boxSpec.center.x - 0.5 * (w.x + h.x + d.x),
           y: boxSpec.center.y - 0.5 * (w.y + h.y + d.y),
@@ -886,16 +888,19 @@ export default class GLShape {
     }
 
     // 8 vertices
-    const uv = (typeof w !== 'number' && typeof h !== 'number' && typeof d !== 'number') ? [
-      {x: c.x, y: c.y, z: c.z},
-      {x: c.x + w.x, y: c.y + w.y, z: c.z + w.z},
-      {x: c.x + h.x, y: c.y + h.y, z: c.z + h.z},
-      {x: c.x + w.x + h.x, y: c.y + w.y + h.y, z: c.z + w.z + h.z},
-      {x: c.x + d.x, y: c.y + d.y, z: c.z + d.z},
-      {x: c.x + w.x + d.x, y: c.y + w.y + d.y, z: c.z + w.z + d.z},
-      {x: c.x + h.x + d.x, y: c.y + h.y + d.y, z: c.z + h.z + d.z},
-      {x: c.x + w.x + h.x + d.x, y: c.y + w.y + h.y + d.y, z: c.z + w.z + h.z + d.z},
-    ] : [];
+    const uv =
+      typeof w !== 'number' && typeof h !== 'number' && typeof d !== 'number'
+        ? [
+            {x: c.x, y: c.y, z: c.z},
+            {x: c.x + w.x, y: c.y + w.y, z: c.z + w.z},
+            {x: c.x + h.x, y: c.y + h.y, z: c.z + h.z},
+            {x: c.x + w.x + h.x, y: c.y + w.y + h.y, z: c.z + w.z + h.z},
+            {x: c.x + d.x, y: c.y + d.y, z: c.z + d.z},
+            {x: c.x + w.x + d.x, y: c.y + w.y + d.y, z: c.z + w.z + d.z},
+            {x: c.x + h.x + d.x, y: c.y + h.y + d.y, z: c.z + h.z + d.z},
+            {x: c.x + w.x + h.x + d.x, y: c.y + w.y + h.y + d.y, z: c.z + w.z + h.z + d.z},
+          ]
+        : [];
 
     // but.. so that we can have sharp issues, we want a unique normal
     // for each face - since normals are associated with vertices, need to duplicate
@@ -986,7 +991,7 @@ export default class GLShape {
    */
   addCylinder(cylinderSpec) {
     cylinderSpec.start = cylinderSpec.start || {x: 0, y: 0, z: 0};
-    cylinderSpec.end = cylinderSpec.end || { x: 0, y: 0, z: 0 };
+    cylinderSpec.end = cylinderSpec.end || {x: 0, y: 0, z: 0};
 
     const start = new Vector3(
       cylinderSpec.start.x || 0,
@@ -1030,8 +1035,8 @@ export default class GLShape {
    * @param {import('./specs').CylinderSpec} cylinderSpec
    */
   addDashedCylinder(cylinderSpec) {
-    cylinderSpec.start = cylinderSpec.start || { x: 0, y: 0, z: 0 };
-    cylinderSpec.end = cylinderSpec.end || { x: 0, y: 0, z: 0 };
+    cylinderSpec.start = cylinderSpec.start || {x: 0, y: 0, z: 0};
+    cylinderSpec.end = cylinderSpec.end || {x: 0, y: 0, z: 0};
     cylinderSpec.dashLength = cylinderSpec.dashLength || 0.25;
     cylinderSpec.gapLength = cylinderSpec.gapLength || 0.25;
 
@@ -1193,8 +1198,8 @@ export default class GLShape {
         });
    */
   addLine(lineSpec) {
-    lineSpec.start = lineSpec.start || { x:0, y:0, z:0 };
-    lineSpec.end = lineSpec.end || { x:0, y:0, z:0 };
+    lineSpec.start = lineSpec.start || {x: 0, y: 0, z: 0};
+    lineSpec.end = lineSpec.end || {x: 0, y: 0, z: 0};
 
     const start = new Vector3(lineSpec.start.x || 0, lineSpec.start.y || 0, lineSpec.start.z || 0);
     const end = new Vector3(lineSpec.end.x, lineSpec.end.y || 0, lineSpec.end.z || 0);
@@ -1258,8 +1263,8 @@ export default class GLShape {
           });
    */
   addArrow(arrowSpec) {
-    arrowSpec.start = arrowSpec.start || { x:0, y:0, z:0 };
-    arrowSpec.end = arrowSpec.end || { x:0, y:0, z:0 };
+    arrowSpec.start = arrowSpec.start || {x: 0, y: 0, z: 0};
+    arrowSpec.end = arrowSpec.end || {x: 0, y: 0, z: 0};
 
     arrowSpec.start = new Vector3(
       arrowSpec.start.x || 0,
@@ -1279,7 +1284,8 @@ export default class GLShape {
 
     arrowSpec.radiusRatio = arrowSpec.radiusRatio || 1.618034;
 
-    arrowSpec.mid = arrowSpec.mid && arrowSpec.mid > 0 && arrowSpec.mid < 1 ? arrowSpec.mid : 0.618034;
+    arrowSpec.mid =
+      arrowSpec.mid && arrowSpec.mid > 0 && arrowSpec.mid < 1 ? arrowSpec.mid : 0.618034;
 
     drawArrow(this, this.geo, arrowSpec);
 
@@ -1299,7 +1305,7 @@ export default class GLShape {
   /**
    * Create isosurface from voluemetric data.
    * @function GLShape#addIsosurface
-   * @param {import("./volume").VolumeData} data - volumetric input data
+   * @param {import("./VolumeData").default} data - volumetric input data
    * @param {import('./specs').IsoSurfaceSpec} volSpec - volumetric data shape specification
    * @param {Function} [callback]
    * @example //the user can specify a selected region for the isosurface
@@ -1381,13 +1387,13 @@ export default class GLShape {
       let ymin = volSpec.coords[0].y;
       let zmin = volSpec.coords[0].z;
 
-      for (let i = 0; i < volSpec.coords.length; i++) {
-        if (volSpec.coords[i].x > xmax) xmax = volSpec.coords[i].x;
-        else if (volSpec.coords[i].x < xmin) xmin = volSpec.coords[i].x;
-        if (volSpec.coords[i].y > ymax) ymax = volSpec.coords[i].y;
-        else if (volSpec.coords[i].y < ymin) ymin = volSpec.coords[i].y;
-        if (volSpec.coords[i].z > zmax) zmax = volSpec.coords[i].z;
-        else if (volSpec.coords[i].z < zmin) zmin = volSpec.coords[i].z;
+      for (let j = 0; j < volSpec.coords.length; j++) {
+        if (volSpec.coords[j].x > xmax) xmax = volSpec.coords[j].x;
+        else if (volSpec.coords[j].x < xmin) xmin = volSpec.coords[j].x;
+        if (volSpec.coords[j].y > ymax) ymax = volSpec.coords[j].y;
+        else if (volSpec.coords[j].y < ymin) ymin = volSpec.coords[j].y;
+        if (volSpec.coords[j].z > zmax) zmax = volSpec.coords[j].z;
+        else if (volSpec.coords[j].z < zmin) zmin = volSpec.coords[j].z;
       }
 
       let rad = 2;
@@ -1410,31 +1416,31 @@ export default class GLShape {
       zmax += rad;
 
       // accounts for radius
-      for (let i = 0; i < verts.length; i++) {
+      for (let k = 0; k < verts.length; k++) {
         if (
-          verts[i].x > xmin &&
-          verts[i].x < xmax &&
-          verts[i].y > ymin &&
-          verts[i].y < ymax &&
-          verts[i].z > zmin &&
-          verts[i].z < zmax &&
-          inSelectedRegion(verts[i], volSpec.coords, rad)
+          verts[k].x > xmin &&
+          verts[k].x < xmax &&
+          verts[k].y > ymin &&
+          verts[k].y < ymax &&
+          verts[k].z > zmin &&
+          verts[k].z < zmax &&
+          inSelectedRegion(verts[k], volSpec.coords, rad)
         ) {
           vertexmapping.push(newvertices.length);
-          newvertices.push(verts[i]);
+          newvertices.push(verts[k]);
         } else {
           vertexmapping.push(-1);
         }
       }
-      for (let i = 0; i + 2 < faces.length; i += 3) {
+      for (let l = 0; l + 2 < faces.length; l += 3) {
         if (
-          vertexmapping[faces[i]] !== -1 &&
-          vertexmapping[faces[i + 1]] !== -1 &&
-          vertexmapping[faces[i + 2]] !== -1
+          vertexmapping[faces[l]] !== -1 &&
+          vertexmapping[faces[l + 1]] !== -1 &&
+          vertexmapping[faces[l + 2]] !== -1
         ) {
-          newfaces.push(faces[i] - (faces[i] - vertexmapping[faces[i]]));
-          newfaces.push(faces[i + 1] - (faces[i + 1] - vertexmapping[faces[i + 1]]));
-          newfaces.push(faces[i + 2] - (faces[i + 2] - vertexmapping[faces[i + 2]]));
+          newfaces.push(faces[l] - (faces[l] - vertexmapping[faces[l]]));
+          newfaces.push(faces[l + 1] - (faces[l + 1] - vertexmapping[faces[l + 1]]));
+          newfaces.push(faces[l + 2] - (faces[l + 2] - vertexmapping[faces[l + 2]]));
         }
       }
       verts = newvertices;
@@ -1462,10 +1468,10 @@ export default class GLShape {
     const total = new Vector3(0, 0, 0);
     const maxv = origin.clone();
     const minv = origin.clone().add(size);
-    for (let i = 0; i < verts.length; i++) {
-      total.add(verts[i]);
-      maxv.max(verts[i]);
-      minv.min(verts[i]);
+    for (let m = 0; m < verts.length; m++) {
+      total.add(verts[m]);
+      maxv.max(verts[m]);
+      minv.min(verts[m]);
     }
     total.divideScalar(verts.length);
     const len1 = total.distanceTo(minv);
@@ -1478,12 +1484,12 @@ export default class GLShape {
   /**
    * @deprecated Use addIsosurface instead
    * Creates custom shape from volumetric data
-   * @param {string} data - Volumetric input data
-   * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
-   * @param {import('./specs').IsoSurfaceSpec} volSpec - Volumetric data shape specification
+   * @param {string} _data - Volumetric input data
+   * @param {string} _fmt - Input data format (e.g. 'cube' for cube file format)
+   * @param {import('./specs').IsoSurfaceSpec} _volSpec - Volumetric data shape specification
    */
   // eslint-disable-next-line class-methods-use-this
-  addVolumetricData(data, fmt, volSpec) {
+  addVolumetricData(_data, _fmt, _volSpec) {
     // let res = new VolumeData(data, fmt);
     // this.addIsosurface(res, volSpec);
     throw new Error('addVolumetricData has been removed. Use addIsosurface instead.');

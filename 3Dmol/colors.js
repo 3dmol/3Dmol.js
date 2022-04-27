@@ -673,7 +673,7 @@ export const builtinColorSchemes = {
  * @return {Color}
  */
 export function getColorFromStyle(atom, style) {
-  let schemeName = style.colorscheme;
+  const schemeName = style.colorscheme;
   let scheme;
   if (typeof builtinColorSchemes[schemeName] != 'undefined') {
     scheme = builtinColorSchemes[schemeName];

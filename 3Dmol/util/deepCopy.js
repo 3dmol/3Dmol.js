@@ -1,11 +1,17 @@
 // deep copy, cannot deal with circular refs; undefined input becomes an empty object
 // https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
+/**
+ * @template T
+ * @param {T} inObject 
+ * @returns {T} 
+ */
 const deepCopy = inObject => {
   let outObject;
   let value;
   let key;
 
   if (inObject === undefined) {
+    // @ts-ignore the generic type is not used
     return {};
   }
   if (typeof inObject != 'object' || inObject == null) {
@@ -22,6 +28,7 @@ const deepCopy = inObject => {
     outObject[key] = deepCopy(value);
   }
 
+  // @ts-ignore
   return outObject;
 };
 

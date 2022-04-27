@@ -691,6 +691,16 @@ export function square(n) {
 }
 
 // return conversion matrix given crystal unit cell parameters
+/**
+ * 
+ * @param {number} a 
+ * @param {number} b 
+ * @param {number} c 
+ * @param {number} alpha 
+ * @param {number} beta 
+ * @param {number} gamma 
+ * @returns {Matrix3}
+ */
 export function conversionMatrix3(a, b, c, alpha, beta, gamma) {
   // convert to radians
   alpha = (alpha * Math.PI) / 180;

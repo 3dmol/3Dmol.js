@@ -3,11 +3,11 @@ import CAP from "./enum/CAP";
 import GLModel from "./GLModel";
 import GLViewer from "./GLViewer";
 import Gradient from "./Gradient";
-import { VolumeData } from "./volume";
+import VolumeData from "./VolumeData";
 import Color from "./WebGL/core/Color";
-import { Vector2, Vector3 } from "./WebGL/math";
+import { Matrix3, Matrix4, Vector2, Vector3 } from "./WebGL/math";
 
-export type AnyFunc = (...args:any[]|undefined[]) => any
+export type AnyFunc = (...args: any[] | undefined[]) => any
 
 export type ColorSpec = Color | string | number;
 
@@ -101,7 +101,7 @@ export type ViewerGridSpec = Partial<{
   cols: number;
   row: number;
   col: number;
-  viewers: Array<Array<GLViewer|null>>;
+  viewers: Array<Array<GLViewer | null>>;
   canvas: HTMLCanvasElement;
   controlAll: boolean;
 }>
@@ -128,13 +128,13 @@ export type AtomSpec = {
   hetflag: boolean;
   chain: string;
   resi: number;
-  icode: number;
-  rescode: number;
+  icode: number | string;
+  rescode: number | string;
   serial: number;
   atom: string;
   ss: string;
   singleBonds: boolean;
-  b: number;
+  b: number | string;
   pdbline: string;
   clickable: boolean;
   hoverable: boolean;
@@ -145,6 +145,23 @@ export type AtomSpec = {
   bondStyles: any[];
   symmetries: Array<Vector3Like>;
   color: ColorSpec;
+  hoverCallback: AnyFunc;
+  unhoverCallback: AnyFunc;
+  contextMenuEnabled: boolean;
+  hbondOther: AtomSpec;
+  hbondDistanceSq: number;
+  altLoc: string;
+  uMat: {
+    u11: number;
+    u22: number;
+    u33: number;
+    u12: number;
+    u13: number;
+    u23: number;
+  }
+  ssbegin:boolean;
+  ssend:boolean;
+  reschain:number;
 }>;
 
 /** 3 dimensional vector */
@@ -285,7 +302,7 @@ export type ShapeSpec = Partial<{
   hidden: boolean;
   linewidth: number;
   clickable: boolean;
-  callback: AnyFunc| string
+  callback: AnyFunc | string
   frame: number;
   voldata: VolumeData;
   volscheme: Gradient;
@@ -301,7 +318,7 @@ export type CustomShapeSpec = {
   vertexArr: Array<Vector3Like>;
   normalArr: Array<Vector3Like>;
   faceArr: Array<number>;
-} &Partial<{
+} & Partial<{
   color: ColorSpec | Array<ColorSpec>;
 }> & ShapeSpec;
 
@@ -417,7 +434,8 @@ export type ParserOptionsSpec = Partial<{
   assignBonds: boolean;
   style: AtomStyleSpec;
   cartoonQuality: number;
-  defaultcolors: Record<string, number>
+  defaultcolors: Record<string, number>;
+  dontConnectDuplicatedAtoms: boolean;
 }>;
 
 /**
@@ -521,3 +539,16 @@ export type UnitCellStyleSpec = Partial<{
   clabel: string;
   clabelstyle: LabelSpec;
 }>;
+
+
+export type ParserResult = Array<Array<Partial<AtomSpec>>>
+  & {
+    modelData?: Array<{
+      symmetries?: Matrix4[];
+      cryst?: {
+        matrix?: Matrix3
+      }
+    }>; 
+    origin?: Vector3;
+    box?: [number, number, number];
+  };
