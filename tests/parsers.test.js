@@ -390,7 +390,15 @@ describe('Function SDF\nparseV2000', ()=>{
     });
 
     test("Atom of atoms[0][8] is equal to elem", ()=>{
-        expect(atoms[0][8].elem).toBe(atoms[0][8].atom);
+        expect(atoms[0][8].atom).toBe(atoms[0][8].elem);
+    });
+
+    test("Test bonds of atoms[0][8]", ()=>{
+        expect(atoms[0][8].bonds).toEqual([6]);
+    });
+
+    test("Test bonds of atoms[0][8]", ()=>{
+        expect(atoms[0][8].bondOrder).toEqual([1]);
     });
 
 
@@ -480,13 +488,20 @@ describe('Function SDF\nparseV2000 options: multimodel', ()=>{
 
 
 describe('Function json', ()=>{
-    // const data = '{"m":[{"a":[{"x":85,"y":144},{"x":102.32050807568878,"y":134},{"x":67.67949192431124,"y":134},{"x":85,"y":164}],"b":[{"b":0,"e":1},{"b":0,"e":2},{"b":0,"e":3}]},{"a":[{"x":213,"y":131},{"x":230.32050807568876,"y":121},{"x":247.64101615137753,"y":131},{"x":264.9615242270663,"y":121}],"b":[{"b":0,"e":1},{"b":1,"e":2},{"b":2,"e":3}]}]}'
+    const data = '{"m":[{"a":[{"x":85,"y":144},{"x":102.32050807568878,"y":134},{"x":67.67949192431124,"y":134},{"x":85,"y":164}],"b":[{"b":0,"e":1},{"b":0,"e":2},{"b":0,"e":3}]},{"a":[{"x":213,"y":131},{"x":230.32050807568876,"y":121},{"x":247.64101615137753,"y":131},{"x":264.9615242270663,"y":121}],"b":[{"b":0,"e":1},{"b":1,"e":2},{"b":2,"e":3}]}]}'
+    let atoms = $3Dmol.Parsers.json(data, {});
+
+     test("Atom is not empty ", ()=>{
+        expect(atoms).not.toBe([]);
+    });
+
 });
 
 
 describe('Function cif\nInput: multiple.cif', ()=>{
     const data = fs.readFileSync('tests/test_structs/multiple.cif', 'utf-8')
     let atoms = $3Dmol.Parsers.cif(data, {});
+    let atoms2 = $3Dmol.Parsers.cif(data, {assignBonds:false});
     
     test("Atoms is not empty", ()=>{
         expect(atoms).not.toBe([]);
@@ -562,6 +577,10 @@ describe('Function cif\nInput: multiple.cif', ()=>{
         expect(atoms[0][0].bonds).toEqual([1,28,5]);
     });
 
+    test("Test atoms[0][0] bondOrder", ()=>{
+        expect(atoms[0][0].bondOrder).toEqual([1,1,1]);
+    });
+
     test("All atom ss are 'c'", ()=>{
         for(let i = 0; i < atoms.length; i++){
             for(let j = 0; j < atoms[0].length; j++){
@@ -577,7 +596,7 @@ describe('Function cif\nInput: multiple.cif', ()=>{
             }
         }
     });
-
+    /*
     test("Test atoms bondOrder", ()=>{
         for(let i = 0; i < atoms.length; i++){
             for(let j = 0; j < atoms[0].length; j++){
@@ -585,35 +604,131 @@ describe('Function cif\nInput: multiple.cif', ()=>{
             }
         }
     });
-
+    */
     test("Test atoms properties", ()=>{
         for(let i = 0; i < atoms.length; i++){
             for(let j = 0; j < atoms[0].length; j++){
                 expect(atoms[i][j].properties).toEqual({});
-s            }
+            }
+        }
+    });
+
+    test("Atoms bonds are empty when assignBonds is false", ()=>{
+        for(let i = 0; i < atoms2.length; i++){
+            for(let j = 0; j < atoms2[0].length; j++){
+                expect(atoms2[i][j].bonds).toEqual([]);
+            }
+        }
+    });
+
+    test("Atoms bondOrder are empty when assignBonds is false", ()=>{
+        for(let i = 0; i < atoms2.length; i++){
+            for(let j = 0; j < atoms2[0].length; j++){
+                expect(atoms2[i][j].bondOrder).toEqual([]);
+            }
         }
     });
 
 });
 
-describe('function MOL2', ()=>{
+
+
+describe('Function MOL2\nInput: multiple.mol2', ()=>{
     const data = fs.readFileSync('tests/test_structs/multiple.mol2', 'utf-8')
-    let atoms = $3Dmol.Parsers.MOL2(data, {});
+    let atoms = $3Dmol.Parsers.MOL2(data, {});// cannot use multimodel
     
-    test("MOL2 input", ()=>{
-        expect(atoms).toBeDefined();
+    test("Atoms is not empty", ()=>{
+        expect(atoms).not.toBe([[]]);
     });
+
+    test("Test atoms length", ()=>{
+        expect(atoms.length).toBe(1);
+    });
+
+    test("natoms is 43 (atoms[0].length)", ()=>{
+        expect(atoms[0].length).toBe(43);
+
+    });
+
+    test("Elem of atoms[0][6] is N", ()=>{
+        expect(atoms[0][6].elem).toBe('N');
+    });
+
+    test("Atom of atoms[0][6] is N.am", ()=>{
+        expect(atoms[0][6].atom).toBe('N.am');
+    });
+
+    test("Atom serial is the serial id in mol2 file", ()=>{
+        for(let i = 0; i < atoms[0].length; i++){
+            expect(atoms[0][i].serial).toBe(i+1);
+        }
+    });
+    // pick 1 example to test
+    test("Test x of atoms[0][6]", ()=>{
+        expect(atoms[0][6].x).toBeCloseTo(3.5113);
+    });
+
+    test("Test y of atoms[0][6]", ()=>{
+        expect(atoms[0][6].y).toBeCloseTo(23.9905);
+    });
+
+    test("Test z of atoms[0][6]", ()=>{
+        expect(atoms[0][6].z).toBeCloseTo(25.9254);
+    });
+
+    test("Atom index is the index in 'atoms'", ()=>{
+        for(let i = 0; i < atoms[0].length; i++){
+            expect(atoms[0][i].index).toBe(i);
+        }
+    });
+
+    test("Test bonds of atoms[0][21]", ()=>{
+        expect(atoms[0][21].bonds).toEqual([20,22,23]);
+    });
+
+    test("Test bondOrder of atoms[0][21]", ()=>{
+        expect(atoms[0][21].bondOrder).toEqual([1,2,1]);
+    });
+    
+    test("Test properties of atoms[0][21]", ()=>{
+        let charge = 0.242;
+        expect(atoms[0][21].properties).toEqual({'charge' : charge, 
+                                                    'partialCharge' : charge});
+    });
+
 });
-/*
+
+//noH
+describe('Function MOL2\nInput: benzene.mol2 options: keepH', ()=>{
+    const data = fs.readFileSync('tests/test_structs/benzene.mol2', 'utf-8')
+
+    test("Atom is defined when elem is 'H' and keepH is true or undefined", ()=>{
+        let atoms = $3Dmol.Parsers.MOL2(data, {}); // noH = true
+        expect(atoms[0][6]).toBeDefined();
+    });
+
+    test("Atom is undefined when elem is 'H' and keepH is false", ()=>{
+        let atoms = $3Dmol.Parsers.MOL2(data, {keepH:false}); // noH = true
+        expect(atoms[0][6]).toBeUndefined();
+    });
+
+});
+
+
 describe('function PDBQT', ()=>{
     const data = fs.readFileSync('tests/test_structs/1B5S.pdb', 'utf-8')
     let atoms = $3Dmol.Parsers.PDBQT(data, {});
     
+    test("Atoms is not empty", ()=>{
+        expect(atoms).not.toBe([[]]);
+    });
+
     test("PDBQT input", ()=>{
         expect(atoms).toBeDefined();
     });
 });
 
+/*
 describe('function PQR', ()=>{
     const data = fs.readFileSync('tests/auto/data/1fas.pqr', 'utf-8')
     let atoms = $3Dmol.Parsers.PQR(data, {});
