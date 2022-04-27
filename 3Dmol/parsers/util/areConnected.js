@@ -1,0 +1,28 @@
+  // return true if atom1 and atom2 are probably bonded to each other
+
+import bondLength from "./bondLength";
+
+  // based on distance alone
+export default function areConnected(atom1, atom2) {
+    let maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
+    maxsq += 0.25; // fudge factor, especially important for md frames, also see 1i3d
+    maxsq *= maxsq;
+
+    let xdiff = atom1.x - atom2.x;
+    xdiff *= xdiff;
+    if (xdiff > maxsq) return false;
+    let ydiff = atom1.y - atom2.y;
+    ydiff *= ydiff;
+    if (ydiff > maxsq) return false;
+    let zdiff = atom1.z - atom2.z;
+    zdiff *= zdiff;
+    if (zdiff > maxsq) return false;
+
+    const distSquared = xdiff + ydiff + zdiff;
+
+    if (Number.isNaN(distSquared)) return false;
+    if (distSquared < 0.5) return false; // maybe duplicate position.
+    if (distSquared > maxsq) return false;
+    if (atom1.altLoc !== atom2.altLoc && atom1.altLoc !== ' ' && atom2.altLoc !== ' ') return false; // don't connect across alternate locations
+    return true;
+  };
