@@ -46,7 +46,7 @@
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
-    "generate:glcheck": "python ./tests/glcheck/generate_glcheck_render_tests.py",
+    "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py",
     "coverage:glcheck": "npx nyc report --reporter text --reporter html --report-dir ./tests/glcheck/coverage",
     "coverage": "npm run cov:jest && npm run cov:glcheck && npm run combine",
     "cov:jest": "npx jest --coverage --coverage-directory=./tests/jest/coverage",
