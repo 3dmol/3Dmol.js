@@ -587,6 +587,7 @@ export default class GLModel {
   };
 
   // private variables
+  /** @type {import('./specs').AtomSpec[]} */
   atoms = [];
   /** @type {any[] & Partial<{numFrames: any; url:any; origIndex:any; path:any}>} */
   frames = [];
@@ -601,6 +602,7 @@ export default class GLModel {
   renderedMolObj = null;
   /** @type {Color[]|null} */
   lastColors = null;
+
   modelData = {};
   /** @type {Array<any> | null} */
   modelDatas = null; // if there is different modelData per frame
@@ -735,9 +737,8 @@ export default class GLModel {
    *
    */
   getSymmetries() {
-    if (typeof this.modelData.symmetries == 'undefined') {
-      this.modelData.symmetries = [this.idMatrix];
-    }
+    if (!this.modelData) this.modelData = {};
+    if (!this.modelData.symmetries) this.modelData.symmetries = [this.idMatrix];
     return this.modelData.symmetries;
   }
 
@@ -835,7 +836,7 @@ export default class GLModel {
    * Add atoms as frames of model
    *
    * @function GLModel#addFrame
-   * @param {import('./specs').AtomSpec} atom - atoms to be added
+   * @param {import('./specs').AtomSpec|import('./specs').AtomSpec[]} atom - atoms to be added
    */
   addFrame(atom) {
     this.frames.push(atom);
@@ -951,7 +952,7 @@ export default class GLModel {
    */
   addMolData(data, format, options) {
     options = options || {};
-    if (!data) throw new Error("No data provided ot GLModel.addMolData");
+    if (!data) throw new Error('No data provided ot GLModel.addMolData');
     const parsedAtoms = GLModel.parseMolData(data, format, options);
     this.dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
     const mData = parsedAtoms.modelData;
@@ -988,7 +989,7 @@ export default class GLModel {
       } else {
         // add atoms to current frame
         for (let i = 0; i < parsedAtoms.length; i++) {
-          this.addAtoms(/** @type {import('./specs').AtomSpec[]} */(parsedAtoms[i]));
+          this.addAtoms(/** @type {import('./specs').AtomSpec[]} */ (parsedAtoms[i]));
         }
       }
     }
@@ -1039,7 +1040,7 @@ export default class GLModel {
     // code not noticing the changes
     sel = deepCopyAndCache(sel || {}, this);
 
-    if (!from) from = this.atoms;
+    if (!from) from = this.atoms || [];
     const aLength = from.length;
     for (let i = 0; i < aLength; i++) {
       const atom = from[i];
@@ -1551,6 +1552,7 @@ export default class GLModel {
    * @param {Object} options
    */
   globj(group, options) {
+    console.debug(`GLViewer.globj: ${Date.now()}`, group, options);
     if (this.molObj === null || options.regen) {
       // have to regenerate
       this.molObj = this.createMolObj(this.atoms, options);
@@ -1937,10 +1939,13 @@ export default class GLModel {
   // faster
   // at some point we should optimize this to avoid unnecessary
   // recalculation
-  /** param {AtomSpec[]} atoms */
+  /**
+   * @param {import('./specs').AtomSpec[]} atoms
+   */
   createMolObj(atoms, options) {
     options = options || {};
-
+    console.debug(`GLModel.createMolObj:`, atoms, options);
+    if (!atoms) throw new Error("No atoms passed to createMolObj");
     const ret = new Object3D();
     const cartoonAtoms = [];
     const lineGeometries = {};
@@ -2157,6 +2162,8 @@ export default class GLModel {
     // for BIOMT assembly
     if (
       this.dontDuplicateAtoms &&
+      // added check for model data nullishness
+      this.modelData &&
       this.modelData.symmetries &&
       this.modelData.symmetries.length > 0
     ) {
@@ -2191,10 +2198,10 @@ export default class GLModel {
     dir.sub(p1);
 
     /**
-     * 
-     * @param {import('./specs').AtomSpec} crossAtom1 
-     * @param {import('./specs').AtomSpec} crossAtom2 
-     * @returns 
+     *
+     * @param {import('./specs').AtomSpec} crossAtom1
+     * @param {import('./specs').AtomSpec} crossAtom2
+     * @returns
      */
     function getGoodCross(crossAtom1, crossAtom2) {
       // get vector 2 different neighboring atom
@@ -2286,7 +2293,7 @@ export default class GLModel {
           search(nexti, i, component);
         }
       }
-    };
+    }
 
     for (let i = 0; i < this.atoms.length; i++) {
       const atom = this.atoms[i];
@@ -3057,10 +3064,10 @@ export default class GLModel {
   }
 
   /**
-   * 
-   * @param {string|Uint8Array} data 
-   * @param {import('./specs').FileFomats|string|undefined} format 
-   * @param {import('./specs').ParserOptionsSpec} options 
+   *
+   * @param {string|Uint8Array} data
+   * @param {import('./specs').FileFomats|string|undefined} format
+   * @param {import('./specs').ParserOptionsSpec} options
    * @returns {import('./specs').ParserResult}
    */
   static parseMolData(data, format, options) {

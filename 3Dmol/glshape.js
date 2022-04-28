@@ -1507,7 +1507,7 @@ export default class GLShape {
    * @param {Object3D} group
    *
    */
-  globj(group) {
+  globj(group, exts) {
     if (this.renderedShapeObj) {
       group.remove(this.renderedShapeObj);
       this.renderedShapeObj = null;

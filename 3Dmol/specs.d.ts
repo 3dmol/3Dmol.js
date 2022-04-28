@@ -540,15 +540,18 @@ export type UnitCellStyleSpec = Partial<{
   clabelstyle: LabelSpec;
 }>;
 
+export type ModelDataType = {
+  symmetries?: Matrix4[];
+  cryst?: {
+    matrix?: Matrix3
+  }
+}
+
 
 export type ParserResult = Array<Array<Partial<AtomSpec>>>
   & {
-    modelData?: Array<{
-      symmetries?: Matrix4[];
-      cryst?: {
-        matrix?: Matrix3
-      }
-    }>; 
+    modelData?: Array<ModelDataType>; 
     origin?: Vector3;
     box?: [number, number, number];
   };
+

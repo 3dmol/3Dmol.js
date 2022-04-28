@@ -130,6 +130,7 @@ export default class GLViewer {
   // Scene data
   /** @type {Array<GLModel>} */
   models = []; // atomistic molecular models
+
   surfaces = {};
   /** @type {Array<GLShape|GLVolumetricRender>} */
   shapes = []; // Generic shapes
@@ -577,6 +578,7 @@ export default class GLViewer {
   // display scene
   // if nolink is set/true, don't propagate changes to linked viewers
   show(nolink) {
+    console.debug(`GLViewer.show at ${Date.now()}`, `nolink=${nolink}`);
     this.renderer.setViewport();
     if (!this.scene) return;
     // var time = new Date();
@@ -1265,6 +1267,7 @@ export default class GLViewer {
    * @function GLViewer#resize
    */
   resize() {
+    console.debug(`GLViewer.resize() at ${Date.now()}`);
     let regen = false;
     if (this.renderer.isLost() && this.WIDTH > 0 && this.HEIGHT > 0) {
       // create new context
@@ -1585,14 +1588,16 @@ export default class GLViewer {
     return [pos.x, pos.y, pos.z, this.rotationGroup.position.z, q.x, q.y, q.z, q.w];
   }
 
-  /** Sets the view to the specified translation, zoom, and rotation.
+  /**
+   * Sets the view to the specified translation, zoom, and rotation.
    *
    * @function GLViewer#setView
    * @param {Array<number>} [arg] - Array formatted identically to the return value of getView
    * @param {boolean} [nolink]
    * */
   setView(arg, nolink) {
-    if (arg === undefined || (Array.isArray(arg) && arg.length >= 8)) return this;
+    console.debug(`GLviewer.setView: ${Date.now()}`, arg, nolink, this.modelGroup, this.rotationGroup);
+    if (arg === undefined || !(Array.isArray(arg) && arg.length >= 8)) return this;
 
     if (!this.modelGroup || !this.rotationGroup) return this;
     this.modelGroup.position.x = arg[0];
@@ -1607,7 +1612,6 @@ export default class GLViewer {
       this.rotationGroup.position.x = arg[8];
       this.rotationGroup.position.y = arg[9];
     }
-
     this.show(nolink);
     return this;
   }
@@ -1624,119 +1628,109 @@ export default class GLViewer {
     this.updateClickables(); // must render for clickable styles to take effect
     const view = this.getView();
 
-    if (this.stateChangeCallback) {
+    if(this.stateChangeCallback) {
       // todo: have ability to only send delta updates
       this.stateChangeCallback(this.getInternalState());
     }
 
-    let i;
-    let n;
-    if (!exts) exts = this.renderer.supportedExtensions();
+    let i; let n;
+    if(!exts) exts = this.renderer.supportedExtensions();
     for (i = 0; i < this.models.length; i++) {
-      if (this.models[i]) {
-        this.models[i].globj(this.modelGroup, exts);
-      }
+        if (this.models[i]) {
+            this.models[i].globj(this.modelGroup, exts);
+        }
     }
 
     for (i = 0; i < this.shapes.length; i++) {
-      if (this.shapes[i]) {
-        // exists
-        if (
-          typeof this.shapes[i].frame === 'undefined' ||
-          this.viewer_frame < 0 ||
-          this.shapes[i].frame < 0 ||
-          this.shapes[i].frame == this.viewer_frame
-        ) {
-          this.shapes[i].globj(this.modelGroup);
-        } else {
-          // should not be displayed in current frame
-          this.shapes[i].removegl(this.modelGroup);
+        if (this.shapes[i]) { // exists
+            if ((typeof(this.shapes[i].frame) === 'undefined' || this.viewer_frame < 0 ||
+                            this.shapes[i].frame < 0 || this.shapes[i].frame == this.viewer_frame)) {
+                this.shapes[i].globj(this.modelGroup, exts);
+            } else { // should not be displayed in current frame
+                this.shapes[i].removegl(this.modelGroup);
+            }
         }
-      }
     }
 
     for (i = 0; i < this.labels.length; i++) {
-      if (
-        this.labels[i] &&
-        typeof this.labels[i].frame != 'undefined' &&
-        this.labels[i].frame >= 0
-      ) {
-        // exists and has frame specifier
-        this.modelGroup.remove(this.labels[i].sprite);
-        if (this.viewer_frame < 0 || this.labels[i].frame == this.viewer_frame) {
-          this.modelGroup.add(this.labels[i].sprite);
+        if (this.labels[i] && typeof(this.labels[i].frame) != 'undefined' && this.labels[i].frame >= 0) { // exists and has frame specifier
+            this.modelGroup.remove(this.labels[i].sprite);
+            if (this.viewer_frame < 0 || this.labels[i].frame == this.viewer_frame) {
+                this.modelGroup.add(this.labels[i].sprite);
+            }
         }
-      }
     }
 
-    for (i in this.surfaces) {
-      // this is an object with possible holes
-      if (!this.surfaces[i]) continue;
-      const surfArr = this.surfaces[i];
-      for (n = 0; n < surfArr.length; n++) {
-        if (surfArr[n]) {
-          const {geo} = surfArr[n];
-          // async surface generation can cause
-          // the geometry to be webgl initialized before it is fully
-          // formed; force various recalculations until full surface
-          // is
-          // available
-          if (!surfArr[n].finished || exts.regen) {
-            geo.verticesNeedUpdate = true;
-            geo.elementsNeedUpdate = true;
-            geo.normalsNeedUpdate = true;
-            geo.colorsNeedUpdate = true;
-            geo.buffersNeedUpdate = true;
-            geo.boundingSphere = null;
+    for (i in this.surfaces) { // this is an object with possible holes
+        if(!this.surfaces.hasOwnProperty(i)) continue;
+        const surfArr = this.surfaces[i];
+        for (n = 0; n < surfArr.length; n++) {
+            if (surfArr.hasOwnProperty(n)) {
+                const geo = surfArr[n].geo;
+                // async surface generation can cause
+                // the geometry to be webgl initialized before it is fully
+                // formed; force various recalculations until full surface
+                // is
+                // available
+                if (!surfArr[n].finished || exts.regen) {
+                    geo.verticesNeedUpdate = true;
+                    geo.elementsNeedUpdate = true;
+                    geo.normalsNeedUpdate = true;
+                    geo.colorsNeedUpdate = true;
+                    geo.buffersNeedUpdate = true;
+                    geo.boundingSphere = null;
 
-            if (surfArr[n].done) surfArr[n].finished = true;
+                    if (surfArr[n].done)
+                        surfArr[n].finished = true;
 
-            // remove partially rendered surface
-            if (surfArr[n].lastGL) this.modelGroup.remove(surfArr[n].lastGL);
+                    // remove partially rendered surface
+                    if (surfArr[n].lastGL)
+                        this.modelGroup.remove(surfArr[n].lastGL);
 
-            // create new surface
-            let smesh = null;
+                    // create new surface
+                    let smesh = null;
 
-            if (surfArr[n].mat instanceof LineBasicMaterial) {
-              // special case line meshes
-              smesh = new Line(geo, surfArr[n].mat);
-            } else {
-              smesh = new Mesh(geo, surfArr[n].mat);
+                    if(surfArr[n].mat instanceof LineBasicMaterial) {
+                        // special case line meshes
+                        smesh = new Line(geo, surfArr[n].mat);
+                    }
+                    else {
+                        smesh = new Mesh(geo, surfArr[n].mat);
+                    }
+                    if(surfArr[n].mat.transparent && surfArr[n].mat.opacity == 0) {
+                        // don't bother with hidden surfaces
+                        smesh.visible = false;
+                    } else {
+                        smesh.visible = true;
+                    }
+                    if (surfArr[n].symmetries.length > 1 ||
+                    (surfArr[n].symmetries.length == 1 &&
+                    !(surfArr[n].symmetries[n].isIdentity()))) {
+                        const tmeshes = new Object3D(); // transformed meshes
+                        for (let j = 0; j < surfArr[n].symmetries.length; j++) {
+                            const tmesh = smesh.clone();
+                            tmesh.matrix = surfArr[n].symmetries[j];
+                            tmesh.matrixAutoUpdate = false;
+                            tmeshes.add(tmesh);
+                        }
+                        surfArr[n].lastGL = tmeshes;
+                        this.modelGroup.add(tmeshes);
+                    }
+                    else {
+                        surfArr[n].lastGL = smesh;
+                        this.modelGroup.add(smesh);
+                    }
+                } // else final surface already there
             }
-            if (surfArr[n].mat.transparent && surfArr[n].mat.opacity == 0) {
-              // don't bother with hidden surfaces
-              smesh.visible = false;
-            } else {
-              smesh.visible = true;
-            }
-            if (
-              surfArr[n].symmetries.length > 1 ||
-              (surfArr[n].symmetries.length == 1 && !surfArr[n].symmetries[n].isIdentity())
-            ) {
-              const tmeshes = new Object3D(); // transformed meshes
-              for (let j = 0; j < surfArr[n].symmetries.length; j++) {
-                const tmesh = smesh.clone();
-                tmesh.matrix = surfArr[n].symmetries[j];
-                tmesh.matrixAutoUpdate = false;
-                tmeshes.add(tmesh);
-              }
-              surfArr[n].lastGL = tmeshes;
-              this.modelGroup.add(tmeshes);
-            } else {
-              surfArr[n].lastGL = smesh;
-              this.modelGroup.add(smesh);
-            }
-          } // else final surface already there
         }
-      }
     }
 
     this.setView(view); // Calls show() => renderer render
-    if (typeof callback === 'function') {
-      callback(this);
+    if(typeof callback ==='function'){
+        callback(this);
     }
     return this;
-  }
+};
 
   /** @param {import('./specs').AtomSelectionSpec} sel
    * @return {Array<GLModel>} list of models specified by sel
@@ -3285,13 +3279,18 @@ export default class GLViewer {
     let interval = 100;
     let loop = 'forward';
     let reps = 0;
-    options = {
-      loop,
-      reps,
-      interval,
-      ...options,
+    options = options || {};
+    if (options.interval) {
+      interval = options.interval;
+    }
+    if (options.loop) {
+      loop = options.loop;
+    }
+    if (options.reps) {
+      reps = options.reps;
     }
     const mostFrames = this.getNumFrames();
+    const that = this;
     let currFrame = 0;
     let inc = 1;
     if (options.step) {
@@ -3300,46 +3299,45 @@ export default class GLViewer {
     }
     let displayCount = 0;
     const displayMax = mostFrames * reps;
-    let time = Date.now();
-    let intervalID;
-
-    const resolve = () => {
-      this.render();
-      if (!this.getCanvas().isConnected && this.renderer.isLost()) {
-        // we no longer exist
-        this.stopAnimate();
-      } else if (++displayCount == displayMax || !this.isAnimated()) {
-        clearTimeout(intervalID);
-        this.animationTimers.delete(intervalID);
-        this.decAnim();
-      } else {
-        let newInterval = interval - (Date.now() - time);
-        newInterval = newInterval > 0 ? newInterval : 0;
-        this.animationTimers.delete(intervalID);
-        intervalID = setTimeout(display, newInterval, loop);
-        this.animationTimers.add(intervalID);
-      }
-    };
-
-    const display = (direction) => {
-      time = Date.now();
+    let time = new Date();
+    let resolve; let intervalID;
+    const display = function (direction) {
+      time = new Date();
       if (direction == 'forward') {
-        this.setFrame(currFrame).then(() => {
+        that.setFrame(currFrame).then(() => {
           currFrame = (currFrame + inc) % mostFrames;
           resolve();
         });
       } else if (direction == 'backward') {
-        this.setFrame(mostFrames - 1 - currFrame).then(() => {
+        that.setFrame(mostFrames - 1 - currFrame).then(() => {
           currFrame = (currFrame + inc) % mostFrames;
           resolve();
         });
       } else {
         // back and forth
-        this.setFrame(currFrame).then(() => {
+        that.setFrame(currFrame).then(() => {
           currFrame += inc;
           inc *= currFrame % (mostFrames - 1) == 0 ? -1 : 1;
           resolve();
         });
+      }
+    };
+    resolve = function () {
+      that.render();
+      if (!that.getCanvas().isConnected && that.renderer.isLost()) {
+        // we no longer exist
+        that.stopAnimate();
+      } else if (++displayCount == displayMax || !that.isAnimated()) {
+        clearTimeout(intervalID);
+        that.animationTimers.delete(intervalID);
+        that.decAnim();
+      } else {
+        // @ts-ignore
+        let newInterval = interval - (new Date() - time);
+        newInterval = newInterval > 0 ? newInterval : 0;
+        that.animationTimers.delete(intervalID);
+        intervalID = setTimeout(display, newInterval, loop);
+        that.animationTimers.add(intervalID);
       }
     };
 
@@ -3426,7 +3424,7 @@ export default class GLViewer {
     for (let i = 0; i < modelatoms.length; i++) {
       const newModel = new GLModel(this.models.length, options.defaultcolors);
       newModel.setAtomDefaults(modelatoms[i]);
-      newModel.addFrame(modelatoms[i]);
+      newModel.addFrame(/** @type {import('./specs').AtomSpec[]} */(modelatoms[i]));
       newModel.setFrame(0);
       if (modelatoms.modelData) newModel.setModelData(modelatoms.modelData[i]);
       newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
@@ -3581,9 +3579,9 @@ export default class GLViewer {
   }
 
   /**
-   * 
-   * @param {keyof GLModel} func 
-   * @param {import('./specs').AtomSelectionSpec} sel 
+   *
+   * @param {keyof GLModel} func
+   * @param {import('./specs').AtomSelectionSpec} sel
    * @param  {any[]} args
    */
   applyToModels(func, sel, ...args) {
@@ -3622,7 +3620,13 @@ export default class GLViewer {
       sel = {};
     }
 
-    this.applyToModels('setStyle', (/** @type {import('./specs').AtomSelectionSpec} */(sel)), sel, style, false);
+    this.applyToModels(
+      'setStyle',
+      /** @type {import('./specs').AtomSelectionSpec} */ (sel),
+      sel,
+      style,
+      false
+    );
     return this;
   }
 
@@ -3646,7 +3650,13 @@ export default class GLViewer {
       style = /** @type {import('./specs').AtomStyleSpec} */ (sel);
       sel = {};
     }
-    this.applyToModels('setStyle', (/** @type {import('./specs').AtomSelectionSpec} */(sel)), sel, style, true);
+    this.applyToModels(
+      'setStyle',
+      /** @type {import('./specs').AtomSelectionSpec} */ (sel),
+      sel,
+      style,
+      true
+    );
     return this;
   }
 

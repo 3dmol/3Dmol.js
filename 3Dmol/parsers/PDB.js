@@ -160,7 +160,7 @@ const getSinglePDB = (lines, options, sslookup) => {
         
         const to = parseInt(line.substring(coffsets[j], 5));
         const toindex = serialToIndex[to];
-        const toAtom = atoms[toindex];
+        const toAtom = atoms[toindex] || {};
         if (!fromAtom.bonds) fromAtom.bonds = [];
         if (!fromAtom.bondOrder) fromAtom.bondOrder = [];
         if (fromAtom !== undefined && toAtom !== undefined) {

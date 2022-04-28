@@ -36,9 +36,11 @@ export default function parseCUBE(str, options) {
   // always assume bohr: openbabel source code
   // always assume angstrom: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
   // we are going to go with n<0 means angstrom - note this is just the first n
+  // @ts-ignore
   const convFactor = lineArr[0] > 0 ? 0.529177 : 1;
   origin.multiplyScalar(convFactor);
 
+  // @ts-ignore
   const nX = Math.abs(lineArr[0]);
   const xVec = new Vector3(
     parseFloat(lineArr[1]),
@@ -47,6 +49,7 @@ export default function parseCUBE(str, options) {
   ).multiplyScalar(convFactor);
 
   lineArr = lines[4].replace(/^\s+/, '').replace(/\s+/g, ' ').split(' ');
+  // @ts-ignore
   const nY = Math.abs(lineArr[0]);
   const yVec = new Vector3(
     parseFloat(lineArr[1]),
@@ -55,6 +58,7 @@ export default function parseCUBE(str, options) {
   ).multiplyScalar(convFactor);
 
   lineArr = lines[5].replace(/^\s+/, '').replace(/\s+/g, ' ').split(' ');
+  // @ts-ignore
   const nZ = Math.abs(lineArr[0]);
   const zVec = new Vector3(
     parseFloat(lineArr[1]),
@@ -65,6 +69,7 @@ export default function parseCUBE(str, options) {
   cryst.size = {x: nX, y: nY, z: nZ};
   cryst.unit = new Vector3(xVec.x, yVec.y, zVec.z);
 
+  // eslint-disable-next-line eqeqeq
   if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0 || zVec.y != 0) {
     // need a transformation matrix
     cryst.matrix4 = new Matrix4(
@@ -94,6 +99,7 @@ export default function parseCUBE(str, options) {
     cryst.unit = new Vector3(1, 1, 1);
   }
 
+  // @ts-ignore
   atoms.modelData = [{cryst}];
 
   // Extract atom portion; send to new GLModel...
@@ -116,6 +122,7 @@ export default function parseCUBE(str, options) {
     atom.bonds = [];
     atom.bondOrder = [];
     atom.properties = {};
+    // @ts-ignore
     atoms[atoms.length - 1].push(atom);
   }
 
