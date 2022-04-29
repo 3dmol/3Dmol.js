@@ -10,7 +10,7 @@
   "homepage": "http://3dmol.csb.pitt.edu",
   "jest": {
     "testRegex": [
-      "./*\\.test.js",
+      "./*\\.test.js$",
       "./*\\.test.ts"
     ]
   },
