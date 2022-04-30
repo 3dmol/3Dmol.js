@@ -41,7 +41,7 @@ describe('Function VASP | Input: CONTCAR |', () => {
 });
 
 
-describe('Function CUBE', ()=>{ 
+describe('Function CUBE', ()=>{
     // CUBE returns 'atoms'
     const data = fs.readFileSync('tests/auto/data/1fas.cube', 'utf-8');
     let atoms = $3Dmol.Parsers.CUBE(data, {});
@@ -135,7 +135,7 @@ describe('Function XYZ | Input: C111tiny.xyz | options:{} |', ()=>{
  
 /* onemol gives no change */
 
-describe('Function XYZ | Input: C111tiny.xyz | options: assignBonds', ()=>{
+describe('Function XYZ | Input: C111tiny.xyz | options: assignBonds |', ()=>{
     const data = fs.readFileSync('tests/auto/data/C111tiny.xyz', 'utf-8');
     let atoms = $3Dmol.Parsers.XYZ(data, {assignBonds:false}); //assignbonds
 
@@ -378,21 +378,7 @@ describe('Function PDBQT | option: multimodel, onemol', ()=>{
 });
 
 
-describe('Function PQR', ()=>{
-    const data = fs.readFileSync('tests/auto/data/1fas.pqr', 'utf-8')
-    let atoms = $3Dmol.Parsers.PQR(data, {});
 
-    test("Length of atoms should be 1", ()=>{
-        expect(atoms.length).toBe(1);
-    });
-
-    /*
-    test("snapshot", ()=>{
-        expect(atoms).toMatchSnapshot();
-    });
-    */ 
-
-});
 
 /*
 describe('Function MMTF', ()=>{
@@ -408,16 +394,6 @@ describe('Function MMTF', ()=>{
     
     test("mmtf input", ()=>{
         //expect(atoms).toBeDefined();
-    });
-});
-*/
-/*
-describe('function PRMTOP', ()=>{
-    const data = fs.readFileSync('tests/auto/data/model1.prmtop', 'utf-8')
-    let atoms = $3Dmol.Parsers.PRMTOP(data);
-    
-    test("PRMTOP input", ()=>{
-        expect(atoms).toBeDefined();
     });
 });
 */
