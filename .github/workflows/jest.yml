@@ -16,4 +16,4 @@ jobs:
         with:
           node-version: 16.x
       - run: npm install
-      - run: npx jest ./*\\.test.js --passWithNoTests
+      - run: npx jest --verbose ./*\\.test.js --passWithNoTests

@@ -717,7 +717,7 @@ $3Dmol.builtinColorSchemes = {
         'whiteCarbon' : {'prop':'elem', map:$3Dmol.elementColors.whiteCarbon},
         'orangeCarbon' : {'prop':'elem', map:$3Dmol.elementColors.orangeCarbon},
         'yellowCarbon' : {'prop':'elem', map:$3Dmol.elementColors.yellowCarbon},
-        'blueCaron' : {'prop':'elem', map:$3Dmol.elementColors.blueCarbon},
+        'blueCarbon' : {'prop':'elem', map:$3Dmol.elementColors.blueCarbon},
 };
 
 /** Return proper color for atom given style
