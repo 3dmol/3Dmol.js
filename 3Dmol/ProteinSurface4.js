@@ -38,6 +38,7 @@ export default class ProteinSurface {
   // use throughout...
   static PointGrid = class PointGrid {
     constructor(length, width, height) {
+      console.debug(`new ProteinSurface(${length},${width},${height}):`)
       // the standard says this is zero initialized
       this.data = new Int32Array(length * width * height * 3);
       this.width = width;

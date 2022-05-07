@@ -648,6 +648,7 @@ export default class GLModel {
    * @function GLModel#setInternalState
    */
   setInternalState(state) {
+    console.debug(`GLModel<${this.id}>.setInternalState`, state);
     this.atoms = state.atoms;
     this.frames = state.frames;
     this.molObj = null;
@@ -898,8 +899,8 @@ export default class GLModel {
         const mult = (i * amplitude) / numFrames;
         newVector.multiplyScalar(mult);
         starting.add(newVector);
-        /** @type {import('./specs').AtomSpec} */
-        const newAtom = {};
+        /** @type {Partial<import('./specs').AtomSpec>} */
+        const newAtom = {style: {}};
         for (const k in this.atoms[j]) {
           newAtom[k] = this.atoms[j][k];
         }
@@ -916,7 +917,7 @@ export default class GLModel {
           spec.start = starting;
           spec.end = arrowend;
           spec.frame = currframe;
-          if (!spec.color) {
+          if (!spec.color && newAtom.style) {
             let s = newAtom.style.sphere;
             if (!s) s = newAtom.style.stick;
             if (!s) s = newAtom.style.line;
@@ -952,7 +953,6 @@ export default class GLModel {
    */
   addMolData(data, format, options) {
     options = options || {};
-    if (!data) throw new Error('No data provided ot GLModel.addMolData');
     const parsedAtoms = GLModel.parseMolData(data, format, options);
     this.dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
     const mData = parsedAtoms.modelData;
@@ -1237,6 +1237,7 @@ export default class GLModel {
         });
    */
   setStyle(sel, style, add) {
+    console.debug(`GLModel.setStyle(${sel}, ${style}, ${add}) ${Date.now()}`, sel, style, add);
     if (typeof style === 'undefined' && typeof add == 'undefined') {
       // if a single argument is provided, assume it is a style and select all
       style = /** @type {import('./specs').AtomStyleSpec} */ (sel);
@@ -1940,12 +1941,13 @@ export default class GLModel {
   // at some point we should optimize this to avoid unnecessary
   // recalculation
   /**
-   * @param {import('./specs').AtomSpec[]} atoms
+   * @param {import('./specs').AtomSpec[]} [atoms]
+   * @param {any} [options]
+   * @returns {Object3D}
    */
   createMolObj(atoms, options) {
     options = options || {};
-    console.debug(`GLModel.createMolObj:`, atoms, options);
-    if (!atoms) throw new Error("No atoms passed to createMolObj");
+    console.debug(`GLModel<${this.id}>.createMolObj:`, atoms, options);
     const ret = new Object3D();
     const cartoonAtoms = [];
     const lineGeometries = {};
@@ -1979,49 +1981,51 @@ export default class GLModel {
     let testOpacities;
     const opacities = {};
     const range = [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
-    for (i = 0, n = atoms.length; i < n; i++) {
-      const atom = atoms[i];
-      // recreate gl info for each atom as necessary
-      // set up appropriate intersection spheres for clickable atoms
-      if (atom && atom.style) {
-        if ((atom.clickable || atom.hoverable) && atom.intersectionShape === undefined)
-          atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle: []};
+    if (atoms) {
+      for (i = 0, n = atoms.length; i < n; i++) {
+        const atom = atoms[i];
+        // recreate gl info for each atom as necessary
+        // set up appropriate intersection spheres for clickable atoms
+        if (atom && atom.style) {
+          if ((atom.clickable || atom.hoverable) && atom.intersectionShape === undefined)
+            atom.intersectionShape = {sphere: [], cylinder: [], line: [], triangle: []};
 
-        testOpacities = {line: undefined, cross: undefined, stick: undefined, sphere: undefined};
-        for (j in testOpacities) {
-          if (atom.style[j]) {
-            if (atom.style[j].opacity) testOpacities[j] = parseFloat(atom.style[j].opacity);
-            else testOpacities[j] = 1;
-          } else testOpacities[j] = undefined;
+          testOpacities = {line: undefined, cross: undefined, stick: undefined, sphere: undefined};
+          for (j in testOpacities) {
+            if (atom.style[j]) {
+              if (atom.style[j].opacity) testOpacities[j] = parseFloat(atom.style[j].opacity);
+              else testOpacities[j] = 1;
+            } else testOpacities[j] = undefined;
 
-          if (opacities[j]) {
-            if (testOpacities[j] != undefined && opacities[j] != testOpacities[j]) {
-              console.log(`Warning: ${j} opacity is ambiguous`);
-              opacities[j] = 1;
-            }
-          } else opacities[j] = testOpacities[j];
-        }
-
-        drawSphereFunc(atom, sphereGeometry);
-        this.drawAtomClickSphere(atom);
-        // @ts-ignore
-        this.drawAtomCross(atom, crossGeometries);
-        // @ts-ignore
-        this.drawBondLines(atom, atoms, lineGeometries);
-        this.drawBondSticks(atom, atoms, stickGeometry);
-
-        if (typeof atom.style.cartoon !== 'undefined' && !atom.style.cartoon.hidden) {
-          // gradient color scheme range
-          if (
-            atom.style.cartoon.color === 'spectrum' &&
-            typeof atom.resi === 'number' &&
-            !atom.hetflag
-          ) {
-            if (atom.resi < range[0]) range[0] = atom.resi;
-            if (atom.resi > range[1]) range[1] = atom.resi;
+            if (opacities[j]) {
+              if (testOpacities[j] != undefined && opacities[j] != testOpacities[j]) {
+                console.log(`Warning: ${j} opacity is ambiguous`);
+                opacities[j] = 1;
+              }
+            } else opacities[j] = testOpacities[j];
           }
 
-          cartoonAtoms.push(atom);
+          drawSphereFunc(atom, sphereGeometry);
+          this.drawAtomClickSphere(atom);
+          // @ts-ignore
+          this.drawAtomCross(atom, crossGeometries);
+          // @ts-ignore
+          this.drawBondLines(atom, atoms, lineGeometries);
+          this.drawBondSticks(atom, atoms, stickGeometry);
+
+          if (typeof atom.style.cartoon !== 'undefined' && !atom.style.cartoon.hidden) {
+            // gradient color scheme range
+            if (
+              atom.style.cartoon.color === 'spectrum' &&
+              typeof atom.resi === 'number' &&
+              !atom.hetflag
+            ) {
+              if (atom.resi < range[0]) range[0] = atom.resi;
+              if (atom.resi > range[1]) range[1] = atom.resi;
+            }
+
+            cartoonAtoms.push(atom);
+          }
         }
       }
     }
@@ -2376,7 +2380,7 @@ export default class GLModel {
    * @param {Geometry} geo
    */
   drawAtomSphere(atom, geo) {
-    if (!atom.style.sphere) return;
+    if (!atom.style || !atom.style.sphere) return;
     const style = atom.style.sphere;
     if (style.hidden) return;
 
@@ -2392,23 +2396,14 @@ export default class GLModel {
     GLDraw.drawSphere(geo, atom, radius, C);
   }
 
-  // cross drawing
-  /** @typedef CrossStyleSpec
-   * @prop {boolean} hidden - do not show
-   * @prop {number} linewidth *deprecated due to vanishing browser support*
-   * @prop {number} radius
-   * @prop {number} scale - scale radius by specified amount
-   * @prop {import('./specs').ColorSchemeSpec} colorscheme - element based coloring
-   * @prop {import('./specs').ColorSpec} color - fixed coloring, overrides colorscheme
-   * @prop {number} opacity - opacity, must be the same for all atoms in the model
-   */
+
   /**
    *
    * @param {import('./specs').AtomSpec} atom
    * @param {Geometry[]} geos
    */
   drawAtomCross(atom, geos) {
-    if (!atom.style.cross) return;
+    if (!atom.style || !atom.style.cross) return;
     const style = atom.style.cross;
     if (style.hidden) return;
     const linewidth = style.linewidth || defaultlineWidth;
@@ -3065,9 +3060,9 @@ export default class GLModel {
 
   /**
    *
-   * @param {string|Uint8Array} data
-   * @param {import('./specs').FileFomats|string|undefined} format
-   * @param {import('./specs').ParserOptionsSpec} options
+   * @param {string|Uint8Array} [data]
+   * @param {import('./specs').FileFomats|string} [format]
+   * @param {import('./specs').ParserOptionsSpec} [options]
    * @returns {import('./specs').ParserResult}
    */
   static parseMolData(data, format, options) {
@@ -3087,7 +3082,7 @@ export default class GLModel {
     if (typeof Parsers[format] == 'undefined') {
       // let someone provide a file name and get format from extension
       format = format.split('.').pop();
-      if (typeof Parsers[format] == 'undefined') {
+      if (data && typeof Parsers[format] == 'undefined') {
         console.log(`Unknown format: ${format}`);
         // try to guess correct format from data contents
         if (data instanceof Uint8Array) {

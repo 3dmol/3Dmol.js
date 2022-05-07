@@ -122,6 +122,7 @@ export type AtomSpec = {
   x: number;
   y: number;
   z: number;
+  style: AtomStyleSpec;
 } & Partial<{
   resn: string;
   surfaceColor: ColorSpec;
@@ -141,7 +142,6 @@ export type AtomSpec = {
   callback: (e: GLViewer) => any;
   invert: boolean;
   intersectionShape: any;
-  style: any;
   bondStyles: any[];
   symmetries: Array<Vector3Like>;
   color: ColorSpec;
@@ -220,7 +220,6 @@ export type WithinSelectionSpec = Partial<{
 
 
 type LineStyleSpec = any;
-type CrossStyleSpec = any;
 type StickStyleSpec = any;
 type SphereStyleSpec = any;
 type ClickSphereStyleSpec = any;
@@ -464,7 +463,28 @@ export type CartoonStyleSpec = Partial<{
   width: number;
   /** set opacity from 0-1; transparency is set per-chain with a warning outputted in the event of ambiguity */
   opacity: number;
+  hidden: boolean;
 }>;
+
+  // cross drawing
+  /** @typedef CrossStyleSpec
+   * @prop {boolean} hidden - do not show
+   * @prop {number} linewidth *deprecated due to vanishing browser support*
+   * @prop {number} radius
+   * @prop {number} scale - scale radius by specified amount
+   * @prop {import('./specs').ColorSchemeSpec} colorscheme - element based coloring
+   * @prop {import('./specs').ColorSpec} color - fixed coloring, overrides colorscheme
+   * @prop {number} opacity - opacity, must be the same for all atoms in the model
+   */
+  export type CrossStyleSpec = Partial<{
+    hidden: boolean;
+    linewidth: number;
+    radius: number;
+    scale: number;
+    colorscheme: ColorSchemeSpec;
+    color: ColorSpec;
+    opacity: number;
+  }>
 
 /**
   * Label type specification

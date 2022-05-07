@@ -14,7 +14,7 @@ import isNumeric from './isNumeric';
  * = OR ~ - separates key/value pairs of a value object, if not provided value is null
  *     twiddle is supported since = has special meaning in URLs
  * @param {string} str
- * @returns {Object}
+ * @returns {import('../specs').AtomStyleSpec}
  */
 export default function specStringToObject(str) {
   if (typeof str == 'object') {
@@ -52,6 +52,7 @@ export default function specStringToObject(str) {
     return val;
   };
 
+  /** @type {import('../specs').AtomStyleSpec} */
   const ret = {};
   if (str === 'all') return ret;
   const fields = str.split(';');

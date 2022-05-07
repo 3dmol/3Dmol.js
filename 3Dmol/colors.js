@@ -668,7 +668,7 @@ export const builtinColorSchemes = {
 };
 
 /** Return proper color for atom given style
- * @param {import('./specs').AtomSpec} atom
+ * @param {Partial<import('./specs').AtomSpec>} atom
  * @param {import('./specs').ColorSchemeSpec} style
  * @return {Color}
  */
@@ -722,7 +722,7 @@ export function getColorFromStyle(atom, style) {
       if (typeof scheme.map[val] != 'undefined') {
         color = scheme.map[val];
       }
-    } else if (style.colorscheme && typeof style.colorscheme[atom.elem] != 'undefined') {
+    } else if (style.colorscheme && atom.elem && style.colorscheme[atom.elem]) {
       // actual color scheme provided
       color = style.colorscheme[atom.elem];
     } else {

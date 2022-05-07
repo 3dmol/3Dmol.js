@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 import { Vector3, Matrix4 } from "../WebGL/math";
 import anumToSymbol from "./util/anumToSymbol";
 import assignBonds from "./util/assignBonds";
@@ -8,6 +9,7 @@ import assignBonds from "./util/assignBonds";
  */
 export default function parseCUBE(str, options) {
   options = options || {};
+  /** @type {import("../specs").ParserResult} */
   const atoms = [[]];
   let lines = str.split(/\r?\n/);
   const assignbonds = options.assignBonds === undefined ? true : options.assignBonds;
@@ -69,7 +71,6 @@ export default function parseCUBE(str, options) {
   cryst.size = {x: nX, y: nY, z: nZ};
   cryst.unit = new Vector3(xVec.x, yVec.y, zVec.z);
 
-  // eslint-disable-next-line eqeqeq
   if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0 || zVec.y != 0) {
     // need a transformation matrix
     cryst.matrix4 = new Matrix4(
@@ -100,7 +101,7 @@ export default function parseCUBE(str, options) {
   }
 
   // @ts-ignore
-  atoms.modelData = [{cryst}];
+  atoms.modelDaata = [{cryst}];
 
   // Extract atom portion; send to new GLModel...
   lines = lines.splice(6, natoms);
@@ -122,12 +123,11 @@ export default function parseCUBE(str, options) {
     atom.bonds = [];
     atom.bondOrder = [];
     atom.properties = {};
-    // @ts-ignore
     atoms[atoms.length - 1].push(atom);
   }
 
   if (assignbonds) {
-    for (let i = 0; i < atoms.length; i++) assignBonds(atoms[i]);
+    for (let i = 0; i < atoms.length; i++) assignBonds(/** @type {import("../specs").AtomSpec[]} */(atoms[i]));
   }
   return atoms;
 }
