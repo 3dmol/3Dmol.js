@@ -8,6 +8,11 @@ var $3Dmol = $3Dmol || {};
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
+  In nucleic acids, the base cylinders obtain their color from the
+  atom to which the cylinder is drawn, which is 'N1' for purines (resn: 'A', 'G', 'DA', 'DG') and 
+  'N3' for pyrimidines (resn: 'C', 'U', 'DC', 'DT'). 
+  The different nucleobases can therefore be distinguished as by setting the colors 
+  of each of these atoms. The backbone color is set from the 'P' atoms ('O5' for the 5' terminus).
  * @typedef CartoonStyleSpec
  * @prop {ColorSpec} color - strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number
  * @prop {string} style - style of cartoon rendering (trace, oval, rectangle
@@ -23,11 +28,6 @@ var $3Dmol = $3Dmol || {};
  *       structure-dependent; does not apply to trace or ribbon
  * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain
  *       with a warning outputted in the event of ambiguity
- * @prop {} In nucleic acids, the base cylinders obtain their color from the
- *       atom to which the cylinder is drawn, which is 'N1' for purines (resn:
- *       'A', 'G', 'DA', 'DG') and 'N3' for pyrimidines (resn: 'C', 'U', 'DC',
- *       'DT'). The different nucleobases can therefore be distinguished as
- *       follows:
  * @example $3Dmol.download("pdb:4ZD3",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setViewStyle({style:"outline"});

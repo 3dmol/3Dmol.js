@@ -19,7 +19,7 @@
   * @prop {boolean} keepH - do not strip hydrogens ; supported by sdf,mol2
   * @prop {object} parseStyle - used to define ChemDoodle styles ; supported by cdjson
   * @prop {boolean} doAssembly - boolean dictating weather or not to do assembly ; supported by mcif
-  * @prop {boolean} duplicateAssemblyAtoms- Set to true if you wish to duplicate assembly atoms otherwise false ; supported by all formats with symmetries.  Not duplicating will result in faster rendering but it will not be possible to individually style symmetries.
+  * @prop {boolean} duplicateAssemblyAtoms - Set to true if you wish to duplicate assembly atoms otherwise false ; supported by all formats with symmetries.  Not duplicating will result in faster rendering but it will not be possible to individually style symmetries.
   * @prop {boolean} normalizeAssembly - shift symmetry mates so their centroid is in the unit cell
   * @prop {boolean} dontConnectDuplicatedAtoms - do not detect bonds between symmetries generated with duplicateAssemblyAtoms (cif only - other formats never make bonds between symmetries)
   * @prop {boolean} noSecondaryStructure - boolean dictating the presence of a secondary structure ; supported by pdb
