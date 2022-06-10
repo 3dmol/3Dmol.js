@@ -4150,7 +4150,7 @@ $3Dmol.GLViewer = (function() {
             var surfid = nextSurfID();
             var mat = null;
             if(typeof type =="string"){
-                if(surfaceTypeMap[type]!== undefined)
+                if(surfaceTypeMap[type.toUpperCase()]!== undefined)
                     type = surfaceTypeMap[type];
                 else{
                     console.log("Surface type : " + type + " is not recognized");

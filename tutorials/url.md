@@ -39,7 +39,7 @@ So, the structure identifier portion of the url is `pdb=4KW4`, and the url to vi
 
 Arbitrary URLs can also be provided.
 
-[`https://3Dmol.org/viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf`](../viewer.html?url=http://3dmol.csb.pitt.edu/tests/test_structs/benzene.sdf&type=sdf)
+[`https://3Dmol.org/viewer.html?url=https://3dmol.org/tests/test_structs/benzene.sdf&type=sdf`](../viewer.html?url=https://3dmol.org/tests/test_structs/benzene.sdf&type=sdf)
 
 Be default, the file format will be inferred by any extension (e.g., `.sdf`) present in the URL.  The file format may be
 manually specified using the type parameter, as shown above.
