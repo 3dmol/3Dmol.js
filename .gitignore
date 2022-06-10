@@ -13,6 +13,7 @@ package-lock.json  #suppose to commit, but triggers security warning on github
 .nyc_output
 .vscode
 .st
+tmp/
 
 
 #Ignoring Virtual Environments for the Active Learning Environment Project

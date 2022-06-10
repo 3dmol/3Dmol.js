@@ -17,6 +17,9 @@
   "devDependencies": {
     "@babel/plugin-transform-typescript": "^7.16.8",
     "@babel/preset-env": "^7.16.11",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-typescript": "^8.3.3",
     "del": "^6.0.0",
     "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",
@@ -35,7 +38,8 @@
     "jest": "^27.5.1",
     "jsdoc": "^3.6.10",
     "jsdom": "^19.0.0",
-    "jshint": "^2.13.1"
+    "jshint": "^2.13.1",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "scripts": {
     "build": "gulp",
