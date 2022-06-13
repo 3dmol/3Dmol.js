@@ -23,7 +23,8 @@
   * @prop {boolean} normalizeAssembly - shift symmetry mates so their centroid is in the unit cell
   * @prop {boolean} dontConnectDuplicatedAtoms - do not detect bonds between symmetries generated with duplicateAssemblyAtoms (cif only - other formats never make bonds between symmetries)
   * @prop {boolean} noSecondaryStructure - boolean dictating the presence of a secondary structure ; supported by pdb
-  * @prop {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb
+  * @prop {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb, mmtf, cif
+  * @prop {number} hbondCutoff - maximum distance used for identifying hydrogen bonds when computing secondary structure; supported by pdb, mmtf, cif
   * @prop {string} altLoc -which alternate location to select, if present; '*' to load all ; supported by pdb
   * @prop {number} assemblyIndex - index of the assembly in symmetry ; supported by mmtf
   * @prop {boolean} assignBonds - for formats without explicit bonds (e.g. PDB, xyz) infer bonding (default true). 
@@ -289,9 +290,9 @@ $3Dmol.Parsers = (function() {
     // this will identify all hydrogen bonds between backbone
     // atoms; assume atom names are correct, only identifies
     // single closest hbond
-    var assignBackboneHBonds = function(atomsarray) {
-        var maxlength = 3.2;
-        var maxlengthSq = 10.24;
+    var assignBackboneHBonds = function(atomsarray, hbondCutoff) {
+        var maxlength = hbondCutoff || 3.2;
+        var maxlengthSq = maxlength*maxlength;
         var atoms = [];
         var i, j, n;
         for (i = 0, n = atomsarray.length; i < n; i++) {
@@ -343,8 +344,8 @@ $3Dmol.Parsers = (function() {
         }
     };
 
-    var computeSecondaryStructure = function(atomsarray) {
-        assignBackboneHBonds(atomsarray);
+    var computeSecondaryStructure = function(atomsarray, hbondCutoff) {
+        assignBackboneHBonds(atomsarray,hbondCutoff);
 
         // compute, per residue, what the secondary structure is
         var chres = {}; // lookup by chain and resid
@@ -1436,7 +1437,7 @@ $3Dmol.Parsers = (function() {
         }
         for (let i = 0; i < atoms.length; i++) {
             if(assignbonds) assignBonds(atoms[i]);
-            computeSecondaryStructure(atoms[i]);
+            computeSecondaryStructure(atoms[i],options.hbondCutoff);
             processSymmetries(modelData[i].symmetries, atoms[i], options, modelData[i].cryst);
             if(options.duplicateAssemblyAtoms && !options.dontConnectDuplicatedAtoms && assignbonds) assignBonds(atoms[i]);
         }
@@ -1831,7 +1832,7 @@ $3Dmol.Parsers = (function() {
             processSymmetries(modelData.symmetries, atoms, options, modelData.cryst);
 
         if (computeStruct  && !ignoreStruct) {
-            computeSecondaryStructure(atoms);
+            computeSecondaryStructure(atoms,options.hbondCutoff);
         }
 
         // Assign secondary structures from pdb file
@@ -2014,7 +2015,7 @@ $3Dmol.Parsers = (function() {
         for (let i = 0; i < atoms.length; i++) {
             assignPDBBonds(atoms[i]);
             if (computeStruct)
-                computeSecondaryStructure(atoms[i]);
+                computeSecondaryStructure(atoms[i],options.hbondCutoff);
         }
         
         return atoms;
@@ -2318,7 +2319,7 @@ $3Dmol.Parsers = (function() {
         }                
         
         if (computeStruct  && !ignoreStruct) {
-            computeSecondaryStructure(atoms);
+            computeSecondaryStructure(atoms,options.hbondCutoff);
         }       
         
         return atoms;
