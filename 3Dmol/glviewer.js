@@ -3394,7 +3394,7 @@ $3Dmol.GLViewer = (function() {
         this.addModel =  function(data, format, options) {
             if(options && !options.defaultcolors) {
                 options.defaultcolors = defaultcolors;
-                options.cartoonQuality = config.cartoonQuality;
+                options.cartoonQuality = options.cartoonQuality || config.cartoonQuality;
             } else if(typeof(options) === 'undefined') {
                 options = {defaultcolors:defaultcolors, cartoonQuality:config.cartoonQuality};
             }

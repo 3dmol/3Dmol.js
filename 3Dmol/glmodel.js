@@ -283,7 +283,7 @@ $3Dmol.GLModel = (function() {
         // sphere drawing
         var defaultSphereRadius = (options.defaultSphereRadius) ? options.defaultSphereRadius : 1.5;
 
-        var defaultCartoonQuality = (options.cartoonQuality)? options.cartoonQuality : 5;
+        var defaultCartoonQuality = (options.cartoonQuality)? options.cartoonQuality : 10;
 
         // return proper radius for atom given style
         /** 

@@ -1262,7 +1262,7 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var defaultDrawCartoon = function(group, atomList, gradientrange, quality) {
-        quality = quality || 5;
+        quality = quality || 10;
         drawCartoon(group, atomList, gradientrange, quality, quality);
     };
 
