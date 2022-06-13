@@ -58,7 +58,7 @@ $3Dmol.GLViewer = (function() {
             hoverDuration = config.hoverDuration;
         }
         if(config.antialias === undefined) config.antialias = true;
-        if(config.cartoonQuality === undefined) config.cartoonQuality = 5;
+        if(config.cartoonQuality === undefined) config.cartoonQuality = 10;
 
         //reimplement jquery getwidth/height
         var getRect = function() {
