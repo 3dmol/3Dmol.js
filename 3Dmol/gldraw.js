@@ -708,10 +708,10 @@ $3Dmol.GLDraw = (function() {
     // Sphere component
     var sphereVertexCache = {
         cache : {},
-        getVerticesForRadius : function(radius) {
-
-            if (typeof (this.cache[radius]) !== "undefined")
-                return this.cache[radius];
+        getVerticesForRadius : function(radius, sphereQuality) {
+            sphereQuality = sphereQuality || 2;
+            if (typeof (this.cache[[radius,sphereQuality]]) !== "undefined")
+                return this.cache[[radius,sphereQuality]];
 
             var obj = {
                 vertices : [],
@@ -719,7 +719,6 @@ $3Dmol.GLDraw = (function() {
                 normals : []
             };
             // scale quality with radius heuristically
-            var sphereQuality = 1;
             var widthSegments = 16 * sphereQuality;
             var heightSegments = 10 * sphereQuality;
             if (radius < 1) {
@@ -764,7 +763,7 @@ $3Dmol.GLDraw = (function() {
 
             }
 
-            this.cache[radius] = obj;
+            this.cache[[radius,sphereQuality]] = obj;
             return obj;
         }
 
@@ -780,11 +779,12 @@ $3Dmol.GLDraw = (function() {
      *            radius
      * @param {$3Dmol.Color}
      *            color
+     * @param {number} quality of sphere (default 2, higher increases number of triangles)
      */
-    draw.drawSphere = function(geo, pos, radius, color) {
+    draw.drawSphere = function(geo, pos, radius, color, sphereQuality) {
 
         var x, y;
-        var vobj = sphereVertexCache.getVerticesForRadius(radius);
+        var vobj = sphereVertexCache.getVerticesForRadius(radius, sphereQuality);
 
         var vertices = vobj.vertices;
         var normals = vobj.normals;
