@@ -12,6 +12,7 @@ export * from "./stickimposter"
 export * from "./stickimposteroutline"
 export * from "./volumetric"
 
+import { Shader } from "../shaders"
 import { basic } from "./basic"
 import { instanced } from "./instanced"
 import { lambert } from "./lambert"
@@ -27,7 +28,7 @@ import { stickimposteroutline } from "./stickimposteroutline"
 import { volumetric } from "./volumetric"
 
 
-export const ShaderLib = {
+export const ShaderLib: Record<string, Shader> = {
     basic,
     instanced,
     lambert,

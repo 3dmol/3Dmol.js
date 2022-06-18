@@ -1,4 +1,6 @@
-import { Sphere, Cylinder, Triangle } from "./shapes"
+import { Color } from './core/Color';
+//import { SpritePlugin } from './SpritePlugin';
+import { Sphere, Cylinder, Triangle } from "./shapes/index"
 import {
   Matrix4,
   Matrix3,
@@ -9,8 +11,9 @@ import {
   Vector3,
   clamp,
   degToRad,
-} from "./math";
+} from "./math/index";
 import { square } from "./math/utils/square";
+import { ShaderLib, ShaderUtils } from "./shaders/index";
 
 // @ts-ignore
 window.$3Dmol = {
@@ -32,4 +35,8 @@ window.$3Dmol = {
   Cylinder,
   Sphere,
   Triangle,
+  ShaderLib,
+  ShaderUtils,
+  //SpritePlugin,
+  Color
 };

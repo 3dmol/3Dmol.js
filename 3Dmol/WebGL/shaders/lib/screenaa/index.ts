@@ -1,8 +1,15 @@
+import { Shader } from "../../shaders"
+import { uniforms } from "./uniforms"
 import fragmentShader from "./screenaa.frag"
 import vertexShader from "./screenaa.vert"
-import { uniforms } from "./uniforms"
 
-export const screenaa = {
+
+//import fs from "fs"
+//
+//const fragmentShader = fs.readFileSync(__dirname + "/screenaa.frag", "utf8")
+//const vertexShader = fs.readFileSync(__dirname + "/screenaa.vert", "utf8")
+
+export const screenaa: Shader = {
     fragmentShader,
     vertexShader,
     uniforms

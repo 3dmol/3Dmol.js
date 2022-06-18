@@ -1,8 +1,14 @@
+import { Shader } from "../../shaders"
+import { uniforms } from "./uniforms"
+//import { fragmentShader, vertexShader } from "./shaders"
 import fragmentShader from "./sprite.frag"
 import vertexShader from "./sprite.vert"
-import { uniforms } from "./uniforms"
 
-export const sprite = {
+
+//const fragmentShader = fs.readFileSync(path.resove(__dirname, "./sprite.frag"), "utf8")
+//const vertexShader = fs.readFileSync(path.resove(__dirname, "./sprite.vert"), "utf8")
+
+export const sprite: Shader = {
     fragmentShader,
     vertexShader,
     uniforms
