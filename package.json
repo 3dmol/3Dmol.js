@@ -15,11 +15,9 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-transform-typescript": "^7.16.8",
-    "@babel/preset-env": "^7.16.11",
-    "@rollup/plugin-commonjs": "^22.0.0",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "@rollup/plugin-typescript": "^8.3.3",
+    "@babel/plugin-transform-typescript": "^7.18.4",
+    "@babel/preset-env": "^7.18.2",
+    "@parcel/transformer-glsl": "^2.6.1",
     "del": "^6.0.0",
     "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",
@@ -39,7 +37,6 @@
     "jsdoc": "^3.6.10",
     "jsdom": "^19.0.0",
     "jshint": "^2.13.1",
-    "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.7.3"
   },
   "scripts": {
@@ -67,5 +64,16 @@
     "pako": "^2.0.4",
     "upng-js": "^2.1.0",
     "yargs-parser": "^20.2.9"
+  },
+  "targets": {
+    "main": false,
+    "module": false,
+    "webgl": {
+      "source": "3Dmol/WebGL/index.ts",
+      "distDir": "tmp",
+      "outputFormat": "esmodule",
+      "optimize": false,
+      "isLibrary": true
+    }
   }
 }

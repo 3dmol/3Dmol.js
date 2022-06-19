@@ -83,7 +83,7 @@ function build_quick() { //nomin
 	return src(jqsrc.concat(extsrc).concat(tssrc).concat(coresrc).concat(uisrc)).pipe(concat('3Dmol.js')).pipe(dest('build'));
 }
 
-const rollup = shell.task('npx rollup -c rollup.config.js')
+const rollup = shell.task('npx parcel build')
 
 exports.build = series(check,rollup, parallel(tests,
                     minify, minify_nojquery));

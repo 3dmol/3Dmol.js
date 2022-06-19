@@ -1,3 +1,7 @@
+import { ShaderUtils } from './shaders/utils/index';
+import { ShaderLib } from './shaders/lib/index';
+import { SpritePlugin } from './SpritePlugin';
+import { Color } from './core/Color';
 import { Sphere, Cylinder, Triangle } from "./shapes"
 import {
   Matrix4,
@@ -32,4 +36,8 @@ window.$3Dmol = {
   Cylinder,
   Sphere,
   Triangle,
+  Color,
+  SpritePlugin,
+  ShaderLib,
+  ShaderUtils
 };

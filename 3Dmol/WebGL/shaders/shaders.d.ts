@@ -5,13 +5,3 @@ declare type Shader = {
     vertexShader: string;
     uniforms: Record<string, Color | number | []>
 }
-
-declare module "*.vert" {
-    const value: string;
-    export default value;
-}
-
-declare module "*.frag" {
-    const value: string;
-    export default value;
-}

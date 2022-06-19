@@ -2,7 +2,7 @@
   global = global || window;
   (factory((global['MMTF'] = global.MMTF || {})));
   
-}(this, function (exports) { 'use strict';
+}(window, function (exports) { 'use strict';
 
 
   /**

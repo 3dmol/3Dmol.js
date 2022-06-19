@@ -1,5 +1,5 @@
 import { clone } from "./clone"
-import stickimposterFragmentShader from "./stickimposter.frag"
+import stickimposterFragmentShader from "./stickimposterFragmentShader.partial.frag"
 
 
 export const ShaderUtils = {

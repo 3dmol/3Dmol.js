@@ -4,12 +4,12 @@ uniform vec2 dimensions;
 
 // Basic FXAA implementation based on the code on geeks3d.com 
 
-#define FXAA_REDUCE_MIN   (1.0/ 128.0)
-#define FXAA_REDUCE_MUL   (1.0 / 8.0)
-#define FXAA_SPAN_MAX     8.0
 
 vec4 applyFXAA(vec2 fragCoord, sampler2D tex)
 {
+    float FXAA_REDUCE_MIN = (1.0/ 128.0)
+    float FXAA_REDUCE_MUL = (1.0 / 8.0)
+    float FXAA_SPAN_MAX = 8.0
     vec4 color;
     vec2 inverseVP = vec2(1.0 / dimensions.x, 1.0 / dimensions.y);
     vec3 rgbNW = texture2D(tex, fragCoord + vec2(-1.0, -1.0) * inverseVP).xyz;
