@@ -17,9 +17,7 @@
   "devDependencies": {
     "@babel/plugin-transform-typescript": "^7.18.4",
     "@babel/preset-env": "^7.18.2",
-    "@parcel/optimizer-data-url": "^2.6.0",
-    "@parcel/transformer-glsl": "^2.6.0",
-    "@parcel/transformer-inline-string": "^2.6.0",
+    "@parcel/transformer-glsl": "^2.6.1",
     "del": "^6.0.0",
     "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",

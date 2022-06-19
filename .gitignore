@@ -14,6 +14,7 @@ package-lock.json  #suppose to commit, but triggers security warning on github
 .vscode
 .st
 tmp/
+.parcel-cache/
 
 
 #Ignoring Virtual Environments for the Active Learning Environment Project
