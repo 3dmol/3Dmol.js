@@ -1,4 +1,4 @@
-import { Color } from 'three';
+import {Color} from "../../core/Color";
 
 export function clone( uniforms_src ) {
 

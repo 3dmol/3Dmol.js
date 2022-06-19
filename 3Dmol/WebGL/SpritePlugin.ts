@@ -1,34 +1,39 @@
 //Render plugins go here
-import { sprite } from "./shaders/lib/sprite"
+import { sprite } from "./shaders/lib/sprite";
+import { Shader } from "./shaders/shaders";
 
+type Nullable<T> = T | null;
+type NullableWebGLUniformLocation = Nullable<WebGLUniformLocation>;
+
+type UniformsValueType = {
+  uvOffset: NullableWebGLUniformLocation;
+  uvScale: NullableWebGLUniformLocation;
+  rotation: NullableWebGLUniformLocation;
+  scale: NullableWebGLUniformLocation;
+  alignment: NullableWebGLUniformLocation;
+  color: NullableWebGLUniformLocation;
+  map: NullableWebGLUniformLocation;
+  opacity: NullableWebGLUniformLocation;
+  useScreenCoordinates: NullableWebGLUniformLocation;
+  screenPosition: NullableWebGLUniformLocation;
+  modelViewMatrix: NullableWebGLUniformLocation;
+  projectionMatrix: NullableWebGLUniformLocation;
+  fogType: NullableWebGLUniformLocation;
+  fogDensity: NullableWebGLUniformLocation;
+  fogNear: NullableWebGLUniformLocation;
+  fogFar: NullableWebGLUniformLocation;
+  fogColor: NullableWebGLUniformLocation;
+  alphaTest: NullableWebGLUniformLocation;
+};
 
 type Sprite = {
-  vertices: Float32Array;
-  faces: Uint16Array;
-  vertexBuffer: WebGLBuffer;
-  elementBuffer: WebGLBuffer;
-  program: WebGLProgram;
+  vertices: Nullable<Float32Array>;
+  faces: Nullable<Uint16Array>;
+  vertexBuffer: Nullable<WebGLBuffer>;
+  elementBuffer: Nullable<WebGLBuffer>;
+  program: Nullable<WebGLProgram>;
   attributes: Record<string, number>;
-  uniforms: Partial<{
-    uvOffset: WebGLUniformLocation;
-    uvScale: WebGLUniformLocation;
-    rotation: WebGLUniformLocation;
-    scale: WebGLUniformLocation;
-    alignment: WebGLUniformLocation;
-    color: WebGLUniformLocation;
-    map: WebGLUniformLocation;
-    opacity: WebGLUniformLocation;
-    useScreenCoordinates: WebGLUniformLocation;
-    screenPosition: WebGLUniformLocation;
-    modelViewMatrix: WebGLUniformLocation;
-    projectionMatrix: WebGLUniformLocation;
-    fogType: WebGLUniformLocation;
-    fogDensity: WebGLUniformLocation;
-    fogNear: WebGLUniformLocation;
-    fogFar: WebGLUniformLocation;
-    fogColor: WebGLUniformLocation;
-    alphaTest: WebGLUniformLocation;
-  }>;
+  uniforms: Nullable<UniformsValueType>;
 };
 
 /**
@@ -38,7 +43,15 @@ export class SpritePlugin {
   private gl: WebGLRenderingContext;
   private renderer;
   private precision;
-  private sprite: Partial<Sprite> = {};
+  private sprite: Sprite = {
+    vertices: null,
+    faces: null,
+    vertexBuffer: null,
+    elementBuffer: null,
+    program: null,
+    attributes: {},
+    uniforms: null,
+  };
 
   init(renderer) {
     this.gl = renderer.context as WebGLRenderingContext;
@@ -100,7 +113,7 @@ export class SpritePlugin {
     this.sprite.program = this.createProgram(sprite, this.precision);
 
     this.sprite.attributes = {};
-    this.sprite.uniforms = {};
+    const uniforms = {} as Partial<UniformsValueType>;
 
     this.sprite.attributes.position = this.gl.getAttribLocation(
       this.sprite.program,
@@ -111,82 +124,72 @@ export class SpritePlugin {
       "uv"
     );
 
-    this.sprite.uniforms.uvOffset = this.gl.getUniformLocation(
+    uniforms.uvOffset = this.gl.getUniformLocation(
       this.sprite.program,
       "uvOffset"
     );
-    this.sprite.uniforms.uvScale = this.gl.getUniformLocation(
+    uniforms.uvScale = this.gl.getUniformLocation(
       this.sprite.program,
       "uvScale"
     );
-    this.sprite.uniforms.rotation = this.gl.getUniformLocation(
+    uniforms.rotation = this.gl.getUniformLocation(
       this.sprite.program,
       "rotation"
     );
-    this.sprite.uniforms.scale = this.gl.getUniformLocation(
-      this.sprite.program,
-      "scale"
-    );
-    this.sprite.uniforms.alignment = this.gl.getUniformLocation(
+    uniforms.scale = this.gl.getUniformLocation(this.sprite.program, "scale");
+    uniforms.alignment = this.gl.getUniformLocation(
       this.sprite.program,
       "alignment"
     );
-    this.sprite.uniforms.color = this.gl.getUniformLocation(
-      this.sprite.program,
-      "color"
-    );
-    this.sprite.uniforms.map = this.gl.getUniformLocation(
-      this.sprite.program,
-      "map"
-    );
-    this.sprite.uniforms.opacity = this.gl.getUniformLocation(
+    uniforms.color = this.gl.getUniformLocation(this.sprite.program, "color");
+    uniforms.map = this.gl.getUniformLocation(this.sprite.program, "map");
+    uniforms.opacity = this.gl.getUniformLocation(
       this.sprite.program,
       "opacity"
     );
-    this.sprite.uniforms.useScreenCoordinates = this.gl.getUniformLocation(
+    uniforms.useScreenCoordinates = this.gl.getUniformLocation(
       this.sprite.program,
       "useScreenCoordinates"
     );
-    this.sprite.uniforms.screenPosition = this.gl.getUniformLocation(
+    uniforms.screenPosition = this.gl.getUniformLocation(
       this.sprite.program,
       "screenPosition"
     );
-    this.sprite.uniforms.modelViewMatrix = this.gl.getUniformLocation(
+    uniforms.modelViewMatrix = this.gl.getUniformLocation(
       this.sprite.program,
       "modelViewMatrix"
     );
-    this.sprite.uniforms.projectionMatrix = this.gl.getUniformLocation(
+    uniforms.projectionMatrix = this.gl.getUniformLocation(
       this.sprite.program,
       "projectionMatrix"
     );
-    this.sprite.uniforms.fogType = this.gl.getUniformLocation(
+    uniforms.fogType = this.gl.getUniformLocation(
       this.sprite.program,
       "fogType"
     );
-    this.sprite.uniforms.fogDensity = this.gl.getUniformLocation(
+    uniforms.fogDensity = this.gl.getUniformLocation(
       this.sprite.program,
       "fogDensity"
     );
-    this.sprite.uniforms.fogNear = this.gl.getUniformLocation(
+    uniforms.fogNear = this.gl.getUniformLocation(
       this.sprite.program,
       "fogNear"
     );
-    this.sprite.uniforms.fogFar = this.gl.getUniformLocation(
-      this.sprite.program,
-      "fogFar"
-    );
-    this.sprite.uniforms.fogColor = this.gl.getUniformLocation(
+    uniforms.fogFar = this.gl.getUniformLocation(this.sprite.program, "fogFar");
+    uniforms.fogColor = this.gl.getUniformLocation(
       this.sprite.program,
       "fogColor"
     );
-    this.sprite.uniforms.alphaTest = this.gl.getUniformLocation(
+    uniforms.alphaTest = this.gl.getUniformLocation(
       this.sprite.program,
       "alphaTest"
     );
+
+    this.sprite.uniforms = uniforms as UniformsValueType;
   }
 
   render(scene, camera, viewportWidth, viewportHeight, inFront) {
-    let sprites = [];
+    let sprites: unknown[] = [];
     scene.this.this.webglSprites.forEach((sprite) => {
       //depthTest is false for inFront labels
       if (inFront && sprite.material.depthTest == false) {
@@ -200,8 +203,10 @@ export class SpritePlugin {
 
     if (!nSprites) return;
 
-    var attributes = this.sprite.attributes,
-      uniforms = this.sprite.uniforms;
+    const attributes = this.sprite.attributes;
+    const uniforms = this.sprite.uniforms;
+
+    if (!uniforms) throw new Error("Uniforms not defined");
 
     var halfViewportWidth = viewportWidth * 0.5,
       halfViewportHeight = viewportHeight * 0.5;
@@ -271,12 +276,12 @@ export class SpritePlugin {
 
     // update positions and sort
 
-    var i,
-      sprite,
-      material,
-      size,
-      fogType,
-      scale = [];
+    var i;
+    let sprite;
+    let material;
+    let size;
+    let fogType;
+    let scale: number[] = [];
 
     for (i = 0; i < nSprites; i++) {
       sprite = sprites[i];
@@ -306,7 +311,7 @@ export class SpritePlugin {
       if (!sprite.visible || material.opacity === 0) continue;
 
       if (material.map && material.map.image && material.map.image.width) {
-        this.gl.uniform1f(uniforms.alphaTest, material.alphaTest);
+        this.gl.uniform1f(uniforms?.alphaTest || null, material.alphaTest);
         var w = material.map.image.width;
         var h = material.map.image.height;
 
@@ -386,12 +391,7 @@ export class SpritePlugin {
         this.renderer.setDepthWrite(material.depthWrite);
         this.renderer.setTexture(material.map, 0);
 
-        this.gl.drawElements(
-          this.gl.TRIANGLES,
-          6,
-          this.gl.UNSIGNED_SHORT,
-          0
-        );
+        this.gl.drawElements(this.gl.TRIANGLES, 6, this.gl.UNSIGNED_SHORT, 0);
       }
     }
 
@@ -399,11 +399,22 @@ export class SpritePlugin {
     this.gl.enable(this.gl.CULL_FACE);
   }
 
-  private createProgram(shader, precision): WebGLProgram {
+  private createProgram(shader: Shader, precision): WebGLProgram {
     var program = this.gl.createProgram();
+
+    if (!program) throw new Error("Error creating webgl program");
 
     var fragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
     var vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
+
+    if (!fragmentShader)
+      throw new Error(
+        "Unable to create fragment shader SpritePlugin.createProgram"
+      );
+    if (!vertexShader)
+      throw new Error(
+        "Unable to create vertex shader SpritePlugin.createProgram"
+      );
 
     var prefix = "precision " + precision + " float;\n";
 
@@ -417,9 +428,9 @@ export class SpritePlugin {
       !this.gl.getShaderParameter(fragmentShader, this.gl.COMPILE_STATUS) ||
       !this.gl.getShaderParameter(vertexShader, this.gl.COMPILE_STATUS)
     ) {
-      console.error(this.gl.getShaderInfoLog(fragmentShader));
-      console.error("could not initialize shader");
-      return null;
+      throw new Error(`Error compiling shader: 
+      ${this.gl.getShaderInfoLog(fragmentShader)} 
+      ${this.gl.getShaderInfoLog(vertexShader)}`);
     }
 
     this.gl.attachShader(program, fragmentShader);

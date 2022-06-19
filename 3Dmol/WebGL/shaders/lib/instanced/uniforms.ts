@@ -1,4 +1,4 @@
-import { Color } from 'three';
+import {Color} from "../../../core/Color";
 
 export const uniforms = {
     opacity: { type: 'f', value: 1.0 },
