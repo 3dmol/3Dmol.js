@@ -9,7 +9,7 @@ import vertexShader from "./sprite.vert"
 //const vertexShader = fs.readFileSync(path.resove(__dirname, "./sprite.vert"), "utf8")
 
 export const sprite: Shader = {
-    fragmentShader,
-    vertexShader,
+    fragmentShader: fragmentShader.replace("#define GLSLIFY 1", ""),
+    vertexShader: vertexShader.replace("#define GLSLIFY 1", ""),
     uniforms
 }

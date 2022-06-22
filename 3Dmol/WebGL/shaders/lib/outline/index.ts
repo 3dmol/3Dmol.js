@@ -9,7 +9,7 @@ import vertexShader from "./outline.vert";
 //const vertexShader = fs.readFileSync(__dirname + "/outline.vert", "utf8");
 
 export const outline: Shader = {
-  fragmentShader,
-  vertexShader,
+  fragmentShader: fragmentShader.replace("#define GLSLIFY 1", ""),
+  vertexShader: vertexShader.replace("#define GLSLIFY 1", ""),
   uniforms,
 };

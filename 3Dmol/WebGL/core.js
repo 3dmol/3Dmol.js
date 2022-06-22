@@ -42,6 +42,83 @@ $3Dmol.EventDispatcher = function() {
     
 };
 
+$3Dmol.Color = function( color ){
+    
+    if ( arguments.length > 1) {
+            this.r = arguments[0] || 0.0;
+            this.g = arguments[1] || 0.0;
+            this.b = arguments[2] || 0.0;
+
+            return this;
+    }
+    
+    return this.set(color);
+                
+};
+
+$3Dmol.Color.prototype = {
+    
+    constructor: $3Dmol.Color,
+    
+    r: 0.0, g: 0.0, b: 0.0,
+    
+    set : function(val) {
+        
+            if (val instanceof $3Dmol.Color) 
+                return val.clone();
+
+            else if (typeof val === 'number')
+                this.setHex(val);
+            
+            else if (typeof val === 'object' && "r" in val && "g" in val && "b" in val) {
+                this.r = val.r;
+                this.g = val.g;
+                this.b = val.b;
+            }
+    },
+    
+    setHex: function(hex) {
+        
+            hex = Math.floor(hex);
+
+            this.r = (hex >> 16 & 255) / 255;
+            this.g = (hex >> 8 & 255) / 255;
+            this.b = (hex & 255) / 255;                                                                                     
+        
+            return this;
+    },
+    
+    getHex: function() {
+        var R = Math.round(this.r*255);
+        var G = Math.round(this.g*255);
+        var B = Math.round(this.b*255);
+        return R<<16 | G << 8 | B;
+    },
+    
+    clone : function() {
+            return new $3Dmol.Color(this.r, this.g, this.b);
+    },
+        
+    copy : function(color) {
+        this.r = color.r;
+        this.g = color.g;
+        this.b = color.b;
+        
+        return this;
+    },
+    
+    //return object that represents color components from 0 to 255
+    scaled : function() {
+        var ret = {};
+        ret.r = Math.round(this.r*255);
+        ret.g = Math.round(this.g*255);
+        ret.b = Math.round(this.b*255);
+        ret.a = 1.0;
+        return ret;
+    }
+    
+};
+
 //Object3D base constructor function
 /** @this {$3Dmol.Object3D} */
 $3Dmol.Object3D = function() {

@@ -7,7 +7,7 @@ import vertexShader from "./sphereimposteroutline.vert";
 //const vertexShader = fs.readFileSync(__dirname + "/sphereimposteroutline.vert", "utf8");
 
 export const sphereimposteroutline: Shader = {
-    fragmentShader,
-    vertexShader,
+    fragmentShader: fragmentShader.replace("#define GLSLIFY 1", ""),
+    vertexShader: vertexShader.replace("#define GLSLIFY 1", ""),
     uniforms
 }

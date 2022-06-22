@@ -11,7 +11,7 @@ export class Color implements Colored {
   b: number = 0.0;
 
   constructor(r: number | Color | Colored, g?: number, b?: number) {
-    if (typeof r == "number") {
+    if (arguments.length > 1 && typeof r === "number") {
       this.r = r || 0.0;
       this.g = g || 0.0;
       this.b = b || 0.0;

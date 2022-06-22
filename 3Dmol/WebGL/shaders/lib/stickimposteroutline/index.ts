@@ -10,7 +10,7 @@ import vertexShader from "./stickimposteroutline.vert";
 const fragmentShader = stickimposterFragmentShaderStart + 'gl_FragColor = vec4(color,1.0);}';
 
 export const stickimposteroutline: Shader = {
-    fragmentShader,
-    vertexShader,
+    fragmentShader: fragmentShader.replace('#define GLSLIFY 1', ''),
+    vertexShader: vertexShader.replace('#define GLSLIFY 1', ''),
     uniforms
 }

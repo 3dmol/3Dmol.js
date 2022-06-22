@@ -13,7 +13,7 @@ import vertexShader from './stickimposter.vert';
 const fragmentShader = [stickimposterFragmentShaderStart, stickimposterFragmentShaderEnd].join('\n');
 
 export const stickimposter: Shader = {
-    fragmentShader,
-    vertexShader,
+    fragmentShader: fragmentShader.replace('#define GLSLIFY 1', ''),
+    vertexShader: vertexShader.replace('#define GLSLIFY 1', ''),
     uniforms
 }

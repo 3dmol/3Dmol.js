@@ -1,5 +1,5 @@
 //Render plugins go here
-import { sprite } from "./shaders/lib/sprite";
+import { ShaderLib } from "./shaders/index";
 import { Shader } from "./shaders/shaders";
 
 type Nullable<T> = T | null;
@@ -110,7 +110,7 @@ export class SpritePlugin {
       this.gl.STATIC_DRAW
     );
 
-    this.sprite.program = this.createProgram(sprite, this.precision);
+    this.sprite.program = this.createProgram(ShaderLib.sprite, this.precision);
 
     this.sprite.attributes = {};
     const uniforms = {} as Partial<UniformsValueType>;
@@ -190,7 +190,7 @@ export class SpritePlugin {
 
   render(scene, camera, viewportWidth, viewportHeight, inFront) {
     let sprites: unknown[] = [];
-    scene.this.this.webglSprites.forEach((sprite) => {
+    scene?.__webglSprites?.forEach((sprite) => {
       //depthTest is false for inFront labels
       if (inFront && sprite.material.depthTest == false) {
         sprites.push(sprite);
@@ -291,11 +291,11 @@ export class SpritePlugin {
       if (!sprite.visible || material.opacity === 0) continue;
 
       if (!material.useScreenCoordinates) {
-        sprite.this.modelViewMatrix.multiplyMatrices(
+        sprite._modelViewMatrix.multiplyMatrices(
           camera.matrixWorldInverse,
           sprite.matrixWorld
         );
-        sprite.z = -sprite.this.modelViewMatrix.elements[14];
+        sprite.z = -sprite._modelViewMatrix.elements[14];
       } else {
         sprite.z = -sprite.position.z;
       }
@@ -335,7 +335,7 @@ export class SpritePlugin {
           this.gl.uniformMatrix4fv(
             uniforms.modelViewMatrix,
             false,
-            sprite.this.modelViewMatrix.elements
+            sprite._modelViewMatrix.elements
           );
         }
 

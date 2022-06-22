@@ -9,7 +9,7 @@ import vertexShader from './instanced.vert';
 //const vertexShader = fs.readFileSync(__dirname + "./instanced.vert", "utf8") 
 
 export const instanced: Shader = {
-    fragmentShader,
-    vertexShader,
+    fragmentShader: fragmentShader.replace("#define GLSLIFY 1", ""),
+    vertexShader: vertexShader.replace("#define GLSLIFY 1", ""),
     uniforms,
 }
