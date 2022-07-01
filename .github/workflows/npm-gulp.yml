@@ -24,5 +24,6 @@ jobs:
 
     - name: Build
       run: |
+        npm i -g npm@latest
         npm install
-        gulp
+        npm run build
