@@ -25,4 +25,4 @@ jobs:
     - name: Build
       run: |
         npm install
-        gulp
+        npm run build
