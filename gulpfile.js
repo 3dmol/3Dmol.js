@@ -10,7 +10,7 @@ const del = require('del');
 const jsdoc = require('gulp-jsdoc3');
 
 tssrc = ['tmp/index.js'];
-coresrc = ['3Dmol/3dmol.js','3Dmol/WebGL/core.js','3Dmol/WebGL/**.js','3Dmol/**.js','!3Dmol/SurfaceWorker.js','3Dmol/SurfaceWorker.js'];
+coresrc = ['3Dmol/3dmol.js','3Dmol/WebGL/**.js','3Dmol/**.js','!3Dmol/SurfaceWorker.js','3Dmol/SurfaceWorker.js'];
 extsrc = ['js/disable_amd.js','js/mmtf.js','node_modules/pako/dist/pako.js','node_modules/netcdfjs/dist/netcdfjs.js','node_modules/upng-js/UPNG.js'];
 uisrc = ['3Dmol/ui/ui.js', '3Dmol/ui/state.js', '3Dmol/ui/icon.js', '3Dmol/ui/form.js', '3Dmol/ui/defaultValues.js'];
 jqsrc = ['node_modules/jquery/dist/jquery.js'];
