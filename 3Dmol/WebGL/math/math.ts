@@ -150,7 +150,7 @@ export class Matrix4 {
     );
   }
 
-  setRotationFromEuler(v: { x?: any; y?: any; z?: any }, order: string) {
+  setRotationFromEuler(v: { x?: any; y?: any; z?: any }, order?: string) {
     const te = this.elements;
 
     const { x } = v;
@@ -753,7 +753,7 @@ export class Matrix4 {
     return snapped.isIdentity();
   }
 
-  decompose(translation: Vector3, rotation: Quaternion, scale: Vector3) {
+  decompose(translation?: Vector3, rotation?: Quaternion, scale?: Vector3) {
     const te = this.elements;
     const mat4 = mRotation;
     // grab the axis vectors
