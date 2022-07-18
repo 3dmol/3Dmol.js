@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "outDir": "tmp/types",
+    "module": "esnext",
+    "target": "ES2015",
+    "allowJs": true,
+    "sourceMap": true,
+    "declaration": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "moduleResolution": "node",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "typeRoots": ["3Dmol/global.d.ts"],
+  },
+  "include": ["./3Dmol/WebGL/**/*.ts"],
+  "exclude": ["node_modules", "*.frag", "*.vert"],
+}
