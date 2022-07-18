@@ -10,16 +10,13 @@ export class Cylinder {
   direction: Vector3
   radius: number
 
-  constructor(c1?:Vector3, c2?:Vector3, radius?:number) {
-    this.c1 = c1 !== undefined ? c1 : new Vector3();
-
-    this.c2 = c2 !== undefined ? c2 : new Vector3();
-
+  constructor(c1:Vector3 = new Vector3(), c2:Vector3 = new Vector3(), radius:number = 0) {
+    this.c1 = c1;
+    this.c2 = c2;
+    this.radius = radius;
     this.direction = new Vector3()
       .subVectors(this.c2, this.c1)
       .normalize();
-
-    this.radius = radius !== undefined ? radius : 0;
   }
 
   copy(cylinder:Cylinder):Cylinder {

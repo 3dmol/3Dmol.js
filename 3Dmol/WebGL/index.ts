@@ -1,6 +1,6 @@
+import { Fog } from './Fog';
 import { Mesh } from './objects/Mesh';
 import { Line, LineStyle } from './objects/Line';
-import { Scene } from './Scene';
 import { Light } from './Light';
 import { Camera } from './Camera';
 import { VolumetricMaterial } from './materials/VolumetricMaterial';
@@ -20,7 +20,7 @@ import { UVMapping } from './core/UVMapping';
 import { Texture, TextureIdCount } from './core/Texture';
 import { Raycaster } from './core/Raycaster';
 import { Projector } from './core/Projector';
-import { Object3D, Object3DIDCount } from './core/Object3D';
+import { Object3D, Object3DIDCount, Scene } from './core/Object3D';
 import { Geometry, GeometryIDCount, GeometryGroup } from './core/Geometry';
 import { EventDispatcher } from './core/EventDispatcher';
 import { TextureOperations } from './constants/TextureOperations';
@@ -45,13 +45,14 @@ import { square } from "./math/utils/square";
 import { ShaderLib, ShaderUtils } from "./shaders/index";
 import { Colors } from './constants/Colors';
 import { ClampToEdgeWrapping, LinearFilter, NearestFilter, LinearMipMapLinearFilter, UnsignedByteType, FloatType, RGBAFormat, RFormat, R32Format } from './constants/TextureConstants';
-import { intersectObject } from './core/intersectObject';
+import { intersectObject } from './core';
 import { MeshBasicMaterial } from './materials/MeshBasicMaterial';
 import { Sprite } from './objects/Sprite';
 
-
-(window as Record<string, any>).$3Dmol = {
-  ...((window as Record<string, any>).$3Dmol || {}),
+//@ts-ignore
+window.$3Dmol = {
+  //@ts-ignore
+  ...(window.$3Dmol || {}),
   Matrix3,
   Matrix4,
   Quaternion,
@@ -129,4 +130,5 @@ import { Sprite } from './objects/Sprite';
   Sprite,
   LineStrip: LineStyle.LineStrip,
   LinePieces: LineStyle.LinePieces,
+  Fog
 };

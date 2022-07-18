@@ -1,5 +1,8 @@
+import type { Material } from './../materials/Material';
 import { Matrix4, Quaternion, Vector3 } from "../math";
-import { Scene } from "../Scene";
+import type { Geometry } from './Geometry';
+import type { Fog } from '../Fog';
+import type { Light } from '../Light';
 
 export let Object3DIDCount = 0;
 // Object3D base constructor function
@@ -21,8 +24,8 @@ export class Object3D {
   rotationAutoUpdate = true;
   useQuaternion = false;
   visible = true;
-  geometry;
-  material;
+  geometry?: Geometry;
+  material?: Material;
 
   lookAt(vector: Vector3) {
     this.matrix.lookAt(vector, this.position, this.up);
@@ -73,7 +76,7 @@ export class Object3D {
   }
 
   //convert to vrml
-  vrml(indent) {
+  vrml(indent?: string) {
     //attempt to pretty print
     if (!indent) indent = " ";
     //all objects have a transformation (usually identity)
@@ -139,7 +142,7 @@ export class Object3D {
     this.matrixWorldNeedsUpdate = true;
   }
 
-  updateMatrixWorld(force) {
+  updateMatrixWorld(force?: boolean) {
     if (this.matrixAutoUpdate === true) this.updateMatrix();
 
     if (this.matrixWorldNeedsUpdate === true || force === true) {
@@ -193,7 +196,7 @@ export class Object3D {
     return object;
   }
 
-  setVisible(val): void {
+  setVisible(val: boolean): void {
     //recursively set visibility
     this.visible = val;
     for (var i = 0; i < this.children.length; i++) {
@@ -203,3 +206,79 @@ export class Object3D {
   }
 }
 
+
+/*
+ * Scene class
+ */
+/** @constructor */
+export class Scene extends Object3D {
+  fog: Fog | null = null;
+  //may not need...
+  overrideMaterial: Material | null = null;
+  matrixAutoUpdate = false;
+  __objects = [] as Object3D[];
+  __lights = [] as Light[];
+  __objectsAdded = [] as Object3D[];
+  __objectsRemoved = [] as Object3D[];
+
+  __addObject<T extends Object3D>(object: T) {
+    //Directional Lighting
+    // @ts-ignore
+    if (object instanceof window.$3Dmol.Light) {
+      if (this.__lights.indexOf(object as unknown as Light) === -1) this.__lights.push(object as unknown as Light);
+
+      //TODO: Do I need this??
+      if ((object as unknown as Light).target && (object as unknown as Light).target.parent === undefined)
+        this.add((object as unknown as Light).target);
+    }
+
+    //Rotation group
+    else {
+      if (this.__objects.indexOf(object) === -1) {
+        this.__objects.push(object);
+        this.__objectsAdded.push(object);
+
+        //Check if previously removed
+
+        var idx = this.__objectsRemoved.indexOf(object);
+
+        if (idx !== -1) this.__objectsRemoved.splice(idx, 1);
+      }
+    }
+
+    //Add object's children
+
+    for (var i = 0; i < object.children.length; i++)
+      this.__addObject(object.children[i]);
+  }
+
+  __removeObject<T extends Object3D>(object: T) {
+    var idx;
+    // @ts-ignore
+    if (object instanceof window.$3Dmol.Light) {
+      idx = this.__lights.indexOf(object as unknown as Light);
+
+      if (idx !== -1) this.__lights.splice(idx, 1);
+    }
+
+    //Object3D
+    else {
+      idx = this.__objects.indexOf(object);
+
+      if (idx !== -1) {
+        this.__objects.splice(idx, 1);
+        this.__objectsRemoved.push(object);
+
+        //Check if previously added
+
+        var ai = this.__objectsAdded.indexOf(object);
+
+        if (ai !== -1) this.__objectsAdded.splice(idx, 1);
+      }
+    }
+
+    //Remove object's children
+    for (var i = 0; i < object.children.length; i++)
+      this.__removeObject(object.children[i]);
+  }
+}

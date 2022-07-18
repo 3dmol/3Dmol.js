@@ -1,104 +1,60 @@
-import { TextureOperations } from './../constants/TextureOperations';
-import { Color } from '../core/Color';
-import { Material } from './Material';
+import { TextureOperations } from "./../constants/TextureOperations";
+import { Color } from "../core/Color";
+import { Material } from "./Material";
 
 /**
  * This class is ripped right out of three.js.
  * It was missing in 3Dmol despite being referenced in Mesh.ts
  */
 class MeshBasicMaterial extends Material {
-  isMeshBasicMaterial: boolean;
-  type: string;
-  color: Color;
-  map: null;
-  lightMap: null;
-  lightMapIntensity: number;
-  aoMap: null;
-  aoMapIntensity: number;
-  specularMap: null;
-  alphaMap: null;
-  envMap: null;
-  combine: any;
-  reflectivity: number;
-  refractionRatio: number;
-  wireframe: boolean;
-  wireframeLinewidth: number;
-  wireframeLinecap: string;
-  wireframeLinejoin: string;
-  fog: boolean;
+  isMeshBasicMaterial = true;
+  type = "MeshBasicMaterial";
+  color = new Color(0xffffff); // emissive
+  map = undefined;
+  lightMap = null;
+  lightMapIntensity = 1.0;
+  aoMap = null;
+  aoMapIntensity = 1.0;
+  specularMap = null;
+  alphaMap = null;
+  envMap = null;
+  combine = TextureOperations.MultiplyOperation;
+  reflectivity = 1;
+  refractionRatio = 0.98;
+  wireframe = false;
+  wireframeLinewidth = 1;
+  wireframeLinecap = "round";
+  wireframeLinejoin = "round";
+  fog = true;
 
-	constructor( parameters ) {
+  constructor(values: Partial<Record<keyof MeshBasicMaterial, any>> = {} as any) {
+    super();
+    this.setValues(values);
+  }
 
-		super();
+	clone<T extends this>(material = new MeshBasicMaterial() as T): T {
+    super.clone.call(this, material);
 
-		this.isMeshBasicMaterial = true;
+    material.color.copy(this.color);
+    material.map = this.map
+    material.lightMap = this.lightMap
+    material.lightMapIntensity = this.lightMapIntensity
+    material.aoMap = this.aoMap
+    material.aoMapIntensity = this.aoMapIntensity
+    material.specularMap = this.specularMap
+    material.alphaMap = this.alphaMap
+    material.envMap = this.envMap
+    material.combine = this.combine
+    material.reflectivity = this.reflectivity
+    material.refractionRatio = this.refractionRatio
+    material.wireframe = this.wireframe
+    material.wireframeLinewidth = this.wireframeLinewidth
+    material.wireframeLinecap = this.wireframeLinecap
+    material.wireframeLinejoin = this.wireframeLinejoin
+    material.fog = this.fog
 
-		this.type = 'MeshBasicMaterial';
-
-		this.color = new Color( 0xffffff ); // emissive
-
-		this.map = null;
-
-		this.lightMap = null;
-		this.lightMapIntensity = 1.0;
-
-		this.aoMap = null;
-		this.aoMapIntensity = 1.0;
-
-		this.specularMap = null;
-
-		this.alphaMap = null;
-
-		this.envMap = null;
-		this.combine = TextureOperations.MultiplyOperation;
-		this.reflectivity = 1;
-		this.refractionRatio = 0.98;
-
-		this.wireframe = false;
-		this.wireframeLinewidth = 1;
-		this.wireframeLinecap = 'round';
-		this.wireframeLinejoin = 'round';
-
-		this.fog = true;
-
-		this.setValues( parameters );
-
-	}
-
-	copy( source ) {
-
-		super.copy( source );
-
-		this.color.copy( source.color );
-
-		this.map = source.map;
-
-		this.lightMap = source.lightMap;
-		this.lightMapIntensity = source.lightMapIntensity;
-
-		this.aoMap = source.aoMap;
-		this.aoMapIntensity = source.aoMapIntensity;
-
-		this.specularMap = source.specularMap;
-
-		this.alphaMap = source.alphaMap;
-
-		this.envMap = source.envMap;
-		this.combine = source.combine;
-		this.reflectivity = source.reflectivity;
-		this.refractionRatio = source.refractionRatio;
-
-		this.wireframe = source.wireframe;
-		this.wireframeLinewidth = source.wireframeLinewidth;
-		this.wireframeLinecap = source.wireframeLinecap;
-		this.wireframeLinejoin = source.wireframeLinejoin;
-
-		this.fog = source.fog;
-
-		return this;
-
-	}
-
+    return material;
+  }
 }
 
 export { MeshBasicMaterial };

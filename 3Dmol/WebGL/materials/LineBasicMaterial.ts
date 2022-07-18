@@ -1,37 +1,25 @@
-import { Color } from './../core/Color';
+import { Color } from "../core/Color";
 import { Material } from "./Material";
 //Line basic material
 /** @constructor */
 export class LineBasicMaterial extends Material {
-  color: any;
-  linewidth: number;
-  linecap: string;
-  linejoin: string;
-  vertexColors: boolean;
-  fog: boolean;
-  shaderID: string;
+  color = new Color(0xffffff);
+  linewidth = 1;
+  linecap = "round";
+  linejoin = "round";
+  vertexColors = false;
+  fog = true;
+  shaderID = "basic";
   constructor(parameters?: any) {
     super();
-
-    this.color = new Color(0xffffff);
-
-    this.linewidth = 1;
-    this.linecap = "round";
-    this.linejoin = "round";
-
-    this.vertexColors = false;
-
-    this.fog = true;
-    this.shaderID = "basic";
     this.setValues(parameters);
   }
 
-  clone() {
-    var material = new LineBasicMaterial();
+  clone<T extends this>(material: T = new LineBasicMaterial() as T): T {
 
     super.clone.call(this, material);
 
     material.color.copy(this.color);
-    return material;
+    return material as T;
   }
 }

@@ -2,9 +2,9 @@ import { Color } from "../core/Color";
 import { ImposterMaterial } from "./ImposterMaterial";
 
 export class SphereImposterOutlineMaterial extends ImposterMaterial {
-  outlineColor: any;
-  outlineWidth: any;
-  outlinePushback: any;
+  outlineColor: Color;
+  outlineWidth: number;
+  outlinePushback: number;
   
   constructor(parameters?: any) {
     super(parameters);
@@ -18,8 +18,7 @@ export class SphereImposterOutlineMaterial extends ImposterMaterial {
     this.setValues(parameters);
   }
 
-  clone() {
-    var material = new SphereImposterOutlineMaterial();
+  clone<T extends this>(material: T = new SphereImposterOutlineMaterial() as T): T {
     super.clone.call(this, material);
     material.outlineColor = this.outlineColor;
     material.outlineWidth = this.outlineWidth;

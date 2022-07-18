@@ -1,38 +1,28 @@
-import { LineBasicMaterial } from '../materials/LineBasicMaterial';
+import type { Material } from './../materials/Material';
+import type { LineBasicMaterial } from '../materials/LineBasicMaterial';
 import { EventDispatcher } from "./EventDispatcher";
 import { Vector3 } from "../math";
 import { CC, Color, Colored } from "./Color";
 const BUFFERSIZE = 65535; //limited to 16bit indices
 export class GeometryGroup {
   id: number;
-  vertexArray: Float32Array | null;
-  colorArray: Float32Array | null;
-  normalArray: Float32Array | null;
-  radiusArray: Float32Array | null;
-  faceArray: Uint16Array | null;
-  lineArray: Uint16Array | null;
-  vertices: number;
-  faceidx: number;
-  lineidx: number;
+  vertexArray: Float32Array | null = null;
+  colorArray: Float32Array | null = null;
+  normalArray: Float32Array | null = null;
+  radiusArray: Float32Array | null = null;
+  faceArray: Uint16Array | null = null;
+  lineArray: Uint16Array | null = null;
+  vertices: number = 0;
+  faceidx: number = 0;
+  lineidx: number = 0;
   __inittedArrays = false;
   useOffset: unknown;
 
-  constructor(id: number) {
-    this.id = id || 0;
-    //for performance reasons, callers must directly modify these
-    this.vertexArray = null;
-    this.colorArray = null;
-    this.normalArray = null;
-    this.faceArray = null;
-    this.radiusArray = null;
-    //this.adjFaceArray=null;
-    this.lineArray = null;
-    this.vertices = 0;
-    this.faceidx = 0;
-    this.lineidx = 0;
+  constructor(id = 0) {
+    this.id = id;
   }
 
-  setColors(setcolor: (r: number, g: number, b: number) => Colored): void {
+  setColors(setcolor: (r: number, g: number, b: number) => Color | number): void {
     //apply a function that takes the vertex coordinate and returns a color
     var v = this.vertexArray;
     var c = this.colorArray;
@@ -171,7 +161,7 @@ export class GeometryGroup {
     }
   }
 
-  vrml(indent, material) {
+  vrml(indent: string, material?: Material) {
     var ret = "";
     ret +=
       indent +
@@ -182,13 +172,13 @@ export class GeometryGroup {
       "  material Material {\n" +
       indent +
       "   diffuseColor " +
-      material.color.r +
+      material?.color?.r +
       " " +
-      material.color.g +
+      material?.color?.g +
       " " +
-      material.color.b +
+      material?.color?.b +
       "\n";
-    if (material.transparent) {
+    if (material?.transparent) {
       ret += indent + "   transparency " + (1.0 - material.opacity) + "\n";
     }
     ret += indent + "  }\n"; //material
@@ -196,7 +186,8 @@ export class GeometryGroup {
 
     var oldindent = indent;
     indent += " "; //inshape
-    if (material instanceof LineBasicMaterial) {
+    // @ts-ignore
+    if (material instanceof window.$3Dmol.LineBasicMaterial) {
       ret +=
         indent +
         "geometry IndexedLineSet {\n" +
@@ -303,8 +294,7 @@ export class GeometryGroup {
     return ret;
   }
 
-  truncateArrayBuffers(mesh, reallocatemem) {
-    mesh = mesh === true ? true : false;
+  truncateArrayBuffers(mesh = true, reallocatemem = false) {
 
     var vertexArr = this.vertexArray,
       colorArr = this.colorArray,
@@ -352,51 +342,32 @@ export class GeometryGroup {
  
 export class Geometry extends EventDispatcher {
   id: number;
-  name: string;
-  hasTangents: boolean;
-  dynamic: boolean;
+  name: string = "";
+  hasTangents: boolean =  false;
+  dynamic: boolean = true; // the intermediate typed arrays will be deleted when set to false;
   radii: boolean;
   mesh: boolean;
   offset: boolean;
-  verticesNeedUpdate: boolean;
-  elementsNeedUpdate: boolean;
-  normalsNeedUpdate: boolean;
-  colorsNeedUpdate: boolean;
-  buffersNeedUpdate: boolean;
-  geometryGroups: GeometryGroup[];
-  groups: number;
+  verticesNeedUpdate: boolean = false;
+  elementsNeedUpdate: boolean = false;
+  normalsNeedUpdate: boolean = false;
+  colorsNeedUpdate: boolean = false;
+  buffersNeedUpdate: boolean = false;
+  geometryGroups: GeometryGroup[] = [];
+  groups: number = 0;
 
-  constructor(mesh, radii, offset) {
+
+  constructor(mesh = false, radii = false, offset = false) {
     super();
-
     this.id = GeometryIDCount++;
-
-    this.name = "";
-
-    this.hasTangents = false;
-
-    this.dynamic = true; // the intermediate typed arrays will be deleted when set to false
-    this.mesh = mesh === true ? true : false; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
-    this.radii = radii || false;
-    this.offset = offset || false; //offset buffer used for instancing
-    // update flags
-
-    this.verticesNeedUpdate = false;
-    this.elementsNeedUpdate = false;
-    this.normalsNeedUpdate = false;
-    this.colorsNeedUpdate = false;
-
-    this.buffersNeedUpdate = false;
-
-    this.geometryGroups = [];
-    this.groups = 0;
+    this.mesh = mesh; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
+    this.radii = radii;
+    this.offset = offset; //offset buffer used for instancing
   }
 
   //Get geometry group to accomodate addVertices new vertices - create
   // new group if necessary
-  updateGeoGroup(addVertices) {
-    addVertices = addVertices || 0;
-
+  updateGeoGroup(addVertices = 0): GeometryGroup {
     var retGroup =
       this.groups > 0 ? this.geometryGroups[this.groups - 1] : null;
 
@@ -410,7 +381,7 @@ export class Geometry extends EventDispatcher {
   }
 
   //return comma separated list of IndexedFace (or Line) sets from geometry groups
-  vrml(indent, material) {
+  vrml(indent: string, material?: Material): string {
     var ret = "";
     var len = this.geometryGroups.length;
     for (var g = 0; g < len; g++) {
@@ -445,30 +416,28 @@ export class Geometry extends EventDispatcher {
     return ret;
   }
 
-  setUpNormals(three) {
-    three = three || false;
-
+  setUpNormals(...args: Parameters<GeometryGroup["setNormals"]>) {
     for (var g = 0; g < this.groups; g++) {
       var geoGroup = this.geometryGroups[g];
 
-      geoGroup.setNormals(/** three -- this parameter was not used*/);
+      geoGroup.setNormals(...args);
     }
   }
 
-  setColors(setcolor): void {
+  setColors(...setcolor: Parameters<GeometryGroup["setColors"]>): void {
     var len = this.geometryGroups.length;
     for (var g = 0; g < len; g++) {
       var geoGroup = this.geometryGroups[g];
-      geoGroup.setColors(setcolor);
+      geoGroup.setColors(...setcolor);
     }
   }
 
 
-  setUpWireframe() {
+  setUpWireframe(...lineIndexArgs: Parameters<GeometryGroup["setLineIndices"]>) {
     for (var g = 0; g < this.groups; g++) {
       var geoGroup = this.geometryGroups[g];
 
-      geoGroup.setLineIndices();
+      geoGroup.setLineIndices(...lineIndexArgs);
     }
   }
 
@@ -491,7 +460,7 @@ export class Geometry extends EventDispatcher {
     this.dispatchEvent({ type: "dispose" });
   }
 
-  get vertices () {
+  get vertices (): number {
     var vertices = 0;
     for (var g = 0; g < this.groups; g++)
       vertices += this.geometryGroups[g].vertices;

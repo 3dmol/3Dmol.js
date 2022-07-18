@@ -12,8 +12,8 @@ var z: Vector3;
 // Matrix 4
 export class Matrix4 {
   elements: Float32Array;
-  constructor(
-    n11?: Iterable<number> | number,
+  constructor(n11: Array<number>);
+  constructor(n11?: number,
     n12?: number,
     n13?: number,
     n14?: number,
@@ -28,34 +28,49 @@ export class Matrix4 {
     n41?: number,
     n42?: number,
     n43?: number,
-    n44?: number
+    n44?: number);
+  constructor(
+    n11: Array<number> | number = 1,
+    n12: number = 0,
+    n13: number = 0,
+    n14: number = 0,
+    n21: number = 0,
+    n22: number = 1,
+    n23: number = 0,
+    n24: number = 0,
+    n31: number = 0,
+    n32: number = 0,
+    n33: number = 1,
+    n34: number = 0,
+    n41: number = 0,
+    n42: number = 0,
+    n43: number = 0,
+    n44: number = 1
   ) {
     if (
-      typeof n12 === "undefined" &&
       typeof n11 !== "undefined" &&
       typeof n11 !== "number"
     ) {
       // passing list like initialization
       this.elements = new Float32Array(n11);
-    } else if (typeof n11 === "number" || typeof n11 === "undefined") {
+    } else {
       this.elements = new Float32Array(16);
-
-      this.elements[0] = n11 !== undefined ? n11 : 1;
-      this.elements[4] = n12 || 0;
-      this.elements[8] = n13 || 0;
-      this.elements[12] = n14 || 0;
-      this.elements[1] = n21 || 0;
-      this.elements[5] = n22 !== undefined ? n22 : 1;
-      this.elements[9] = n23 || 0;
-      this.elements[13] = n24 || 0;
-      this.elements[2] = n31 || 0;
-      this.elements[6] = n32 || 0;
-      this.elements[10] = n33 !== undefined ? n33 : 1;
-      this.elements[14] = n34 || 0;
-      this.elements[3] = n41 || 0;
-      this.elements[7] = n42 || 0;
-      this.elements[11] = n43 || 0;
-      this.elements[15] = n44 !== undefined ? n44 : 1;
+      this.elements[0] = n11;
+      this.elements[4] = n12;
+      this.elements[8] = n13;
+      this.elements[12] = n14;
+      this.elements[1] = n21;
+      this.elements[5] = n22;
+      this.elements[9] = n23;
+      this.elements[13] = n24;
+      this.elements[2] = n31;
+      this.elements[6] = n32;
+      this.elements[10] = n33;
+      this.elements[14] = n34;
+      this.elements[3] = n41;
+      this.elements[7] = n42;
+      this.elements[11] = n43;
+      this.elements[15] = n44;
     }
   }
 
@@ -150,12 +165,10 @@ export class Matrix4 {
     );
   }
 
-  setRotationFromEuler(v: { x?: any; y?: any; z?: any }, order?: string) {
+  setRotationFromEuler(v: Vector3, order?: string) {
     const te = this.elements;
 
-    const { x } = v;
-    const { y } = v;
-    const { z } = v;
+    const { x, y, z } = v;
     const a = Math.cos(x);
     const b = Math.sin(x);
     const c = Math.cos(y);
@@ -186,13 +199,10 @@ export class Matrix4 {
     return this;
   }
 
-  setRotationFromQuaternion(q: { x?: any; y?: any; z?: any; w?: any }) {
+  setRotationFromQuaternion(q: Quaternion) {
     const te = this.elements;
 
-    const { x } = q;
-    const { y } = q;
-    const { z } = q;
-    const { w } = q;
+    const { x, y, z, w } = q;
     const x2 = x + x;
     const y2 = y + y;
     const z2 = z + z;
@@ -354,7 +364,7 @@ export class Matrix4 {
     return this;
   }
 
-  setPosition(v: { x: any; y: any; z: any }) {
+  setPosition(v: Vector3) {
     const te = this.elements;
 
     te[12] = v.x;
@@ -364,7 +374,7 @@ export class Matrix4 {
     return this;
   }
 
-  translate(v: { x: any; y: any; z: any }) {
+  translate(v: Vector3) {
     const te = this.elements;
 
     te[12] += v.x;
@@ -1123,7 +1133,7 @@ export class Vector3 {
     return this;
   }
 
-  getPositionFromMatrix(m: { elements: any[] }) {
+  getPositionFromMatrix(m: Matrix4) {
     this.x = m.elements[12];
     this.y = m.elements[13];
     this.z = m.elements[14];
@@ -1131,7 +1141,7 @@ export class Vector3 {
     return this;
   }
 
-  setEulerFromRotationMatrix(m: { elements: any }, order: string) {
+  setEulerFromRotationMatrix(m: Matrix4, order: string) {
     // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
     const te = m.elements;
     const m11 = te[0];
@@ -1163,7 +1173,7 @@ export class Vector3 {
     return this;
   }
 
-  rotateAboutVector(axis, ang: number) {
+  rotateAboutVector(axis: Vector3, ang: number) {
     axis.normalize();
     const cosang = Math.cos(ang);
     const sinang = Math.sin(ang);

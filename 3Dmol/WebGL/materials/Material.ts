@@ -1,63 +1,45 @@
-import { Sides } from './../constants/Sides';
-import { Color } from "../core/Color";
-import { EventDispatcher } from "../core/EventDispatcher";
-import { Vector3 } from "../math";
+import { Sides } from "../constants/Sides";
+import { EventDispatcher, Color } from "../core";
+import type { Texture } from "../core";
+import { Vector2, Vector3 } from "../math";
 /**
  * Line and Mesh material types
  * @constructor
  */
 export class Material extends EventDispatcher {
-  copy(source: any) {
-    throw new Error('Method not implemented.');
-  }
-  id: number;
-  name: string;
-  side: number;
-  opacity: number;
-  transparent: boolean;
-  depthTest: boolean;
-  depthWrite: boolean;
-  stencilTest: boolean;
-  polygonOffset: boolean;
-  polygonOffsetFactor: number;
-  polygonOffsetUnits: number;
-  alphaTest: number;
-  visible: boolean;
-  needsUpdate: boolean;
+  id = MaterialIdCount++;
+  name = "";
   overdraw: any;
-  constructor() {
-    super();
-    this.id = MaterialIdCount++;
+  color?: Color;
+  map?: Texture;
+  useScreenCoordinates?: boolean;
+  alignment?: Vector2;
+  screenOffset?: Vector2;
+  uvScale?: Vector2;
+  uvOffset?: Vector2;
+  scaleByViewport?: boolean;
+  fog?: unknown;
 
-    this.name = "";
+  side = Sides.FrontSide;
+  opacity = 1;
+  transparent = false;
+  depthTest = true;
+  depthWrite = true;
+  stencilTest = true;
+  polygonOffset = false;
+  polygonOffsetFactor = 0;
+  polygonOffsetUnits = 0;
+  alphaTest = 0;
+  visible = true;
+  needsUpdate = true;
 
-    //TODO: Which of these instance variables can I remove??
-    this.side = Sides.FrontSide;
-
-    this.opacity = 1;
-    this.transparent = false;
-
-    this.depthTest = true;
-    this.depthWrite = true;
-
-    this.stencilTest = true;
-
-    this.polygonOffset = false;
-    this.polygonOffsetFactor = 0;
-    this.polygonOffsetUnits = 0;
-
-    this.alphaTest = 0;
-
-    this.visible = true;
-
-    this.needsUpdate = true;
-  }
-
-  setValues(values) {
+  setValues(
+    values: Partial<Record<keyof Material, any>> = {} as any
+  ) {
     if (values === undefined) return;
 
     for (var key in values) {
-      var newValue = values[key];
+      var newValue: Material[keyof Material] = values[key as keyof Material];
 
       if (newValue === undefined) {
         console.warn("$3Dmol.Material: '" + key + "' parameter is undefined.");
@@ -65,18 +47,19 @@ export class Material extends EventDispatcher {
       }
 
       if (key in this) {
-        var currentValue = this[key];
+        var currentValue = this[key as keyof Material];
 
         if (currentValue instanceof Color && newValue instanceof Color) {
           currentValue.copy(newValue);
         } else if (currentValue instanceof Color) {
-          currentValue.set(newValue);
+          currentValue.set(newValue as unknown as Color);
         } else if (
           currentValue instanceof Vector3 &&
           newValue instanceof Vector3
         ) {
           currentValue.copy(newValue);
         } else {
+          // @ts-ignore checked above
           this[key] = newValue;
         }
       }
@@ -84,9 +67,7 @@ export class Material extends EventDispatcher {
   }
 
   //TODO: might want to look into blending equations
-  clone(material) {
-    if (material === undefined) material = new Material();
-
+  clone<T extends this>(material = new Material() as T): T {
     material.name = this.name;
 
     material.side = this.side;

@@ -82,8 +82,7 @@ export class Texture extends EventDispatcher {
     this.onUpdate = null;
   }
 
-  clone(texture) {
-    if (texture === undefined) texture = new Texture();
+  clone(texture = new Texture()): Texture {
 
     texture.image = this.image;
 

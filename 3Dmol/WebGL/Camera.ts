@@ -1,37 +1,34 @@
-import type { Quaternion } from './math/Quaternion';
-import { Object3D } from './core/Object3D';
-import { Matrix4 } from './math';
+import type { Quaternion } from "./math";
+import { Object3D } from "./core";
+import { Matrix4, Vector3 } from "./math";
 /*
  * Simplified Perspective Camera
  */
 
 /** @constructor */
 export class Camera extends Object3D {
-  fov: any;
-  aspect: any;
-  near: any;
-  far: any;
-  projectionMatrix: any;
-  projectionMatrixInverse: any;
-  matrixWorldInverse: any;
+  projectionMatrix = new Matrix4();
+  projectionMatrixInverse = new Matrix4();
+  matrixWorldInverse = new Matrix4();
   right: number;
   left: number;
   top: number;
   bottom: number;
-  ortho: boolean; constructor(fov, aspect, near, far, ortho) {
+  ortho: boolean;
+  fov: number;
+  aspect: number;
+  near: number;
+  far: number;
+  constructor(fov = 50, aspect = 1, near = 0.1, far = 2000, ortho = false) {
     super();
 
-    this.fov = fov !== undefined ? fov : 50;
-    this.aspect = aspect !== undefined ? aspect : 1;
-    this.near = near !== undefined ? near : 0.1;
-    this.far = far !== undefined ? far : 2000;
-
-    this.projectionMatrix = new Matrix4();
-    this.projectionMatrixInverse = new Matrix4();
-    this.matrixWorldInverse = new Matrix4();
+    this.fov = fov;
+    this.aspect = aspect;
+    this.near = near;
+    this.far = far;
 
     var center = this.position.z;
-    this.right = center * Math.tan(Math.PI / 180 * fov);
+    this.right = center * Math.tan((Math.PI / 180) * fov);
     this.left = -this.right;
     this.top = this.right / this.aspect;
     this.bottom = -this.top;
@@ -39,33 +36,40 @@ export class Camera extends Object3D {
     this.ortho = !!ortho;
 
     this.updateProjectionMatrix();
+  }
 
-  };
-
-
-  lookAt(vector) {
-
+  lookAt(vector: Vector3) {
     //Why is the parameter order switched (compared to Object3D)?
     this.matrix.lookAt(this.position, vector, this.up);
 
     if (this.rotationAutoUpdate) {
-
-      if (this.useQuaternion === false)
+      if (this.useQuaternion === false && this.rotation instanceof Vector3) {
         this.rotation.setEulerFromRotationMatrix(this.matrix, this.eulerOrder);
-      else
+      } else {
         this.quaternion.copy(this.matrix.decompose()[1] as Quaternion);
-
+      }
     }
-
-  };
+  }
 
   updateProjectionMatrix() {
     if (this.ortho) {
-      this.projectionMatrix.makeOrthographic(this.left, this.right, this.top, this.bottom, this.near, this.far);
+      this.projectionMatrix.makeOrthographic(
+        this.left,
+        this.right,
+        this.top,
+        this.bottom,
+        this.near,
+        this.far
+      );
     } else {
-      this.projectionMatrix.makePerspective(this.fov, this.aspect, this.near, this.far);
+      this.projectionMatrix.makePerspective(
+        this.fov,
+        this.aspect,
+        this.near,
+        this.far
+      );
     }
 
     this.projectionMatrixInverse.getInverse(this.projectionMatrix);
-  };
+  }
 }

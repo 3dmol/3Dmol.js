@@ -1,37 +1,29 @@
-import { SpriteAlignment } from '../constants/SpriteAlignment';
-import { Texture } from '../core/Texture';
-import { Color } from '../core/Color';
-import { Vector2 } from '../math';
-import { Material } from './Material';
+import { SpriteAlignment } from "../constants/SpriteAlignment";
+import { Texture } from "../core/Texture";
+import { Color } from "../core/Color";
+import { Vector2 } from "../math";
+import { Material } from "./Material";
 export class SpriteMaterial extends Material {
-  color: Color;
-  map: any;
-  useScreenCoordinates: boolean;
   sizeAttenuation: boolean;
   screenOffset: any;
   scaleByViewPort: boolean;
   alignment: any;
-  fog: boolean;
-  uvOffset: Vector2;
-  uvScale: Vector2;
-  scaleByViewport: any; 
+  scaleByViewport: any;
+
+  color = new Color(0xffffff);
+  map = new Texture();
+  useScreenCoordinates = true;
+  fog = false; // use scene fog
+  uvOffset = new Vector2(0, 0);
+  uvScale = new Vector2(1, 1);
+  
   constructor(parameters?: any) {
     super();
-
-    this.color = new Color(0xffffff);
-    this.map = new Texture();
-
-    this.useScreenCoordinates = true;
     this.depthTest = !this.useScreenCoordinates;
     this.sizeAttenuation = !this.useScreenCoordinates;
     this.screenOffset = this.screenOffset;
     this.scaleByViewPort = !this.sizeAttenuation;
     this.alignment = SpriteAlignment.center.clone();
-
-    this.fog = false; // use scene fog
-
-    this.uvOffset = new Vector2(0, 0);
-    this.uvScale = new Vector2(1, 1);
 
     this.setValues(parameters);
 
@@ -43,13 +35,9 @@ export class SpriteMaterial extends Material {
       this.sizeAttenuation = !this.useScreenCoordinates;
     if (parameters.scaleByViewPort === undefined)
       this.scaleByViewPort = !this.sizeAttenuation;
+  }
 
-  };
-
-  clone() {
-
-    var material = new SpriteMaterial();
-
+  clone<T extends this>(material = new SpriteMaterial() as T): T {
     super.clone.call(this, material);
 
     material.color.copy(this.color);
@@ -64,6 +52,5 @@ export class SpriteMaterial extends Material {
     material.uvOffset.copy(this.uvOffset);
 
     return material;
-
-  };
+  }
 }

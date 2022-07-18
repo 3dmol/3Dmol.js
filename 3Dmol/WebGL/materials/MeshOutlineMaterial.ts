@@ -19,8 +19,7 @@ export class MeshOutlineMaterial extends Material {
     this.outlineWidth = parameters.width || 0.1;
     this.outlinePushback = parameters.pushback || 1.0;
   }
-  clone(material) {
-    if (typeof material === "undefined") material = new MeshOutlineMaterial();
+  clone<T extends this>(material: T = new MeshOutlineMaterial() as T): T {
     super.clone.call(this, material);
     material.fog = this.fog;
     material.shaderID = this.shaderID;

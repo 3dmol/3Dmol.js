@@ -1,20 +1,16 @@
-import { Sides } from './../constants/Sides';
+import { Sides } from "./../constants/Sides";
 import { MeshLambertMaterial } from "./MeshLambertMaterial";
 //Double sided Mesh Lambert material
 /** @constructor */
 export class MeshDoubleLambertMaterial extends MeshLambertMaterial {
+  shaderID = "lambertdouble";
+  side = Sides.DoubleSide;
   constructor(parameters?: any) {
     super(parameters);
-
-    this.shaderID = "lambertdouble";
-    this.side = Sides.DoubleSide;
   }
 
-  clone() {
-    var material = new MeshDoubleLambertMaterial();
-
+  clone<T extends this>(material: T = new MeshDoubleLambertMaterial() as T): T {
     super.clone.call(this, material);
-
     return material;
   }
 }
