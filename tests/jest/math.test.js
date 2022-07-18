@@ -1116,7 +1116,9 @@ function rayTests()
 		let direction = new $3Dmol.Vector3(4, 5, 6);
 		let ray1 =  new $3Dmol.Ray(origin, direction);
 		let ray2 = new $3Dmol.Ray(origin, direction);
-		expect(() => ray1.equals(ray2)).toThrow("ray.origin.equals is not a function");
+		// the error message can change we just test that this function doesn't exist
+		// follow up question, why does this function not exist?
+		expect(() => ray1.equals(ray2)).toThrow();
 	}
 	function rayClone()
 	{

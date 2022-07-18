@@ -1,3 +1,4 @@
+import { Renderer } from './Renderer';
 import { Fog } from './Fog';
 import { Mesh } from './objects/Mesh';
 import { Line, LineStyle } from './objects/Line';
@@ -130,5 +131,6 @@ window.$3Dmol = {
   Sprite,
   LineStrip: LineStyle.LineStrip,
   LinePieces: LineStyle.LinePieces,
-  Fog
+  Fog,
+  Renderer
 };
