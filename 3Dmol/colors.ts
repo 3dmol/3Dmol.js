@@ -636,7 +636,21 @@ export const chains = {
   },
 };
 
-/** @property built in color schemes
+/**
+ * built in color schemes
+ * @example //Using a function in order to define the colors. 
+  $3Dmol.download("pdb:4UAA",viewer,{},function(){
+                  viewer.setBackgroundColor(0xffffffff);
+                  var colorAsSnake = function(atom) {
+                    return atom.resi % 2 ? 'white': 'green'
+                  };
+
+                  viewer.setStyle( {chain:'A'}, { cartoon: {colorfunc: colorAsSnake }});
+                  viewer.setStyle( {chain:'B'}, { stick: {colorscheme: 'yellowCarbon'}});
+
+                  viewer.render();
+              });
+
  * The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme */
 export const builtinColorSchemes = {
   ssPyMol: { prop: "ss", map: ssColors.pyMol },
