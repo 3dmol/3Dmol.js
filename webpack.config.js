@@ -10,7 +10,7 @@ Author: ${pkg.author}`;
 module.exports = {
   target: "web",
   mode: "production",
-  entry: "./3Dmol/WebGL/index.ts",
+  entry: "./3Dmol/index.ts",
   output: {
     filename: `index.js`,
     path: path.resolve(__dirname, "tmp"),

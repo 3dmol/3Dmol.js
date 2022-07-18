@@ -610,19 +610,6 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
 };
 
 
-//return the value of an atom property prop, or null if non existent
-// looks first in properties, then in the atom itself
-$3Dmol.getAtomProperty = function(atom, prop) {
-    var val = null;
-    if (atom.properties &&
-            typeof (atom.properties[prop]) != "undefined") {
-        val = atom.properties[prop];
-    } else if(typeof(atom[prop]) != 'undefined') {
-        val = atom[prop];
-    }
-    return val;
-};
-
 /* get the min and max values of the specified property in the provided
 * @function $3Dmol.getPropertyRange
 * @param {AtomSpec[]} atomlist - list of atoms to evaluate
