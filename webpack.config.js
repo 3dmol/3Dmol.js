@@ -31,5 +31,5 @@ module.exports = {
     ],
   },
 
-  plugins: [new webpack.BannerPlugin({ banner }), new BundleAnalyzerPlugin()],
+  plugins: [new webpack.BannerPlugin({ banner })],
 };
