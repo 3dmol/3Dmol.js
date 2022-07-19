@@ -169,6 +169,6 @@ window.$3Dmol = {
   getAtomProperty,
   Parsers,
   base64ToArray,
-  //Label,
-  //LabelCount
+  Label,
+  LabelCount
 };
