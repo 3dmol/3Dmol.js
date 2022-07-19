@@ -1,8 +1,10 @@
-//Encapsulate marching cube algorithm for isosurface generation
-// (currently used by protein surface rendering and generic volumetric data reading)
-
 import { Vector3 } from "./WebGL";
 
+//to match with protein surface...
+const ISDONE = 2;
+
+//Encapsulate marching cube algorithm for isosurface generation
+// (currently used by protein surface rendering and generic volumetric data reading)
 //Marching cube algorithm - assume data has been pre-treated so isovalue is 0
 // (i.e. select points greater than 0)
 //origin -  vector of origin of volumetric data (default is (0,0,0))
@@ -12,16 +14,6 @@ import { Vector3 } from "./WebGL";
 // fulltable - if true, use full marching cubes and tritables - else use trimmed table (e.g. surf render)
 // voxel - if true, draws with a blocky voxel style (default false)
 // verts, faces - vertex and face arrays to fill up
-
-//to match with protein surface...
-const ISDONE = 2;
-
-
-
-
-
-
-
 //each webworker needs its own marching cube object
 export class MarchingCube {
   /*
@@ -343,7 +335,7 @@ export class MarchingCube {
     0xd03, 0xc0a, 0x70c, 0x605, 0x50f, 0x406, 0xb06, 0xa0f, 0x905, 0x80c, 0x30a,
     0x203, 0x109, 0x0,
   ];
-  
+
   private static triTable2 = [
     [],
     [8, 3, 0],
@@ -617,7 +609,7 @@ export class MarchingCube {
     var nZ = spec.nZ || 0;
 
     var scale = spec.scale || 1.0;
-    var unitCube: {x: number; y: number; z:number;} | null = null;
+    var unitCube: { x: number; y: number; z: number } | null = null;
     if (spec.unitCube) {
       unitCube = spec.unitCube;
     } else {
