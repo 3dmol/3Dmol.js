@@ -2,6 +2,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const pkg = require("./package.json");
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const banner = `${pkg.name} v${pkg.version}
 ${pkg.description}
@@ -9,14 +10,14 @@ Author: ${pkg.author}`;
 
 module.exports = {
   target: "web",
-  mode: "production",
+  mode: "development",
   entry: "./3Dmol/index.ts",
   output: {
     filename: `index.js`,
     path: path.resolve(__dirname, "tmp"),
     globalObject: "this",
     library: pkg.name,
-    libraryTarget: "umd",
+    libraryTarget: "commonjs",
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],
@@ -30,5 +31,5 @@ module.exports = {
     ],
   },
 
-  plugins: [new webpack.BannerPlugin({ banner })],
+  plugins: [new webpack.BannerPlugin({ banner }), new BundleAnalyzerPlugin()],
 };

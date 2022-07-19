@@ -1,3 +1,4 @@
+import { Parsers } from './parsers/index';
 import { Gradient } from './Gradient';
 import { ssColors, elementColors, residues, chains, builtinColorSchemes, getColorFromStyle, htmlColors } from "./colors";
 import {
@@ -71,6 +72,7 @@ import {
   square,
 } from "./WebGL";
 import { getAtomProperty } from './utils/getAtomProperty';
+import { base64ToArray } from './utils/base64ToArray';
 //@ts-ignore
 window.$3Dmol = {
   //@ts-ignore
@@ -163,5 +165,7 @@ window.$3Dmol = {
   builtinColorSchemes,
   getColorFromStyle,
   Gradient,
-  getAtomProperty
+  getAtomProperty,
+  Parsers,
+  base64ToArray
 };
