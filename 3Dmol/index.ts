@@ -75,6 +75,7 @@ import {
 } from "./WebGL";
 import { getAtomProperty } from './utils/getAtomProperty';
 import { base64ToArray } from './utils/base64ToArray';
+import { MarchingCube } from './MarchingCube';
 //@ts-ignore
 window.$3Dmol = {
   //@ts-ignore
@@ -173,5 +174,6 @@ window.$3Dmol = {
   Label,
   LabelCount,
   partialCharges,
-  applyPartialCharges
+  applyPartialCharges,
+  MarchingCube
 };
