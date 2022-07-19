@@ -1,7 +1,6 @@
 name: glcheck
 on:
   pull_request:
-    branches: [master]
   push:
     branches: [master, feature-glcheck]
   workflow_dispatch:
