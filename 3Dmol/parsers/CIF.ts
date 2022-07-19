@@ -10,8 +10,7 @@ import { conversionMatrix3, Matrix4, Vector3,  } from "../WebGL"
  * @param {string} str
  * @param {ParserOptionsSpec} options
  */
-export function CIF(str: string, options: ParserOptionsSpec) {
-  options = options || {};
+export function CIF(str: string, options: ParserOptionsSpec = {}) {
   var atoms: any[] & Record<string, any> = [];
   var noAssembly = !options.doAssembly; // don't assemble by default
   var modelData: any[] & Record<string, any> = (atoms.modelData = []);
@@ -84,9 +83,9 @@ export function CIF(str: string, options: ParserOptionsSpec) {
           // files consistent.
           var dot = line.split(/\s/)[0].indexOf(".");
           if (dot > -1) {
-            line = line.split('')
-            line[dot] = "_";
-            line = line.join('');
+            let lineArr = line.split('')
+            lineArr[dot] = "_";
+            line = lineArr.join('');
             line = line.substr(0, dot) + "_" + line.substr(dot + 1);
           }
         }
