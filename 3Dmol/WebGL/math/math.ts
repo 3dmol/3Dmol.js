@@ -12,8 +12,9 @@ var z: Vector3;
 // Matrix 4
 export class Matrix4 {
   elements: Float32Array;
+  constructor(n11: Array<number>);
   constructor(
-    n11?: Iterable<number> | number,
+    n11?: number,
     n12?: number,
     n13?: number,
     n14?: number,
@@ -29,33 +30,46 @@ export class Matrix4 {
     n42?: number,
     n43?: number,
     n44?: number
+  );
+  constructor(
+    n11: Array<number> | number = 1,
+    n12: number = 0,
+    n13: number = 0,
+    n14: number = 0,
+    n21: number = 0,
+    n22: number = 1,
+    n23: number = 0,
+    n24: number = 0,
+    n31: number = 0,
+    n32: number = 0,
+    n33: number = 1,
+    n34: number = 0,
+    n41: number = 0,
+    n42: number = 0,
+    n43: number = 0,
+    n44: number = 1
   ) {
-    if (
-      typeof n12 === "undefined" &&
-      typeof n11 !== "undefined" &&
-      typeof n11 !== "number"
-    ) {
+    if (typeof n11 !== "undefined" && typeof n11 !== "number") {
       // passing list like initialization
       this.elements = new Float32Array(n11);
-    } else if (typeof n11 === "number" || typeof n11 === "undefined") {
+    } else {
       this.elements = new Float32Array(16);
-
-      this.elements[0] = n11 !== undefined ? n11 : 1;
-      this.elements[4] = n12 || 0;
-      this.elements[8] = n13 || 0;
-      this.elements[12] = n14 || 0;
-      this.elements[1] = n21 || 0;
-      this.elements[5] = n22 !== undefined ? n22 : 1;
-      this.elements[9] = n23 || 0;
-      this.elements[13] = n24 || 0;
-      this.elements[2] = n31 || 0;
-      this.elements[6] = n32 || 0;
-      this.elements[10] = n33 !== undefined ? n33 : 1;
-      this.elements[14] = n34 || 0;
-      this.elements[3] = n41 || 0;
-      this.elements[7] = n42 || 0;
-      this.elements[11] = n43 || 0;
-      this.elements[15] = n44 !== undefined ? n44 : 1;
+      this.elements[0] = n11;
+      this.elements[4] = n12;
+      this.elements[8] = n13;
+      this.elements[12] = n14;
+      this.elements[1] = n21;
+      this.elements[5] = n22;
+      this.elements[9] = n23;
+      this.elements[13] = n24;
+      this.elements[2] = n31;
+      this.elements[6] = n32;
+      this.elements[10] = n33;
+      this.elements[14] = n34;
+      this.elements[3] = n41;
+      this.elements[7] = n42;
+      this.elements[11] = n43;
+      this.elements[15] = n44;
     }
   }
 
@@ -150,12 +164,10 @@ export class Matrix4 {
     );
   }
 
-  setRotationFromEuler(v: { x?: any; y?: any; z?: any }, order: string) {
+  setRotationFromEuler(v: Vector3, order?: string) {
     const te = this.elements;
 
-    const { x } = v;
-    const { y } = v;
-    const { z } = v;
+    const { x, y, z } = v;
     const a = Math.cos(x);
     const b = Math.sin(x);
     const c = Math.cos(y);
@@ -186,13 +198,10 @@ export class Matrix4 {
     return this;
   }
 
-  setRotationFromQuaternion(q: { x?: any; y?: any; z?: any; w?: any }) {
+  setRotationFromQuaternion(q: Quaternion) {
     const te = this.elements;
 
-    const { x } = q;
-    const { y } = q;
-    const { z } = q;
-    const { w } = q;
+    const { x, y, z, w } = q;
     const x2 = x + x;
     const y2 = y + y;
     const z2 = z + z;
@@ -354,7 +363,7 @@ export class Matrix4 {
     return this;
   }
 
-  setPosition(v: { x: any; y: any; z: any }) {
+  setPosition(v: Vector3) {
     const te = this.elements;
 
     te[12] = v.x;
@@ -364,7 +373,7 @@ export class Matrix4 {
     return this;
   }
 
-  translate(v: { x: any; y: any; z: any }) {
+  translate(v: Vector3) {
     const te = this.elements;
 
     te[12] += v.x;
@@ -753,7 +762,7 @@ export class Matrix4 {
     return snapped.isIdentity();
   }
 
-  decompose(translation: Vector3, rotation: Quaternion, scale: Vector3) {
+  decompose(translation?: Vector3, rotation?: Quaternion, scale?: Vector3) {
     const te = this.elements;
     const mat4 = mRotation;
     // grab the axis vectors
@@ -1123,7 +1132,7 @@ export class Vector3 {
     return this;
   }
 
-  getPositionFromMatrix(m: { elements: any[] }) {
+  getPositionFromMatrix(m: Matrix4) {
     this.x = m.elements[12];
     this.y = m.elements[13];
     this.z = m.elements[14];
@@ -1131,7 +1140,7 @@ export class Vector3 {
     return this;
   }
 
-  setEulerFromRotationMatrix(m: { elements: any }, order: string) {
+  setEulerFromRotationMatrix(m: Matrix4, order: string) {
     // assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled)
     const te = m.elements;
     const m11 = te[0];
@@ -1163,7 +1172,7 @@ export class Vector3 {
     return this;
   }
 
-  rotateAboutVector(axis, ang: number) {
+  rotateAboutVector(axis: Vector3, ang: number) {
     axis.normalize();
     const cosang = Math.cos(ang);
     const sinang = Math.sin(ang);
@@ -1235,29 +1244,18 @@ export interface Matrix3 {
 
 export class Matrix3 {
   constructor(
-    n11: any,
-    n12: number,
-    n13: number,
-    n21: number,
-    n22: number,
-    n23: number,
-    n31: number,
-    n32: number,
-    n33: number
+    n11: number = 1,
+    n12: number = 0,
+    n13: number = 0,
+    n21: number = 0,
+    n22: number = 1,
+    n23: number = 0,
+    n31: number = 0,
+    n32: number = 0,
+    n33: number = 1
   ) {
     this.elements = new Float32Array(9);
-
-    this.set(
-      n11 !== undefined ? n11 : 1,
-      n12 || 0,
-      n13 || 0,
-      n21 || 0,
-      n22 !== undefined ? n22 : 1,
-      n23 || 0,
-      n31 || 0,
-      n32 || 0,
-      n33 !== undefined ? n33 : 1
-    );
+    this.set(n11, n12, n13, n21, n22, n23, n31, n32, n33);
   }
 
   set(
@@ -1441,122 +1439,112 @@ export class Matrix3 {
   }
 }
 export class Ray {
-    origin: Vector3;
-    direction: Vector3;
-  
-  
-    constructor(origin?: Vector3, direction?: Vector3) {
-      this.origin = origin !== undefined ? origin : new Vector3();
-      this.direction = direction !== undefined ? direction : new Vector3();
+  origin: Vector3;
+  direction: Vector3;
+
+  constructor(origin?: Vector3, direction?: Vector3) {
+    this.origin = origin !== undefined ? origin : new Vector3();
+    this.direction = direction !== undefined ? direction : new Vector3();
+  }
+
+  set(origin: Vector3, direction: Vector3) {
+    this.origin.copy(origin);
+    this.direction.copy(direction);
+
+    return this;
+  }
+
+  copy(ray: Ray) {
+    this.origin.copy(ray.origin);
+    this.direction.copy(ray.direction);
+
+    return this;
+  }
+
+  at(t: number, optionalTarget: Vector3) {
+    const result = optionalTarget || new Vector3();
+
+    return result.copy(this.direction).multiplyScalar(t).add(this.origin);
+  }
+
+  recast(t: any) {
+    const v1 = x;
+    this.origin.copy(this.at(t, v1));
+
+    return this;
+  }
+
+  closestPointToPoint(point: Vector3, optionalTarget: Vector3) {
+    const result = optionalTarget || new Vector3();
+    result.subVectors(point, this.origin);
+    const directionDistance = result.dot(this.direction);
+
+    // returns a point on this ray
+    return result
+      .copy(this.direction)
+      .multiplyScalar(directionDistance)
+      .add(this.origin);
+  }
+
+  distanceToPoint(point: Vector3) {
+    const v1 = x;
+    const directionDistance = v1
+      .subVectors(point, this.origin)
+      .dot(this.direction);
+    v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
+    return v1.distanceTo(point);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  isIntersectionCylinder() {}
+
+  isIntersectionSphere(sphere: Sphere) {
+    return this.distanceToPoint(sphere.center) <= sphere.radius;
+  }
+
+  isIntersectionPlane(plane: any) {
+    const denominator = plane.normal.dot(this.direction);
+
+    // plane and ray are not perpendicular
+    if (denominator !== 0) return true;
+
+    if (plane.distanceToPoint(this.origin) === 0) return true;
+
+    return false;
+  }
+
+  distanceToPlane(plane: any) {
+    const denominator = plane.normal.dot(this.direction);
+    if (denominator === 0) {
+      // line is coplanar
+      if (plane.distanceToPoint(this.origin) === 0) return 0;
+
+      // ray is parallel
+      return undefined;
     }
-  
-    set(origin: Vector3, direction: Vector3) {
-      this.origin.copy(origin);
-      this.direction.copy(direction);
-  
-      return this;
-    }
-  
-    copy(ray: Ray) {
-      this.origin.copy(ray.origin);
-      this.direction.copy(ray.direction);
-  
-      return this;
-    }
-  
-    at(t: number, optionalTarget: Vector3) {
-      const result = optionalTarget || new Vector3();
-  
-      return result.copy(this.direction).multiplyScalar(t).add(this.origin);
-    }
-  
-    recast(t: any) {
-      const v1 = x;
-      this.origin.copy(this.at(t, v1));
-  
-      return this;
-    }
-  
-    closestPointToPoint(point: Vector3, optionalTarget: Vector3) {
-      const result = optionalTarget || new Vector3();
-      result.subVectors(point, this.origin);
-      const directionDistance = result.dot(this.direction);
-  
-      // returns a point on this ray
-      return result
-        .copy(this.direction)
-        .multiplyScalar(directionDistance)
-        .add(this.origin);
-    }
-  
-    distanceToPoint(point: Vector3) {
-      const v1 = x;
-      const directionDistance = v1
-        .subVectors(point, this.origin)
-        .dot(this.direction);
-      v1.copy(this.direction).multiplyScalar(directionDistance).add(this.origin);
-      return v1.distanceTo(point);
-    }
-  
-    // eslint-disable-next-line class-methods-use-this
-    isIntersectionCylinder() {}
-  
-    isIntersectionSphere(sphere: Sphere) {
-      return this.distanceToPoint(sphere.center) <= sphere.radius;
-    }
-  
-    isIntersectionPlane(plane: any) {
-      const denominator = plane.normal.dot(this.direction);
-  
-      // plane and ray are not perpendicular
-      if (denominator !== 0) return true;
-  
-      if (plane.distanceToPoint(this.origin) === 0) return true;
-  
-      return false;
-    }
-  
-    distanceToPlane(plane: any) {
-      const denominator = plane.normal.dot(this.direction);
-      if (denominator === 0) {
-        // line is coplanar
-        if (plane.distanceToPoint(this.origin) === 0) return 0;
-  
-        // ray is parallel
-        return undefined;
-      }
-  
-      const t = -(this.origin.dot(plane.normal) + plane.constant) / denominator;
-  
-      return t;
-    }
-  
-    intersectPlane(plane: any, optionalTarget: any) {
-      const t = this.distanceToPlane(plane);
-  
-      if (t === undefined) return undefined;
-  
-      return this.at(t, optionalTarget);
-    }
-  
-    applyMatrix4(matrix4: any) {
-      this.direction.add(this.origin).applyMatrix4(matrix4);
-      this.origin.applyMatrix4(matrix4);
-      this.direction.sub(this.origin);
-  
-      return this;
-    }
-  
-    equals(ray: {
-      origin: { equals: (arg0: any) => any };
-      direction: { equals: (arg0: any) => any };
-    }) {
-      return (
-        ray.origin.equals(this.origin) && ray.direction.equals(this.direction)
-      );
-    }
-  
-    clone() {
-      return new Ray().copy(this);
-    }
+
+    const t = -(this.origin.dot(plane.normal) + plane.constant) / denominator;
+
+    return t;
+  }
+
+  intersectPlane(plane: any, optionalTarget: any) {
+    const t = this.distanceToPlane(plane);
+
+    if (t === undefined) return undefined;
+
+    return this.at(t, optionalTarget);
+  }
+
+  applyMatrix4(matrix4: any) {
+    this.direction.add(this.origin).applyMatrix4(matrix4);
+    this.origin.applyMatrix4(matrix4);
+    this.direction.sub(this.origin);
+
+    return this;
+  }
+
+  clone() {
+    return new Ray().copy(this);
+  }
 }

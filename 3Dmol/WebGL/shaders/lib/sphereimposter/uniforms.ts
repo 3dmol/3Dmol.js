@@ -1,6 +1,6 @@
 import {Color} from "../../../core/Color";
 
-export const uniforms: Uniforms = {
+export const uniforms = {
     opacity: { type: 'f', value: 1.0 },
     fogColor: { type: 'c', value: new Color(1.0, 1.0, 1.0) },
     fogNear: { type: 'f', value: 1.0 },

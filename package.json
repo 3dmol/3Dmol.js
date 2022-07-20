@@ -15,10 +15,21 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-transform-typescript": "^7.18.4",
-    "@babel/preset-env": "^7.18.2",
-    "@parcel/transformer-glsl": "^2.6.1",
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.6",
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@babel/plugin-transform-typescript": "^7.18.8",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.18.6",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "awesome-typescript-loader": "^5.2.1",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.5",
+    "babel-preset-minify": "^0.5.2",
     "del": "^6.0.0",
+    "eslint": "^7.32.0",
+    "file-loader": "^6.2.0",
     "glcheck": "3dmol/glcheck#master",
     "glob-parent": "^5.1.2",
     "gulp": "^4.0.2",
@@ -29,6 +40,7 @@
     "gulp-jshint": "^2.1.0",
     "gulp-merge": "^0.1.1",
     "gulp-rename": "^2.0.0",
+    "gulp-rollup": "^2.17.0",
     "gulp-shell": "^0.8.0",
     "gulp-terser": "^2.0.1",
     "gulp-uglify": "^3.0.2",
@@ -37,8 +49,15 @@
     "jsdoc": "^3.6.10",
     "jsdom": "^19.0.0",
     "jshint": "^2.13.1",
-    "parcel": "^2.6.0",
-    "typescript": "^4.7.3"
+    "prettier": "^2.7.1",
+    "raw-loader": "^4.0.2",
+    "terser-webpack-plugin": "^5.3.3",
+    "ts-loader": "^9.3.1",
+    "typescript": "^3",
+    "url-loader": "^4.1.1",
+    "webpack": "^5",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "4.9.3"
   },
   "scripts": {
     "build": "gulp",
@@ -62,19 +81,5 @@
     "pako": "^2.0.4",
     "upng-js": "^2.1.0",
     "yargs-parser": "^20.2.9"
-  },
-  "targets": {
-    "main": false,
-    "module": false,
-    "browser": false,
-    "typescript": {
-      "source": "./3Dmol/WebGL/index.ts",
-      "distDir": "./tmp/",
-      "isLibrary": true,
-      "outputFormat": "esmodule",
-      "engines": {
-        "browsers": "> 0.5%, last 2 versions, not dead"
-      }
-    }
   }
 }

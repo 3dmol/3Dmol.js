@@ -9,12 +9,10 @@ export class Triangle {
   b: Vector3;
   c: Vector3;
 
-  constructor(a, b, c) {
-    this.a = a !== undefined ? a : new Vector3();
-
-    this.b = b !== undefined ? b : new Vector3();
-
-    this.c = c !== undefined ? c : new Vector3();
+  constructor(a = new Vector3(), b = new Vector3(), c = new Vector3()) {
+    this.a = a;
+    this.b = b;
+    this.c = c;
   }
 
   copy(triangle: Triangle): Triangle {

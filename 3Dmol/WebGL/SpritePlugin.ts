@@ -1,4 +1,8 @@
+import { Fog } from "./Fog";
+import type { Camera } from "./Camera";
+import { Scene } from "./core";
 //Render plugins go here
+import { Sprite } from "./objects/Sprite";
 import { ShaderLib } from "./shaders/index";
 import { Shader } from "./shaders/shaders";
 
@@ -26,7 +30,7 @@ type UniformsValueType = {
   alphaTest: NullableWebGLUniformLocation;
 };
 
-type Sprite = {
+type SpriteMeta = {
   vertices: Nullable<Float32Array>;
   faces: Nullable<Uint16Array>;
   vertexBuffer: Nullable<WebGLBuffer>;
@@ -40,10 +44,10 @@ type Sprite = {
  * Sprite render plugin
  */
 export class SpritePlugin {
-  private gl: WebGLRenderingContext;
-  private renderer;
-  private precision;
-  private sprite: Sprite = {
+  private gl?: WebGLRenderingContext;
+  private renderer: any;
+  private precision?: number;
+  private sprite: SpriteMeta = {
     vertices: null,
     faces: null,
     vertexBuffer: null,
@@ -52,8 +56,9 @@ export class SpritePlugin {
     attributes: {},
     uniforms: null,
   };
+  sprites?: Sprite[];
 
-  init(renderer) {
+  init(renderer: any) {
     this.gl = renderer.context as WebGLRenderingContext;
     this.renderer = renderer;
 
@@ -110,7 +115,10 @@ export class SpritePlugin {
       this.gl.STATIC_DRAW
     );
 
-    this.sprite.program = this.createProgram(ShaderLib.sprite, this.precision);
+    this.sprite.program = this.createProgram(
+      ShaderLib.sprite,
+      this.precision || 1 /** added default to single precision */
+    );
 
     this.sprite.attributes = {};
     const uniforms = {} as Partial<UniformsValueType>;
@@ -188,8 +196,16 @@ export class SpritePlugin {
     this.sprite.uniforms = uniforms as UniformsValueType;
   }
 
-  render(scene, camera, viewportWidth, viewportHeight, inFront) {
+  render(
+    scene: Scene,
+    camera: Camera,
+    viewportWidth: number,
+    viewportHeight: number,
+    inFront?: boolean
+  ) {
+    if (!this.gl) throw new Error("WebGLRenderer not initialized");
     let sprites: unknown[] = [];
+    // @ts-ignore I do not know where this __webglSprites is coming from
     scene?.__webglSprites?.forEach((sprite) => {
       //depthTest is false for inFront labels
       if (inFront && sprite.material.depthTest == false) {
@@ -252,7 +268,7 @@ export class SpritePlugin {
 
     var oldFogType = 0;
     var sceneFogType = 0;
-    var fog = scene.fog;
+    var fog = scene.fog as Fog;
 
     if (fog) {
       this.gl.uniform3f(
@@ -277,15 +293,16 @@ export class SpritePlugin {
     // update positions and sort
 
     var i;
-    let sprite;
+    let sprite: Sprite;
     let material;
     let size;
     let fogType;
     let scale: number[] = [];
 
     for (i = 0; i < nSprites; i++) {
-      sprite = sprites[i];
+      sprite = sprites[i] as Sprite;
       material = sprite.material;
+      if (!material) continue;
       if (material.depthTest == false && !inFront) continue;
 
       if (!sprite.visible || material.opacity === 0) continue;
@@ -301,13 +318,13 @@ export class SpritePlugin {
       }
     }
 
-    sprites.sort(this.painterSortStable);
+    sprites.sort(painterSortStable);
 
     // render all sprites
     for (i = 0; i < nSprites; i++) {
-      sprite = sprites[i];
+      sprite = sprites[i] as Sprite;
       material = sprite.material;
-
+      if (!material) continue;
       if (!sprite.visible || material.opacity === 0) continue;
 
       if (material.map && material.map.image && material.map.image.width) {
@@ -355,35 +372,35 @@ export class SpritePlugin {
         scale[0] *= size * sprite.scale.x;
         scale[1] *= size * sprite.scale.y;
 
-        let alignx = material.alignment.x,
-          aligny = material.alignment.y;
+        let alignx = material?.alignment?.x,
+          aligny = material?.alignment?.y;
         if (material.screenOffset) {
           //adjust alignment offset by screenOffset adjusted to sprite coords
-          alignx += (2.0 * material.screenOffset.x) / w;
-          aligny += (2.0 * material.screenOffset.y) / h;
+          alignx = (alignx || 0) + (2.0 * material.screenOffset.x) / w;
+          aligny = (aligny || 0) + (2.0 * material.screenOffset.y) / h;
         }
 
         this.gl.uniform2f(
           uniforms.uvScale,
-          material.uvScale.x,
-          material.uvScale.y
+          material?.uvScale?.x || 1,
+          material?.uvScale?.y || 1
         );
         this.gl.uniform2f(
           uniforms.uvOffset,
-          material.uvOffset.x,
-          material.uvOffset.y
+          material?.uvOffset?.x || 0,
+          material?.uvOffset?.y || 0
         );
-        this.gl.uniform2f(uniforms.alignment, alignx, aligny);
+        this.gl.uniform2f(uniforms.alignment, alignx || 0, aligny || 0);
 
         this.gl.uniform1f(uniforms.opacity, material.opacity);
         this.gl.uniform3f(
           uniforms.color,
-          material.color.r,
-          material.color.g,
-          material.color.b
+          material?.color?.r || 0,
+          material?.color?.g || 0,
+          material?.color?.b || 0
         );
 
-        this.gl.uniform1f(uniforms.rotation, sprite.rotation);
+        this.gl.uniform1f(uniforms.rotation, sprite.rotation as number);
         this.gl.uniform2fv(uniforms.scale, scale);
 
         //this.renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
@@ -399,7 +416,8 @@ export class SpritePlugin {
     this.gl.enable(this.gl.CULL_FACE);
   }
 
-  private createProgram(shader: Shader, precision): WebGLProgram {
+  private createProgram(shader: Shader, precision: number): WebGLProgram {
+    if (!this.gl) throw new Error("WebGL Rendering context not found");
     var program = this.gl.createProgram();
 
     if (!program) throw new Error("Error creating webgl program");
@@ -443,12 +461,11 @@ export class SpritePlugin {
 
     return program;
   }
-
-  private painterSortStable(a, b) {
-    if (a.z !== b.z) {
-      return b.z - a.z;
-    } else {
-      return b.id - a.id;
-    }
+}
+function painterSortStable(a: any, b: any): number {
+  if (a.z !== b.z) {
+    return b.z - a.z;
+  } else {
+    return b.id - a.id;
   }
 }

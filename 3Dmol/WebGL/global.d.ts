@@ -4,6 +4,6 @@ declare module "*.vert" {
 }
 
 declare module "*.frag" {
-    const value: string;
-    export default value;
+    const value1: string;
+    export default value1;
 }

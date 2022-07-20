@@ -7,9 +7,9 @@ export class Sphere {
   center: Vector3
   radius: number
 
-  constructor(center?: Vector3, radius?: number) {
-    this.center = center !== undefined ? center : new Vector3();
-    this.radius = radius !== undefined ? radius : 0;
+  constructor(center = new Vector3(), radius = 0) {
+    this.center = center;
+    this.radius = radius;
   }
 
   set(center: Vector3, radius: number): Sphere {
