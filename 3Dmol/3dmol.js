@@ -271,20 +271,7 @@ $3Dmol.getbin = function(uri, callback, request,postdata) {
     else return promise;
 };
 
-/**
- * Convert a base64 encoded string to a Uint8Array
- * @function $3Dmol.base64ToArray
- * @param {string} base64 encoded string
- */
-$3Dmol.base64ToArray = function(base64) {
-    var binary_string =  window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array( len );
-    for (var i = 0; i < len; i++)        {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes;
-};
+
 
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
@@ -609,19 +596,6 @@ $3Dmol.getExtent = function(atomlist, ignoreSymmetries) {
             [ xsum / cnt, ysum / cnt, zsum / cnt ] ];
 };
 
-
-//return the value of an atom property prop, or null if non existent
-// looks first in properties, then in the atom itself
-$3Dmol.getAtomProperty = function(atom, prop) {
-    var val = null;
-    if (atom.properties &&
-            typeof (atom.properties[prop]) != "undefined") {
-        val = atom.properties[prop];
-    } else if(typeof(atom[prop]) != 'undefined') {
-        val = atom[prop];
-    }
-    return val;
-};
 
 /* get the min and max values of the specified property in the provided
 * @function $3Dmol.getPropertyRange
