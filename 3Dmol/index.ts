@@ -1,3 +1,4 @@
+import { applyPartialCharges, partialCharges } from './partialCharges';
 import { LabelCount, Label } from './Label';
 import { Parsers } from './parsers/index';
 import { Gradient } from './Gradient';
@@ -170,5 +171,7 @@ window.$3Dmol = {
   Parsers,
   base64ToArray,
   Label,
-  LabelCount
+  LabelCount,
+  partialCharges,
+  applyPartialCharges
 };
