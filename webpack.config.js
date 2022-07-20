@@ -10,14 +10,14 @@ Author: ${pkg.author}`;
 
 module.exports = {
   target: "web",
-  mode: "development",
+  mode: "production",
   entry: "./3Dmol/index.ts",
   output: {
     filename: `index.js`,
     path: path.resolve(__dirname, "tmp"),
     globalObject: "this",
     library: pkg.name,
-    libraryTarget: "commonjs",
+    libraryTarget: "umd",
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],
@@ -31,5 +31,5 @@ module.exports = {
     ],
   },
 
-  plugins: [new webpack.BannerPlugin({ banner }), new BundleAnalyzerPlugin()],
+  plugins: [new webpack.BannerPlugin({ banner })],
 };

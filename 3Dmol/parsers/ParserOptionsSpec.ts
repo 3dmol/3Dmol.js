@@ -19,7 +19,7 @@
   * @prop {number} assemblyIndex - index of the assembly in symmetry ; supported by mmtf
   * @prop {boolean} assignBonds - for formats without explicit bonds (e.g. PDB, xyz) infer bonding (default true). 
   */
- export type ParserOptionsSpec = {
+ export type ParserOptionsSpec = Partial<{
   frames: boolean,
   vibrate: {
     frames: number,
@@ -38,4 +38,4 @@
   altLoc: string,
   assemblyIndex: number,
   assignBonds: boolean
- }
+ }>
