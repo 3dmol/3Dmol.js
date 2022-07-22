@@ -58,7 +58,7 @@ $3Dmol.GLViewer = (function() {
             hoverDuration = config.hoverDuration;
         }
         if(config.antialias === undefined) config.antialias = true;
-        if(config.cartoonQuality === undefined) config.cartoonQuality = 5;
+        if(config.cartoonQuality === undefined) config.cartoonQuality = 10;
 
         //reimplement jquery getwidth/height
         var getRect = function() {
@@ -3394,7 +3394,7 @@ $3Dmol.GLViewer = (function() {
         this.addModel =  function(data, format, options) {
             if(options && !options.defaultcolors) {
                 options.defaultcolors = defaultcolors;
-                options.cartoonQuality = config.cartoonQuality;
+                options.cartoonQuality = options.cartoonQuality || config.cartoonQuality;
             } else if(typeof(options) === 'undefined') {
                 options = {defaultcolors:defaultcolors, cartoonQuality:config.cartoonQuality};
             }
