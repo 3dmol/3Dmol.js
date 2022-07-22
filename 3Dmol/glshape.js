@@ -738,7 +738,7 @@ $3Dmol.GLShape = (function() {
                 sphereSpec.center, sphereSpec.radius));
 
             $3Dmol.GLDraw.drawSphere(geo, sphereSpec.center,
-                sphereSpec.radius, sphereSpec.color);
+                sphereSpec.radius, sphereSpec.color, sphereSpec.quality);
 
             components.push({
                 centroid: new $3Dmol.Vector3(sphereSpec.center.x,

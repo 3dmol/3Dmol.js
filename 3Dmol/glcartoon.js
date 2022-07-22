@@ -229,12 +229,19 @@ $3Dmol.drawCartoon = (function() {
         var v_offset, va_offset, f_offset;
         var currentAtom, lastAtom;
         var color, colori;
-        var geoGroup = geo.updateGeoGroup(2 * num * len); // ensure vertex
-                                                            // capacity
         var vertexArray,colorArray,faceArray, face;
+        let geoGroup = geo.updateGeoGroup();
         
         for (i = 0; i < len; i++) {
-
+            let gnum = geo.groups;
+            let replicating = false;
+            geoGroup = geo.updateGeoGroup(2 * num ); // ensure vertex capacity
+            if(gnum != geo.groups && i > 0) {
+                //we created a new geo - need to replicate vertices at edge 
+                //(but not faces)
+                i = i-1;
+                replicating = true;
+            }
             colori = Math.round(i * (colors.length - 1) / len);
             color = $3Dmol.CC.color(colors[colori]);
 
@@ -326,7 +333,7 @@ $3Dmol.drawCartoon = (function() {
                 colorArray[va_offset + 3 * j + 2] = color.b;
             }
 
-            if (i > 0) {
+            if (i > 0 && !replicating) {
 
                 for (j = 0; j < num * 2; j++) {
 
@@ -685,22 +692,6 @@ $3Dmol.drawCartoon = (function() {
         // TODO: Add intersection planes for caps
     };
 
-    // TODO: Need to update this (will we ever use this?)
-    var drawSmoothCurve = function(group, _points, width, colors, div) {
-        if (_points.length === 0)
-            return;
-
-        div = (div === undefined) ? 5 : div;
-
-        var geo = new $3Dmol.Geometry();
-        var lineMaterial = new $3Dmol.LineBasicMaterial({
-            linewidth : width
-        });
-        lineMaterial.vertexColors = true;
-        var line = new $3Dmol.Line(geo, lineMaterial);
-        line.type = $3Dmol.LineStrip;
-        group.add(line);
-    };
 
     var drawStrip = function(geo, points, colors, div, thickness, opacity,
             shape) {
@@ -768,7 +759,6 @@ $3Dmol.drawCartoon = (function() {
     var addBackbonePoints = function(points, num, smoothen, backbonePt,
             orientPt, prevOrientPt, backboneAtom, atoms, atomi) {
         var widthScalar, i, delta, v, addArrowPoints, testStyle;
-
 
         if (!backbonePt || !orientPt || !backboneAtom)
             return;
@@ -897,8 +887,7 @@ $3Dmol.drawCartoon = (function() {
     var pyrResns = { "DT": true, "DC":true, "U":true, "C":true, "T":true };
     var naResns = { "DA":true, "DG":true, "A":true, "G":true, "DT": true, "DC":true, "U":true, "C":true, "T":true };
     
-    var drawCartoon = function(group, atomList, gradientrange, fill,
-            doNotSmoothen, num, div) {
+    var drawCartoon = function(group, atomList, gradientrange, num, div) {
         num = num || defaultNum;
         div = div || defaultDiv;
 
@@ -984,9 +973,7 @@ $3Dmol.drawCartoon = (function() {
 
         var flushGeom = function(connect) {
             //write out points, update geom,etc
-            for (var i = 0; !thickness && i < num; i++)
-                drawSmoothCurve(group, points[i], 1, colors, div, opacity);
-            if (fill && points[0].length > 0) {
+            if (points[0].length > 0) {
                 drawStrip(geo, points, colors, div, thickness, opacity,
                         points.style);
             }
@@ -1040,7 +1027,7 @@ $3Dmol.drawCartoon = (function() {
                 flushGeom(curr.chain == next.chain);
             }
             
-            if(points.length && points[0].length > (30000/num/div/2)) {
+            if(false && points.length && points[0].length > (30000/num/div/2)) {
                 flushGeom(true);
             }
             
@@ -1145,7 +1132,7 @@ $3Dmol.drawCartoon = (function() {
                                     baseEndPt, 0.4, $3Dmol.CC
                                             .color(baseEndPt.color), 0, 2);
                             addBackbonePoints(points, num,
-                                    !doNotSmoothen, terminalPt, termOrientPt,
+                                    true, terminalPt, termOrientPt,
                                     prevOrientPt, curr, atoms, a);
                             colors.push(nextColor);
 
@@ -1154,10 +1141,7 @@ $3Dmol.drawCartoon = (function() {
                         }
 
                         // draw accumulated strand points
-                        for (i = 0; !thickness && i < num; i++)
-                            drawSmoothCurve(group, points[i], 1, colors, div,
-                                    opacity);
-                        if (fill && points[0].length > 0)
+                        if (points[0].length > 0)
                             drawStrip(geo, points, colors, div, thickness,
                                     opacity, points.style);
 
@@ -1246,7 +1230,7 @@ $3Dmol.drawCartoon = (function() {
                 // when we have a backbone point and orientation point in the
                 // same residue, accumulate strand points
                 if (orientPt && backbonePt && orientPt.resi === backbonePt.resi) {
-                    addBackbonePoints(points, num, !doNotSmoothen,
+                    addBackbonePoints(points, num, true,
                             backbonePt, orientPt, prevOrientPt, curr, atoms,
                             a);
                     prevOrientPt = orientPt;
@@ -1268,7 +1252,7 @@ $3Dmol.drawCartoon = (function() {
 
             $3Dmol.GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, 0.4,
                     $3Dmol.CC.color(baseEndPt.color), 0, 2);
-            addBackbonePoints(points, num, !doNotSmoothen, terminalPt,
+            addBackbonePoints(points, num, true, terminalPt,
                     termOrientPt, prevOrientPt, curr, atoms, a);
             colors.push(nextColor);
         }
@@ -1278,9 +1262,8 @@ $3Dmol.drawCartoon = (function() {
     };
 
     var defaultDrawCartoon = function(group, atomList, gradientrange, quality) {
-        quality = quality || 5;
-        drawCartoon(group, atomList, gradientrange, true,
-                false, quality, quality);
+        quality = quality || 10;
+        drawCartoon(group, atomList, gradientrange, quality, quality);
     };
 
     return defaultDrawCartoon;
