@@ -77,24 +77,20 @@ function commonTests()
 	}
 	function gradGetPredef()
 	{
-		let grad = new $3Dmol.Gradient.RWB();
+		let grad = {};
 		grad.gradient = "rwb";
 		grad = $3Dmol.Gradient.getGradient(grad);
-		let vth = grad.valueToHex;
-		let range = grad.range;
-		expect(grad).toEqual({valueToHex: vth, range: range});
+		expect(grad).toBeInstanceOf($3Dmol.Gradient.RWB);
 	}
 	function gradGetPredefSet()
 	{
-		let grad = new $3Dmol.Gradient.RWB();
+		let grad = {};
 		grad.gradient = "rwb";
 		grad.min = 0;
 		grad.max = 100;
 		grad.mid = 50;
 		grad = $3Dmol.Gradient.getGradient(grad);
-		let vth = grad.valueToHex;
-		let range = grad.range;
-		expect(grad).toEqual({valueToHex: vth, range: range});
+		expect(grad).toBeInstanceOf($3Dmol.Gradient.RWB);
 	}
 function rwbTests()
 {
@@ -231,6 +227,7 @@ function sinebowTests()
 	function sinebowVTHThreeArgsNoRange()
 	{
 		let grad = new $3Dmol.Gradient.Sinebow(0, 100, 50);
+		expect(grad).toBeDefined();
 		let hexVal = grad.valueToHex(10);
 		expect(hexVal).toEqual(0xed7f11);
 	}

@@ -2,6 +2,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const pkg = require("./package.json");
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const banner = `${pkg.name} v${pkg.version}
 ${pkg.description}
@@ -10,7 +11,7 @@ Author: ${pkg.author}`;
 module.exports = {
   target: "web",
   mode: "production",
-  entry: "./3Dmol/WebGL/index.ts",
+  entry: "./3Dmol/index.ts",
   output: {
     filename: `index.js`,
     path: path.resolve(__dirname, "tmp"),
