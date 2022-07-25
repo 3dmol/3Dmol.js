@@ -11,10 +11,10 @@ Author: ${pkg.author}`;
 module.exports = {
   target: "web",
   mode: "production",
-  entry: "./3Dmol/index.ts",
+  entry: "./src/ts/main/index.ts",
   output: {
     filename: `index.js`,
-    path: path.resolve(__dirname, "tmp"),
+    path: path.resolve(__dirname, "..", "..", "tmp"),
     globalObject: "this",
     library: pkg.name,
     libraryTarget: "umd",
