@@ -2,7 +2,8 @@
 const path = require("path");
 const webpack = require("webpack");
 const pkg = require("./package.json");
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 const banner = `${pkg.name} v${pkg.version}
 ${pkg.description}
@@ -10,7 +11,7 @@ Author: ${pkg.author}`;
 
 module.exports = {
   target: "web",
-  mode: "production",
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
   entry: "./src/ts/main/index.ts",
   output: {
     filename: `index.js`,
@@ -25,7 +26,7 @@ module.exports = {
 
   module: {
     rules: [
-      { test: /\.tsx?$/, loader: "ts-loader"},
+      { test: /\.tsx?$/, loader: "ts-loader" },
       { test: /\.frag/, loader: "raw-loader" },
       { test: /\.vert/, loader: "raw-loader" },
     ],

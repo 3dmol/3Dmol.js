@@ -14,8 +14,8 @@
       "dom",
       "esnext"
     ],
-    "typeRoots": ["3Dmol/global.d.ts"],
+    "typeRoots": ["../../node_modules/@types"],
   },
-  "include": ["./3Dmol/WebGL/**/*.ts"],
+  "include": ["./**/*.ts"],
   "exclude": ["node_modules", "*.frag", "*.vert"],
 }
