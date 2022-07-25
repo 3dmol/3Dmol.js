@@ -1,3 +1,5 @@
+import { applyPartialCharges, partialCharges } from './partialCharges';
+import { LabelCount, Label } from './Label';
 import { Parsers } from './parsers/index';
 import { Gradient } from './Gradient';
 import { ssColors, elementColors, residues, chains, builtinColorSchemes, getColorFromStyle, htmlColors } from "./colors";
@@ -167,5 +169,9 @@ window.$3Dmol = {
   Gradient,
   getAtomProperty,
   Parsers,
-  base64ToArray
+  base64ToArray,
+  Label,
+  LabelCount,
+  partialCharges,
+  applyPartialCharges
 };
