@@ -34,6 +34,6 @@
       "./3Dmol/global.d.ts",
       "./3Dmol/WebGL/shaders/shaders.d.ts"
     ],
-    "out": "tsdocs"
+    "out": "doc/typescript"
   }
 }
