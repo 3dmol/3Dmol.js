@@ -62,7 +62,7 @@
     "webpack-dev-server": "4.9.3"
   },
   "scripts": {
-    "build": "gulp",
+    "build": "gulp && npm run doc",
     "prepare": "npm run build",
     "jest": "npx jest --coverage --coverage-directory=./tests/jest/coverage",
     "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
