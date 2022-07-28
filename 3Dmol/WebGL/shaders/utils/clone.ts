@@ -1,6 +1,6 @@
 import { Color } from "../../core/Color";
 
-type Uniform = Record<any, { type?: unknown; value?: unknown }>
+export type Uniform = Record<any, { type?: unknown; value?: unknown }>
 
 export function clone(
   uniforms_src: Uniform

@@ -92,21 +92,20 @@ class File():
         self.filename=filename
         self.filetype=filetype
         if(self.filetype=="generated"):
-            self.examples=self.getExamples()
+            self.examples=self.getExamples(contents)
         else:
             self.examples = [Example(os.path.basename(filename)[0:-3],contents)]
 
-    def getExamples(self):
+    def getExamples(self, text):
         nearests=[]
         filename=self.filename
-        file=open(filename,'r', encoding="utf-8")
-        text=file.read()
         example_indices=find_all(text,"@example")
         typedef_decorators=find_all(text,"@typedef")
         function_decorators=find_all(text,"@function")
         examples=[]
         #name of nearest function or typdef
         name=""
+        print(f"parsing {filename} found {len(example_indices)} examples")
         for i in example_indices:
             #get the index of the next '*/' or the index of the next '@' symbol
             comments=find_all(text,"*/")
@@ -150,7 +149,6 @@ class File():
             flname=flname.replace('$','') #special character in jquery
             exmp=Example(flname,exmp)
             examples.append(exmp)
-            file.close()
         count=0
         for i,example in enumerate(examples):
             if(i==0):
@@ -172,14 +170,23 @@ class TestSystem():
         manual_tests_path=d+"/tests/auto/tests/"
         examples_path=d+"/3Dmol/"
         files=[]
+
+        # typescript files
+        for filename in glob.glob(examples_path+'/*.ts'):
+            with open(filename, 'r', encoding='utf-8') as file:
+                contents = file.read()
+                files.append(File(filename,"generated",contents))
+
         #these are the files with examples in them
         for filename in glob.glob(examples_path+'/*.js')+glob.glob(examples_path+'/WebGL/*.js'):
-            text=open(filename,'r', encoding="utf-8")
-            files.append(File(filename,"generated",text.read()))
+            with open(filename,'r', encoding="utf-8") as text:
+                files.append(File(filename,"generated",text.read()))
         #these are the built in tests
         for filename in glob.glob(manual_tests_path+'/*.js'):
-            file=open(filename,"r", encoding="utf-8")
-            files.append(File(filename,"builtin",file.read()))
+            with open(filename,"r", encoding="utf-8") as file:
+                files.append(File(filename,"builtin",file.read()))
+        
+        print("Found %d files"%len(files))
         
         return files
 

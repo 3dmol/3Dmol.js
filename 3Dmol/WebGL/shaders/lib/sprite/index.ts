@@ -1,4 +1,4 @@
-import { Shader } from "../../shaders"
+import { Shader } from '../../ShaderType';
 import { uniforms } from "./uniforms"
 //import { fragmentShader, vertexShader } from "./shaders"
 import fragmentShader from "./sprite.frag"

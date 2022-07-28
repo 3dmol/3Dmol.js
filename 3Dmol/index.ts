@@ -175,3 +175,11 @@ window.$3Dmol = {
   partialCharges,
   applyPartialCharges
 };
+
+export * from "./Gradient";
+export * from "./colors";
+export * from "./Label";
+export * from "./partialCharges";
+export * from "./parsers";
+export * from "./WebGL";
+export * from "./utils";

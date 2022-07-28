@@ -155,49 +155,34 @@ export const htmlColors = {
 
 export type ColorSpec = keyof typeof htmlColors | number;
 
-(function () {
-  /**
-   * Color representation.
-   * @typedef ColorSpec
-   * @prop {string} 0xAF10AB - any hex number
-   * @prop {string} <html color name>
-   */
-  /**
- 
- * @typedef ColorschemeSpec
- * Built in colorschemes
- *
- * @example //Using a function in order to define the colors. 
-  download("pdb:4UAA",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
-                  var colorAsSnake = function(atom) {
-                    return atom.resi % 2 ? 'white': 'green'
-                  };
-
-                  viewer.setStyle( {chain:'A'}, { cartoon: {colorfunc: colorAsSnake }});
-                  viewer.setStyle( {chain:'B'}, { stick: {colorscheme: 'yellowCarbon'}});
-
-                  viewer.render();
-              });
- * @prop {string} <html color>Carbon   - use default element colors but with carbon set to specify html color string
- * @prop {string} ssPyMOL - PyMol secondary colorscheme
- * @prop {string} ssJmol - Jmol secondary colorscheme
- * @prop {string} Jmol - Jmol primary colorscheme
- * @prop {string} default - default colorscheme
- * @prop {string} amino - amino acid colorscheme
- * @prop {string} shapely - shapely protien colorscheme
- * @prop {string} nucleic - nucleic acid colorscheme
- * @prop {string} chain - standard chain colorscheme
- * @prop {string} chainHetatm - chain Hetatm colorscheme
- * @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
- * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorscheme.  Is either a Gradient object or the name of a built-in gradient (rwb, roygb, sinebow)
- * @prop {min} - min value for gradient
- * @prop {max} - max value for gradient
- * @prop {mid} - mid point value for gradient (for rwb)
- * @prop {object} map - map of a certain AtomSpec property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
- * @prop {function} colorfunc - Allows the user to provide a function for setting the colorschemes.
+/**
+ * Color representation.
+ * @typedef ColorSpec
+ * @prop {string} 0xAF10AB - any hex number
+ * @prop {string} <html color name>
  */
-})();
+/**
+ 
+* @typedef ColorschemeSpec
+* Built in colorschemes
+* @prop {string} <html color>Carbon   - use default element colors but with carbon set to specify html color string
+* @prop {string} ssPyMOL - PyMol secondary colorscheme
+* @prop {string} ssJmol - Jmol secondary colorscheme
+* @prop {string} Jmol - Jmol primary colorscheme
+* @prop {string} default - default colorscheme
+* @prop {string} amino - amino acid colorscheme
+* @prop {string} shapely - shapely protien colorscheme
+* @prop {string} nucleic - nucleic acid colorscheme
+* @prop {string} chain - standard chain colorscheme
+* @prop {string} chainHetatm - chain Hetatm colorscheme
+* @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
+* @prop {Gradient} gradient - Allows the user to provide a gradient to the colorscheme.  Is either a Gradient object or the name of a built-in gradient (rwb, roygb, sinebow)
+* @prop {min} - min value for gradient
+* @prop {max} - max value for gradient
+* @prop {mid} - mid point value for gradient (for rwb)
+* @prop {object} map - map of a certain AtomSpec property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
+* @prop {function} colorfunc - Allows the user to provide a function for setting the colorschemes.
+*/
 
 /** Preset secondary structure color scheme
  * @struct
@@ -638,20 +623,17 @@ export const chains = {
 
 /**
  * built in color schemes
- * @example //Using a function in order to define the colors. 
-  $3Dmol.download("pdb:4UAA",viewer,{},function(){
-                  viewer.setBackgroundColor(0xffffffff);
-                  var colorAsSnake = function(atom) {
-                    return atom.resi % 2 ? 'white': 'green'
-                  };
-
-                  viewer.setStyle( {chain:'A'}, { cartoon: {colorfunc: colorAsSnake }});
-                  viewer.setStyle( {chain:'B'}, { stick: {colorscheme: 'yellowCarbon'}});
-
-                  viewer.render();
-              });
-
- * The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme */
+ * The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme 
+ * @example window.$3Dmol.download("pdb:4UAA",viewer,{},function(){
+ *    viewer.setBackgroundColor(0xffffffff);
+ *    var colorAsSnake = function(atom) {
+ *      return atom.resi % 2 ? 'white': 'green'
+ *    };
+ *    viewer.setStyle( {chain:'A'}, { cartoon: {colorfunc: colorAsSnake }});
+ *    viewer.setStyle( {chain:'B'}, { stick: {colorscheme: 'yellowCarbon'}});
+ *    viewer.render();
+ *  });
+  */
 export const builtinColorSchemes = {
   ssPyMol: { prop: "ss", map: ssColors.pyMol },
   ssJmol: { prop: "ss", map: ssColors.Jmol },
@@ -688,7 +670,7 @@ export function getColorFromStyle(atom, style) {
       .substring(0, scheme.lastIndexOf("Carbon"))
       .toLowerCase();
     if (typeof htmlColors[ccolor] != "undefined") {
-      var newscheme = {...elementColors.defaultColors};
+      var newscheme = { ...elementColors.defaultColors };
       newscheme.C = htmlColors[ccolor];
       builtinColorSchemes[scheme] = { prop: "elem", map: newscheme };
       scheme = builtinColorSchemes[scheme];

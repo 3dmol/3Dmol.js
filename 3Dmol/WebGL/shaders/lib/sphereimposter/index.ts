@@ -1,5 +1,5 @@
 import { uniforms } from './uniforms';
-import { Shader } from '../../shaders';
+import { Shader } from '../../ShaderType';
 import fragmentShader from './sphereimposter.frag';
 import vertexShader from './sphereimposter.vert';
 

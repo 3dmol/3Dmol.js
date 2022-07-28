@@ -4,12 +4,12 @@ import { Scene } from "./core";
 //Render plugins go here
 import { Sprite } from "./objects/Sprite";
 import { ShaderLib } from "./shaders/index";
-import { Shader } from "./shaders/shaders";
+import { Shader } from './shaders/ShaderType';
 
-type Nullable<T> = T | null;
-type NullableWebGLUniformLocation = Nullable<WebGLUniformLocation>;
+export type Nullable<T> = T | null;
+export type NullableWebGLUniformLocation = Nullable<WebGLUniformLocation>;
 
-type UniformsValueType = {
+export type UniformsValueType = {
   uvOffset: NullableWebGLUniformLocation;
   uvScale: NullableWebGLUniformLocation;
   rotation: NullableWebGLUniformLocation;
@@ -30,7 +30,7 @@ type UniformsValueType = {
   alphaTest: NullableWebGLUniformLocation;
 };
 
-type SpriteMeta = {
+export type SpriteMeta = {
   vertices: Nullable<Float32Array>;
   faces: Nullable<Uint16Array>;
   vertexBuffer: Nullable<WebGLBuffer>;

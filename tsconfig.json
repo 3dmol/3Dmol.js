@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
+    "declarationDir": "tmp/types",
     "noImplicitAny": false,
-    "outDir": "tmp/types",
+    "outDir": "tmp",
     "module": "esnext",
     "target": "ES2015",
     "allowJs": true,
@@ -14,8 +15,25 @@
       "dom",
       "esnext"
     ],
-    "typeRoots": ["3Dmol/global.d.ts"],
+    "baseUrl": "./3Dmol",
   },
-  "include": ["./3Dmol/WebGL/**/*.ts"],
-  "exclude": ["node_modules", "*.frag", "*.vert"],
+  "include": [
+    "3Dmol/**/*.ts",
+    "3Dmol/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "*.frag",
+    "*.vert",
+    "@types/estree",
+    "@types/eslint"
+  ],
+  "typedocOptions": {
+    "entryPoints": [
+      "./3Dmol/index.ts",
+      "./3Dmol/global.d.ts",
+      "./3Dmol/WebGL/shaders/shaders.d.ts"
+    ],
+    "out": "tsdocs"
+  }
 }

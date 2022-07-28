@@ -140,7 +140,7 @@ export class ROYGB extends GradientType {
       this.min = min;
       this.max = max;
     }
-};
+  };
   //map value to hex color, range is provided
   valueToHex(val, range) {
     var lo, hi;
@@ -197,8 +197,23 @@ export class ROYGB extends GradientType {
   };
 }
 /**
+ * @constructor Sinebow
  * rainbow gradient with constant saturation, all the way to purple!
  * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
+ * 
+ * @example $.get('data/1fas.pqr', function(data){
+      viewer.addModel(data, "pqr");
+      $.get("data/1fas.cube",function(volumedata){
+          viewer.addSurface($3Dmol.SurfaceType.VDW, {
+              opacity:0.85,
+              voldata: new $3Dmol.VolumeData(volumedata, "cube"),
+              volscheme: new $3Dmol.Gradient.Sinebow(2,0,1)
+          },{});
+          
+      viewer.render();
+      });
+      viewer.zoomTo();
+  });
  */
 export class Sinebow extends GradientType {
   gradient = "Sinebow";
@@ -207,21 +222,21 @@ export class Sinebow extends GradientType {
   min: number;
   constructor(min, max) {
     super();
-  this.mult = 1.0;
-  this.min = min;
-  this.max = max;
-  if (typeof max == "undefined" && Array.isArray(min) && min.length >= 2) {
-    //we were passed a single range
-    this.max = min[1];
-    this.min = min[0];
-  }
-  if (max < min) {
-    //reverse the order
-    this.mult = -1.0;
-    this.min *= -1.0;
-    this.max *= -1.0;
-  }
-};
+    this.mult = 1.0;
+    this.min = min;
+    this.max = max;
+    if (typeof max == "undefined" && Array.isArray(min) && min.length >= 2) {
+      //we were passed a single range
+      this.max = min[1];
+      this.min = min[0];
+    }
+    if (max < min) {
+      //reverse the order
+      this.mult = -1.0;
+      this.min *= -1.0;
+      this.max *= -1.0;
+    }
+  };
 
   //map value to hex color, range is provided
   valueToHex(val, range) {
@@ -273,7 +288,7 @@ export const builtinGradients = {
   sinebow: Sinebow,
 };
 
-export class Gradient extends GradientType{
+export class Gradient extends GradientType {
   static RWB = RWB;
   static ROYGB = ROYGB;
   static Sinebow = Sinebow;
@@ -281,7 +296,7 @@ export class Gradient extends GradientType{
   static normalizeValue = normalizeValue;
   static getGradient = getGradient;
   // @ts-ignore
-  valueToHex(_value: number, _range:number):number{}
+  valueToHex(_value: number, _range: number): number { }
   // @ts-ignore
-  range():[number,number]{}
+  range(): [number, number] { }
 }
