@@ -72,7 +72,8 @@
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py",
     "cov:glcheck": "npx nyc report --reporter json --report-dir ./tests/glcheck/coverage",
-    "coverage": "istanbul report --include ./tests/**/coverage/coverage-final.json html"
+    "coverage": "istanbul report --include ./tests/**/coverage/coverage-final.json html",
+    "doc": "npx typedoc ./3Dmol/index.ts"
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",
