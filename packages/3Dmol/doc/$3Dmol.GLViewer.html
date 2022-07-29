@@ -1,0 +1,13486 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>3Dmol.js Class: GLViewer</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="navbar navbar-fixed-top navbar-inverse">
+		<div class="navbar-inner">
+			<a class="brand" href="../index.html">3Dmol.js</a>
+                        
+			<ul class="nav">
+                                <li>
+                                <a href="index.html">Documentation</a>
+                                </li>
+				
+				<li class="dropdown">
+					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="$3Dmol.html">$3Dmol</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLDraw.html">$3Dmol.GLDraw</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLVolumetricRender.html">$3Dmol.GLVolumetricRender</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.StateManager.html">$3Dmol.StateManager</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.UI.html">$3Dmol.UI</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.VolumeData.html">$3Dmol.VolumeData</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="tutorial-code.html">Using 3Dmol within your code</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-embeddable.html">Embedding a 3Dmol Viewer</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-learning_environment.html">Active Learning with 3Dmol.js</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-url.html">Viewing Molecules with the 3Dmol Server</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="types.html" class="dropdown-toggle" data-toggle="dropdown">Type Specifications<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="types.html#AlertBox">AlertBox</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ArrowSpec">ArrowSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#AtomSpec">AtomSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#AtomStyleSpec">AtomStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#BoxSpec">BoxSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CartoonStyleSpec">CartoonStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ContextMenu">ContextMenu</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CrossStyleSpec">CrossStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CurveSpec">CurveSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CustomShapeSpec">CustomShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CylinderSpec">CylinderSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#FileFormats">FileFormats</a>
+						</li>
+						
+						<li>
+							<a href="types.html#IsoSurfaceSpec">IsoSurfaceSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#LineSpec">LineSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#LineStyleSpec">LineStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ModelToolbar">ModelToolbar</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Property">Property</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Selection">Selection</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SelectionBox">SelectionBox</a>
+						</li>
+						
+						<li>
+							<a href="types.html#setLocation">setLocation</a>
+						</li>
+						
+						<li>
+							<a href="types.html#setPosition">setPosition</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ShapeSpec">ShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SphereShapeSpec">SphereShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SphereStyleSpec">SphereStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#StickStyleSpec">StickStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#StyleBox">StyleBox</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Surface">Surface</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SurfaceMenu">SurfaceMenu</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SurfaceStyleSpec">SurfaceStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#UnitCellStyleSpec">UnitCellStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Vector3">Vector3</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ViewerGridSpec">ViewerGridSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ViewerSpec">ViewerSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#VolumetricRendererSpec">VolumetricRendererSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#WithinSelectionSpec">WithinSelectionSpec</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+
+		
+		<div class="span8">
+			
+				<div id="main">
+					
+
+
+	<h1 class="page-title">Class: GLViewer</h1>
+<section>
+
+<header>
+    <h2>
+        <span class="ancestors"><a href="$3Dmol.html">$3Dmol</a>.</span>
+    
+    GLViewer
+    </h2>
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+
+    
+        
+<dt>
+    <h4 class="name" id="GLViewer"><span class="type-signature"></span>new GLViewer<span class="signature">(element, config)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>WebGL-based 3Dmol.js viewer<br>
+Note: The preferred method of instantiating a GLViewer is through <a href="$3Dmol.html#.createViewer">$3Dmol.createViewer</a></p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>HTML element within which to create viewer</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#ViewerSpec">ViewerSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object containing optional configuration for the viewer</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id="addArrow"><span class="type-signature"></span>addArrow<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add arrow shape</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#ArrowSpec">ArrowSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&quot;pdb:4DM7&quot;,viewer,{},function(){
+
+                  viewer.setBackgroundColor(0xffffffff);
+                  viewer.addArrow({
+                      start: {x:-10.0, y:0.0, z:0.0},
+                      end: {x:0.0, y:-10.0, z:0.0},
+                      radius: 1.0,
+                      radiusRadio:1.0,
+                      mid:1.0,
+                      clickable:true,
+                      callback:function(){
+                          this.color.setHex(0xFF0000FF);
+                          viewer.render( );
+                      }
+                  });
+                  viewer.render();
+                });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addAsOneMolecule"><span class="type-signature"></span>addAsOneMolecule<span class="signature">(data, format)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add model to viewer. Given multimodel file and its format,<br>
+all atoms are added to one model</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input format (see <a href="types.html#FileFormats">FileFormats</a>)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;../test_structs/multiple.sdf&#x27;, function(data){
+                  viewer.addAsOneMolecule(data, &quot;sdf&quot;);
+                  viewer.zoomTo();
+                  viewer.render();
+              });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addBox"><span class="type-signature"></span>addBox<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add box shape. This method provides a shorthand<br>
+way to create a box shape object</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#BoxSpec">BoxSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Box shape style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.addLine({color:&#x27;red&#x27;,start:{x:0,y:0,z:0},end:{x:5,y:0,z:0}});
+         viewer.addLine({color:&#x27;blue&#x27;,start:{x:0,y:0,z:0},end:{x:0,y:5,z:0}});
+         viewer.addLine({color:&#x27;green&#x27;,start:{x:0,y:0,z:0},end:{x:0,y:0,z:5}});
+
+         viewer.addBox({center:{x:0,y:0,z:0},dimensions: {w:3,h:4,d:2},color:&#x27;magenta&#x27;});
+         viewer.zoomTo();
+         viewer.rotate(45, {x:1,y:1,z:1});
+         viewer.render();</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addCurve"><span class="type-signature"></span>addCurve<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add Curve shape</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#CurveSpec">CurveSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.addCurve({points: [{x:0.0,y:0.0,z:0.0}, {x:5.0,y:3.0,z:0.0}, {x:5.0,y:7.0,z:0.0}, {x:0.0,y:10.0,z:0.0}],
+                                  radius:0.5,
+                                  smooth: 10,
+                                  fromArrow:false,
+                                  toArrow: true,
+                                  color:&#x27;orange&#x27;,
+                                  });
+              viewer.addCurve({points: [{x:-1,y:0.0,z:0.0}, {x:-5.0,y:5.0,z:0.0}, {x:-2,y:10.0,z:0.0}],
+                                  radius:1,
+                                  fromArrow:true,
+                                  toArrow: false,
+                                  color:&#x27;purple&#x27;,
+                                  });
+              viewer.zoomTo();
+              viewer.render();</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addCustom"><span class="type-signature"></span>addCustom<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add custom shape component from user supplied function</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">CustomSpec</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">function triangle(viewer) {
+    var vertices = [];
+    var normals = [];
+    var colors = [];
+    var r = 20;
+    //triangle
+    vertices.push(new $3Dmol.Vector3(0,0,0));
+    vertices.push(new $3Dmol.Vector3(r,0,0));
+    vertices.push(new $3Dmol.Vector3(0,r,0));
+
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+    normals.push(new $3Dmol.Vector3(0,0,1));
+
+    colors.push({r:1,g:0,b:0});
+    colors.push({r:0,g:1,b:0});
+    colors.push({r:0,g:0,b:1});
+
+    var faces = [ 0,1,2 ];
+
+    var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
+    viewer.addCustom(spec);
+}
+            triangle(viewer);
+            viewer.render();</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addCylinder"><span class="type-signature"></span>addCylinder<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add cylinder shape</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#CylinderSpec">CylinderSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.setBackgroundColor(0xffffffff);
+              viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
+                                  end:{x:10.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  fromCap:1,
+                                  toCap:2,
+                                  color:&#x27;red&#x27;,
+                                  hoverable:true,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0x00FFFF00);viewer.render( );},
+                                  hover_callback: function(){ viewer.render( );},
+                                  unhover_callback: function(){ this.color.setHex(0xFF000000);viewer.render( );}
+                                 });
+              viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
+                                  end:{x:0.0,y:10.0,z:0.0},
+                                  radius:0.5,
+                                  fromCap:false,
+                                  toCap:true,
+                                  color:&#x27;teal&#x27;});
+              viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
+                                  end:{x:20.0,y:0.0,z:0.0},
+                                  radius:1.0,
+                                  color:&#x27;black&#x27;,
+                                  fromCap:false,
+                                  toCap:false});
+              viewer.render();</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addIsosurface"><span class="type-signature"></span>addIsosurface<span class="signature">(data, spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Construct isosurface from volumetric data.  This is more flexible<br>
+than addVolumetricData, but can not be used with py3Dmol.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.VolumeData.html">$3Dmol.VolumeData</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>volumetric data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#IsoSurfaceSpec">IsoSurfaceSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Shape style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;../test_structs/benzene-homo.cube&#x27;, function(data){
+                  var voldata = new $3Dmol.VolumeData(data, &quot;cube&quot;);
+                  viewer.addIsosurface(voldata, {isoval: 0.01,
+                                                 color: &quot;blue&quot;});
+                  viewer.addIsosurface(voldata, {isoval: -0.01,
+                                                 color: &quot;red&quot;});
+                  viewer.zoomTo();
+                  viewer.render();
+                });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addLabel"><span class="type-signature"></span>addLabel<span class="signature">(text, options, sel, noshow)</span><span class="type-signature"> &rarr; {$3Dmol.Label}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add label to viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label text</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">LabelSpec</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label style specification</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">AtomSelection</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Set position of label to center of this selection</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>noshow</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if true, do not immediately display label - when adding multiple labels this is more efficient</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">$3Dmol.Label</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&quot;pdb:2EJ0&quot;,viewer,{},function(){
+
+                  viewer.addLabel(&quot;Aromatic&quot;, {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel(&quot;Label&quot;,{font:&#x27;sans-serif&#x27;,fontSize:18,fontColor:&#x27;white&#x27;,fontOpacity:1,borderThickness:1.0,
+                                           borderColor:&#x27;red&#x27;,borderOpacity:0.5,backgroundColor:&#x27;black&#x27;,backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.setStyle({chain:&#x27;A&#x27;},{cross:{hidden:true}});
+                  viewer.setStyle({chain:&#x27;B&#x27;},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      colorscheme:&#x27;greenCarbon&#x27;}});
+                  viewer.setStyle({chain:&#x27;C&#x27;},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      radius:0.5}});
+                  viewer.setStyle({chain:&#x27;D&#x27;},{cross:{hidden:false,
+                                                      linewidth:10.0}});
+                  viewer.setStyle({chain:&#x27;E&#x27;},{cross:{hidden:false,
+                                                      linewidth:1.0,
+                                                      color:&#x27;black&#x27;}});
+
+                  viewer.render();
+
+
+                });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addLine"><span class="type-signature"></span>addLine<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add line shape</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#LineSpec">LineSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style specification, can specify dashed, dashLength, and gapLength</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&quot;pdb:2ABJ&quot;,viewer,{},function(){
+
+                  viewer.setViewStyle({style:&quot;outline&quot;});
+                  viewer.setStyle({chain:&#x27;A&#x27;},{sphere:{hidden:true}});
+                  viewer.setStyle({chain:&#x27;D&#x27;},{sphere:{radius:3.0}});
+                  viewer.setStyle({chain:&#x27;G&#x27;},{sphere:{colorscheme:&#x27;greenCarbon&#x27;}});
+                  viewer.setStyle({chain:&#x27;J&#x27;},{sphere:{color:&#x27;blue&#x27;}});
+                  viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
+                  viewer.render();
+              });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addMesh"><span class="type-signature"></span>addMesh<span class="signature">(mesh, style)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Adds an explicit mesh as a surface object.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>mesh</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Mesh</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>surfid</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addModel"><span class="type-signature"></span>addModel<span class="signature">(data, format, options)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add model to viewer, given molecular data and its format</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">ParserOptionsSpec</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>format dependent options. Attributes depend on the input file format.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.setViewStyle({style:&quot;outline&quot;});
+              $.get(&#x27;data/1fas.pqr&#x27;, function(data){
+                  viewer.addModel(data, &quot;pqr&quot;);
+                  $.get(&quot;data/1fas.cube&quot;,function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, &quot;cube&quot;), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+
+                  viewer.render();
+                  });
+                  viewer.zoomTo();
+              });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addModels"><span class="type-signature"></span>addModels<span class="signature">(data, format)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Given multimodel file and its format, add atom data to the viewer as separate models<br>
+and return list of these models</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input format (see <a href="types.html#FileFormats">FileFormats</a>)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Array.&lt;<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addModelsAsFrames"><span class="type-signature"></span>addModelsAsFrames<span class="signature">(data, format)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add model to viewer. Given multimodel file and its format,<br>
+different atomlists are stored in model's frame<br>
+property and model's atoms are set to the 0th frame</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input format (see <a href="types.html#FileFormats">FileFormats</a>)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;../test_structs/multiple2.xyz&#x27;, function(data){
+                  viewer.addModelsAsFrames(data, &quot;xyz&quot;);
+                  viewer.animate({loop: &quot;forward&quot;,reps: 1});
+                  viewer.setStyle({stick:{colorscheme:&#x27;magentaCarbon&#x27;}});
+                  viewer.zoomTo();
+                  viewer.render();
+              });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addPropertyLabels"><span class="type-signature"></span>addPropertyLabels<span class="signature">(prop, sel, style)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add property labels.  This will generate one label per a selected<br>
+atom at the atom's coordinates with the property value as the label text.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>prop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>property name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><ul>
+<li>@example<br>
+$3Dmol.download(&quot;cid:5291&quot;,viewer,{},function(){<br>
+viewer.setStyle({stick: {radius:.2}});<br>
+viewer.addPropertyLabels(&quot;index&quot;,{not:{elem:'H'}}, {fontColor:'black',font: 'sans-serif', fontSize: 28, showBackground:false,alignment:'center'});<br>
+viewer.zoomTo();<br>
+viewer.render();<br>
+});</li>
+</ul></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addResLabels"><span class="type-signature"></span>addResLabels<span class="signature">(sel, style, byframe)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add residue labels.  This will generate one label per a<br>
+residue within the selected atoms.  The label will be at the<br>
+centroid of the atoms and styled according to the passed style.<br>
+The label text will be [resn][resi]</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>byframe</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if true, create labels for every individual frame, not just current</p>
+<ul>
+<li>@example<br>
+$3Dmol.download(&quot;mmtf:2ll5&quot;,viewer,{},function(){<br>
+viewer.setStyle({stick:{radius:0.15},cartoon:{}});<br>
+viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false, screenOffset: {x:0,y:0}});<br>
+viewer.zoomTo();<br>
+viewer.render();<br>
+});</li>
+</ul></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addShape"><span class="type-signature"></span>addShape<span class="signature">(shapeSpec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add shape object to viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>shapeSpec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#ShapeSpec">ShapeSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>style specification for label</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+	<dt class="tag-see">See:</dt>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addSphere"><span class="type-signature"></span>addSphere<span class="signature">(spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add sphere shape. This method provides a shorthand<br>
+way to create a spherical shape object</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#SphereShapeSpec">SphereShapeSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Sphere shape style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:&#x27;red&#x27;});
+
+         viewer.render();</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addStyle"><span class="type-signature"></span>addStyle<span class="signature">(sel, style)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add style properties to all selected atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Atom selection specification</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomStyleSpec">AtomStyleSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>style spec to add to specified atoms</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&#x27;pdb:5IRE&#x27;,viewer,{doAssembly: false},function(m) {
+       viewer.setStyle({cartoon:{}});
+       //keep cartoon style, but show thick sticks for chain A
+       viewer.addStyle({chain:&#x27;A&#x27;},{stick:{radius:.5,colorscheme:&quot;magentaCarbon&quot;}});
+       viewer.zoomTo();
+       viewer.render();
+       });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addSurface"><span class="type-signature"></span>addSurface<span class="signature">(type, style, atomsel, allsel, focus, surfacecallback)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add surface representation to atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.html#.SurfaceType">$3Dmol.SurfaceType</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Surface type (VDW, MS, SAS, or SES)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#SurfaceStyleSpec">SurfaceStyleSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>optional style specification for surface material (e.g. for different coloring scheme, etc)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>atomsel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Show surface for atoms in this selection</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>allsel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Use atoms in this selection to calculate surface; may be larger group than 'atomsel'</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>focus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optionally begin rendering surface specified atoms</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>surfacecallback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>function to be called after setting the surface</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addUnitCell"><span class="type-signature"></span>addUnitCell<span class="signature">(model, spec)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and add unit cell visualization.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLModel</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#UnitCellStyleSpec">UnitCellStyleSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>visualization style</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/1jpy.cif&#x27;, function(data) {
+                  let m = viewer.addModel(data);
+                  viewer.addUnitCell(m, {box:{color:&#x27;purple&#x27;},alabel:&#x27;X&#x27;,blabel:&#x27;Y&#x27;,clabel:&#x27;Z&#x27;,alabelstyle: {fontColor: &#x27;black&#x27;,backgroundColor:&#x27;white&#x27;,inFront:true,fontSize:40},astyle:{color:&#x27;darkred&#x27;, radius:5,midpos: -10}});
+                  viewer.zoomTo();
+                  viewer.render();
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addVolumetricData"><span class="type-signature"></span>addVolumetricData<span class="signature">(data, format, or)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Construct isosurface from volumetric data in gaussian cube format</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input file contents</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>format</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input file format</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>or</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#IsoSurfaceSpec">IsoSurfaceSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>{VolumetricRenderSpec} spec - Shape style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/bohr.cube&#x27;, function(data) {
+
+      viewer.addVolumetricData(data, &quot;cube&quot;, {isoval: -0.01, color: &quot;red&quot;, opacity: 0.95});
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.render();
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="addVolumetricRender"><span class="type-signature"></span>addVolumetricRender<span class="signature">(data, spec)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create volumetric renderer for volumetricData</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.VolumeData.html">$3Dmol.VolumeData</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>volumetric data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>spec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">VolumetricRenderSpec</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>specification of volumetric render</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="animate"><span class="type-signature"></span>animate<span class="signature">(options)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Animate all models in viewer from their respective frames</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>can specify interval (speed of animation), loop (direction<br>
+of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), and reps (numer of repetitions, 0 indicates infinite loop)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="apngURI"><span class="type-signature"></span>apngURI<span class="signature">()</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return a promise that resolves to an animated PNG image URI of<br>
+viewer contents (base64 encoded) for nframes of viewer changes.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="center"><span class="type-signature"></span>center<span class="signature">(<span class="optional">sel</span>, <span class="optional">animationDuration</span>, <span class="optional">fixedPath</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Selection specification specifying model and atom<br>
+properties to select. Default: all atoms in viewer</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>animationDuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>an optional parameter that denotes<br>
+the duration of a zoom animation</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fixedPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if true animation is constrained to<br>
+requested motion, overriding updates that happen during the animation         *</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">// if the user were to pass the animationDuration value to
+          // the function like so viewer.zoomTo({resn:&#x27;STI&#x27;},1000);
+        //   the program would center on resn &#x27;STI&#x27; over the course
+        //   of 1 second(1000 milleseconds).
+ // Reposition to centroid of all atoms of all models in this
+//viewer glviewer.center();
+    $.get(&#x27;data/4csv.pdb&#x27;, function(data) {
+      viewer.addModel(data,&#x27;pdb&#x27;);
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.center();
+      viewer.render(callback);
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="clear"><span class="type-signature"></span>clear<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Clear scene of all objects</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="createModelFrom"><span class="type-signature"></span>createModelFrom<span class="signature">(sel, <span class="optional">extract</span>)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create a new model from atoms specified by sel.<br>
+If extract, removes selected atoms from existing models</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Atom selection specification</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>extract</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>If true, remove selected atoms from existing models</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="enableContextMenu"><span class="type-signature"></span>enableContextMenu<span class="signature">(sel, contextMenuEnabled)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>enable context menu and callback of selected atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>atom selection to apply hoverable settings to</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>contextMenuEnabled</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>whether contextMenu-handling is enabled for the selection</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="enableFog"><span class="type-signature"></span>enableFog<span class="signature">(fog)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Enable/disable fog for content far from the camera</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>fog</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>whether to enable or disable the fog</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="exportJSON"><span class="type-signature"></span>exportJSON<span class="signature">(includeStyles, modelID)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Export one or all of the loaded models into ChemDoodle compatible JSON.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>includeStyles</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Whether or not to include style information.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>modelID</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optional parameter for which model to export. If left out, export all of them.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="exportVRML"><span class="type-signature"></span>exportVRML<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>return a VRML string representation of the scene.  Include VRML header information</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>VRML</p>
+</div>
+
+
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="fitSlab"><span class="type-signature"></span>fitSlab<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Adjust slab to fully enclose selection (default everything).</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Selection specification specifying model and atom<br>
+properties to select. Default: all atoms in viewer</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getFrame"><span class="type-signature"></span>getFrame<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Gets the current viewer frame.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getInternalState"><span class="type-signature"></span>getInternalState<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return object representing internal state of<br>
+the viewer appropriate for passing to setInternalState</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getModel"><span class="type-signature"></span>getModel<span class="signature">(<span class="optional">id</span>)</span><span class="type-signature"> &rarr; {GLModel}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return specified model</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+		<th>Default</th>
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    last model id
+                
+                </td>
+            
+
+            <td class="description last"><p>Retrieve model with specified id</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+	<dt class="tag-default">Default Value:</dt>
+	<dd class="tag-default">
+		<ul class="dummy">
+			<li>Returns last model added to viewer or null if there are no models</li>
+		</ul>
+	</dd>
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">GLModel</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">// Retrieve reference to first GLModel added var m =
+   $3Dmol.download(&quot;pdb:1UBQ&quot;,viewer,{},function(m1){
+                  $3Dmol.download(&quot;pdb:1UBI&quot;, viewer,{}, function(m2) {
+                    viewer.zoomTo();
+                    m1.setStyle({cartoon: {color:&#x27;green&#x27;}});
+                    //could use m2 here as well
+                    viewer.getModel().setStyle({cartoon: {color:&#x27;blue&#x27;}});
+                    viewer.render();
+                })
+              });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getNumFrames"><span class="type-signature"></span>getNumFrames<span class="signature">()</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns the number of frames that the model with the most frames in the viewer has</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getPerceivedDistance"><span class="type-signature"></span>getPerceivedDistance<span class="signature">()</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return the z distance between the model and the camera</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>distance</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getSlab"><span class="type-signature"></span>getSlab<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Get slab of view (contents outside of slab are clipped).</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	<h5 class="subsection-title">Properties:</h5>
+
+	<dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>near</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>near clipping plane distance</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>far</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>far clipping plane distance</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Object</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getSurface"><span class="type-signature"></span>getSurface<span class="signature">(surf)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return surface object</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>surf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>surface id</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getView"><span class="type-signature"></span>getView<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;number>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns an array representing the current viewpoint.<br>
+Translation, zoom, and rotation quaternion.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>[ pos.x, pos.y, pos.z, rotationGroup.position.z, q.x, q.y, q.z, q.w ]</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Array.&lt;number></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="hasVolumetricRender"><span class="type-signature"></span>hasVolumetricRender<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return true if volumetric rendering is supported (WebGL 2.0 required)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="isAnimated"><span class="type-signature"></span>isAnimated<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return true if viewer is currently being animated, false otherwise</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="linkViewer"><span class="type-signature"></span>linkViewer<span class="signature">(otherview)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Synchronize this view matrix of this viewer to the passed viewer.<br>
+When the viewpoint of this viewer changes, the other viewer will<br>
+be set to this viewer's view.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>otherview</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="mapAtomProperties"><span class="type-signature"></span>mapAtomProperties<span class="signature">(props,, sel)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add specified properties to all atoms matching input argument</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>props,</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>either array of atom selectors with associated props, or function that takes atom and sets its properties</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>subset of atoms to work on - model selection must be specified here</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;../test_structs/b.sdf&#x27;, function(data){
+                      viewer.addModel(data,&#x27;sdf&#x27;);
+                      let props = [];
+                      //make the atom index a property x
+                      for(let i = 0; i &lt; 8; i++) {
+                        props.push({index:i,props:{&#x27;x&#x27;:i}});
+                      }
+                      viewer.mapAtomProperties(props);
+                      viewer.setStyle({sphere:{colorscheme:{gradient:&#x27;roygb&#x27;,prop:&#x27;x&#x27;,min:0,max:8}}});
+                      viewer.zoomTo();
+                      viewer.render();
+                    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="modelToScreen"><span class="type-signature"></span>modelToScreen<span class="signature">()</span><span class="type-signature"> &rarr; {object|list}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Convert model coordinates to screen coordinates.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">list</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>an object or list of objects with x,y,z attributes (e.g. an atom)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <ul>
+<li>and object or list of {x: screenX, y: screenY}</li>
+</ul>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">object</span>
+|
+
+<span class="param-type">list</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="pdbData"><span class="type-signature"></span>pdbData<span class="signature">(<span class="optional">sel</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return pdb output of selected atoms (if atoms from pdb input)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Selection specification specifying model and atom properties to select.  Default: all atoms in viewer</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>PDB string of selected atoms</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="pngURI"><span class="type-signature"></span>pngURI<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return image URI of viewer contents (base64 encoded).</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeAllLabels"><span class="type-signature"></span>removeAllLabels<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove all labels from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&quot;pdb:1ubq&quot;,viewer,{},function(){
+
+               viewer.addResLabels();
+               viewer.setStyle({},{stick:{}});
+               viewer.render( ); //show labels
+
+               viewer.removeAllLabels();
+               viewer.render(); //hide labels
+        });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeAllModels"><span class="type-signature"></span>removeAllModels<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Delete all existing models</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeAllShapes"><span class="type-signature"></span>removeAllShapes<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove all shape objects from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeAllSurfaces"><span class="type-signature"></span>removeAllSurfaces<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove all surfaces.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeLabel"><span class="type-signature"></span>removeLabel<span class="signature">(label)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove label from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Label</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>$3Dmol label</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">// Remove labels created in
+         $3Dmol.download(&quot;pdb:2EJ0&quot;,viewer,{},function(){
+                  var toremove = viewer.addLabel(&quot;Aromatic&quot;, {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+                  viewer.addLabel(&quot;Label&quot;,{font:&#x27;sans-serif&#x27;,fontSize:18,fontColor:&#x27;white&#x27;,fontOpacity:1,borderThickness:1.0,
+                                           borderColor:&#x27;red&#x27;,borderOpacity:0.5,backgroundColor:&#x27;black&#x27;,backgroundOpacity:0.5,
+                                           position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
+                  viewer.removeLabel(toremove);
+                  viewer.render();
+
+
+                });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeModel"><span class="type-signature"></span>removeModel<span class="signature">(model)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Delete specified model from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeShape"><span class="type-signature"></span>removeShape<span class="signature">(shape)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove shape object from viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>shape</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Reference to shape object to remove</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeSurface"><span class="type-signature"></span>removeSurface<span class="signature">(surf)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove surface with given ID</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>surf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>surface id</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="removeUnitCell"><span class="type-signature"></span>removeUnitCell<span class="signature">(model)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Remove unit cell visualization from model.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLModel</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/icsd_200866.cif&#x27;, function(data) {
+                  let m = viewer.addModel(data);
+                  viewer.setStyle({sphere:{}})
+                  viewer.addUnitCell();
+                  viewer.zoomTo();
+                  viewer.removeUnitCell();
+                  viewer.render();
+            });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="render"><span class="type-signature"></span>render<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Render current state of viewer, after<br>
+adding/removing models, applying styles, etc.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="replicateUnitCell"><span class="type-signature"></span>replicateUnitCell<span class="signature">(A, B, C, model)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Replicate atoms in model to form a super cell of the specified dimensions.<br>
+Original cell will be centered as much as possible.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>A</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>number of times to replicate cell in X dimension.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>B</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>number of times to replicate cell in Y dimension.  If absent, X value is used.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>C</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>number of times to replicate cell in Z dimension.  If absent, Y value is used.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GLModel</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/icsd_200866.cif&#x27;, function(data) {
+                  let m = viewer.addModel(data);
+                  viewer.setStyle({sphere:{scale:.25}})
+                  viewer.addUnitCell();
+                  viewer.zoomTo();
+                  viewer.replicateUnitCell(3,2,1,m);
+                  viewer.render();
+            });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="resize"><span class="type-signature"></span>resize<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Resize viewer according to containing HTML element's dimensions</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="rotate"><span class="type-signature"></span>rotate<span class="signature">(<span class="optional">angle</span>, <span class="optional">axis</span>, <span class="optional">animationDuration</span>, <span class="optional">fixedPath</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Rotate scene by angle degrees around axis</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>angle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Angle, in degrees, to rotate by.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>axis</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Axis (&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;vx&quot;, &quot;vy&quot;, or &quot;vz&quot;) to rotate around.<br>
+Default &quot;y&quot;.  View relative (rather than model relative) axes are prefixed with v.<br>
+Axis can also be specified as a vector.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>animationDuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>an optional parameter that denotes<br>
+the duration of the rotation animation. Default 0 (no animation)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fixedPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if true animation is constrained to<br>
+requested motion, overriding updates that happen during the animation         *</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&#x27;cid:4000&#x27;, viewer, {}, function() {
+      viewer.setStyle({stick:{}});
+      viewer.zoomTo();
+      viewer.rotate(90,&#x27;y&#x27;,1);
+      viewer.render(callback);
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="screenOffsetToModel"><span class="type-signature"></span>screenOffsetToModel<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>For a given screen (x,y) displacement return model displacement</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="screenToModelDistance"><span class="type-signature"></span>screenToModelDistance<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Distance from screen coordinate to model coordinate assuming screen point<br>
+is projected to the same depth as model coordinate</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="selectedAtoms"><span class="type-signature"></span>selectedAtoms<span class="signature">(sel)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>return list of atoms selected by sel</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Array.&lt;Object></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setAutoEyeSeparation"><span class="type-signature"></span>setAutoEyeSeparation<span class="signature">()</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Used for setting an approx value of eyeSeparation. Created for calling by StereoViewer object</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>camera x position</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setBackgroundColor"><span class="type-signature"></span>setBackgroundColor<span class="signature">(hex, a)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set the background color (default white)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>hex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Hexcode specified background color, or standard color spec</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>a</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Alpha level (default 1.0)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.setBackgroundColor(0x000000);</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setCameraParameters"><span class="type-signature"></span>setCameraParameters<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set camera parameters (distance to the origin and field of view)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">parameters</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>new camera parameters, with possible fields<br>
+being fov for the field of view, z for the<br>
+distance to the origin, and orthographic (boolean)<br>
+for kind of projection (default false).</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&quot;data/set1_122_complex.mol2&quot;, function(data) {
+                var m = viewer.addModel(data);
+                viewer.setStyle({stick:{}});
+                viewer.zoomTo();
+                viewer.setCameraParameters({ fov: 10 , z: 300 });
+                viewer.render();
+            });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setClickable"><span class="type-signature"></span>setClickable<span class="signature">(sel, clickable, callback)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set click-handling properties to all selected atomsthis.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>atom selection to apply clickable settings to</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>clickable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>whether click-handling is enabled for the selection</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>function called when an atom in the selection is clicked</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&quot;cid:307900&quot;,viewer,{},function(){
+
+                   viewer.setStyle({},{sphere:{}});
+                   viewer.setClickable({},true,function(atom,viewer,event,container) {
+                       viewer.addLabel(atom.resn+&quot;:&quot;+atom.atom,{position: atom, backgroundColor: &#x27;darkgreen&#x27;, backgroundOpacity: 0.8});
+                   });
+                   viewer.render();
+        });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setColorByElement"><span class="type-signature"></span>setColorByElement<span class="signature">(sel, colors)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>colors</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setColorByProperty"><span class="type-signature"></span>setColorByProperty<span class="signature">(sel, prop, scheme)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>prop</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>scheme</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setContainer"><span class="type-signature"></span>setContainer<span class="signature">(element)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Change the viewer's container element<br>
+Also useful if the original container element was removed from the DOM.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Either HTML element or string identifier. Defaults to the element used to initialize the viewer.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setFrame"><span class="type-signature"></span>setFrame<span class="signature">(framenum)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Sets the atomlists of all models in the viewer to specified frame.<br>
+Shapes and labels can also be displayed by frame.<br>
+Sets to last frame if framenum out of range</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>framenum</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>fame index to use, starts at zero</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setHeight"><span class="type-signature"></span>setHeight<span class="signature">(h)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set viewer height</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>h</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Height in pixels</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setHoverable"><span class="type-signature"></span>setHoverable<span class="signature">(sel, hoverable, hover_callback, unhover_callback)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set hoverable and callback of selected atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>atom selection to apply hoverable settings to</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>hoverable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>whether hover-handling is enabled for the selection</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>hover_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>function called when an atom in the selection is hovered over</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>unhover_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>function called when the mouse moves out of the hover area</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$3Dmol.download(&quot;pdb:1ubq&quot;,viewer,{},function(){
+
+               viewer.setHoverable({},true,function(atom,viewer,event,container) {
+                   if(!atom.label) {
+                    atom.label = viewer.addLabel(atom.resn+&quot;:&quot;+atom.atom,{position: atom, backgroundColor: &#x27;mintcream&#x27;, fontColor:&#x27;black&#x27;});
+                   }
+               },
+               function(atom) {
+                   if(atom.label) {
+                    viewer.removeLabel(atom.label);
+                    delete atom.label;
+                   }
+                }
+               );
+               viewer.setStyle({},{stick:{}});
+               viewer.render();
+        });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setHoverDuration"><span class="type-signature"></span>setHoverDuration<span class="signature">(<span class="optional">hoverDuration</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set the duration of the hover delay</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>hoverDuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>an optional parameter that denotes<br>
+the duration of the hover delay (in milliseconds) before the hover action is called</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setInternalState"><span class="type-signature"></span>setInternalState<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Overwrite internal state of the viewer with passed  object<br>
+which should come from getInternalState.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setLabelStyle"><span class="type-signature"></span>setLabelStyle<span class="signature">(label, stylespec)</span><span class="type-signature"> &rarr; {$3Dmol.Label}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Modify existing label's style</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Label</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>$3Dmol label</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>stylespec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">$3Dmol.Label</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setLabelText"><span class="type-signature"></span>setLabelText<span class="signature">(label, text)</span><span class="type-signature"> &rarr; {$3Dmol.Label}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Modify existing label's text</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Label</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>$3Dmol label</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Label text</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">$3Dmol.Label</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setPerceivedDistance"><span class="type-signature"></span>setPerceivedDistance<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set the distance between the model and the camera<br>
+Essentially zooming. Useful while stereo rendering.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setProjection"><span class="type-signature"></span>setProjection<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set view projection scheme.  Either orthographic or perspective.<br>
+Default is perspective.  Orthographic can also be enabled on viewer creation<br>
+by setting orthographic to true in the config object.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.setViewStyle({style:&quot;outline&quot;});
+              $.get(&#x27;data/1fas.pqr&#x27;, function(data){
+                  viewer.addModel(data, &quot;pqr&quot;);
+                  $.get(&quot;data/1fas.cube&quot;,function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, &quot;cube&quot;), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                  });
+                  viewer.zoomTo();
+
+                  viewer.setProjection(&quot;orthographic&quot;);
+                  viewer.render(callback);
+              });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setSlab"><span class="type-signature"></span>setSlab<span class="signature">(near, far)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set slab of view (contents outside of slab are clipped).<br>
+Must call render to update.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>near</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>near clipping plane distance</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>far</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>far clipping plane distance</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setStateChangeCallback"><span class="type-signature"></span>setStateChangeCallback<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set a callback to call when the view has potentially changed.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setStyle"><span class="type-signature"></span>setStyle<span class="signature">(sel, style)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set style properties to all selected atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Atom selection specification</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#AtomStyleSpec">AtomStyleSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Style spec to apply to specified atoms</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download(&#x27;pdb:5IRE&#x27;,viewer,{doAssembly: false},function(m) {
+        m.setStyle({chain:&#x27;A&#x27;},{&#x27;cartoon&#x27;:{color:&#x27;spectrum&#x27;}});
+        m.setStyle({chain:&#x27;C&#x27;},{&#x27;cartoon&#x27;:{style:&#x27;trace&#x27;,color:&#x27;blue&#x27;}});
+        m.setStyle({chain:&#x27;E&#x27;},{&#x27;cartoon&#x27;:{tubes:true,arrows:true,color:&#x27;green&#x27;,opacity:0.75}});
+        m.setStyle({chain:&#x27;B&#x27;},{&#x27;cartoon&#x27;:{color:&#x27;red&#x27;,opacity:0.5}});
+        m.setStyle({chain:&#x27;D&#x27;},{&#x27;cartoon&#x27;:{style:&#x27;trace&#x27;,color:&#x27;grey&#x27;,opacity:0.75}});
+        m.setStyle({chain:&#x27;F&#x27;},{&#x27;cartoon&#x27;:{arrows:true,color:&#x27;white&#x27;}});
+       // viewer.addStyle({chain:&#x27;B&#x27;},{line:{}});
+       viewer.zoomTo();
+       viewer.render();
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setSurfaceMaterialStyle"><span class="type-signature"></span>setSurfaceMaterialStyle<span class="signature">(surf, style)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set the surface material to something else, must render change</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>surf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Surface ID to apply changes to</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>style</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#SurfaceStyleSpec">SurfaceStyleSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>new material style specification</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&quot;data/9002806.cif&quot;,function(data){
+            viewer.addModel(data);
+            viewer.setStyle({stick:{}});
+            let surf = viewer.addSurface(&quot;SAS&quot;);
+            surf.then(function() {
+                viewer.setSurfaceMaterialStyle(surf.surfid, {color:&#x27;blue&#x27;,opacity:0.5});
+                viewer.render();
+                });
+           });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setView"><span class="type-signature"></span>setView<span class="signature">(arg)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Sets the view to the specified translation, zoom, and rotation.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>arg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array formatted identically to the return value of getView</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setViewChangeCallback"><span class="type-signature"></span>setViewChangeCallback<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set a callback to call when the view has potentially changed.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setViewStyle"><span class="type-signature"></span>setViewStyle<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set global view styles.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.setViewStyle({style:&quot;outline&quot;});
+              $.get(&#x27;data/1fas.pqr&#x27;, function(data){
+                  viewer.addModel(data, &quot;pqr&quot;);
+                  $.get(&quot;data/1fas.cube&quot;,function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, &quot;cube&quot;), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
+                  });
+                  viewer.zoomTo();
+                  viewer.render(callback);
+              });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setWidth"><span class="type-signature"></span>setWidth<span class="signature">(w)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set viewer width</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>w</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Width in pixels</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setZoomLimits"><span class="type-signature"></span>setZoomLimits<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Set lower and upper limit stops for zoom.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">lower</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>limit on zoom in (positive number).  Default 0.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">upper</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>limit on zoom out (positive number).  Default infinite.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&quot;data/set1_122_complex.mol2&quot;, function(moldata) {
+                var m = viewer.addModel(moldata);
+                viewer.setStyle({stick:{colorscheme:&quot;Jmol&quot;}});
+                viewer.setZoomLimits(100,200);
+                viewer.zoomTo();
+                viewer.zoom(10); //will not zoom all the way
+                viewer.render();
+            });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="spin"><span class="type-signature"></span>spin<span class="signature">(<span class="optional">axis</span>, <span class="optional">speed</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Continuously rotate a scene around the specified axis.</p>
+<p>Call <code>$3Dmol.GLViewer.spin(false)</code> to stop spinning.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>axis</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Axis (&quot;x&quot;, &quot;y&quot;, &quot;z&quot;, &quot;vx&quot;, &quot;vy&quot;, or &quot;vz&quot;) to rotate around.<br>
+Default &quot;y&quot;.  View relative (rather than model relative) axes are prefixed with v.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>speed</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Speed multiplier for spinning the viewer. 1 is default and a negative<br>
+value reverses the direction of the spin.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="stopAnimate"><span class="type-signature"></span>stopAnimate<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Stop animation of all models in viewer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="targetedObjects"><span class="type-signature"></span>targetedObjects<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Return a list of objects that intersect that at the specified viewer position.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">x</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>x position in screen coordinates</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">y</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>y position in screen coordinates</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">objects</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>list of objects or selection object specifying what object to check for targeting</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="translate"><span class="type-signature"></span>translate<span class="signature">(x, y, <span class="optional">animationDuration</span>, <span class="optional">fixedPath</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Translate current view by x,y screen coordinates<br>
+This pans the camera rather than translating the model.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Relative change in view coordinates of camera</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Relative change in view coordinates of camera</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>animationDuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>an optional parameter that denotes<br>
+the duration of a zoom animation</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fixedPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if true animation is constrained to<br>
+requested motion, overriding updates that happen during the animation         *</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/4csv.pdb&#x27;, function(data) {
+      viewer.addModel(data,&#x27;pdb&#x27;);
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.translate(200,50);
+      viewer.rotate(90,&#x27;z&#x27;);
+      viewer.render(callback);
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="translateScene"><span class="type-signature"></span>translateScene<span class="signature">(x, y, <span class="optional">animationDuration</span>, <span class="optional">fixedPath</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Translate current models by x,y screen coordinates<br>
+This translates the models relative to the current view. It does<br>
+not change the center of rotation.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>x</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Relative change in x screen coordinate</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>y</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Relative change in y screen coordinate</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>animationDuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>an optional parameter that denotes<br>
+the duration of a zoom animation</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fixedPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if true animation is constrained to<br>
+requested motion, overriding updates that happen during the animation         *</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/4csv.pdb&#x27;, function(data) {
+      viewer.addModel(data,&#x27;pdb&#x27;);
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo();
+      viewer.translateScene(200,50);
+      viewer.rotate(90,&#x27;z&#x27;); // will no longer be around model center
+      viewer.render(callback);
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="vibrate"><span class="type-signature"></span>vibrate<span class="signature">(numFrames, amplitude, bothWays, arrowSpec)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>If  atoms have dx, dy, dz properties (in some xyz files), vibrate populates each model's frame property based on parameters.<br>
+Models can then be animated</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>numFrames</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>number of frames to be created, default to 10</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>amplitude</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>amplitude of distortion, default to 1 (full)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>bothWays</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if true, extend both in positive and negative directions by numFrames</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>arrowSpec</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#ArrowSpec">ArrowSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="zoom"><span class="type-signature"></span>zoom<span class="signature">(<span class="optional">factor</span>, <span class="optional">animationDuration</span>, <span class="optional">fixedPath</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Zoom current view by a constant factor</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>factor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Magnification factor. Values greater than 1<br>
+will zoom in, less than one will zoom out. Default 2.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>animationDuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>an optional parameter that denotes<br>
+the duration of a zoom animation</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fixedPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if true animation is constrained to<br>
+requested motion, overriding updates that happen during the animation</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/4csv.pdb&#x27;, function(data) {
+      viewer.addModel(data,&#x27;pdb&#x27;);
+      viewer.setStyle({cartoon:{},stick:{}});
+      viewer.zoomTo()
+      viewer.zoom(2,1000);
+      viewer.render();
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="zoomTo"><span class="type-signature"></span>zoomTo<span class="signature">(<span class="optional">sel</span>, <span class="optional">animationDuration</span>, <span class="optional">fixedPath</span>)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Zoom to center of atom selection.  The slab will be set appropriately for<br>
+the selection, unless an empty selection is provided, in which case there will be no slab.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>sel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Selection specification specifying model and atom<br>
+properties to select. Default: all atoms in viewer</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>animationDuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>an optional parameter that denotes<br>
+the duration of a zoom animation</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>fixedPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if true animation is constrained to<br>
+requested motion, overriding updates that happen during the animation         *</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">$.get(&#x27;data/1fas.pqr&#x27;, function(data){
+                  viewer.addModel(data, &quot;pqr&quot;);
+                  $.get(&quot;data/1fas.cube&quot;,function(volumedata){
+                      viewer.addSurface($3Dmol.SurfaceType.VDW, {
+                          opacity:0.85,
+                          voldata: new $3Dmol.VolumeData(volumedata, &quot;cube&quot;),
+                          volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),&#x27;charge&#x27;))
+                      },{});
+
+                  viewer.render();
+                  });
+                  viewer.zoomTo();
+                });</pre>
+
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+				</div>
+
+				<div class="clearfix"></div>
+				<footer>
+					
+					
+		<span class="copyright">
+		3Dmol.js © 2019
+		</span>
+					<br />
+					
+		<span class="jsdoc-message">
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a>
+		on Thu Jul 28 2022 17:35:16 GMT-0400 (Eastern Daylight Time) using the <a
+			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		</span>
+				</footer>
+			</div>
+
+			
+			<div class="span3">
+				<div id="toc"></div>
+			</div>
+			
+			<br clear="both">
+		</div>
+
+	</div>
+	<!--<script src="scripts/sunlight.js"></script>-->
+	<script src="scripts/docstrap.lib.js"></script>
+	<script src="scripts/bootstrap-dropdown.js"></script>
+	<script src="scripts/toc.js"></script>
+
+	<script>
+		$( function () {
+			$( "[id*='$']" ).each( function () {
+				var $this = $( this );
+
+				$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+			} );
+
+			$( "#toc" ).toc( {
+				anchorName  : function ( i, heading, prefix ) {
+					return $( heading ).attr( "id" ) || ( prefix + i );
+				},
+				selectors   : "h1,h2,h3,h4",
+				showAndHide : false,
+				scrollTo    : "100px"
+			} );
+
+			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
+			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+			$( '.dropdown-toggle' ).dropdown();
+//			$( ".tutorial-section pre, .readme-section pre" ).addClass( "sunlight-highlight-javascript" ).addClass( "linenums" );
+
+			$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+				var $this = $( this );
+
+				var example = $this.find( "code" );
+				exampleText = example.html();
+				var lang = /{@lang (.*?)}/.exec( exampleText );
+				if ( lang && lang[1] ) {
+					exampleText = exampleText.replace( lang[0], "" );
+					example.html( exampleText );
+					lang = lang[1];
+				} else {
+					lang = "javascript";
+				}
+
+				if ( lang ) {
+
+					$this
+						.addClass( "sunlight-highlight-" + lang )
+						.addClass( "linenums" )
+						.html( example.html() );
+
+				}
+			} );
+
+			Sunlight.highlightAll( {
+				lineNumbers : true,
+				showMenu : true,
+				enableDoclinks : true
+			} );
+		} );
+	 </script>
+
+
+
+	<!--Navigation and Symbol Display-->
+	
+
+
+	<!--Google Analytics-->
+	
+
+</body>
+</html>

@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>3Dmol.js Namespace: $3Dmol</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="navbar navbar-fixed-top navbar-inverse">
+		<div class="navbar-inner">
+			<a class="brand" href="../index.html">3Dmol.js</a>
+                        
+			<ul class="nav">
+                                <li>
+                                <a href="index.html">Documentation</a>
+                                </li>
+				
+				<li class="dropdown">
+					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="$3Dmol.html">$3Dmol</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLDraw.html">$3Dmol.GLDraw</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLShape.html">$3Dmol.GLShape</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.GLVolumetricRender.html">$3Dmol.GLVolumetricRender</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.StateManager.html">$3Dmol.StateManager</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.UI.html">$3Dmol.UI</a>
+						</li>
+						
+						<li>
+							<a href="$3Dmol.VolumeData.html">$3Dmol.VolumeData</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="tutorial-code.html">Using 3Dmol within your code</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-embeddable.html">Embedding a 3Dmol Viewer</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-learning_environment.html">Active Learning with 3Dmol.js</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-url.html">Viewing Molecules with the 3Dmol Server</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="types.html" class="dropdown-toggle" data-toggle="dropdown">Type Specifications<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="types.html#AlertBox">AlertBox</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ArrowSpec">ArrowSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#AtomSelectionSpec">AtomSelectionSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#AtomSpec">AtomSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#AtomStyleSpec">AtomStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#BoxSpec">BoxSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CartoonStyleSpec">CartoonStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ContextMenu">ContextMenu</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CrossStyleSpec">CrossStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CurveSpec">CurveSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CustomShapeSpec">CustomShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#CylinderSpec">CylinderSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#FileFormats">FileFormats</a>
+						</li>
+						
+						<li>
+							<a href="types.html#IsoSurfaceSpec">IsoSurfaceSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#LineSpec">LineSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#LineStyleSpec">LineStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ModelToolbar">ModelToolbar</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Property">Property</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Selection">Selection</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SelectionBox">SelectionBox</a>
+						</li>
+						
+						<li>
+							<a href="types.html#setLocation">setLocation</a>
+						</li>
+						
+						<li>
+							<a href="types.html#setPosition">setPosition</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ShapeSpec">ShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SphereShapeSpec">SphereShapeSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SphereStyleSpec">SphereStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#StickStyleSpec">StickStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#StyleBox">StyleBox</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Surface">Surface</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SurfaceMenu">SurfaceMenu</a>
+						</li>
+						
+						<li>
+							<a href="types.html#SurfaceStyleSpec">SurfaceStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#UnitCellStyleSpec">UnitCellStyleSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#Vector3">Vector3</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ViewerGridSpec">ViewerGridSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#ViewerSpec">ViewerSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#VolumetricRendererSpec">VolumetricRendererSpec</a>
+						</li>
+						
+						<li>
+							<a href="types.html#WithinSelectionSpec">WithinSelectionSpec</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+
+		
+		<div class="span8">
+			
+				<div id="main">
+					
+
+
+	<h1 class="page-title">Namespace: $3Dmol</h1>
+<section>
+
+<header>
+    <h2>
+    $3Dmol
+    </h2>
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+
+    
+        
+            <div class="description"><p>All of the functionality of $3Dmol.js is contained within the<br>
+$3Dmol global namespace</p></div>
+        
+
+        
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="$3Dmol.GLModel.html">GLModel</a></dt>
+            <dd></dd>
+        
+            <dt><a href="$3Dmol.GLShape.html">GLShape</a></dt>
+            <dd></dd>
+        
+            <dt><a href="$3Dmol.GLShape.html">GLShape</a></dt>
+            <dd></dd>
+        
+            <dt><a href="$3Dmol.GLViewer.html">GLViewer</a></dt>
+            <dd></dd>
+        
+            <dt><a href="$3Dmol.GLVolumetricRender.html">GLVolumetricRender</a></dt>
+            <dd></dd>
+        
+            <dt><a href="$3Dmol.StateManager.html">StateManager</a></dt>
+            <dd></dd>
+        
+            <dt><a href="$3Dmol.UI.html">UI</a></dt>
+            <dd></dd>
+        
+            <dt><a href="$3Dmol.VolumeData.html">VolumeData</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Namespaces</h3>
+
+        <dl>
+            <dt><a href="namespaces.html#$3Dmol.GLDraw"><a href="$3Dmol.GLDraw.html">GLDraw</a></a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id=".CAP"><span class="type-signature">&lt;static, readonly> </span>CAP<span class="type-signature"> :number</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Enum for cylinder cap styles.</p>
+    </div>
+    
+    
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">number</span>
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+	
+
+	<h5 class="subsection-title">Properties:</h5>
+
+	<dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+		<th>Default</th>
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>NONE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>FLAT</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>ROUND</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    2
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".SurfaceType"><span class="type-signature">&lt;static> </span>SurfaceType<span class="type-signature"> :number</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>$3Dmol surface types</p>
+    </div>
+    
+    
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">number</span>
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+	
+
+	<h5 class="subsection-title">Properties:</h5>
+
+	<dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+		<th>Default</th>
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>VDW</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    1
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>MS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    2
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>SAS</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    3
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>SES</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    4
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".syncSurface"><span class="type-signature">&lt;static> </span>syncSurface<span class="type-signature"> :boolean</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Render surface synchronously if true</p>
+    </div>
+    
+    
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">boolean</span>
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".viewers"><span class="type-signature">&lt;static> </span>viewers<span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Contains a dictionary of embedded viewers created from HTML elements<br>
+with a the viewer_3Dmoljs css class indexed by their id (or numerically<br>
+if they do not have an id).</p>
+    </div>
+    
+    
+    
+
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id=".createViewer"><span class="type-signature">&lt;static> </span>createViewer<span class="signature">(element, config, shared_viewer_resources)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and initialize an appropriate viewer at supplied HTML element using specification in config</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Either HTML element or string identifier</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#ViewerSpec">ViewerSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Viewer configuration</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>shared_viewer_resources</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>shared resources between viewers' renderers</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>GLViewer, null if unable to instantiate WebGL</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">var viewer = $3Dmol.createViewer(
+     &#x27;gldiv&#x27;, //id of div to create canvas in
+     {
+       defaultcolors: $3Dmol.elementColors.rasmol,
+       backgroundColor: &#x27;black&#x27;
+     }
+   );
+                       </pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".createViewerGrid"><span class="type-signature">&lt;static> </span>createViewerGrid<span class="signature">(element, config, viewer_config)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Create and initialize an appropriate a grid of viewers that share a WebGL canvas</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>element</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Either HTML element or string identifier</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GridSpec</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>grid configuration</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>viewer_config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="types.html#ViewerGridSpec">ViewerGridSpec</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Viewer specification to apply to all subviewers</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>[[$3Dmol.GLViewer]] 2D array of GLViewers</p>
+</div>
+
+
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">var viewers = $3Dmol.createViewerGrid(
+     &#x27;gldiv&#x27;, //id of div to create canvas in
+     {
+       rows: 2,
+       cols: 2,
+       control_all: true  //mouse controls all viewers
+     },
+     { backgroundColor: &#x27;lightgrey&#x27; }
+   );
+   $.get(&#x27;data/1jpy.cif&#x27;, function(data) {
+     var viewer = viewers[0][0];
+     viewer.addModel(data,&#x27;cif&#x27;);
+     viewer.setStyle({sphere:{}});
+     viewer.zoomTo();
+     viewer.render( );
+
+     viewer = viewers[0][1];
+     viewer.addModel(data,&#x27;cif&#x27;);
+     viewer.setStyle({stick:{}});
+     viewer.zoomTo();     
+     viewer.render( );
+     
+     viewer = viewers[1][0];
+     viewer.addModel(data,&#x27;cif&#x27;);
+     viewer.setStyle({cartoon:{color:&#x27;spectrum&#x27;}});
+     viewer.zoomTo();     
+     viewer.render( );
+     
+     viewer = viewers[1][1];
+     viewer.addModel(data,&#x27;cif&#x27;);
+     viewer.setStyle({cartoon:{colorscheme:&#x27;chain&#x27;}});
+     viewer.zoomTo();     
+     viewer.render();
+     
+     
+   });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".download"><span class="type-signature">&lt;static> </span>download<span class="signature">(query, viewer, options, callback)</span><span class="type-signature"> &rarr; {<a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>query</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>String specifying pdb or pubchem id; must be prefaced with &quot;pdb: &quot; or &quot;cid: &quot;, respectively</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>viewer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="$3Dmol.GLViewer.html">$3Dmol.GLViewer</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Add new model to existing viewer</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Specify additional options<br>
+format: file format to download, if multiple are available, default format is pdb<br>
+pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Function to call with model as argument after data is loaded.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>GLModel, Promise if callback is not provided</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="$3Dmol.GLModel.html">$3Dmol.GLModel</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+        <h5>Example</h5>
+        
+    <pre class="sunlight-highlight-javascript">viewer.setBackgroundColor(0xffffffff);
+       $3Dmol.download(&#x27;pdb:2nbd&#x27;,viewer,{onemol: true,multimodel: true},function(m) {
+        m.setStyle({&#x27;cartoon&#x27;:{colorscheme:{prop:&#x27;ss&#x27;,map:$3Dmol.ssColors.Jmol}}});
+       viewer.zoomTo();
+       viewer.render(callback);
+    });</pre>
+
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".getbin"><span class="type-signature">&lt;static> </span>getbin<span class="signature">(uri, callback, request)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Download binary data (e.g. a gzipped file) into an array buffer and provide<br>
+arraybuffer to callback.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>uri</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>location of data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Function to call with arraybuffer as argument.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>type of request</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Promise</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".getExtent"><span class="type-signature">&lt;static> </span>getExtent<span class="signature">(atomlist)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>computes the bounding box around the provided atoms</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>atomlist</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;<a href="types.html#AtomSpec">AtomSpec</a>></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Array</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".mergeGeos"><span class="type-signature">&lt;static> </span>mergeGeos<span class="signature">(geometry, mesh)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>geometry</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Geometry</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>mesh</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">$3Dmol.Mesh</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">undefined</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".specStringToObject"><span class="type-signature">&lt;static> </span>specStringToObject<span class="signature">((String))</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Parse a string that represents a style or atom selection and convert it<br>
+into an object.  The goal is to make it easier to write out these specifications<br>
+without resorting to json. Objects cannot be defined recursively.<br>
+; - delineates fields of the object<br>
+: - if the field has a value other than an empty object, it comes after a colon<br>
+, - delineates key/value pairs of a value object<br>
+If the value object consists of ONLY keys (no = present) the keys are<br>
+converted to a list.  Otherwise a object of key/value pairs is created with<br>
+any missing values set to null<br>
+= OR ~ - separates key/value pairs of a value object, if not provided value is null<br>
+twiddle is supported since = has special meaning in URLs</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>(String)</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>str</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Object</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+				</div>
+
+				<div class="clearfix"></div>
+				<footer>
+					
+					
+		<span class="copyright">
+		3Dmol.js © 2019
+		</span>
+					<br />
+					
+		<span class="jsdoc-message">
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a>
+		on Thu Jul 28 2022 17:35:16 GMT-0400 (Eastern Daylight Time) using the <a
+			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		</span>
+				</footer>
+			</div>
+
+			
+			<div class="span3">
+				<div id="toc"></div>
+			</div>
+			
+			<br clear="both">
+		</div>
+
+	</div>
+	<!--<script src="scripts/sunlight.js"></script>-->
+	<script src="scripts/docstrap.lib.js"></script>
+	<script src="scripts/bootstrap-dropdown.js"></script>
+	<script src="scripts/toc.js"></script>
+
+	<script>
+		$( function () {
+			$( "[id*='$']" ).each( function () {
+				var $this = $( this );
+
+				$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+			} );
+
+			$( "#toc" ).toc( {
+				anchorName  : function ( i, heading, prefix ) {
+					return $( heading ).attr( "id" ) || ( prefix + i );
+				},
+				selectors   : "h1,h2,h3,h4",
+				showAndHide : false,
+				scrollTo    : "100px"
+			} );
+
+			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
+			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+			$( '.dropdown-toggle' ).dropdown();
+//			$( ".tutorial-section pre, .readme-section pre" ).addClass( "sunlight-highlight-javascript" ).addClass( "linenums" );
+
+			$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+				var $this = $( this );
+
+				var example = $this.find( "code" );
+				exampleText = example.html();
+				var lang = /{@lang (.*?)}/.exec( exampleText );
+				if ( lang && lang[1] ) {
+					exampleText = exampleText.replace( lang[0], "" );
+					example.html( exampleText );
+					lang = lang[1];
+				} else {
+					lang = "javascript";
+				}
+
+				if ( lang ) {
+
+					$this
+						.addClass( "sunlight-highlight-" + lang )
+						.addClass( "linenums" )
+						.html( example.html() );
+
+				}
+			} );
+
+			Sunlight.highlightAll( {
+				lineNumbers : true,
+				showMenu : true,
+				enableDoclinks : true
+			} );
+		} );
+	 </script>
+
+
+
+	<!--Navigation and Symbol Display-->
+	
+
+
+	<!--Google Analytics-->
+	
+
+</body>
+</html>
