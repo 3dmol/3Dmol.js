@@ -60,13 +60,15 @@
         "url": "https://github.com/dkoes/3Dmol.js.git"
     },
     "scripts": {
-        "build": "npm run build --workspaces",
+        "build": "npm run build --workspaces && npm run copy-build && npm run depricate-build",
         "coverage": "npm run coverage --workspaces",
         "doc": "npm run doc --workspaces",
         "glcheck": "npm run glcheck --workspaces",
         "jest": "npm run jest --workspaces",
         "prepare": "npm run build",
-        "test": "npm run test --workspaces"
+        "test": "npm run test --workspaces",
+        "copy-build": "cp -rf ./packages/3Dmol/build .",
+        "depricate-build": "echo ';console.warn(\"https://3dmol.csb.pitt.edu/build/3Dmol.js has been depricated; please use https://3dmol.csb.pitt.edu/packages/3Dmol/build/3Dmol.js\");' >> ./build/3Dmol.js && echo ';console.warn(\"https://3dmol.csb.pitt.edu/build/3Dmol.js has been depricated; please use https://3dmol.csb.pitt.edu/packages/3Dmol/build/3Dmol.js\");' >> ./build/3Dmol-nojquery.js && echo ';console.warn(\"https://3dmol.csb.pitt.edu/build/3Dmol.js has been depricated; please use https://3dmol.csb.pitt.edu/packages/3Dmol/build/3Dmol.js\");' >> ./build/3Dmol-nojquery-min.js && echo ';console.warn(\"https://3dmol.csb.pitt.edu/build/3Dmol.js has been depricated; please use https://3dmol.csb.pitt.edu/packages/3Dmol/build/3Dmol.js\")' >> ./build/3Dmol-min.js"
     },
     "version": "1.8.0",
     "workspaces": [
