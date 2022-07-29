@@ -21,9 +21,9 @@
     "@babel/plugin-transform-typescript": "^7.18.8",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.18.6",
+    "@types/estree": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "@typescript-eslint/parser": "^4.33.0",
-    "awesome-typescript-loader": "^5.2.1",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
     "babel-preset-minify": "^0.5.2",
@@ -53,7 +53,8 @@
     "raw-loader": "^4.0.2",
     "terser-webpack-plugin": "^5.3.3",
     "ts-loader": "^9.3.1",
-    "typescript": "^3",
+    "typedoc": "^0.23.9",
+    "typescript": "^4.7.4",
     "url-loader": "^4.1.1",
     "webpack": "^5",
     "webpack-bundle-analyzer": "^4.5.0",
@@ -61,7 +62,7 @@
     "webpack-dev-server": "4.9.3"
   },
   "scripts": {
-    "build": "gulp",
+    "build": "gulp && npm run doc",
     "prepare": "npm run build",
     "jest": "npx jest --coverage --coverage-directory=./tests/jest/coverage",
     "types": "jsdoc -t node_modules/tsd-jsdoc/dist -r 3Dmol/. -d types",
@@ -71,7 +72,8 @@
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py",
     "cov:glcheck": "npx nyc report --reporter json --report-dir ./tests/glcheck/coverage",
-    "coverage": "istanbul report --include ./tests/**/coverage/coverage-final.json html"
+    "coverage": "istanbul report --include ./tests/**/coverage/coverage-final.json html",
+    "doc": "npx typedoc ./3Dmol/index.ts"
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol-min.js",

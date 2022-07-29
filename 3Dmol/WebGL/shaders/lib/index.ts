@@ -12,7 +12,7 @@ export * from "./stickimposter"
 export * from "./stickimposteroutline"
 export * from "./volumetric"
 
-import { Shader } from "../shaders"
+import { Shader } from '../ShaderType';
 import { basic } from "./basic"
 import { instanced } from "./instanced"
 import { lambert } from "./lambert"

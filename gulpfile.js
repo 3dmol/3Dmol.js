@@ -134,4 +134,4 @@ exports.build = series(check, webpack, parallel(tests, minify, minify_nojquery))
 exports.default = series(clean, parallel(exports.build, doc));
 exports.build_quick = series(webpack, parallel(build_quick, tests));
 exports.clean = clean;
-exports.doc = doc;
+exports.doc = doc

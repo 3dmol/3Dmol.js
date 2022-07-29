@@ -142,7 +142,7 @@ jQuery(function() {
   let viewer = $3Dmol.createViewer( element, config );
 
   $('#btn-02').on('click', function() {
-    let pdbUri = '../doc-data/1ycr.pdb';
+    let pdbUri = './doc-data/1ycr.pdb';
     jQuery.ajax( pdbUri, { 
       success: function(data) {
         let v = viewer;
@@ -200,7 +200,7 @@ jQuery(function() {
     return atom.resi % 2 == 0 ? 'white' : 'green';
   };
   $('#btn-03').on('click', function() {
-    let pdbUri = '../doc-data/1ycr.pdb';
+    let pdbUri = './doc-data/1ycr.pdb';
     jQuery.ajax( pdbUri, { 
       success: function(data) {
         let v = viewer;

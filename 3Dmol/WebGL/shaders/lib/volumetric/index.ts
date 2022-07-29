@@ -1,5 +1,5 @@
 import { uniforms } from "./uniforms";
-import { Shader } from "../../shaders";
+import { Shader } from '../../ShaderType';
 import fragmentShader from "./volumetric.frag";
 import vertexShader from "./volumetric.vert";
 //import fs from "fs";
