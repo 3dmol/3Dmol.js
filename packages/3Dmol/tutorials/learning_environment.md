@@ -21,7 +21,7 @@ git clone https://github.com/3dmol/3Dmol.js.git
 cd 3Dmol.js
 npm install
 #run a standalone flask server
-cd learning-environment
+cd packages/learning-environment
 #can optionally specify a port with -p <PORT>, default is 5000
 python3 server.py
 ```
