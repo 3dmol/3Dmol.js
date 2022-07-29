@@ -1,0 +1,16 @@
+tests
+/node_modules
+/nbproject/private/
+script.map
+.DS_Store
+package-lock.json  #suppose to commit, but triggers security warning on github
+.settings
+
+#Ignoring Virtual Environments for the Active Learning Environment Project
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/

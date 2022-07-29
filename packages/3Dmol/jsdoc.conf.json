@@ -1,0 +1,31 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "plugins": ["plugins/markdown"],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "systemName": "3Dmol.js",
+        "footer": "",
+        "copyright":"3Dmol.js © 2019",
+        "navType": "vertical",
+        "theme": "cerulean",
+        "linenums"              : true,
+        "collapseSymbols"       : false,
+        "inverseNav"            : true,
+        "highlightTutorialCode" : true
+    },
+    "markdown"  : {
+        "parser"   : "gfm",
+        "hardwrap" : true
+    },
+    "opts":{
+        "recurse": true,
+	"encoding": "utf8",
+	"template": "3Dmol-doc-template",
+	"destination": "doc",
+        "tutorials": "tutorials"
+     },
+     "tutorials": "tutorials/"
+}

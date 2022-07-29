@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <title>$3Dmol Test</title>
+        <style>
+            body div {
+                margin: 0;
+                border: 0;
+                padding: 0;
+                width: 100%;
+            }
+            .viewer_3Dmoljs {
+                width: 100%;
+                height: 45vh;
+                position: relative;
+            }
+                
+        </style>
+        <script src="../../build/3Dmol.js"></script>
+    </head>    
+    
+    <body>
+
+        <div class='viewer_3Dmoljs' id='viewer1' data-pdb='2POR' data-backgroundcolor='0xffffff' data-style='{"cartoon":{}}'></div>
+            <hr style="margin: 0; padding: 0;">
+        <div class='viewer_3Dmoljs' id='viewer2' data-pdb='1YCR' data-backgroundcolor='0xffffff' data-style='{"stick":{}}'></div>
+
+    </body> 
+    
+</html>
