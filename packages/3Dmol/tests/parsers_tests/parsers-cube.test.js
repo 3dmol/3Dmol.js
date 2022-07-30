@@ -9,7 +9,7 @@ const fs = require('fs');
 
 describe('Function CUBE | Input:1fas.cube |', ()=>{
     // CUBE returns 'atoms'
-    const data = fs.readFileSync('tests/auto/data/1fas.cube', 'utf-8');
+    const data = fs.readFileSync('../auto/data/1fas.cube', 'utf-8');
     let atoms = $3Dmol.Parsers.CUBE(data, {}); // assignBonds is undefined (same as true)
 
     test("Atom is empty if input has less than 6 lines", () => {
@@ -29,7 +29,7 @@ describe('Function CUBE | Input:1fas.cube |', ()=>{
 });
 
 describe('Function CUBE | Input:1fas.cube | assignBonds: false |', ()=>{ 
-    const data = fs.readFileSync('tests/auto/data/1fas.cube', 'utf-8');
+    const data = fs.readFileSync('../auto/data/1fas.cube', 'utf-8');
     let atoms = $3Dmol.Parsers.CUBE(data, {assignBonds:false});
 
     test("All bonds are empty when assignBonds is false", ()=>{

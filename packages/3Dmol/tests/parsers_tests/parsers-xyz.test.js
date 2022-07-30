@@ -8,7 +8,7 @@ let $3Dmol = require("../../build/3Dmol.js");
 const fs = require('fs');
 
 describe('Function XYZ | Input: C111tiny.xyz | options:{} |', ()=>{
-    const data = fs.readFileSync('tests/auto/data/C111tiny.xyz', 'utf-8')
+    const data = fs.readFileSync('../auto/data/C111tiny.xyz', 'utf-8')
     let atomCount = 17411;
     let atoms = $3Dmol.Parsers.XYZ(data, {}); 
 
@@ -47,7 +47,7 @@ describe('Function XYZ | Input: C111tiny.xyz | options:{} |', ()=>{
 });
 
 describe('Function XYZ | Input: C111tiny.xyz | options: assignBonds |', ()=>{
-    const data = fs.readFileSync('tests/auto/data/C111tiny.xyz', 'utf-8');
+    const data = fs.readFileSync('../auto/data/C111tiny.xyz', 'utf-8');
     let atoms = $3Dmol.Parsers.XYZ(data, {assignBonds:false}); //assignbonds
 
     // assignBonds affects bonds and bondOrder
@@ -70,7 +70,7 @@ describe('Function XYZ | Input: C111tiny.xyz | options: assignBonds |', ()=>{
 });
 
 describe('Function XYZ | Input: C111tiny.xyz | options: multimodel, onemol |', ()=>{
-    const data = fs.readFileSync('tests/auto/data/C111tiny.xyz', 'utf-8');
+    const data = fs.readFileSync('../auto/data/C111tiny.xyz', 'utf-8');
 
     test("Atoms should match the snapshot when multimodel is true", ()=>{
         let atoms = $3Dmol.Parsers.XYZ(data, {multimodel:true}); 

@@ -8,7 +8,7 @@ let $3Dmol = require("../../build/3Dmol.js");
 const fs = require('fs');
 
 describe('Function PQR | Input:1fas.pqr |', ()=>{
-    const data = fs.readFileSync('tests/auto/data/1fas.pqr', 'utf-8')
+    const data = fs.readFileSync('../auto/data/1fas.pqr', 'utf-8')
     let atoms = $3Dmol.Parsers.PQR(data, {});
 
     test("Length of atoms should be 1", ()=>{
@@ -22,7 +22,7 @@ describe('Function PQR | Input:1fas.pqr |', ()=>{
 });
 
 describe('Function PQR | Input:1fas.pqr | options:multimodel, onemol |', ()=>{
-    const data = fs.readFileSync('tests/auto/data/1fas.pqr', 'utf-8')
+    const data = fs.readFileSync('../auto/data/1fas.pqr', 'utf-8')
 
     test("Atoms should match the snapshot (multimodel:true, onemol:false)", ()=>{
         let atoms = $3Dmol.Parsers.PQR(data, {multimodel:true, onemol:false});
@@ -37,7 +37,7 @@ describe('Function PQR | Input:1fas.pqr | options:multimodel, onemol |', ()=>{
 });
 
 describe('Function PQR | Input:1fas.pqr | options:noSecondaryStructure |', ()=>{
-    const data = fs.readFileSync('tests/auto/data/1fas.pqr', 'utf-8')
+    const data = fs.readFileSync('../auto/data/1fas.pqr', 'utf-8')
 
     test("Atoms should match the snapshot (noSecondaryStructure:true)", ()=>{
         let atoms = $3Dmol.Parsers.PQR(data, {noSecondaryStructure:true}); // computeStruct = false

@@ -8,7 +8,7 @@ let $3Dmol = require("../../build/3Dmol.js");
 const fs = require('fs');
 
 describe('Function PDBQT | Input:1SMT.pdb |', ()=>{
-    const data = fs.readFileSync('tests/test_structs/1SMT.pdb', 'utf-8')
+    const data = fs.readFileSync('../test_structs/1SMT.pdb', 'utf-8')
     let atoms = $3Dmol.Parsers.PDBQT(data, {});
 
     test("Atoms should match the snapshot", ()=>{
@@ -18,7 +18,7 @@ describe('Function PDBQT | Input:1SMT.pdb |', ()=>{
 });
 
 describe('Function PDBQT | Input:1SMT.pdb | option: multimodel, onemol |', ()=>{
-    const data = fs.readFileSync('tests/test_structs/1SMT.pdb', 'utf-8')
+    const data = fs.readFileSync('../test_structs/1SMT.pdb', 'utf-8')
     
     test("Atoms should match the snapshot (multimodel:true, onemol:false/undefined)", ()=>{
         let atoms = $3Dmol.Parsers.PDBQT(data, {multimodel:true, onemol:false});
