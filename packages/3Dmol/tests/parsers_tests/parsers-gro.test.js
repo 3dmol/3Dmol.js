@@ -6,9 +6,10 @@ global.$ = require("jquery");
 global.URL.createObjectURL = function() {};
 let $3Dmol = require("../../build/3Dmol.js");
 const fs = require('fs');
+const path = require("path");
 
 describe('Function GRO | Input:2water.gro |', ()=>{
-    const data = fs.readFileSync('../auto/data/2water.gro', 'utf-8')
+    const data = fs.readFileSync(path.resolve(__dirname,'../auto/data/2water.gro'), 'utf-8')
     let atoms = $3Dmol.Parsers.GRO(data);
     let atomCount = atoms[0].length; // 6
 

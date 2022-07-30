@@ -6,9 +6,10 @@ global.$ = require("jquery");
 global.URL.createObjectURL = function() {};
 let $3Dmol = require("../../build/3Dmol.js");
 const fs = require('fs');
+const path = require("path");
 
 describe('Function PRMTOP | Input:model1.prmtop |', ()=>{
-    const data = fs.readFileSync('../auto/data/model1.prmtop', 'utf-8')
+    const data = fs.readFileSync(path.resolve(__dirname,'../auto/data/model1.prmtop'), 'utf-8')
     let atoms = $3Dmol.Parsers.PRMTOP(data);
     
     test("Atoms is empty if input data has less than 1 line", ()=>{

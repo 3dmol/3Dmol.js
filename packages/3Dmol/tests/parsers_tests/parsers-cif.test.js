@@ -6,9 +6,10 @@ global.$ = require("jquery");
 global.URL.createObjectURL = function() {};
 let $3Dmol = require("../../build/3Dmol.js");
 const fs = require('fs');
+const path = require('path');
 
 describe('Function cif | Input: multiple.cif | option: assignBonds |', ()=>{
-    const data = fs.readFileSync('../test_structs/multiple.cif', 'utf-8')
+    const data = fs.readFileSync(path.resolve(__dirname,'../test_structs/multiple.cif'), 'utf-8')
     let atoms = $3Dmol.Parsers.cif(data, {});
     let atoms2 = $3Dmol.Parsers.cif(data, {assignBonds:false});
     
@@ -43,7 +44,7 @@ describe('Function cif | Input: multiple.cif | option: assignBonds |', ()=>{
 });
 
 describe('Function cif | Input: multiple.cif | option: duplicateAssemblyAtoms, dontConnectDuplicatedAtoms |', ()=>{
-    const data = fs.readFileSync('../test_structs/multiple.cif', 'utf-8')
+    const data = fs.readFileSync(path.resolve(__dirname,'../test_structs/multiple.cif'), 'utf-8')
     let atoms = $3Dmol.Parsers.cif(data, {duplicateAssemblyAtoms:true, dontConnectDuplicatedAtoms:false});
 
     test("Atoms should match the snapshot (duplicateAssemblyAtoms:true, dontConnectDuplicatedAtoms:false)", ()=>{

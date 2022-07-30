@@ -6,9 +6,10 @@ global.$ = require("jquery");
 global.URL.createObjectURL = function() {};
 let $3Dmol = require("../../build/3Dmol.js");
 const fs = require('fs');
+const path = require("path");
 
 describe('Function SDF | parseV2000 |', ()=>{
-    const data = fs.readFileSync('../test_structs/aromaticsdf.sdf', 'utf-8')
+    const data = fs.readFileSync(path.resolve(__dirname, '../test_structs/aromaticsdf.sdf'), 'utf-8')
     // undefined keepH
     let atoms = $3Dmol.Parsers.SDF(data, {});
     let atomCount = atoms[0].length;
@@ -55,7 +56,7 @@ describe('Function SDF | parseV2000 |', ()=>{
 
 // keepH = false; noH = true;
 describe('Function SDF | parseV2000 | options: keepH |', ()=>{
-    const data = fs.readFileSync('../test_structs/aromaticsdf.sdf', 'utf-8')
+    const data = fs.readFileSync(path.resolve(__dirname, '../test_structs/aromaticsdf.sdf'), 'utf-8')
     let atoms = $3Dmol.Parsers.SDF(data, {keepH:false});
 
     test("Atoms should match the snapshot when keepH is false", ()=>{
@@ -66,7 +67,7 @@ describe('Function SDF | parseV2000 | options: keepH |', ()=>{
 
 // multimodel
 describe('Function SDF | parseV2000 | options: multimodel, onemol |', ()=>{
-    const data = fs.readFileSync('../test_structs/aromaticsdf.sdf', 'utf-8')
+    const data = fs.readFileSync(path.resolve(__dirname, '../test_structs/aromaticsdf.sdf'), 'utf-8')
 
     test("Atoms should match the snapshot when multimodel is true and onemol is false/undefinedd", ()=>{
         let atoms = $3Dmol.Parsers.SDF(data, {multimodel:true, onemol:false}); 
