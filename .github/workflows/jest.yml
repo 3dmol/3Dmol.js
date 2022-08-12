@@ -1,11 +1,11 @@
 name: Jest
 
-on: 
+on:
+  pull_request:
   push:
     branches: [master]
-  pull_request:
-    branches:
-      - '**'
+  workflow_dispatch:
+
 
 jobs:
   jest:
