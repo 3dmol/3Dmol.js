@@ -4,7 +4,7 @@
 <title>3Dmol.js Viewer</title>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<script src="build/3Dmol.js"></script>
+<script src="packages/3Dmol/build/3Dmol-min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
  
@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="viewer.css">
   <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
   <script src="viewer.js"></script>
-  <script src="learning-environment/sessions.js"></script>
+  <script src="packages/learning-environment/sessions.js"></script>
   
 <script>
     (function(i, s, o, g, r, a, m) {
@@ -37,7 +37,7 @@
 </head>
 <body>
 <span id="menu"  onclick="toggleHide();">&#9776;</span>
-<div id="sessionbutton"><img src="learning-environment/share.png" width=32></div>
+<div id="sessionbutton"><img src="packages/learning-environment/share.png" width=32></div>
 <div id="sessionconnect" class="rightdialog">
 <div>
 <button id="sessionconnectbutton" disabled>Create</button> Session: <input type=text size=10 id="session_name_input">

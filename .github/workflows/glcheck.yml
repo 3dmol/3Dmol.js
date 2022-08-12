@@ -2,7 +2,7 @@ name: glcheck
 on:
   pull_request:
   push:
-    branches: [master, feature-glcheck]
+    branches: [master]
   workflow_dispatch:
   
 jobs:

@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "declarationDir": "tmp/types",
+    "noImplicitAny": false,
+    "outDir": "tmp",
+    "module": "esnext",
+    "target": "ES2015",
+    "allowJs": true,
+    "sourceMap": true,
+    "declaration": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": false,
+    "moduleResolution": "node",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "baseUrl": "./src/ts/main",
+  },
+  "include": [
+    "src/ts/main/**/*.ts",
+    "src/ts/main/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "*.frag",
+    "*.vert"
+  ],
+  "typedocOptions": {
+    "entryPoints": [
+      "./src/ts/main/index.ts",
+      "./src/ts/main/global.d.ts",
+      "./src/ts/main/WebGL/shaders/shaders.d.ts"
+    ],
+    "out": "doc/typescript"
+  }
+}

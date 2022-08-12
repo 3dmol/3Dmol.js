@@ -3,8 +3,6 @@
 script.map
 my_pdbs/
 build
-doc
-doc/scripts/toc.js
 .DS_Store
 package-lock.json  #suppose to commit, but triggers security warning on github
 .settings
@@ -15,6 +13,7 @@ package-lock.json  #suppose to commit, but triggers security warning on github
 .st
 tmp/
 .parcel-cache/
+nbproject
 
 
 #Ignoring Virtual Environments for the Active Learning Environment Project

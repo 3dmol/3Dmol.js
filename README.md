@@ -14,14 +14,14 @@ With 3Dmol.js, you can add beautifully rendered molecular visualizations to your
 * clickable interactivity with molecular data
 * geometric shapes including spheres and arrows
 
-See the [documentation](https://3dmol.csb.pitt.edu/doc/index.html) to learn how to use 3Dmol.js as a hosted viewer, embeddable viewer, or as a component of a larger application.
+See the [documentation](https://3dmol.csb.pitt.edu/packages/3Dmol/doc/index.html) to learn how to use 3Dmol.js as a hosted viewer, embeddable viewer, or as a component of a larger application.
 
 ## Examples
 
 #### PDB
 We support the use of both PDB queries as well as PDB files.
 
-![Alt Text](ReadMeIMGS/example1.png)
+![Alt Text](examples/example1.png)
 
 First you simply create the viewer with a div's id.
 ```javascript
@@ -39,7 +39,7 @@ $3Dmol.download("pdb:1MO8",viewer,{multimodel:true, frames:true},function(){
 #### Surfaces
 We also support the use of surfaces that are asynchronously loaded and support different color schemes
 
-![Alt Text](ReadMeIMGS/example2.png)
+![Alt Text](examples/example2.png)
 
 ```javascript
 viewer.addSurface($3Dmol.SurfaceType.VDW, {
@@ -52,7 +52,7 @@ viewer.addSurface($3Dmol.SurfaceType.VDW, {
 #### Shapes
 The use of different shapes and styles is supported.
 
-![Alt Text](ReadMeIMGS/example3.png)
+![Alt Text](examples/example3.png)
 
 ```javascript
 viewer.addCylinder({start:{x:0.0,y:2.0,z:0.0},
@@ -71,7 +71,7 @@ viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
 
 ## Documentation
 
-Please check out our documentation at [3dmol.js](https://3dmol.csb.pitt.edu/doc/index.html). We have tutorials, as well as the stable release of the platform.
+Please check out our documentation at [3dmol.js](https://3dmol.csb.pitt.edu/packages/3Dmol/doc/index.html). We have tutorials, as well as the stable release of the platform.
 
 ## Contact
 
