@@ -24,7 +24,7 @@ export type IsoSurfaceSpec = Partial<{
     /** distance around coords to include data [default = 2.0] */
     seldist: number;
     /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
-    voldata: VolumeData;
+    voldata: any; //VolumeData; not ported yet
     /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
     volscheme: Gradient;
     /** format of voldata if not a $3Dmol.VolumeData object */
@@ -32,5 +32,5 @@ export type IsoSurfaceSpec = Partial<{
     /** if true, user can click on object to trigger callback */
     clickable: boolean;
     /** function to call on click */
-    callback: (viewer: GLViewer, event: MouseEvent) => void;
+    callback: (viewer: /**GLViewer*/ any, event: MouseEvent) => void;
 }>;

@@ -183,3 +183,4 @@ export * from "./partialCharges";
 export * from "./parsers";
 export * from "./WebGL";
 export * from "./utils";
+export * from "./specs";

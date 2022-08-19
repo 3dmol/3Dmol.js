@@ -1,3 +1,10 @@
+export type LineStyleSpec = any;
+export type CrossStyleSpec = any;
+export type StickStyleSpec = any;
+export type SphereStyleSpec = any;
+export type CartoonStyleSpec = any;
+export type ClickSphereStyleSpec = any;
+
 export type AtomStyleSpec = Partial<{
   /** draw bonds as lines */
   line: LineStyleSpec;
@@ -12,5 +19,6 @@ export type AtomStyleSpec = Partial<{
   /** invisible style for click handling only */
   clicksphere: ClickSphereStyleSpec;
 }>;
+
 
 
