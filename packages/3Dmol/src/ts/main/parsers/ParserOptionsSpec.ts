@@ -14,7 +14,8 @@
   * @prop {boolean} normalizeAssembly - shift symmetry mates so their centroid is in the unit cell
   * @prop {boolean} dontConnectDuplicatedAtoms - do not detect bonds between symmetries generated with duplicateAssemblyAtoms (cif only - other formats never make bonds between symmetries)
   * @prop {boolean} noSecondaryStructure - boolean dictating the presence of a secondary structure ; supported by pdb
-  * @prop {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb
+  * @prop {boolean} noComputeSecondaryStructure - do not compute ss ; supported by pdb, mmtf, cif
+  * @prop {number} hbondCutoff - maximum distance used for identifying hydrogen bonds when computing secondary structure; supported by pdb, mmtf, cif
   * @prop {string} altLoc -which alternate location to select, if present; '*' to load all ; supported by pdb
   * @prop {number} assemblyIndex - index of the assembly in symmetry ; supported by mmtf
   * @prop {boolean} assignBonds - for formats without explicit bonds (e.g. PDB, xyz) infer bonding (default true). 
@@ -35,6 +36,7 @@
   dontConnectDuplicatedAtoms: boolean,
   noSecondaryStructure: boolean,
   noComputeSecondaryStructure: boolean,
+  hbondCutoff: number,
   altLoc: string,
   assemblyIndex: number,
   assignBonds: boolean

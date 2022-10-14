@@ -245,7 +245,7 @@ export function getSinglePDB(lines, options, sslookup) {
     processSymmetries(modelData.symmetries, atoms, options, modelData.cryst);
 
   if (computeStruct && !ignoreStruct) {
-    computeSecondaryStructure(atoms);
+    computeSecondaryStructure(atoms, options.hbondCutoff);
   }
 
   // Assign secondary structures from pdb file

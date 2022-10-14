@@ -1,12 +1,12 @@
 // this will identify all hydrogen bonds between backbone
 // atoms; assume atom names are correct, only identifies
 // single closest hbond
-export function assignBackboneHBonds(atomsarray) {
-  var maxlength = 3.2;
-  var maxlengthSq = 10.24;
-  var atoms = [];
-  var i, j, n;
-  for (i = 0, n = atomsarray.length; i < n; i++) {
+export function assignBackboneHBonds(atomsarray, hbondCutoff) {
+  let maxlength = hbondCutoff || 3.2;
+  let maxlengthSq = maxlength*maxlength;
+  let atoms = [];
+
+  for (let i = 0, n = atomsarray.length; i < n; i++) {
     atomsarray[i].index = i;
     // only consider 'N' and 'O'
     var atom = atomsarray[i];
@@ -20,10 +20,10 @@ export function assignBackboneHBonds(atomsarray) {
   atoms.sort(function (a, b) {
     return a.z - b.z;
   });
-  for (i = 0, n = atoms.length; i < n; i++) {
+  for (let i = 0, n = atoms.length; i < n; i++) {
     var ai = atoms[i];
 
-    for (j = i + 1; j < n; j++) {
+    for (let j = i + 1; j < n; j++) {
       var aj = atoms[j];
       var zdiff = aj.z - ai.z;
       if (zdiff > maxlength)

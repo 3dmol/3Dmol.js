@@ -106,7 +106,7 @@ export function PQR(str, options) {
       for (let i = 0; i < atoms.length; i++) {
           assignPDBBonds(atoms[i]);
           if (computeStruct)
-              computeSecondaryStructure(atoms[i]);
+              computeSecondaryStructure(atoms[i],options.hbondCutoff);
       }
       
       return atoms;

@@ -126,11 +126,26 @@ function build_quick() {
     .pipe(dest("build"));
 }
 
-const webpack = shell.task("webpack --config webpack.config.js");
-
-
-exports.build = series(check, webpack, parallel(tests, minify, minify_nojquery));
+//const webpack = shell.task("webpack --config webpack.config.js");
+//todo: separate dev/prod
+const webpack = require('webpack')
+const webpackDev = require('./webpack.dev.js')
+const webpackProd = require('./webpack.prod.js')
+function assets(cb) {
+    return new Promise((resolve, reject) => {
+        webpack(webpackDev, (err, stats) => {
+            if (err) {
+                return reject(err)
+            }
+            if (stats.hasErrors()) {
+                return reject(new Error(stats.compilation.errors.join('\n')))
+            }
+            resolve()
+        })
+    })
+}
+exports.build = series(check, assets, parallel(tests, minify, minify_nojquery));
 exports.default = series(clean, parallel(exports.build, doc));
-exports.build_quick = series(webpack, parallel(build_quick, tests));
+exports.build_quick = series(assets, parallel(build_quick, tests));
 exports.clean = clean;
 exports.doc = doc

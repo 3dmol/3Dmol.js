@@ -185,7 +185,7 @@ class TestSystem():
             with open(filename,"r", encoding="utf-8") as file:
                 files.append(File(filename,"builtin",file.read()))
         
-        print("Found %d files"%len(files))
+        #print("Found %d files"%len(files))
         
         return files
 

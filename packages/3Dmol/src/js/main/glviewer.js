@@ -3324,8 +3324,8 @@ $3Dmol.GLViewer = (function() {
             };
             resolve = function() {
                 that.render();
-                if(!that.getCanvas().isConnected && renderer.isLost()) {
-                    //we no longer exist
+                if(!that.getCanvas().isConnected) {
+                    //we no longer exist as part of the DOM
                     that.stopAnimate();
                 }
                 else if (++displayCount == displayMax || !that.isAnimated()) {

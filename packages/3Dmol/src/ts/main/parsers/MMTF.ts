@@ -301,7 +301,7 @@ export function MMTF(bindata, options) {
   }                
   
   if (computeStruct  && !ignoreStruct) {
-      computeSecondaryStructure(atoms);
+      computeSecondaryStructure(atoms,options.hbondCutoff);
   }       
   
   return atoms;

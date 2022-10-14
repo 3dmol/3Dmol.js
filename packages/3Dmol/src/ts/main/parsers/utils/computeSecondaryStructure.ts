@@ -1,7 +1,7 @@
 import { assignBackboneHBonds } from "./assignBackboneHBonds";
 
-export function computeSecondaryStructure(atomsarray) {
-  assignBackboneHBonds(atomsarray);
+export function computeSecondaryStructure(atomsarray, hbondCutoff) {
+  assignBackboneHBonds(atomsarray, hbondCutoff);
 
   // compute, per residue, what the secondary structure is
   var chres = {}; // lookup by chain and resid

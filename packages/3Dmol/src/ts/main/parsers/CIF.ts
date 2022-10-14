@@ -397,7 +397,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
   }
   for (let i = 0; i < atoms.length; i++) {
     if (assignbonds) assignBonds(atoms[i]);
-    computeSecondaryStructure(atoms[i]);
+    computeSecondaryStructure(atoms[i],options.hbondCutoff);
     processSymmetries(
       modelData[i].symmetries,
       atoms[i],

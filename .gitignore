@@ -1,12 +1,15 @@
 /node_modules
 /nbproject/private/
 script.map
+.externalToolBuilders
+.pydevproject
 my_pdbs/
-build
 .DS_Store
 package-lock.json  #suppose to commit, but triggers security warning on github
 .settings
 /assets
+node_modules
+__pycache__
 /'design concepts'
 .nyc_output
 .vscode
