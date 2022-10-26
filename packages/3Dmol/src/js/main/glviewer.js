@@ -1177,6 +1177,11 @@ $3Dmol.GLViewer = (function() {
                 initContainer(container);
                 regen = true;
             }
+            if(WIDTH == 0 || HEIGHT == 0) {
+                if(animated) this.pauseAnimate();
+            } else if(animated) {
+                this.resumeAnimate();
+            }
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
             camera.aspect = ASPECT;
@@ -3296,7 +3301,7 @@ $3Dmol.GLViewer = (function() {
             var displayCount = 0;
             var displayMax = mostFrames * reps;
             var time = new Date();
-            var resolve, intervalID;
+            var resolve, timer;
             var display = function(direction) {
                 time = new Date();
                 if (direction == "forward") {
@@ -3329,21 +3334,21 @@ $3Dmol.GLViewer = (function() {
                     that.stopAnimate();
                 }
                 else if (++displayCount == displayMax || !that.isAnimated()) {
-                    clearTimeout(intervalID);
-                    animationTimers.delete(intervalID);
+                    timer.cancel();
+                    animationTimers.delete(timer);
                     decAnim();
                 }
                 else {
                     var newInterval = interval - (new Date() - time);
                     newInterval = (newInterval>0)?newInterval:0;
-                    animationTimers.delete(intervalID);
-                    intervalID = setTimeout(display, newInterval, loop);
-                    animationTimers.add(intervalID);
+                    animationTimers.delete(timer);
+                    timer = $3Dmol.PausableTimer(display, newInterval, loop);
+                    animationTimers.add(timer);
                 }
             };
 
-            intervalID = setTimeout(display, 0, loop);
-            animationTimers.add(intervalID);
+            timer = $3Dmol.PausableTimer(display, 0, loop);
+            animationTimers.add(timer);
             return this;
         };
 
@@ -3353,10 +3358,29 @@ $3Dmol.GLViewer = (function() {
          */
         this.stopAnimate = function() {
             animated = 0;
-            animationTimers.forEach(function(timer) { clearTimeout(timer);});
+            animationTimers.forEach(function(timer) { timer.cancel();});
             animationTimers = new Set();
             return this;
         };
+
+        /**
+         * Pause animation of all models in viewer
+         * @function $3Dmol.GLViewer#pauseAnimate
+         */
+        this.pauseAnimate = function() {
+            animationTimers.forEach(function(timer) { timer.pause();});
+            return this;
+        };     
+        
+        /**
+         * Resume animation of all models in viewer
+         * @function $3Dmol.GLViewer#resumeAnimate
+         */
+        this.resumeAnimate = function() {
+            animationTimers.forEach(function(timer) { timer.resume();});
+            return this;
+        };        
+           
 
         /**
          * Return true if viewer is currently being animated, false otherwise

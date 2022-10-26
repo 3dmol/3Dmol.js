@@ -784,3 +784,32 @@ $3Dmol.adjustVolumeStyle = function(style) {
         }
     }
 };
+
+//adapted from https://stackoverflow.com/questions/3969475/javascript-pause-settimeout
+$3Dmol.PausableTimer = function (fn, countdown, arg) {
+    var ident, complete = false;
+    var total_time_run = 0;
+    var start_time = new Date().getTime();
+
+    function _time_diff(date1, date2) {
+        return date2 ? date2 - date1 : new Date().getTime() - date1;
+    }
+
+    function cancel() {
+        clearTimeout(ident);
+    }
+
+    function pause() {
+        clearTimeout(ident);
+        total_time_run = _time_diff(start_time);
+        complete = total_time_run >= countdown;
+    }
+
+    function resume() {
+        ident = complete ? -1 : setTimeout(fn, countdown - total_time_run);
+    }
+
+    ident = setTimeout(fn, countdown, arg);
+
+    return { cancel: cancel, pause: pause, resume: resume };
+};
