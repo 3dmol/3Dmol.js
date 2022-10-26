@@ -787,7 +787,7 @@ $3Dmol.adjustVolumeStyle = function(style) {
 
 //adapted from https://stackoverflow.com/questions/3969475/javascript-pause-settimeout
 $3Dmol.PausableTimer = function (fn, countdown, arg) {
-    var ident, complete = false;
+    var ident = false;
     var total_time_run = 0;
     var start_time = new Date().getTime();
 
@@ -806,7 +806,7 @@ $3Dmol.PausableTimer = function (fn, countdown, arg) {
     }
 
     function resume() {
-        ident = complete ? -1 : setTimeout(fn, countdown - total_time_run);
+        ident = setTimeout(fn, Math.max(0,countdown - total_time_run));
     }
 
     ident = setTimeout(fn, countdown, arg);

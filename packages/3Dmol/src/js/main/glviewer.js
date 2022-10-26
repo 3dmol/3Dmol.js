@@ -1178,9 +1178,9 @@ $3Dmol.GLViewer = (function() {
                 regen = true;
             }
             if(WIDTH == 0 || HEIGHT == 0) {
-                if(animated) this.pauseAnimate();
+                if(animated) _viewer.pauseAnimate();
             } else if(animated) {
-                this.resumeAnimate();
+                _viewer.resumeAnimate();
             }
             ASPECT = renderer.getAspect(WIDTH,HEIGHT);
             renderer.setSize(WIDTH, HEIGHT);
