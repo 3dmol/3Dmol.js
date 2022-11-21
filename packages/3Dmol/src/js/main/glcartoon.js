@@ -1041,7 +1041,9 @@ $3Dmol.drawCartoon = (function() {
                  */
                 if (next.hetflag) 
                     ; //ignore non-protein atoms
-                else if (next.elem === 'C' && next.atom === 'CA' || inNucleicAcid && next.atom === "P") {
+                else if (next.elem === 'C' && next.atom === 'CA' || 
+                        inNucleicAcid && next.atom === "P" ||
+                        next.atom === 'BB') {
                     // determine cylinder color
                     nextColor = cartoonColor(next, cartoon);                    
 
