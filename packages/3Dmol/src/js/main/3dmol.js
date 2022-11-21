@@ -803,7 +803,6 @@ $3Dmol.PausableTimer = function (fn, countdown, arg) {
     function pause() {
         clearTimeout(ident);
         total_time_run = _time_diff(start_time);
-        complete = total_time_run >= countdown;
     }
 
     function resume() {
