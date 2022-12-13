@@ -55,7 +55,7 @@ H         -0.57470       -7.29915        1.13071
 </textarea>
 */
 
-viewer.addModel($('#mol').val(),'xyz');
+viewer.addModel($3Dmol.$('#mol').val(),'xyz');
 viewer.setStyle({'sphere':{radius:0.5},'stick':{}});
 viewer.setClickable({},true,function(atom) {
     viewer.removeAllShapes();

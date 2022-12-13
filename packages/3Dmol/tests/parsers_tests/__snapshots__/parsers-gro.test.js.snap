@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Function GRO | Input:2water.gro | Atoms should match the snapshot 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "atom": "OW1",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         1,
         2,
       ],
@@ -18,7 +18,7 @@ Array [
       "dz": 0.434,
       "elem": "O",
       "index": 0,
-      "properties": Object {},
+      "properties": {},
       "resi": 1,
       "resn": "WATER",
       "serial": 0,
@@ -26,12 +26,12 @@ Array [
       "y": 16.240000000000002,
       "z": 16.79,
     },
-    Object {
+    {
       "atom": "HW2",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
       ],
       "dx": 8.085,
@@ -39,7 +39,7 @@ Array [
       "dz": -7.791,
       "elem": "H",
       "index": 1,
-      "properties": Object {},
+      "properties": {},
       "resi": 1,
       "resn": "WATER",
       "serial": 1,
@@ -47,12 +47,12 @@ Array [
       "y": 16.61,
       "z": 17.470000000000002,
     },
-    Object {
+    {
       "atom": "HW3",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
       ],
       "dx": -9.045,
@@ -60,7 +60,7 @@ Array [
       "dz": 13.18,
       "elem": "H",
       "index": 2,
-      "properties": Object {},
+      "properties": {},
       "resi": 1,
       "resn": "WATER",
       "serial": 2,
@@ -68,13 +68,13 @@ Array [
       "y": 15.68,
       "z": 16.13,
     },
-    Object {
+    {
       "atom": "OW1",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         5,
       ],
@@ -83,7 +83,7 @@ Array [
       "dz": -1.734,
       "elem": "O",
       "index": 3,
-      "properties": Object {},
+      "properties": {},
       "resi": 2,
       "resn": "WATER",
       "serial": 3,
@@ -91,12 +91,12 @@ Array [
       "y": 0.53,
       "z": 6.22,
     },
-    Object {
+    {
       "atom": "HW2",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
       ],
       "dx": -10.641,
@@ -104,7 +104,7 @@ Array [
       "dz": 0.257,
       "elem": "H",
       "index": 4,
-      "properties": Object {},
+      "properties": {},
       "resi": 2,
       "resn": "WATER",
       "serial": 4,
@@ -112,12 +112,12 @@ Array [
       "y": 0.02,
       "z": 6.800000000000001,
     },
-    Object {
+    {
       "atom": "HW3",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
       ],
       "dx": 19.427,
@@ -125,7 +125,7 @@ Array [
       "dz": -0.24400000000000002,
       "elem": "H",
       "index": 5,
-      "properties": Object {},
+      "properties": {},
       "resi": 2,
       "resn": "WATER",
       "serial": 5,

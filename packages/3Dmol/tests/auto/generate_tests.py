@@ -137,7 +137,7 @@ class File():
                 name=""
             exmp=text[i+8:smallest_next]
             exmp=exmp.replace('*','')
-            filename=re.sub(r'.*/3Dmol/',"",filename)
+            filename=re.sub(r'.*/3Dmol/src/',"",filename)
             flname=filename+"_"+name
             
             flname=flname.replace(".","_")
@@ -163,7 +163,7 @@ class File():
 
 
 class TestSystem():
-    def __init__(self,d='.'):
+    def __init__(self,d):
         self.files=self.declareFiles(d)
 
     def declareFiles(self,d):
@@ -171,13 +171,13 @@ class TestSystem():
         examples_path=abspath(d+"/src")
         files=[]
         # typescript files
-        for filename in glob.glob(examples_path+'/ts/main/*.ts'):
+        for filename in glob.glob(examples_path+'/*.ts'):
             with open(filename, 'r', encoding='utf-8') as file:
                 contents = file.read()
                 files.append(File(filename,"generated",contents))
 
         #these are the files with examples in them
-        for filename in glob.glob(examples_path+'/js/main/*.js'):
+        for filename in glob.glob(examples_path+'/*.js'):
             with open(filename,'r', encoding="utf-8") as text:
                 files.append(File(filename,"generated",text.read()))
         #these are the built in tests
@@ -190,9 +190,15 @@ class TestSystem():
         return files
 
 if __name__ == '__main__':
-    test=TestSystem() 
-    path=abspath("./tests/auto/build.js")
     
+    rootdir = os.getcwd()
+    if rootdir.endswith('tests/auto'): # in test dir
+        path = abspath(rootdir + '/build.js')
+        rootdir = abspath("../..")
+    else: # assume run from 3Dmol        
+        path=abspath("./tests/auto/build.js")
+
+    test=TestSystem(rootdir) 
     f=open(path,"w")
     f.write("")
     

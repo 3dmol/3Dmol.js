@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Function json | Atoms should match the snapshot 1`] = `
-Array [
-  Array [
-    Object {
-      "bondOrder": Array [
+[
+  [
+    {
+      "bondOrder": [
         1,
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         1,
         2,
         3,
@@ -21,11 +21,11 @@ Array [
       "y": 144,
       "z": 0,
     },
-    Object {
-      "bondOrder": Array [
+    {
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
       ],
       "elem": "C",
@@ -35,11 +35,11 @@ Array [
       "y": 134,
       "z": 0,
     },
-    Object {
-      "bondOrder": Array [
+    {
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
       ],
       "elem": "C",
@@ -49,11 +49,11 @@ Array [
       "y": 134,
       "z": 0,
     },
-    Object {
-      "bondOrder": Array [
+    {
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
       ],
       "elem": "C",

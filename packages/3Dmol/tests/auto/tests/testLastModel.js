@@ -13826,8 +13826,8 @@ _pdbx_struct_assembly_auth_evidence.details                ?
 </textarea>    
 */
 
-var cif1 = $("#cif1").val();
-var cif2 = $("#cif2").val();
+var cif1 = $3Dmol.$("#cif1").val();
+var cif2 = $3Dmol.$("#cif2").val();
 
 viewer.addModel(cif1, "cif");
 viewer.addModel(cif2, "cif");

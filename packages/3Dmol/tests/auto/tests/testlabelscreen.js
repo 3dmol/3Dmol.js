@@ -55,7 +55,7 @@ H         -0.57470       -7.29915        1.13071
 </textarea>
 */
 
-viewer.addModel($('#mol').val(),'xyz');
+viewer.addModel($3Dmol.$('#mol').val(),'xyz');
 viewer.setStyle({'sphere':{radius:0.5},'stick':{}});
 
 viewer.addLabel("Screen Label",{position:{x:0,y:0,z:0},useScreen: true, fontSize: 24});

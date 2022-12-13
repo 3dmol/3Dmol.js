@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "declarationDir": "tmp/types",
+    "declarationDir": "build/types",
     "noImplicitAny": false,
     "outDir": "tmp",
     "module": "esnext",
@@ -15,11 +15,12 @@
       "dom",
       "esnext"
     ],
-    "baseUrl": "./src/ts/main",
+    "baseUrl": "./src",
   },
   "include": [
-    "src/ts/main/**/*.ts",
-    "src/ts/main/**/*.d.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.js"   
   ],
   "exclude": [
     "node_modules",
@@ -28,9 +29,9 @@
   ],
   "typedocOptions": {
     "entryPoints": [
-      "./src/ts/main/index.ts",
-      "./src/ts/main/global.d.ts",
-      "./src/ts/main/WebGL/shaders/shaders.d.ts"
+      "./src/index.ts",
+      "./src/global.d.ts",
+      "./src/WebGL/shaders/shaders.d.ts"
     ],
     "out": "doc/typescript"
   }

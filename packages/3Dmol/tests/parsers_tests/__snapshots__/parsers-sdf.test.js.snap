@@ -1,52 +1,52 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Function SDF | parseV2000 | Atoms should match the snapshot 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         10,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 0,
-      "properties": Object {},
+      "properties": {},
       "serial": 0,
       "x": -9.856,
       "y": 4.168,
       "z": 6.715,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 1,
-      "properties": Object {},
+      "properties": {},
       "serial": 1,
       "x": -12.153,
       "y": 2.39,
       "z": 5.307,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         1,
         4,
         5,
@@ -54,20 +54,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 2,
-      "properties": Object {},
+      "properties": {},
       "serial": 2,
       "x": -11.98,
       "y": 3.867,
       "z": 5.218,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         6,
         7,
@@ -75,20 +75,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 3,
-      "properties": Object {},
+      "properties": {},
       "serial": 3,
       "x": -11.355,
       "y": 5.923,
       "z": 5.494,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         2,
         3,
@@ -96,39 +96,39 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 4,
-      "properties": Object {},
+      "properties": {},
       "serial": 4,
       "x": -10.967,
       "y": 4.626,
       "z": 5.788,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
         6,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 5,
-      "properties": Object {},
+      "properties": {},
       "serial": 5,
       "x": -12.865,
       "y": 4.669,
       "z": 4.596,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
         5,
         8,
@@ -136,73 +136,73 @@ Array [
       "elem": "N",
       "hetflag": true,
       "index": 6,
-      "properties": Object {},
+      "properties": {},
       "serial": 6,
       "x": -12.483,
       "y": 5.926,
       "z": 4.762,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
         9,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 7,
-      "properties": Object {},
+      "properties": {},
       "serial": 7,
       "x": -10.714,
       "y": 7.084,
       "z": 5.905,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         6,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 8,
-      "properties": Object {},
+      "properties": {},
       "serial": 8,
       "x": -12.943,
       "y": 6.722,
       "z": 4.411,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         7,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 9,
-      "properties": Object {},
+      "properties": {},
       "serial": 9,
       "x": -9.929,
       "y": 7.031,
       "z": 6.415,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         11,
         12,
@@ -210,20 +210,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 10,
-      "properties": Object {},
+      "properties": {},
       "serial": 10,
       "x": -9.716,
       "y": 4.99,
       "z": 7.966,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
         14,
         16,
@@ -231,20 +231,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 11,
-      "properties": Object {},
+      "properties": {},
       "serial": 11,
       "x": -8.698,
       "y": 5.843,
       "z": 8.337,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         1,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
         13,
         15,
@@ -252,37 +252,37 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 12,
-      "properties": Object {},
+      "properties": {},
       "serial": 12,
       "x": -10.564,
       "y": 5.007,
       "z": 9.052,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         12,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 13,
-      "properties": Object {},
+      "properties": {},
       "serial": 13,
       "x": -11.829,
       "y": 4.236,
       "z": 9.194,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         11,
         15,
         17,
@@ -290,79 +290,79 @@ Array [
       "elem": "N",
       "hetflag": true,
       "index": 14,
-      "properties": Object {},
+      "properties": {},
       "serial": 14,
       "x": -8.933,
       "y": 6.343,
       "z": 9.563,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         12,
         14,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 15,
-      "properties": Object {},
+      "properties": {},
       "serial": 15,
       "x": -10.075,
       "y": 5.83,
       "z": 10.001,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         11,
         18,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 16,
-      "properties": Object {},
+      "properties": {},
       "serial": 16,
       "x": -7.582,
       "y": 6.162,
       "z": 7.573,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         14,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 17,
-      "properties": Object {},
+      "properties": {},
       "serial": 17,
       "x": -8.359,
       "y": 6.978,
       "z": 10.05,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         16,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 18,
-      "properties": Object {},
+      "properties": {},
       "serial": 18,
       "x": -7.471,
       "y": 5.782,
@@ -373,52 +373,52 @@ Array [
 `;
 
 exports[`Function SDF | parseV2000 | options: keepH | Atoms should match the snapshot when keepH is false 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         8,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 0,
-      "properties": Object {},
+      "properties": {},
       "serial": 0,
       "x": -9.856,
       "y": 4.168,
       "z": 6.715,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 1,
-      "properties": Object {},
+      "properties": {},
       "serial": 1,
       "x": -12.153,
       "y": 2.39,
       "z": 5.307,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         1,
         4,
         5,
@@ -426,20 +426,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 2,
-      "properties": Object {},
+      "properties": {},
       "serial": 2,
       "x": -11.98,
       "y": 3.867,
       "z": 5.218,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         6,
         7,
@@ -447,20 +447,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 3,
-      "properties": Object {},
+      "properties": {},
       "serial": 3,
       "x": -11.355,
       "y": 5.923,
       "z": 5.494,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         2,
         3,
@@ -468,75 +468,75 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 4,
-      "properties": Object {},
+      "properties": {},
       "serial": 4,
       "x": -10.967,
       "y": 4.626,
       "z": 5.788,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
         6,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 5,
-      "properties": Object {},
+      "properties": {},
       "serial": 5,
       "x": -12.865,
       "y": 4.669,
       "z": 4.596,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
         5,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 6,
-      "properties": Object {},
+      "properties": {},
       "serial": 6,
       "x": -12.483,
       "y": 5.926,
       "z": 4.762,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 7,
-      "properties": Object {},
+      "properties": {},
       "serial": 7,
       "x": -10.714,
       "y": 7.084,
       "z": 5.905,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         9,
         10,
@@ -544,20 +544,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 8,
-      "properties": Object {},
+      "properties": {},
       "serial": 10,
       "x": -9.716,
       "y": 4.99,
       "z": 7.966,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         8,
         12,
         14,
@@ -565,20 +565,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 9,
-      "properties": Object {},
+      "properties": {},
       "serial": 11,
       "x": -8.698,
       "y": 5.843,
       "z": 8.337,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         1,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         8,
         11,
         13,
@@ -586,79 +586,79 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 10,
-      "properties": Object {},
+      "properties": {},
       "serial": 12,
       "x": -10.564,
       "y": 5.007,
       "z": 9.052,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 11,
-      "properties": Object {},
+      "properties": {},
       "serial": 13,
       "x": -11.829,
       "y": 4.236,
       "z": 9.194,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         9,
         13,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 12,
-      "properties": Object {},
+      "properties": {},
       "serial": 14,
       "x": -8.933,
       "y": 6.343,
       "z": 9.563,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
         12,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 13,
-      "properties": Object {},
+      "properties": {},
       "serial": 15,
       "x": -10.075,
       "y": 5.83,
       "z": 10.001,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         9,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 14,
-      "properties": Object {},
+      "properties": {},
       "serial": 16,
       "x": -7.582,
       "y": 6.162,
@@ -669,52 +669,52 @@ Array [
 `;
 
 exports[`Function SDF | parseV2000 | options: multimodel, onemol | Atoms should match the snapshot when multimodel is true and onemol is false/undefinedd 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         10,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 0,
-      "properties": Object {},
+      "properties": {},
       "serial": 0,
       "x": -9.856,
       "y": 4.168,
       "z": 6.715,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 1,
-      "properties": Object {},
+      "properties": {},
       "serial": 1,
       "x": -12.153,
       "y": 2.39,
       "z": 5.307,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         1,
         4,
         5,
@@ -722,20 +722,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 2,
-      "properties": Object {},
+      "properties": {},
       "serial": 2,
       "x": -11.98,
       "y": 3.867,
       "z": 5.218,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         6,
         7,
@@ -743,20 +743,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 3,
-      "properties": Object {},
+      "properties": {},
       "serial": 3,
       "x": -11.355,
       "y": 5.923,
       "z": 5.494,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         2,
         3,
@@ -764,39 +764,39 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 4,
-      "properties": Object {},
+      "properties": {},
       "serial": 4,
       "x": -10.967,
       "y": 4.626,
       "z": 5.788,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
         6,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 5,
-      "properties": Object {},
+      "properties": {},
       "serial": 5,
       "x": -12.865,
       "y": 4.669,
       "z": 4.596,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
         5,
         8,
@@ -804,73 +804,73 @@ Array [
       "elem": "N",
       "hetflag": true,
       "index": 6,
-      "properties": Object {},
+      "properties": {},
       "serial": 6,
       "x": -12.483,
       "y": 5.926,
       "z": 4.762,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
         9,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 7,
-      "properties": Object {},
+      "properties": {},
       "serial": 7,
       "x": -10.714,
       "y": 7.084,
       "z": 5.905,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         6,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 8,
-      "properties": Object {},
+      "properties": {},
       "serial": 8,
       "x": -12.943,
       "y": 6.722,
       "z": 4.411,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         7,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 9,
-      "properties": Object {},
+      "properties": {},
       "serial": 9,
       "x": -9.929,
       "y": 7.031,
       "z": 6.415,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         11,
         12,
@@ -878,20 +878,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 10,
-      "properties": Object {},
+      "properties": {},
       "serial": 10,
       "x": -9.716,
       "y": 4.99,
       "z": 7.966,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
         14,
         16,
@@ -899,20 +899,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 11,
-      "properties": Object {},
+      "properties": {},
       "serial": 11,
       "x": -8.698,
       "y": 5.843,
       "z": 8.337,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         1,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
         13,
         15,
@@ -920,37 +920,37 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 12,
-      "properties": Object {},
+      "properties": {},
       "serial": 12,
       "x": -10.564,
       "y": 5.007,
       "z": 9.052,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         12,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 13,
-      "properties": Object {},
+      "properties": {},
       "serial": 13,
       "x": -11.829,
       "y": 4.236,
       "z": 9.194,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         11,
         15,
         17,
@@ -958,136 +958,136 @@ Array [
       "elem": "N",
       "hetflag": true,
       "index": 14,
-      "properties": Object {},
+      "properties": {},
       "serial": 14,
       "x": -8.933,
       "y": 6.343,
       "z": 9.563,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         12,
         14,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 15,
-      "properties": Object {},
+      "properties": {},
       "serial": 15,
       "x": -10.075,
       "y": 5.83,
       "z": 10.001,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         11,
         18,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 16,
-      "properties": Object {},
+      "properties": {},
       "serial": 16,
       "x": -7.582,
       "y": 6.162,
       "z": 7.573,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         14,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 17,
-      "properties": Object {},
+      "properties": {},
       "serial": 17,
       "x": -8.359,
       "y": 6.978,
       "z": 10.05,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         16,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 18,
-      "properties": Object {},
+      "properties": {},
       "serial": 18,
       "x": -7.471,
       "y": 5.782,
       "z": 6.724,
     },
   ],
-  Array [],
+  [],
 ]
 `;
 
 exports[`Function SDF | parseV2000 | options: multimodel, onemol | Atoms should match the snapshot when multimodel is true and onemol is true 1`] = `
-Array [
-  Array [
-    Object {
+[
+  [
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         10,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 0,
-      "properties": Object {},
+      "properties": {},
       "serial": 0,
       "x": -9.856,
       "y": 4.168,
       "z": 6.715,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 1,
-      "properties": Object {},
+      "properties": {},
       "serial": 1,
       "x": -12.153,
       "y": 2.39,
       "z": 5.307,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         1,
         4,
         5,
@@ -1095,20 +1095,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 2,
-      "properties": Object {},
+      "properties": {},
       "serial": 2,
       "x": -11.98,
       "y": 3.867,
       "z": 5.218,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         4,
         6,
         7,
@@ -1116,20 +1116,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 3,
-      "properties": Object {},
+      "properties": {},
       "serial": 3,
       "x": -11.355,
       "y": 5.923,
       "z": 5.494,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         2,
         3,
@@ -1137,39 +1137,39 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 4,
-      "properties": Object {},
+      "properties": {},
       "serial": 4,
       "x": -10.967,
       "y": 4.626,
       "z": 5.788,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         2,
         6,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 5,
-      "properties": Object {},
+      "properties": {},
       "serial": 5,
       "x": -12.865,
       "y": 4.669,
       "z": 4.596,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
         5,
         8,
@@ -1177,73 +1177,73 @@ Array [
       "elem": "N",
       "hetflag": true,
       "index": 6,
-      "properties": Object {},
+      "properties": {},
       "serial": 6,
       "x": -12.483,
       "y": 5.926,
       "z": 4.762,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         3,
         9,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 7,
-      "properties": Object {},
+      "properties": {},
       "serial": 7,
       "x": -10.714,
       "y": 7.084,
       "z": 5.905,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         6,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 8,
-      "properties": Object {},
+      "properties": {},
       "serial": 8,
       "x": -12.943,
       "y": 6.722,
       "z": 4.411,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         7,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 9,
-      "properties": Object {},
+      "properties": {},
       "serial": 9,
       "x": -9.929,
       "y": 7.031,
       "z": 6.415,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         0,
         11,
         12,
@@ -1251,20 +1251,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 10,
-      "properties": Object {},
+      "properties": {},
       "serial": 10,
       "x": -9.716,
       "y": 4.99,
       "z": 7.966,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
         14,
         16,
@@ -1272,20 +1272,20 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 11,
-      "properties": Object {},
+      "properties": {},
       "serial": 11,
       "x": -8.698,
       "y": 5.843,
       "z": 8.337,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         1,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         10,
         13,
         15,
@@ -1293,37 +1293,37 @@ Array [
       "elem": "C",
       "hetflag": true,
       "index": 12,
-      "properties": Object {},
+      "properties": {},
       "serial": 12,
       "x": -10.564,
       "y": 5.007,
       "z": 9.052,
     },
-    Object {
+    {
       "atom": "C",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         12,
       ],
       "elem": "C",
       "hetflag": true,
       "index": 13,
-      "properties": Object {},
+      "properties": {},
       "serial": 13,
       "x": -11.829,
       "y": 4.236,
       "z": 9.194,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         11,
         15,
         17,
@@ -1331,79 +1331,79 @@ Array [
       "elem": "N",
       "hetflag": true,
       "index": 14,
-      "properties": Object {},
+      "properties": {},
       "serial": 14,
       "x": -8.933,
       "y": 6.343,
       "z": 9.563,
     },
-    Object {
+    {
       "atom": "N",
-      "bondOrder": Array [
+      "bondOrder": [
         4,
         4,
       ],
-      "bonds": Array [
+      "bonds": [
         12,
         14,
       ],
       "elem": "N",
       "hetflag": true,
       "index": 15,
-      "properties": Object {},
+      "properties": {},
       "serial": 15,
       "x": -10.075,
       "y": 5.83,
       "z": 10.001,
     },
-    Object {
+    {
       "atom": "O",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         11,
         18,
       ],
       "elem": "O",
       "hetflag": true,
       "index": 16,
-      "properties": Object {},
+      "properties": {},
       "serial": 16,
       "x": -7.582,
       "y": 6.162,
       "z": 7.573,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         14,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 17,
-      "properties": Object {},
+      "properties": {},
       "serial": 17,
       "x": -8.359,
       "y": 6.978,
       "z": 10.05,
     },
-    Object {
+    {
       "atom": "H",
-      "bondOrder": Array [
+      "bondOrder": [
         1,
       ],
-      "bonds": Array [
+      "bonds": [
         16,
       ],
       "elem": "H",
       "hetflag": true,
       "index": 18,
-      "properties": Object {},
+      "properties": {},
       "serial": 18,
       "x": -7.471,
       "y": 5.782,
