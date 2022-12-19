@@ -16,10 +16,6 @@ $3Dmol = (function(window) {
 
 })(window);
 
-if ( typeof module === "object" && typeof module.exports === "object" ) { 
-	//for node.js exporting
-	module.exports = $3Dmol; 
-}
 
 /* The following code "phones home" to register that an ip 
    address has loaded 3Dmol.js.  Being able track this usage
@@ -626,19 +622,6 @@ $3Dmol.getPropertyRange = function (atomlist, prop) {
     return [ min, max ];
 };
 
-//hackish way to work with requirejs - doesn't actually work yet
-//since we don't use the require optimizer to combine modules
-if(typeof(_3dmol_saved_define) !== 'undefined') {
-    /** When pulling in external sources, disable amd to ensure they
-     * populate the global namespace as expected.  Restore it so code
-     * using amd still works. */     
-          
-    define = _3dmol_saved_define;  // eslint-disable-line no-redeclare
-    require = _3dmol_saved_require; // eslint-disable-line no-redeclare, no-unused-vars
-}
-if( typeof(define) === 'function' && define.amd) {
-    define('$3Dmol',[], function() { return $3Dmol; });
-}
 
 /* StereoViewer for stereoscopic viewing
   @function $3Dmol.createStereoViewer

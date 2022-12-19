@@ -870,12 +870,6 @@ export class Matrix4 {
 mRotation = new Matrix4();
 mScale = new Matrix4();
 
-export interface Vector3 {
-  x: number;
-  y: number;
-  z: number;
-}
-
 // A 3 Vector
 export class Vector3 {
   // unaccounted for assignents to vector3 properties in other parts of the code

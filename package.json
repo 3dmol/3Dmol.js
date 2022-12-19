@@ -5,9 +5,6 @@
         "yargs-parser": "^20.2.9"
     },
     "description": "Object oriented Javascript molecular visualization library",
-    "devDependencies": {
-        "glcheck": "3dmol/glcheck#master"
-    },
     "homepage": "http://3dmol.csb.pitt.edu",
     "license": "BSD-3-Clause",
     "name": "3dmol",

@@ -9,6 +9,8 @@ import { conversionMatrix3, Matrix4, Vector3,  } from "../WebGL"
 /**
  * @param {string} str
  * @param {ParserOptionsSpec} options
+ * @category Parsers
+
  */
 export function CIF(str: string, options: ParserOptionsSpec = {}) {
   var atoms: any[] & Record<string, any> = [];

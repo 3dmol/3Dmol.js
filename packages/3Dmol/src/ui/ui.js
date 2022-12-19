@@ -75,7 +75,7 @@
         surfaceMenu.updateScrollBox(HEIGHT);
       }
 
-      /**
+      /*
        * ModelToolbar is part of $3Dmol.UI to edit or change the model loaded into the viewer
        * 
        * @function ModelToolbar
@@ -198,7 +198,7 @@
 
         });
 
-        /**
+        /*
          * Sets the title in the ui with specified value
          * 
          * @function ModelToolbar#setModel 
@@ -224,7 +224,7 @@
       }
 
 
-      /**
+      /*
        * Selection box creates the UI panel to manipulate selections and style that are drawn 
        * on the viewport
        * 
@@ -307,7 +307,7 @@
           hidden = !hidden;
         }
 
-        /**
+        /*
          * Card for manipulation of a selection form and related styles
          * 
          * @function Selection
@@ -515,7 +515,7 @@
             }
           });
 
-          /**
+          /*
            * @function Selection#setProperty
            * @param {string} id Id of the selection created in StateManager 
            * @param {Object} specs Defination of the selection that will be used to set default 
@@ -533,7 +533,7 @@
             finalizeSelection(id);
           }
 
-          /**
+          /*
            * Adds style to the given selection 
            * 
            * @function Selection#addStyle 
@@ -558,7 +558,7 @@
         });
 
 
-        /**
+        /*
          * Remove all the selection card from the ui
          */
         this.empty = function(){
@@ -566,7 +566,7 @@
           _editingForm = false;
         }
 
-        /**
+        /*
          * Adds or create new selection card
          * 
          * @function SelectionBox#editSelection
@@ -596,11 +596,8 @@
         }
       }
    
-      /**
-       * 
-       * @param {Object} Jquery dom object
-       */
-      /**
+     
+      /*
        * Creates StyleBox for listing out different styles inside the selection
        * 
        * @function StyleBox 
@@ -668,7 +665,7 @@
         styles.css('box-sizing', 'content-box');
 
 
-        /**
+        /*
          * Style card to define the value of the style 
          * 
          * @param {string} sid Id of the selction for which the style box is created
@@ -862,7 +859,7 @@
       }
 
 
-      /**
+      /*
        * Add alert messages to different panels 
        * 
        * @function AlertBox
@@ -947,7 +944,7 @@
         }
       }
 
-      /**
+      /*
        * Creates the panel for manipulation of labels on the viewport
        * 
        * @function ContextMenu
@@ -1008,7 +1005,7 @@
         var propertyMenu = $('<div></div>');
         contentBox.append(propertyMenu);
         
-        /**
+        /*
          * Property object used in property menu 
          * 
          * @function Property 
@@ -1047,7 +1044,7 @@
           console.log('Type of value', typeof(value), value);
         }
 
-        /**
+        /*
          * @param {AtomSpec} atom Value of different property of the atom, if the atom has prop : true
          * then that option is made visible in the context menu
          */
@@ -1169,7 +1166,7 @@
 
         // Add Label Inputs 
 
-        /**
+        /*
          * Generate input elements that are used as form values in the context menu under addLabelForm
          * @returns {Object} that holds different input elements
          */
@@ -1383,7 +1380,7 @@
         }
       }
 
-      /**
+      /*
        * Creates UI panel for surface manipulations
        * 
        * @function SurfaceMenu 
@@ -1438,7 +1435,7 @@
 
         var surfaces = this.surfaces = [];
 
-        /**
+        /*
          * Creates cards for manipulation of surface
          * 
          * @function Surface 
@@ -1790,7 +1787,7 @@
         }
       }
 
-      /**
+      /*
        * Sets the css position property left and top for the element
        * 
        * @function setPosition
@@ -1805,7 +1802,7 @@
       }
 
 
-      /**
+      /*
         * Sets the location of the element relative to the parseInt
         * as per position types
         * @function setLocation
@@ -1895,7 +1892,7 @@
         return getRect(container).width;
       }
 
-      /**
+      /*
         * button - generates button with the given markup as contents
         * @param {String} svg SVG markup string that contains the content of the button
         * @param {Number} height Height of the content

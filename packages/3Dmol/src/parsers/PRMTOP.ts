@@ -1,6 +1,14 @@
 // @ts-nocheck
 /**
  * Parse a prmtop file from str and create atoms
+ * 
+  * @param {string}
+  *            str
+  * @param {ParserOptionsSpec}
+  *            options - noSecondaryStructure (do not compute ss)
+  *  
+ * @category Parsers
+
  */
 export function PRMTOP(str /*, options*/) {
   var atoms = [];

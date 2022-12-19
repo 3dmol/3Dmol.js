@@ -4372,7 +4372,6 @@ $3Dmol.GLViewer = (function() {
                         for (let i = 0; i < extents.length; i++) {
                             var worker = workers[i % workers.length];
                             worker.onmessage = rfunction;
-
                             worker.onerror = efunction;
 
                             worker.postMessage({

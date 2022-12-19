@@ -1,7 +1,8 @@
+import {Vector3} from "./WebGL/math"
 
 //Encapsulate marching cube algorithm for isosurface generation
 // (currently used by protein surface rendering and generic volumetric data reading)
-$3Dmol.MarchingCubeInitializer = function() {
+export class MarchingCubeInitializer {
     
     //Marching cube algorithm - assume data has been pre-treated so isovalue is 0 
     // (i.e. select points greater than 0)
@@ -14,24 +15,25 @@ $3Dmol.MarchingCubeInitializer = function() {
     // verts, faces - vertex and face arrays to fill up
     
     //to match with protein surface...
-    var ISDONE = 2;
-    var my = {};
-    var edgeTable, edgeTable2;
-    var triTable, triTable2;
-    
-    my.march = function(data, verts, faces, spec) {
+    ISDONE: number = 2;
 
-        var fulltable = !!(spec.fulltable);
-        var origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
-        var voxel = !!(spec.voxel);
-        var transform = spec.matrix; //if this is set, it overrides origin and unitCube
+    constructor() {
+
+    }
+
+    march(data, verts, faces, spec) {
+
+        let fulltable = !!(spec.fulltable);
+        let origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
+        let voxel = !!(spec.voxel);
+        let transform = spec.matrix; //if this is set, it overrides origin and unitCube
         
-        var nX = spec.nX || 0;
-        var nY = spec.nY || 0;
-        var nZ = spec.nZ || 0;
+        let nX = spec.nX || 0;
+        let nY = spec.nY || 0;
+        let nZ = spec.nZ || 0;
         
-        var scale = spec.scale || 1.0;
-        var unitCube = null;
+        let scale = spec.scale || 1.0;
+        let unitCube = null;
         if(spec.unitCube) {
             unitCube = spec.unitCube;
         } else {
@@ -39,9 +41,9 @@ $3Dmol.MarchingCubeInitializer = function() {
         }
         
         //keep track of calculated vertices to avoid repeats
-        var vertnums = new Int32Array(nX*nY*nZ);
+        let vertnums = new Int32Array(nX*nY*nZ);
         
-        var i, il;
+        let i, il;
         
         for (i = 0, il = vertnums.length; i < il; ++i)
             vertnums[i] = -1;
@@ -49,13 +51,13 @@ $3Dmol.MarchingCubeInitializer = function() {
         // create (or retrieve) a vertex at the appropriate point for
         // the edge (p1,p2)
         
-        var getVertex = function(i, j, k, code, p1, p2) {
-            var pt = {x:0,y:0,z:0};
-            var val1 = !!(code & (1 << p1));
-            var val2 = !!(code & (1 << p2));
+        let getVertex = function(i, j, k, code, p1, p2) {
+            let pt = {x:0,y:0,z:0};
+            let val1 = !!(code & (1 << p1));
+            let val2 = !!(code & (1 << p2));
              
             // p1 if they are the same or if !val1
-            var p = p1;
+            let p = p1;
             if (!val1 && val2)
                 p = p2;
             
@@ -68,17 +70,16 @@ $3Dmol.MarchingCubeInitializer = function() {
                 i++;
 
             if(transform) {
-                pt = new $3Dmol.Vector3(i,j,k);
-                pt = pt.applyMatrix4(transform);
-                pt = {x: pt.x, y: pt.y, z: pt.z}; //remove vector gunk
+                let vpt = new Vector3(i,j,k);
+                vpt = vpt.applyMatrix4(transform);
+                pt = {x: vpt.x, y: vpt.y, z: vpt.z}; //remove vector gunk
             } else {
                 pt.x = origin.x+unitCube.x*i;
                 pt.y = origin.y+unitCube.y*j;
                 pt.z = origin.z+unitCube.z*k;
             }
             
-            var index = ((nY * i) + j) * nZ + k;
-            
+            let index = ((nY * i) + j) * nZ + k;
             //Have to add option to do voxels
             if (!voxel) {
             
@@ -98,27 +99,27 @@ $3Dmol.MarchingCubeInitializer = function() {
             
         };
             
-        var intersects = new Int32Array(12);
+        let intersects = new Int32Array(12);
         
-        var etable = (fulltable) ? edgeTable2 : edgeTable;
-        var tritable = (fulltable) ? triTable2 : triTable;
+        let etable = (fulltable) ? this.edgeTable2 : this.edgeTable;
+        let tritable = (fulltable) ? this.triTable2 : this.triTable;
                 
         //Run marching cubes algorithm
         for (i = 0; i < nX-1; ++i) {
             
-            for (var j = 0; j < nY-1; ++j){
+            for (let j = 0; j < nY-1; ++j){
                 
-                for (var k = 0; k < nZ-1; ++k){
+                for (let k = 0; k < nZ-1; ++k){
                     
-                    var code = 0;
+                    let code = 0;
                     
-                    for (var p = 0; p < 8; ++p) {
-                        var index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1)) *
+                    for (let p = 0; p < 8; ++p) {
+                        let index = ((nY * (i + ((p & 4) >> 2))) + j + ((p & 2) >> 1)) *
                                         nZ + k + (p & 1);
 
                         //TODO: Need to fix vpBits in protein surface for this to work
-                        var val = !!(data[index] & ISDONE);
-                        //var val = !!(data[index] > 0);   
+                        let val:any = !!(data[index] & this.ISDONE);
+                        //let val = !!(data[index] > 0);   
                         
                         code |= val << p;                        
                     }
@@ -126,12 +127,12 @@ $3Dmol.MarchingCubeInitializer = function() {
                     if (code === 0 || code === 255)
                         continue;
                     
-                    var ecode = etable[code];
+                    let ecode = etable[code];
                     
                     if (ecode === 0)
                         continue;
                         
-                    var ttable = tritable[code];                        
+                    let ttable = tritable[code];                        
                     
                     if (ecode & 1)
                         intersects[0] = getVertex(i, j, k, code, 0, 1);
@@ -158,9 +159,9 @@ $3Dmol.MarchingCubeInitializer = function() {
                     if (ecode & 2048)
                         intersects[11] = getVertex(i, j, k, code, 2, 6);       
 
-                    for (var t = 0; t < ttable.length; t += 3) {
+                    for (let t = 0; t < ttable.length; t += 3) {
                         
-                        var a = intersects[ttable[t]],
+                        let a = intersects[ttable[t]],
                             b = intersects[ttable[t+1]],
                             c = intersects[ttable[t+2]];         
                                            
@@ -183,23 +184,23 @@ $3Dmol.MarchingCubeInitializer = function() {
         
     };
 
-    my.laplacianSmooth = function(numiter, verts, faces) {
-            var tps = new Array(verts.length);
-            var i, il, j, jl, k;
+    laplacianSmooth (numiter, verts, faces) {
+            let tps = new Array(verts.length);
+            let i, il, j, jl, k;
             for (i = 0, il = verts.length; i < il; i++)
                     tps[i] = {
                         x : 0,
                         y : 0,
                         z : 0
                     };
-            var vertdeg = new Array(20);
-            var flagvert;
+            let vertdeg = new Array(20);
+            let flagvert;
             for (i = 0; i < 20; i++)
                     vertdeg[i] = new Array(verts.length);
             for (i = 0, il = verts.length; i < il; i++)
                     vertdeg[0][i] = 0;
             for (i = 0, il = faces.length / 3; i < il; i++) {
-                var aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
+                let aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[aoffset]]; j < jl; j++) {
                     if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
@@ -270,11 +271,9 @@ $3Dmol.MarchingCubeInitializer = function() {
                 }
             }
 
-            var wt = 1.00;
-            var wt2 = 0.50;
-//            var ssign;
-//            var scaleFactor = 1;
-//            var outwt = 0.75 / (scaleFactor + 3.5); // area-preserving
+            let wt = 1.00;
+            let wt2 = 0.50;
+
             for (k = 0; k < numiter; k++) {
                     for (i = 0, il = verts.length; i < il; i++) {
                             if (vertdeg[0][i] < 3) {
@@ -319,7 +318,7 @@ $3Dmol.MarchingCubeInitializer = function() {
                             verts[i].z = tps[i].z;
                     }
                     /*
-                     * computenorm(); for (var i = 0; i < vertnumber; i++) { if
+                     * computenorm(); for (let i = 0; i < vertnumber; i++) { if
                      * (verts[i].inout) ssign = 1; else ssign = -1; verts[i].x += ssign *
                      * outwt * verts[i].pn.x; verts[i].y += ssign * outwt *
                      * verts[i].pn.y; verts[i].z += ssign * outwt * verts[i].pn.z; }
@@ -337,7 +336,7 @@ $3Dmol.MarchingCubeInitializer = function() {
      * sensible corner numbering scheme and the discrete nature of our voxel data
      * (resulting in fewer faces).
      */
-    my.edgeTable = [ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+    edgeTable: Uint32Array = new Uint32Array([ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
             0xb00, 0x0, 0x0, 0x0, 0x700, 0x0, 0xd00, 0xe00, 0xf00, 0x0, 0x0, 0x0,
             0x8a, 0x0, 0x15, 0x0, 0x86, 0x0, 0x0, 0x0, 0x28c, 0x0, 0x813, 0xf19,
             0xe10, 0x0, 0x0, 0x0, 0x2a, 0x0, 0x0, 0x0, 0x126, 0x0, 0x0, 0x15, 0x1c,
@@ -360,11 +359,10 @@ $3Dmol.MarchingCubeInitializer = function() {
             0x12a, 0x33, 0x339, 0x230, 0xe00, 0xe00, 0xc12, 0xd9a, 0x684, 0x795,
             0x49f, 0x596, 0x92, 0xb9f, 0x815, 0x99c, 0x9a, 0x393, 0x99, 0x190,
             0xf00, 0xe08, 0xd01, 0xc0a, 0x704, 0x605, 0x50f, 0x406, 0xb02, 0xa0f,
-            0x905, 0x80c, 0x30a, 0x203, 0x109, 0x0 ];
+            0x905, 0x80c, 0x30a, 0x203, 0x109, 0x0 ]);
     
-    edgeTable = new Uint32Array(my.edgeTable);
     
-    triTable = my.triTable = [ [], [], [], [], [], [], [], [ 11, 9, 8 ], [], [], [],
+    triTable =  [ [], [], [], [], [], [], [], [ 11, 9, 8 ], [], [], [],
             [ 8, 10, 9 ], [], [ 10, 8, 11 ], [ 9, 11, 10 ],
             [ 8, 10, 9, 8, 11, 10 ], [], [], [], [ 1, 7, 3 ], [], [ 4, 2, 0 ], [],
             [ 2, 1, 7 ], [], [], [], [ 2, 7, 3, 2, 9, 7 ], [],
@@ -623,11 +621,11 @@ $3Dmol.MarchingCubeInitializer = function() {
             [ 11, 3, 2, 0, 9, 1 ], [ 11, 0, 2, 11, 8, 0 ], [ 11, 3, 2 ],
             [ 8, 1, 3, 8, 9, 1 ], [ 9, 1, 0 ], [ 8, 0, 3 ], [] ];
             
-            return my;
 };
 
+export let MarchingCube = new MarchingCubeInitializer();
 //each webworker needs its own marching cube object
-$3Dmol.MarchingCube  = $3Dmol.MarchingCubeInitializer();    
+
 
 
 

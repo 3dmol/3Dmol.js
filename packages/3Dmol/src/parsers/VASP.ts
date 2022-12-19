@@ -5,6 +5,7 @@ import { Matrix3 } from "../WebGL";
  *            str
  * @param {ParserOptionsSpec}
  *            options
+ * @category Parsers
  */
 export function VASP(str /*,options*/) {
   var atoms: any[][] & Record<string, any> = [[]];

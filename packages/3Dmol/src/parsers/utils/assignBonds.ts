@@ -1,6 +1,6 @@
 import { areConnected } from "./areConnected";
 
-/**
+/*
  * @param {AtomSpec[]} atoms
  */
 export function assignBonds(atoms) {

@@ -41,7 +41,10 @@ let mmtfHETATMtypes = new Set([
 "PEPTIDE-LIKE",
 "SACCHARIDE" ]);
 
-//mmtf shoul be passed as a binary UInt8Array buffer or a base64 encoded string
+/** @param bindata - binary UInt8Array buffer or a base64 encoded string
+ *  @param ParserOptionsSpec
+ *  @category Parsers
+*/
 export function MMTFparser(bindata, options) {
   
   var noH = !options.keepH; // suppress hydrogens by default

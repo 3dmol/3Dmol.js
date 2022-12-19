@@ -1,4 +1,4 @@
-/**
+/*
  * @param {!Array.<string>} lines
  * @param {ParserOptionsSpec} options
  * @returns {!Array.<Array<Object>>}
@@ -66,7 +66,7 @@ var parseV2000 = function (lines, options) {
   return atoms;
 };
 
-/**
+/*
  * @param {!Array.<string>} lines
  * @param {ParserOptionsSpec} options
  * @returns {!Array.<!Array<!Object>>}
@@ -161,13 +161,14 @@ var parseV3000 = function (lines, options) {
   return atoms;
 };
 
-// put atoms specified in sdf fromat in str into atoms
-// adds to atoms, does not replace
+
 /**
  * @param {string}
  *            str
  * @param {ParserOptionsSpec}
  *            options
+ * @category Parsers
+
  */
 export function SDF(str, options) {
   var molformat = "V2000";

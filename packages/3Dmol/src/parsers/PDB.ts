@@ -10,6 +10,8 @@ import { getSinglePDB } from "./utils/getSinglePDB";
  * @param {ParserOptionsSpec} options - keepH (do not strip hydrogens), noSecondaryStructure,
  *            assignbonds (default true, calculate implicit bonds)
  *            (do not compute ss), altLoc (which alternate location to select, if present; '*' to load all)
+ * @category Parsers
+ * 
  */
 export function PDB(str, options) {
   options = options || {};

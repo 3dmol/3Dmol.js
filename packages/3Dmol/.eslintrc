@@ -33,10 +33,6 @@
       "MMTF": "readonly",
       "TextDecoder": "readonly",
       "FileReader": "readonly",
-      "define": "writable",
-      "require": "writable",
-      "_3dmol_saved_define": "writable",
-      "_3dmol_saved_require": "writable",
       "ProteinSurface": "readonly"
     }  
 }

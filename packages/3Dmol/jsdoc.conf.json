@@ -10,7 +10,7 @@
         "excludePattern": "WebGL|vendor"
     },    
     "templates": {
-        "cleverLinks": false,
+        "cleverLinks": true,
         "monospaceLinks": false,
         "footer": "",
         "copyright":"3Dmol.js © 2019-2022",
@@ -21,7 +21,6 @@
          "better-docs": {
              "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a>",
              "title": "3Dmol.js Documentation",
-             //"logo": "../assets/3dmol.png",
              "css": "../tutorials/style.css",
             "navLinks": [
                 {
@@ -41,7 +40,8 @@
          //"template": "3Dmol-doc-template",
         "template": "../../node_modules/better-docs",
         "destination": "doc",
-        "tutorials": "tutorials"
+        "tutorials": "tutorials",
+        "search": true
      },
      "tutorials": "tutorials/"
 }

@@ -5,7 +5,7 @@ import { areConnected } from "./areConnected";
 import { assignBonds } from "./assignBonds";
 import { standardResidues } from "./standardResidues";
 
-/**
+/*
  * @param {AtomSpec[]}
  *            atomsarray
  */

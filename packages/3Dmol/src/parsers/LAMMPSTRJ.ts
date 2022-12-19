@@ -2,6 +2,8 @@ import { assignBonds } from "./utils/assignBonds";
 
 /**
  * Parse a lammps trajectory file from str and create atoms
+ * @category Parsers
+
  */
 export function LAMMPSTRJ(str, options) {
   var atoms: any[] = [];

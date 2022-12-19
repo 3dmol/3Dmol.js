@@ -1,5 +1,5 @@
 
-/**
+/*
  * $3Dmol.StateManager - StateManager creates the space to preserve the state of the ui and sync it with the GLViewer
  * @constructor 
  * @param {$3Dmol.GLViewer} glviewer StateManager is required to have interaction between glviewer and the ui. 

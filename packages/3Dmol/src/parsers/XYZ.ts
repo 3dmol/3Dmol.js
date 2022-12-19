@@ -7,6 +7,7 @@ import { assignBonds } from "./utils/assignBonds";
 /**
  * @param {string} str
  * @param {ParserOptionsSpec} options
+ * @category Parsers
  */
 export function XYZ(str: string, options: ParserOptionsSpec) {
   options = options || {};

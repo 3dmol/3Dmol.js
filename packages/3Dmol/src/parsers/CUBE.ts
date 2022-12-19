@@ -7,7 +7,9 @@ import { anumToSymbol } from "./utils/anumToSymbol";
      *            str
      * @param {ParserOptionsSpec}
      *            options
-     */
+ * @category Parsers
+     
+*/
 export function CUBE(str, options) {
   options = options || {};
   var atoms: any[][] & Record<string, any> = [[]];

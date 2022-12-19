@@ -5,6 +5,7 @@
  *            str
  * @param {ParserOptionsSpec}
  *            options
+ * @category Parsers
  */
 export function MOL2(str, options) {
   var atoms: any[][] & Record<string,any> = [[]];

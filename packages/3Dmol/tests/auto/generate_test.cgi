@@ -33,7 +33,7 @@ else:
     ex = testinfo[test]
     print("""<html><head>
         <title>%s</title>
-        <script src="../../build/3Dmol.js"></script>        
+        <script src="../../build/3Dmol-min.js"></script>        
         <script>$ = $3Dmol.$;</script>      
         </head>
         

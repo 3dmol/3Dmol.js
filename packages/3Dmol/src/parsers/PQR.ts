@@ -9,6 +9,7 @@ import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
      *            str
      * @param {ParserOptionsSpec}
      *            options - noSecondaryStructure (do not compute ss)
+    * @category Parsers 
      */
 export function PQR(str, options) {
 

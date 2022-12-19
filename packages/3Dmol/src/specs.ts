@@ -1,6 +1,5 @@
 // Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation
-(function() {
 /**
  * GLViewer input specification
  * @typedef ViewerSpec
@@ -150,10 +149,10 @@
  * @prop {number} opacity - sets the transparency: 0 to hide, 1 for fully opaque
  * @prop {ColorschemeSpec} colorscheme - element based coloring
  * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
- * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified
- * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields.
+ * @prop {VolumeData} voldata - volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified
+ * @prop {Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields.
  * @prop {string} volformat - format of voldata if not a $3Dmol.VolumeData object
- * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead.
+ * @prop {Object} map - specifies a numeric atom property (prop) and color mapping (scheme) such as {@link Gradient.RWB}.  Deprecated, use colorscheme instead.
  *
  * @example
  * var setStyles = function(volumedata){
@@ -185,8 +184,8 @@
  * @prop {number} smoothness - amount to smooth surface (default 1)
  * @prop {list} coords - coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates
  * @prop {number} seldist - distance around coords to include data [default = 2.0]
- * @prop {$3Dmol.VolumeData} voldata - volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified
- * @prop {$3Dmol.Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields.
+ * @prop {VolumeData} voldata - volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified
+ * @prop {Gradient} volscheme - coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields.
  * @prop {string} volformat - format of voldata if not a $3Dmol.VolumeData object 
  * @prop {boolean} clickable - if true, user can click on object to trigger callback
  * @prop {function} callback - function to call on click
@@ -230,7 +229,7 @@
  * Sphere shape specification. Extends {@link ShapeSpec}
  *
  * @typedef SphereShapeSpec
- * @prop {$3Dmol.Vector3} center
+ * @prop {Vector3} center
  * @prop {number} radius
  *
  */
@@ -239,8 +238,8 @@
  * Box shape specification. Extends {@link ShapeSpec}
  *
  * @typedef BoxSpec
- * @prop {$3Dmol.Vector3} corner - bottom corner of box
- * @prop {$3Dmol.Vector3} center - alternative to corner: center of box
+ * @prop {Vector3} corner - bottom corner of box
+ * @prop {Vector3} center - alternative to corner: center of box
  * @prop {Object} dimensions - {w:width, h:height, d:depth}; can be either scalars or vectors (for not-axis aligned boxes)
  *
  */
@@ -249,8 +248,8 @@
 /**
  * Arrow shape specification.  Extends {@link ShapeSpec}
  * @typedef ArrowSpec
- * @prop {$3Dmol.Vector3} start
- * @prop {$3Dmol.Vector3} end
+ * @prop {Vector3} start
+ * @prop {Vector3} end
  * @prop {number} radius
  * @prop {ColorSpec} color
  * @prop {boolean} hidden
@@ -263,18 +262,18 @@
 /**
  * Cylinder shape specification.  Extends {@link ShapeSpec}
  * @typedef CylinderSpec
- * @prop {$3Dmol.Vector3} start
- * @prop {$3Dmol.Vector3} end
+ * @prop {Vector3} start
+ * @prop {Vector3} end
  * @prop {number} radius
- * @prop {$3Dmol.CAP} fromCap - 0 for none, 1 for flat, 2 for round
- * @prop {$3Dmol.CAP} toCap - 0 for none, 1 for flat, 2 for round
+ * @prop {CAP} fromCap - 0 for none, 1 for flat, 2 for round
+ * @prop {CAP} toCap - 0 for none, 1 for flat, 2 for round
  * @prop {boolean} dashed
  */
 
 /**
  * Curve shape specification.  Extends {@link ShapeSpec}
  * @typedef CurveSpec
- * @prop {$3Dmol.Vector3} points - list of (x,y,z) points to interpolate between to make curve
+ * @prop {Vector3} points - list of (x,y,z) points to interpolate between to make curve
  * @prop {number} smooth - amount of interpolation
  * @prop {number} radius
  * @prop {boolean} fromArrow - if an arrow should be drawn at the start
@@ -284,26 +283,9 @@
 /**
  * Line shape specification.  Extends {@link ShapeSpec}  (but defaults to wireframe)
  * @typedef LineSpec
- * @prop {$3Dmol.Vector3} start
- * @prop {$3Dmol.Vector3} end
+ * @prop {Vector3} start
+ * @prop {Vector3} end
  */
 
 
-/**
-* File formats supported by 3Dmol.js
-* @typedef FileFormats
-* @prop cdjson,json  Chemical JSON format
-* @prop cube Gaussian cube format
-* @prop gro  Gromacs topology format, need to add coordinates to resulting model.
-* @prop mcif,cif Crystallographic Information File, the successor to PDB that makes you miss the PDB file format
-* @prop mmtf Macromolecular Transmission Format, the successor to PDB that is totally awesome
-* @prop mol2 Sybyl Mol2 format
-* @prop pdb The venerable Protein Data Bank format
-* @prop pqr Like PDB but with partial charges which are read into the partialcharge atom property
-* @prop prmtop Amber topology file, must add coordinates
-* @prop sdf MDL MOL format, supports multiple models and meta data
-* @prop vasp VASP format (CONTCAR, POSCAR)
-* @prop xyz XYZ cartesian coordinates format
-*/
 
-})();

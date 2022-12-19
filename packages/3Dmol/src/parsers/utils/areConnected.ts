@@ -1,6 +1,6 @@
 import { bondLength } from "./bondLength";
 
-/**
+/*
  * return true if atom1 and atom2 are probably bonded to each other based on distance alone
  */
 export function areConnected(atom1, atom2) {
