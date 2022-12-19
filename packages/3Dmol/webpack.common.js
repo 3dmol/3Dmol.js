@@ -20,7 +20,6 @@ module.exports =  {
         "./src/glmodel.js",
         "./src/glshape.js", 
         "./src/glviewer.js",
-        "./src/volume.js",
         "./src/SurfaceWorker.js",
         "./src/ui/ui.js",
         "./src/ui/state.js",
