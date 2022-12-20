@@ -18,7 +18,6 @@ module.exports =  {
         "./src/glcartoon.js",
         "./src/gldraw.js",
         "./src/glmodel.js",
-        "./src/glshape.js", 
         "./src/glviewer.js",
         "./src/SurfaceWorker.js",
         "./src/ui/ui.js",

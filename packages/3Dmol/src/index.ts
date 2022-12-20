@@ -9,6 +9,9 @@ export * from "./WebGL";
 export * from "./utils";
 export * from "./ProteinSurface4"
 export * from "./marchingcube"
+export * from "./VolumeData"
+export * from "./VolumetricRender"
+export * from "./GLShape"
  
 declare var __webpack_exports__:any;
 window.$3Dmol = __webpack_exports__;

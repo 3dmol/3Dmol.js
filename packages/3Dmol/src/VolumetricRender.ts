@@ -1,7 +1,7 @@
-import { Sphere } from "WebGL/shapes";
-import { Vector3, Matrix4 } from "WebGL/math";
-import { VolumetricMaterial, Mesh, Texture, Object3D } from "WebGL";
-import { CC } from "WebGL";
+import { Sphere } from "./WebGL/shapes";
+import { Vector3, Matrix4 } from "./WebGL/math";
+import { VolumetricMaterial, Mesh, Texture, Object3D } from "./WebGL";
+import { CC } from "./WebGL";
 
 declare var $3Dmol;
 
@@ -14,7 +14,7 @@ declare var $3Dmol;
  * @param {VolumetricRenderSpec} spec - specification of volumetric render
  * @returns {$3Dmol.GLShape}
  */
-class GLVolumetricRender {
+export class GLVolumetricRender {
 
     static interpolateArray(data, fitCount) {
         function linearInterpolate(before, after, atPoint) {

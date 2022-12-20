@@ -1,8 +1,7 @@
-import { base64ToArray } from "utils";
-import { Vector3, Matrix4 } from "WebGL/math";
-import { VASP } from "parsers/VASP";
-import { CUBE } from "parsers/CUBE";
-import { NullLiteral } from "@babel/types";
+import { base64ToArray } from "./utils";
+import { Vector3, Matrix4 } from "./WebGL/math";
+import { VASP } from "./parsers/VASP";
+import { CUBE } from "./parsers/CUBE";
 
 declare var pako: any;
 
@@ -41,12 +40,12 @@ export class VolumeData {
     // x->y->z
 
     matrix: any = null; //if set must transform data
-    inversematrix: Matrix4|NullLiteral = null;
+    inversematrix: Matrix4|null = null;
     dimensionorder: any;
 
     isbinary = new Set<string>(['ccp4','CCP4']);
 
-    constructor(str: any, format: string, options: VolumeDataOptions) {
+    constructor(str: any, format: string, options?: VolumeDataOptions) {
         format = format.toLowerCase();
 
         if (/\.gz$/.test(format)) {
