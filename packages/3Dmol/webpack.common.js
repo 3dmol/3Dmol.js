@@ -15,7 +15,6 @@ module.exports =  {
   entry: ["./src/index.ts", 
         "./src/3dmol.js",
         "./src/autoload.js", 
-        "./src/glcartoon.js",
         "./src/glmodel.js",
         "./src/glviewer.js",
         "./src/SurfaceWorker.js",

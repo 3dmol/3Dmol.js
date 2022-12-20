@@ -1,5 +1,5 @@
-import { Vector3, Matrix4 } from "./WebGL/math";
-import { Geometry, CC, Material } from "./WebGL";
+import { Vector3 } from "./WebGL/math";
+import { Geometry } from "./WebGL";
 
 
 //define enum values

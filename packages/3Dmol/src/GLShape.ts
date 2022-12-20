@@ -8,6 +8,7 @@ import { MarchingCube } from "./marchingcube";
 import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { GLDraw } from "./GLDraw"
+import { subdivide_spline } from "./glcartoon";
 
 /**
  * A GLShape is a collection of user specified shapes.
@@ -1003,7 +1004,7 @@ export class GLShape {
         if (typeof (curveSpec.toCap) == "undefined") curveSpec.toCap = 2;
 
         //subdivide into smoothed spline points
-        var points = $3Dmol.subdivide_spline(curveSpec.points, curveSpec.smooth);
+        var points = subdivide_spline(curveSpec.points, curveSpec.smooth);
 
         if (points.length < 3) {
             console.log("Too few points in addCurve");

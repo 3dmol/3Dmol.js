@@ -32,6 +32,7 @@ export class Material extends EventDispatcher {
   alphaTest = 0;
   visible = true;
   needsUpdate = true;
+  outline = false;
 
   setValues(
     values: Partial<Record<keyof Material, any>> = {} as any

@@ -5,6 +5,8 @@ import { MeshLambertMaterial } from "./MeshLambertMaterial";
 export class MeshDoubleLambertMaterial extends MeshLambertMaterial {
   shaderID = "lambertdouble";
   side = DoubleSide;
+  outline = false;
+  
   constructor(parameters?: any) {
     super(parameters);
   }
