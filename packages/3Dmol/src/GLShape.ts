@@ -1,12 +1,13 @@
 import { Geometry, CC, Material } from "./WebGL";
 import { Sphere, Cylinder, Triangle } from "./WebGL/shapes";
-import { Vector3, Matrix4 } from "./WebGL/math";
+import { Vector3 } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
 import { DoubleSide } from "./WebGL";
 import { Color } from "./WebGL";
 import { MarchingCube } from "./marchingcube";
 import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
+import { GLDraw } from "./GLDraw"
 
 /**
  * A GLShape is a collection of user specified shapes.
@@ -750,7 +751,7 @@ export class GLShape {
 
         this.intersectionShape.sphere.push(new Sphere(sphereSpec.center, sphereSpec.radius));
 
-        $3Dmol.GLDraw.drawSphere(this.geo, sphereSpec.center,
+        GLDraw.drawSphere(this.geo, sphereSpec.center,
             sphereSpec.radius, sphereSpec.color, sphereSpec.quality);
 
         this.components.push({
@@ -924,7 +925,7 @@ export class GLShape {
 
         this.intersectionShape.cylinder.push(new Cylinder(start, end, radius));
 
-        $3Dmol.GLDraw.drawCylinder(this.geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);
+        GLDraw.drawCylinder(this.geo, start, end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);
 
         var centroid = new Vector3();
         this.components.push({
@@ -974,7 +975,7 @@ export class GLShape {
 
             this.intersectionShape.cylinder.push(new Cylinder(new_start, new_end, radius));
 
-            $3Dmol.GLDraw.drawCylinder(this.geo, new_start, new_end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);
+            GLDraw.drawCylinder(this.geo, new_start, new_end, radius, color, cylinderSpec.fromCap, cylinderSpec.toCap);
 
             new_start = new Vector3(new_end.x + gapVector.x, new_end.y + gapVector.y, new_end.z + gapVector.z);
 

@@ -16,7 +16,6 @@ module.exports =  {
         "./src/3dmol.js",
         "./src/autoload.js", 
         "./src/glcartoon.js",
-        "./src/gldraw.js",
         "./src/glmodel.js",
         "./src/glviewer.js",
         "./src/SurfaceWorker.js",
