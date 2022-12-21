@@ -1,16 +1,31 @@
 //auto-initialization
+
+import { createViewer } from "./GLViewer";
+import { SurfaceType } from "./ProteinSurface4";
+import { specStringToObject } from "./utilities";
+import { CC } from "./WebGL";
+
+export var autoinit = false;
+export var processing_autoinit = false;
+declare var $;
+
+/**
+ * Contains a dictionary of embedded viewers created from HTML elements
+ * with a the viewer_3Dmoljs css class indexed by their id (or numerically
+ * if they do not have an id).
+*/
+export var viewers: any = {};
+
 //Create embedded viewer from HTML attributes if true
 //viewer and callback are used by the testing harness
-$3Dmol.autoload=function(viewer,callback){
+export function autoload(viewer?,callback?){
     var i, dataname, type;
     if ($(".viewer_3Dmoljs")[0] !== undefined)
-        $3Dmol.autoinit = true;
+        autoinit = true;
 
-    if ($3Dmol.autoinit) {
-        $3Dmol.processing_autoinit = true;
-        viewer =(viewer!= undefined) ? viewer :null;
-        
-        $3Dmol.viewers = {};
+    if (autoinit) {
+        processing_autoinit = true;
+        viewer =(viewer!= undefined) ? viewer :null;        
         var nviewers = 0;
         $(".viewer_3Dmoljs").each( function() {
             var viewerdiv = $(this);
@@ -66,16 +81,16 @@ $3Dmol.autoload=function(viewer,callback){
             }
             var options = {};
             if(viewerdiv.data("options"))
-                options = $3Dmol.specStringToObject(viewerdiv.data("options"));
+                options = specStringToObject(viewerdiv.data("options"));
                 
             //note that data tags must be lowercase
-            var bgcolor = $3Dmol.CC.color(viewerdiv.data("backgroundcolor"));
+            var bgcolor = CC.color(viewerdiv.data("backgroundcolor"));
             var bgalpha = viewerdiv.data("backgroundalpha");
             bgalpha = bgalpha == undefined ? 1.0 : parseFloat(bgalpha);
             var style = {line:{}};
-            if(viewerdiv.data("style")) style = $3Dmol.specStringToObject(viewerdiv.data("style"));
+            if(viewerdiv.data("style")) style = specStringToObject(viewerdiv.data("style"));
             var select = {};
-            if(viewerdiv.data("select")) select = $3Dmol.specStringToObject(viewerdiv.data("select"));
+            if(viewerdiv.data("select")) select = specStringToObject(viewerdiv.data("select"));
             var selectstylelist = [];
             var surfaces = [];
             var labels = [];
@@ -101,29 +116,29 @@ $3Dmol.autoload=function(viewer,callback){
                 var selname, newsel, styleobj;
                 if(m) {
                     selname = "select"+m[1];
-                    newsel = $3Dmol.specStringToObject(d[selname]);
-                    styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    newsel = specStringToObject(d[selname]);
+                    styleobj = specStringToObject(d[dataname]);
                     selectstylelist.push([newsel,styleobj]);
                 }         
                 m = surfre.exec(dataname);
                 if(m) {
                     selname = "select"+m[1];
-                    newsel = $3Dmol.specStringToObject(d[selname]);
-                    styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    newsel = specStringToObject(d[selname]);
+                    styleobj = specStringToObject(d[dataname]);
                     surfaces.push([newsel,styleobj]);
                 }
                 m = reslabre.exec(dataname);
                 if(m) {
                     selname = "select"+m[1];
-                    newsel = $3Dmol.specStringToObject(d[selname]);
-                    styleobj = $3Dmol.specStringToObject(d[dataname]);
+                    newsel = specStringToObject(d[selname]);
+                    styleobj = specStringToObject(d[dataname]);
                     labels.push([newsel,styleobj]);
                 }
                 if(dataname == "zoomto") {
-                    zoomto = $3Dmol.specStringToObject(d[dataname]);
+                    zoomto = specStringToObject(d[dataname]);
                 }
                 if(dataname == "spin") {
-                    spin = $3Dmol.specStringToObject(d[dataname]);
+                    spin = specStringToObject(d[dataname]);
                 }
             }
             
@@ -159,7 +174,7 @@ $3Dmol.autoload=function(viewer,callback){
                         doload($3Dmol, viewer, sel, sty);                 
                     }
                     else {
-                        glviewer.addSurface($3Dmol.SurfaceType.VDW, sty, sel, sel);
+                        glviewer.addSurface(SurfaceType.VDW, sty, sel, sel);
                     }
                     
                 }
@@ -180,12 +195,11 @@ $3Dmol.autoload=function(viewer,callback){
             var glviewer = viewer;
             try {
                 var config = viewerdiv.data('config') || {};
-                config.defaultcolors = config.defaultcolors || $3Dmol.rasmolElementColors;
                 if(config.backgroundColor === undefined) config.backgroundColor = bgcolor;
                 if(config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;
                 config.ui = showUI;		    
                 if(glviewer==null) {
-                    glviewer = $3Dmol.viewers[this.id || nviewers++] = $3Dmol.createViewer(viewerdiv, config);
+                    glviewer = viewers[this.id || nviewers++] = createViewer(viewerdiv, config);
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
                     glviewer.setConfig(config);
@@ -224,7 +238,7 @@ $3Dmol.autoload=function(viewer,callback){
                                 runres(glviewer);
                             }
                         }
-                        $3Dmol.processing_autoinit = false;
+                        processing_autoinit = false;
                         if(callback) callback(glviewer);
                     }
                 };
@@ -256,7 +270,7 @@ $3Dmol.autoload=function(viewer,callback){
                         runres(glviewer);
                     }
                 }
-                $3Dmol.processing_autoinit = false;                
+                processing_autoinit = false;                
                 if (callback) 
                     callback(glviewer);
             }            
@@ -267,11 +281,11 @@ $3Dmol.autoload=function(viewer,callback){
 //if domcontent has already load
 if (document.readyState === "interactive") {
     $(document).ready(function() {
-        $3Dmol.autoload();
+        autoload();
     });
 } else {
     document.addEventListener('DOMContentLoaded', function() {
-        $3Dmol.autoload();    
+        autoload();    
     });
 }
     

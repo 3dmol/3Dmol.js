@@ -4,11 +4,12 @@ import { Vector3 } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
 import { DoubleSide } from "./WebGL";
 import { Color } from "./WebGL";
-import { MarchingCube } from "./marchingcube";
+import { MarchingCube } from "./ProteinSurface4";
 import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { GLDraw } from "./GLDraw"
 import { subdivide_spline } from "./glcartoon";
+import { adjustVolumeStyle, extend, makeFunction } from "./utilities";
 
 /**
  * A GLShape is a collection of user specified shapes.
@@ -21,9 +22,9 @@ import { subdivide_spline } from "./glcartoon";
 export class GLShape {
 
     // Marching cube, to match with protein surface generation
-    static ISDONE = 2;
+    private static ISDONE = 2;
 
-    static finalizeGeo(geo) {
+    private static finalizeGeo(geo) {
         //to avoid creating a bunch of geometries, we leave geoGroup untruncated
         //until render is called, at which point we truncate; 
         //successive called up updateGeo will return a new geometry
@@ -471,7 +472,7 @@ export class GLShape {
     };
 
     //helper function for adding an appropriately sized mesh
-    static addCustomGeo(shape, geo, mesh, color, clickable) {
+    private static addCustomGeo(shape, geo, mesh, color, clickable) {
         var geoGroup = geo.addGeoGroup();
         var vertexArr = mesh.vertexArr, normalArr = mesh.normalArr,
             faceArr = mesh.faceArr;
@@ -618,10 +619,10 @@ export class GLShape {
         shape.linewidth = typeof (stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
         // Click handling
         shape.clickable = stylespec.clickable ? true : false;
-        shape.callback = $3Dmol.makeFunction(stylespec.callback);
+        shape.callback = makeFunction(stylespec.callback);
         shape.hoverable = stylespec.hoverable ? true : false;
-        shape.hover_callback = $3Dmol.makeFunction(stylespec.hover_callback);
-        shape.unhover_callback = $3Dmol.makeFunction(stylespec.unhover_callback);
+        shape.hover_callback = makeFunction(stylespec.hover_callback);
+        shape.unhover_callback = makeFunction(stylespec.unhover_callback);
 
         shape.hidden = stylespec.hidden;
         shape.frame = stylespec.frame;
@@ -641,6 +642,8 @@ export class GLShape {
     unhover_callback: any;
     frame: any;
     side = DoubleSide;
+    shapePosition:any;
+    
     private geo: Geometry;
     private linegeo: Geometry;
     private stylespec: any;
@@ -697,7 +700,7 @@ export class GLShape {
         GLShape.updateFromStyle(this, this.stylespec);
 
         if (newspec.voldata && newspec.volscheme) {
-            $3Dmol.adjustVolumeStyle(newspec);
+            adjustVolumeStyle(newspec);
 
             //convert volumetric data into colors
             const scheme = newspec.volscheme;
@@ -863,7 +866,7 @@ export class GLShape {
         faces.splice(faces.length, 0, foff + 0, foff + 2, foff + 1, foff + 1, foff + 2, foff + 3);
         foff += 4;
 
-        var spec = $3Dmol.extend({}, boxSpec);
+        var spec = extend({}, boxSpec);
         spec.vertexArr = verts;
         spec.faceArr = faces;
         spec.normalArr = [];

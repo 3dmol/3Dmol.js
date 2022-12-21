@@ -1,3 +1,55 @@
+
+let SYBYLtoElem = {
+  'C.1': 'C',
+  'C1': 'C',
+  'C.2': 'C',
+  'C2': 'C',
+  'C.3': 'C',
+  'C3': 'C',  
+  'C.ar': 'C',
+  'Car': 'C',
+  'C.cat': 'C',
+  'Ccat': 'C',
+  'H.spc' :'H',
+  'Hspc':'H',
+  'H.t3p':'H',
+  'Ht3p': 'H',
+  'N.1':'N',
+  'N1':'N',
+  'N.2':'N',
+  'N2':'N',
+  'N.3':'N',
+  'N3':'N',
+  'N.4':'N',
+  'N4':'N',
+  'N.am':'N',
+  'Nam':'N',
+  'N.ar':'N',
+  'Nar':'N',
+  'N.p13':'N',
+  'Np13':'N',    
+  'O.2':'O',
+  'O2':'O',
+  'O.3':'O',
+  'O3':'O',
+  'O.co2':'O',
+  'Oco2':'O',
+  'O.spc':'O',
+  'Ospc':'O',    
+  'O.t3p':'O',
+  'Ot3p':'O',  
+  'P.3':'P',
+  'P3':'P',
+  'S.2':'S',
+  'S2':'S',  
+  'S.3':'S',
+  'S3':'S',  
+  'S.o':'S',
+  'So':'S',  
+  'S.o2':'S',
+  'So2':'S'
+};
+
 // parse SYBYL mol2 file from string - assumed to only contain one molecule
 // tag
 /**
@@ -31,7 +83,7 @@ export function MOL2(str, options) {
     if (tokens.length > 1) nbonds = parseInt(tokens[1]);
 
     var offset = 4;
-    var i;
+    var i: number;
     // Continue until 'Atom' section
     for (i = 3; i < lines.length; i++) {
       if (lines[i] == "@<TRIPOS>ATOM") {
@@ -49,9 +101,17 @@ export function MOL2(str, options) {
       tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
       var atom: Record<string, any> = {};
       // get element
-      var elem = tokens[5].split(".")[0];
-      atom.atom = atom.elem =
-        elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+      var elem = tokens[5];
+      if(SYBYLtoElem[elem] !== undefined) {        
+        elem = SYBYLtoElem[elem];
+      } else {
+        elem = elem.split(".")[0];
+        elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+      }
+
+      atom.atom = tokens[1];
+      atom.elem = elem;
+        
       if (atom.elem == "H" && noH) {
         // ignore
       } else {

@@ -1,5 +1,5 @@
 import { builtinGradients } from "./Gradient";
-import { getAtomProperty } from "./utils/getAtomProperty";
+import { getAtomProperty } from "./utilities";
 import { CC } from "./WebGL";
 
 export const htmlColors = {

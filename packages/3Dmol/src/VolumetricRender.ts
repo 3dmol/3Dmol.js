@@ -2,8 +2,7 @@ import { Sphere } from "./WebGL/shapes";
 import { Vector3, Matrix4 } from "./WebGL/math";
 import { VolumetricMaterial, Mesh, Texture, Object3D } from "./WebGL";
 import { CC } from "./WebGL";
-
-declare var $3Dmol;
+import { GLShape } from "./GLShape";
 
 /**
  * A GLVolumetricRender is a "shape" for representing volumetric data as a density distribution.
@@ -36,6 +35,7 @@ export class GLVolumetricRender {
 
     hidden = false;
     boundingSphere = new Sphere();
+    shapePosition: any;
     renderedShapeObj: any = null;
     shapeObj: any = null;
     geo: any;
@@ -152,7 +152,7 @@ export class GLVolumetricRender {
         }
 
         //use GLShape to construct box
-        var shape = new $3Dmol.GLShape();
+        var shape = new GLShape({});
         shape.addBox({
             corner: { x: this.extent[0][0], y: this.extent[0][1], z: this.extent[0][2] },
             dimensions: {

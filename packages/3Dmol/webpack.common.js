@@ -1,9 +1,8 @@
-// tslint:disable:object-literal-sort-keys
+/* eslint-disable no-undef*/
 const path = require("path");
 const webpack = require("webpack");
 const pkg = require("./package.json");
 const ESLintPlugin = require('eslint-webpack-plugin');
-
 
 const banner = `${pkg.name} v${pkg.version}
 ${pkg.description}
@@ -14,15 +13,14 @@ module.exports =  {
   mode: "production",
   entry: ["./src/index.ts", 
         "./src/3dmol.js",
-        "./src/autoload.js", 
-        "./src/glmodel.js",
-        "./src/glviewer.js",
         "./src/SurfaceWorker.js",
+
         "./src/ui/ui.js",
         "./src/ui/state.js",
         "./src/ui/icon.js",
         "./src/ui/form.js",        
         "./src/ui/defaultValues.js",
+        
         "./src/exporter.js"
         ],
   output: {

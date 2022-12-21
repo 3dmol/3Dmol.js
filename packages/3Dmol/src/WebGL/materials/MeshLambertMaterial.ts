@@ -35,6 +35,9 @@ export class MeshLambertMaterial extends Material {
   vertexColors = Coloring.NoColors;
   skinning = false;
 
+  voldata:any;
+  volscheme:any;
+
   constructor(parameters?: any) {
     super();
     this.setValues(parameters);

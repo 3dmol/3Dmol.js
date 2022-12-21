@@ -1,4 +1,4 @@
-import { base64ToArray } from "./utils";
+import { base64ToArray } from "./utilities";
 import { Vector3, Matrix4 } from "./WebGL/math";
 import { VASP } from "./parsers/VASP";
 import { CUBE } from "./parsers/CUBE";

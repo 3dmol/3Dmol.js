@@ -123,10 +123,10 @@ export class Label {
     var position = style.position
       ? style.position
       : {
-          x: -10,
-          y: 1,
-          z: 1,
-        };
+        x: -10,
+        y: 1,
+        z: 1,
+      };
 
     // Should labels always be in front of model?
     var inFront = style.inFront !== undefined ? style.inFront : true;

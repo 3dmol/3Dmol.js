@@ -9,6 +9,7 @@ import { MeshDoubleLambertMaterial, Coloring, Mesh } from "./WebGL";
 import { Gradient } from "./Gradient";
 import { getColorFromStyle } from "./colors";
 import { GLDraw } from "./GLDraw";
+import { isNumeric } from "./utilities";
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
@@ -1033,7 +1034,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                 nextColor = cartoonColor(next, cartoon);
 
                 // determine cylinder thickness
-                if ($3Dmol.isNumeric(cartoon.thickness))
+                if (isNumeric(cartoon.thickness))
                     thickness = cartoon.thickness;
                 else
                     thickness = defaultThickness;
@@ -1164,7 +1165,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                     // segment
                     nextColor = cartoonColor(next, cartoon);
                     colors.push(nextColor);
-                    if ($3Dmol.isNumeric(cartoon.thickness))
+                    if (isNumeric(cartoon.thickness))
                         thickness = cartoon.thickness;
                     else
                         thickness = defaultThickness;

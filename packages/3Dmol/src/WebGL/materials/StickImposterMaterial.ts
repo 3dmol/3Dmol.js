@@ -2,7 +2,7 @@ import { ImposterMaterial } from "./ImposterMaterial";
 export class StickImposterMaterial extends ImposterMaterial {
   shaderID = "stickimposter";
 
-  constructor(parameters?: Record<keyof ImposterMaterial, unknown>) {
+  constructor(parameters?: any) {
     super(parameters);
     this.setValues(parameters);
   }

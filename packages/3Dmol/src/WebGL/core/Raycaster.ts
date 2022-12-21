@@ -16,7 +16,7 @@ export class Raycaster {
   far: number;
   precision = 0.0001;
   linePrecision = 0.2;
-  constructor(origin: Vector3 | undefined, direction: Vector3 | undefined, far: number, near: number) {
+  constructor(origin: Vector3 | undefined, direction: Vector3 | undefined, far?: number, near?: number) {
     this.ray = new Ray(origin, direction);
 
     if (this.ray.direction.lengthSq() > 0) this.ray.direction.normalize();

@@ -19,6 +19,7 @@ export class Camera extends Object3D {
   aspect: number;
   near: number;
   far: number;
+  z: number;
   constructor(fov = 50, aspect = 1, near = 0.1, far = 2000, ortho = false) {
     super();
 

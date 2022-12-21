@@ -1,4 +1,4 @@
-import { base64ToArray } from "../utils/base64ToArray";
+import { base64ToArray } from "../utilities";
 import { Matrix4 } from "../WebGL";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 import { processSymmetries } from "./utils/processSymmetries";

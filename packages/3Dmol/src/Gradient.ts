@@ -52,7 +52,7 @@ export class RWB extends GradientType {
   max: number;
   mid?: number;
   mult: number;
-  constructor(min: number | [number, number], max?: number, mid?: number) {
+  constructor(min?: number | [number, number], max?: number, mid?: number) {
     super();
     this.mult = 1.0;
     this.mid = mid;
