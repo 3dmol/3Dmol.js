@@ -1,0 +1,25 @@
+name: 3Dmol.js CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+  
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        run: |
+          npm i -g npm@latest
+          npm install
+      - name: Test    
+        run: npm test
+      - name: Coverage
+        run: npm run cover
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+
