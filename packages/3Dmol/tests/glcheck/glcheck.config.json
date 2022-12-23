@@ -3,8 +3,8 @@
     "renderTestThreshold": 0.962,
     "renderTimeout": 60000,
     "saveRenderFailures": true,
-    "coverageFiles": "tests/glcheck/render-tests/assets/*",
     "referenceImageDir": "tests/glcheck/reference-images",
     "renderFailureDir": "tests/glcheck/render-failures",
+    "coverage": false,
     "defaultViewport": { "width": 800, "height": 800 }
 }

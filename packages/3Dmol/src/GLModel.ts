@@ -1890,7 +1890,7 @@ export class GLModel {
                 for (let i = 0; i < item.length; i++) {
                     copy[key].push(GLModel.deepCopyAndCache(item[i], model));
                 }
-            } else if (typeof item === "object" && key != "properties") {
+            } else if (typeof item === "object" && key != "properties" && key != "model") {
                 copy[key] = GLModel.deepCopyAndCache(item, model);
             } else {
                 copy[key] = item;

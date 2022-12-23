@@ -9,6 +9,10 @@ from os.path import join as pathjoin, exists, abspath
 from posixpath import split
 from shutil import copytree, rmtree
 
+suffix = ''
+if len(sys.argv) > 1:
+    suffix = sys.argv[1]
+
 curDir = abspath(split(abspath(__file__))[0]) 
 projectDir = abspath(pathjoin(curDir, "..", ".."))# hardcoded directory paths :-(
 testSrcDir = pathjoin(projectDir, 'tests', "auto")
@@ -48,6 +52,9 @@ symlink(buildSrcDir, testAssetsDir,target_is_directory=True)
 symlink(dataSrcDir, dataAssetDir,target_is_directory=True)
 symlink(testStructsSrcDir, structAssetDir,target_is_directory=True)
 
+additionalCode = '';
+if suffix == '-prof': #coverage doesn't play nicely with webworker
+    additionalCode = '$3Dmol.setSyncSurface(true);'
 
 for file in testsys.files:
     for example in file.examples:
@@ -58,8 +65,8 @@ f"""
 <html lang="en">
     <head>
         <title>{example.name}</title>
-        <script src="./assets/3Dmol-min.js"></script>  
-        <script>$ = $3Dmol.$;</script>       
+        <script src="./assets/3Dmol{suffix}.js"></script>  
+        <script>$ = $3Dmol.$; {additionalCode}</script>       
     </head>
     <body style="margin:0;padding:0">
         {prescript}

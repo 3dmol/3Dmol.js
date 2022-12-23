@@ -4,7 +4,7 @@
 
 global.$ = require("jquery");
 global.URL.createObjectURL = function() {};
-let $3Dmol = require("../../build/3Dmol.js");
+let $3Dmol = require("../../build/3Dmol-prof.js");
 
 //A poorman's JS version of Python's range
 let range = (start, end) => [...Array.from(Array(end + 1).keys()).slice(start)];

@@ -19,10 +19,16 @@
         "glcheck": "npm run glcheck --workspaces",
         "jest": "npm run jest --workspaces",
         "prepare": "npm run build",
-        "test": "npm run test --workspaces"
+        "test": "npm run test --workspaces",
+        "cover": "npm run cover --workspaces"
     },
     "version": "1.8.0",
     "workspaces": [
         "./packages/*"
-    ]
+    ],
+    "devDependencies": {
+        "codecov": "^3.8.3",
+        "jest-webgl-canvas-mock": "^0.2.3",
+        "nyc": "^15.1.0"
+    }
 }

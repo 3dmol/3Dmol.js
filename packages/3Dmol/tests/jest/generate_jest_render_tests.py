@@ -31,9 +31,9 @@ import generate_tests
 def preproc_src(string: str) -> str:
     #for the most part generate_tests does this, but it is necessary here
     #to handle code in divs as we aren't using the post-processed versions
-    string = string.replace("../test_structs/","3Dmol/tests/test_structs/")
+    string = string.replace("../test_structs/","http://localhost:8125/tests/test_structs/")
     if 'mdsrv' not in string: #test93
-        string = string.replace("data/","3Dmol/tests/auto/data/")
+        string = string.replace("data/","http://localhost:8125/tests/auto/data/")
     string = string.replace('viewer.render()','viewer.render(callback)')
     return string
 
@@ -54,6 +54,51 @@ jest.setTimeout(30000);
 //we only use this to check the
 WebGLRenderingContext.prototype.getParameter = function(p) { return "WebGL 2.0 (OpenGL ES 3.0 Chromium)"; };
 WebGLRenderingContext.prototype.texImage3D = function() {};
+
+var server = null;
+
+//have to spin up a webserver just to serve files **eye roll**
+beforeAll(() => {
+    var http = require('http');
+    var fs = require('fs');
+    var path = require('path');
+
+    server = http.createServer(function (request, response) {
+
+        var filePath = '.' + request.url;
+
+        fs.readFile(filePath, function (error, content) {
+            if (error) {
+                if (error.code == 'ENOENT') {
+                    fs.readFile('./404.html', function (error, content) {
+                        response.writeHead(200, {  });
+                        response.end(content, 'utf-8');
+                    });
+                }
+                else {
+                    response.writeHead(500);
+                    response.end('Sorry, check with the site admin for error: ' + error.code + '\\n');
+                    response.end();
+                }
+            }
+            else {
+                response.setHeader('Access-Control-Allow-Origin', '*');
+                response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+                response.writeHead(200, {});
+
+                response.end(content);
+            }
+        });
+
+    });
+    server.listen(8125);
+}
+);
+
+afterAll((done) => {
+    server.close(done);
+});
+
 ''');
        
 
