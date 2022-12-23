@@ -86,4 +86,4 @@ If you use 3Dmol.js, please cite our [Bioinformatics paper](http://bioinformatic
 
 ## Funding
 
-3DMol.js is funded through R01GM108340 from the National Institute of General Medical Sciences. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institute of General Medical Sciences or the National Institutes of Health.
+3DMol.js is funded through R35GM140753 (and previously R01GM108340) from the National Institute of General Medical Sciences. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institute of General Medical Sciences or the National Institutes of Health.
