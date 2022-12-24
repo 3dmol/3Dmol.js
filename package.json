@@ -22,7 +22,6 @@
         "test": "npm run test --workspaces",
         "cover": "npm run cover --workspaces"
     },
-    "version": "1.8.0",
     "workspaces": [
         "./packages/*"
     ],

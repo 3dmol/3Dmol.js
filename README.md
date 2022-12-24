@@ -1,5 +1,7 @@
 # 3Dmol.js
 [![CDNJS](https://img.shields.io/cdnjs/v/3Dmol.svg)](https://cdnjs.com/libraries/3Dmol)
+[![codecov](https://codecov.io/gh/3dmol/3Dmol.js/branch/master/graph/badge.svg)](https://codecov.io/gh/3dmol/3Dmol.js)
+![Github CI](https://github.com/3dmol/3Dmol.js/actions/workflows/CI.yml/badge.svg)
 
 3Dmol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required!
 
@@ -84,4 +86,4 @@ If you use 3Dmol.js, please cite our [Bioinformatics paper](http://bioinformatic
 
 ## Funding
 
-3DMol.js is funded through R01GM108340 from the National Institute of General Medical Sciences. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institute of General Medical Sciences or the National Institutes of Health.
+3DMol.js is funded through R35GM140753 (and previously R01GM108340) from the National Institute of General Medical Sciences. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institute of General Medical Sciences or the National Institutes of Health.
