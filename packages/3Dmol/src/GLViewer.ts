@@ -1,10 +1,10 @@
 //a molecular viewer based on GLMol
 
-import { Geometry, CC, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide } from "./WebGL";
+import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide } from "./WebGL";
 import { Vector3, Matrix4, Matrix3, Quaternion } from "./WebGL/math";
 import { MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line } from "./WebGL";
-import { getColorFromStyle, elementColors } from "./colors";
-import { extend, getExtent, makeFunction, getPropertyRange, isEmptyObject, adjustVolumeStyle, mergeGeos, PausableTimer } from "./utilities";
+import { elementColors, CC } from "./colors";
+import { extend, getExtent, makeFunction, getPropertyRange, isEmptyObject, adjustVolumeStyle, mergeGeos, PausableTimer, getColorFromStyle } from "./utilities";
 import { Gradient } from "./Gradient";
 import { GLModel } from "./GLModel";
 import { Label } from "./Label";
@@ -37,7 +37,7 @@ export class GLViewer {
     private glDOM: any = null;
     private ui: any = null;
 
-    private models = []; // atomistic molecular models
+    private models: GLModel[] = []; // atomistic molecular models
     private surfaces: any = {};
     private shapes = []; // Generic shapes
     private labels = [];
@@ -293,7 +293,7 @@ export class GLViewer {
         this.contextMenuEnabledAtoms.splice(0, this.contextMenuEnabledAtoms.length);
 
         for (let i = 0, il = this.models.length; i < il; i++) {
-            var model = this.models[i];
+            let model = this.models[i];
             if (model) {
                 let atoms = model.selectedAtoms({
                     clickable: true
@@ -472,12 +472,12 @@ export class GLViewer {
     private adjustZoomToLimits(z) {
         //a lower limit of 0 is at CAMERA_Z
         if (this.config.lowerZoomLimit && this.config.lowerZoomLimit > 0) {
-            var lower = this.CAMERA_Z - this.config.lowerZoomLimit;
+            let lower = this.CAMERA_Z - this.config.lowerZoomLimit;
             if (z > lower) z = lower;
         }
 
         if (this.config.upperZoomLimit && this.config.upperZoomLimit > 0) {
-            var upper = this.CAMERA_Z - this.config.upperZoomLimit;
+            let upper = this.CAMERA_Z - this.config.upperZoomLimit;
             if (z < upper) z = upper;
         }
 
@@ -488,16 +488,16 @@ export class GLViewer {
     };
     //interpolate between two normalized quaternions (t between 0 and 1)
     //https://en.wikipedia.org/wiki/Slerp
-    private static slerp(v0, v1, t) {
+    private static slerp(v0: Quaternion, v1: Quaternion, t: number) {
         // Compute the cosine of the angle between the two vectors.
         //dot product
-        if (t == 1) return v1;
-        else if (t == 0) return v0;
-        var dot = v0.x * v1.x + v0.y * v1.y + v0.z * v1.z + v0.w * v1.w;
+        if (t == 1) return v1.clone();
+        else if (t == 0) return v0.clone();
+        let dot = v0.x * v1.x + v0.y * v1.y + v0.z * v1.z + v0.w * v1.w;
         if (dot > 0.9995) {
             // If the inputs are too close for comfort, linearly interpolate
             // and normalize the result.
-            var result = new Quaternion(
+            let result = new Quaternion(
                 v0.x + t * (v1.x - v0.x),
                 v0.y + t * (v1.y - v0.y),
                 v0.z + t * (v1.z - v0.z),
@@ -1370,7 +1370,7 @@ export class GLViewer {
      *             value reverses the direction of the spin.
      *
      */
-    public spin(axis, speed) {
+    public spin(axis, speed: number = 1) {
         clearInterval(this.spinInterval);
         if (typeof axis == 'undefined')
             axis = 'y';
@@ -1379,9 +1379,6 @@ export class GLViewer {
                 return;
             else
                 axis = 'y';
-        }
-        if (typeof speed != 'number') {
-            speed = 1;
         }
 
         if (Array.isArray(axis)) {
@@ -1409,10 +1406,10 @@ export class GLViewer {
     //and rotationgroup quaternion
     //return array includes final position, but not current
     //the returned array includes an animate method
-    private animateMotion(duration, fixed, mpos, rz, rot, cam) {
+    private animateMotion(duration: number, fixed: boolean, mpos: Vector3, rz: number, rot: Quaternion, cam: Vector3) {
         var interval = 20;
-        var steps: any = Math.ceil(duration / interval);
-        if (steps < 1) steps = 1;
+        var nsteps: number = Math.ceil(duration / interval);
+        if (nsteps < 1) nsteps = 1;
         this.incAnim();
 
         var curr = {
@@ -1423,24 +1420,14 @@ export class GLViewer {
         };
 
         if (fixed) { //precompute path and stick to it
-            steps = new Array(steps);
-            var n = steps.length;
-            for (var i = 0; i < n; i++) {
-                let frac = (i + 1) / n;
+            let steps = new Array(nsteps);
+            for (let i = 0; i < nsteps; i++) {
+                let frac = (i + 1) / nsteps;
                 let next: any = { mpos: curr.mpos, rz: curr.rz, rot: curr.rot };
-                if (mpos) {
-                    next.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac).add(curr.mpos);
-                }
-                if (typeof (rz) != 'undefined' && rz != null) {
-                    next.rz = curr.rz + frac * (rz - curr.rz);
-                }
-                if (rot) {
-                    next.rot = GLViewer.slerp(curr.rot, rot, frac);
-                }
-                if (cam) {
-                    next.cam = cam.clone().sub(curr.cam).multiplyScalar(frac).add(curr.cam);
-                }
-
+                next.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac).add(curr.mpos);
+                next.rz = curr.rz + frac * (rz - curr.rz);
+                next.rot = GLViewer.slerp(curr.rot, rot, frac);
+                next.cam = cam.clone().sub(curr.cam).multiplyScalar(frac).add(curr.cam);
                 steps[i] = next;
             }
 
@@ -1449,18 +1436,10 @@ export class GLViewer {
             let callback = function () {
                 var p = steps[step];
                 step += 1;
-                if (p.mpos) {
-                    self.modelGroup.position = p.mpos;
-                }
-                if (p.rz) {
-                    self.rotationGroup.position.z = p.rz;
-                }
-                if (p.rot) {
-                    self.rotationGroup.quaternion = p.rot;
-                }
-                if (p.cam) {
-                    self.camera.lookAt(p.cam);
-                }
+                self.modelGroup.position = p.mpos;
+                self.rotationGroup.position.z = p.rz;
+                self.rotationGroup.quaternion = p.rot;
+                self.camera.lookAt(p.cam);
 
                 if (step < steps.length) {
                     setTimeout(callback, interval);
@@ -1473,7 +1452,7 @@ export class GLViewer {
 
         } else { //relative update
             var delta: any = {};
-            let frac = 1.0 / steps;
+            let frac = 1.0 / nsteps;
             if (mpos) {
                 delta.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac);
             }
@@ -1506,7 +1485,7 @@ export class GLViewer {
                     self.camera.lookAt(self.lookingAt);
                 }
 
-                if (step < steps) {
+                if (step < nsteps) {
                     setTimeout(callback, interval);
                 } else {
                     self.decAnim();
@@ -1541,7 +1520,7 @@ export class GLViewer {
      
      *
      */
-    public rotate(angle, axis: any = "y", animationDuration = 0, fixedPath?) {
+    public rotate(angle, axis: any = "y", animationDuration: number = 0, fixedPath: boolean = false) {
 
         if (axis == "x") {
             axis = { x: 1, y: 0, z: 0 };
@@ -1769,25 +1748,27 @@ export class GLViewer {
     /** @param {AtomSelectionSpec} sel
      * @return list of models specified by sel
      */
-    private getModelList(sel) {
-        var ms = [];
+    private getModelList(sel): GLModel[] {
+        let ms: GLModel[] = [];
         if (typeof sel === 'undefined' || typeof sel.model === "undefined") {
             for (let i = 0; i < this.models.length; i++) {
                 if (this.models[i])
                     ms.push(this.models[i]);
             }
         } else { // specific to some models
-            ms = sel.model;
-            if (!Array.isArray(ms))
-                ms = [ms];
+            let selm:any = sel.model;
+            if (!Array.isArray(selm))
+                selm = [selm];
 
-            for (let i = 0; i < ms.length; i++) {
+            for (let i = 0; i < selm.length; i++) {
                 //allow referencing models by order of creation
-                if (typeof ms[i] === 'number') {
-                    var index = ms[i];
+                if (typeof selm[i] === 'number') {
+                    var index = selm[i];
                     //support python backward indexing
                     if (index < 0) index += this.models.length;
-                    ms[i] = this.models[index];
+                    ms.push(this.models[index]);
+                } else {
+                    ms.push(selm[i]);
                 }
             }
         }
@@ -1807,7 +1788,7 @@ export class GLViewer {
 
         var ms = this.getModelList(sel);
 
-        for (var i = 0; i < ms.length; i++) {
+        for (let i = 0; i < ms.length; i++) {
             atoms = atoms.concat(ms[i].selectedAtoms(sel));
         }
 
@@ -1910,9 +1891,8 @@ export class GLViewer {
     });
      
          */
-    public zoom(factor, animationDuration, fixedPath) {
+    public zoom(factor?, animationDuration: number = 0, fixedPath: boolean = false) {
         factor = factor || 2;
-        animationDuration = animationDuration !== undefined ? animationDuration : 0;
         var scale = (this.CAMERA_Z - this.rotationGroup.position.z) / factor;
         var final_z = this.CAMERA_Z - scale;
 
@@ -1950,8 +1930,7 @@ export class GLViewer {
     viewer.render(callback);
     });
      */
-    public translate(x, y, animationDuration, fixedPath) {
-        animationDuration = animationDuration !== undefined ? animationDuration : 0;
+    public translate(x, y, animationDuration: number = 0, fixedPath: boolean = false) {
         var dx = x / this.WIDTH;
         var dy = y / this.HEIGHT;
         var v = new Vector3(0, 0, -this.CAMERA_Z);
@@ -1999,8 +1978,7 @@ export class GLViewer {
     viewer.render(callback);
     });
      */
-    public translateScene(x, y, animationDuration, fixedPath) {
-        animationDuration = animationDuration !== undefined ? animationDuration : 0;
+    public translateScene(x, y, animationDuration: number = 0, fixedPath = false) {
 
         var t = this.screenOffsetToModel(x, y);
         var final_position = this.modelGroup.position.clone().add(t);
@@ -2072,8 +2050,7 @@ export class GLViewer {
     viewer.render(callback);
     });
      */
-    public center(sel, animationDuration, fixedPath) {
-        animationDuration = animationDuration !== undefined ? animationDuration : 0;
+    public center(sel, animationDuration: number = 0, fixedPath: boolean = false) {
         var allatoms, alltmp;
         sel = sel || {};
         var atoms = this.getAtomsFromSel(sel);

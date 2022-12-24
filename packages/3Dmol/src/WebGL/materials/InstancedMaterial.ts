@@ -1,6 +1,6 @@
 import { Coloring } from "../constants/Coloring";
 import { Shading } from "../constants/Shading";
-import { Color } from "../core/Color";
+import { Color } from "../../colors";
 import { Vector3 } from "../math";
 import { Material } from "./Material";
 

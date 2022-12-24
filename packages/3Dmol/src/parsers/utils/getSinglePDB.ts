@@ -119,13 +119,12 @@ export function getSinglePDB(lines, options, sslookup) {
       for (let j = 0; j < 4; j++) {
         var to = parseInt(line.substr(coffsets[j], 5));
         var toindex = serialToIndex[to];
+        let from_to = fromindex+":"+toindex;
         var toAtom = atoms[toindex];
         if (fromAtom !== undefined && toAtom !== undefined) {
           // duplicated conect records indicate bond order
-          // @ts-ignore
-          if (!seenbonds[[fromindex, toindex]]) {
-            // @ts-ignore
-            seenbonds[[fromindex, toindex]] = 1;
+          if (!seenbonds[from_to]) {
+            seenbonds[from_to] = 1;
             if (
               fromAtom.bonds.length == 0 ||
               fromAtom.bonds[fromAtom.bonds.length - 1] != toindex
@@ -135,13 +134,11 @@ export function getSinglePDB(lines, options, sslookup) {
             }
           } else {
             //update bond order
-            // @ts-ignore
-            seenbonds[[fromindex, toindex]] += 1;
+            seenbonds[from_to] += 1;
 
             for (let bi = 0; bi < fromAtom.bonds.length; bi++) {
               if (fromAtom.bonds[bi] == toindex) {
-                // @ts-ignore
-                var newbo = seenbonds[[fromindex, toindex]];
+                var newbo = seenbonds[from_to];
                 if (newbo >= 4) {
                   //aromatic
                   fromAtom.bondOrder[bi] = 1;

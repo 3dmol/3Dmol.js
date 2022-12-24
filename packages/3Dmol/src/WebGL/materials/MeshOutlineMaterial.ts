@@ -1,4 +1,4 @@
-import { Color } from "../core/Color";
+import { Color } from "../../colors";
 import { Material } from "./Material";
 //Outlined Mesh Lamert material
 /** @constructor */

@@ -9,8 +9,8 @@ import {
   RGBAFormat,
   NearestFilter,
 } from "./constants/TextureConstants";
-import { Color } from "./core";
-import { Light } from "./Light";
+import { Light } from "./core";
+import { Color } from "../colors";
 import {
   MeshOutlineMaterial,
   SphereImposterOutlineMaterial,
@@ -761,7 +761,7 @@ export class Renderer {
     this._gl.texImage2D(
       this._gl.TEXTURE_2D,
       0,
-      // @ts-ignore Property 'DEPTH_COMPONENT32F' does not exist on type 'WebGLRenderingContext'. Did you mean 'DEPTH_COMPONENT16'?
+      // @ts-ignore Property 'DEPTH_COMPONENT32F' does not exist on type 'WebGLRenderingContext'. Did you mean 'DEPTH_COMPONENT16'? - typescript definitions not updated for WebGL 2.0?
       this._gl.DEPTH_COMPONENT32F,
       width,
       height,

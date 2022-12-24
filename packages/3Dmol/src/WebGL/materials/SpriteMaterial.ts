@@ -1,6 +1,6 @@
 import { SpriteAlignment } from "../constants/SpriteAlignment";
 import { Texture } from "../core/Texture";
-import { Color } from "../core/Color";
+import { Color } from "../../colors";
 import { Vector2 } from "../math";
 import { Material } from "./Material";
 export class SpriteMaterial extends Material {

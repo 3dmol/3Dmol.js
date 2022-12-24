@@ -3,7 +3,7 @@
 import { createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
 import { specStringToObject } from "./utilities";
-import { CC } from "./WebGL";
+import { CC } from "./colors";
 
 export var autoinit = false;
 export var processing_autoinit = false;

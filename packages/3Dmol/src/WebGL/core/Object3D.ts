@@ -2,7 +2,8 @@ import type { Material } from './../materials/Material';
 import { Matrix4, Quaternion, Vector3 } from "../math";
 import type { Geometry } from './Geometry';
 import type { Fog } from '../Fog';
-import type { Light } from '../Light';
+import { Color, ColorConstructorArg } from "../../colors";
+import { Sprite } from 'WebGL/objects';
 
 export let Object3DIDCount = 0;
 // Object3D base constructor function
@@ -31,7 +32,7 @@ export class Object3D {
     this.matrix.lookAt(vector, this.position, this.up);
     if (this.rotationAutoUpdate) {
       if (this.useQuaternion === true)
-        this.quaternion.copy(this.matrix.decompose()[1] as Quaternion);
+        console.error("Unimplemented math operation.");
       else if (this.rotation instanceof Vector3)
         this.rotation.setEulerFromRotationMatrix(this.matrix, this.eulerOrder);
     }
@@ -220,11 +221,11 @@ export class Scene extends Object3D {
   __lights = [] as Light[];
   __objectsAdded = [] as Object3D[];
   __objectsRemoved = [] as Object3D[];
+  __webglSprites: Sprite[];
 
   __addObject<T extends Object3D>(object: T) {
     //Directional Lighting
-    // @ts-ignore
-    if (object instanceof window.$3Dmol.Light) {
+    if (object instanceof Light) {
       if (this.__lights.indexOf(object as unknown as Light) === -1) this.__lights.push(object as unknown as Light);
 
       //TODO: Do I need this??
@@ -254,8 +255,7 @@ export class Scene extends Object3D {
 
   __removeObject<T extends Object3D>(object: T) {
     var idx;
-    // @ts-ignore
-    if (object instanceof window.$3Dmol.Light) {
+    if (object instanceof Light) {
       idx = this.__lights.indexOf(object as unknown as Light);
 
       if (idx !== -1) this.__lights.splice(idx, 1);
@@ -280,5 +280,20 @@ export class Scene extends Object3D {
     //Remove object's children
     for (var i = 0; i < object.children.length; i++)
       this.__removeObject(object.children[i]);
+  }
+}
+
+
+export class Light extends Object3D {
+  color: Color;
+  intensity: any;
+  position = new Vector3(0, 1, 0);
+  target = new Object3D();
+  castShadow = false;
+  onlyShadow = false;
+  constructor(hex?: ColorConstructorArg, intensity: number = 1) {
+    super();
+    this.color = new Color(hex);
+    this.intensity = intensity;
   }
 }

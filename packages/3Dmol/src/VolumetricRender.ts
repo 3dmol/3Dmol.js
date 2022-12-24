@@ -1,7 +1,7 @@
 import { Sphere } from "./WebGL/shapes";
 import { Vector3, Matrix4 } from "./WebGL/math";
 import { VolumetricMaterial, Mesh, Texture, Object3D } from "./WebGL";
-import { CC } from "./WebGL";
+import { CC } from "./colors";
 import { GLShape } from "./GLShape";
 
 /**

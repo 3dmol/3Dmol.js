@@ -1,5 +1,5 @@
 import { TextureOperations } from "./../constants/TextureOperations";
-import { Color } from "../core/Color";
+import { Color } from "../../colors";
 import { Material } from "./Material";
 
 /**

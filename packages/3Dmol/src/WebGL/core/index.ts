@@ -1,4 +1,3 @@
-export * from "./Color";
 export * from "./EventDispatcher";
 export * from "./Geometry";
 export * from "./Object3D";

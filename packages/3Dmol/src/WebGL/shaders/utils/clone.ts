@@ -1,4 +1,4 @@
-import { Color } from "../../core/Color";
+import { Color } from "../../../colors";
 
 export type Uniform = Record<any, { type?: unknown; value?: unknown }>
 

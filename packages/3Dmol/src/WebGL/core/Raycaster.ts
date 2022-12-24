@@ -77,7 +77,6 @@ var w_0 = new Vector3(); // for cylinders, cylinder.c1 - ray.origin
 var v1 = new Vector3(); // all purpose local vector
 var v2 = new Vector3();
 var v3 = new Vector3();
-//var facePlane = new $3Dmol.Plane();
 var matrixPosition = new Vector3();
 
 //object is a Sphere or (Bounding) Box

@@ -1,7 +1,7 @@
 //Volumetric material
 
 import { FrontSide } from "../constants/Sides";
-import { Color } from "../core/Color";
+import { Color } from "../../colors";
 import { Material } from "./Material";
 
 /** @constructor */

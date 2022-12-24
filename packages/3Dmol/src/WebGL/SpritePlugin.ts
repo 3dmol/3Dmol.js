@@ -205,7 +205,6 @@ export class SpritePlugin {
   ) {
     if (!this.gl) throw new Error("WebGLRenderer not initialized");
     let sprites: unknown[] = [];
-    // @ts-ignore I do not know where this __webglSprites is coming from
     scene?.__webglSprites?.forEach((sprite) => {
       //depthTest is false for inFront labels
       if (inFront && sprite.material.depthTest == false) {

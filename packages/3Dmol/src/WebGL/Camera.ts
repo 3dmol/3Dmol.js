@@ -47,7 +47,7 @@ export class Camera extends Object3D {
       if (this.useQuaternion === false && this.rotation instanceof Vector3) {
         this.rotation.setEulerFromRotationMatrix(this.matrix, this.eulerOrder);
       } else {
-        this.quaternion.copy(this.matrix.decompose()[1] as Quaternion);
+        console.error("Unimplemented math operation.");
       }
     }
   }

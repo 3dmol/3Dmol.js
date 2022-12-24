@@ -1,12 +1,12 @@
 import {
   SpriteAlignment,
-  Color,
-  CC,
   Texture,
   SpriteMaterial,
   Sprite,
 } from "./WebGL";
 import { Gradient } from "./Gradient";
+import { Color, CC } from "./colors";
+
 //Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
 
 export let LabelCount = 0;

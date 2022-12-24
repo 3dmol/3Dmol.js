@@ -1,7 +1,8 @@
 import {FrontSide}  from "../constants/Sides";
-import { EventDispatcher, Color } from "../core";
+import { EventDispatcher } from "../core";
 import type { Texture } from "../core";
 import { Vector2, Vector3 } from "../math";
+import { Color } from "../../colors";
 /**
  * Line and Mesh material types
  * @constructor
@@ -60,7 +61,6 @@ export class Material extends EventDispatcher {
         ) {
           currentValue.copy(newValue);
         } else {
-          // @ts-ignore checked above
           this[key] = newValue;
         }
       }

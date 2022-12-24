@@ -2,15 +2,15 @@
 //atoms in the same model.  An atom is uniquely specified by its model id and
 //its serial number.
 //A glmodel knows how to apply the styles on each atom to create a gl object
-import { Geometry, CC, Material, StickImposterMaterial } from "./WebGL";
+import { Geometry, Material, StickImposterMaterial } from "./WebGL";
 import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3 } from "./WebGL/math";
-import { Color } from "./WebGL";
+import { Color, CC } from "./colors";
 import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { GLDraw } from "./GLDraw"
 import { drawCartoon } from "./glcartoon";
-import { getColorFromStyle, elementColors } from "./colors";
-import { deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin } from "./utilities";
+import { elementColors } from "./colors";
+import { deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
 import { Gradient } from "./Gradient";
 import { Parsers } from "./parsers";
 
@@ -486,7 +486,7 @@ export class GLModel {
 
     };
 
-    private addLine(vertexArray, colorArray, offset, p1, p2, c1) {
+    private addLine(vertexArray, colorArray, offset, p1:Vector3, p2:Vector3, c1:Color) {
         //make line from p1 to p2, does not incremeant counts
         vertexArray[offset] = p1.x; vertexArray[offset + 1] = p1.y; vertexArray[offset + 2] = p1.z;
         colorArray[offset] = c1.r; colorArray[offset + 1] = c1.g; colorArray[offset + 2] = c1.b;
@@ -570,10 +570,10 @@ export class GLModel {
                 }
                 if (bstyle.singleBond) singleBond = true;
                 if (typeof (bstyle.color1) != "undefined") {
-                    c1 = CC.color(bstyle.color1);
+                    c1 = CC.color(bstyle.color1) as Color;
                 }
                 if (typeof (bstyle.color2) != "undefined") {
-                    c2 = CC.color(bstyle.color2);
+                    c2 = CC.color(bstyle.color2) as Color;
                 }
             }
 
@@ -724,7 +724,7 @@ export class GLModel {
         }
     };
 
-    private drawAtomInstanced(atom, geo) {
+    private drawAtomInstanced(atom, geo:Geometry) {
 
         if (!atom.style.sphere)
             return;
@@ -962,10 +962,10 @@ export class GLModel {
                     if (bstyle.radius) bondR = bstyle.radius;
                     if (bstyle.singleBond) singleBond = true;
                     if (typeof (bstyle.color1) != "undefined") {
-                        C1 = CC.color(bstyle.color1);
+                        C1 = CC.color(bstyle.color1) as Color;
                     }
                     if (typeof (bstyle.color2) != "undefined") {
-                        C2 = CC.color(bstyle.color2);
+                        C2 = CC.color(bstyle.color2) as Color;
                     }
                 }
                 var p1 = new Vector3(atom.x, atom.y, atom.z);
@@ -2108,9 +2108,8 @@ export class GLModel {
               viewer.render();
           });
      */
-    public selectedAtoms(sel, from) {
+    public selectedAtoms(sel, from?) {
         var ret = [];
-
 
         // make a copy of the selection to allow caching results without
         // the possibility for the user to change the selection and this
@@ -2595,7 +2594,7 @@ export class GLModel {
      * @param {boolean} whether or not to include style information. Defaults to false.
      * @return {Object}
      */
-    public toCDObject(includeStyles) {
+    public toCDObject(includeStyles:boolean=false) {
         var out: any = { a: [], b: [] };
         if (includeStyles) {
             out.s = [];

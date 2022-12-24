@@ -1,7 +1,8 @@
 //a collection of miscellaneous utility functions
 
-import { Gradient } from "./Gradient";
+import { builtinGradients, Gradient } from "./Gradient";
 import { VolumeData } from "./VolumeData";
+import {builtinColorSchemes, CC, elementColors, htmlColors, Color} from "./colors";
 
 declare var $;
 
@@ -563,3 +564,86 @@ export function download(query, viewer, options, callback?) {
     }
     else return promise;
 };
+
+
+/** Return proper color for atom given style
+ * @param {AtomSpec} atom
+ * @param {AtomStyle} style
+ * @return {Color}
+ */
+export function getColorFromStyle(atom, style):Color {
+    let scheme = style.colorscheme;
+    if (typeof builtinColorSchemes[scheme] != "undefined") {
+      scheme = builtinColorSchemes[scheme];
+    } else if (typeof scheme == "string" && scheme.endsWith("Carbon")) {
+      //any color you want of carbon
+      let ccolor = scheme
+        .substring(0, scheme.lastIndexOf("Carbon"))
+        .toLowerCase();
+      if (typeof htmlColors[ccolor] != "undefined") {
+        let newscheme = { ...elementColors.defaultColors };
+        newscheme.C = htmlColors[ccolor];
+        builtinColorSchemes[scheme] = { prop: "elem", map: newscheme };
+        scheme = builtinColorSchemes[scheme];
+      }
+    }
+  
+    let color = atom.color;
+    if (typeof style.color != "undefined" && style.color != "spectrum")
+      color = style.color;
+    if (typeof scheme != "undefined") {
+      let prop, val;
+      if (typeof elementColors[scheme] != "undefined") {
+        //name of builtin colorscheme
+        scheme = elementColors[scheme];
+        if (typeof scheme[atom[scheme.prop]] != "undefined") {
+          color = scheme.map[atom[scheme.prop]];
+        }
+      } else if (typeof scheme[atom[scheme.prop]] != "undefined") {
+        //actual color scheme provided
+        color = scheme.map[atom[scheme.prop]];
+      } else if (
+        typeof scheme.prop != "undefined" &&
+        typeof scheme.gradient != "undefined"
+      ) {
+        //apply a property mapping
+        prop = scheme.prop;
+        var grad = scheme.gradient; //redefining scheme
+        if (typeof builtinGradients[grad] != "undefined") {
+          grad = new builtinGradients[grad](
+            scheme.min,
+            scheme.max,
+            scheme.mid
+          );
+        }
+  
+        let range = grad.range() || [-1, 1]; //sensible default
+        val = getAtomProperty(atom, prop);
+        if (val != null) {
+          color = grad.valueToHex(val, range);
+        }
+      } else if (
+        typeof scheme.prop != "undefined" &&
+        typeof scheme.map != "undefined"
+      ) {
+        //apply a discrete property mapping
+        prop = scheme.prop;
+        val = getAtomProperty(atom, prop);
+        if (typeof scheme.map[val] != "undefined") {
+          color = scheme.map[val];
+        }
+      } else if (typeof style.colorscheme[atom.elem] != "undefined") {
+        //actual color scheme provided
+        color = style.colorscheme[atom.elem];
+      } else {
+        console.log("Could not interpret colorscheme " + scheme);
+      }
+    } else if (typeof style.colorfunc != "undefined") {
+      //this is a user provided function for turning an atom into a color
+      color = style.colorfunc(atom);
+    }
+  
+    let C = CC.color(color);
+    return C;
+  };
+  

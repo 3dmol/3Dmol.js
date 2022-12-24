@@ -1,4 +1,4 @@
-import { Color, ColorConstructorArg } from './core';
+import { Color, ColorConstructorArg } from '../colors';
 
 export class Fog {
   name = "";

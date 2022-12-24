@@ -297,8 +297,6 @@ export class Gradient extends GradientType {
   static builtinGradients = builtinGradients;
   static normalizeValue = normalizeValue;
   static getGradient = getGradient;
-  // @ts-ignore
-  valueToHex(_value: number, _range: number): number { }
-  // @ts-ignore
-  range(): [number, number] { }
+  valueToHex(_value: number, _range: number): number { return 0; }
+  range(): [number, number]|null { return null; }
 }

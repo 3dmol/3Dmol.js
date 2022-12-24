@@ -762,46 +762,6 @@ export class Matrix4 {
     return snapped.isIdentity();
   }
 
-  decompose(translation?: Vector3, rotation?: Quaternion, scale?: Vector3) {
-    const te = this.elements;
-    const mat4 = mRotation;
-    // grab the axis vectors
-    x.set(te[0], te[1], te[2]);
-    y.set(te[4], te[5], te[6]);
-    z.set(te[8], te[9], te[10]);
-
-    translation = translation instanceof Vector3 ? translation : new Vector3();
-    rotation = rotation instanceof Quaternion ? rotation : new Quaternion();
-    scale = scale instanceof Vector3 ? scale : new Vector3();
-
-    scale.x = x.length();
-    scale.y = y.length();
-    scale.z = z.length();
-
-    translation.x = te[12];
-    translation.y = te[13];
-    translation.z = te[14];
-
-    // scale the rotation part
-    mat4.copy(this);
-
-    mat4.elements[0] /= scale.x;
-    mat4.elements[1] /= scale.x;
-    mat4.elements[2] /= scale.x;
-
-    mat4.elements[4] /= scale.y;
-    mat4.elements[5] /= scale.y;
-    mat4.elements[6] /= scale.y;
-
-    mat4.elements[8] /= scale.z;
-    mat4.elements[9] /= scale.z;
-    mat4.elements[10] /= scale.z;
-
-    // @ts-ignore
-    rotation.setFromRotationMatrix(mat4);
-
-    return [translation, rotation, scale];
-  }
 
   getScale(scale?: Vector3): Vector3 {
     const te = this.elements;
@@ -1126,6 +1086,10 @@ export class Vector3 {
     return this;
   }
 
+  equals(b: Vector3) {
+    return this.x == b.x && this.y == b.y && this.z == b.z;
+  }
+  
   getPositionFromMatrix(m: Matrix4) {
     this.x = m.elements[12];
     this.y = m.elements[13];

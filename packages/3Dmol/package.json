@@ -69,13 +69,14 @@
   "scripts": {
     "build": "webpack --config webpack.dev.js --mode development  && webpack --config webpack.prod.js --mode production && python3 tests/auto/generate_tests.py && npm run doc",
     "prepare": "npm run build",
-    "jest": "npx jest",
-    "test": "npm run jest && npm run glcheck",
+    "jest": "npx jest --testPathIgnorePatterns=render.test.js",
+    "test": "npm run generate:jest && npm run jest && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py -min",
-    "cover": "python3 tests/jest/generate_jest_render_tests.py && npx jest --coverage",
+    "generate:jest": "python3 tests/jest/generate_jest_render_tests.py",
+    "cover": "npm run generate:jest && npx jest --coverage",
     "doc": "npx jsdoc -c jsdoc.conf.json src doc.md"
   }
 }

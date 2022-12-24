@@ -1,6 +1,147 @@
-import { builtinGradients } from "./Gradient";
-import { getAtomProperty } from "./utilities";
-import { CC } from "./WebGL";
+export interface Colored {
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+}
+
+export type ColorConstructorArg = number | Color | Colored | undefined;
+export class Color implements Colored {
+  r: number = 0.0;
+  g: number = 0.0;
+  b: number = 0.0;
+
+  constructor(r?: ColorConstructorArg, g?: number, b?: number) {
+    if (arguments.length > 1 && typeof r === "number") {
+      this.r = r || 0.0;
+      this.g = g || 0.0;
+      this.b = b || 0.0;
+
+      return this;
+    }
+
+    return this.set(r || 0.0);
+  }
+
+  set<T extends Colored>(val: Color | number | T): Color {
+    if (val instanceof Color) return val.clone();
+    else if (typeof val === "number") this.setHex(val);
+    else if (typeof val === "object") {
+      this.r = val?.r || 0.0;
+      this.g = val?.g || 0.0;
+      this.b = val?.b || 0.0;
+    }
+    return this;
+  }
+
+  setHex(hex: number): Color {
+    hex = Math.floor(hex);
+
+    this.r = ((hex >> 16) & 255) / 255;
+    this.g = ((hex >> 8) & 255) / 255;
+    this.b = (hex & 255) / 255;
+
+    return this;
+  }
+
+  getHex(): number {
+    var R = Math.round(this.r * 255);
+    var G = Math.round(this.g * 255);
+    var B = Math.round(this.b * 255);
+    return (R << 16) | (G << 8) | B;
+  }
+
+  clone(): Color {
+    return new Color(this.r, this.g, this.b);
+  }
+
+  copy(color: Color): Color {
+    this.r = color.r;
+    this.g = color.g;
+    this.b = color.b;
+
+    return this;
+  }
+
+  //return object that represents color components from 0 to 255
+  scaled<T extends Colored>(): Colored {
+    var ret: Partial<T> = {};
+    ret.r = Math.round(this.r * 255);
+    ret.g = Math.round(this.g * 255);
+    ret.b = Math.round(this.b * 255);
+    ret.a = 1.0;
+    return ret as T;
+  }
+}
+
+// in an attempt to reduce memory overhead, cache all $3Dmol.Colors
+// this makes things a little faster
+export class CC {
+  static rgbRegEx =
+    /rgb(a?)\(\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)/i;
+  static cache: Record<number, Color> = { 0: new Color(0) };
+  static color(hex: undefined): Color;
+  static color(hex: number | string): Color;
+  static color(hex: number[]): Color[];
+  static color(hex?: unknown): unknown {
+    // Undefined values default to black
+    if (!hex) return CC.cache[0];
+    // cache hits
+    if (typeof hex === "number" && typeof CC.cache[hex] !== "undefined")
+      return CC.cache[hex];
+
+    // arrays
+    if (hex && Array.isArray(hex))
+      // parse elements recursively
+      return hex.map(CC.color as (hex: number) => Color);
+
+    // numbers and hex strings
+    let hexval = CC.getHex(hex as (string | number));
+    let c = new Color(hexval);
+    CC.cache[hexval] = c;
+    return c;
+  }
+
+  static getHex(hex: Array<string | number>): number[];
+  static getHex(hex: string | number): number;
+  static getHex(hex: unknown): unknown {
+    if (Array.isArray(hex)) return hex.map(CC.getHex) as number[];
+    if (typeof hex === "string") {
+      let hexs: string = hex as string;
+      if (!isNaN(parseInt(hexs))) return parseInt(hexs);
+      hexs = hexs.trim();
+
+      if (hexs.length == 4 && hexs[0] == "#") {
+        hexs = "#" + hexs[1] + hexs[1] + hexs[2] + hexs[2] + hexs[3] + hexs[3]; //expand to full hex number
+      }
+
+      if (hexs.length == 7 && hexs[0] == "#") {
+        return parseInt(hexs.substring(1), 16);
+      }
+
+      let m = CC.rgbRegEx.exec(hexs);
+      if (m) {
+        if (m[1] != "") {
+          console.log(
+            "WARNING: Opacity value in rgba ignored.  Specify separately as opacity attribute."
+          );
+        }
+        let ret = 0;
+        for (let i = 2; i < 5; i++) {
+          ret *= 256;
+          let val = m[i].endsWith("%")
+            ? (255 * parseFloat(m[i])) / 100
+            : parseFloat(m[i]);
+          ret += Math.round(val);
+        }
+        return ret;
+      }
+      return (window as any)?.$3Dmol?.htmlColors[hex.toLowerCase()] || 0x000000;
+    }
+    return hex as number;
+  }
+}
+
 
 export const htmlColors = {
   aliceblue: 0xf0f8ff,
@@ -653,85 +794,4 @@ export const builtinColorSchemes = {
   orangeCarbon: { prop: "elem", map: elementColors.orangeCarbon },
   yellowCarbon: { prop: "elem", map: elementColors.yellowCarbon },
   blueCarbon: { prop: "elem", map: elementColors.blueCarbon },
-};
-
-/** Return proper color for atom given style
- * @param {AtomSpec} atom
- * @param {AtomStyle} style
- * @return {Color}
- */
-export function getColorFromStyle(atom, style) {
-  var scheme = style.colorscheme;
-  if (typeof builtinColorSchemes[scheme] != "undefined") {
-    scheme = builtinColorSchemes[scheme];
-  } else if (typeof scheme == "string" && scheme.endsWith("Carbon")) {
-    //any color you want of carbon
-    var ccolor = scheme
-      .substring(0, scheme.lastIndexOf("Carbon"))
-      .toLowerCase();
-    if (typeof htmlColors[ccolor] != "undefined") {
-      var newscheme = { ...elementColors.defaultColors };
-      newscheme.C = htmlColors[ccolor];
-      builtinColorSchemes[scheme] = { prop: "elem", map: newscheme };
-      scheme = builtinColorSchemes[scheme];
-    }
-  }
-
-  var color = atom.color;
-  if (typeof style.color != "undefined" && style.color != "spectrum")
-    color = style.color;
-  if (typeof scheme != "undefined") {
-    var prop, val;
-    if (typeof elementColors[scheme] != "undefined") {
-      //name of builtin colorscheme
-      scheme = elementColors[scheme];
-      if (typeof scheme[atom[scheme.prop]] != "undefined") {
-        color = scheme.map[atom[scheme.prop]];
-      }
-    } else if (typeof scheme[atom[scheme.prop]] != "undefined") {
-      //actual color scheme provided
-      color = scheme.map[atom[scheme.prop]];
-    } else if (
-      typeof scheme.prop != "undefined" &&
-      typeof scheme.gradient != "undefined"
-    ) {
-      //apply a property mapping
-      prop = scheme.prop;
-      var grad = scheme.gradient; //redefining scheme
-      if (typeof builtinGradients[grad] != "undefined") {
-        grad = new builtinGradients[grad](
-          scheme.min,
-          scheme.max,
-          scheme.mid
-        );
-      }
-
-      var range = grad.range() || [-1, 1]; //sensible default
-      val = getAtomProperty(atom, prop);
-      if (val != null) {
-        color = grad.valueToHex(val, range);
-      }
-    } else if (
-      typeof scheme.prop != "undefined" &&
-      typeof scheme.map != "undefined"
-    ) {
-      //apply a discrete property mapping
-      prop = scheme.prop;
-      val = getAtomProperty(atom, prop);
-      if (typeof scheme.map[val] != "undefined") {
-        color = scheme.map[val];
-      }
-    } else if (typeof style.colorscheme[atom.elem] != "undefined") {
-      //actual color scheme provided
-      color = style.colorscheme[atom.elem];
-    } else {
-      console.log("Could not interpret colorscheme " + scheme);
-    }
-  } else if (typeof style.colorfunc != "undefined") {
-    //this is a user provided function for turning an atom into a color
-    color = style.colorfunc(atom);
-  }
-
-  var C = CC.color(color);
-  return C;
 };

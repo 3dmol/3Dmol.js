@@ -6,7 +6,8 @@ export * from "./colors";
 export * from "./Label";
 export * from "./partialCharges";
 export * from "./parsers";
-export * from "./WebGL";
+export * from "./WebGL/math";
+export * from "./WebGL/shapes";
 export * from "./utilities";
 export * from "./ProteinSurface4"
 export * from "./VolumeData"

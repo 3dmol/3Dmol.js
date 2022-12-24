@@ -1,8 +1,8 @@
 import type { Material } from './../materials/Material';
-import type { LineBasicMaterial } from '../materials/LineBasicMaterial';
+import { LineBasicMaterial } from '../materials/LineBasicMaterial';
 import { EventDispatcher } from "./EventDispatcher";
 import { Vector3 } from "../math";
-import { CC, Color, Colored } from "./Color";
+import { CC, Color, Colored } from "../../colors";
 const BUFFERSIZE = 65535; //limited to 16bit indices
 export class GeometryGroup {
   id: number;
@@ -186,8 +186,7 @@ export class GeometryGroup {
 
     var oldindent = indent;
     indent += " "; //inshape
-    // @ts-ignore
-    if (material instanceof window.$3Dmol.LineBasicMaterial) {
+    if (material instanceof LineBasicMaterial) {
       ret +=
         indent +
         "geometry IndexedLineSet {\n" +

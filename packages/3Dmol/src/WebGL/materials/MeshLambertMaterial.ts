@@ -3,7 +3,7 @@ import { Shading } from "./../constants/Shading";
 import { Material } from "./Material";
 //Mesh Lambert material
 
-import { Color } from "../core/Color";
+import { Color } from "../../colors";
 import { Vector3 } from "../math";
 
 /** @constructor */

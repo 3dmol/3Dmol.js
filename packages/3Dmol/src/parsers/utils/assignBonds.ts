@@ -74,15 +74,12 @@ export function assignBonds(atoms) {
     { x: 1, y: 1, z: 0 },
     { x: 1, y: 1, z: 1 },
   ];
-  for (let x in grid) {
-    // @ts-ignore
-    x = parseInt(x);
-    for (let y in grid[x]) {
-      // @ts-ignore
-      y = parseInt(y);
-      for (let z in grid[x][y]) {
-        // @ts-ignore
-        z = parseInt(z);
+  for (let xg in grid) {
+    let x = parseInt(xg);
+    for (let yg in grid[x]) {
+      let y = parseInt(yg);
+      for (let zg in grid[x][y]) {
+        let z = parseInt(zg);
         let points = grid[x][y][z];
 
         for (let i = 0; i < points.length; i++) {

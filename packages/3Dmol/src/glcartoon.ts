@@ -3,13 +3,12 @@
 //of atoms with assigned secondary structure
 
 import { Vector3 } from "./WebGL/math";
-import { Geometry, CC, Material } from "./WebGL";
 import { Triangle, Sphere } from "./WebGL/shapes";
-import { MeshDoubleLambertMaterial, Coloring, Mesh } from "./WebGL";
+import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring } from "./WebGL";
 import { Gradient } from "./Gradient";
-import { getColorFromStyle } from "./colors";
+import { CC } from "./colors";
 import { GLDraw } from "./GLDraw";
-import { isNumeric } from "./utilities";
+import { isNumeric, getColorFromStyle } from "./utilities";
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.

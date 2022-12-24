@@ -36,7 +36,6 @@ export class Sphere {
   }
 
   equals(sphere: Sphere): boolean {
-    // @ts-ignore
     return sphere.center.equals(this.center) && sphere.radius === this.radius;
   }
 

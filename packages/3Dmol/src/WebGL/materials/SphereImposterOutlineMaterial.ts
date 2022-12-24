@@ -1,4 +1,4 @@
-import { Color } from "../core/Color";
+import { Color } from "../../colors";
 import { ImposterMaterial } from "./ImposterMaterial";
 
 export class SphereImposterOutlineMaterial extends ImposterMaterial {

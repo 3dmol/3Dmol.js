@@ -119,6 +119,6 @@ $$$$
 let data = $3Dmol.$('#sdf').val();
 viewer.addModel(data,'sdf')
 viewer.setStyle({sphere: {scale: 0.5, radius: 0.5}})
-viewer.render()
+viewer.render(/* no callback*/ )
 viewer.zoomTo();
 viewer.render();

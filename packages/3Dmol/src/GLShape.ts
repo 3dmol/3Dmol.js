@@ -1,9 +1,9 @@
-import { Geometry, CC, Material } from "./WebGL";
+import { Geometry, Material } from "./WebGL";
 import { Sphere, Cylinder, Triangle } from "./WebGL/shapes";
 import { Vector3 } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
 import { DoubleSide } from "./WebGL";
-import { Color } from "./WebGL";
+import { Color, CC } from "./colors";
 import { MarchingCube } from "./ProteinSurface4";
 import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
