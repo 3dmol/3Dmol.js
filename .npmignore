@@ -4,6 +4,7 @@
 script.map
 .DS_Store
 .settings
+.ipynb
 
 #Ignoring Virtual Environments for the Active Learning Environment Project
 .env
