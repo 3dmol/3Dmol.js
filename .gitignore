@@ -1,25 +1,25 @@
 /node_modules
 /nbproject/private/
+/build
+/doc
 script.map
 .externalToolBuilders
 .pydevproject
-my_pdbs/
 .DS_Store
-package-lock.json  #suppose to commit, but triggers security warning on github
 .settings
-/assets
 node_modules
 __pycache__
-/'design concepts'
 .nyc_output
 .vscode
 .st
 tmp/
 .parcel-cache/
 nbproject
-coverage
-codecov
+/coverage
+/codecov
 PUBLISH
+
+/tests/jest/render.test.js
 
 #Ignoring Virtual Environments for the Active Learning Environment Project
 .env
@@ -29,5 +29,3 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-assets/
-design concepts/

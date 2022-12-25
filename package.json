@@ -1,33 +1,78 @@
 {
-    "author": "David Koes and contributors",
-    "dependencies": {
-        "ini": "^2.0.0",
-        "yargs-parser": "^20.2.9"
-    },
-    "description": "Object oriented Javascript molecular visualization library",
-    "homepage": "http://3dmol.csb.pitt.edu",
-    "license": "BSD-3-Clause",
-    "name": "3dmol",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/dkoes/3Dmol.js.git"
-    },
-    "scripts": {
-        "build": "npm run build --workspaces",
-        "coverage": "npm run coverage --workspaces",
-        "doc": "npm run doc --workspaces",
-        "glcheck": "npm run glcheck --workspaces",
-        "jest": "npm run jest --workspaces",
-        "prepare": "npm run build",
-        "test": "npm run test --workspaces",
-        "cover": "npm run cover --workspaces"
-    },
-    "workspaces": [
-        "./packages/*"
+  "name": "3dmol",
+  "version": "2.0.0",
+  "description": "Object oriented JavaScript molecular visualization library",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/3dmol/3Dmol.js.git"
+  },
+  "author": "David Koes and contributors",
+  "homepage": "http://3dmol.org",
+  "jest": {
+    "testRegex": [
+      "./*\\.test.js$",
+      "./*\\.test.ts$"
     ],
-    "devDependencies": {
-        "codecov": "^3.8.3",
-        "jest-webgl-canvas-mock": "^0.2.3",
-        "nyc": "^15.1.0"
-    }
+    "setupFiles": [
+      "jest-webgl-canvas-mock",
+      "jsdom-worker"
+    ],
+    "coverageReporters": [
+      "lcov",
+      "text"
+    ]
+  },
+  "license": "BSD-3-Clause",
+  "main": "build/3Dmol.js",
+  "scripts": {
+    "build": "webpack --config webpack.dev.js --mode development  && webpack --config webpack.prod.js --mode production && python3 tests/auto/generate_tests.py && npm run doc",
+    "prepare": "npm run build",
+    "jest": "npx jest --testPathIgnorePatterns=render.test.js",
+    "test": "npm run generate:jest && npm run jest && npm run glcheck",
+    "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
+    "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
+    "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
+    "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py -min",
+    "generate:jest": "python3 tests/jest/generate_jest_render_tests.py",
+    "cover": "npm run generate:jest && npx jest --coverage",
+    "doc": "npx jsdoc -c jsdoc.conf.json src doc.md"
+  },
+  "dependencies": {
+    "iobuffer": "^5.3.1",
+    "jquery": "^3.6.3",
+    "netcdfjs": "^2.0.2",
+    "pako": "^2.1.0",
+    "upng-js": "^2.1.0",
+    "utf8": "^3.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.7",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/plugin-transform-typescript": "^7.20.7",
+    "better-docs": "github:3dmol/better-docs#master",
+    "canvas": "^2.11.0",
+    "codecov": "^3.8.3",
+    "del": "^7.0.0",
+    "eslint": "^8.30.0",
+    "eslint-webpack-plugin": "^3.2.0",
+    "glcheck": "github:3dmol/glcheck",
+    "jest": "^29.3.1",
+    "jest-environment-jsdom": "^29.3.1",
+    "jest-webgl-canvas-mock": "^0.2.3",
+    "jsdoc": "^4.0.0",
+    "jsdom": "^20.0.3",
+    "jsdom-worker": "^0.3.0",
+    "raw-loader": "^4.0.2",
+    "source-map-support": "^0.5.21",
+    "taffydb": "^2.7.3",
+    "terser-webpack-plugin": "^5.3.6",
+    "ts-loader": "^9.4.2",
+    "ts-node": "^10.9.1",
+    "tsc": "^2.0.4",
+    "typescript": "^4.9.4",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.75.0",
+    "webpack-bundle-analyzer": "^4.7.0",
+    "webpack-cli": "^5.0.1"
+  }
 }

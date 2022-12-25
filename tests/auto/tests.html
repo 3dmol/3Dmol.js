@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+                <html> 
+                    <head>
+                        <title></title>
+<script
+  src="https://code.jquery.com/jquery-3.6.1.js"
+  integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
+  crossorigin="anonymous"></script>
+              <script src="../../build/3Dmol.js"></script>
+            <script src="build.js"></script>
+            <script src="resemble.js"></script>
+            <script src="jszip.js"></script>
+            <script src="test.js"></script>
+            <link rel="stylesheet" type="text/css" href="style.css">
+            
+                    </head>
+                    <body>
+            <div id="summary">
+            <button type="button" id="sorttable">Sort</button>
+            <button type="button" id="download" disabled>Images...</button>
+            <h3>Status</h3>
+              <ul id="summary_list">
+              </ul>
+            </div>
+            <table id="tests">
+              <thead>
+              <tr><th>Status</th><th>Rendered</th><th>Reference</th><th>Difference</th></tr>
+              </thead>
+              <tbody id="tests_table">
+              </tbody>
+            </table>
+
+            <div id="gldiv" style="width: 400px; height: 400px; position: relative; visability:hidden; background-color: white;"></div>
+
+    </body>
+         </html>

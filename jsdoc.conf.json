@@ -1,0 +1,47 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "plugins": ["plugins/markdown",
+            "../../node_modules/better-docs/typescript",
+            "../../node_modules/better-docs/category"],
+    "source": {
+        "includePattern": "\\.(jsx|js|ts|tsx)$",
+        "excludePattern": "WebGL|vendor"
+    },    
+    "templates": {
+        "cleverLinks": true,
+        "monospaceLinks": false,
+        "footer": "",
+        "copyright":"3Dmol.js © 2019-2022",
+        "linenums"              : true,
+        "collapseSymbols"       : false,
+        "inverseNav"            : true,
+        "highlightTutorialCode" : true,
+         "better-docs": {
+             "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a>",
+             "title": "3Dmol.js Documentation",
+             "css": "../tutorials/style.css",
+            "navLinks": [
+                {
+                    "label": "Github",
+                    "href": "https://github.com/3dmol/3Dmol.js"
+                }
+            ]         
+        }        
+    },
+    "markdown"  : {
+        "parser"   : "gfm",
+        "hardwrap" : true
+    },
+    "opts":{
+        "recurse": true,
+        "encoding": "utf8",
+         //"template": "3Dmol-doc-template",
+        "template": "../../node_modules/better-docs",
+        "destination": "doc",
+        "tutorials": "tutorials",
+        "search": true
+     },
+     "tutorials": "tutorials/"
+}

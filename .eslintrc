@@ -1,0 +1,38 @@
+{
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false
+  },
+  "extends": ["eslint:recommended"],
+  "ignorePatterns": ["**/vendor/*.js"],
+  "rules": {
+    "no-prototype-builtins": "off"
+  },
+  "env": {
+    "es6": true
+  },
+  "globals": {
+      "$3Dmol": "writable",
+      "console": "writable", 
+      "document": "readonly",
+      "$": "readonly",
+      "window": "readonly",
+      "self": "writable" , 
+      "module": "readonly",
+      "Blob": "readonly",
+      "pako": "readonly",
+      "UPNG": "readonly",
+      "netcdfjs": "readonly",
+      "XMLHttpRequest": "readonly",
+      "alert": "readonly",
+      "setTimeout": "readonly",
+      "clearTimeout": "readonly",
+      "setInterval": "readonly",
+      "clearInterval": "readonly",
+      "Worker": "readonly",
+      "MMTF": "readonly",
+      "TextDecoder": "readonly",
+      "FileReader": "readonly",
+      "ProteinSurface": "readonly"
+    }  
+}

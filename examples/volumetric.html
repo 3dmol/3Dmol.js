@@ -2,7 +2,7 @@
 <html>
     <head>
     <title>DX Example</title>
-    <script src="../packages/3Dmol/build/3Dmol.js"></script>
+    <script src="../build/3Dmol.js"></script>
 
     <style>
     head, body {
@@ -23,11 +23,8 @@
         // testing (my testing)
         // framebuffer antialiasing ?
 
-        $.get('../packages/3Dmol/tests/test_structs/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / -0.2->0.2
-        // $.get('../packages/3Dmol/tests/test_structs/ch3cl-esp.cube', function(data){  // --iso 0.000001 or 0.2 / -40->37
-        // $.get('../packages/3Dmol/tests/auto/data/bohr.cube', function(data){ // --iso 1
-        // $.get('../packages/3Dmol/tests/auto/data/test.cube', function(data){ // --iso 0.0001
-        // $3Dmol.getbin('../packages/3Dmol/tests/auto/data/1lo6_2FOFC.ccp4', function(data) { // --iso 0.4
+        $.get('../tests/test_structs/benzene-homo.cube', function(data){  // --iso 0.000001 or 0.1 / -0.2->0.2
+
             var voldata = new $3Dmol.VolumeData(data, "cube");
 
             // values outside data range causes error

@@ -1,6 +1,0 @@
-doc
-build
-tmp
-.nyc_output
-/coverage
-/tests/jest/render.test.js

@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Function json | Atoms should match the snapshot 1`] = `
+[
+  [
+    {
+      "bondOrder": [
+        1,
+        1,
+        1,
+      ],
+      "bonds": [
+        1,
+        2,
+        3,
+      ],
+      "elem": "C",
+      "id": undefined,
+      "serial": 0,
+      "x": 85,
+      "y": 144,
+      "z": 0,
+    },
+    {
+      "bondOrder": [
+        1,
+      ],
+      "bonds": [
+        0,
+      ],
+      "elem": "C",
+      "id": undefined,
+      "serial": 1,
+      "x": 102.32050807568878,
+      "y": 134,
+      "z": 0,
+    },
+    {
+      "bondOrder": [
+        1,
+      ],
+      "bonds": [
+        0,
+      ],
+      "elem": "C",
+      "id": undefined,
+      "serial": 2,
+      "x": 67.67949192431124,
+      "y": 134,
+      "z": 0,
+    },
+    {
+      "bondOrder": [
+        1,
+      ],
+      "bonds": [
+        0,
+      ],
+      "elem": "C",
+      "id": undefined,
+      "serial": 3,
+      "x": 85,
+      "y": 164,
+      "z": 0,
+    },
+  ],
+]
+`;
