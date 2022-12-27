@@ -12,7 +12,7 @@ import { GLShape, splitMesh } from "./GLShape";
 import { VolumeData } from "./VolumeData";
 import { ProteinSurface, SurfaceType, syncSurface } from "./ProteinSurface4";
 import { GLVolumetricRender } from "./VolumetricRender";
-import {UPNG} from 'upng-js'
+import { UPNG } from 'upng-js'
 
 
 /**
@@ -33,8 +33,7 @@ export class GLViewer {
     private bgColor: any;
     private camerax: number;
     private _viewer: GLViewer;
-    private glDOM: HTMLCanvasElement|null = null;
-    private ui: any = null;
+    private glDOM: HTMLCanvasElement | null = null;
 
     private models: GLModel[] = []; // atomistic molecular models
     private surfaces: any = {};
@@ -82,7 +81,7 @@ export class GLViewer {
     private slabNear = -50; // relative to the center of rotationGroup
     private slabFar = 50;
 
-    public container: HTMLElement|null;
+    public container: HTMLElement | null;
 
     surfaceTypeMap = {
         "VDW": SurfaceType.VDW,
@@ -91,8 +90,6 @@ export class GLViewer {
         "SES": SurfaceType.SES
     };
 
-
-    // UI variables
     private cq = new Quaternion(0, 0, 0, 1);
     private dq = new Quaternion(0, 0, 0, 1);
     private animated = 0;
@@ -197,12 +194,12 @@ export class GLViewer {
 
         if (!this.nomouse) {
             // user can request that the mouse handlers not be installed
-            this.glDOM.addEventListener('mousedown', this._handleMouseDown.bind(this));
-            this.glDOM.addEventListener('touchstart', this._handleMouseDown.bind(this));
-            this.glDOM.addEventListener('wheel', this._handleMouseScroll.bind(this));
-            this.glDOM.addEventListener('mousemove', this._handleMouseMove.bind(this));
-            this.glDOM.addEventListener('touchmove', this._handleMouseMove.bind(this));
-            this.glDOM.addEventListener("contextmenu", this._handleContextMenu.bind(this));
+            this.glDOM.addEventListener('mousedown', this._handleMouseDown.bind(this), { passive: false });
+            this.glDOM.addEventListener('touchstart', this._handleMouseDown.bind(this), { passive: false });
+            this.glDOM.addEventListener('wheel', this._handleMouseScroll.bind(this), { passive: false });
+            this.glDOM.addEventListener('mousemove', this._handleMouseMove.bind(this), { passive: false });
+            this.glDOM.addEventListener('touchmove', this._handleMouseMove.bind(this), { passive: false });
+            this.glDOM.addEventListener("contextmenu", this._handleContextMenu.bind(this), { passive: false });
         }
 
     };
@@ -605,7 +602,7 @@ export class GLViewer {
             this.setViewStyle(this.config);
         }
 
-        window.addEventListener("resize",this.resize.bind(this));
+        window.addEventListener("resize", this.resize.bind(this));
 
         if (typeof (window.ResizeObserver) !== "undefined") {
             this.divwatcher = new window.ResizeObserver(this.resize.bind(this));
@@ -619,8 +616,6 @@ export class GLViewer {
             // errors in callback shouldn't invalidate the viewer
             console.log("error with glviewer callback: " + e);
         }
-
-        this.ui = new $3Dmol.StateManager(this._viewer, this.config); // Creates the UI state management tool
 
     };
 
@@ -888,8 +883,6 @@ export class GLViewer {
             }
         }, 1000);
 
-        // Exiting context menu on next mouse event
-        this.ui.exitContextMenu();
     };
 
     public _handleMouseUp(ev) {
@@ -936,10 +929,8 @@ export class GLViewer {
         }
         this.rotationGroup.position.z = this.adjustZoomToLimits(this.rotationGroup.position.z);
         this.show();
-
-        // Exiting context menu on next mouse event
-        this.ui.exitContextMenu();
     };
+    
     /**
      * Return image URI of viewer contents (base64 encoded).
      * @function $3Dmol.GLViewer#pngURI
@@ -1112,20 +1103,11 @@ export class GLViewer {
         this.show();
     };
 
-    private handleContextMenuSelection(mouseX, mouseY) {
-        let intersects = this.targetedObjects(mouseX, mouseY, this.contextMenuEnabledAtoms);
-        // console.log('Intersected Objects',mouseX, mouseY, contextMenuEnabledAtoms,  intersects[0]);
-        var selected = null;
-        if (intersects.length) {
-            selected = intersects[0].clickable;
-            // console.log('intersects and selected', selected);
-        }
-
-        var offset = this.canvasOffset();
-        var x = this.mouseStartX - offset.left;
-        var y = this.mouseStartY - offset.top;
-        this.ui.openContextMenu(selected, x, y);
-    };
+    /** User specified function for handling a context menu event.
+     * Handler is passed the selected object, x and y in canvas coordinates, 
+     * and original event.
+     */
+    public userContextMenuHandler: Function | null = null;
 
     public _handleContextMenu(ev) {
         ev.preventDefault();
@@ -1135,15 +1117,24 @@ export class GLViewer {
         if (newX != this.mouseStartX || newY != this.mouseStartY) {
             return;
         } else {
-            // console.log('Context Menu Called', ev);
             var x = this.mouseStartX;
             var y = this.mouseStartY;
             var offset = this.canvasOffset();
             var mouseX = ((x - offset.left) / this.WIDTH) * 2 - 1;
             var mouseY = -((y - offset.top) / this.HEIGHT) * 2 + 1;
-            this.handleContextMenuSelection(mouseX, mouseY);
-        }
+            let intersects = this.targetedObjects(mouseX, mouseY, this.contextMenuEnabledAtoms);
+            var selected = null;
+            if (intersects.length) {
+                selected = intersects[0].clickable;
+            }
 
+            var offset = this.canvasOffset();
+            var x = this.mouseStartX - offset.left;
+            var y = this.mouseStartY - offset.top;
+            if (this.userContextMenuHandler) {
+                this.userContextMenuHandler(selected, x, y,);
+            }
+        }
     };
 
 
@@ -1310,8 +1301,6 @@ export class GLViewer {
             this.show();
         }
 
-        // UI Edition
-        this.ui.updateUI();
         return this;
     };
 
@@ -1753,7 +1742,7 @@ export class GLViewer {
                     ms.push(this.models[i]);
             }
         } else { // specific to some models
-            let selm:any = sel.model;
+            let selm: any = sel.model;
             if (!Array.isArray(selm))
                 selm = [selm];
 
@@ -4710,7 +4699,6 @@ export class GLViewer {
      * Set the default cartoon quality for newly created models.  Default is 5.
      * Current models are not affected.
      * @number quality, higher results in higher resolution renders
-     * @function $3Dmol.GLViewer#ui.setDefaultCartoonQuality
      */
     public setDefaultCartoonQuality(val) {
         this.config.cartoonQuality = val;

@@ -37,8 +37,10 @@ export function autoload(viewer?, callback?) {
                 viewerdiv.style.position = 'relative';
             }
 
-            if (viewerdiv.dataset.ui)
+            var UI:any = null;
+            if (viewerdiv.dataset.ui) {
                 showUI = true;
+            }
 
             type = null;
             if (viewerdiv.dataset.pdb) {
@@ -149,7 +151,7 @@ export function autoload(viewer?, callback?) {
                 glviewer.setStyle(select, style);
 
                 if (showUI) {
-                    glviewer.ui.loadSelectionStyle(select, style);
+                    UI.createSelectionAndStyle(select, style);
                 }
 
                 for (i = 0; i < selectstylelist.length; i++) {
@@ -157,7 +159,7 @@ export function autoload(viewer?, callback?) {
                     let sty = selectstylelist[i][1] || { "line": {} };
                     glviewer.setStyle(sel, sty);
                     if (showUI) {
-                        glviewer.ui.loadSelectionStyle(sel, sty);
+                        UI.createSelectionAndStyle(select, style);
                     }
                 }
                 for (i = 0; i < surfaces.length; i++) {
@@ -167,7 +169,7 @@ export function autoload(viewer?, callback?) {
 
                     if (showUI) {
                         viewer.addSurface(SurfaceType.VDW, sty, sel, sel).then((surfid) => {
-                            viewer.ui.loadSurface("VDW", sel, sty, surfid);
+                            UI.loadSurface("VDW", sel, sty, surfid);
                         });
                     }
                     else {
@@ -194,13 +196,17 @@ export function autoload(viewer?, callback?) {
                 var config: any = specStringToObject(viewerdiv.dataset.config) || {};
                 if (config.backgroundColor === undefined) config.backgroundColor = bgcolor;
                 if (config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;
-                config.ui = showUI;
                 if (glviewer == null) {
                     glviewer = viewers[viewerdiv.id || nviewers++] = createViewer(viewerdiv, config);
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
                     glviewer.setConfig(config);
-                    if (showUI) glviewer.ui.initiateUI();
+                    if (UI) 
+                        UI.initiateUI();
+                }
+
+                if(showUI) {
+                    UI = new $3Dmol.StateManager(glviewer); // Creates the UI state management tool
                 }
             } catch (error) {
                 console.log(error);
@@ -218,7 +224,7 @@ export function autoload(viewer?, callback?) {
                     glviewer.addModel(moldata, type, options);
                     if (showUI) {
                         var modelName = viewerdiv.dataset[datatypes[i]];
-                        glviewer.ui.setModelTitle(modelName);
+                        UI.setModelTitle(modelName);
                     }
                     i += 1;
                     if (i < datauri.length) {

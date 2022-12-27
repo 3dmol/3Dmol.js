@@ -8,8 +8,8 @@
 $3Dmol.StateManager = (function(){
 
   function States(glviewer, config){
-    config = config || {};
-    config.ui = config.ui || false;
+    config = config || glviewer.getConfig();
+    config.ui = true;
 
     var canvas = $(glviewer.getCanvas());
     var parentElement = $(glviewer.container);
@@ -270,6 +270,8 @@ $3Dmol.StateManager = (function(){
       if(this.ui) this.ui.tools.contextMenu.show(x, y, atom, atomExist);    
     }
 
+    glviewer.userContextMenuHandler = this.openContextMenu.bind(this);
+
     /**
      * Adds Label to the viewport specific to the selection
      * @function $3Dmol.StateManager#addLabel
@@ -343,6 +345,8 @@ $3Dmol.StateManager = (function(){
             this.ui.tools.contextMenu.hide(processContextMenu);
         }
     }
+
+    glviewer.container.addEventListener('wheel', this.exitContextMenu.bind(this), { passive: false });
 
     /**
      * Removes the label specific to the selection 
@@ -543,6 +547,14 @@ $3Dmol.StateManager = (function(){
         this.ui.resize();
       }
     };
+
+    window.addEventListener("resize",this.updateUI.bind(this));
+
+    if (typeof (window.ResizeObserver) !== "undefined") {
+        this.divwatcher = new window.ResizeObserver(this.updateUI.bind(this));
+        this.divwatcher.observe(glviewer.container);
+    }
+
     
     // UI changes
 

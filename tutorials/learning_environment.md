@@ -11,8 +11,8 @@ The instructor can pose questions that the students then answer by clicking on a
 The easiest way to use the 3Dmol.js active learning environment is through the hosted viewer at [https://3dmol.csb.pitt.edu].  However, it may be desirable to host your own instance for your class.  A light-weight Flask webserver can quickly be brought up on a Ubuntu Linux machine with a few commands:
 
 
-```
-{@lang bash}#install dependencies
+```{@lang bash}
+#install dependencies
 apt install npm python3-pip git
 pip3 install flask flask_socketio eventlet
 #get latest version from git

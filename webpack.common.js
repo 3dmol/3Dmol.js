@@ -11,7 +11,6 @@ Author: ${pkg.author}`;
 module.exports =  {
   target: "web",
   entry: ["./src/index.ts", 
-        "./src/3dmol.js",
         "./src/SurfaceWorker.js",
 
         "./src/ui/ui.js",
@@ -25,7 +24,7 @@ module.exports =  {
   output: {
     path: path.resolve(__dirname, "build"),
     globalObject: "this",
-    library: pkg.name,
+    library: "$3Dmol",
     libraryTarget: "umd",
   },
 

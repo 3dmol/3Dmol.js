@@ -23,7 +23,6 @@ export * from "./autoload"
 declare var __webpack_exports__: any;
 
 if (window) {
+    //this needs to be exported here so the webworker can see it
     window.$3Dmol = __webpack_exports__;
-    //internalize jquery for now
-    //window.$3Dmol.$ = $;
 }
