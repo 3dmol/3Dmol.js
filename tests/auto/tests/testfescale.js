@@ -116,7 +116,7 @@ $$$$
 </textarea>
 */
 
-let data = $3Dmol.$('#sdf').val();
+let data = $('#sdf').val();
 viewer.addModel(data,'sdf')
 viewer.setStyle({sphere: {scale: 0.5, radius: 0.5}})
 viewer.render(/* no callback*/ )

@@ -1659,7 +1659,7 @@ END
 </textarea>
 */
 
-var data = $3Dmol.$("#pdb_4udv").val(); //this is 4UDV (has 49 syms)
+var data = $("#pdb_4udv").val(); //this is 4UDV (has 49 syms)
 
 viewer.setBackgroundColor(0xffffff);
 

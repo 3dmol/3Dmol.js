@@ -2,10 +2,9 @@
 
 import { builtinGradients, Gradient } from "./Gradient";
 import { VolumeData } from "./VolumeData";
-import {builtinColorSchemes, CC, elementColors, htmlColors, Color} from "./colors";
-import * as $ from 'jquery';
+import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
 
-//simplified version of $.extend
+//simplified version of jquery extend
 export function extend(obj1, src1) {
     for (var key in src1) {
         if (src1.hasOwnProperty(key) && src1[key] !== undefined) {
@@ -269,6 +268,14 @@ export function specStringToObject(str) {
         return str;
     }
 
+    //if this is a json string, parse it directly
+    try {
+        let parsed = JSON.parse(str);
+        return parsed;
+    } catch (error) {
+
+    }
+
     str = str.replace(/%7E/, '~'); //copy/pasting urls sometimes does this
     //convert things that look like numbers into numbers
     var massage = function (val) {
@@ -326,66 +333,28 @@ export function specStringToObject(str) {
     return ret;
 };
 
+
+
+function checkStatus(response) {
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+    }
+    return response;
+}
+
 /**
-*
-* jquery.binarytransport.js
-*
-* @description. jQuery ajax transport for making binary data type requests.
-* @version 1.0 
-* @author Henry Algus <henryalgus@gmail.com>
-*
-*/
-
-// use this transport for "binary" data type
-$.ajaxTransport(
-    "+binary",
-    function (options, originalOptions, jqXHR) {
-        // check for conditions and support for blob / arraybuffer response type
-        if (window.FormData && ((options.dataType && (options.dataType == 'binary')) ||
-            (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) ||
-                (window.Blob && options.data instanceof Blob))))) {
-            return {
-                // create new XMLHttpRequest
-                send: function (headers, callback) {
-                    // setup all variables
-                    var xhr = new XMLHttpRequest(), url = options.url, type = options.type, async = options.async || true,
-                        // blob or arraybuffer. Default is blob
-                        dataType = options.responseType || "blob",
-                        data = options.data || null,
-                        username = options.username || null,
-                        password = options.password || null;
-
-                    var xhrret = function () {
-                        var data = {};
-                        data[options.dataType] = xhr.response;
-                        // make callback and send data
-                        callback(xhr.status, xhr.statusText,
-                            data,
-                            xhr.getAllResponseHeaders());
-                    };
-
-                    xhr.addEventListener('load', xhrret);
-                    xhr.addEventListener('error', xhrret);
-                    xhr.addEventListener('abort', xhrret);
-
-                    xhr.open(type, url, async, username,
-                        password);
-
-                    // setup custom headers
-                    for (var i in headers) {
-                        xhr.setRequestHeader(i, headers[i]);
-                    }
-
-                    xhr.responseType = dataType;
-                    xhr.send(data);
-                },
-                abort: function () {
-                    jqXHR.abort();
-                }
-            };
-        }
-    });
-
+ * Fetch data from URL
+ * 
+ * @param uri URL
+ * @param callback Function to call with data 
+ */
+export function get(uri, callback?) {
+    var promise = fetch(uri).then(checkStatus).then((response) => response.text());
+    if (callback)
+        return promise.then(callback);
+    else
+        return promise;
+}
 
 /**
  * Download binary data (e.g. a gzipped file) into an array buffer and provide
@@ -398,29 +367,19 @@ $.ajaxTransport(
  * @return {Promise}
  */
 export function getbin(uri, callback?, request?, postdata?) {
-    var promise = new Promise<ArrayBufferLike>(function (resolve, reject) {
+    var promise;
+    if (request == "POST") {
+        promise = fetch(uri, { method: 'POST', body: postdata })
+            .then((response) => checkStatus(response))
+            .then((response) => response.arrayBuffer());
+    } else {
+        promise = fetch(uri).then((response) => checkStatus(response))
+            .then((response) => response.arrayBuffer());
+    }
 
-        request = (request == undefined) ? "GET" : request;
-        $.ajax({
-            url: uri,
-            dataType: "binary",
-            method: request,
-            data: postdata,
-            responseType: "arraybuffer",
-            processData: false
-        })
-            .done(function (ret) {
-                resolve(ret);
-            })
-            .fail(function (e, txt) {
-                console.log(txt);
-                reject();
-            });
-    });
     if (callback) return promise.then(callback);
     else return promise;
 };
-
 
 
 /**
@@ -533,10 +492,10 @@ export function download(query, viewer, options, callback?) {
                         uri = pdbUri + query + ".pdb";
                         type = "pdb";
                         console.log("falling back to pdb format");
-                        $.get(uri, function (ret) {
-                            handler(ret);
+                        get(uri).then(function (data) {
+                            handler(data);
                             resolve(m);
-                        }).fail(function (e) {
+                        }).catch(function (e) {
                             handler("");
                             resolve(m);
                             console.log("fetch of " + uri + " failed: " + e.statusText);
@@ -544,10 +503,10 @@ export function download(query, viewer, options, callback?) {
                     }); //an error msg has already been printed
             }
             else {
-                $.get(uri, function (ret) {
-                    handler(ret);
+                get(uri).then(function (data) {
+                    handler(data);
                     resolve(m);
-                }).fail(function (e) {
+                }).catch(function (e) {
                     handler("");
                     resolve(m);
                     console.log("fetch of " + uri + " failed: " + e.statusText);
@@ -570,79 +529,89 @@ export function download(query, viewer, options, callback?) {
  * @param {AtomStyle} style
  * @return {Color}
  */
-export function getColorFromStyle(atom, style):Color {
+export function getColorFromStyle(atom, style): Color {
     let scheme = style.colorscheme;
     if (typeof builtinColorSchemes[scheme] != "undefined") {
-      scheme = builtinColorSchemes[scheme];
-    } else if (typeof scheme == "string" && scheme.endsWith("Carbon")) {
-      //any color you want of carbon
-      let ccolor = scheme
-        .substring(0, scheme.lastIndexOf("Carbon"))
-        .toLowerCase();
-      if (typeof htmlColors[ccolor] != "undefined") {
-        let newscheme = { ...elementColors.defaultColors };
-        newscheme.C = htmlColors[ccolor];
-        builtinColorSchemes[scheme] = { prop: "elem", map: newscheme };
         scheme = builtinColorSchemes[scheme];
-      }
+    } else if (typeof scheme == "string" && scheme.endsWith("Carbon")) {
+        //any color you want of carbon
+        let ccolor = scheme
+            .substring(0, scheme.lastIndexOf("Carbon"))
+            .toLowerCase();
+        if (typeof htmlColors[ccolor] != "undefined") {
+            let newscheme = { ...elementColors.defaultColors };
+            newscheme.C = htmlColors[ccolor];
+            builtinColorSchemes[scheme] = { prop: "elem", map: newscheme };
+            scheme = builtinColorSchemes[scheme];
+        }
     }
-  
+
     let color = atom.color;
     if (typeof style.color != "undefined" && style.color != "spectrum")
-      color = style.color;
+        color = style.color;
     if (typeof scheme != "undefined") {
-      let prop, val;
-      if (typeof elementColors[scheme] != "undefined") {
-        //name of builtin colorscheme
-        scheme = elementColors[scheme];
-        if (typeof scheme[atom[scheme.prop]] != "undefined") {
-          color = scheme.map[atom[scheme.prop]];
+        let prop, val;
+        if (typeof elementColors[scheme] != "undefined") {
+            //name of builtin colorscheme
+            scheme = elementColors[scheme];
+            if (typeof scheme[atom[scheme.prop]] != "undefined") {
+                color = scheme.map[atom[scheme.prop]];
+            }
+        } else if (typeof scheme[atom[scheme.prop]] != "undefined") {
+            //actual color scheme provided
+            color = scheme.map[atom[scheme.prop]];
+        } else if (
+            typeof scheme.prop != "undefined" &&
+            typeof scheme.gradient != "undefined"
+        ) {
+            //apply a property mapping
+            prop = scheme.prop;
+            var grad = scheme.gradient; //redefining scheme
+            if (typeof builtinGradients[grad] != "undefined") {
+                grad = new builtinGradients[grad](
+                    scheme.min,
+                    scheme.max,
+                    scheme.mid
+                );
+            }
+
+            let range = grad.range() || [-1, 1]; //sensible default
+            val = getAtomProperty(atom, prop);
+            if (val != null) {
+                color = grad.valueToHex(val, range);
+            }
+        } else if (
+            typeof scheme.prop != "undefined" &&
+            typeof scheme.map != "undefined"
+        ) {
+            //apply a discrete property mapping
+            prop = scheme.prop;
+            val = getAtomProperty(atom, prop);
+            if (typeof scheme.map[val] != "undefined") {
+                color = scheme.map[val];
+            }
+        } else if (typeof style.colorscheme[atom.elem] != "undefined") {
+            //actual color scheme provided
+            color = style.colorscheme[atom.elem];
+        } else {
+            console.log("Could not interpret colorscheme " + scheme);
         }
-      } else if (typeof scheme[atom[scheme.prop]] != "undefined") {
-        //actual color scheme provided
-        color = scheme.map[atom[scheme.prop]];
-      } else if (
-        typeof scheme.prop != "undefined" &&
-        typeof scheme.gradient != "undefined"
-      ) {
-        //apply a property mapping
-        prop = scheme.prop;
-        var grad = scheme.gradient; //redefining scheme
-        if (typeof builtinGradients[grad] != "undefined") {
-          grad = new builtinGradients[grad](
-            scheme.min,
-            scheme.max,
-            scheme.mid
-          );
-        }
-  
-        let range = grad.range() || [-1, 1]; //sensible default
-        val = getAtomProperty(atom, prop);
-        if (val != null) {
-          color = grad.valueToHex(val, range);
-        }
-      } else if (
-        typeof scheme.prop != "undefined" &&
-        typeof scheme.map != "undefined"
-      ) {
-        //apply a discrete property mapping
-        prop = scheme.prop;
-        val = getAtomProperty(atom, prop);
-        if (typeof scheme.map[val] != "undefined") {
-          color = scheme.map[val];
-        }
-      } else if (typeof style.colorscheme[atom.elem] != "undefined") {
-        //actual color scheme provided
-        color = style.colorscheme[atom.elem];
-      } else {
-        console.log("Could not interpret colorscheme " + scheme);
-      }
     } else if (typeof style.colorfunc != "undefined") {
-      //this is a user provided function for turning an atom into a color
-      color = style.colorfunc(atom);
+        //this is a user provided function for turning an atom into a color
+        color = style.colorfunc(atom);
     }
-  
+
     let C = CC.color(color);
     return C;
-  };
-  
+};
+
+//given a string selector, element, or jquery object, return the HTMLElement
+export function getElement(element): HTMLElement | null {
+    let ret = element;
+    if (typeof (element) === "string") {
+        ret = document.querySelector("#" + element);
+    } else if (typeof element === 'object' && element.get) { //jquery
+        ret = element.get(0);
+    }
+    return ret;
+}

@@ -19,11 +19,11 @@ export * from "./GLModel"
 export * from "./GLViewer"
 export * from "./autoload"
 
-import * as $ from 'jquery';
+//import * as $ from 'jquery';
 declare var __webpack_exports__: any;
 
 if (window) {
     window.$3Dmol = __webpack_exports__;
     //internalize jquery for now
-    window.$3Dmol.$ = $;
+    //window.$3Dmol.$ = $;
 }

@@ -1008,7 +1008,7 @@ END
 
             
             
-            var rec = viewer.addModel($3Dmol.$('#rec').val(),'pdb');
+            var rec = viewer.addModel($('#rec').val(),'pdb');
             rec.setHoverable({},true, function(atom){  //hover
                 viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.8});
                 viewer.render( /*no callback*/);},

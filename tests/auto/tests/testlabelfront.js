@@ -55,7 +55,7 @@ H         -0.57470       -7.29915        1.13071
 </textarea>
 */
 
-viewer.addModel($3Dmol.$('#mol').val(),'xyz');
+viewer.addModel($('#mol').val(),'xyz');
 viewer.setStyle({'sphere':{radius:0.5,opacity:.9},'stick':{opacity:.9}});
 
 viewer.selectedAtoms().forEach(atom => {

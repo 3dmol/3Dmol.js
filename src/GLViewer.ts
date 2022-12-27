@@ -4,7 +4,7 @@ import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Co
 import { Vector3, Matrix4, Matrix3, Quaternion } from "./WebGL/math";
 import { MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line } from "./WebGL";
 import { elementColors, CC } from "./colors";
-import { extend, getExtent, makeFunction, getPropertyRange, isEmptyObject, adjustVolumeStyle, mergeGeos, PausableTimer, getColorFromStyle } from "./utilities";
+import { extend, getExtent, makeFunction, getPropertyRange, isEmptyObject, adjustVolumeStyle, mergeGeos, PausableTimer, getColorFromStyle, getElement } from "./utilities";
 import { Gradient } from "./Gradient";
 import { GLModel } from "./GLModel";
 import { Label } from "./Label";
@@ -13,7 +13,6 @@ import { VolumeData } from "./VolumeData";
 import { ProteinSurface, SurfaceType, syncSurface } from "./ProteinSurface4";
 import { GLVolumetricRender } from "./VolumetricRender";
 import {UPNG} from 'upng-js'
-import * as $ from 'jquery';
 
 
 /**
@@ -34,7 +33,7 @@ export class GLViewer {
     private bgColor: any;
     private camerax: number;
     private _viewer: GLViewer;
-    private glDOM: any = null;
+    private glDOM: HTMLCanvasElement|null = null;
     private ui: any = null;
 
     private models: GLModel[] = []; // atomistic molecular models
@@ -83,7 +82,7 @@ export class GLViewer {
     private slabNear = -50; // relative to the center of rotationGroup
     private slabFar = 50;
 
-    public container: any;
+    public container: HTMLElement|null;
 
     surfaceTypeMap = {
         "VDW": SurfaceType.VDW,
@@ -117,7 +116,7 @@ export class GLViewer {
 
     //reimplement jquery getwidth/height
     private getRect() {
-        let div = this.container[0];
+        let div = this.container;
         let rect = div.getBoundingClientRect();
         if (rect.width == 0 && rect.height == 0 && div.style.display === 'none') {
             let oldpos = div.style.position;
@@ -194,15 +193,16 @@ export class GLViewer {
         this.ASPECT = this.renderer.getAspect(this.WIDTH, this.HEIGHT);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         this.container.append(this.renderer.domElement);
-        this.glDOM = $(this.renderer.domElement);
+        this.glDOM = this.renderer.domElement;
 
         if (!this.nomouse) {
             // user can request that the mouse handlers not be installed
-            this.glDOM.on('mousedown touchstart', this._handleMouseDown.bind(this));
-            this.glDOM.on('wheel', this._handleMouseScroll.bind(this));
-            this.glDOM.on('mousemove touchmove', this._handleMouseMove.bind(this));
-
-            this.glDOM.on("contextmenu", this._handleContextMenu.bind(this));
+            this.glDOM.addEventListener('mousedown', this._handleMouseDown.bind(this));
+            this.glDOM.addEventListener('touchstart', this._handleMouseDown.bind(this));
+            this.glDOM.addEventListener('wheel', this._handleMouseScroll.bind(this));
+            this.glDOM.addEventListener('mousemove', this._handleMouseMove.bind(this));
+            this.glDOM.addEventListener('touchmove', this._handleMouseMove.bind(this));
+            this.glDOM.addEventListener("contextmenu", this._handleContextMenu.bind(this));
         }
 
     };
@@ -353,7 +353,7 @@ export class GLViewer {
 
     //return offset of container
     private canvasOffset() {
-        let canvas = this.glDOM.get(0);
+        let canvas = this.glDOM;
         let rect = canvas.getBoundingClientRect();
         let doc = canvas.ownerDocument;
         let docElem = doc.documentElement;
@@ -413,38 +413,38 @@ export class GLViewer {
 
     private calcTouchDistance(ev) { // distance between first two
         // fingers
-        var xdiff = ev.originalEvent.targetTouches[0].pageX -
-            ev.originalEvent.targetTouches[1].pageX;
-        var ydiff = ev.originalEvent.targetTouches[0].pageY -
-            ev.originalEvent.targetTouches[1].pageY;
+        var xdiff = ev.targetTouches[0].pageX -
+            ev.targetTouches[1].pageX;
+        var ydiff = ev.targetTouches[0].pageY -
+            ev.targetTouches[1].pageY;
         return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
     };
 
     //check targetTouches as well
     private getX(ev) {
         var x = ev.pageX;
-        if (x == undefined) x = ev.originalEvent.pageX; //firefox
-        if (ev.originalEvent.targetTouches &&
-            ev.originalEvent.targetTouches[0]) {
-            x = ev.originalEvent.targetTouches[0].pageX;
+        if (x == undefined) x = ev.pageX; //firefox
+        if (ev.targetTouches &&
+            ev.targetTouches[0]) {
+            x = ev.targetTouches[0].pageX;
         }
-        else if (ev.originalEvent.changedTouches &&
-            ev.originalEvent.changedTouches[0]) {
-            x = ev.originalEvent.changedTouches[0].pageX;
+        else if (ev.changedTouches &&
+            ev.changedTouches[0]) {
+            x = ev.changedTouches[0].pageX;
         }
         return x;
     };
 
     private getY(ev) {
         var y = ev.pageY;
-        if (y == undefined) y = ev.originalEvent.pageY;
-        if (ev.originalEvent.targetTouches &&
-            ev.originalEvent.targetTouches[0]) {
-            y = ev.originalEvent.targetTouches[0].pageY;
+        if (y == undefined) y = ev.pageY;
+        if (ev.targetTouches &&
+            ev.targetTouches[0]) {
+            y = ev.targetTouches[0].pageY;
         }
-        else if (ev.originalEvent.changedTouches &&
-            ev.originalEvent.changedTouches[0]) {
-            y = ev.originalEvent.changedTouches[0].pageY;
+        else if (ev.changedTouches &&
+            ev.changedTouches[0]) {
+            y = ev.changedTouches[0].pageY;
         }
         return y;
     };
@@ -561,7 +561,7 @@ export class GLViewer {
             this.camerax = parseFloat(this.config.camerax);
         }
         this._viewer = this;
-        this.container = $(element); //we expect container to be jquery
+        this.container = element; //we expect container to be HTMLElement
 
         if (this.config.hoverDuration != undefined) {
             this.hoverDuration = this.config.hoverDuration;
@@ -597,18 +597,19 @@ export class GLViewer {
 
         // this event is bound to the body element, not the container,
         // so no need to put it inside initContainer()
-        $('body').on('mouseup touchend', this._handleMouseUp.bind(this));
+        document.body.addEventListener('mouseup', this._handleMouseUp.bind(this));
+        document.body.addEventListener('touchend', this._handleMouseUp.bind(this));
 
         this.initContainer(this.container);
         if (this.config.style) { //enable setting style in constructor
             this.setViewStyle(this.config);
         }
 
-        $(window).resize(this.resize.bind(this));
+        window.addEventListener("resize",this.resize.bind(this));
 
         if (typeof (window.ResizeObserver) !== "undefined") {
             this.divwatcher = new window.ResizeObserver(this.resize.bind(this));
-            this.divwatcher.observe(this.container[0]);
+            this.divwatcher.observe(this.container);
         }
 
         try {
@@ -800,7 +801,7 @@ export class GLViewer {
      * @param {lower} - limit on zoom in (positive number).  Default 0.
      * @param {upper} - limit on zoom out (positive number).  Default infinite.
      * @example
-      $.get("data/set1_122_complex.mol2", function(moldata) {
+      $3Dmol.get("data/set1_122_complex.mol2", function(moldata) {
             var m = viewer.addModel(moldata);
             viewer.setStyle({stick:{colorscheme:"Jmol"}});
             viewer.setZoomLimits(100,200);
@@ -825,7 +826,7 @@ export class GLViewer {
      *                       distance to the origin, and orthographic (boolean)
      *                       for kind of projection (default false).
      * @example
-      $.get("data/set1_122_complex.mol2", function(data) {
+      $3Dmol.get("data/set1_122_complex.mol2", function(data) {
             var m = viewer.addModel(data);
             viewer.setStyle({stick:{}});
             viewer.zoomTo();
@@ -862,8 +863,8 @@ export class GLViewer {
         this.mouseStartY = y;
         this.touchHold = true;
         this.touchDistanceStart = 0;
-        if (ev.originalEvent.targetTouches &&
-            ev.originalEvent.targetTouches.length == 2) {
+        if (ev.targetTouches &&
+            ev.targetTouches.length == 2) {
             this.touchDistanceStart = this.calcTouchDistance(ev);
         }
         this.cq = this.rotationGroup.quaternion.clone();
@@ -874,11 +875,11 @@ export class GLViewer {
 
         let self = this;
         setTimeout(function () {
-            if (ev.originalEvent.targetTouches) {
+            if (ev.targetTouches) {
                 if (self.touchHold == true) {
                     // console.log('Touch hold', x,y);
-                    self.glDOM = $(self.renderer.domElement);
-                    self.glDOM.trigger('contextmenu');
+                    self.glDOM = self.renderer.domElement;
+                    self.glDOM.dispatchEvent(new Event('contextmenu'));
                 }
                 else {
                     // console.log('Touch hold ended earlier');
@@ -925,13 +926,13 @@ export class GLViewer {
 
         var scaleFactor = (this.CAMERA_Z - this.rotationGroup.position.z) * 0.85;
         var mult = 1.0;
-        if (ev.originalEvent.ctrlKey) {
+        if (ev.ctrlKey) {
             mult = -1.0; //this is a pinch event turned into a wheel event (or they're just holding down the ctrl)
         }
-        if (ev.originalEvent.detail) {
-            this.rotationGroup.position.z += mult * scaleFactor * ev.originalEvent.detail / 10;
-        } else if (ev.originalEvent.wheelDelta) {
-            this.rotationGroup.position.z -= mult * scaleFactor * ev.originalEvent.wheelDelta / 400;
+        if (ev.detail) {
+            this.rotationGroup.position.z += mult * scaleFactor * ev.detail / 10;
+        } else if (ev.wheelDelta) {
+            this.rotationGroup.position.z -= mult * scaleFactor * ev.wheelDelta / 400;
         }
         this.rotationGroup.position.z = this.adjustZoomToLimits(this.rotationGroup.position.z);
         this.show();
@@ -1003,8 +1004,8 @@ export class GLViewer {
     /**
      * Return underlying canvas element.
      */
-    public getCanvas() {
-        return this.glDOM.get(0);
+    public getCanvas(): HTMLCanvasElement {
+        return this.glDOM;
     };
 
     /**
@@ -1068,14 +1069,14 @@ export class GLViewer {
         var dy = (y - this.mouseStartY) / this.HEIGHT;
         // check for pinch
         if (this.touchDistanceStart != 0 &&
-            ev.originalEvent.targetTouches &&
-            ev.originalEvent.targetTouches.length == 2) {
+            ev.targetTouches &&
+            ev.targetTouches.length == 2) {
             var newdist = this.calcTouchDistance(ev);
             // change to zoom
             mode = 2;
             dy = (newdist - this.touchDistanceStart) * 2 / (this.WIDTH + this.HEIGHT);
-        } else if (ev.originalEvent.targetTouches &&
-            ev.originalEvent.targetTouches.length == 3) {
+        } else if (ev.targetTouches &&
+            ev.targetTouches.length == 3) {
             // translate
             mode = 1;
         }
@@ -1157,12 +1158,8 @@ export class GLViewer {
      
      */
     public setContainer(element) {
-        if (typeof (element) === "string")
-            element = $("#" + element);
-        if (!element) {
-            element = this.container;
-        }
-        this.initContainer(element);
+        let elem = getElement(element) || this.container;
+        this.initContainer(elem);
         return this;
     };
 
@@ -1207,9 +1204,9 @@ export class GLViewer {
      *
      * @example
      viewer.setViewStyle({style:"outline"});
-          $.get('data/1fas.pqr', function(data){
+          $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
-              $.get("data/1fas.cube",function(volumedata){
+              $3Dmol.get("data/1fas.cube",function(volumedata){
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
               });
               viewer.zoomTo();
@@ -1230,9 +1227,9 @@ export class GLViewer {
      *
      * @example
      *   viewer.setViewStyle({style:"outline"});
-          $.get('data/1fas.pqr', function(data){
+          $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
-              $.get("data/1fas.cube",function(volumedata){
+              $3Dmol.get("data/1fas.cube",function(volumedata){
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
               });
               viewer.zoomTo();
@@ -1290,7 +1287,7 @@ export class GLViewer {
         let regen = false;
         if (this.renderer.isLost() && this.WIDTH > 0 && this.HEIGHT > 0) {
             //create new context
-            this.container.children('canvas').remove(); //remove existing
+            this.container.querySelector('canvas').remove(); //remove existing
             this.setupRenderer();
             this.initContainer(this.container);
             regen = true;
@@ -1882,7 +1879,7 @@ export class GLViewer {
      * @param {Boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation
      * @example
-    $.get('data/4csv.pdb', function(data) {
+    $3Dmol.get('data/4csv.pdb', function(data) {
     viewer.addModel(data,'pdb');
     viewer.setStyle({cartoon:{},stick:{}});
     viewer.zoomTo()
@@ -1921,7 +1918,7 @@ export class GLViewer {
      *            the duration of a zoom animation
      * @param {Boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation         *
-     * @example     $.get('data/4csv.pdb', function(data) {
+     * @example     $3Dmol.get('data/4csv.pdb', function(data) {
     viewer.addModel(data,'pdb');
     viewer.setStyle({cartoon:{},stick:{}});
     viewer.zoomTo();
@@ -1969,7 +1966,7 @@ export class GLViewer {
      *            the duration of a zoom animation
      * @param {Boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation         *
-     * @example     $.get('data/4csv.pdb', function(data) {
+     * @example     $3Dmol.get('data/4csv.pdb', function(data) {
     viewer.addModel(data,'pdb');
     viewer.setStyle({cartoon:{},stick:{}});
     viewer.zoomTo();
@@ -2043,7 +2040,7 @@ export class GLViewer {
      *         //   of 1 second(1000 milleseconds).
      *  // Reposition to centroid of all atoms of all models in this
      * //viewer glviewer.center();
-    $.get('data/4csv.pdb', function(data) {
+    $3Dmol.get('data/4csv.pdb', function(data) {
     viewer.addModel(data,'pdb');
     viewer.setStyle({cartoon:{},stick:{}});
     viewer.center();
@@ -2150,9 +2147,9 @@ export class GLViewer {
       * @example
      
      
-          $.get('data/1fas.pqr', function(data){
+          $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
-              $.get("data/1fas.cube",function(volumedata){
+              $3Dmol.get("data/1fas.cube",function(volumedata){
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {
                       opacity:0.85,
                       voldata: new $3Dmol.VolumeData(volumedata, "cube"),
@@ -2821,7 +2818,7 @@ export class GLViewer {
      * @param {UnitCellStyleSpec} spec - visualization style
        @example
      
-            $.get('data/1jpy.cif', function(data) {
+            $3Dmol.get('data/1jpy.cif', function(data) {
               let m = viewer.addModel(data);
               viewer.addUnitCell(m, {box:{color:'purple'},alabel:'X',blabel:'Y',clabel:'Z',alabelstyle: {fontColor: 'black',backgroundColor:'white',inFront:true,fontSize:40},astyle:{color:'darkred', radius:5,midpos: -10}});
               viewer.zoomTo();
@@ -2966,7 +2963,7 @@ export class GLViewer {
     * @function $3Dmol.GLViewer#removeUnitCell
     * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
       @example
-           $.get('data/icsd_200866.cif', function(data) {
+           $3Dmol.get('data/icsd_200866.cif', function(data) {
              let m = viewer.addModel(data);
              viewer.setStyle({sphere:{}})
              viewer.addUnitCell();
@@ -2995,7 +2992,7 @@ export class GLViewer {
     * @param {integer} C - number of times to replicate cell in Z dimension.  If absent, Y value is used.
     * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
       @example
-           $.get('data/icsd_200866.cif', function(data) {
+           $3Dmol.get('data/icsd_200866.cif', function(data) {
              let m = viewer.addModel(data);
              viewer.setStyle({sphere:{scale:.25}})
              viewer.addUnitCell();
@@ -3150,7 +3147,7 @@ export class GLViewer {
      * @example
      
      
-    $.get('data/bohr.cube', function(data) {
+    $3Dmol.get('data/bohr.cube', function(data) {
      
     viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95});
     viewer.setStyle({cartoon:{},stick:{}});
@@ -3180,7 +3177,7 @@ export class GLViewer {
      * @return {GLShape}
      *
      @example
-     $.get('../test_structs/benzene-homo.cube', function(data){
+     $3Dmol.get('../test_structs/benzene-homo.cube', function(data){
               var voldata = new $3Dmol.VolumeData(data, "cube");
               viewer.addIsosurface(voldata, {isoval: 0.01,
                                              color: "blue"});
@@ -3435,9 +3432,9 @@ export class GLViewer {
      
      
           viewer.setViewStyle({style:"outline"});
-          $.get('data/1fas.pqr', function(data){
+          $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
-              $.get("data/1fas.cube",function(volumedata){
+              $3Dmol.get("data/1fas.cube",function(volumedata){
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
      
               viewer.render();
@@ -3502,7 +3499,7 @@ export class GLViewer {
      * @return {GLModel}
      *
      * @example
-            $.get('../test_structs/multiple2.xyz', function(data){
+            $3Dmol.get('../test_structs/multiple2.xyz', function(data){
               viewer.addModelsAsFrames(data, "xyz");
               viewer.animate({loop: "forward",reps: 1});
               viewer.setStyle({stick:{colorscheme:'magentaCarbon'}});
@@ -3532,7 +3529,7 @@ export class GLViewer {
      @example
      
      
-          $.get('../test_structs/multiple.sdf', function(data){
+          $3Dmol.get('../test_structs/multiple.sdf', function(data){
               viewer.addAsOneMolecule(data, "sdf");
               viewer.zoomTo();
               viewer.render();
@@ -4484,7 +4481,7 @@ export class GLViewer {
      * @param {number} surf - Surface ID to apply changes to
      * @param {SurfaceStyleSpec} style - new material style specification
      @example
-     $.get("data/9002806.cif",function(data){
+     $3Dmol.get("data/9002806.cif",function(data){
         viewer.addModel(data);
         viewer.setStyle({stick:{}});
         let surf = viewer.addSurface("SAS");
@@ -4616,7 +4613,7 @@ export class GLViewer {
      * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
      * @param {AtomSelectionSpec} sel  - subset of atoms to work on - model selection must be specified here
          @example
-         $.get('../test_structs/b.sdf', function(data){
+         $3Dmol.get('../test_structs/b.sdf', function(data){
                   viewer.addModel(data,'sdf');
                   let props = [];
                   //make the atom index a property x
@@ -4739,8 +4736,7 @@ export class GLViewer {
  *                        
  */
 export function createViewer(element, config?) {
-    if (typeof (element) === "string")
-        element = $("#" + element);
+    element = getElement(element);
     if (!element) return;
 
     config = config || {};
@@ -4771,7 +4767,7 @@ export function createViewer(element, config?) {
      },
      { backgroundColor: 'lightgrey' }
    );
-   $.get('data/1jpy.cif', function(data) {
+   $3Dmol.get('data/1jpy.cif', function(data) {
      var viewer = viewers[0][0];
      viewer.addModel(data,'cif');
      viewer.setStyle({sphere:{}});
@@ -4801,8 +4797,7 @@ export function createViewer(element, config?) {
      
  */
 export function createViewerGrid(element, config?, viewer_config?) {
-    if (typeof (element) === "string")
-        element = $("#" + element);
+    element = getElement(element);
     if (!element) return;
 
     config = config || {};
@@ -4815,7 +4810,7 @@ export function createViewerGrid(element, config?, viewer_config?) {
     viewer_config.rows = config.rows;
     viewer_config.cols = config.cols;
     viewer_config.control_all = config.control_all != undefined ? config.control_all : false;
-    $(element).append($(canvas));
+    element.appendChild(canvas);
 
     //try to create the  viewer
     try {
@@ -4847,8 +4842,7 @@ export function createViewerGrid(element, config?, viewer_config?) {
 */
 export function createStereoViewer(element) {
     var that = this;
-    if (typeof (element) === "string")
-        element = $("#" + element);
+    element = getElement(element);
     if (!element) return;
 
     var viewers = createViewerGrid(element, { rows: 1, cols: 2, control_all: true });

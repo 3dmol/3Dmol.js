@@ -33,7 +33,7 @@ $$$$
         </textarea>
 */
 
-$3Dmol.$.get('data/corners.dx', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
+$3Dmol.get('data/corners.dx', function(data){  // --iso 0.000001 or 0.1 / data: -0.2->0.2
     var voldata = new $3Dmol.VolumeData(data, "dx");
 
     viewer.addVolumetricRender(voldata, {

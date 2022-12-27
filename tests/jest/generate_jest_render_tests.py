@@ -109,8 +109,8 @@ for file in testsys.files:
         output.write(f"test('{example.name}', (jestdone) => {{\n")
 
         output.write(f'''    const $3Dmol = require('../../build/3Dmol.js');
+    const $ = require('jquery');
     $3Dmol.setSyncSurface(true);
-    const $ = $3Dmol.$;
     console.log('{example.name}');
     ''')
         output.write(prescript);

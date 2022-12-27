@@ -1,6 +1,6 @@
 /* @script
    $3Dmol.initShapes = function(viewer) { 
-    $.get('../test_structs/benzene-homo.cube', function(data){
+    $3Dmol.get('../test_structs/benzene-homo.cube', function(data){
         var voldata = new $3Dmol.VolumeData(data, "cube");
         viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
         viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 

@@ -11,8 +11,8 @@ $3Dmol.StateManager = (function(){
     config = config || {};
     config.ui = config.ui || false;
 
-    var canvas = $(glviewer.getRenderer().domElement);
-    var parentElement = glviewer.container;
+    var canvas = $(glviewer.getCanvas());
+    var parentElement = $(glviewer.container);
 
     var height = parentElement.height();
     var width = parentElement.width();

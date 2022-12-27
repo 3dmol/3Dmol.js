@@ -15,7 +15,7 @@ HETATM   12 O    HOH A   3       3.945   4.569   3.303  1.00  0.00       B   O
 </textarea>
 */
 
-let data = $3Dmol.$('#waterpdb').val();
+let data = $('#waterpdb').val();
 let m = viewer.addModel(data, "pdb", {keepH:true});
 viewer.setStyle({'model': -1}, {'sphere':{}});
 viewer.zoomTo();

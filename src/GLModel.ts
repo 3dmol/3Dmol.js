@@ -10,12 +10,11 @@ import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3
 import { GLDraw } from "./GLDraw"
 import { drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
-import { deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
+import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
 import { Gradient } from "./Gradient";
 import { Parsers } from "./parsers";
-import {NetCDFReader} from "netcdfjs"
-import {inflate} from "pako"
-import * as $ from 'jquery';
+import { NetCDFReader } from "netcdfjs"
+import { inflate } from "pako"
 
 /**
  * GLModel represents a group of related atoms
@@ -321,9 +320,9 @@ export class GLModel {
         else if (GLModel.vdwRadii[atom.elem])
             r = GLModel.vdwRadii[atom.elem];
         else if (atom.elem.length > 1) { //see if adjusting case helps
-            let e:string = atom.elem;
-            e = e[0].toUpperCase()+e[1].toLowerCase();
-            if (GLModel.vdwRadii[e]) 
+            let e: string = atom.elem;
+            e = e[0].toUpperCase() + e[1].toLowerCase();
+            if (GLModel.vdwRadii[e])
                 r = GLModel.vdwRadii[e];
         }
 
@@ -485,7 +484,7 @@ export class GLModel {
 
     };
 
-    private addLine(vertexArray, colorArray, offset, p1:Vector3, p2:Vector3, c1:Color) {
+    private addLine(vertexArray, colorArray, offset, p1: Vector3, p2: Vector3, c1: Color) {
         //make line from p1 to p2, does not incremeant counts
         vertexArray[offset] = p1.x; vertexArray[offset + 1] = p1.y; vertexArray[offset + 2] = p1.z;
         colorArray[offset] = c1.r; colorArray[offset + 1] = c1.g; colorArray[offset + 2] = c1.b;
@@ -723,7 +722,7 @@ export class GLModel {
         }
     };
 
-    private drawAtomInstanced(atom, geo:Geometry) {
+    private drawAtomInstanced(atom, geo: Geometry) {
 
         if (!atom.style.sphere)
             return;
@@ -852,7 +851,7 @@ export class GLModel {
         var g = color.g;
         var b = color.b;
 
-        var negateColor = function(c) {
+        var negateColor = function (c) {
             //set sign bit
             var n = -c;
             if (n == 0) n = -0.0001;
@@ -1911,7 +1910,7 @@ export class GLModel {
 
                 if (key == "and") {
                     // get the intersection of two sets
-                    const intersect = function(first, other) {
+                    const intersect = function (first, other) {
                         const result = new Set();
                         for (const elem of other) {
                             if (first.has(elem)) {
@@ -2593,7 +2592,7 @@ export class GLModel {
      * @param {boolean} whether or not to include style information. Defaults to false.
      * @return {Object}
      */
-    public toCDObject(includeStyles:boolean=false) {
+    public toCDObject(includeStyles: boolean = false) {
         var out: any = { a: [], b: [] };
         if (includeStyles) {
             out.s = [];
@@ -2628,7 +2627,7 @@ export class GLModel {
                 let secondAtom = atom.bonds[b];
                 if (firstAtom >= secondAtom)
                     continue;
-                let bond:any = {
+                let bond: any = {
                     b: firstAtom,
                     e: secondAtom
                 };
@@ -2768,7 +2767,7 @@ export class GLModel {
     public addResLabels(sel, viewer, style, byframe) {
 
         var created_labels = [];
-        var helper = function(model, framenum?) {
+        var helper = function (model, framenum?) {
             var atoms = model.selectedAtoms(sel, atoms);
             var bylabel = {};
             //collect by chain:resn:resi
@@ -2833,7 +2832,7 @@ export class GLModel {
         var visited = new Int8Array(this.atoms.length);
         visited.fill(0);
 
-        var search = function(i, prev, component) {
+        var search = function (i, prev, component) {
             //add i to component and recursive explore connected atoms
             component.push([i, prev]);
             var atom = self.atoms[i];
@@ -2867,23 +2866,19 @@ export class GLModel {
         this.frames = [];
         var self = this;
         if (this.box) this.setupDFS();
-
-        return new Promise<void>(function (resolve, reject) {
-            if (!url.startsWith('http')) url = 'http://' + url;
-            $.get(url + "/traj/numframes/" + path, function (numFrames) {
-                if (!isNaN(parseInt(numFrames))) {
-                    self.frames.push(self.atoms);
-                    self.frames.numFrames = numFrames;
-                    self.frames.url = url;
-                    self.frames.path = path;
-                    self.setFrame(0)
-                        .then(function () {
-                            resolve();
-                        }).catch(reject);
-                }
-            });
+        if (!url.startsWith('http'))
+            url = 'http://' + url;
+        return get(url + "/traj/numframes/" + path, function (numFrames) {
+            if (!isNaN(parseInt(numFrames))) {
+                self.frames.push(self.atoms);
+                self.frames.numFrames = numFrames;
+                self.frames.url = url;
+                self.frames.path = path;
+                return self.setFrame(0);
+            }
         });
     };
+
 
     /**
     * Set coordinates for the atoms from provided trajectory file. 

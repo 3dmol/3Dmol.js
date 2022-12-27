@@ -12,7 +12,7 @@ HETATM   10  H   MOL A   1       1.923  -1.308  -0.588   0.12702678   1.2000 H
 END
 </textarea>
 */
-let data = $3Dmol.$('#pqrmol').val();
+let data = $('#pqrmol').val();
 let mol = viewer.addModel(data,'pqr');
 let grad =  new $3Dmol.Gradient.RWB(-.3,0.3);
 mol.setStyle({},{stick:{radius:0.075,colorscheme:{prop:'partialCharge',gradient:grad}},sphere:{radius:0.35,colorscheme:{prop:'partialCharge',gradient:grad}}});

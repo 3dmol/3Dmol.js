@@ -5414,7 +5414,7 @@ END
 */
 
 
-var data = $3Dmol.$("#mydata").val();
+var data = $("#mydata").val();
 var m = viewer.addModel(data, "pdb");
 m.setStyle({cartoon:{}});
 viewer.zoomTo();

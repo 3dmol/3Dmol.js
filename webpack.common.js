@@ -43,7 +43,6 @@ module.exports =  {
 
   plugins: [
     new webpack.ProvidePlugin({
-        $: "jquery",
         MMTF: path.resolve(__dirname, "./src/vendor/mmtf.js")
     }),
     new webpack.BannerPlugin({ banner }), 

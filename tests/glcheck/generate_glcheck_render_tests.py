@@ -66,7 +66,9 @@ f"""
     <head>
         <title>{example.name}</title>
         <script src="./assets/3Dmol{suffix}.js"></script>  
-        <script>$ = $3Dmol.$; {additionalCode}</script>       
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+
+        <script>{additionalCode}</script>       
     </head>
     <body style="margin:0;padding:0">
         {prescript}

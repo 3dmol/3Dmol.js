@@ -6,6 +6,7 @@
 	<title>3Dmol.js - A modern, object-oriented JavaScript library for visualizing molecular data</title>
 
 	<link type="text/css" rel="stylesheet" href="css/index.css">
+  <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
 	<script src="build/3Dmol.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -19,7 +20,6 @@
 </script>        
         <script>
             var $3Dmol = $3Dmol || {};
-            var $ = $3Dmol.$ || {};
             var initSDF = function(viewer) {
                 var s1 = viewer.addSphere({radius: 1.25, center: {x:-6.89, y:0.75, z:0.35}});
                 s1.wireframe = true; s1.color = $3Dmol.CC.color("purple");
