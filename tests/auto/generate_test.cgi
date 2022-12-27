@@ -34,7 +34,7 @@ else:
     print("""<html><head>
         <title>%s</title>
         <script src="../../build/3Dmol.js"></script>        
-        <script>$ = $3Dmol.$;</script>      
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>      
         </head>
         
         <body style="margin:0;padding:0">

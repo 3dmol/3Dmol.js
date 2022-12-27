@@ -142,7 +142,7 @@ export class Renderer {
   private _outlineSphereImposterMaterial: SphereImposterOutlineMaterial;
   private _outlineStickImposterMaterial: StickImposterOutlineMaterial;
   private _outlineEnabled: boolean;
-  private _extInstanced: ReturnType<WebGL2RenderingContext["getExtension"]>;
+  private _extInstanced: any;
   private _extFragDepth: ReturnType<WebGL2RenderingContext["getExtension"]>;
   private _extFloatLinear: ReturnType<WebGL2RenderingContext["getExtension"]>;
   private _extColorBufferFloat: ReturnType<WebGL2RenderingContext["getExtension"]>;
@@ -194,7 +194,14 @@ export class Renderer {
     this.setDefaultGLState();
 
     this.context = this._gl;
-    this._extInstanced = this._gl.getExtension("ANGLE_instanced_arrays");
+    if(this.isWebGL1()) {
+      this._extInstanced = this._gl.getExtension("ANGLE_instanced_arrays");
+    } else { //no longer an extension, wrap
+      this._extInstanced = {
+        vertexAttribDivisorANGLE: (this._gl as WebGL2RenderingContext).vertexAttribDivisor.bind(this._gl),
+        drawElementsInstancedANGLE: (this._gl as WebGL2RenderingContext).drawElementsInstanced.bind(this._gl),
+      };
+    }
     this._extFragDepth = this._gl.getExtension("EXT_frag_depth");
     this._extFloatLinear = this._gl.getExtension("OES_texture_float_linear");
     this._extColorBufferFloat = this._gl.getExtension("EXT_color_buffer_float");
@@ -761,8 +768,7 @@ export class Renderer {
     this._gl.texImage2D(
       this._gl.TEXTURE_2D,
       0,
-      // @ts-ignore Property 'DEPTH_COMPONENT32F' does not exist on type 'WebGLRenderingContext'. Did you mean 'DEPTH_COMPONENT16'? - typescript definitions not updated for WebGL 2.0?
-      this._gl.DEPTH_COMPONENT32F,
+      (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
       width,
       height,
       0,
