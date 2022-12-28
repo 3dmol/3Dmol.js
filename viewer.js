@@ -911,7 +911,7 @@ var runcmds = function(cmds, viewer,renderSurface) {
 };
 function run() {
         try {
-            var url = window.location.search.substr(1);
+            var url = window.location.search.substring(1);
             url= decodeURIComponent(url)
             var cmds = url.split("&");
             var first = cmds.splice(0, 1)[0];

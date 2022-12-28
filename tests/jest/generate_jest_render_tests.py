@@ -54,6 +54,8 @@ jest.setTimeout(120000);
 //we only use this to check the
 WebGLRenderingContext.prototype.getParameter = function(p) { return "WebGL 2.0 (OpenGL ES 3.0 Chromium)"; };
 WebGLRenderingContext.prototype.texImage3D = function() {};
+WebGLRenderingContext.prototype.vertexAttribDivisor = function() {};
+WebGLRenderingContext.prototype.drawElementsInstanced = function() {};
 
 var server = null;
 

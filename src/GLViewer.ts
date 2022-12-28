@@ -1142,8 +1142,6 @@ export class GLViewer {
      * Change the viewer's container element
      * Also useful if the original container element was removed from the DOM.
      *
-     * @function $3Dmol.GLViewer#setContainer
-     *
      * @param {Object | string} element
      *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
      
