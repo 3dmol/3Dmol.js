@@ -12,11 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: latest      
       - name: Build
         run: |
-          npm i -g n
-          n latest
-          npm i -g npm@latest
+          npm i npm@latest
           npm install
       - name: Test    
         run: npm test
