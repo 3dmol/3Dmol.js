@@ -1,18 +1,14 @@
 import type { Material } from "../materials";
 import type { Geometry } from "../core";
-import { MeshBasicMaterial } from "../materials";
 import { Object3D } from "../core";
 //Mesh Object
-/** @constructor */
+/* @constructor */
 export class Mesh extends Object3D {
   geometry: Geometry;
   material: Material;
   constructor(
     geometry: Geometry,
-    material = new MeshBasicMaterial({
-      color: Math.random() * 0xffffff,
-      wireframe: true,
-    }) as Material
+    material: Material
   ) {
     super();
     this.geometry = geometry;

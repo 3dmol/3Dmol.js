@@ -1,7 +1,7 @@
 import { DoubleSide } from "./../constants/Sides";
 import { MeshLambertMaterial } from "./MeshLambertMaterial";
 //Double sided Mesh Lambert material
-/** @constructor */
+/* @constructor */
 export class MeshDoubleLambertMaterial extends MeshLambertMaterial {
   shaderID = "lambertdouble";
   side = DoubleSide;

@@ -1,3 +1,6 @@
+/* @interface
+ * 
+ */
 export interface Colored {
   r: number;
   g: number;
@@ -6,10 +9,21 @@ export interface Colored {
 }
 
 export type ColorConstructorArg = number | Color | Colored | undefined;
+
+
+/** 
+ * @class
+   * 
+   * @param r red 8bit number or numeric value of full color
+   * @param g green 8bit number
+   * @param b blue 8bit number
+   */
+ 
 export class Color implements Colored {
   r: number = 0.0;
   g: number = 0.0;
   b: number = 0.0;
+
 
   constructor(r?: ColorConstructorArg, g?: number, b?: number) {
     if (arguments.length > 1 && typeof r === "number") {

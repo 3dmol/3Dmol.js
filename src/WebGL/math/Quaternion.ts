@@ -6,7 +6,9 @@ export interface Quaternion {
   w: number;
 }
 
-
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Quaternion {
   x: number;
   y: number;

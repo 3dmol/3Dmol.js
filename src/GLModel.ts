@@ -1433,7 +1433,6 @@ export class GLModel {
      * Return object representing internal state of 
      * the model appropriate for passing to setInternalState
      * 
-     * @function $3Dmol.GLModel#getInternalState
     */
     public getInternalState() {
         return {
@@ -1445,7 +1444,6 @@ export class GLModel {
     /**
      * Overwrite the internal model state with the passed state.
      * 
-     * @function $3Dmol.GLModel#setInternalState
     */
     public setInternalState(state) {
         this.atoms = state.atoms;
@@ -1456,7 +1454,6 @@ export class GLModel {
     /**
      * Returns crystallographic information if present.
      *
-     * @function $3Dmol.GLModel#getCrystData
      *
      */
     public getCrystData() {
@@ -1478,7 +1475,6 @@ export class GLModel {
     /**
      * Set crystallographic information using three angles and three lengths
      *
-     * @function $3Dmol.GLModel#setCrystData
      * @param {number} a - length of unit cell side
      * @param {number} b - length of unit cell side
      * @param {number} c - length of unit cell side
@@ -1510,10 +1506,9 @@ export class GLModel {
      * This function removes `a`, `b`, `c`, `alpha`, `beta`, `gamma` from 
      * the crystal data.
      *
-     * @function $3Dmol.GLModel#setCrystMatrix
-     * @param {$3Dmol.Matrix3} matrix - unit cell matrix
+     * @param {Matrix3} matrix - unit cell matrix
      */
-    public setCrystMatrix(matrix) {
+    public setCrystMatrix(matrix:Matrix3) {
         matrix = matrix || new Matrix3(
             1, 0, 0,
             0, 1, 0,
@@ -1529,8 +1524,7 @@ export class GLModel {
      * Returns list of rotational/translational matrices if there is BIOMT data
      * Otherwise returns a list of just the ID matrix
      *
-     * @function $3Dmol.GLModel#getSymmetries
-     * @return {Array<$3Dmol.Matrix4>}
+     * @return {Array<Matrix4>}
      *
      */
     public getSymmetries() {
@@ -1544,8 +1538,7 @@ export class GLModel {
     /**
      * Sets symmetries based on specified matrices in list
      *
-     * @function $3Dmol.GLModel#setSymmetries
-     * @param {Array<$3Dmol.Matrix4>} list
+     * @param {Array<Matrix4>} list
      *
      */
     public setSymmetries(list) {
@@ -1560,7 +1553,6 @@ export class GLModel {
     /**
      * Returns model id number
      * 
-     * @function $3Dmol.GLModel#getID
      * @return {number} Model ID
      */
     public getID() {
@@ -1570,7 +1562,6 @@ export class GLModel {
     /**
      * Returns model's frames property, a list of atom lists
      * 
-     * @function $3Dmol.GLModel#getNumFrames
      * @return {number}
      */
     public getNumFrames() {
@@ -1617,7 +1608,6 @@ export class GLModel {
      * Sets model's atomlist to specified frame
      * Sets to last frame if framenum out of range
      * 
-     * @function $3Dmol.GLModel#setFrame
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @return {Promise}
      */
@@ -1667,7 +1657,6 @@ export class GLModel {
     /**
      * Add atoms as frames of model
      * 
-     * @function $3Dmol.GLModel#addFrame
      * @param {AtomSpec} atom - atoms to be added
      */
     public addFrame(atoms) {
@@ -1679,7 +1668,6 @@ export class GLModel {
      * If model atoms have dx, dy, dz properties (in some xyz files), vibrate populates the model's frame property based on parameters.
      * Model can then be animated
      * 
-     * @function $3Dmol.GLModel#vibrate
      * @param {number} numFrames - number of frames to be created, default to 10
      * @param {number} amplitude - amplitude of distortion, default to 1 (full)
      * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
@@ -1778,7 +1766,6 @@ export class GLModel {
 
     /** add atoms to this model from molecular data string
      * 
-     * @function $3Dmol.GLModel#addMolData
      * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
      * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
      * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input format
@@ -1946,7 +1933,6 @@ export class GLModel {
     /** given a selection specification, return true if atom is selected.
      * Does not support context-aware selectors like expand/within/byres.
      * 
-     * @function $3Dmol.GLModel#atomIsSelected
      * @param {AtomSpec} atom
      * @param {AtomSelectionSpec} sel
      * @return {boolean}
@@ -2093,11 +2079,10 @@ export class GLModel {
 
     /** return list of atoms selected by sel, this is specific to glmodel
      * 
-     * @function $3Dmol.GLModel#selectedAtoms
      * @param {AtomSelectionSpec} sel
      * @return {Array.<Object>}
      * @example
-     *$3Dmol.download("pdb:4wwy",viewer,{},function(){
+     $3Dmol.download("pdb:4wwy",viewer,{},function(){
               var atoms = viewer.selectedAtoms({chain:'A'});
               for(var i = 0, n = atoms.length; i < n; i++) {
                  atoms[i].b = 0.0;
@@ -2218,7 +2203,6 @@ export class GLModel {
 
     /** Add list of new atoms to model.  Adjusts bonds appropriately.
      * 
-     * @function $3Dmol.GLModel#addAtoms
      * @param {type} newatoms
      * @example
      * var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
@@ -2272,7 +2256,6 @@ export class GLModel {
 
     /** Remove specified atoms from model
      * 
-     * @function $3Dmol.GLModel#removeAtoms
      * @param {type} badatoms - list of atoms
      */
     public removeAtoms(badatoms) {
@@ -2301,7 +2284,6 @@ export class GLModel {
 
     /** Set atom style of selected atoms
      * 
-     * @function $3Dmol.GLModel#setStyle
      * @param {AtomSelectionSpec} sel
      * @param {AtomStyleSpec} style
      * @param {boolean} add - if true, add to current style, don't replace
@@ -2385,7 +2367,6 @@ export class GLModel {
 
     /** Set clickable and callback of selected atoms
      * 
-     * @function $3Dmol.GLModel#setClickable
      * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
      * @param {boolean} clickable - whether click-handling is enabled for the selection
      * @param {function} callback - function called when an atom in the selection is clicked
@@ -2424,7 +2405,6 @@ export class GLModel {
 
     /** Set hoverable and callback of selected atoms
     * 
-    * @function $3Dmol.GLModel#setHoverable
     * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
     * @param {boolean} hoverable - whether hover-handling is enabled for the selection
     * @param {function} hover_callback - function called when an atom in the selection is hovered over
@@ -2470,7 +2450,6 @@ export class GLModel {
 
     /** enable context menu of selected atoms
      * 
-     * @function $3Dmol.GLModel#enableContextMenu
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
      */
@@ -2499,7 +2478,6 @@ export class GLModel {
 
     /** given a mapping from element to color, set atom colors
      * 
-     * @function $3Dmol.GLModel#setColorByElement
      * @param {type} sel
      * @param {type} colors
      */
@@ -2520,7 +2498,6 @@ export class GLModel {
     };
 
     /**
-     * @function $3Dmol.GLModel.setColorByProperty
      * @param {type} sel
      * @param {type} prop
      * @param {type} gradient
@@ -2554,7 +2531,6 @@ export class GLModel {
     };
 
     /**
-     * @function $3Dmol.GLModel#setColorByFunction
      * @deprecated use setStyle and colorfunc attribute
      * @param {type} sel - selection object
      * @param {type} func - function to be used to set the color
@@ -2588,7 +2564,6 @@ export class GLModel {
 
     /** Convert the model into an object in the format of a ChemDoodle JSON model.
      *
-     * @function $3Dmol.GLModel#toCDObject
      * @param {boolean} whether or not to include style information. Defaults to false.
      * @return {Object}
      */
@@ -2644,7 +2619,6 @@ export class GLModel {
 
     /** manage the globj for this model in the possed modelGroup - if it has to be regenerated, remove and add
      * 
-     * @function $3Dmol.GLModel#globj
      * @param {Object3D} group
      * @param Object options
      */
@@ -2665,7 +2639,6 @@ export class GLModel {
     };
 
     /** return a VRML string representation of the model.  Does not include VRML header information
-     * @function $3Dmol.GLModel#exportVRML
      * @return VRML
      */
     public exportVRML() {
@@ -2676,7 +2649,6 @@ export class GLModel {
 
     /** Remove any renderable mol object from scene
      * 
-     * @function $3Dmol.GLModel#removegl
      * @param {Object3D} group
      */
     public removegl(group) {
@@ -2690,16 +2662,18 @@ export class GLModel {
         this.molObj = null;
     };
 
-    /**@function hide
+    /**
      * Don't show this model in future renderings. Keep all styles and state
      * so it can be efficiencly shown again.
+     *      
+     * * @see GLModel#show
+
      * @example
         $3Dmol.download("pdb:3ucr",viewer,{},function(){  
         viewer.setStyle({},{stick:{}});
         viewer.getModel().hide();  
         viewer.render();
         });
-     * @function $3Dmol.GLModel#hide
      */
     public hide() {
         this.hidden = true;
@@ -2707,8 +2681,9 @@ export class GLModel {
         if (this.molObj) this.molObj.setVisible(false);
     };
 
-    /**@function show
-     * Unhide a hidden model (see $3Dmol.GLModel#hide)
+    /**
+     * Unhide a hidden model 
+     * @see GLModel#hide
      * @example
         $3Dmol.download("pdb:3ucr",viewer,{},function(){  
         viewer.setStyle({},{stick:{}});
@@ -2717,7 +2692,6 @@ export class GLModel {
         viewer.getModel().show()
         viewer.render();
         });
-     * @function $3Dmol.GLModel#show
      */
     public show() {
         this.hidden = false;
@@ -2727,11 +2701,10 @@ export class GLModel {
 
 
     /** Create labels for atoms that show the value of the passed property.
-     * @function $3Dmol.GLModel#addPropertyLabels
      * 
      * @param {String} prop - property name
      * @param {AtomSelectionSpec} sel
-     * @param {$3Dmol.GLViewer} viewer
+     * @param {GLViewer} viewer
      * @param {LabelSpec} options
      */
     public addPropertyLabels(prop, sel, viewer, style) {
@@ -2757,10 +2730,9 @@ export class GLModel {
     /** Create labels for residues of selected atoms.
      * Will create a single label at the center of mass of all atoms
      * with the same chain,resn, and resi.
-     * @function $3Dmol.GLModel#addResLabels
      * 
      * @param {AtomSelectionSpec} sel
-     * @param {$3Dmol.GLViewer} viewer
+     * @param {GLViewer} viewer
      * @param {LabelSpec} options
      * @param {boolean} byframe - if true, create labels for every individual frame, not just current; frames must be loaded already
      */
@@ -2857,7 +2829,6 @@ export class GLModel {
 
     /**
     * Set coordinates from remote trajectory file. 
-    * @function $3Dmol.GLModel#setCoordinatesFromURL
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
     * @return {Promise}
@@ -2882,7 +2853,6 @@ export class GLModel {
 
     /**
     * Set coordinates for the atoms from provided trajectory file. 
-    * @function $3Dmol.GLModel#setCoordinates
     * @param {string} str - contains the data of the file
     * @param {string} format - contains the format of the file (mdcrd, inpcrd, pdb, netcdf, or array).  Arrays should be TxNx3 where T is the number of timesteps and N the number of atoms.
       @example
@@ -2941,7 +2911,6 @@ export class GLModel {
 
     /**
      * add atomSpecs to validAtomSelectionSpecs
-     * @function $3Dmol.GLModel#addAtomSpecs
      * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
      * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
      * 

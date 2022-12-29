@@ -1,8 +1,7 @@
-.logo .navbar-item {
-    font-size: 2em;
-    color: #006;
-}
-
-.logo .navbar-item a {
-    color: #006;
-}
+  .prettyprint {
+    background-color: #f3f3f3;
+  }
+  .content pre.prettyprint {
+    padding: 1px;
+    background-color: black;
+  }

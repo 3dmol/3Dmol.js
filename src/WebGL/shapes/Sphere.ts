@@ -3,6 +3,9 @@ import { Vector3 } from '../math';
 //Intersection sphere and box shapes.
 
 //Intersection sphere for sphere, stick render
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Sphere {
   center: Vector3
   radius: number

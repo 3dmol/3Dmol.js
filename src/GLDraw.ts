@@ -6,7 +6,7 @@ import { Geometry } from "./WebGL";
 /**
  * Enum for cylinder cap styles.
  * @readonly
- * @enum {number} $3Dmol.CAP
+ * @enum 
  */
 export enum CAP {
     NONE = 0,
@@ -270,8 +270,9 @@ export namespace GLDraw {
     var cylVertexCache = new CylVertexCache();
 
 
-    /** Create a cylinder 
-     * @function $3Dmol.GLDraw.drawCylinder
+    /** 
+     * Create a cylinder 
+     * @memberof GLDraw 
      * @param {geometry}
      *            geo
      * @param {Point}
@@ -280,10 +281,10 @@ export namespace GLDraw {
      *            to
      * @param {float}
      *            radius
-     * @param {$3Dmol.Color}
+     * @param {Color}
      *            color
-     * @param {$3Dmol.CAP} fromCap - 0 for none, 1 for flat, 2 for round
-     * @param {$3Dmol.CAP} toCap = 0 for none, 1 for flat, 2 for round
+     * @param {CAP} fromCap - 0 for none, 1 for flat, 2 for round
+     * @param {CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
     export function drawCylinder(geo: Geometry, from, to, radius: number, color, fromCap:CAP = 0, toCap:CAP = 0) {
@@ -564,7 +565,7 @@ export namespace GLDraw {
 
 
     /** Create a cone 
-     * @function $3Dmol.GLDraw.drawCone
+     * @memberof GLDraw
      * @param {geometry}
      *            geo
      * @param {Point}
@@ -573,7 +574,7 @@ export namespace GLDraw {
      *            to
      * @param {float}
      *            radius
-     * @param {$3Dmol.Color}
+     * @param {Color}
      *            color
      *            */
     export function drawCone (geo: Geometry, from, to, radius: number, color?) {
@@ -748,14 +749,14 @@ export namespace GLDraw {
     var sphereVertexCache = new SphereVertexCache();
 
     /** Create a sphere.
-     * @function $3Dmol.GLDraw.drawSphere
+     * @memberof GLDraw
      * @param {geometry}
      *            geo
      * @param {Point}
      *            pos
      * @param {float}
      *            radius
-     * @param {$3Dmol.Color}
+     * @param {Color}
      *            color
      * @param {number} quality of sphere (default 2, higher increases number of triangles)
      */

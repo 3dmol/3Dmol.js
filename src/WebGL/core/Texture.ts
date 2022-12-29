@@ -16,7 +16,7 @@ import { Vector2 } from "../math";
 import { EventDispatcher } from "./EventDispatcher";
 import { UVMapping } from "./UVMapping";
 
-/** @constructor */
+/* @constructor */
 export class Texture extends EventDispatcher {
   id: number;
   name: string;

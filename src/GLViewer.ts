@@ -17,7 +17,7 @@ import { UPNG } from 'upng-js'
 
 /**
  * WebGL-based 3Dmol.js viewer
- * Note: The preferred method of instantiating a GLViewer is through {@link $3Dmol.createViewer}
+ * Note: The preferred method of instantiating a GLViewer is through {@link createViewer}
  *
  * @class
 */
@@ -622,7 +622,6 @@ export class GLViewer {
     /**
     * Return a list of objects that intersect that at the specified viewer position.
     *
-    * @function $3Dmol.GLViewer#targetedObjects
     * @param {x} - x position in screen coordinates
     * @param {y} - y position in screen coordinates
     * @param {Object[]} - list of objects or selection object specifying what object to check for targeting
@@ -642,7 +641,6 @@ export class GLViewer {
     };
 
     /** Convert model coordinates to screen coordinates.
-     * @function $3Dmol.GLViewer#modelToScreen
      * @param {object | list} - an object or list of objects with x,y,z attributes (e.g. an atom)
      * @return {object | list} - and object or list of {x: screenX, y: screenY}
      */
@@ -672,7 +670,6 @@ export class GLViewer {
      * @param{x} x displacement in screen coordinates
      * @param{y} y displacement in screen corodinates
      * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis
-     * @function $3Dmol.GLViewer#screenOffsetToModel
     */
     public screenOffsetToModel(x, y, modelz?) {
         var dx = x / this.WIDTH;
@@ -694,7 +691,6 @@ export class GLViewer {
      * is projected to the same depth as model coordinate
      * @param{screen} xy screen coordinate
      * @param{model} xyz model coordinate
-     * @function $3Dmol.GLViewer#screenToModelDistance
     */
     public screenToModelDistance(screen, model) {
         let offset = this.canvasOffset();
@@ -714,7 +710,6 @@ export class GLViewer {
     /**
      * Set a callback to call when the view has potentially changed.
      *
-     * @function $3Dmol.GLViewer#setViewChangeCallback
     */
     public setViewChangeCallback(callback) {
         if (typeof (callback) === 'function' || callback == null)
@@ -724,7 +719,6 @@ export class GLViewer {
     /**
      * Set a callback to call when the view has potentially changed.
      *
-     * @function $3Dmol.GLViewer#setStateChangeCallback
     */
     public setStateChangeCallback(callback) {
         if (typeof (callback) === 'function' || callback == null)
@@ -750,7 +744,6 @@ export class GLViewer {
      * Return object representing internal state of
      * the viewer appropriate for passing to setInternalState
      *
-     * @function $3Dmol.GLViewer#getInternalState
     */
     public getInternalState() {
         var ret = { 'models': [], 'surfaces': [], 'shapes': [], 'labels': [] };
@@ -769,7 +762,6 @@ export class GLViewer {
      * Overwrite internal state of the viewer with passed  object
      * which should come from getInternalState.
      *
-     * @function $3Dmol.GLViewer#setInternalState
     */
     public setInternalState(state) {
 
@@ -792,7 +784,6 @@ export class GLViewer {
     /**
      * Set lower and upper limit stops for zoom.
      *
-     * @function $3Dmol.GLViewer#setZoomLimits
      * @param {lower} - limit on zoom in (positive number).  Default 0.
      * @param {upper} - limit on zoom out (positive number).  Default infinite.
      * @example
@@ -815,7 +806,6 @@ export class GLViewer {
     /**
      * Set camera parameters (distance to the origin and field of view)
      *
-     * @function $3Dmol.GLViewer#setCameraParameters
      * @param {parameters} - new camera parameters, with possible fields
      *                       being fov for the field of view, z for the
      *                       distance to the origin, and orthographic (boolean)
@@ -932,9 +922,7 @@ export class GLViewer {
     };
     
     /**
-     * Return image URI of viewer contents (base64 encoded).
-     * @function $3Dmol.GLViewer#pngURI
-     *
+     * Return image URI of viewer contents (base64 encoded).     *
      */
     public pngURI() {
         return this.getCanvas().toDataURL('image/png');
@@ -943,7 +931,6 @@ export class GLViewer {
     /**
      * Return a promise that resolves to an animated PNG image URI of 
      viewer contents (base64 encoded) for nframes of viewer changes.
-     * @function $3Dmol.GLViewer#apngURI
      * @return {Promise}
      */
     public apngURI(nframes) {
@@ -1009,7 +996,6 @@ export class GLViewer {
     /**
          * Set the duration of the hover delay
          *
-         * @function $3Dmol.GLViewer#setHoverDuration
          * @param {number}
          *            [hoverDuration] - an optional parameter that denotes
          *            the duration of the hover delay (in milliseconds) before the hover action is called
@@ -1155,7 +1141,6 @@ export class GLViewer {
     /**
      * Set the background color (default white)
      *
-     * @function $3Dmol.GLViewer#setBackgroundColor
      * @param {number}
      *            hex Hexcode specified background color, or standard color spec
      * @param {number}
@@ -1189,7 +1174,6 @@ export class GLViewer {
      * Default is perspective.  Orthographic can also be enabled on viewer creation
      * by setting orthographic to true in the config object.
      *
-     * @function $3Dmol.GLViewer#setProjection
      *
      * @example
      viewer.setViewStyle({style:"outline"});
@@ -1212,7 +1196,6 @@ export class GLViewer {
 
     /**
      * Set global view styles.
-     * @function $3Dmol.GLViewer#setViewStyle
      *
      * @example
      *   viewer.setViewStyle({style:"outline"});
@@ -1242,9 +1225,7 @@ export class GLViewer {
     /**
      * Set viewer width
      *
-     * @function $3Dmol.GLViewer#setWidth
-     * @param {number}
-     *            w Width in pixels
+     * @param {number} w Width in pixels
      */
     public setWidth(w) {
         this.WIDTH = w || this.WIDTH;
@@ -1255,9 +1236,7 @@ export class GLViewer {
     /**
      * Set viewer height
      *
-     * @function $3Dmol.GLViewer#setHeight
-     * @param {number}
-     *            h Height in pixels
+     * @param {number} h Height in pixels
      */
     public setHeight(h) {
         this.HEIGHT = h || this.HEIGHT;
@@ -1268,7 +1247,6 @@ export class GLViewer {
     /**
      * Resize viewer according to containing HTML element's dimensions
      *
-     * @function $3Dmol.GLViewer#resize
      */
     public resize() {
         this.WIDTH = this.getWidth();
@@ -1306,7 +1284,6 @@ export class GLViewer {
     /**
      * Return specified model
      *
-     * @function $3Dmol.GLViewer#getModel
      * @param {number}
      *            [id=last model id] - Retrieve model with specified id
      * @default Returns last model added to viewer or null if there are no models
@@ -1343,9 +1320,8 @@ export class GLViewer {
     /**
      * Continuously rotate a scene around the specified axis.
      *
-     * Call `$3Dmol.GLViewer.spin(false)` to stop spinning.
+     * Call `spin(false)` to stop spinning.
      *
-     * @function $3Dmol.GLViewer#spin
      * @param {string}
      *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
      *            Default "y".  View relative (rather than model relative) axes are prefixed with v.
@@ -1483,7 +1459,6 @@ export class GLViewer {
     /**
      * Rotate scene by angle degrees around axis
      *
-     * @function $3Dmol.GLViewer#rotate
      * @param {number}
      *            [angle] - Angle, in degrees, to rotate by.
      * @param {string}
@@ -1570,7 +1545,6 @@ export class GLViewer {
 
     /** Returns an array representing the current viewpoint.
      * Translation, zoom, and rotation quaternion.
-     * @function $3Dmol.GLViewer#getView
      * @returns {Array.<number>} [ pos.x, pos.y, pos.z, rotationGroup.position.z, q.x, q.y, q.z, q.w ]
      *  */
     public getView() {
@@ -1584,7 +1558,6 @@ export class GLViewer {
 
     /** Sets the view to the specified translation, zoom, and rotation.
      *
-     * @function $3Dmol.GLViewer#setView
      * @param {Array.<number>} arg Array formatted identically to the return value of getView */
     public setView(arg, nolink?) {
 
@@ -1617,7 +1590,6 @@ export class GLViewer {
      * Render current state of viewer, after
      * adding/removing models, applying styles, etc.
      *
-     * @function $3Dmol.GLViewer#render
      */
     public render(callback?, exts?) {
         this.renderer.setViewport();
@@ -1804,7 +1776,6 @@ export class GLViewer {
 
     /** return list of atoms selected by sel
      *
-     * @function $3Dmol.GLViewer#selectedAtoms
      * @param {AtomSelectionSpec} sel
      * @return {Array.<Object>}
      */
@@ -1814,7 +1785,6 @@ export class GLViewer {
 
     /**
     * Returns valid values for the specified attribute in the given selection
-    * @function $3Dmol.GlViewer#getUniqueValues
     * @param {string} attribute
     * @param {AtomSelectionSpec} sel
     * @return {Array.<Object>}
@@ -1839,7 +1809,6 @@ export class GLViewer {
     /**
      * Return pdb output of selected atoms (if atoms from pdb input)
      *
-     * @function $3Dmol.GLViewer#pdbData
      * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
      * @return {string} PDB string of selected atoms
      */
@@ -1856,7 +1825,6 @@ export class GLViewer {
     /**
      * Zoom current view by a constant factor
      *
-     * @function $3Dmol.GLViewer#zoom
      * @param {number}
      *            [factor] - Magnification factor. Values greater than 1
      *            will zoom in, less than one will zoom out. Default 2.
@@ -1897,7 +1865,6 @@ export class GLViewer {
      * Translate current view by x,y screen coordinates
      * This pans the camera rather than translating the model.
      *
-     * @function $3Dmol.GLViewer#translate
      * @param {number} x Relative change in view coordinates of camera
      * @param {number} y Relative change in view coordinates of camera
      * @param {number}
@@ -1945,7 +1912,6 @@ export class GLViewer {
      * This translates the models relative to the current view. It does
      * not change the center of rotation.
      *
-     * @function $3Dmol.GLViewer#translateScene
      * @param {number} x Relative change in x screen coordinate
      * @param {number} y Relative change in y screen coordinate
      * @param {number}
@@ -1983,7 +1949,6 @@ export class GLViewer {
     /**
      * Adjust slab to fully enclose selection (default everything).
      *
-     * @function $3Dmol.GLViewer#fitSlab
      * @param {Object}
      *            [sel] - Selection specification specifying model and atom
      *            properties to select. Default: all atoms in viewer
@@ -2012,7 +1977,6 @@ export class GLViewer {
     /**
      * Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).
      *
-     * @function $3Dmol.GLViewer#center
      * @param {Object}
      *            [sel] - Selection specification specifying model and atom
      *            properties to select. Default: all atoms in viewer
@@ -2122,7 +2086,6 @@ export class GLViewer {
      * Zoom to center of atom selection.  The slab will be set appropriately for
      * the selection, unless an empty selection is provided, in which case there will be no slab.
      *
-     * @function $3Dmol.GLViewer#zoomTo
      * @param {Object}
      *            [sel] - Selection specification specifying model and atom
      *            properties to select. Default: all atoms in viewer
@@ -2260,7 +2223,6 @@ export class GLViewer {
      * Set slab of view (contents outside of slab are clipped).
      * Must call render to update.
      *
-     * @function $3Dmol.GLViewer#setSlab
      * @param {number} near near clipping plane distance
      * @param {number} far far clipping plane distance
      */
@@ -2272,7 +2234,6 @@ export class GLViewer {
     /**
      * Get slab of view (contents outside of slab are clipped).
      *
-     * @function $3Dmol.GLViewer#getSlab
      * @return {Object}
      *      @property {number} near - near clipping plane distance
      *      @property {number} far - far clipping plane distance
@@ -2284,7 +2245,6 @@ export class GLViewer {
     /**
      * Add label to viewer
      *
-     * @function $3Dmol.GLViewer#addLabel
      * @param {string}
      *            text - Label text
      * @param {LabelSpec}
@@ -2292,7 +2252,7 @@ export class GLViewer {
       @param {AtomSelection}
      *            sel - Set position of label to center of this selection
      * @param {boolean} noshow - if true, do not immediately display label - when adding multiple labels this is more efficient
-     * @return {$3Dmol.Label}
+     * @return {Label}
      *
      * @example
      *  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
@@ -2344,7 +2304,6 @@ export class GLViewer {
      * centroid of the atoms and styled according to the passed style.
      * The label text will be [resn][resi]
      *
-     * @function $3Dmol.GLViewer#addResLabels
      * @param {Object} sel
      * @param {Object} style
      * @param {boolean} byframe - if true, create labels for every individual frame, not just current
@@ -2367,7 +2326,6 @@ export class GLViewer {
     /** Add property labels.  This will generate one label per a selected
      * atom at the atom's coordinates with the property value as the label text.
      *
-     * @function $3Dmol.GLViewer#addPropertyLabels
      * @param {string} prop - property name
      * @param {Object} sel
      * @param {Object} style
@@ -2389,9 +2347,7 @@ export class GLViewer {
     /**
      * Remove label from viewer
      *
-     * @function $3Dmol.GLViewer#removeLabel
-     * @param {$3Dmol.Label}
-     *            label - $3Dmol label
+     * @param {Label} label - $3Dmol label
      *
      * @example // Remove labels created in
      $3Dmol.download("pdb:2EJ0",viewer,{},function(){
@@ -2423,7 +2379,6 @@ export class GLViewer {
     /**
      * Remove all labels from viewer
      *
-     * @function $3Dmol.GLViewer#removeAllLabels
      *         @example
     $3Dmol.download("pdb:1ubq",viewer,{},function(){
      
@@ -2450,12 +2405,10 @@ export class GLViewer {
     /**
      * Modify existing label's style
      *
-     * @function $3Dmol.GLViewer#setLabelStyle
-     * @param {$3Dmol.Label}
-     *            label - $3Dmol label
+     * @param {Label} label - $3Dmol label
      * @param {Object}
      *            stylespec - Label style specification
-     * @return {$3Dmol.Label}
+     * @return {Label}
      */
     public setLabelStyle(label, stylespec) {
         this.modelGroup.remove(label.sprite);
@@ -2472,12 +2425,10 @@ export class GLViewer {
     /**
      * Modify existing label's text
      *
-     * @function $3Dmol.GLViewer#setLabelText
-     * @param {$3Dmol.Label}
-     *            label - $3Dmol label
+     * @param {Label}  label - $3Dmol label
      * @param {String}
      *            text - Label text
-     * @return {$3Dmol.Label}
+     * @return {Label}
      */
     public setLabelText(label, text) {
         this.modelGroup.remove(label.sprite);
@@ -2494,7 +2445,6 @@ export class GLViewer {
      * Add shape object to viewer
      * @see {@link GLShape}
      *
-     * @function $3Dmol.GLViewer#addShape
      * @param {ShapeSpec} shapeSpec - style specification for label
      * @return {GLShape}
      */
@@ -2505,13 +2455,11 @@ export class GLViewer {
         this.shapes.push(shape);
 
         return shape;
-
     };
 
     /**
      * Remove shape object from viewer
      *
-     * @function $3Dmol.GLViewer#removeShape
      * @param {GLShape} shape - Reference to shape object to remove
      */
     public removeShape(shape) {
@@ -2528,7 +2476,6 @@ export class GLViewer {
 
     /**
      * Remove all shape objects from viewer
-     * @function $3Dmol.GLViewer#removeAllShapes
      */
     public removeAllShapes() {
         for (var i = 0; i < this.shapes.length; i++) {
@@ -2555,7 +2502,6 @@ export class GLViewer {
      * Create and add sphere shape. This method provides a shorthand
      * way to create a spherical shape object
      *
-     * @function $3Dmol.GLViewer#addSphere
      * @param {SphereShapeSpec} spec - Sphere shape style specification
      * @return {GLShape}
      @example
@@ -2581,7 +2527,6 @@ export class GLViewer {
      * Create and add box shape. This method provides a shorthand
      * way to create a box shape object
      *
-     * @function $3Dmol.GLViewer#addBox
      * @param {BoxSpec} spec - Box shape style specification
      * @return {GLShape}
      @example
@@ -2617,7 +2562,6 @@ export class GLViewer {
     /**
      * Create and add arrow shape
      *
-     * @function $3Dmol.GLViewer#addArrow
      * @param {ArrowSpec} spec - Style specification
      * @return {GLShape}
      @example
@@ -2657,7 +2601,6 @@ export class GLViewer {
     /**
      * Create and add cylinder shape
      *
-     * @function $3Dmol.GLViewer#addCylinder
      * @param {CylinderSpec} spec - Style specification
      * @return {GLShape}
      
@@ -2710,7 +2653,6 @@ export class GLViewer {
     /**
      * Create and add Curve shape
      *
-     * @function $3Dmol.GLViewer#addCurve
      * @param {CurveSpec} spec - Style specification
      * @return {GLShape}
      
@@ -2746,7 +2688,6 @@ export class GLViewer {
     /**
      * Create and add line shape
      *
-     * @function $3Dmol.GLViewer#addLine
      * @param {LineSpec} spec - Style specification, can specify dashed, dashLength, and gapLength
      * @return {GLShape}
      @example
@@ -2800,7 +2741,6 @@ export class GLViewer {
     /**
      * Create and add unit cell visualization.
      *
-     * @function $3Dmol.GLViewer#addUnitCell
      * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
      * @param {UnitCellStyleSpec} spec - visualization style
        @example
@@ -2947,7 +2887,6 @@ export class GLViewer {
     /**
     * Remove unit cell visualization from model.
     *
-    * @function $3Dmol.GLViewer#removeUnitCell
     * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
       @example
            $3Dmol.get('data/icsd_200866.cif', function(data) {
@@ -2973,7 +2912,6 @@ export class GLViewer {
     * Replicate atoms in model to form a super cell of the specified dimensions.
     * Original cell will be centered as much as possible.
     *
-    * @function $3Dmol.GLViewer#replicateUnitCell
     * @param {integer} A - number of times to replicate cell in X dimension.
     * @param {integer} B - number of times to replicate cell in Y dimension.  If absent, X value is used.
     * @param {integer} C - number of times to replicate cell in Z dimension.  If absent, Y value is used.
@@ -3082,7 +3020,6 @@ export class GLViewer {
     /**
      * Add custom shape component from user supplied function
      *
-     * @function $3Dmol.GLViewer#addCustom
      * @param {CustomSpec} spec - Style specification
      * @return {GLShape}
      @example
@@ -3125,7 +3062,6 @@ export class GLViewer {
 
     /**
      * Construct isosurface from volumetric data in gaussian cube format
-     * @function $3Dmol.GLViewer#addVolumetricData
      * @param {String} data - Input file contents
      * @param {String} format - Input file format
      * @param {IsoSurfaceSpec} or {VolumetricRenderSpec} spec - Shape style specification
@@ -3158,8 +3094,7 @@ export class GLViewer {
     /**
      * Construct isosurface from volumetric data.  This is more flexible
     * than addVolumetricData, but can not be used with py3Dmol.
-     * @function $3Dmol.GLViewer#addIsosurface
-     * @param {$3Dmol.VolumeData} data - volumetric data
+     * @param {VolumeData} data - volumetric data
      * @param {IsoSurfaceSpec} spec - Shape style specification
      * @return {GLShape}
      *
@@ -3185,8 +3120,7 @@ export class GLViewer {
 
     /**
      * Create volumetric renderer for volumetricData
-     * @function $3Dmol.GLViewer#addVolumetricRender
-     * @param {$3Dmol.VolumeData} data - volumetric data
+     * @param {VolumeData} data - volumetric data
      * @param {VolumetricRenderSpec} spec - specification of volumetric render
      *
      * @return {GLShape}
@@ -3203,7 +3137,6 @@ export class GLViewer {
     /**
      * Return true if volumetric rendering is supported (WebGL 2.0 required)
      *
-     * @function $3Dmol.GLViewer#hasVolumetricRender
      * @return {boolean}
      */
     public hasVolumetricRender() {
@@ -3213,7 +3146,6 @@ export class GLViewer {
     /**
      * Enable/disable fog for content far from the camera
      *
-     * @function $3Dmol.GLViewer#enableFog
      * @param {boolean} fog whether to enable or disable the fog
      */
     public enableFog(fog) {
@@ -3230,7 +3162,6 @@ export class GLViewer {
      * Shapes and labels can also be displayed by frame.
      * Sets to last frame if framenum out of range
      *
-     * @function $3Dmol.GLViewer#setFrame
      * @param {number} framenum - fame index to use, starts at zero
      * @return {Promise}
      */
@@ -3249,7 +3180,6 @@ export class GLViewer {
     /**
      * Gets the current viewer frame.
      *
-     * @function $3Dmol.GLViewer#getFrame
      */
     public getFrame() {
         return this.viewer_frame;
@@ -3258,7 +3188,6 @@ export class GLViewer {
     /**
      * Returns the number of frames that the model with the most frames in the viewer has
      *
-     * @function $3Dmol.GLViewer#getNumFrames
      * @return {number}
      */
     public getNumFrames() {
@@ -3284,7 +3213,6 @@ export class GLViewer {
 
     /**
      * Animate all models in viewer from their respective frames
-     * @function $3Dmol.GLViewer#animate
      * @param {Object} options - can specify interval (speed of animation), loop (direction
      * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), and reps (numer of repetitions, 0 indicates infinite loop)
      *
@@ -3370,7 +3298,6 @@ export class GLViewer {
 
     /**
      * Stop animation of all models in viewer
-     * @function $3Dmol.GLViewer#stopAnimate
      */
     public stopAnimate() {
         this.animated = 0;
@@ -3381,7 +3308,6 @@ export class GLViewer {
 
     /**
      * Pause animation of all models in viewer
-     * @function $3Dmol.GLViewer#pauseAnimate
      */
     public pauseAnimate() {
         this.animationTimers.forEach(function (timer) { timer.pause(); });
@@ -3390,7 +3316,6 @@ export class GLViewer {
 
     /**
      * Resume animation of all models in viewer
-     * @function $3Dmol.GLViewer#resumeAnimate
      */
     public resumeAnimate() {
         this.animationTimers.forEach(function (timer) { timer.resume(); });
@@ -3400,7 +3325,6 @@ export class GLViewer {
 
     /**
      * Return true if viewer is currently being animated, false otherwise
-     * @function $3Dmol.GLViewer#isAnimated
      * @return {boolean}
      */
     public isAnimated() {
@@ -3411,7 +3335,6 @@ export class GLViewer {
     /**
      * Create and add model to viewer, given molecular data and its format
      *
-     * @function $3Dmol.GLViewer#addModel
      * @param {string} data - Input data
      * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
      * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
@@ -3449,7 +3372,6 @@ export class GLViewer {
      * Given multimodel file and its format, add atom data to the viewer as separate models
      * and return list of these models
      *
-     * @function $3Dmol.GLViewer#addModels
      * @param {string} data - Input data
      * @param {string} format - Input format (see {@link FileFormats})
      * @return {Array<GLModel>}
@@ -3480,7 +3402,6 @@ export class GLViewer {
      * different atomlists are stored in model's frame
      * property and model's atoms are set to the 0th frame
      *
-     * @function $3Dmol.GLViewer#addModelsAsFrames
      * @param {string} data - Input data
      * @param {string} format - Input format (see {@link FileFormats})
      * @return {GLModel}
@@ -3509,7 +3430,6 @@ export class GLViewer {
      * Create and add model to viewer. Given multimodel file and its format,
      * all atoms are added to one model
      *
-     * @function $3Dmol.GLViewer#addAsOneMolecule
      * @param {string} data - Input data
      * @param {string} format - Input format (see {@link FileFormats})
      * @return {GLModel}
@@ -3537,7 +3457,6 @@ export class GLViewer {
     /**
      * Delete specified model from viewer
      *
-     * @function $3Dmol.GLViewer#removeModel
      * @param {GLModel} model
      */
     public removeModel(model) {
@@ -3555,7 +3474,6 @@ export class GLViewer {
 
     /**
      * Delete all existing models
-     * @function $3Dmol.GLViewer#removeAllModels
      */
     public removeAllModels() {
         for (var i = 0; i < this.models.length; i++) {
@@ -3569,7 +3487,6 @@ export class GLViewer {
 
     /**
      * Export one or all of the loaded models into ChemDoodle compatible JSON.
-     * @function $3Dmol.GLViewer#exportJSON
      * @param {boolean} includeStyles - Whether or not to include style information.
      * @param {number} modelID - Optional parameter for which model to export. If left out, export all of them.
      * @return {string}
@@ -3587,7 +3504,6 @@ export class GLViewer {
     };
 
     /** return a VRML string representation of the scene.  Include VRML header information
-     * @function $3Dmol.GLViewer#exportVRML
      * @return VRML
      */
     public exportVRML() {
@@ -3606,7 +3522,6 @@ export class GLViewer {
      * Create a new model from atoms specified by sel.
      * If extract, removes selected atoms from existing models
      *
-     * @function $3Dmol.GLViewer#createModelFrom
      * @param {Object} sel - Atom selection specification
      * @param {boolean=} extract - If true, remove selected atoms from existing models
      * @return {GLModel}
@@ -3637,7 +3552,6 @@ export class GLViewer {
     /**
      * Set style properties to all selected atoms
      *
-     * @function $3Dmol.GLViewer#setStyle
      * @param {AtomSelectionSpec} sel - Atom selection specification
      * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
      *
@@ -3669,7 +3583,6 @@ export class GLViewer {
     /**
      * Add style properties to all selected atoms
      *
-     * @function $3Dmol.GLViewer#addStyle
      * @param {AtomSelectionSpec} sel - Atom selection specification
      * @param {AtomStyleSpec} style - style spec to add to specified atoms
      @example
@@ -3696,7 +3609,6 @@ export class GLViewer {
     /**
      * Set click-handling properties to all selected atomsthis.
      *
-     * @function $3Dmol.GLViewer#setClickable
      * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
      * @param {boolean} clickable - whether click-handling is enabled for the selection
      * @param {function} callback - function called when an atom in the selection is clicked
@@ -3717,7 +3629,6 @@ export class GLViewer {
     };
     /** Set hoverable and callback of selected atoms
      *
-     * @function $3Dmol.GLViewer#setHoverable
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} hoverable - whether hover-handling is enabled for the selection
      * @param {function} hover_callback - function called when an atom in the selection is hovered over
@@ -3749,7 +3660,6 @@ export class GLViewer {
 
     /** enable context menu and callback of selected atoms
      *
-     * @function $3Dmol.GLViewer#enableContextMenu
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
      
@@ -3763,7 +3673,6 @@ export class GLViewer {
      * If  atoms have dx, dy, dz properties (in some xyz files), vibrate populates each model's frame property based on parameters.
      * Models can then be animated
      *
-     * @function $3Dmol.GLViewer#vibrate
      * @param {number} numFrames - number of frames to be created, default to 10
      * @param {number} amplitude - amplitude of distortion, default to 1 (full)
      * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
@@ -3775,7 +3684,6 @@ export class GLViewer {
     };
 
     /**
-     * @function $3Dmol.GLViewer#setColorByProperty
      * @param {AtomSelectionSpec} sel
      * @param {type} prop
      * @param {type} scheme
@@ -3786,7 +3694,6 @@ export class GLViewer {
     };
 
     /**
-     * @function $3Dmol.GLViewer#setColorByElement
      * @param {AtomSelectionSpec} sel
      * @param {type} colors
      */
@@ -3935,9 +3842,9 @@ export class GLViewer {
      * @param {AtomSpec[]} atoms
      * @param {{vertices:number,faces:number}}
      *            VandF
-     * @param {$3Dmol.MeshLambertMaterial}
+     * @param {MeshLambertMaterial}
      *            mat
-     * @return {$3Dmol.Mesh}
+     * @return {Mesh}
      */
     private static generateSurfaceMesh(atoms, VandF, mat) {
         var geo = new Geometry(true);
@@ -4047,7 +3954,7 @@ export class GLViewer {
     // do same thing as worker in main thread
     /**
      *
-     * @param {$3Dmol.SurfaceType}
+     * @param {SurfaceType}
      *            type
      * @param {Array}
      *            expandedExtent
@@ -4097,7 +4004,7 @@ export class GLViewer {
      *
      * @param {matSpec}
      *            style
-     * @return {$3Dmol.MeshLambertMaterial}
+     * @return {MeshLambertMaterial}
      */
     private static getMatWithStyle(style) {
         var mat = new MeshLambertMaterial();
@@ -4122,8 +4029,7 @@ export class GLViewer {
 
     /**
      * Adds an explicit mesh as a surface object.
-     * @function $3Dmol.GLViewer#addMesh
-     * @param {$3Dmol.Mesh}
+     * @param {Mesh}
      *            mesh
      * @param {Object}
      *            style
@@ -4157,8 +4063,7 @@ export class GLViewer {
 
     /**
      * Add surface representation to atoms
-     * @function $3Dmol.GLViewer#addSurface
-     * @param {$3Dmol.SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
+     * @param {SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
      * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
      * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
      * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
@@ -4464,7 +4369,6 @@ export class GLViewer {
 
     /**
      * Set the surface material to something else, must render change
-    *  @function $3Dmol.GLViewer#setSurfaceMaterialStyle
      * @param {number} surf - Surface ID to apply changes to
      * @param {SurfaceStyleSpec} style - new material style specification
      @example
@@ -4512,7 +4416,6 @@ export class GLViewer {
 
     /**
      * Return surface object
-     * @function $3Dmol.GLViewer#getSurface
      * @param {number} surf - surface id
      */
     public getSurface(surf) {
@@ -4521,7 +4424,6 @@ export class GLViewer {
 
     /**
      * Remove surface with given ID
-     * @function $3Dmol.GLViewer#removeSurface
      * @param {number} surf - surface id
      */
     public removeSurface(surf) {
@@ -4541,7 +4443,7 @@ export class GLViewer {
     };
 
     /** Remove all surfaces.
-     * @function $3Dmol.GLViewer#removeAllSurfaces */
+     **/
     public removeAllSurfaces() {
         for (var n in this.surfaces) {
             if (!this.surfaces.hasOwnProperty(n)) continue;
@@ -4581,7 +4483,6 @@ export class GLViewer {
     };
 
     /** Clear scene of all objects
-     * @function $3Dmol.GLViewer#clear
      * */
     public clear() {
         this.removeAllSurfaces();
@@ -4596,7 +4497,6 @@ export class GLViewer {
     // properties for those atoms
     /**
      * Add specified properties to all atoms matching input argument
-     * @function $3Dmol.GLViewer#mapAtomProperties
      * @param {Object} props, either array of atom selectors with associated props, or function that takes atom and sets its properties
      * @param {AtomSelectionSpec} sel  - subset of atoms to work on - model selection must be specified here
          @example
@@ -4651,7 +4551,6 @@ export class GLViewer {
      * Synchronize this view matrix of this viewer to the passed viewer.
      * When the viewpoint of this viewer changes, the other viewer will
      * be set to this viewer's view.
-     * @function $3Dmol.GLViewer#linkViewer
      * @param {$3Dmol.GLViewer} otherview
      */
     public linkViewer(otherviewer) {
@@ -4661,7 +4560,6 @@ export class GLViewer {
 
     /**
      * Return the z distance between the model and the camera
-     * @function $3Dmol.GLViewer#getPerceivedDistance
      * @return {number} distance
      */
     public getPerceivedDistance() {
@@ -4671,7 +4569,6 @@ export class GLViewer {
     /**
      * Set the distance between the model and the camera
      * Essentially zooming. Useful while stereo rendering.
-     * @function $3Dmol.GLViewer#setPerceivedDistance
      */
     public setPerceivedDistance(dist) {
         this.rotationGroup.position.z = this.CAMERA_Z - dist;
@@ -4679,7 +4576,6 @@ export class GLViewer {
 
     /**
      * Used for setting an approx value of eyeSeparation. Created for calling by StereoViewer object
-     * @function $3Dmol.GLViewer#setAutoEyeSeparation
      * @return {number} camera x position
      */
     public setAutoEyeSeparation(isright, x) {
@@ -4707,10 +4603,9 @@ export class GLViewer {
 
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
- @function $3Dmol.createViewer
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} [config] Viewer configuration
- * @return {$3Dmol.GLViewer} GLViewer, null if unable to instantiate WebGL
+ * @return {GLViewer} GLViewer, null if unable to instantiate WebGL
  * @example
    var viewer = $3Dmol.createViewer(
      'gldiv', //id of div to create canvas in
@@ -4738,11 +4633,10 @@ export function createViewer(element, config?) {
 
 /**
  * Create and initialize an appropriate a grid of viewers that share a WebGL canvas
- @function $3Dmol.createViewerGrid
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {GridSpec} [config] - grid configuration
  * @param {ViewerGridSpec} [viewer_config] - Viewer specification to apply to all subviewers
- * @return [[$3Dmol.GLViewer]] 2D array of GLViewers
+ * @return [[GLViewer]] 2D array of GLViewers
  * @example                    
    var viewers = $3Dmol.createViewerGrid(
      'gldiv', //id of div to create canvas in
@@ -4822,7 +4716,6 @@ export function createViewerGrid(element, config?, viewer_config?) {
 
 
 /* StereoViewer for stereoscopic viewing
-  @function $3Dmol.createStereoViewer
 * @param {Object | string} element - Either HTML element or string identifier
 * 
 */

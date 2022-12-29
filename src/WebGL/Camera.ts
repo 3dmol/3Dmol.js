@@ -5,7 +5,7 @@ import { Matrix4, Vector3 } from "./math";
  * Simplified Perspective Camera
  */
 
-/** @constructor */
+/* @constructor */
 export class Camera extends Object3D {
   projectionMatrix = new Matrix4();
   projectionMatrixInverse = new Matrix4();

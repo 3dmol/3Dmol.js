@@ -34,11 +34,11 @@ export class GLShape {
         }
     };
 
-    /**
+    /* 
      * 
      * @param {Geometry}
      *            geo
-     * @param {$3Dmol.Color | colorlike} color
+     * @param {Color | colorlike} color
      */
     static updateColor(geo: Geometry, color) {
 
@@ -75,7 +75,7 @@ export class GLShape {
     };
 
 
-    /**
+    /*
      * @param {GLShape}
      *            shape
      * @param {geometryGroup}
@@ -430,7 +430,7 @@ export class GLShape {
 
     // Update a bounding sphere's position and radius
     // from list of centroids and new points
-    /**
+    /*
      * @param {$3Dmol.Sphere}
      *            sphere
      * @param {Object}
@@ -561,7 +561,7 @@ export class GLShape {
 
     // handles custom shape generation from user supplied arrays
     // May need to generate normal and/or line indices
-    /**
+    /*
      * @param {$3Dmol.GLShape}
      *            shape
      * @param {geometry}
@@ -592,7 +592,7 @@ export class GLShape {
     };
 
 
-    /**
+    /*
      * 
      * @param {$3Dmol.GLShape}
      *            shape
@@ -653,10 +653,9 @@ export class GLShape {
     /**
      * Custom renderable shape
      * 
-     * @constructor GLShape
+     * @constructor 
      * 
      * @param {Object} stylespec
-     * @returns {$3Dmol.GLShape}
      */
     constructor(stylespec) {
 
@@ -683,9 +682,7 @@ export class GLShape {
     };
 
     /** Update shape with new style specification
-     * @function $3Dmol.GLShape#updateStyle
      * @param {ShapeSpec} newspec
-     * @return {$3Dmol.GLShape}
        @example 
         let sphere = viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
         sphere.updateStyle({color:'yellow',opacity:0.5});
@@ -718,10 +715,7 @@ export class GLShape {
 
     /**
      * Creates a custom shape from supplied vertex and face arrays
-     * @function $3Dmol.GLShape#addCustom
-     * @param {CustomShapeSpec} customSpec
-     * @return {$3Dmol.GLShape}
-     
+     * @param {CustomShapeSpec} customSpec     
      */
     addCustom(customSpec) {
 
@@ -735,9 +729,7 @@ export class GLShape {
 
     /**
      * Creates a sphere shape
-     * @function $3Dmol.GLShape#addSphere
      * @param {SphereSpec} sphereSpec
-     * @return {$3Dmol.GLShape}
      @example 
      viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
      
@@ -771,9 +763,7 @@ export class GLShape {
 
     /**
      * Creates a box
-     * @function $3Dmol.GLShape#addBox
      * @param {BoxSpec} boxSpec
-     * @return {$3Dmol.GLShape}
      @example 
      var shape = viewer.addShape({color:'red'});
      shape.addBox({corner: {x:1,y:2,z:0}, dimensions: {w: 4, h: 2, d: 6}});
@@ -882,9 +872,7 @@ export class GLShape {
 
     /**
      * Creates a cylinder shape
-     * @function $3Dmol.GLShape#addCylinder
      * @param {CylinderSpec} cylinderSpec
-     * @return {$3Dmol.GLShape}
      @example
           viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
                               end:{x:10.0,y:0.0,z:0.0},
@@ -943,9 +931,7 @@ export class GLShape {
 
     /**
      * Creates a dashed cylinder shape
-     * @function $3Dmol.GLShape#addDashedCylinder
      * @param {CylinderSpec} cylinderSpec
-     * @return {$3Dmol.GLShape}       
      */
     addDashedCylinder(cylinderSpec) {
         cylinderSpec.start = cylinderSpec.start || {};
@@ -995,9 +981,7 @@ export class GLShape {
 
     /**
      * Creates a curved shape
-     * @function $3Dmol.GLShape#addCurve
      * @param {CurveSpec} curveSpec
-     * @return {$3Dmol.GLShape}
      */
     addCurve(curveSpec) {
 
@@ -1074,9 +1058,7 @@ export class GLShape {
 
     /**
      * Creates a line shape
-     * @function $3Dmol.GLShape#addLine         
      * @param {LineSpec} lineSpec
-     * @return {$3Dmol.GLShape}
      @example
      $3Dmol.download("pdb:2ABJ",viewer,{},function(){
               viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
@@ -1127,9 +1109,7 @@ export class GLShape {
 
     /**
      * Creates an arrow shape
-     * @function $3Dmol.GLShape#addArrow        
      * @param {ArrowSpec} arrowSpec
-     * @return {$3Dmol.GLShape}
      @example
       $3Dmol.download("pdb:4DM7",viewer,{},function(){
               viewer.setBackgroundColor(0xffffffff);
@@ -1203,8 +1183,7 @@ export class GLShape {
 
     /**
      * Create isosurface from voluemetric data.
-     * @function $3Dmol.GLShape#addIsosurface         
-     * @param {$3Dmol.VolumeData} data - volumetric input data
+     * @param {VolumeData} data - volumetric input data
      * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
      * @example //the user can specify a selected region for the isosurface 
      $.get('../test_structs/benzene-homo.cube', function(data){
@@ -1388,7 +1367,6 @@ export class GLShape {
      * @param {string} data - Volumetric input data 
      * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
      * @param {IsoSurfaceSpec} isoSpec - Volumetric data shape specification
-     * @return {$3Dmol.GLShape}
      */
     addVolumetricData(data, fmt, volSpec) {
         data = new VolumeData(data, fmt);
@@ -1402,7 +1380,7 @@ export class GLShape {
         return this.geo;
     };
 
-    /**
+    /*
      * Initialize webgl objects for rendering
      * @param {$3Dmol.Object3D} group
      * 

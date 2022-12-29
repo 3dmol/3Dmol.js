@@ -3,7 +3,7 @@ import { EventDispatcher } from "../core";
 import type { Texture } from "../core";
 import { Vector2, Vector3 } from "../math";
 import { Color } from "../../colors";
-/**
+/*
  * Line and Mesh material types
  * @constructor
  */

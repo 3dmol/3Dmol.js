@@ -124,7 +124,7 @@ export class GeometryGroup {
     }
   }
 
-  /** sets line index array from face arr
+  /* sets line index array from face arr
   Note - assumes all faces are triangles (i.e. there will
   be an extra diagonal for four-sided faces - user should
   specify linearr for custom shape generation to show wireframe squares

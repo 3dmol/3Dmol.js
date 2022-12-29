@@ -211,7 +211,7 @@ export class Object3D {
 /*
  * Scene class
  */
-/** @constructor */
+/* @constructor */
 export class Scene extends Object3D {
   fog: Fog | null = null;
   //may not need...

@@ -6,8 +6,7 @@
             "../../node_modules/better-docs/typescript",
             "../../node_modules/better-docs/category"],
     "source": {
-        "includePattern": "\\.(jsx|js|ts|tsx)$",
-        "excludePattern": "WebGL|vendor"
+        "includePattern": "\\.(jsx|js|ts|tsx)$"
     },    
     "templates": {
         "cleverLinks": true,
@@ -37,8 +36,7 @@
     "opts":{
         "recurse": true,
         "encoding": "utf8",
-         //"template": "3Dmol-doc-template",
-        "template": "../../node_modules/better-docs",
+        "template": "./node_modules/better-docs",
         "destination": "doc",
         "tutorials": "tutorials",
         "search": true

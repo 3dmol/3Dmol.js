@@ -80,7 +80,7 @@ export function adjustVolumeStyle(style) {
 };
 
 
-/**
+/*
  * computes the bounding box around the provided atoms
  * @param {AtomSpec[]} atomlist
  * @return {Array}
@@ -198,9 +198,8 @@ export class PausableTimer {
 
 };
 
-/**
+/*
  * Convert a base64 encoded string to a Uint8Array
- * @function $3Dmol.base64ToArray
  * @param {string} base64 encoded string
  */
 export function base64ToArray(base64) {
@@ -227,7 +226,7 @@ export function getAtomProperty(atom, prop) {
 };
 
 //Miscellaneous functions and classes - to be incorporated into $3Dmol proper
-/**
+/*
  * 
  * @param {$3Dmol.Geometry} geometry
  * @param {$3Dmol.Mesh} mesh
@@ -245,7 +244,7 @@ export function mergeGeos(geometry, mesh) {
 };
 
 
-/**
+/*
  * Parse a string that represents a style or atom selection and convert it
  * into an object.  The goal is to make it easier to write out these specifications
  * without resorting to json. Objects cannot be defined recursively.
@@ -359,7 +358,6 @@ export function get(uri, callback?) {
 /**
  * Download binary data (e.g. a gzipped file) into an array buffer and provide
  * arraybuffer to callback.
- * @function $3Dmol.getbin
  * @param {string} uri - location of data
  * @param {Function} [callback] - Function to call with arraybuffer as argument.  
  * @param {string} [request] - type of request
@@ -384,15 +382,14 @@ export function getbin(uri, callback?, request?, postdata?) {
 
 /**
  * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * @function $3Dmol.download
  * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
- * @param {$3Dmol.GLViewer} viewer - Add new model to existing viewer
+ * @param {GLViewer} viewer - Add new model to existing viewer
  * @param {Object} options - Specify additional options
  *                           format: file format to download, if multiple are available, default format is pdb
  *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
  * @param {Function} [callback] - Function to call with model as argument after data is loaded.
   
- * @return {$3Dmol.GLModel} GLModel, Promise if callback is not provided
+ * @return {GLModel} GLModel, Promise if callback is not provided
  * @example
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
@@ -524,7 +521,7 @@ export function download(query, viewer, options, callback?) {
 };
 
 
-/** Return proper color for atom given style
+/* Return proper color for atom given style
  * @param {AtomSpec} atom
  * @param {AtomStyle} style
  * @return {Color}

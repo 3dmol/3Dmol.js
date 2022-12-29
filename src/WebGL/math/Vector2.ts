@@ -1,4 +1,6 @@
-// A 2 Vector
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Vector2 {
     x: number;
     y: number;

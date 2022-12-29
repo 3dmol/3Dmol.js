@@ -4,7 +4,7 @@ import { FrontSide } from "../constants/Sides";
 import { Color } from "../../colors";
 import { Material } from "./Material";
 
-/** @constructor */
+/* @constructor */
 export class VolumetricMaterial extends Material {
   transparent = false;
   volumetric = true;

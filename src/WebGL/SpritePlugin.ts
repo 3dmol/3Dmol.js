@@ -40,7 +40,7 @@ export type SpriteMeta = {
   uniforms: Nullable<UniformsValueType>;
 };
 
-/**
+/*
  * Sprite render plugin
  */
 export class SpritePlugin {

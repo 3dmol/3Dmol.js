@@ -3,7 +3,14 @@ import { Vector3 } from "../math";
 
 const v1 = new Vector3();
 
-//plane specified by three points
+
+/**   plane specified by three points
+
+ *  @class 
+ *  @subcategory  Math
+ *  
+ * 
+ */ 
 export class Triangle {
   a: Vector3;
   b: Vector3;

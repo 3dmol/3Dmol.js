@@ -1,7 +1,7 @@
 import { Color } from "../../colors";
 import { Material } from "./Material";
 //Outlined Mesh Lamert material
-/** @constructor */
+/* @constructor */
 export class MeshOutlineMaterial extends Material {
   fog: boolean;
   shaderID: string;

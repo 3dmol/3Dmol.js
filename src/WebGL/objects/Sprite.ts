@@ -3,7 +3,7 @@ import { SpriteMaterial } from '../materials';
 import { Object3D } from "../core";
 import { Vector3 } from '../math';
 //Sprite object
-/** @constructor */
+/* @constructor */
 export class Sprite extends Object3D {
   rotation3d: Vector3;
   _modelViewMatrix: any;

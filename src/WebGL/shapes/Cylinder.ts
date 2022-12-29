@@ -3,7 +3,9 @@ import { Vector3 } from '../math';
 let vector = new Vector3()
 
 //Bounding cylinder for stick render
-/** @constructor */
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Cylinder {
   c1: Vector3
   c2: Vector3

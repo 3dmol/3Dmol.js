@@ -4,7 +4,7 @@ import { Color } from "../../colors";
 import { Vector3 } from "../math";
 import { Material } from "./Material";
 //Imposter material
-/** @constructor */
+/* @constructor */
 export class ImposterMaterial extends Material {
   combine: any;
   morphTargets: any;

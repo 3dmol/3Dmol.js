@@ -6,7 +6,7 @@ import { Material } from "./Material";
 import { Color } from "../../colors";
 import { Vector3 } from "../math";
 
-/** @constructor */
+/* @constructor */
 export class MeshLambertMaterial extends Material {
   combine: any;
   morphTargets: any;

@@ -1,7 +1,7 @@
 import { Color } from "../../colors";
 import { Material } from "./Material";
 //Line basic material
-/** @constructor */
+/* @constructor */
 export class LineBasicMaterial extends Material {
   color = new Color(0xffffff);
   linewidth = 1;

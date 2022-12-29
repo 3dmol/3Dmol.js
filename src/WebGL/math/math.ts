@@ -9,7 +9,9 @@ var x: Vector3;
 var y: Vector3;
 var z: Vector3;
 
-// Matrix 4
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Matrix4 {
   elements: Float32Array;
   constructor(n11: Array<number>);
@@ -830,7 +832,18 @@ export class Matrix4 {
 mRotation = new Matrix4();
 mScale = new Matrix4();
 
-// A 3 Vector
+/**
+ * @interface
+ */
+export interface Vector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Vector3 {
   // unaccounted for assignents to vector3 properties in other parts of the code
   // look in glcartoon.js for example
@@ -1195,11 +1208,16 @@ x = new Vector3();
 y = new Vector3();
 z = new Vector3();
 
-// Matrix3
+/* 
+ * @interface Matrix3
+ */
 export interface Matrix3 {
   elements: Float32Array;
 }
 
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Matrix3 {
   constructor(
     n11: number = 1,
@@ -1396,6 +1414,10 @@ export class Matrix3 {
     );
   }
 }
+
+/** @class 
+ *  @subcategory  Math
+ * */ 
 export class Ray {
   origin: Vector3;
   direction: Vector3;
