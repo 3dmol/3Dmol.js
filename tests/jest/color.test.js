@@ -3,7 +3,7 @@
 */
 
 global.$ = require("jquery");
-global.URL.createObjectURL = function() {};
+global.URL.createObjectURL = function () { };
 let $3Dmol = require("../../build/3Dmol.js");
 
 
@@ -13,11 +13,11 @@ describe("Color", () => {
     })
 
     it("has a 0 to 1 based number constructor", () => {
-        expect(new $3Dmol.Color(1,0,0)).toBeInstanceOf($3Dmol.Color);
+        expect(new $3Dmol.Color(1, 0, 0)).toBeInstanceOf($3Dmol.Color);
     })
 
     it("has a copy constructor", () => {
-        let color = new $3Dmol.Color(1,0,0);
+        let color = new $3Dmol.Color(1, 0, 0);
         let copy = new $3Dmol.Color(color)
         expect(copy).toBeInstanceOf($3Dmol.Color);
         expect(copy).toHaveProperty("r", 1);
@@ -34,7 +34,7 @@ describe("Color", () => {
     })
 
     it("has Colored object constructor", () => {
-        let color = new $3Dmol.Color({r:1, g:0, b:0});
+        let color = new $3Dmol.Color({ r: 1, g: 0, b: 0 });
         expect(color).toBeInstanceOf($3Dmol.Color);
         expect(color).toHaveProperty("r", 1);
         expect(color).toHaveProperty("g", 0);
@@ -55,7 +55,7 @@ describe("Color", () => {
 
     it("can copy a colored obj", () => {
         let color = new $3Dmol.Color();
-        let other = new $3Dmol.Color({r:1, g:0, b:0});
+        let other = new $3Dmol.Color({ r: 1, g: 0, b: 0 });
         color.copy(other);
         expect(color).toBeInstanceOf($3Dmol.Color);
         expect(color).toHaveProperty("r", 1);
@@ -77,7 +77,7 @@ describe("Color", () => {
         let color = new $3Dmol.Color(0xff0000);
         let scaled = color.scaled();
         console.log(scaled);
-        expect(JSON.stringify(scaled)).toEqual(JSON.stringify({r:255, g:0, b:0, a: 1}));
+        expect(JSON.stringify(scaled)).toEqual(JSON.stringify({ r: 255, g: 0, b: 0, a: 1 }));
     })
 
     it("has r, g, and b properties that are zero initialized", () => {
