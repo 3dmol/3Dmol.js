@@ -16,7 +16,7 @@ With 3Dmol.js, you can add beautifully rendered molecular visualizations to your
 * clickable interactivity with molecular data
 * geometric shapes including spheres and arrows
 
-See the [documentation](https://3dmol.csb.pitt.edu/packages/3Dmol/doc/index.html) to learn how to use 3Dmol.js as a hosted viewer, embeddable viewer, or as a component of a larger application.
+See the [documentation](https://3dmol.org/doc/index.html) to learn how to use 3Dmol.js as a hosted viewer, embeddable viewer, or as a component of a larger application.
 
 ## Examples
 
