@@ -155,6 +155,7 @@ export class Label {
     var height = fontSize * 1.25 + 2 * borderThickness + 2 * padding; // 1.25 is extra height factor for text below baseline: g,j,p,q.
 
     if (style.backgroundImage) {
+      //resize label to image
       var img = style.backgroundImage;
       var w = style.backgroundWidth ? style.backgroundWidth : img.width;
       var h = style.backgroundHeight ? style.backgroundHeight : img.height;
@@ -230,11 +231,8 @@ export class Label {
       );
     }
 
-    if (style.backgroundImage) {
-      let img = style.backgroundImage;
-      let w = style.backgroundWidth ? style.backgroundWidth : img.width;
-      let h = style.backgroundHeight ? style.backgroundHeight : img.height;
-      this.context.drawImage(img, 0, 0, w, h);
+    if (style.backgroundImage) {      
+      this.context.drawImage(img, 0, 0, width, height);
     }
 
     // text color
