@@ -1322,10 +1322,10 @@ export class GLViewer {
      *
      * Call `spin(false)` to stop spinning.
      *
-     * @param {string}
+     * @param axis {string|boolean|Array}
      *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
      *            Default "y".  View relative (rather than model relative) axes are prefixed with v.
-     * @param {number}
+     * @param speed {number}
      *            [speed] - Speed multiplier for spinning the viewer. 1 is default and a negative
      *             value reverses the direction of the spin.
      *
