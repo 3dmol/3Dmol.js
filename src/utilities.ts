@@ -568,7 +568,7 @@ export function getColorFromStyle(atom, style): Color {
                 grad = new builtinGradients[grad](
                     scheme.min,
                     scheme.max,
-                    scheme.mid
+                    scheme.mid ? scheme.mid : scheme.colors
                 );
             }
 

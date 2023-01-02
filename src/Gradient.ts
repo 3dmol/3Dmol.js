@@ -1,3 +1,5 @@
+import { CC, Color } from "./colors";
+
 export abstract class GradientType {
   gradient?: string;
   abstract valueToHex(value: number, range: number): number;
@@ -33,7 +35,11 @@ export function getGradient(grad) {
     let min = grad.min === undefined ? -1 : grad.min;
     let max = grad.max === undefined ? 1 : grad.max;
     if (grad.mid === undefined) {
-      return new builtinGradients[grad.gradient](min, max);
+      if (grad.colors === undefined) {
+        return new builtinGradients[grad.gradient](min, max);
+      } else {
+        return new builtinGradients[grad.gradient](min, max, grad.colors);
+      }
     } else {
       return new builtinGradients[grad.gradient](min, max, grad.mid);
     }
@@ -281,6 +287,101 @@ export class Sinebow extends GradientType {
   };
 }
 
+
+/**
+ * Custom linear gradient using user supplied colors.
+ * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
+ * Midpoints are not supported - color map should be specified to get desired middle color.
+ * 
+ * @param {number} min 
+ * @param {number} max
+ * @param {Array} colors  Array of colors that will be linearly interpolated between from min to max values.
+ * @subcategory Gradients
+ * 
+ * @example
+       $3Dmol.get('../test_structs/af.pdb', function(data){
+              viewer.addModel(data);
+              viewer.setStyle({cartoon:{colorscheme:{prop: 'b', gradient:'linear', min: 70, max: 100, colors: ["blue","yellow","green"]}}});
+              viewer.zoomTo();
+              viewer.render();
+            });
+ */
+export class CustomLinear extends GradientType {
+  gradient = "linear";
+  min: number;
+  max: number;
+  colors = new Array<Color>();
+
+  constructor(min: any, max: any, colors?: any) {
+    super();
+
+    var carr: Array<any>;
+    if (Array.isArray(min) && min.length >= 2) {
+      //we were passed a single range
+      this.max = min[1] as number;
+      this.min = min[0] as number;
+      carr = max;
+    } else {
+      this.min = min as number;
+      this.max = max as number;
+      carr = colors;
+    }
+
+    //convert colors
+    if (carr) {
+      for (let c of carr) {
+        this.colors.push(CC.color(c));
+      }
+    } else {
+      this.colors.push(CC.color(0));
+    }
+
+  }
+
+  //return range used for color mapping, null if none set
+  range() {
+    if (typeof this.min != "undefined" && typeof this.max != "undefined") {
+      return [this.min, this.max] as [number, number];
+    }
+    return null;
+  }
+
+  //map value to hex color, range is provided
+  valueToHex(val, range) {
+    var lo, hi;
+    if (range) {
+      lo = range[0];
+      hi = range[1];
+    } else {
+      lo = this.min;
+      hi = this.max;
+    }
+
+    if (val === undefined) return 0xffffff;
+
+    var norm = normalizeValue(lo, hi, val);
+    lo = norm.lo;
+    hi = norm.hi;
+    val = norm.val;
+
+    let nsteps = this.colors.length;
+    let stepsize = (hi - lo) / nsteps;
+    let startpos = Math.min(Math.floor((val - lo) / stepsize), nsteps - 1);
+    let endpos = Math.min(startpos + 1, nsteps - 1);
+
+    let frac = (val - lo - (startpos * stepsize)) / stepsize;
+
+    let startcol = this.colors[startpos];
+    let endcol = this.colors[endpos];
+
+    let col = new Color(startcol.r + frac * (endcol.r - startcol.r),
+      startcol.g + frac * (endcol.g - startcol.g),
+      startcol.b + frac * (endcol.b - startcol.b));
+    return col.getHex();
+  }
+}
+
+
 //map from names to gradient constructors
 export const builtinGradients = {
   rwb: RWB,
@@ -288,15 +389,17 @@ export const builtinGradients = {
   roygb: ROYGB,
   ROYGB: ROYGB,
   sinebow: Sinebow,
+  linear: CustomLinear
 };
 
 export class Gradient extends GradientType {
   static RWB = RWB;
   static ROYGB = ROYGB;
   static Sinebow = Sinebow;
+  static CustomLinear = CustomLinear;
   static builtinGradients = builtinGradients;
   static normalizeValue = normalizeValue;
   static getGradient = getGradient;
   valueToHex(_value: number, _range: number): number { return 0; }
-  range(): [number, number]|null { return null; }
+  range(): [number, number] | null { return null; }
 }

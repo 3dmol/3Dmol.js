@@ -332,9 +332,10 @@ export type ColorSpec = keyof typeof htmlColors | number;
 * @prop {string} chainHetatm - chain Hetatm colorscheme
 * @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
 * @prop {Gradient} gradient - Allows the user to provide a gradient to the colorscheme.  Is either a Gradient object or the name of a built-in gradient (rwb, roygb, sinebow)
-* @prop {min} - min value for gradient
-* @prop {max} - max value for gradient
-* @prop {mid} - mid point value for gradient (for rwb)
+* @prop {nuber} min - min value for gradient
+* @prop {number} max - max value for gradient
+* @prop {number} mid - mid point value for gradient (for rwb)
+* @prop {Array} colors - custom colors for gradient (for linear) 
 * @prop {object} map - map of a certain AtomSpec property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
 * @prop {function} colorfunc - Allows the user to provide a function for setting the colorschemes.
 */
