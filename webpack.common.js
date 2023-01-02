@@ -10,21 +10,19 @@ Author: ${pkg.author}`;
 
 module.exports =  {
   target: "web",
-  entry: ["./src/index.ts", 
-        "./src/SurfaceWorker.js",
-
-        "./src/ui/ui.js",
-        "./src/ui/state.js",
-        "./src/ui/icon.js",
-        "./src/ui/form.js",        
-        "./src/ui/defaultValues.js",
-        
+  entry: {'3Dmol':["./src/index.ts", 
+        "./src/SurfaceWorker.js",        
         "./src/exporter.js"
         ],
+      '3Dmol.ui': [ "./src/ui/ui.js",
+      "./src/ui/state.js",
+      "./src/ui/icon.js",
+      "./src/ui/form.js",        
+      "./src/ui/defaultValues.js"]},
   output: {
     path: path.resolve(__dirname, "build"),
     globalObject: "this",
-    library: pkg.name,
+    library: '[name]',
     libraryTarget: "umd",
   },
 

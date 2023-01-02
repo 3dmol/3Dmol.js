@@ -23,6 +23,6 @@ module.exports = merge(common, {
     ],
   },
   output: {
-    filename: `3Dmol-min.js`,
+    filename: `[name]-min.js`,
   }
 });
