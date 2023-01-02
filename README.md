@@ -73,7 +73,7 @@ viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
 
 ## Documentation
 
-Please check out our documentation at [3dmol.js](https://3dmol.csb.pitt.edu/packages/3Dmol/doc/index.html). We have tutorials, as well as the stable release of the platform.
+Please check out our documentation at [3dmol.js](https://3dmol.org/doc/index.html). We have tutorials, as well as the stable release of the platform.
 
 ## Contact
 
