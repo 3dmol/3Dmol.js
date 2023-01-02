@@ -60,7 +60,12 @@ H         -0.57470       -7.29915        1.13071
 viewer.addModel($('#mol').val(),'xyz');
 viewer.setStyle({'sphere':{radius:0.5},'stick':{}});
 
-document.querySelector("#lily").decode().then(() => {
+var img = document.querySelector("#lily");
+if(typeof img.decode == "undefined") {
+    //node shim
+    img.decode = () => { return Promise.resolve();};
+}
+img.decode().then(() => {
     viewer.addLabel("",{position:{x:-5,y:-10,z:0},useScreen: false, backgroundImage: document.querySelector("#lily")});
     viewer.zoomTo();
     viewer.render();
