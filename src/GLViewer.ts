@@ -3607,7 +3607,7 @@ export class GLViewer {
 
 
     /**
-     * Set click-handling properties to all selected atomsthis.
+     * Set click-handling properties to all selected atoms. *Important*: render must be called for this to take effect.
      *
      * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
      * @param {boolean} clickable - whether click-handling is enabled for the selection

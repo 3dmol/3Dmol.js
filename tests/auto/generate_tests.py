@@ -8,26 +8,7 @@
 import os, re, glob, sys
 from posixpath import abspath
 #from IPython.core.magics import script
-def find_all(text,sub):
-    examples=[]
-    index=0
-    while index < len(text):
-        index = text.find(sub, index)
-        if index == -1:
-            break
-        examples.append(index)
-        index += 2
-    return examples
-def find_next(text,sub,currenti):
-    index=currenti
-    i=-1
-    while index < len(text):
-        index = text.find(sub, index)
-        if index == -1:
-            break
-        i=index
-        index += 2
-    return i
+
 def script_string(typedef,text):
     string="function "+typedef+"{"+text+"}\n"
     return string
@@ -100,44 +81,24 @@ class File():
     def getExamples(self, text):
         nearests=[]
         filename=self.filename
-        example_indices=find_all(text,"@example")
-        typedef_decorators=find_all(text,"@typedef")
-        function_decorators=find_all(text,"@function")
-        examples=[]
-        #name of nearest function or typdef
-        name=""
-        for i in example_indices:
-            #get the index of the next '*/' or the index of the next '@' symbol
-            comments=find_all(text,"*/")
+        filename=re.sub(r'.*/src/',"",filename)
 
-            ats=find_all(text,"@")
-            smallest_next=0
-            for comment in comments:
-                if comment>i:
-                    smallest_next=comment
-                    break
-            for at in ats:
-                if(at>i and at<smallest_next):
-                    smallest_next=at
-                    break
-            #at this point smallest next should be correct
-            nearest_dec=-1
-            for dec in function_decorators:
-                if dec<i and dec>nearest_dec:
-                    nearest_dec=dec
-            for dec in typedef_decorators:
-                if dec<i and dec>nearest_dec:
-                    nearest_dec=dec
-            nearests.append(nearest_dec)
-            endline=text[nearest_dec:].find("\n")
-            if(nearest_dec!=-1):
-                name=text[nearest_dec+9:endline+nearest_dec]
-                name=name[name.find("#")+1:]
-            else:
-                name=""
-            exmp=text[i+8:smallest_next]
-            exmp=exmp.replace('*','')
-            filename=re.sub(r'.*/src/',"",filename)
+        #extract  example block from before function/methods
+        fex =  re.findall(r'@example(((?!\*/).)*?)\*/\s+(export\s+function|public|\s*)\s+(\S+)\s*\(',text,re.DOTALL)
+         #extract just code and name
+        fex = [(m[0],m[-1]) for m in fex]
+
+        #and from typedefs
+        tex = re.findall(r'@typedef\s+(\S+)\s+((?!\*/).)*@example(.*?)\*/',text,re.DOTALL)
+        tex = [(m[-1],m[0]) for m in tex]
+        
+        #classes
+        cex =  re.findall(r'@example(((?!\*/).)*?)\*/\s+export (class|const|enum)\s+(\S+)',text,re.DOTALL)
+        cex = [(m[0],m[-1]) for m in cex]
+
+
+        def makename(name):
+            #massage file/func name
             flname=filename+"_"+name
             
             flname=flname.replace(".","_")
@@ -147,17 +108,21 @@ class File():
             flname=flname.replace("3Dmol","")
             flname=flname.replace("3","_3")
             flname=flname.replace('$','') #special character in jquery
-            exmp=Example(flname,exmp)
-            examples.append(exmp)
-        count=0
-        for i,example in enumerate(examples):
-            if(i==0):
-                continue
-            if(nearests[i]==nearests[i-1]):
-                count+=1
-                examples[i].name=name+str(count)
-            else:
-                count=0
+
+            return flname
+
+        examples = []
+        for code,name in fex+tex+cex:
+            code = code.replace('*','')
+            name = makename(name)
+            #look for @directives and stop the code there
+            m = re.search('(^.*?)@(\S+).*',code,re.DOTALL)
+            if m:
+                code = m.group(1)
+                if m.group(2) == 'example':
+                    print(f"Need to handle multiple examples in {name}")
+            examples.append(Example(name,code))
+
 
         return examples
 

@@ -1128,7 +1128,7 @@ export class GLShape {
               viewer.render();
             });
      */
-    addArrow(arrowSpec) {
+    public addArrow(arrowSpec) {
 
         arrowSpec.start = arrowSpec.start || {};
         arrowSpec.end = arrowSpec.end || {};
