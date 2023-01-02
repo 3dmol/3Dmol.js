@@ -3219,7 +3219,7 @@ export class GLViewer {
     /**
      * Animate all models in viewer from their respective frames
      * @param {Object} options - can specify interval (speed of animation), loop (direction
-     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), and reps (numer of repetitions, 0 indicates infinite loop)
+     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, and reps (numer of repetitions, 0 indicates infinite loop)
      *
      */
 
@@ -3241,6 +3241,9 @@ export class GLViewer {
         var mostFrames = this.getNumFrames();
         var self = this;
         var currFrame = 0;
+        if(options.startFrame) {
+            currFrame = options.startFrame%mostFrames;
+        }
         var inc = 1;
         if (options.step) {
             inc = options.step;
