@@ -4,7 +4,7 @@
 
    
     viewer._handleMouseScroll({pageX: 127, pageY: 129, wheelDelta: 600, preventDefault: function(){}});
-
+    viewer.render();
   };
 */
   /* @div

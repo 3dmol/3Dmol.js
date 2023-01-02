@@ -31,7 +31,7 @@ class Example():
 
         #make sure callback is called
         self.script = self.script.replace('viewer.render()','viewer.render(callback)')
-        if 'viewer.render(callback)' not in self.script and len(self.divs) == 0:
+        if not re.search(r'viewer.render(.*callback)', self.script) and len(self.divs) == 0:
             self.script += "\nviewer.render(callback);\n";
         
         if self.script.count("viewer.render(callback)") > 1:

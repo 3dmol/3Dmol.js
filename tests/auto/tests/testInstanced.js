@@ -5,5 +5,5 @@ $3Dmol.download("cid:2519",viewer,{},function(){
         viewer.zoomTo();    
         viewer.zoom(4);
         //turn off imposters
-        viewer.render(undefined,{supportsAIA:true,supportsImposters:false});
+        viewer.render(callback,{supportsAIA:true,supportsImposters:false});
 });

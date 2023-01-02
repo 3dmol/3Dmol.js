@@ -54,7 +54,7 @@ H         -1.27595       -6.08352       -0.88112
 H         -0.57470       -7.29915        1.13071
 </textarea>
 
-<img src="data/smlily.png" id="lily" style="display:none">
+<img src="data/smlily.png" id="lily" style="display:none" width=100 height=102>
 */
 
 viewer.addModel($('#mol').val(),'xyz');

@@ -2,11 +2,10 @@
    $3Dmol.testclicky = function(viewer) { 
 
     viewer.setClickable({},true,function(atom) {
-      console.log('clicked');
       viewer.removeAllShapes();
       viewer.addSphere({center:atom,radius:1.0,color:'purple',alpha:0.4});
       viewer.addLabel("Label",{position: atom, bold: true});
-    viewer.render( );
+    viewer.render();
 });
     viewer.render( );
 
