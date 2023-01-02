@@ -1222,25 +1222,32 @@ export class GLViewer {
     };
 
 
+    private updateSize() {
+        this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.ASPECT = this.renderer.getAspect(this.WIDTH, this.HEIGHT);
+        this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.camera.aspect = this.ASPECT;
+        this.camera.updateProjectionMatrix();
+    }
     /**
-     * Set viewer width
+     * Set viewer width independently of the HTML container.  This is probably not what you want.
      *
      * @param {number} w Width in pixels
      */
     public setWidth(w) {
         this.WIDTH = w || this.WIDTH;
-        this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.updateSize();       
         return this;
     };
 
     /**
-     * Set viewer height
+     * Set viewer height independently of the HTML container.  This is probably not what you want.
      *
      * @param {number} h Height in pixels
      */
     public setHeight(h) {
         this.HEIGHT = h || this.HEIGHT;
-        this.renderer.setSize(this.WIDTH, this.HEIGHT);
+        this.updateSize();
         return this;
     };
 
@@ -1264,10 +1271,8 @@ export class GLViewer {
         } else if (this.animated) {
             this._viewer.resumeAnimate();
         }
-        this.ASPECT = this.renderer.getAspect(this.WIDTH, this.HEIGHT);
-        this.renderer.setSize(this.WIDTH, this.HEIGHT);
-        this.camera.aspect = this.ASPECT;
-        this.camera.updateProjectionMatrix();
+
+        this.updateSize();
 
         if (regen) { //restored rendere, need to regenerate scene
             let options = this.renderer.supportedExtensions();
@@ -1322,10 +1327,10 @@ export class GLViewer {
      *
      * Call `spin(false)` to stop spinning.
      *
-     * @param axis {string|boolean|Array}
+     * @param  {string|boolean|Array} axis
      *            [axis] - Axis ("x", "y", "z", "vx", "vy", or "vz") to rotate around.
      *            Default "y".  View relative (rather than model relative) axes are prefixed with v.
-     * @param speed {number}
+     * @param  {number} speed
      *            [speed] - Speed multiplier for spinning the viewer. 1 is default and a negative
      *             value reverses the direction of the spin.
      *
