@@ -1,5 +1,7 @@
 /tests
 /node_modules
+/tmp
+/coverage
 /nbproject/private/
 script.map
 .DS_Store
