@@ -93,7 +93,7 @@ class File():
         tex = [(m[-1],m[0]) for m in tex]
         
         #classes
-        cex =  re.findall(r'@example(((?!\*/).)*?)\*/\s+export (class|const|enum)\s+(\S+)',text,re.DOTALL)
+        cex =  re.findall(r'@example(((?!\*/).)*?)\*/\s+export (class|const|enum|interface)\s+(\S+)',text,re.DOTALL)
         cex = [(m[0],m[-1]) for m in cex]
 
 
