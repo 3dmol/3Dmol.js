@@ -6,32 +6,18 @@ import { Vector3 } from "./WebGL/math";
 import { Triangle, Sphere } from "./WebGL/shapes";
 import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring } from "./WebGL";
 import { Gradient } from "./Gradient";
-import { CC } from "./colors";
+import { CC, ColorSpec } from "./colors";
 import { GLDraw } from "./GLDraw";
 import { isNumeric, getColorFromStyle } from "./utilities";
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
-  In nucleic acids, the base cylinders obtain their color from the
-  atom to which the cylinder is drawn, which is 'N1' for purines (resn: 'A', 'G', 'DA', 'DG') and 
+  In nucleic acids, the base cylinders obtain their color from the  atom to which the cylinder is drawn, which is 'N1' for purines (resn: 'A', 'G', 'DA', 'DG') and 
   'N3' for pyrimidines (resn: 'C', 'U', 'DC', 'DT'). 
   The different nucleobases can therefore be distinguished as by setting the colors 
   of each of these atoms. The backbone color is set from the 'P' atoms ('O5' for the 5' terminus).
- * @typedef CartoonStyleSpec
- * @prop {ColorSpec} color - strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number
- * @prop {string} style - style of cartoon rendering (trace, oval, rectangle
- *       (default), parabola, edged)
- * @prop {boolean} ribbon - whether to use constant strand width, disregarding
- *       secondary structure; use thickness to adjust radius
- * @prop {boolean} arrows - whether to add arrows showing beta-sheet
- *       directionality; does not apply to trace or ribbon
- * @prop {boolean} tubes - whether to display alpha helices as simple cylinders;
- *       does not apply to trace
- * @prop {number} thickness - cartoon strand thickness, default is 0.4
- * @prop {number} width - cartoon strand width, default is secondary
- *       structure-dependent; does not apply to trace or ribbon
- * @prop {number} opacity - set opacity from 0-1; transparency is set per-chain
- *       with a warning outputted in the event of ambiguity
+
+ * 
  * @example $3Dmol.download("pdb:4ZD3",viewer,{},function(){
                   viewer.setBackgroundColor(0xffffffff);
                   viewer.setViewStyle({style:"outline"});
@@ -39,7 +25,29 @@ import { isNumeric, getColorFromStyle } from "./utilities";
                   viewer.render();
               });
  */
-
+export interface CartoonStyleSpec {
+    /** strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number */
+    color?: ColorSpec;
+    /**  style of cartoon rendering (trace, oval, rectangle (default), parabola, edged) */
+    style?: string;
+    /**  whether to use constant strand width, disregarding
+    *       secondary structure; use thickness to adjust radius */
+    ribbon?: boolean; 
+    /** whether to add arrows showing beta-sheet
+    *       directionality; does not apply to trace or ribbon */
+    arrows?: boolean; 
+    /** whether to display alpha helices as simple cylinders;
+    *       does not apply to trace */
+    tubes?: boolean; 
+    /** cartoon strand thickness, default is 0.4 */
+    thickness?:number;
+    /** cartoon strand width, default is secondary
+    *       structure-dependent; does not apply to trace or ribbon */
+    width?:number; 
+    /** set opacity from 0-1; transparency is set per-chain
+    *       with a warning outputted in the event of ambiguity */
+    opacity?: number 
+};
 
 // helper functions
 // Catmull-Rom subdivision

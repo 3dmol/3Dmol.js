@@ -3,9 +3,11 @@ import {
   Texture,
   SpriteMaterial,
   Sprite,
+  Vector3,
+  Vector2,
 } from "./WebGL";
 import { Gradient } from "./Gradient";
-import { Color, CC } from "./colors";
+import { Color, CC, ColorSpec } from "./colors";
 
 //Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
 
@@ -46,6 +48,46 @@ function getColor(style, stylealpha?: any, init?: any) {
     ret.a = parseFloat(stylealpha);
   }
   return ret;
+}
+
+/** Label style specification */
+export interface LabelSpec {
+/** font name, default sans-serif */
+  font?: string;
+  /** height of text, default 18 */
+  fontSize: number;
+  /** font color, default white */
+  fontColor: ColorSpec;
+  /** font opacity, default 1 */
+  fontOpacity: number;
+  /** line width of border around label, default 0  */
+  borderThickness: number;
+  /** color of border, default backgroundColor */
+  borderColor: ColorSpec;
+  /** opacity of border */
+  borderOpacity: number;
+  /** color of background, default black */
+  backgroundColor: ColorSpec;
+  /** opacity of background, default 1.0 */
+  backgroundOpacity: number;
+  /** coordinates for label */
+  position: Vector3;
+  /** x,y pixel offset of label from position */
+  screenOffset: Vector2;
+  /** always put labels in front of model */
+  inFront: boolean;
+  /** show background rounded rectangle, default true */
+  showBackground: boolean;
+  /** sets the label to change with the model when zooming */
+  fixed: boolean;
+  /** position is in screen (not model) coordinates which are pixel offsets from the upper left corner */
+  useScreen: boolean;
+  /** An elment to draw into the label. Any CanvasImageSource is allowed.  Label is resized to size of image */
+  backgroundImage: any;
+  /** how to orient the label w/respect to position: topLeft (default), topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight */
+  alignment: string;
+  /** if set, only display in this frame of an animation */
+  frame: number;
 }
 
 /**

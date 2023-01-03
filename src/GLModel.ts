@@ -5,10 +5,10 @@
 import { Geometry, Material, StickImposterMaterial } from "./WebGL";
 import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3 } from "./WebGL/math";
-import { Color, CC } from "./colors";
+import { Color, CC, ColorschemeSpec, ColorSpec } from "./colors";
 import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { GLDraw } from "./GLDraw"
-import { drawCartoon } from "./glcartoon";
+import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
 import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
 import { Gradient } from "./Gradient";
@@ -332,15 +332,7 @@ export class GLModel {
     };
 
     // cross drawing
-    /** @typedef CrossStyleSpec
-     * @prop {boolean} hidden - do not show 
-     * @prop {number} linewidth *deprecated due to vanishing browser support* 
-     * @prop {number} radius 
-     * @prop {number} scale - scale radius by specified amount
-     * @prop {ColorschemeSpec} colorscheme - element based coloring
-     * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
-     * @prop {number} opacity - opacity, must be the same for all atoms in the model
-     */
+
     /**
      * 
      * @param {AtomSpec} atom
@@ -492,13 +484,6 @@ export class GLModel {
         colorArray[offset + 3] = c1.r; colorArray[offset + 4] = c1.g; colorArray[offset + 5] = c1.b;
     };
 
-    /**@typedef LineStyleSpec
-     * @prop {boolean} hidden - do not show line
-     * @prop {number} linewidth *deprecated due to vanishing browser support* 
-     * @prop {ColorschemeSpec} colorscheme - element based coloring
-     * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
-     * @prop {number} opacity - opacity, must be the same for all atoms in the model
-     */
 
     // bonds - both atoms must match bond style
     // standardize on only drawing for lowest to highest
@@ -665,17 +650,6 @@ export class GLModel {
         }
 
     };
-
-
-
-    /**@typedef SphereStyleSpec
-     * @prop {boolean} hidden - do not show atom
-     * @prop {number} radius - override van der waals radius
-     * @prop {number} scale - scale radius by specified amount
-     * @prop {ColorschemeSpec} colorscheme - element based coloring
-     * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
-     * @prop {number} opacity - opacity, must be the same for all atoms in the model
-     */
 
     //sphere drawing
     //See also: drawCylinder
@@ -898,15 +872,6 @@ export class GLModel {
         faceArray[faceoffset + 5] = startv;
         geoGroup.faceidx += 6;
     };
-
-    /**@typedef StickStyleSpec
-     * @prop {boolean} hidden - do not show 
-     * @prop {number} radius 
-     * @prop {boolean} singleBonds - draw all bonds as single bonds if set
-     * @prop {ColorschemeSpec} colorscheme - element based coloring
-     * @prop {ColorSpec} color - fixed coloring, overrides colorscheme
-     * @prop {number} opacity - opacity, must be the same for all atoms in the model
-     */
 
     // draws cylinders and small spheres (at bond radius)
     private drawBondSticks(atom, atoms, geo) {
@@ -1508,7 +1473,7 @@ export class GLModel {
      *
      * @param {Matrix3} matrix - unit cell matrix
      */
-    public setCrystMatrix(matrix:Matrix3) {
+    public setCrystMatrix(matrix: Matrix3) {
         matrix = matrix || new Matrix3(
             1, 0, 0,
             0, 1, 0,
@@ -3012,3 +2977,102 @@ export class GLModel {
     };
 
 }
+
+/** Atom style specification */
+export interface AtomStyleSpec {
+    /** draw bonds as lines */
+    line?: LineStyleSpec;
+    /** draw atoms as crossed lines (aka stars) */
+    cross?: CrossStyleSpec;
+    /** draw bonds as capped cylinders */
+    stick?: StickStyleSpec;
+    /** draw atoms as spheres */
+    sphere?: SphereStyleSpec;
+    /** draw cartoon representation of secondary structure */
+    cartoon?: CartoonStyleSpec;
+    /** invisible style for click handling only */
+    clicksphere?: ClickSphereStyleSpec;
+};
+
+/** Line style specification
+ */
+export interface LineStyleSpec {
+    /** do not show line */
+    hidden?: boolean;
+    /** *deprecated due to vanishing browser support*  */
+    linewidth?: number;
+    /** colorscheme to use on atoms */
+    colorscheme?: ColorschemeSpec;
+    /** fixed coloring, overrides colorscheme */
+    color?: ColorSpec;
+    /** opacity (zero to one), must be the same for all atoms in a model */
+    opacity?: number;
+
+}
+
+/** Cross style specification
+ */
+export interface CrossStyleSpec {
+    /** do not show line */
+    hidden?: boolean;
+    /** *deprecated due to vanishing browser support*  */
+    linewidth?: number;
+    /** radius of cross */
+    radius?: number;
+    /** scale VDW radius by specified amount */
+    scale?: number;
+    /** colorscheme to use on atoms */
+    colorscheme?: ColorschemeSpec;
+    /** fixed coloring, overrides colorscheme */
+    color?: ColorSpec;
+    /** opacity (zero to one), must be the same for all atoms in a model */
+    opacity?: number;
+}
+
+/** Stick (cylinder) style specification
+ */
+export interface StickStyleSpec {
+    /** do not show sticks */
+    hidden?: boolean;
+    /** radius of stick */
+    radius?: number;
+    /** draw all bonds as single bonds */
+    singleBonds?: boolean;
+    /** colorscheme to use on atoms */
+    colorscheme?: ColorschemeSpec;
+    /** fixed coloring, overrides colorscheme */
+    color?: ColorSpec;
+    /** opacity (zero to one), must be the same for all atoms in a model */
+    opacity?: number;
+}
+
+
+/** Sphere (spacefill) style specification
+ */
+export interface SphereStyleSpec {
+    /** do not show sticks */
+    hidden?: boolean;
+    /** fixed radius of sphere */
+    radius?: number;
+    /** scale VDW radius by specified amount */
+    scale?: number;    
+    /** colorscheme to use on atoms */
+    colorscheme?: ColorschemeSpec;
+    /** fixed coloring, overrides colorscheme */
+    color?: ColorSpec;
+    /** opacity (zero to one), must be the same for all atoms in a model */
+    opacity?: number;
+}    
+
+/** Invisible click sphere style specification.  This lets you set
+ * larger (or smaller) click targets on atoms then the default radii or
+ * have clickable atoms even if they aren't being rendered visibly.
+ */
+export interface ClickSphereStyleSpec {
+    /** do not show sticks */
+    hidden?: boolean;
+    /** fixed radius of sphere */
+    radius?: number;
+    /** scale VDW radius by specified amount */
+    scale?: number;     
+}    

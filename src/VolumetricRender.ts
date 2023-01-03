@@ -4,6 +4,22 @@ import { VolumetricMaterial, Mesh, Texture, Object3D } from "./WebGL";
 import { CC } from "./colors";
 import { GLShape } from "./GLShape";
 
+
+
+/**
+ * VolumetricRenderer style specification
+*/
+export interface VolumetricRendererSpec {
+    /** list of objects containing @color, @opacity and @value properties to specify color per voxel data value */
+    transferfn: { color: unknown; opacity: unknown; value: unknown }[];
+    /** number of times to sample each voxel approximately (default 5) */
+    subsamples: number;
+    /**  coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
+    coords: Array<Vector3>;
+    /** distance around coords to include data [default = 2.0] */
+    seldist: number; 
+};
+
 /**
  * A GLVolumetricRender is a "shape" for representing volumetric data as a density distribution.
  *
@@ -42,8 +58,8 @@ export class GLVolumetricRender {
     subsamples = 5.0;
     data: any = null;
     transferfunctionbuffer: any = [];
-    min:number = 0;
-    max:number = 0;
+    min: number = 0;
+    max: number = 0;
     extent: any;
     maxdepth: number;
     texmatrix: any;
@@ -276,6 +292,6 @@ export class GLVolumetricRender {
     }
     get z() {
         return this.boundingSphere.center.z;
-    }        
+    }
 }
 

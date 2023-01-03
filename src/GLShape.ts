@@ -3,13 +3,184 @@ import { Sphere, Cylinder, Triangle } from "./WebGL/shapes";
 import { Vector3 } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
 import { DoubleSide } from "./WebGL";
-import { Color, CC } from "./colors";
+import { Color, CC, ColorSpec } from "./colors";
 import { MarchingCube } from "./ProteinSurface4";
 import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
-import { GLDraw } from "./GLDraw"
+import { CAP, GLDraw } from "./GLDraw"
 import { subdivide_spline } from "./glcartoon";
 import { adjustVolumeStyle, extend, makeFunction } from "./utilities";
+import { Gradient } from "./Gradient";
+
+
+/**
+ * GLShape style specification
+ */
+export interface ShapeSpec {
+    /** solid color */
+    color?: ColorSpec;
+    alpha?: number; //prefer opacity
+    /** transparency, between 0 (invisible) and 1 (opaque) */
+    opacity?: number;
+    /** draw as wireframe, not surface */
+    wireframe?: boolean;
+    /** if true, do not display object */
+    hidden?: boolean;
+    /** width of line for wireframe rendering **No longer supported by most browsers** */
+    linewidth?: number;
+    /** if true, user can click on object to trigger callback */
+    clickable?: boolean;
+    /** function to call on click */
+    callback?: (...args: any[]) => void;
+    /** if set, only display in this frame of an animation */
+    frame?: number;
+};
+
+
+/**
+ * Isosurface style specification
+ * @extends ShapeSpec
+ */
+export interface IsoSurfaceSpec extends ShapeSpec {
+    /** specifies the isovalue to draw surface at */
+    isoval?: number;
+    /** if true uses voxel style rendering */
+    voxel?: boolean;
+    /** amount to smooth surface (default 1) */
+    smoothness?: number;
+    /** coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
+    coords?: Array<Vector3>;
+    /** distance around coords to include data [default = 2.0] */
+    seldist?: number;
+    /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
+    voldata?: VolumeData;
+    /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
+    volscheme?: Gradient;
+    /** format of voldata if not a $3Dmol.VolumeData object */
+    volformat?: string;
+};
+
+
+
+/**
+ * Arrow shape specification.  
+  * @extends ShapeSpec
+ */
+export interface ArrowSpec extends ShapeSpec {
+    /** starting position */
+    start: Vector3;
+    /** ending position */
+    end: Vector3;
+    /** radius (default 0.1A) */
+    radius?: number;
+    /** color */
+    color?: ColorSpec;
+    /** hidden */
+    hidden?: boolean;
+    /** ratio of arrow base to cylinder (1.618034 default) */
+    radiusRatio?: number;
+    /** relative position of arrow base (0.618034 default) */
+    mid?: number;
+    /** position of arrow base in length units, if negative positioned from end instead of start.  Overrides mid. */
+    midpos?: number;
+};
+
+/**
+ * Cylinder shape specification.  
+ * @extends ShapeSpec
+ * 
+ */
+export interface CylinderSpec extends ShapeSpec {
+    /** starting vector */
+    start?: Vector3;
+    /** ending position */
+    end?: Vector3;
+    /** radius */
+    radius?: number;
+    /** Place a cap at the start (none, flat or round) */
+    fromCap?: CAP;
+    /** Place a cap at the end (none, flat or round) */
+    toCap?: CAP;
+    /** Make the cylinder dashed. */
+    dashed?: boolean;
+    /** Length of dashes (default 0.25) */
+    dashLength?: number;
+    /** Length of gaps (default 0.25) */
+    gapLength?: number;
+};
+
+/**
+ * Curve shape specification.  
+ * @extends ShapeSpec
+ */
+export interface CurveSpec extends ShapeSpec {
+    /** Sequence of points to draw curve through */
+    points?: Vector3[];
+    /** amount of interpolation */
+    smooth?: number;
+    /** radius of curve */
+    radius?: number;
+    /** if an arrow should be drawn at the start */
+    fromArrow?: boolean;
+    /** if an arrow should be drawn at the end */
+    toArrow?: boolean;
+};
+
+/**
+ * Line shape specification.  Default to wireframe.
+ * @extends ShapeSpec
+ */
+export interface LineSpec extends ShapeSpec {
+    /** Starting position */
+    start?: Vector3;
+    /** Ending position */
+    end?: Vector3;
+};
+
+/**
+ * Box shape specification. 
+ * @extends ShapeSpec
+ */
+export interface BoxSpec extends ShapeSpec {
+    /** bottom corner of box */
+    corner?: Vector3;
+    /** center of box */
+    center?: Vector3;
+    /** width, height, depth of box */
+    dimensions?: {
+        w: number | Vector3;
+        h: number | Vector3;
+        d: number | Vector3;
+    };
+};
+
+
+/**
+ * Specification for adding custom shape. 
+ * @extends ShapeSpec
+ */
+export interface CustomShapeSpec extends Omit<ShapeSpec, 'color'> {
+    /** List of vertex positions */
+    vertexArr?: Vector3[];
+    /** List of normal vectors for each vertex */
+    normalArr?: Vector3[];
+    /** List of triangles to build the custom shape. Each triangle is defined by the indices of 3 vertices in vertexArr, so the array length should be 3 times the number of faces. */
+    faceArr?: number[];
+    /** Either a single color for the whole object or an array specifying the color at each vertex. */
+    color?: ColorSpec | ColorSpec[];
+};
+
+/**
+ * Sphere shape specification. Extends {@link ShapeSpec}.
+ */
+export interface SphereSpec extends ShapeSpec {
+    /** center of sphere */
+    center?: Vector3;
+    /** radius of sphere */
+    radius?: number;
+};
+
+
 
 /**
  * A GLShape is a collection of user specified shapes.
@@ -642,8 +813,8 @@ export class GLShape {
     unhover_callback: any;
     frame: any;
     side = DoubleSide;
-    shapePosition:any;
-    
+    shapePosition: any;
+
     private geo: Geometry;
     private linegeo: Geometry;
     private stylespec: any;
@@ -1107,6 +1278,7 @@ export class GLShape {
             geoGroup.vertexArray, geoGroup.vertices);
     };
 
+
     /**
      * Creates an arrow shape
      * @param {ArrowSpec} arrowSpec
@@ -1468,7 +1640,7 @@ export class GLShape {
     }
     get z() {
         return this.boundingSphere.center.z;
-    }            
+    }
 };
 
 
@@ -1480,7 +1652,7 @@ export function splitMesh(mesh) {
 
     if (mesh.vertexArr.length < MAXVERT) return [mesh]; //typical case
 
-    var slices:any = [{ vertexArr: [], normalArr: [], faceArr: [] }];
+    var slices: any = [{ vertexArr: [], normalArr: [], faceArr: [] }];
     if (mesh.colorArr) slices.colorArr = [];
     var vertSlice = []; //indexed by original vertex to get current slice
     var vertIndex = []; //indexed by original vertex to get index within slice

@@ -1,3 +1,5 @@
+import { Gradient } from "./Gradient";
+
 /* @interface
  * 
  */
@@ -308,37 +310,31 @@ export const htmlColors = {
   yellowgreen: 0x9acd32,
 };
 
-export type ColorSpec = keyof typeof htmlColors | number;
+/** 
+ * Color representation. A hex number, html color name, or object with r/g/b properties
+ */
+export type ColorSpec =  number | string | Colored;
 
 /**
- * Color representation.
- * @typedef ColorSpec
- * @prop {string} 0xAF10AB - any hex number
- * @prop {string} <html color name>
- */
-/**
- 
-* @typedef ColorschemeSpec
-* Built in colorschemes
-* @prop {string} <html color>Carbon   - use default element colors but with carbon set to specify html color string
-* @prop {string} ssPyMOL - PyMol secondary colorscheme
-* @prop {string} ssJmol - Jmol secondary colorscheme
-* @prop {string} Jmol - Jmol primary colorscheme
-* @prop {string} default - default colorscheme
-* @prop {string} amino - amino acid colorscheme
-* @prop {string} shapely - shapely protien colorscheme
-* @prop {string} nucleic - nucleic acid colorscheme
-* @prop {string} chain - standard chain colorscheme
-* @prop {string} chainHetatm - chain Hetatm colorscheme
-* @prop {string} prop - atomSpec property. Example 'b'. See AtomSpec.
-* @prop {Gradient} gradient - Allows the user to provide a gradient to the colorscheme.  Is either a Gradient object or the name of a built-in gradient (rwb, roygb, sinebow)
-* @prop {nuber} min - min value for gradient
-* @prop {number} max - max value for gradient
-* @prop {number} mid - mid point value for gradient (for rwb)
-* @prop {Array} colors - custom colors for gradient (for linear) 
-* @prop {object} map - map of a certain AtomSpec property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
-* @prop {function} colorfunc - Allows the user to provide a function for setting the colorschemes.
+*  Colorscheme specification. 
+*  @see builtinColorSchemes
 */
+export type ColorschemeSpec = string | {
+  gradient?: Gradient|string;
+  min?: number;
+  max?: number;
+  /**  {AtomSpec} property to use for gradient calculation.  E.g., 'b' for temperature factors of a PDB. */
+  prop?: string;
+  /** mid point value for gradient (for rwb) */
+  mid?: number; 
+  /** Custom colors for gradient (for {@link CustomLinear}) */
+  colors: Array<ColorSpec>; 
+  /** map of a certain {@link AtomSpec} property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
+ */
+  map: Record<string, unknown>
+  /**  Allows the user to provide a function for setting the colorschemes. */
+  colorfunc: Function; 
+};
 
 /** Preset secondary structure color scheme
  * @struct
@@ -779,7 +775,26 @@ export const chains = {
 
 /**
  * built in color schemes
- * The user can pass all of these values directly as the colorscheme and they will use the respective colorscheme 
+ * The user can pass these strings directly as the colorscheme
+ * @prop ssPyMol - pymol secondary structure
+ * @prop  ssJmol - jmol secondary structure
+   @prop Jmol - jmol element defaults
+   @prop amino - amino acid coloring
+   @prop shapely - amino acid coloring
+   @prop nucleic - nucleic acid coloring
+   @prop chain - color by chain
+   @prop rasmol - rasmol default element coloring 
+   @prop default - default element coloring
+   @prop greenCarbon - default element coloring with green carbon
+   @prop cyanCarbon - default element coloring with cyan carbon
+   @prop magentaCarbon - default element coloring with magenta carbon
+   @prop purpleCarbon - default element coloring with purple carbon
+   @prop whiteCarbon - default element coloring with white carbon
+   @prop orangeCarbon - default element coloring with orange carbon
+   @prop yellowCarbon - default element coloring with yellow carbon
+   @prop blueCarbon - default element coloring with blue carbon
+   @prop chainHetatm - color chains
+ * 
  * @example window.$3Dmol.download("pdb:4UAA",viewer,{},function(){
  *    viewer.setBackgroundColor(0xffffffff);
  *    var colorAsSnake = function(atom) {
@@ -791,6 +806,7 @@ export const chains = {
  *  });
   */
 export const builtinColorSchemes = {
+  /** secondary structure pymol */
   ssPyMol: { prop: "ss", map: ssColors.pyMol },
   ssJmol: { prop: "ss", map: ssColors.Jmol },
   Jmol: { prop: "elem", map: elementColors.Jmol },

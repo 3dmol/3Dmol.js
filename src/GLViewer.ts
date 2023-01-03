@@ -3,12 +3,12 @@
 import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide } from "./WebGL";
 import { Vector3, Matrix4, Matrix3, Quaternion } from "./WebGL/math";
 import { MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line } from "./WebGL";
-import { elementColors, CC } from "./colors";
+import { elementColors, CC, ColorSpec, ColorschemeSpec } from "./colors";
 import { extend, getExtent, makeFunction, getPropertyRange, isEmptyObject, adjustVolumeStyle, mergeGeos, PausableTimer, getColorFromStyle, getElement } from "./utilities";
 import { Gradient } from "./Gradient";
-import { GLModel } from "./GLModel";
-import { Label } from "./Label";
-import { GLShape, splitMesh } from "./GLShape";
+import { GLModel, LineStyleSpec } from "./GLModel";
+import { Label, LabelSpec } from "./Label";
+import { ArrowSpec, GLShape, splitMesh } from "./GLShape";
 import { VolumeData } from "./VolumeData";
 import { ProteinSurface, SurfaceType, syncSurface } from "./ProteinSurface4";
 import { GLVolumetricRender } from "./VolumetricRender";
@@ -920,7 +920,7 @@ export class GLViewer {
         this.rotationGroup.position.z = this.adjustZoomToLimits(this.rotationGroup.position.z);
         this.show();
     };
-    
+
     /**
      * Return image URI of viewer contents (base64 encoded).     *
      */
@@ -1236,7 +1236,7 @@ export class GLViewer {
      */
     public setWidth(w) {
         this.WIDTH = w || this.WIDTH;
-        this.updateSize();       
+        this.updateSize();
         return this;
     };
 
@@ -2727,21 +2727,6 @@ export class GLViewer {
         return s;
     };
 
-    /**
-     * Unit Cell shape specification.
-     * @typedef UnitCellStyleSpec
-     * @prop {LineStyleSpec} box - line style used to draw box
-     * @prop {ArrowSpec} astyle - arrow specification of "a" axis
-     * @prop {ArrowSpec} bstyle - arrow specification of "b" axis
-     * @prop {ArrowSpec} cstyle - arrow specification of "c" axis
-     * @prop {string} alabel - label for a axis
-     * @prop {LabelSpec} alabelstyle - label style for a axis
-     * @prop {string} blabel - label for b axis
-     * @prop {LabelSpec} blabelstyle - label style for b axis
-     * @prop {string} clabel - label for c axis
-     * @prop {LabelSpec} clabelstyle - label style for c axis
-     
-     */
 
     /**
      * Create and add unit cell visualization.
@@ -3241,8 +3226,8 @@ export class GLViewer {
         var mostFrames = this.getNumFrames();
         var self = this;
         var currFrame = 0;
-        if(options.startFrame) {
-            currFrame = options.startFrame%mostFrames;
+        if (options.startFrame) {
+            currFrame = options.startFrame % mostFrames;
         }
         var inc = 1;
         if (options.step) {
@@ -4787,3 +4772,130 @@ export function createStereoViewer(element) {
 
 };
 
+/**
+ * GLViewer input specification
+ */
+export interface ViewerSpec {
+    /** Callback function to be executed with this viewer after setup is complete */
+    callback: (viewer: ViewerSpec) => void;
+    /** Object defining default atom colors as atom => color property value pairs for all models within this viewer */
+    defaultcolors: Record<string, string>;
+    /** 
+     * Whether to disable disable handling of mouse events.
+     * If you want to use your own mouse handlers, set this then bind your handlers to the canvas object.  
+                  The default 3Dmol.js handlers are available for use: 
+                  'mousedown touchstart': viewer._handleMouseDown,
+                  'DOMMouseScroll mousewheel': viewer._handleMouseScroll
+                  'mousemove touchmove': viewer._handleMouseMove   
+     */
+    nomouse: boolean | string;
+    /** Color of the canvas background */
+    backgroundColor: string;
+    /** Alpha transparency of canvas background */
+    backgroundAlpha: number;
+    /** */
+    camerax: number;
+    /** */
+    hoverDuration: number;
+    /** id of the canvas */
+    id: string;
+    /** default 5 */
+    cartoonQuality: number;
+    /** */
+    row: number;
+    /** */
+    col: number;
+    /** */
+    rows: number;
+    /** */
+    cols: number;
+    /** */
+    canvas: HTMLCanvasElement;
+    /** GLViewer has not been ported but this is a viewer object */
+    viewers: unknown[];
+    /** */
+    minimumZoomToDistance: number;
+    /** */
+    lowerZoomLimit: number;
+    /** */
+    upperZoomLimit: number;
+    /** */
+    antialias: boolean;
+    /** */
+    control_all: boolean;
+    /** */
+    orthographic: boolean;
+    /** Disable fog, default to false */
+    disableFog: boolean;
+
+};
+
+/**
+ * Grid GLViewer input specification
+ */
+export interface ViewerGridSpec {
+    /** number of rows in grid */
+    rows: number;
+    /** number of columns in grid */
+    cols: number;
+    /** if true, mouse events are linked */
+    control_all: boolean;
+};
+
+
+/**
+ * @example
+ * var setStyles = function(volumedata){
+ *  var data = new $3Dmol.VolumeData(volumedata, "cube");
+ *  viewer.addSurface("VDW", {opacity:0.85, voldata: data, volscheme: new $3Dmol.Gradient.RWB(-10,10)},{chain:'A'});
+ *  viewer.mapAtomProperties($3Dmol.applyPartialCharges);
+ *  viewer.addSurface($3Dmol.SurfaceType.SAS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.05,.05)}, opacity:1.0},{chain:'B'});
+ *  viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: data, color:'red'},{chain:'C'});
+ *  viewer.addSurface($3Dmol.SurfaceType.SAS, {opacity:0.85,voldata: data, colorscheme:'greenCarbon'},{chain:'D'});
+ *  viewer.render();
+ * };
+ * $3Dmol.download("pdb:4DLN",viewer,{},function(){
+ *   $.get("data/1fas.cube",setStyles);
+ * });
+ */
+export interface SurfaceStyleSpec {
+    /** sets the transparency: 0 to hide, 1 for fully opaque */
+    opacity: number;
+    /** element based coloring */
+    colorscheme: ColorschemeSpec;
+    /** fixed coloring, overrides colorscheme */
+    color: ColorSpec;
+    /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
+    voldata: VolumeData;
+    /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
+    volscheme: Gradient;
+    /** format of voldata if not a {VolumeData} object */
+    volformat: string;
+    /* specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead. */
+    map: Record<string, unknown>
+};
+
+
+    /** Style specification ofr unit cell shape.  */
+export interface UnitCellStyleSpec {
+    /** line style used to draw box */
+    box?: LineStyleSpec;
+    /** arrow specification of the "a" axis */
+    astyle?: ArrowSpec;
+    /** arrow specification of the "b" axis */
+    bstyle?: ArrowSpec;
+    /** arrow specification of the "c" axis */
+    cstyle?: ArrowSpec;        
+    /** label for "a" axis */
+    alabel?: string;
+    /** label style for a axis */
+    alabelstyle?: LabelSpec;
+    /** label for "b" axis */
+    blabel?: string;
+    /** label style for b axis */
+    blabelstyle?: LabelSpec;    
+    /** label for "c" axis */
+    clabel?: string;        
+    /** label style for c axis */
+    clabelstyle?: LabelSpec;    
+}

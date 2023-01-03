@@ -7,6 +7,9 @@ import { Geometry } from "./WebGL";
  * Enum for cylinder cap styles.
  * @readonly
  * @enum 
+ * @property NONE
+ * @property FLAT
+ * @property ROUND
  */
 export enum CAP {
     NONE = 0,

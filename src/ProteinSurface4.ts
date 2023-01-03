@@ -22,8 +22,13 @@ import {Vector3} from "./WebGL/math"
 
 
 /**
- * $3Dmol surface types
+ * Surface types
+ * @readonly
  * @enum {number}
+ * @property VDW - van der Waals surface
+ * @property MS - Molecular surface
+ * @property SAS - Solvent accessible surface
+ * @property SES - Solvent exposed surface
  */
 export enum SurfaceType {
     VDW = 1,
