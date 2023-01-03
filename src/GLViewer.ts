@@ -4087,7 +4087,9 @@ export class GLViewer {
             else {
                 console.log("Surface type : " + stype + " is not recognized");
             }
-        }
+        } else if(typeof stype == "number") {
+            type = stype;
+        } 
 
         // atoms specified by this selection
         var atomlist = null, focusSele = null;
