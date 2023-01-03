@@ -15,6 +15,7 @@ import { Gradient } from "./Gradient";
 import { Parsers } from "./parsers";
 import { NetCDFReader } from "netcdfjs"
 import { inflate } from "pako"
+import { AtomSelectionSpec } from "./specs";
 
 /**
  * GLModel represents a group of related atoms
@@ -23,7 +24,7 @@ import { inflate } from "pako"
 export class GLModel {
 
     // class variables go here
-    static defaultAtomStyle: any = {
+    static defaultAtomStyle: AtomStyleSpec = {
         line: {}
     };
 
@@ -87,179 +88,7 @@ export class GLModel {
         "Ra": 2.83,
         "U": 1.86
     };
-    /*
-        The dictionaries are for dropdown menus and validation of the viewer
-    */
-
-    static validElements = [
-        "H",
-        "Li",
-        "LI",
-        "Na",
-        "NA",
-        "K",
-        "C",
-        "N",
-        "O",
-        "F",
-        "P",
-        "S",
-        "CL",
-        "Cl",
-        "BR",
-        "Br",
-        "SE",
-        "Se",
-        "ZN",
-        "Zn",
-        "CU",
-        "Cu",
-        "NI",
-        "Ni"
-    ];
-
-    // TODO: all these specifications need to get converted to types
-
-    // prop : It is used to add the option for property in context menu in the 3dmol ui
-    // the code for prop can be found under /ui/ui.js -> UI -> ContextMenu -> setProperties -> submit.ui.on 
-    // gui : It is used to generate forms for different features in the 3dmol ui
-    // the code for gui can be found under /ui/form.js -> Form (Form defination)
-    // floatType : separates integer from float since these are used in 
-    // input validation of the 3dmol ui
-    static validAtomSpecs = {
-        "resn": { type: "string", valid: true, prop: true, gui: true }, // Parent residue name
-        "x": { type: "number", floatType: true, valid: false, step: 0.1, prop: true }, // Atom's x coordinate
-        "y": { type: "number", floatType: true, valid: false, step: 0.1, prop: true }, // Atom's y coordinate
-        "z": { type: "number", floatType: true, valid: false, step: 0.1, prop: true }, // Atom's z coordinate
-        "color": { type: "color", gui: false }, // Atom's color, as hex code
-        "surfaceColor": { type: "color", gui: false }, // Hex code for color to be used for surface patch over this atom
-        "elem": { type: "element", gui: true, prop: true }, // Element abbreviation (e.g. 'H', 'Ca', etc)
-        "hetflag": { type: "boolean", valid: false, gui: true }, // Set to true if atom is a heteroatom
-        "chain": { type: "string", gui: true, prop: true }, // Chain this atom belongs to, if specified in input file (e.g 'A' for chain A)
-        "resi": { type: "array_range", gui: true }, // Residue number 
-        "icode": { type: "number", valid: false, step: 0.1 },
-        "rescode": { type: "number", valid: false, step: 0.1, prop: true },
-        "serial": { type: "number", valid: false, step: 0.1 }, // Atom's serial id numbermodels
-        "atom": { type: "string", valid: false, gui: true, prop: true }, // Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon)
-        "bonds": { type: "array", valid: false }, // Array of atom ids this atom is bonded to
-        "ss": { type: "string", valid: false }, // Secondary structure identifier (for cartoon render; e.g. 'h' for helix)
-        "singleBonds": { type: "boolean", valid: false }, // true if this atom forms only single bonds or no bonds at all
-        "bondOrder": { type: "array", valid: false }, // Array of this atom's bond orders, corresponding to bonds identfied by 'bonds'
-        "properties": { type: "properties", valid: false }, // Optional mapping of additional properties
-        "b": { type: "number", floatType: true, valid: false, step: 0.1, prop: true }, // Atom b factor data
-        "pdbline": { type: "string", valid: false }, // If applicable, this atom's record entry from the input PDB file (used to output new PDB from models)
-        "clickable": { type: "boolean", valid: false, gui: false }, // Set this flag to true to enable click selection handling for this atom
-        "contextMenuEnabled": { type: "boolean", valid: false, gui: false }, // Set this flag to true to enable click selection handling for this atom
-        "callback": { type: "function", valid: false }, // Callback click handler function to be executed on this atom and its parent viewer
-        "invert": { type: "boolean", valid: false }, // for selection, inverts the meaning of the selection
-        //unsure about this
-        "reflectivity": { type: "number", floatType: true, gui: false, step: 0.1 }, //for describing the reflectivity of a model
-        "altLoc": { type: "invalid", valid: false }, //alternative location, e.g. in PDB
-        "sym": { type: 'number', gui: false }, //which symmetry
-    };
-
-    //type is irrelivent here becuase htey are are invalid
-    static validExtras = {  // valid atom specs are ok too
-        "model": { type: "string", valid: false }, // a single model or list of models from which atoms should be selected
-        "bonds": { type: "number", valid: false, gui: true }, // overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms
-        "predicate": { type: "string", valid: false }, // user supplied function that gets passed an {AtomSpec} and should return true if the atom should be selected
-        "invert": { type: "boolean", valid: false, gui: true }, // if set, inverts the meaning of the selection
-        "byres": { type: "boolean", valid: false, gui: true }, // if set, expands the selection to include all atoms of any residue that has any atom selected
-        "expand": { type: "number", valid: false, gui: false }, // expands the selection to include all atoms within a given distance from the selection
-        "within": { type: "string", valid: false }, // intersects the selection with the set of atoms within a given distance from another selection
-        "and": { type: "string", valid: false }, // and boolean logic
-        "or": { type: "string", valid: false }, // or boolean logic
-        "not": { type: "string", valid: false }, // not boolean logic
-    };
-
-    static validAtomSelectionSpecs = extend(GLModel.validAtomSpecs, GLModel.validExtras);
-
-    static validLineSpec = {
-        "hidden": { type: "boolean", gui: true },
-        "linewidth": { type: "number", floatType: true, gui: true, step: 0.1, default: GLModel.defaultlineWidth },
-        "colorscheme": { type: "colorscheme", gui: true },
-        "color": { type: "color", gui: true },
-        "opacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-    };
-
-    static validCrossSpec = {
-        "hidden": { type: "boolean", gui: true },
-        "linewidth": { type: "number", floatType: true, gui: false, step: 0.1, default: GLModel.defaultlineWidth, min: 0 },//deprecated
-        "colorscheme": { type: "colorscheme", gui: true },
-        "color": { type: "color", gui: true },
-        "radius": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0.1 },
-        "scale": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0 },
-        "opacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-    };
-
-    static validStickSpec = {
-        "hidden": { type: "boolean", gui: true },
-        "colorscheme": { type: "colorscheme", gui: true },
-        "color": { type: "color", gui: true },
-        "radius": { type: "number", floatType: true, gui: true, step: 0.1, default: 0.25, min: 0.1 },
-        "singleBonds": { type: "boolean", gui: true },
-        "opacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-    };
-
-    static validSphereSpec = {
-        "hidden": { type: "boolean", gui: false }, // needed in the new gui it has separate function to hide the spheres
-        "singleBonds": { type: "boolean", gui: true },
-        "colorscheme": { type: "colorscheme", gui: true },
-        "color": { type: "color", gui: true },
-        "radius": { type: "number", floatType: true, gui: true, step: 0.1, default: 1.5, min: 0 },
-        "scale": { type: "number", floatType: true, gui: true, step: 0.1, default: 1.0, min: 0.1 },
-        "opacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-    };
-
-    static validCartoonSpec = {
-        "style": { validItems: ["trace", "oval", "rectangle", "parabola", "edged"], gui: true },
-        "color": { type: "color", gui: true, spectrum: true },
-        "arrows": { type: "boolean", gui: true },
-        "ribbon": { type: "boolean", gui: true },
-        "hidden": { type: "boolean", gui: true },
-        "tubes": { type: "boolean", gui: true },
-        "thickness": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0 },
-        "width": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0 },
-        "opacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-    };
-
-    static validAtomStyleSpecs = {
-        "line": { validItems: GLModel.validLineSpec, type: "form", gui: true }, // draw bonds as lines
-        "cross": { validItems: GLModel.validCrossSpec, type: "form", gui: true }, // draw atoms as crossed lines (aka stars)
-        "stick": { validItems: GLModel.validStickSpec, type: "form", gui: true }, // draw bonds as capped cylinders
-        "sphere": { validItems: GLModel.validSphereSpec, type: "form", gui: true }, // draw atoms as spheres
-        "cartoon": { validItems: GLModel.validCartoonSpec, type: "form", gui: true }, // draw cartoon representation of secondary structure
-        "colorfunc": { validItems: null, type: "js", valid: false },
-        "clicksphere": { validItems: GLModel.validSphereSpec, type: "form" } //invisible style for click handling
-    };
-
-    static validSurfaceSpecs = {
-        "opacity": { type: "number", floatType: true, gui: true, step: 0.01, default: 1, min: 0, max: 1 },
-        "colorscheme": { type: "colorscheme", gui: true },
-        "color": { type: "color", gui: true },
-        "voldata": { type: "number", floatType: true, gui: false },
-        "volscheme": { type: "number", floatType: true, gui: false },
-        "map": { type: "number", gui: false }
-    };
-
-    static validLabelResSpecs = {
-        "font": { type: "string", gui: true },
-        "fontSize": { type: "number", floatType: true, gui: true, step: 1, default: 12, min: 1 },
-        "fontColor": { type: "color", gui: true },
-        "fontOpacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-        "borderThickness": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0 },
-        "borderColor": { type: "color", gui: true },
-        "borderOpacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-        "backgroundColor": { type: "color", gui: true },
-        "backgroundOpacity": { type: "number", floatType: true, gui: true, step: 0.1, default: 1, min: 0, max: 1 },
-        "position": { type: "array", valid: false },
-        "inFront": { type: "boolean", gui: true },
-        "showBackground": { type: "boolean", gui: true },
-        "fixed": { type: "boolean", gui: true },
-        "alignment": { validItems: ["topLeft", "topCenter", "topRight", "centerLeft", "center", "centerRight", "bottomLeft", "bottomCenter", "bottomRight"], gui: true },
-        "scale": { type: "boolean", gui: false },
-    };
-
+ 
     // class functions
     // return true if a and b represent the same style
     static sameObj(a, b) {
@@ -2267,31 +2096,18 @@ export class GLModel {
               viewer.render();
           });
      */
-    public setStyle(sel, style, add?) {
+    public setStyle(sel:AtomSelectionSpec|AtomStyleSpec|string, style?:AtomStyleSpec|string, add?) {
 
         if (typeof (style) === 'undefined' && typeof (add) == 'undefined') {
             //if a single argument is provided, assume it is a style and select all
-            style = sel;
+            style = sel as AtomStyleSpec|string;
             sel = {};
         }
 
         //if type is just a string, promote it to an object
         if (typeof (style) === 'string') {
             style = specStringToObject(style);
-        }
-        // report to console if this is not a valid selector
-        var s;
-        for (s in sel) {
-            if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
-                console.log('Unknown selector ' + s);
-            }
-        }
-        // report to console if this is not a valid style
-        for (s in style) {
-            if (!GLModel.validAtomStyleSpecs.hasOwnProperty(s)) {
-                console.log('Unknown style ' + s);
-            }
-        }
+        }       
 
         var changedAtoms = false;
         // somethings we only calculate if there is a change in a certain
@@ -2311,7 +2127,7 @@ export class GLModel {
 
 
                 if (!add) selected[i].style = {};
-                for (let s in style) {
+                for (let s in style as AtomStyleSpec) {
                     if (style.hasOwnProperty(s)) {
                         selected[i].style[s] = selected[i].style[s] || {}; //create distinct object for each atom
                         Object.assign(selected[i].style[s], style[s]);
@@ -2337,15 +2153,7 @@ export class GLModel {
      * @param {function} callback - function called when an atom in the selection is clicked
      
      */
-    public setClickable(sel, clickable, callback) {
-
-        // report to console if this is not a valid selector
-        var s;
-        for (s in sel) {
-            if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
-                console.log('Unknown selector ' + s);
-            }
-        }
+    public setClickable(sel:AtomSelectionSpec, clickable:boolean, callback) {
 
         // make sure clickable is a boolean
         clickable = !!clickable;
@@ -2375,13 +2183,7 @@ export class GLModel {
     * @param {function} hover_callback - function called when an atom in the selection is hovered over
     * @param {function} unhover_callback - function called when the mouse moves out of the hover area               
     */
-    public setHoverable(sel, hoverable, hover_callback, unhover_callback) {
-        var s;
-        for (s in sel) {
-            if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
-                console.log('Unknown selector ' + s);
-            }
-        }
+    public setHoverable(sel:AtomSelectionSpec, hoverable:boolean, hover_callback, unhover_callback) {
 
         // make sure hoverable is a boolean
         hoverable = !!hoverable;
@@ -2418,14 +2220,7 @@ export class GLModel {
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
      */
-    public enableContextMenu(sel, contextMenuEnabled) {
-        var s;
-        for (s in sel) {
-            if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(s)) {
-                console.log('Unknown selector ' + s);
-            }
-        }
-
+    public enableContextMenu(sel:AtomSelectionSpec, contextMenuEnabled) {
         // make sure contextMenuEnabled is a boolean
         contextMenuEnabled = !!contextMenuEnabled;
 
@@ -2876,17 +2671,15 @@ export class GLModel {
 
     /**
      * add atomSpecs to validAtomSelectionSpecs
+     * @deprecated
      * @param {Array} customAtomSpecs - array of strings that can be used as atomSelectionSpecs
-     * this is to prevent the 'Unknown Selector x' message on the console for the strings passed
-     * 
+     * this is to prevent the 'Unknown Selector x' message on the console for the strings passed.
+     * These messages are no longer generated as, in theory, typescript will catch problems at compile time.
+     * In practice, there may still be issues at run-time but we don't check for them...
      */
 
     public addAtomSpecs(customAtomSpecs) {
-        for (var i = 0; i < customAtomSpecs.length; i++) {
-            if (!GLModel.validAtomSelectionSpecs.hasOwnProperty(customAtomSpecs[i])) {
-                GLModel.validAtomSelectionSpecs[customAtomSpecs[i]] = {};
-            }
-        }
+
     };
 
     static parseCrd(data, format) {
