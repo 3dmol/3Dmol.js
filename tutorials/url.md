@@ -6,7 +6,7 @@ A 3Dmol viewer URL takes the form `https://3Dmol.org/viewer.html?[query string]`
 
 [`https://3Dmol.org/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=stick&labelres=backgroundOpacity:0.8;fontSize:14`](../viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14)
 
-####Mouse Controls####
+#### Mouse Controls ####
 
 Movement | &nbsp;&nbsp;&nbsp;&nbsp; | Mouse Input | &nbsp;&nbsp;&nbsp;&nbsp; | Touch Input
 ---------|-|:------------|------------
