@@ -352,10 +352,13 @@ export class Geometry extends EventDispatcher {
   normalsNeedUpdate: boolean = false;
   colorsNeedUpdate: boolean = false;
   buffersNeedUpdate: boolean = false;
+  imposter: boolean = false;
+  instanced: boolean = false;
   geometryGroups: GeometryGroup[] = [];
   groups: number = 0;
-
-
+  sphereGeometry?: Geometry;
+  drawnCaps?: any;
+  
   constructor(mesh = false, radii = false, offset = false) {
     super();
     this.id = GeometryIDCount++;

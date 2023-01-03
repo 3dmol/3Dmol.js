@@ -1,4 +1,4 @@
-import { Gradient } from "./Gradient";
+import { Gradient, GradientType } from "./Gradient";
 
 /* @interface
  * 
@@ -97,11 +97,20 @@ export class CC {
     /rgb(a?)\(\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)\s*,\s*([^ ,\)\t]+)/i;
   static cache: Record<number, Color> = { 0: new Color(0) };
   static color(hex: undefined): Color;
-  static color(hex: number | string): Color;
+  static color(hex: number): Color;
+  static color(hex: string): Color;
   static color(hex: number[]): Color[];
+  static color(hex: Color): Color;
+  static color(hex: ColorSpec): Color;
+  static color(hex: ColorSpec[]): Color[];
+  static color(hex: ColorSpec|ColorSpec[]): Color|Color[];
   static color(hex?: unknown): unknown {
     // Undefined values default to black
     if (!hex) return CC.cache[0];
+    //noop
+    if ( hex instanceof Color ) {
+      return hex;
+    }
     // cache hits
     if (typeof hex === "number" && typeof CC.cache[hex] !== "undefined")
       return CC.cache[hex];
@@ -320,7 +329,7 @@ export type ColorSpec =  number | string | Colored;
 *  @see builtinColorSchemes
 */
 export type ColorschemeSpec = string | {
-  gradient?: Gradient|string;
+  gradient?: GradientType|string;
   min?: number;
   max?: number;
   /**  {AtomSpec} property to use for gradient calculation.  E.g., 'b' for temperature factors of a PDB. */
@@ -328,12 +337,12 @@ export type ColorschemeSpec = string | {
   /** mid point value for gradient (for rwb) */
   mid?: number; 
   /** Custom colors for gradient (for {@link CustomLinear}) */
-  colors: Array<ColorSpec>; 
+  colors?: Array<ColorSpec>; 
   /** map of a certain {@link AtomSpec} property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
  */
-  map: Record<string, unknown>
+  map?: Record<string, unknown>
   /**  Allows the user to provide a function for setting the colorschemes. */
-  colorfunc: Function; 
+  colorfunc?: Function; 
 };
 
 /** Preset secondary structure color scheme

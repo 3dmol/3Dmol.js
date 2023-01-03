@@ -835,9 +835,12 @@ mScale = new Matrix4();
 /**
  * @interface
  */
-export interface Vector3 {
+export interface XYZ {
+  /**  */
   x: number;
+  /**  */
   y: number;
+  /**  */
   z: number;
 }
 
@@ -847,13 +850,13 @@ export interface Vector3 {
 export class Vector3 {
   // unaccounted for assignents to vector3 properties in other parts of the code
   // look in glcartoon.js for example
-  color: any;
-  resi: any;
-  style: any;
-  smoothen: any;
-  atom: any;
-  skip: any;
-  atomid: undefined;
+  color?: any;
+  resi?: any;
+  style?: any;
+  smoothen?: any;
+  atom?: any;
+  skip?: any;
+  atomid?: undefined;
 
   x: number;
   y: number;

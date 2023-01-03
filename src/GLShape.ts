@@ -1,6 +1,6 @@
 import { Geometry, Material } from "./WebGL";
 import { Sphere, Cylinder, Triangle } from "./WebGL/shapes";
-import { Vector3 } from "./WebGL/math";
+import { Vector3, XYZ } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
 import { DoubleSide } from "./WebGL";
 import { Color, CC, ColorSpec } from "./colors";
@@ -9,177 +9,10 @@ import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { CAP, GLDraw } from "./GLDraw"
 import { subdivide_spline } from "./glcartoon";
-import { adjustVolumeStyle, extend, makeFunction } from "./utilities";
-import { Gradient } from "./Gradient";
-
-
-/**
- * GLShape style specification
- */
-export interface ShapeSpec {
-    /** solid color */
-    color?: ColorSpec;
-    alpha?: number; //prefer opacity
-    /** transparency, between 0 (invisible) and 1 (opaque) */
-    opacity?: number;
-    /** draw as wireframe, not surface */
-    wireframe?: boolean;
-    /** if true, do not display object */
-    hidden?: boolean;
-    /** width of line for wireframe rendering **No longer supported by most browsers** */
-    linewidth?: number;
-    /** if true, user can click on object to trigger callback */
-    clickable?: boolean;
-    /** function to call on click */
-    callback?: (...args: any[]) => void;
-    /** if set, only display in this frame of an animation */
-    frame?: number;
-};
-
-
-/**
- * Isosurface style specification
- * @extends ShapeSpec
- */
-export interface IsoSurfaceSpec extends ShapeSpec {
-    /** specifies the isovalue to draw surface at */
-    isoval?: number;
-    /** if true uses voxel style rendering */
-    voxel?: boolean;
-    /** amount to smooth surface (default 1) */
-    smoothness?: number;
-    /** coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
-    coords?: Array<Vector3>;
-    /** distance around coords to include data [default = 2.0] */
-    seldist?: number;
-    /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
-    voldata?: VolumeData;
-    /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
-    volscheme?: Gradient;
-    /** format of voldata if not a $3Dmol.VolumeData object */
-    volformat?: string;
-};
-
-
-
-/**
- * Arrow shape specification.  
-  * @extends ShapeSpec
- */
-export interface ArrowSpec extends ShapeSpec {
-    /** starting position */
-    start: Vector3;
-    /** ending position */
-    end: Vector3;
-    /** radius (default 0.1A) */
-    radius?: number;
-    /** color */
-    color?: ColorSpec;
-    /** hidden */
-    hidden?: boolean;
-    /** ratio of arrow base to cylinder (1.618034 default) */
-    radiusRatio?: number;
-    /** relative position of arrow base (0.618034 default) */
-    mid?: number;
-    /** position of arrow base in length units, if negative positioned from end instead of start.  Overrides mid. */
-    midpos?: number;
-};
-
-/**
- * Cylinder shape specification.  
- * @extends ShapeSpec
- * 
- */
-export interface CylinderSpec extends ShapeSpec {
-    /** starting vector */
-    start?: Vector3;
-    /** ending position */
-    end?: Vector3;
-    /** radius */
-    radius?: number;
-    /** Place a cap at the start (none, flat or round) */
-    fromCap?: CAP;
-    /** Place a cap at the end (none, flat or round) */
-    toCap?: CAP;
-    /** Make the cylinder dashed. */
-    dashed?: boolean;
-    /** Length of dashes (default 0.25) */
-    dashLength?: number;
-    /** Length of gaps (default 0.25) */
-    gapLength?: number;
-};
-
-/**
- * Curve shape specification.  
- * @extends ShapeSpec
- */
-export interface CurveSpec extends ShapeSpec {
-    /** Sequence of points to draw curve through */
-    points?: Vector3[];
-    /** amount of interpolation */
-    smooth?: number;
-    /** radius of curve */
-    radius?: number;
-    /** if an arrow should be drawn at the start */
-    fromArrow?: boolean;
-    /** if an arrow should be drawn at the end */
-    toArrow?: boolean;
-};
-
-/**
- * Line shape specification.  Default to wireframe.
- * @extends ShapeSpec
- */
-export interface LineSpec extends ShapeSpec {
-    /** Starting position */
-    start?: Vector3;
-    /** Ending position */
-    end?: Vector3;
-};
-
-/**
- * Box shape specification. 
- * @extends ShapeSpec
- */
-export interface BoxSpec extends ShapeSpec {
-    /** bottom corner of box */
-    corner?: Vector3;
-    /** center of box */
-    center?: Vector3;
-    /** width, height, depth of box */
-    dimensions?: {
-        w: number | Vector3;
-        h: number | Vector3;
-        d: number | Vector3;
-    };
-};
-
-
-/**
- * Specification for adding custom shape. 
- * @extends ShapeSpec
- */
-export interface CustomShapeSpec extends Omit<ShapeSpec, 'color'> {
-    /** List of vertex positions */
-    vertexArr?: Vector3[];
-    /** List of normal vectors for each vertex */
-    normalArr?: Vector3[];
-    /** List of triangles to build the custom shape. Each triangle is defined by the indices of 3 vertices in vertexArr, so the array length should be 3 times the number of faces. */
-    faceArr?: number[];
-    /** Either a single color for the whole object or an array specifying the color at each vertex. */
-    color?: ColorSpec | ColorSpec[];
-};
-
-/**
- * Sphere shape specification. Extends {@link ShapeSpec}.
- */
-export interface SphereSpec extends ShapeSpec {
-    /** center of sphere */
-    center?: Vector3;
-    /** radius of sphere */
-    radius?: number;
-};
-
+import { adjustVolumeStyle, extend, Func, makeFunction } from "./utilities";
+import { Gradient, GradientType } from "./Gradient";
+import { LineStyleSpec } from "GLModel";
+import { VolumetricRendererSpec } from "VolumetricRender";
 
 
 /**
@@ -254,7 +87,7 @@ export class GLShape {
      * @param {ArrowSpec}
      *            spec
      */
-    static drawArrow(shape, geo, spec) {
+    static drawArrow(shape: GLShape, geo: Geometry, spec: ArrowSpec) {
 
         var from = spec.start, end = spec.end, radius = spec.radius,
             radiusRatio = spec.radiusRatio, mid = spec.mid, midoffset = spec.midpos;
@@ -266,7 +99,7 @@ export class GLShape {
 
         // vertices
 
-        var dir = end.clone().sub(from);
+        var dir = new Vector3(end.x, end.y, end.z).sub(from);
         if (midoffset) { //absolute offset, convert to relative
             let length = dir.length();
             if (midoffset > 0) mid = midoffset / length;
@@ -275,11 +108,12 @@ export class GLShape {
 
         dir.multiplyScalar(mid);
 
-        var to = from.clone().add(dir);
+        var to = new Vector3(from.x, from.y, from.z).add(dir);
         var negDir = dir.clone().negate();
 
-        shape.intersectionShape.cylinder.push(new Cylinder(from.clone(), to.clone(), radius));
-        shape.intersectionShape.sphere.push(new Sphere(from.clone(), radius));
+        let fromv = new Vector3(from.x, from.y, from.z);
+        shape.intersectionShape.cylinder.push(new Cylinder(fromv, to.clone(), radius));
+        shape.intersectionShape.sphere.push(new Sphere(fromv, radius));
 
         // get orthonormal vector
         var nvecs = [];
@@ -347,7 +181,7 @@ export class GLShape {
                 var prev_z = vertexArray[offset - 1];
 
                 var c = new Vector3(prev_x, prev_y, prev_z);
-                var b = end.clone(), b2 = to.clone();
+                var b = new Vector3(end.x, end.y, end.z), b2 = to.clone();
                 var a = new Vector3(conebase.x, conebase.y, conebase.z);
 
                 shape.intersectionShape.triangle.push(new Triangle(a, b, c));
@@ -602,7 +436,7 @@ export class GLShape {
     // Update a bounding sphere's position and radius
     // from list of centroids and new points
     /*
-     * @param {$3Dmol.Sphere}
+     * @param {Sphere}
      *            sphere
      * @param {Object}
      *            components, centroid of all objects in shape
@@ -610,7 +444,7 @@ export class GLShape {
      *            points, flat array of all points in shape
      * @param {int} numPoints, number of valid poitns in points
      */
-    static updateBoundingFromPoints(sphere, components, points, numPoints) {
+    static updateBoundingFromPoints(sphere: Sphere, components, points, numPoints: number) {
 
         sphere.center.set(0, 0, 0);
 
@@ -643,7 +477,7 @@ export class GLShape {
     };
 
     //helper function for adding an appropriately sized mesh
-    private static addCustomGeo(shape, geo, mesh, color, clickable) {
+    private static addCustomGeo(shape: GLShape, geo: Geometry, mesh, color, clickable) {
         var geoGroup = geo.addGeoGroup();
         var vertexArr = mesh.vertexArr, normalArr = mesh.normalArr,
             faceArr = mesh.faceArr;
@@ -737,10 +571,10 @@ export class GLShape {
      *            shape
      * @param {geometry}
      *            geo
-     * @param {CustomSpec}
+     * @param {CustomShapeSpec}
      *            customSpec
      */
-    static drawCustom = function (shape, geo, customSpec) {
+    static drawCustom = function (shape: GLShape, geo: Geometry, customSpec: CustomShapeSpec) {
         var mesh = customSpec;
         var vertexArr = mesh.vertexArr;
         var faceArr = mesh.faceArr;
@@ -771,7 +605,7 @@ export class GLShape {
      *            stylespec
      * @returns {undefined}
      */
-    static updateFromStyle(shape, stylespec) {
+    static updateFromStyle(shape: GLShape, stylespec: ShapeSpec) {
         if (typeof (stylespec.color) != 'undefined') {
             shape.color = stylespec.color || new Color();
             if (!(stylespec.color instanceof Color))
@@ -807,10 +641,10 @@ export class GLShape {
     opacity = 1;
     linewidth = 1;
     clickable = false;
-    callback: any;
+    callback: Func;
     hoverable = false;
-    hover_callback: any;
-    unhover_callback: any;
+    hover_callback: Func;
+    unhover_callback: Func;
     frame: any;
     side = DoubleSide;
     shapePosition: any;
@@ -826,9 +660,9 @@ export class GLShape {
      * 
      * @constructor 
      * 
-     * @param {Object} stylespec
+     * @param {ShapeSpec} stylespec
      */
-    constructor(stylespec) {
+    constructor(stylespec: ShapeSpec) {
 
         this.stylespec = stylespec || {};
 
@@ -859,7 +693,7 @@ export class GLShape {
         sphere.updateStyle({color:'yellow',opacity:0.5});
         viewer.render();
      */
-    updateStyle(newspec) {
+    updateStyle(newspec: ShapeSpec) {
 
         for (var prop in newspec) {
             this.stylespec[prop] = newspec[prop];
@@ -888,7 +722,7 @@ export class GLShape {
      * Creates a custom shape from supplied vertex and face arrays
      * @param {CustomShapeSpec} customSpec     
      */
-    addCustom(customSpec) {
+    public addCustom(customSpec: CustomShapeSpec) {
 
         customSpec.vertexArr = customSpec.vertexArr || [];
         customSpec.faceArr = customSpec.faceArr || [];
@@ -906,13 +740,12 @@ export class GLShape {
      
      viewer.render();
      */
-    addSphere(sphereSpec) {
+    public addSphere(sphereSpec: SphereSpec) {
 
-        sphereSpec.center = sphereSpec.center || {
-            x: 0,
-            y: 0,
-            z: 0
-        };
+        if (!sphereSpec.center) {
+            sphereSpec.center = new Vector3(0, 0, 0);
+        }
+
         sphereSpec.radius = sphereSpec.radius ? clamp(sphereSpec.radius, 0, Infinity) : 1.5;
         sphereSpec.color = CC.color(sphereSpec.color);
 
@@ -946,22 +779,28 @@ export class GLShape {
      viewer.rotate(30);
      viewer.render();
      */
-    addBox(boxSpec) {
+    public addBox(boxSpec: BoxSpec) {
 
         var dim = boxSpec.dimensions || { w: 1, h: 1, d: 1 };
 
         //dimensions may be scalar or vector quantities
-        var w = dim.w;
+        var w: XYZ;
         if (typeof (dim.w) == "number") {
             w = { x: dim.w, y: 0, z: 0 };
+        } else {
+            w = dim.w;
         }
-        var h = dim.h;
+        var h: XYZ;
         if (typeof (dim.h) == "number") {
             h = { x: 0, y: dim.h, z: 0 };
+        } else {
+            h = dim.h;
         }
-        var d = dim.d;
+        var d: XYZ;
         if (typeof (dim.d) == "number") {
             d = { x: 0, y: 0, z: dim.d };
+        } else {
+            d = dim.d;
         }
 
         //can position using corner OR center
@@ -1071,18 +910,24 @@ export class GLShape {
                               toCap:false});
           viewer.render();
      */
-    addCylinder(cylinderSpec) {
+    public addCylinder(cylinderSpec: CylinderSpec) {
 
-        cylinderSpec.start = cylinderSpec.start || {};
-        cylinderSpec.end = cylinderSpec.end || {};
+        var start: Vector3;
+        var end: Vector3;
+        if (!cylinderSpec.start) {
+            start = new Vector3(0, 0, 0);
+        } else {
+            start = new Vector3(cylinderSpec.start.x || 0,
+                cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+        }
 
-
-        var start = new Vector3(cylinderSpec.start.x || 0,
-            cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
-        var end = new Vector3(cylinderSpec.end.x,
-            cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
-        if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
-
+        if (!cylinderSpec.end) {
+            end = new Vector3(0, 0, 0);
+        } else {
+            end = new Vector3(cylinderSpec.end.x,
+                cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+            if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+        }
         var radius = cylinderSpec.radius || 0.1;
         var color = CC.color(cylinderSpec.color);
 
@@ -1104,17 +949,25 @@ export class GLShape {
      * Creates a dashed cylinder shape
      * @param {CylinderSpec} cylinderSpec
      */
-    addDashedCylinder(cylinderSpec) {
-        cylinderSpec.start = cylinderSpec.start || {};
-        cylinderSpec.end = cylinderSpec.end || {};
+    public addDashedCylinder(cylinderSpec: CylinderSpec) {
+  
         cylinderSpec.dashLength = cylinderSpec.dashLength || 0.25;
         cylinderSpec.gapLength = cylinderSpec.gapLength || 0.25;
 
-        var start = new Vector3(cylinderSpec.start.x || 0,
-            cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
-        var end = new Vector3(cylinderSpec.end.x,
-            cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
-        if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+        var start: Vector3;
+        if (!cylinderSpec.start) start = new Vector3(0, 0, 0);
+        else {
+            start = new Vector3(cylinderSpec.start.x || 0,
+                cylinderSpec.start.y || 0, cylinderSpec.start.z || 0);
+        }
+
+        var end: Vector3;
+        if (!cylinderSpec.end) end = new Vector3(3, 0, 0);
+        else {
+            end = new Vector3(cylinderSpec.end.x,
+                cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
+            if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+        }
 
         var radius = cylinderSpec.radius || 0.1;
         var color = CC.color(cylinderSpec.color);
@@ -1154,7 +1007,7 @@ export class GLShape {
      * Creates a curved shape
      * @param {CurveSpec} curveSpec
      */
-    addCurve(curveSpec) {
+    public addCurve(curveSpec: CurveSpec) {
 
         curveSpec.points = curveSpec.points || [];
         curveSpec.smooth = curveSpec.smooth || 10;
@@ -1187,7 +1040,7 @@ export class GLShape {
                 start: points[end],
                 end: points[points.length - 1],
                 radius: radius,
-                color: color,
+                color: color as ColorSpec,
                 mid: 0.0001
             };
             this.addArrow(arrowspec);
@@ -1198,7 +1051,7 @@ export class GLShape {
                 start: points[start],
                 end: points[0],
                 radius: radius,
-                color: color,
+                color: color as ColorSpec,
                 mid: 0.0001
             };
             this.addArrow(arrowspec);
@@ -1237,15 +1090,23 @@ export class GLShape {
           });
     
      */
-    addLine(lineSpec) {
-        lineSpec.start = lineSpec.start || {};
-        lineSpec.end = lineSpec.end || {};
+    public addLine(lineSpec: LineSpec) {
 
-        var start = new Vector3(lineSpec.start.x || 0,
-            lineSpec.start.y || 0, lineSpec.start.z || 0);
-        var end = new Vector3(lineSpec.end.x,
-            lineSpec.end.y || 0, lineSpec.end.z || 0);
-        if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+        var start: Vector3;
+        var end: Vector3;
+        if (!lineSpec.start) {
+            start = new Vector3(0, 0, 0);
+        } else {
+            start = new Vector3(lineSpec.start.x || 0,
+                lineSpec.start.y || 0, lineSpec.start.z || 0);
+        }
+        if (!lineSpec.end) {
+            end = new Vector3(3, 0, 0);
+        } else {
+            end = new Vector3(lineSpec.end.x,
+                lineSpec.end.y || 0, lineSpec.end.z || 0);
+            if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+        }
 
         var geoGroup = this.geo.updateGeoGroup(2);
 
@@ -1300,21 +1161,23 @@ export class GLShape {
               viewer.render();
             });
      */
-    public addArrow(arrowSpec) {
+    public addArrow(arrowSpec: ArrowSpec) {
 
-        arrowSpec.start = arrowSpec.start || {};
-        arrowSpec.end = arrowSpec.end || {};
-
-        arrowSpec.start = new Vector3(arrowSpec.start.x || 0,
-            arrowSpec.start.y || 0, arrowSpec.start.z || 0);
+        if (!arrowSpec.start) {
+            arrowSpec.start = new Vector3(0, 0, 0);
+        } else {
+            arrowSpec.start = new Vector3(arrowSpec.start.x || 0,
+                arrowSpec.start.y || 0, arrowSpec.start.z || 0);
+        }
 
         if (arrowSpec.dir instanceof Vector3 && typeof (arrowSpec.length) === 'number') {
             var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
                 arrowSpec.start);
             arrowSpec.end = end;
         }
-
-        else {
+        else if (!arrowSpec.end) {
+            arrowSpec.end = new Vector3(3, 0, 0);
+        } else {
             arrowSpec.end = new Vector3(arrowSpec.end.x,
                 arrowSpec.end.y || 0, arrowSpec.end.z || 0);
             if (typeof (arrowSpec.end.x) == 'undefined') arrowSpec.end.x = 3; //show something even if undefined
@@ -1340,11 +1203,11 @@ export class GLShape {
     };
 
 
-    static distance_from(c1, c2) {
+    static distance_from(c1: XYZ, c2: XYZ) {
         return Math.sqrt(Math.pow((c1.x - c2.x), 2) + Math.pow((c1.y - c2.y), 2) + Math.pow((c1.z - c2.z), 2));
     };
 
-    static inSelectedRegion(coordinate, selectedRegion, radius) {
+    static inSelectedRegion(coordinate: XYZ, selectedRegion, radius: number) {
 
         for (var i = 0; i < selectedRegion.length; i++) {
             if (GLShape.distance_from(selectedRegion[i], coordinate) <= radius)
@@ -1380,7 +1243,7 @@ export class GLShape {
               viewer.render();
             });
      */
-    addIsosurface(data, volSpec, callback?) {//may want to cache the arrays geneerated when selectedRegion ==true
+    addIsosurface(data, volSpec:IsoSurfaceSpec, callback?) {//may want to cache the arrays geneerated when selectedRegion ==true
 
         var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
             : 0.0;
@@ -1540,7 +1403,7 @@ export class GLShape {
      * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
      * @param {IsoSurfaceSpec} isoSpec - Volumetric data shape specification
      */
-    addVolumetricData(data, fmt, volSpec) {
+    public addVolumetricData(data, fmt, volSpec: IsoSurfaceSpec) {
         data = new VolumeData(data, fmt);
         this.addIsosurface(data, volSpec);
     };
@@ -1684,5 +1547,195 @@ export function splitMesh(mesh) {
         }
     }
     return slices;
+};
+
+/**
+ * GLShape style specification
+ */
+export interface ShapeSpec {
+    /** Either a single color for the whole object or an array specifying the color at each vertex ({@link CustomShapeSpec}). */
+    color?: ColorSpec | ColorSpec[];
+    alpha?: number; //prefer opacity
+    /** transparency, between 0 (invisible) and 1 (opaque) */
+    opacity?: number;
+    /** draw as wireframe, not surface */
+    wireframe?: boolean;
+    /** if true, do not display object */
+    hidden?: boolean;
+    /** width of line for wireframe rendering **No longer supported by most browsers** */
+    linewidth?: number;
+    /** if true, user can click on object to trigger callback */
+    clickable?: boolean;
+    /** function to call on click */
+    callback?: Func;
+    /** if true, user can hover on object to trigger callback */
+    hoverable?: boolean;
+    /** hover callback */
+    hover_callback?: Func;
+    /** unhover callback */
+    unhover_callback?: Func;
+    /** if set, only display in this frame of an animation */
+    frame?: number;
+    side?: number;
+    voldata?: VolumeData;
+    volscheme?: GradientType
+};
+
+
+/**
+ * Isosurface style specification
+ * @extends ShapeSpec
+ */
+export interface IsoSurfaceSpec extends ShapeSpec {
+    /** specifies the isovalue to draw surface at */
+    isoval?: number;
+    /** if true uses voxel style rendering */
+    voxel?: boolean;
+    /** amount to smooth surface (default 1) */
+    smoothness?: number;
+    /** coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
+    coords?: XYZ[];
+    /** distance around coords to include data [default = 2.0] */
+    seldist?: number;
+    /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
+    voldata?: VolumeData;
+    /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
+    volscheme?: GradientType;
+    /** format of voldata if not a $3Dmol.VolumeData object */
+    volformat?: string;
+
+    selectedRegion?: XYZ[]; //deprecated
+    selectedOffset?: number; //deprecated
+    radius?: number; //also deprecated
+};
+
+
+
+/**
+ * Arrow shape specification.  
+  * @extends ShapeSpec
+ */
+export interface ArrowSpec extends ShapeSpec {
+    /** starting position */
+    start?: XYZ;
+    /** ending position */
+    end?: XYZ;
+    /** direction to extend from start (instead of specifying end) */
+    dir?: XYZ;
+    /** length to extend in dir direction from start (instead of specifying end) */
+    length?: number;
+    /** radius (default 0.1A) */
+    radius?: number;
+    /** color */
+    color?: ColorSpec;
+    /** hidden */
+    hidden?: boolean;
+    /** ratio of arrow base to cylinder (1.618034 default) */
+    radiusRatio?: number;
+    /** relative position of arrow base (0.618034 default) */
+    mid?: number;
+    /** position of arrow base in length units, if negative positioned from end instead of start.  Overrides mid. */
+    midpos?: number;
+};
+
+/**
+ * Cylinder shape specification.  
+ * @extends ShapeSpec
+ * 
+ */
+export interface CylinderSpec extends ShapeSpec {
+    /** starting vector */
+    start?: XYZ;
+    /** ending position */
+    end?: XYZ;
+    /** radius */
+    radius?: number;
+    /** Place a cap at the start (none, flat or round) */
+    fromCap?: CAP;
+    /** Place a cap at the end (none, flat or round) */
+    toCap?: CAP;
+    /** Make the cylinder dashed. */
+    dashed?: boolean;
+    /** Length of dashes (default 0.25) */
+    dashLength?: number;
+    /** Length of gaps (default 0.25) */
+    gapLength?: number;
+};
+
+/**
+ * Curve shape specification.  
+ * @extends ShapeSpec
+ */
+export interface CurveSpec extends ShapeSpec {
+    /** Sequence of points to draw curve through */
+    points?: XYZ[];
+    /** amount of interpolation */
+    smooth?: number;
+    /** radius of curve */
+    radius?: number;
+    /** if an arrow should be drawn at the start */
+    fromArrow?: boolean;
+    /** if an arrow should be drawn at the end */
+    toArrow?: boolean;
+    /** have cap at start */
+    fromCap?: CAP;
+    /** have cap at end */
+    toCap?: CAP;
+};
+
+/**
+ * Line shape specification.  Default to wireframe.
+ * @extends ShapeSpec
+ */
+export interface LineSpec extends ShapeSpec {
+    /** Starting position */
+    start?: XYZ;
+    /** Ending position */
+    end?: XYZ;
+    /** make dashed */
+    dashed?: boolean;
+};
+
+/**
+ * Box shape specification. 
+ * @extends ShapeSpec
+ */
+export interface BoxSpec extends ShapeSpec {
+    /** bottom corner of box */
+    corner?: XYZ;
+    /** center of box */
+    center?: XYZ;
+    /** width, height, depth of box */
+    dimensions?: {
+        w: number | XYZ;
+        h: number | XYZ;
+        d: number | XYZ;
+    };
+};
+
+
+/**
+ * Specification for adding custom shape. 
+ * @extends ShapeSpec
+ */
+export interface CustomShapeSpec extends ShapeSpec {
+    /** List of vertex positions */
+    vertexArr?: XYZ[];
+    /** List of normal vectors for each vertex */
+    normalArr?: XYZ[];
+    /** List of triangles to build the custom shape. Each triangle is defined by the indices of 3 vertices in vertexArr, so the array length should be 3 times the number of faces. */
+    faceArr?: number[];
+};
+
+/**
+ * Sphere shape specification. Extends {@link ShapeSpec}.
+ */
+export interface SphereSpec extends ShapeSpec {
+    /** center of sphere */
+    center?: XYZ;
+    /** radius of sphere */
+    radius?: number;
+    /** quality metric, higher uses more triangles (default 2) */
+    quality?: number;
 };
 

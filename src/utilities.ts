@@ -3,6 +3,7 @@
 import { builtinGradients, Gradient } from "./Gradient";
 import { VolumeData } from "./VolumeData";
 import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
+import { IsoSurfaceSpec } from "GLShape";
 
 //simplified version of jquery extend
 export function extend(obj1, src1) {
@@ -53,7 +54,9 @@ export function isEmptyObject(obj) {
     return true;
 };
 
-export function makeFunction(callback) {
+export type Func = Function|string|undefined|null;
+
+export function makeFunction(callback:Func) {
     //for py3dmol let users provide callback as string
     if (callback && typeof callback === "string") {
         /* jshint ignore:start */
@@ -68,7 +71,7 @@ export function makeFunction(callback) {
 };
 
 //standardize voldata/volscheme in style
-export function adjustVolumeStyle(style) {
+export function adjustVolumeStyle(style: IsoSurfaceSpec) {
     if (style) {
         if (style.volformat && !(style.voldata instanceof VolumeData)) {
             style.voldata = new VolumeData(style.voldata, style.volformat);

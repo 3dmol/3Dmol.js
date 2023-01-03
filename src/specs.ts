@@ -1,7 +1,7 @@
 // Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation
 
-import { GLModel } from "./GLModel";
+import { AtomStyleSpec, BondStyle, GLModel } from "./GLModel";
 import { ColorSpec } from "./colors";
 
 
@@ -34,6 +34,8 @@ export interface AtomSpec  {
   rescode?: number;
   /** Atom's serial id number */
   serial?: number;
+  /** Index of atom in molecule */
+  index?: number; 
   /** Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon) */
   atom?: string;
   /** Array of atom ids this atom is bonded to */
@@ -57,8 +59,22 @@ export interface AtomSpec  {
     atom: AtomSpec,
     viewer: unknown /** glviewer has not been ported yet */
   ) => void;
+  /** Set this flag to true to enable hover selection handling for this atom */
+  hoverable?: boolean;
+  /** Callback click handler function to be executed on this atom and its parent viewer */
+  hover_callback?: (
+    atom: AtomSpec,
+    viewer: unknown /** glviewer has not been ported yet */
+  ) => void;  
   /** for selection, inverts the meaning of the selection */
   invert?: boolean;
+  /** style of atom */
+  style?: AtomStyleSpec;
+  /** custom bond styling by position in bonds */
+  bondStyles?: BondStyle[];
+  intersectionShape?: any;
+  capDrawn?: boolean;
+  model?: number;
 };
 
 
@@ -78,7 +94,7 @@ export interface AtomSpec  {
  *  viewer.render();
  * });
  */
-export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"> {
+export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"> {
     /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
     model?: GLModel | number |  GLModel[] | number[];
     /** overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms */
@@ -90,15 +106,16 @@ export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"> {
     /** if set, expands the selection to include all atoms of any residue that has any atom selected */
     byres?: boolean;
     /** expands the selection to include all atoms within a given distance from the selection */
-    expand?: number;
+    expand?: number|string;
     /** intersects the selection with the set of atoms within a given distance from another selection */
     within?: WithinSelectionSpec;
     /** take the intersection of the provided lists of {@link AtomSelectionSpec}s */
-    and?: AtomSelectionSpec[];
+    and?: AtomSelectionSpec[] & {__cached_results: any};
     /** take the union of the provided lists of {@link AtomSelectionSpec}s */
-    or?: AtomSelectionSpec[];
+    or?: AtomSelectionSpec[] & {__cached_results: any};
     /** take the inverse of the provided {@link AtomSelectionSpec} */
     not?: AtomSelectionSpec;
+    contextMenuEnabled?: boolean;
   };
 
 

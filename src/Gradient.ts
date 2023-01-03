@@ -2,8 +2,8 @@ import { CC, Color } from "./colors";
 
 export abstract class GradientType {
   gradient?: string;
-  abstract valueToHex(value: number, range: number): number;
-  abstract range(): [number, number] | null;
+  abstract valueToHex(value: number, range?: number[]): number;
+  abstract range(): number[] | null;
 }
 
 export function normalizeValue(
@@ -25,7 +25,7 @@ export function normalizeValue(
 }
 
 //return a Gradient object, even if what is specified is descriptive
-export function getGradient(grad) {
+export function getGradient(grad): GradientType {
   if (grad instanceof GradientType) {
     return grad;
   } else if (
@@ -400,6 +400,6 @@ export class Gradient extends GradientType {
   static builtinGradients = builtinGradients;
   static normalizeValue = normalizeValue;
   static getGradient = getGradient;
-  valueToHex(_value: number, _range: number): number { return 0; }
+  valueToHex(_value: number, _range?: number[]): number { return 0; }
   range(): [number, number] | null { return null; }
 }

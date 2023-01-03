@@ -1,5 +1,5 @@
 import { Matrix4 } from '../math';
-import { Vector3 } from '../math';
+import { Vector3, XYZ } from '../math';
 //Intersection sphere and box shapes.
 
 //Intersection sphere for sphere, stick render
@@ -9,9 +9,10 @@ import { Vector3 } from '../math';
 export class Sphere {
   center: Vector3
   radius: number
+  box?: any;
 
-  constructor(center = new Vector3(), radius = 0) {
-    this.center = center;
+  constructor(center: XYZ = {x:0,y:0,z:0}, radius = 0) {
+    this.center = new Vector3(center.x,center.y,center.z);
     this.radius = radius;
   }
 

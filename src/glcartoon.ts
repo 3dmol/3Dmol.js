@@ -26,27 +26,29 @@ import { isNumeric, getColorFromStyle } from "./utilities";
               });
  */
 export interface CartoonStyleSpec {
+    /** do not show  */
+    hidden?: boolean;
     /** strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number */
     color?: ColorSpec;
     /**  style of cartoon rendering (trace, oval, rectangle (default), parabola, edged) */
     style?: string;
     /**  whether to use constant strand width, disregarding
     *       secondary structure; use thickness to adjust radius */
-    ribbon?: boolean; 
+    ribbon?: boolean;
     /** whether to add arrows showing beta-sheet
     *       directionality; does not apply to trace or ribbon */
-    arrows?: boolean; 
+    arrows?: boolean;
     /** whether to display alpha helices as simple cylinders;
     *       does not apply to trace */
-    tubes?: boolean; 
+    tubes?: boolean;
     /** cartoon strand thickness, default is 0.4 */
-    thickness?:number;
+    thickness?: number;
     /** cartoon strand width, default is secondary
     *       structure-dependent; does not apply to trace or ribbon */
-    width?:number; 
+    width?: number;
     /** set opacity from 0-1; transparency is set per-chain
     *       with a warning outputted in the event of ambiguity */
-    opacity?: number 
+    opacity?: number
 };
 
 // helper functions
@@ -731,7 +733,7 @@ function inConnectedResidues(a, b) {
 };
 
 // add geo to the group
-function setGeo (group, geo, opacity, outline, setNormals) {
+function setGeo(group, geo, opacity, outline, setNormals) {
 
     if (geo == null || geo.vertices == 0) return;
     if (setNormals) {

@@ -11,13 +11,13 @@ import { GLShape } from "./GLShape";
 */
 export interface VolumetricRendererSpec {
     /** list of objects containing @color, @opacity and @value properties to specify color per voxel data value */
-    transferfn: { color: unknown; opacity: unknown; value: unknown }[];
+    transferfn?: { color: unknown; opacity: unknown; value: unknown }[];
     /** number of times to sample each voxel approximately (default 5) */
-    subsamples: number;
+    subsamples?: number;
     /**  coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
-    coords: Array<Vector3>;
+    coords?: Array<Vector3>;
     /** distance around coords to include data [default = 2.0] */
-    seldist: number; 
+    seldist?: number; 
 };
 
 /**

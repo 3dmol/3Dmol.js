@@ -1,17 +1,18 @@
 //a molecular viewer based on GLMol
 
-import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide } from "./WebGL";
-import { Vector3, Matrix4, Matrix3, Quaternion } from "./WebGL/math";
+import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide, Material } from "./WebGL";
+import { Vector3, Matrix4, Matrix3, Quaternion, XYZ } from "./WebGL/math";
 import { MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line } from "./WebGL";
 import { elementColors, CC, ColorSpec, ColorschemeSpec } from "./colors";
 import { extend, getExtent, makeFunction, getPropertyRange, isEmptyObject, adjustVolumeStyle, mergeGeos, PausableTimer, getColorFromStyle, getElement } from "./utilities";
-import { Gradient } from "./Gradient";
-import { GLModel, LineStyleSpec } from "./GLModel";
+import { getGradient, Gradient } from "./Gradient";
+import { AtomStyleSpec, GLModel, LineStyleSpec } from "./GLModel";
 import { Label, LabelSpec } from "./Label";
-import { ArrowSpec, GLShape, splitMesh } from "./GLShape";
+import { ArrowSpec, BoxSpec, CurveSpec, CustomShapeSpec, CylinderSpec, GLShape, IsoSurfaceSpec, LineSpec, ShapeSpec, SphereSpec, splitMesh } from "./GLShape";
 import { VolumeData } from "./VolumeData";
 import { ProteinSurface, SurfaceType, syncSurface } from "./ProteinSurface4";
-import { GLVolumetricRender } from "./VolumetricRender";
+import { GLVolumetricRender, VolumetricRendererSpec } from "./VolumetricRender";
+import { AtomSelectionSpec, AtomSpec } from "./specs";
 import { UPNG } from 'upng-js'
 
 
@@ -38,7 +39,7 @@ export class GLViewer {
     private models: GLModel[] = []; // atomistic molecular models
     private surfaces: any = {};
     private shapes = []; // Generic shapes
-    private labels = [];
+    private labels: Label[] = [];
     private fixed_labels = [];
     private clickables = []; //things you can click on
     private hoverables = []; //things you can hover over
@@ -83,7 +84,7 @@ export class GLViewer {
 
     public container: HTMLElement | null;
 
-    surfaceTypeMap = {
+    static readonly surfaceTypeMap = {
         "VDW": SurfaceType.VDW,
         "MS": SurfaceType.MS,
         "SAS": SurfaceType.SAS,
@@ -331,7 +332,7 @@ export class GLViewer {
     };
 
     // Checks for selection intersects on mousedown
-    private handleClickSelection(mouseX, mouseY, event) {
+    private handleClickSelection(mouseX: number, mouseY: number, event) {
         let intersects = this.targetedObjects(mouseX, mouseY, this.clickables);
         // console.log('handleClickSelection', mouseX, mouseY, intersects);
         if (intersects.length) {
@@ -398,7 +399,7 @@ export class GLViewer {
     };
 
     //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
-    private handleHoverContinue(mouseX, mouseY) {
+    private handleHoverContinue(mouseX: number, mouseY: number) {
         let intersects = this.targetedObjects(mouseX, mouseY, this.hoverables);
         if (intersects.length == 0 || intersects[0] === undefined) {
             this.setHover(null);
@@ -447,7 +448,7 @@ export class GLViewer {
     };
 
     //for grid viewers, return true if point is in this viewer
-    private isInViewer(x, y) {
+    private isInViewer(x: number, y: number) {
         if (this.viewers != undefined && !this.control_all) {
             var width = this.WIDTH / this.cols;
             var height = this.HEIGHT / this.rows;
@@ -466,7 +467,7 @@ export class GLViewer {
 
     //if the user has specify zoom limits, readjust to fit within them
     //also, make sure we don't go past CAMERA_Z
-    private adjustZoomToLimits(z) {
+    private adjustZoomToLimits(z: number) {
         //a lower limit of 0 is at CAMERA_Z
         if (this.config.lowerZoomLimit && this.config.lowerZoomLimit > 0) {
             let lower = this.CAMERA_Z - this.config.lowerZoomLimit;
@@ -538,9 +539,9 @@ export class GLViewer {
     /* @param {Object} element HTML element within which to create viewer
      * @param {ViewerSpec} config Object containing optional configuration for the viewer
      */
-    constructor(element, c) {
+    constructor(element, c: ViewerSpec = {}) {
         // set variables
-        this.config = c || {};
+        this.config = c;
         this.callback = this.config.callback;
         this.defaultcolors = this.config.defaultcolors;
         if (!this.defaultcolors)
@@ -622,11 +623,11 @@ export class GLViewer {
     /**
     * Return a list of objects that intersect that at the specified viewer position.
     *
-    * @param {x} - x position in screen coordinates
-    * @param {y} - y position in screen coordinates
+    * @param x - x position in screen coordinates
+    * @param y - y position in screen coordinates
     * @param {Object[]} - list of objects or selection object specifying what object to check for targeting
     */
-    public targetedObjects(x, y, objects) {
+    public targetedObjects(x: number, y: number, objects) {
         var mouse = {
             x: x,
             y: y,
@@ -671,7 +672,7 @@ export class GLViewer {
      * @param{y} y displacement in screen corodinates
      * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis
     */
-    public screenOffsetToModel(x, y, modelz?) {
+    public screenOffsetToModel(x: number, y: number, modelz?) {
         var dx = x / this.WIDTH;
         var dy = y / this.HEIGHT;
         var zpos = (modelz === undefined ? this.rotationGroup.position.z : modelz);
@@ -692,7 +693,7 @@ export class GLViewer {
      * @param{screen} xy screen coordinate
      * @param{model} xyz model coordinate
     */
-    public screenToModelDistance(screen, model) {
+    public screenToModelDistance(screen: XYZ, model) {
         let offset = this.canvasOffset();
 
         //convert model to screen to get screen z
@@ -933,7 +934,7 @@ export class GLViewer {
      viewer contents (base64 encoded) for nframes of viewer changes.
      * @return {Promise}
      */
-    public apngURI(nframes) {
+    public apngURI(nframes: number) {
         let viewer = this;
         nframes = nframes ? nframes : 1;
         return new Promise(function (resolve) {
@@ -1001,7 +1002,7 @@ export class GLViewer {
          *            the duration of the hover delay (in milliseconds) before the hover action is called
          *
      */
-    public setHoverDuration(duration) {
+    public setHoverDuration(duration?: number) {
         this.hoverDuration = duration;
     };
 
@@ -1153,7 +1154,7 @@ export class GLViewer {
      
      *
      */
-    public setBackgroundColor(hex, a) {
+    public setBackgroundColor(hex: ColorSpec, a: number) {
         if (typeof (a) == "undefined") {
             a = 1.0;
         }
@@ -1234,7 +1235,7 @@ export class GLViewer {
      *
      * @param {number} w Width in pixels
      */
-    public setWidth(w) {
+    public setWidth(w: number) {
         this.WIDTH = w || this.WIDTH;
         this.updateSize();
         return this;
@@ -1245,7 +1246,7 @@ export class GLViewer {
      *
      * @param {number} h Height in pixels
      */
-    public setHeight(h) {
+    public setHeight(h: number) {
         this.HEIGHT = h || this.HEIGHT;
         this.updateSize();
         return this;
@@ -1305,7 +1306,7 @@ export class GLViewer {
             })
           });
      */
-    public getModel(id) {
+    public getModel(id?: number | GLModel) {
         if (id === undefined) {
             return this.models.length == 0 ? null : this.models[this.models.length - 1];
         }
@@ -1484,7 +1485,7 @@ export class GLViewer {
      
      *
      */
-    public rotate(angle, axis: any = "y", animationDuration: number = 0, fixedPath: boolean = false) {
+    public rotate(angle: number, axis: any = "y", animationDuration: number = 0, fixedPath: boolean = false) {
 
         if (axis == "x") {
             axis = { x: 1, y: 0, z: 0 };
@@ -1706,10 +1707,10 @@ export class GLViewer {
         return this;
     };
 
-    /** @param {AtomSelectionSpec} sel
+    /* @param {AtomSelectionSpec|any} sel
      * @return list of models specified by sel
      */
-    private getModelList(sel): GLModel[] {
+    private getModelList(sel: any): GLModel[] {
         let ms: GLModel[] = [];
         if (typeof sel === 'undefined' || typeof sel.model === "undefined") {
             for (let i = 0; i < this.models.length; i++) {
@@ -1742,7 +1743,7 @@ export class GLViewer {
      *            sel
      * @return {AtomSpec[]}
      */
-    private getAtomsFromSel(sel) {
+    private getAtomsFromSel(sel: AtomSelectionSpec): AtomSpec[] {
         var atoms = [];
         if (typeof (sel) === "undefined")
             sel = {};
@@ -1760,11 +1761,11 @@ export class GLViewer {
      *
      * @param {AtomSpec}
      *            atom
-     * @param {AtomSpec}
+     * @param {AtomSelectionSpec}
      *            sel
      * @return {boolean}
      */
-    private atomIsSelected(atom, sel) {
+    private atomIsSelected(atom: AtomSpec, sel: AtomSelectionSpec) {
         if (typeof (sel) === "undefined")
             sel = {};
 
@@ -1782,9 +1783,9 @@ export class GLViewer {
     /** return list of atoms selected by sel
      *
      * @param {AtomSelectionSpec} sel
-     * @return {Array.<Object>}
+     * @return {AtomSpec[]}
      */
-    public selectedAtoms(sel) {
+    public selectedAtoms(sel: AtomSelectionSpec): AtomSpec[] {
         return this.getAtomsFromSel(sel);
     };
 
@@ -1795,7 +1796,7 @@ export class GLViewer {
     * @return {Array.<Object>}
     *
     */
-    public getUniqueValues(attribute, sel) {
+    public getUniqueValues(attribute: string, sel?: AtomSelectionSpec) {
         if (typeof (sel) === "undefined")
             sel = {};
         var atoms = this.getAtomsFromSel(sel);
@@ -1814,10 +1815,10 @@ export class GLViewer {
     /**
      * Return pdb output of selected atoms (if atoms from pdb input)
      *
-     * @param {Object=} [sel] - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
+     * @param {AtomSelectionSpec} sel - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
      * @return {string} PDB string of selected atoms
      */
-    public pdbData(sel) {
+    public pdbData(sel: AtomSelectionSpec) {
         var atoms = this.getAtomsFromSel(sel);
         var ret = "";
         for (var i = 0, n = atoms.length; i < n; ++i) {
@@ -1848,8 +1849,7 @@ export class GLViewer {
     });
      
          */
-    public zoom(factor?, animationDuration: number = 0, fixedPath: boolean = false) {
-        factor = factor || 2;
+    public zoom(factor: number = 2, animationDuration: number = 0, fixedPath: boolean = false) {
         var scale = (this.CAMERA_Z - this.rotationGroup.position.z) / factor;
         var final_z = this.CAMERA_Z - scale;
 
@@ -1886,7 +1886,7 @@ export class GLViewer {
     viewer.render(callback);
     });
      */
-    public translate(x, y, animationDuration: number = 0, fixedPath: boolean = false) {
+    public translate(x: number, y: number, animationDuration: number = 0, fixedPath: boolean = false) {
         var dx = x / this.WIDTH;
         var dy = y / this.HEIGHT;
         var v = new Vector3(0, 0, -this.CAMERA_Z);
@@ -1933,7 +1933,7 @@ export class GLViewer {
     viewer.render(callback);
     });
      */
-    public translateScene(x, y, animationDuration: number = 0, fixedPath = false) {
+    public translateScene(x: number, y: number, animationDuration: number = 0, fixedPath = false) {
 
         var t = this.screenOffsetToModel(x, y);
         var final_position = this.modelGroup.position.clone().add(t);
@@ -1954,11 +1954,11 @@ export class GLViewer {
     /**
      * Adjust slab to fully enclose selection (default everything).
      *
-     * @param {Object}
-     *            [sel] - Selection specification specifying model and atom
+     * @param {AtomSelectionSpec} sel
+     *            Selection specification specifying model and atom
      *            properties to select. Default: all atoms in viewer
      */
-    public fitSlab(sel) {
+    public fitSlab(sel: AtomSelectionSpec) {
         sel = sel || {};
         var atoms = this.getAtomsFromSel(sel);
         var tmp = getExtent(atoms);
@@ -1982,7 +1982,7 @@ export class GLViewer {
     /**
      * Re-center the viewer around the provided selection (unlike zoomTo, does not zoom).
      *
-     * @param {Object}
+     * @param {AtomSelectionSpec}
      *            [sel] - Selection specification specifying model and atom
      *            properties to select. Default: all atoms in viewer
      * @param {number}
@@ -2003,9 +2003,8 @@ export class GLViewer {
     viewer.render(callback);
     });
      */
-    public center(sel, animationDuration: number = 0, fixedPath: boolean = false) {
+    public center(sel: AtomSelectionSpec = {}, animationDuration: number = 0, fixedPath: boolean = false) {
         var allatoms, alltmp;
-        sel = sel || {};
         var atoms = this.getAtomsFromSel(sel);
         var tmp = getExtent(atoms);
 
@@ -2066,7 +2065,7 @@ export class GLViewer {
         var maxDsq = 25;
         for (var i = 0; i < atoms.length; i++) {
             if (atoms[i]) {
-                var dsq = center.distanceToSquared(atoms[i]);
+                var dsq = center.distanceToSquared(atoms[i] as XYZ);
                 if (dsq > maxDsq)
                     maxDsq = dsq;
             }
@@ -2116,9 +2115,7 @@ export class GLViewer {
               viewer.zoomTo();
             });
      */
-    public zoomTo(sel, animationDuration, fixedPath) {
-        animationDuration = animationDuration !== undefined ? animationDuration : 0;
-        sel = sel || {};
+    public zoomTo(sel: AtomSelectionSpec = {}, animationDuration: number = 0, fixedPath: boolean = false) {
         let atoms = this.getAtomsFromSel(sel);
         let atombox = getExtent(atoms);
         let allbox = atombox;
@@ -2197,7 +2194,7 @@ export class GLViewer {
         var maxDsq = MAXD * MAXD;
         for (var i = 0; i < atoms.length; i++) {
             if (atoms[i]) {
-                var dsq = center.distanceToSquared(atoms[i]);
+                var dsq = center.distanceToSquared(atoms[i] as XYZ);
                 if (dsq > maxDsq)
                     maxDsq = dsq;
             }
@@ -2231,7 +2228,7 @@ export class GLViewer {
      * @param {number} near near clipping plane distance
      * @param {number} far far clipping plane distance
      */
-    public setSlab(near, far) {
+    public setSlab(near: number, far: number) {
         this.slabNear = near;
         this.slabFar = far;
     };
@@ -2285,8 +2282,7 @@ export class GLViewer {
             });
      
      */
-    public addLabel(text, options, sel?, noshow?) {
-        options = options || {};
+    public addLabel(text: string, options: LabelSpec = {}, sel?: AtomSelectionSpec, noshow: boolean = false) {
         if (sel) {
             var extent = getExtent(this.getAtomsFromSel(sel));
             options.position = { x: extent[2][0], y: extent[2][1], z: extent[2][2] };
@@ -2309,11 +2305,11 @@ export class GLViewer {
      * centroid of the atoms and styled according to the passed style.
      * The label text will be [resn][resi]
      *
-     * @param {Object} sel
-     * @param {Object} style
+     * @param {AtomSelectionSpec} sel
+     * @param {AtomStyleSpec} style
      * @param {boolean} byframe - if true, create labels for every individual frame, not just current
      *
-     * * @example
+     * @example
          $3Dmol.download("mmtf:2ll5",viewer,{},function(){
               viewer.setStyle({stick:{radius:0.15},cartoon:{}});
               viewer.addResLabels({hetflag:false}, {font: 'Arial', fontColor:'black',showBackground:false, screenOffset: {x:0,y:0}});
@@ -2321,7 +2317,7 @@ export class GLViewer {
               viewer.render();
             });
      */
-    public addResLabels(sel, style, byframe) {
+    public addResLabels(sel: AtomSelectionSpec, style: AtomStyleSpec, byframe: boolean = false) {
         let start = this.labels.length;
         this.applyToModels("addResLabels", sel, this, style, byframe);
         this.show();
@@ -2332,8 +2328,8 @@ export class GLViewer {
      * atom at the atom's coordinates with the property value as the label text.
      *
      * @param {string} prop - property name
-     * @param {Object} sel
-     * @param {Object} style
+     * @param {AtomSelectionSpec} sel
+     * @param {AtomStyleSpec} style
      *
      * * @example
          $3Dmol.download("cid:5291",viewer,{},function(){
@@ -2343,7 +2339,7 @@ export class GLViewer {
               viewer.render();
             });
      */
-    public addPropertyLabels(prop, sel, style) {
+    public addPropertyLabels(prop: string, sel: AtomSelectionSpec, style: AtomStyleSpec) {
         this.applyToModels("addPropertyLabels", prop, sel, this, style);
         this.show();
         return this;
@@ -2367,7 +2363,7 @@ export class GLViewer {
             });
      
      */
-    public removeLabel(label) {
+    public removeLabel(label: Label) {
         //todo: don't do the linear search
         for (var i = 0; i < this.labels.length; i++) {
             if (this.labels[i] == label) {
@@ -2411,11 +2407,11 @@ export class GLViewer {
      * Modify existing label's style
      *
      * @param {Label} label - $3Dmol label
-     * @param {Object}
+     * @param {LabelSpec}
      *            stylespec - Label style specification
      * @return {Label}
      */
-    public setLabelStyle(label, stylespec) {
+    public setLabelStyle(label: Label, stylespec: LabelSpec) {
         this.modelGroup.remove(label.sprite);
         label.dispose();
         label.stylespec = stylespec;
@@ -2435,7 +2431,7 @@ export class GLViewer {
      *            text - Label text
      * @return {Label}
      */
-    public setLabelText(label, text) {
+    public setLabelText(label: Label, text: string) {
         this.modelGroup.remove(label.sprite);
         label.dispose();
         label.text = text;
@@ -2448,12 +2444,12 @@ export class GLViewer {
 
     /**
      * Add shape object to viewer
-     * @see {@link GLShape}
+     * @see {GLShape}
      *
      * @param {ShapeSpec} shapeSpec - style specification for label
      * @return {GLShape}
      */
-    public addShape(shapeSpec) {
+    public addShape(shapeSpec: ShapeSpec) {
         shapeSpec = shapeSpec || {};
         var shape = new GLShape(shapeSpec);
         shape.shapePosition = this.shapes.length;
@@ -2467,7 +2463,7 @@ export class GLViewer {
      *
      * @param {GLShape} shape - Reference to shape object to remove
      */
-    public removeShape(shape) {
+    public removeShape(shape: GLShape) {
         if (!shape)
             return this;
         shape.removegl(this.modelGroup);
@@ -2492,9 +2488,9 @@ export class GLViewer {
     };
 
     //gets the center of the selection
-    private getSelectionCenter(spec) {
+    private getSelectionCenter(spec: AtomSelectionSpec): XYZ {
         if (spec.hasOwnProperty("x") && spec.hasOwnProperty("y") && spec.hasOwnProperty("z"))
-            return spec;
+            return spec as XYZ;
         var atoms = this.getAtomsFromSel(spec);
         if (atoms.length == 0)
             return { x: 0, y: 0, z: 0 };
@@ -2515,7 +2511,7 @@ export class GLViewer {
      
      viewer.render();
      */
-    public addSphere(spec) {
+    public addSphere(spec: SphereSpec) {
         spec = spec || {};
 
         spec.center = this.getSelectionCenter(spec.center);
@@ -2545,8 +2541,7 @@ export class GLViewer {
      viewer.rotate(45, {x:1,y:1,z:1});
      viewer.render();
      */
-    public addBox(spec) {
-        spec = spec || {};
+    public addBox(spec: BoxSpec = {}) {
 
         if (spec.corner != undefined) {
             spec.corner = this.getSelectionCenter(spec.corner);
@@ -2588,8 +2583,7 @@ export class GLViewer {
               viewer.render();
             });
      */
-    public addArrow(spec) {
-        spec = spec || {};
+    public addArrow(spec: ArrowSpec = {}) {
 
         spec.start = this.getSelectionCenter(spec.start);
         spec.end = this.getSelectionCenter(spec.end);
@@ -2637,8 +2631,7 @@ export class GLViewer {
                               toCap:false});
           viewer.render();
      */
-    public addCylinder(spec) {
-        spec = spec || {};
+    public addCylinder(spec: CylinderSpec = {}) {
 
         spec.start = this.getSelectionCenter(spec.start);
         spec.end = this.getSelectionCenter(spec.end);
@@ -2678,8 +2671,7 @@ export class GLViewer {
           viewer.zoomTo();
           viewer.render();
      */
-    public addCurve(spec) {
-        spec = spec || {};
+    public addCurve(spec: CurveSpec = {}) {
         var s = new GLShape(spec);
         s.shapePosition = this.shapes.length;
         s.addCurve(spec);
@@ -2708,8 +2700,7 @@ export class GLViewer {
           });
      
      */
-    public addLine(spec) {
-        spec = spec || {};
+    public addLine(spec: LineSpec = {}) {
 
         spec.start = this.getSelectionCenter(spec.start);
         spec.end = this.getSelectionCenter(spec.end);
@@ -2731,7 +2722,7 @@ export class GLViewer {
     /**
      * Create and add unit cell visualization.
      *
-     * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
+     * @param {GLModel|number} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
      * @param {UnitCellStyleSpec} spec - visualization style
        @example
      
@@ -2742,7 +2733,7 @@ export class GLViewer {
               viewer.render();
     });
      */
-    public addUnitCell(model, spec) {
+    public addUnitCell(model?: GLModel | number, spec?: UnitCellStyleSpec) {
         model = this.getModel(model);
         spec = spec || { alabel: 'a', blabel: 'b', clabel: 'c' };
 
@@ -2877,7 +2868,7 @@ export class GLViewer {
     /**
     * Remove unit cell visualization from model.
     *
-    * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
+    * @param {GLModel|number} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
       @example
            $3Dmol.get('data/icsd_200866.cif', function(data) {
              let m = viewer.addModel(data);
@@ -2888,7 +2879,7 @@ export class GLViewer {
              viewer.render();
        });
     */
-    public removeUnitCell(model) {
+    public removeUnitCell(model?: GLModel | number) {
         model = this.getModel(model);
         if (model.unitCellObjects) {
             let viewer = this;
@@ -2916,11 +2907,8 @@ export class GLViewer {
              viewer.render();
        });
     */
-    public replicateUnitCell(A, B, C, model) {
+    public replicateUnitCell(A: number = 3, B: number = A, C: number = B, model?: GLModel | number) {
         model = this.getModel(model);
-        A = A || 3;
-        B = B || A;
-        C = C || B;
         let cryst = model.getCrystData();
         if (cryst) {
             const atoms = model.selectedAtoms({});
@@ -2956,16 +2944,22 @@ export class GLViewer {
         }
     };
 
-    public addLineDashed(spec, s) {
+    /** Add dashed line to shape */
+    public addLineDashed(spec: CylinderSpec, s: GLShape) {
         spec.dashLength = spec.dashLength || 0.5;
         spec.gapLength = spec.gapLength || 0.5;
-        spec.start = spec.start || {};
-        spec.end = spec.end || {};
 
-        var p1 = new Vector3(spec.start.x || 0,
-            spec.start.y || 0, spec.start.z || 0);
-        var p2 = new Vector3(spec.end.x,
-            spec.end.y || 0, spec.end.z || 0);
+        var p1: Vector3;
+        if (!spec.start) {
+            p1 = new Vector3(0, 0, 0);
+        } else {
+            p1 = new Vector3(spec.start.x || 0,
+                spec.start.y || 0, spec.start.z || 0);
+        }
+
+        var p2: Vector3;
+        if(!spec.end) p2 = new Vector3(0,0,0);
+        else p2 = new Vector3(spec.end.x, spec.end.y || 0, spec.end.z || 0);
 
         var dir = new Vector3();
         var dash = new Vector3();
@@ -3039,7 +3033,7 @@ export class GLViewer {
     triangle(viewer);
     viewer.render();
      */
-    public addCustom(spec) {
+    public addCustom(spec:CustomShapeSpec) {
         spec = spec || {};
         var s = new GLShape(spec);
         s.shapePosition = this.shapes.length;
@@ -3054,7 +3048,7 @@ export class GLViewer {
      * Construct isosurface from volumetric data in gaussian cube format
      * @param {String} data - Input file contents
      * @param {String} format - Input file format
-     * @param {IsoSurfaceSpec} or {VolumetricRenderSpec} spec - Shape style specification
+     * @param {VolumetricRendererSpec|IsoSurfaceSpec} spec - Shape style specification
      * @return {GLShape}
      *
      * @example
@@ -3070,14 +3064,13 @@ export class GLViewer {
      
      
      */
-    public addVolumetricData(data, format, spec) {
-        spec = spec || {};
+    public addVolumetricData(data, format:string, spec:VolumetricRendererSpec|IsoSurfaceSpec={}) {
 
         var voldata = new VolumeData(data, format);
-        if (spec.transferfn) { //volumetric rendering
-            return this.addVolumetricRender(voldata, spec);
+        if (spec.hasOwnProperty('transferfn')) { //volumetric rendering
+            return this.addVolumetricRender(voldata, spec as VolumetricRendererSpec);
         } else {
-            return this.addIsosurface(voldata, spec);
+            return this.addIsosurface(voldata, spec as IsoSurfaceSpec);
         }
     };
 
@@ -3099,8 +3092,7 @@ export class GLViewer {
               viewer.render();
             });
      */
-    public addIsosurface(data, spec, callback?) {
-        spec = spec || {};
+    public addIsosurface(data, spec:IsoSurfaceSpec={}, callback?) {
         var s = new GLShape(spec);
         s.shapePosition = this.shapes.length;
         s.addIsosurface(data, spec, callback);
@@ -3116,7 +3108,7 @@ export class GLViewer {
      * @return {GLShape}
      *
      */
-    public addVolumetricRender(data, spec) {
+    public addVolumetricRender(data, spec:VolumetricRendererSpec) {
         spec = spec || {};
         var s = new GLVolumetricRender(data, spec);
         s.shapePosition = this.shapes.length;
@@ -3138,7 +3130,7 @@ export class GLViewer {
      *
      * @param {boolean} fog whether to enable or disable the fog
      */
-    public enableFog(fog) {
+    public enableFog(fog:boolean) {
         if (fog) {
             this.scene.fog = new Fog(this.bgColor, 100, 200);
         } else {
@@ -3155,7 +3147,7 @@ export class GLViewer {
      * @param {number} framenum - fame index to use, starts at zero
      * @return {Promise}
      */
-    public setFrame(framenum) {
+    public setFrame(framenum:number) {
         this.viewer_frame = framenum;
         let viewer = this;
         return new Promise<void>(function (resolve) {
@@ -3369,7 +3361,7 @@ export class GLViewer {
      * @param {string} format - Input format (see {@link FileFormats})
      * @return {Array<GLModel>}
      */
-    public addModels(data, format, options?) {
+    public addModels(data, format:string, options?) {
         options = options || {};
         options.multimodel = true;
         options.frames = true;
@@ -3408,7 +3400,7 @@ export class GLViewer {
               viewer.render();
           });
      */
-    public addModelsAsFrames(data, format, options?) {
+    public addModelsAsFrames(data, format:string, options?) {
         options = options || {};
         options.multimodel = true;
         options.frames = true;
@@ -3435,7 +3427,7 @@ export class GLViewer {
               viewer.render();
           });
      */
-    public addAsOneMolecule(data, format, options?) {
+    public addAsOneMolecule(data, format:string, options?) {
         options = options || {};
         options.multimodel = true;
         options.onemol = true;
@@ -3450,9 +3442,9 @@ export class GLViewer {
     /**
      * Delete specified model from viewer
      *
-     * @param {GLModel} model
+     * @param {GLModel|number} model
      */
-    public removeModel(model) {
+    public removeModel(model?:GLModel|number) {
         model = this.getModel(model);
         if (!model)
             return;
@@ -3484,7 +3476,7 @@ export class GLViewer {
      * @param {number} modelID - Optional parameter for which model to export. If left out, export all of them.
      * @return {string}
      */
-    public exportJSON(includeStyles, modelID) {
+    public exportJSON(includeStyles:boolean, modelID:number) {
         var object: any = {};
         if (modelID === undefined) {
             object.m = this.models.map(function (model) {
@@ -3515,11 +3507,11 @@ export class GLViewer {
      * Create a new model from atoms specified by sel.
      * If extract, removes selected atoms from existing models
      *
-     * @param {Object} sel - Atom selection specification
+     * @param {AtomSelectionSpec} sel - Atom selection specification
      * @param {boolean=} extract - If true, remove selected atoms from existing models
      * @return {GLModel}
      */
-    public createModelFrom(sel, extract) {
+    public createModelFrom(sel:AtomSelectionSpec, extract:boolean=false) {
         var m = new GLModel(this.models.length, this.defaultcolors);
         for (var i = 0; i < this.models.length; i++) {
             if (this.models[i]) {
@@ -3533,9 +3525,10 @@ export class GLViewer {
         return m;
     };
 
-    private applyToModels(func, sel, value1?, value2?, value3?, value4?, value5?) {
+    private applyToModels(func:string, sel:any, value1?, value2?, value3?, value4?, value5?) {
 
         //apply func to all models that are selected by sel with value1 and 2
+        //sel might not be a selection, in which case getModelList returns everything
         var ms = this.getModelList(sel);
         for (var i = 0; i < ms.length; i++) {
             ms[i][func](sel, value1, value2, value3, value4, value5);
@@ -3545,7 +3538,7 @@ export class GLViewer {
     /**
      * Set style properties to all selected atoms
      *
-     * @param {AtomSelectionSpec} sel - Atom selection specification
+     * @param {AtomSelectionSpec} sel - Atom selection specification.  Can be omitted to select all.
      * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
      *
      * @example
@@ -3562,10 +3555,12 @@ export class GLViewer {
     viewer.render();
     });
      */
-    public setStyle(sel, style) {
+    public setStyle(sel:AtomSelectionSpec, style:AtomStyleSpec);
+    public setStyle(sel:AtomStyleSpec);
+    public setStyle(sel:unknown, style?:unknown) {
         if (typeof (style) === 'undefined') {
             //if a single argument is provided, assume it is a style and select all
-            style = sel;
+            style = sel as AtomStyleSpec;
             sel = {};
         }
 
@@ -3576,7 +3571,7 @@ export class GLViewer {
     /**
      * Add style properties to all selected atoms
      *
-     * @param {AtomSelectionSpec} sel - Atom selection specification
+     * @param {AtomSelectionSpec} sel - Atom selection specification.  Can be omitted to select all
      * @param {AtomStyleSpec} style - style spec to add to specified atoms
      @example
      
@@ -3588,7 +3583,9 @@ export class GLViewer {
     viewer.render();
     });
      */
-    public addStyle(sel, style) {
+    public addStyle(sel:AtomSelectionSpec, style:AtomStyleSpec);
+    public addStyle(sel:AtomStyleSpec);    
+    public addStyle(sel:unknown, style?:unknown) {
         if (typeof (style) === 'undefined') {
             //if a single argument is provided, assume it is a style and select all
             style = sel;
@@ -3616,7 +3613,7 @@ export class GLViewer {
                viewer.render();
     });
      */
-    public setClickable(sel, clickable, callback) {
+    public setClickable(sel:AtomSelectionSpec, clickable:boolean, callback) {
         this.applyToModels("setClickable", sel, clickable, callback);
         return this;
     };
@@ -3646,7 +3643,7 @@ export class GLViewer {
     });
      
      */
-    public setHoverable(sel, hoverable, hover_callback, unhover_callback) {
+    public setHoverable(sel:AtomSelectionSpec, hoverable:boolean, hover_callback, unhover_callback) {
         this.applyToModels("setHoverable", sel, hoverable, hover_callback, unhover_callback);
         return this;
     };
@@ -3657,7 +3654,7 @@ export class GLViewer {
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
      
      */
-    public enableContextMenu(sel, contextMenuEnabled) {
+    public enableContextMenu(sel:AtomSelectionSpec, contextMenuEnabled:boolean) {
         this.applyToModels("enableContextMenu", sel, contextMenuEnabled);
         return this;
     };
@@ -3671,26 +3668,27 @@ export class GLViewer {
      * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
      * @param {ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
      */
-    public vibrate(numFrames, amplitude, bothways, arrowSpec) {
+    public vibrate(numFrames:number, amplitude:number, bothways:boolean, arrowSpec:ArrowSpec) {
         this.applyToModels("vibrate", numFrames, amplitude, bothways, this, arrowSpec);
         return this;
     };
 
     /**
      * @param {AtomSelectionSpec} sel
-     * @param {type} prop
-     * @param {type} scheme
+     * @param {string} prop
+     * @param {Gradient|string} scheme
+     * @param {object} range
      */
-    public setColorByProperty(sel, prop, scheme, range) {
+    public setColorByProperty(sel:AtomSelectionSpec, prop:string, scheme:Gradient|string, range) {
         this.applyToModels("setColorByProperty", sel, prop, scheme, range);
         return this;
     };
 
     /**
      * @param {AtomSelectionSpec} sel
-     * @param {type} colors
+     * @param {object} colors
      */
-    public setColorByElement(sel, colors) {
+    public setColorByElement(sel:AtomSelectionSpec, colors) {
         this.applyToModels("setColorByElement", sel, colors);
         return this;
     };
@@ -3702,7 +3700,7 @@ export class GLViewer {
      *            extent
      * @return {Array}
      */
-    private static getAtomsWithin(atomlist, extent) {
+    private static getAtomsWithin(atomlist:AtomSpec[], extent) {
         var ret = [];
 
         for (let i = 0; i < atomlist.length; i++) {
@@ -3742,7 +3740,7 @@ export class GLViewer {
      * @param {AtomSpec[]} atomstoshow
      * @return {Array}
      */
-    private carveUpExtent(extent, atomlist, atomstoshow) {
+    private carveUpExtent(extent, atomlist: AtomSpec[], atomstoshow: AtomSpec[]) {
         let ret = [];
 
         let index2atomlist = {}; //map from atom.index to position in atomlist
@@ -3839,7 +3837,7 @@ export class GLViewer {
      *            mat
      * @return {Mesh}
      */
-    private static generateSurfaceMesh(atoms, VandF, mat) {
+    private static generateSurfaceMesh(atoms: AtomSpec[], VandF, mat: MeshLambertMaterial) {
         var geo = new Geometry(true);
         // Only one group per call to generate surface mesh (addSurface
         // should split up mesh render)
@@ -3940,7 +3938,7 @@ export class GLViewer {
 
         }
         geoGroup.faceArray = new Uint16Array(faces);
-        var mesh = new Mesh(geo, mat);
+        var mesh = new Mesh(geo, mat as Material);
         return mesh;
     };
 
@@ -3951,17 +3949,17 @@ export class GLViewer {
      *            type
      * @param {Array}
      *            expandedExtent
-     * @param {Array}
+     * @param {AtomSpec[]}
      *            extendedAtoms
-     * @param {Array}
+     * @param {AtomSpec[]}
      *            atomsToShow
      * @param {AtomSpec[]} atoms
      * @param {number}
      *            vol
      * @return {Object}
      */
-    private static generateMeshSyncHelper(type, expandedExtent,
-        extendedAtoms, atomsToShow, atoms, vol) {
+    private static generateMeshSyncHelper(type: SurfaceType, expandedExtent,
+        extendedAtoms: AtomSpec[], atomsToShow: AtomSpec[], atoms: AtomSpec[], vol: number) {
         //            var time = new Date();
         var ps = new ProteinSurface();
         ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
@@ -3993,13 +3991,13 @@ export class GLViewer {
         return ps.getFacesAndVertices(atomsToShow);
     };
 
-    /**
+    /*
      *
-     * @param {matSpec}
+     * @param {SurfaceStyleSpec}
      *            style
      * @return {MeshLambertMaterial}
      */
-    private static getMatWithStyle(style) {
+    private static getMatWithStyle(style: SurfaceStyleSpec) {
         var mat = new MeshLambertMaterial();
         mat.vertexColors = Coloring.VertexColors;
 
@@ -4028,7 +4026,7 @@ export class GLViewer {
      *            style
      * @returns {number} surfid
      */
-    public addMesh(mesh) {
+    public addMesh(mesh: Mesh) {
         var surfobj = {
             geo: mesh.geometry,
             mat: mesh.material,
@@ -4064,7 +4062,8 @@ export class GLViewer {
      * @param {function} surfacecallback - function to be called after setting the surface
      * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
      */
-    public addSurface(type, style, atomsel, allsel, focus, surfacecallback) {
+    public addSurface(stype:SurfaceType|string, style:SurfaceStyleSpec={}, atomsel:AtomSelectionSpec={}, 
+        allsel?:AtomSelectionSpec, focus?: AtomSelectionSpec, surfacecallback?) {
         // type 1: VDW 3: SAS 4: MS 2: SES
         // if sync is true, does all work in main thread, otherwise uses
         // workers
@@ -4080,17 +4079,16 @@ export class GLViewer {
         let surfid = this.nextSurfID();
         let mat = null;
         let self = this;
+        let type:SurfaceType = SurfaceType.VDW;
 
-        if (typeof type == "string") {
-            if (this.surfaceTypeMap[type.toUpperCase()] !== undefined)
-                type = this.surfaceTypeMap[type];
+        if (typeof stype == "string") {
+            if (GLViewer.surfaceTypeMap[stype.toUpperCase()] !== undefined)
+                type = GLViewer.surfaceTypeMap[stype];
             else {
-                console.log("Surface type : " + type + " is not recognized");
+                console.log("Surface type : " + stype + " is not recognized");
             }
         }
-        else if (type === undefined) {
-            type = SurfaceType.VDW; //default
-        }
+
         // atoms specified by this selection
         var atomlist = null, focusSele = null;
         //TODO: currently generating a shallow copy to avoid problems when atoms are chagned
@@ -4116,7 +4114,7 @@ export class GLViewer {
             }
         }
 
-        var addSurfaceHelper = function addSurfaceHelper(surfobj, atomlist, atomsToShow) {
+        var addSurfaceHelper = function addSurfaceHelper(surfobj, atomlist: AtomSpec[], atomsToShow: AtomSpec[]) {
             //function returns promise with surfid resolved
             if (!focus) {
                 focusSele = atomsToShow;
@@ -4129,15 +4127,13 @@ export class GLViewer {
             var extent = getExtent(atomsToShow, true);
             if (style.map && style.map.prop) {
                 // map color space using already set atom properties
-                /** @type {AtomSpec} */
                 var prop = style.map.prop;
-                /** @type {Gradient} */
-                var scheme = style.map.scheme || style.map.gradient || new Gradient.RWB();
-                var range = scheme.range();
+                let scheme = getGradient(style.map.scheme || style.map.gradient || new Gradient.RWB());
+                let range = scheme.range();
                 if (!range) {
                     range = getPropertyRange(atomsToShow, prop);
                 }
-                style.colorscheme = { prop: prop, gradient: scheme };
+                style.colorscheme = { prop: prop as string, gradient: scheme };
 
             }
 
@@ -4196,7 +4192,7 @@ export class GLViewer {
                 // to keep the browser from locking up, call through setTimeout
                 var callSyncHelper = function callSyncHelper(i) {
                     return new Promise<void>(function (resolve) {
-                        var VandF = GLViewer.generateMeshSyncHelper(type, extents[i].extent,
+                        var VandF = GLViewer.generateMeshSyncHelper(type as SurfaceType, extents[i].extent,
                             extents[i].atoms, extents[i].toshow, reducedAtoms,
                             totalVol);
                         //complicated surfaces sometimes have > 2^16 vertices
@@ -4375,7 +4371,7 @@ export class GLViewer {
             });
        });
      */
-    public setSurfaceMaterialStyle(surf, style) {
+    public setSurfaceMaterialStyle(surf:number, style:SurfaceStyleSpec) {
         adjustVolumeStyle(style);
         if (this.surfaces[surf]) {
             var surfArr = this.surfaces[surf];
@@ -4411,7 +4407,7 @@ export class GLViewer {
      * Return surface object
      * @param {number} surf - surface id
      */
-    public getSurface(surf) {
+    public getSurface(surf:number) {
         return this.surfaces[surf];
     };
 
@@ -4419,7 +4415,7 @@ export class GLViewer {
      * Remove surface with given ID
      * @param {number} surf - surface id
      */
-    public removeSurface(surf) {
+    public removeSurface(surf:number) {
         var surfArr = this.surfaces[surf];
         for (var i = 0; i < surfArr.length; i++) {
             if (surfArr[i] && surfArr[i].lastGL) {
@@ -4506,7 +4502,7 @@ export class GLViewer {
                   viewer.render();
                 });
      */
-    public mapAtomProperties(props, sel) {
+    public mapAtomProperties(props, sel:AtomSelectionSpec) {
         sel = sel || {};
         var atoms = this.getAtomsFromSel(sel);
 
@@ -4546,7 +4542,7 @@ export class GLViewer {
      * be set to this viewer's view.
      * @param {$3Dmol.GLViewer} otherview
      */
-    public linkViewer(otherviewer) {
+    public linkViewer(otherviewer:GLViewer) {
         this.linkedViewers.push(otherviewer);
         return this;
     };
@@ -4563,7 +4559,7 @@ export class GLViewer {
      * Set the distance between the model and the camera
      * Essentially zooming. Useful while stereo rendering.
      */
-    public setPerceivedDistance(dist) {
+    public setPerceivedDistance(dist:number) {
         this.rotationGroup.position.z = this.CAMERA_Z - dist;
     };
 
@@ -4571,7 +4567,7 @@ export class GLViewer {
      * Used for setting an approx value of eyeSeparation. Created for calling by StereoViewer object
      * @return {number} camera x position
      */
-    public setAutoEyeSeparation(isright, x) {
+    public setAutoEyeSeparation(isright:boolean, x:number) {
         var dist = this.getPerceivedDistance();
         if (!x) x = 5.0;
         if (isright || this.camera.position.x > 0) //setting a value of dist*tan(x)
@@ -4587,7 +4583,7 @@ export class GLViewer {
      * Current models are not affected.
      * @number quality, higher results in higher resolution renders
      */
-    public setDefaultCartoonQuality(val) {
+    public setDefaultCartoonQuality(val:number) {
         this.config.cartoonQuality = val;
     };
 
@@ -4609,7 +4605,7 @@ export class GLViewer {
    );
  *                        
  */
-export function createViewer(element, config?) {
+export function createViewer(element, config?:ViewerSpec) {
     element = getElement(element);
     if (!element) return;
 
@@ -4669,12 +4665,9 @@ export function createViewer(element, config?) {
    });
      
  */
-export function createViewerGrid(element, config?, viewer_config?) {
+export function createViewerGrid(element, config:ViewerGridSpec={}, viewer_config:ViewerSpec={}) {
     element = getElement(element);
     if (!element) return;
-
-    config = config || {};
-    viewer_config = viewer_config || {};
 
     var viewers = [];
     //create canvas
@@ -4777,9 +4770,9 @@ export function createStereoViewer(element) {
  */
 export interface ViewerSpec {
     /** Callback function to be executed with this viewer after setup is complete */
-    callback: (viewer: ViewerSpec) => void;
+    callback?: (viewer: ViewerSpec) => void;
     /** Object defining default atom colors as atom => color property value pairs for all models within this viewer */
-    defaultcolors: Record<string, string>;
+    defaultcolors?: Record<string, string>;
     /** 
      * Whether to disable disable handling of mouse events.
      * If you want to use your own mouse handlers, set this then bind your handlers to the canvas object.  
@@ -4788,45 +4781,44 @@ export interface ViewerSpec {
                   'DOMMouseScroll mousewheel': viewer._handleMouseScroll
                   'mousemove touchmove': viewer._handleMouseMove   
      */
-    nomouse: boolean | string;
+    nomouse?: boolean | string;
     /** Color of the canvas background */
-    backgroundColor: string;
+    backgroundColor?: string;
     /** Alpha transparency of canvas background */
-    backgroundAlpha: number;
+    backgroundAlpha?: number;
     /** */
-    camerax: number;
+    camerax?: number;
     /** */
-    hoverDuration: number;
+    hoverDuration?: number;
     /** id of the canvas */
-    id: string;
+    id?: string;
     /** default 5 */
-    cartoonQuality: number;
+    cartoonQuality?: number;
     /** */
-    row: number;
+    row?: number;
     /** */
-    col: number;
+    col?: number;
     /** */
-    rows: number;
+    rows?: number;
     /** */
-    cols: number;
+    cols?: number;
     /** */
-    canvas: HTMLCanvasElement;
-    /** GLViewer has not been ported but this is a viewer object */
-    viewers: unknown[];
+    canvas?: HTMLCanvasElement;
+    viewers?: GLViewer[];
     /** */
-    minimumZoomToDistance: number;
+    minimumZoomToDistance?: number;
     /** */
-    lowerZoomLimit: number;
+    lowerZoomLimit?: number;
     /** */
-    upperZoomLimit: number;
+    upperZoomLimit?: number;
     /** */
-    antialias: boolean;
+    antialias?: boolean;
     /** */
-    control_all: boolean;
+    control_all?: boolean;
     /** */
-    orthographic: boolean;
+    orthographic?: boolean;
     /** Disable fog, default to false */
-    disableFog: boolean;
+    disableFog?: boolean;
 
 };
 
@@ -4835,11 +4827,11 @@ export interface ViewerSpec {
  */
 export interface ViewerGridSpec {
     /** number of rows in grid */
-    rows: number;
+    rows?: number;
     /** number of columns in grid */
-    cols: number;
+    cols?: number;
     /** if true, mouse events are linked */
-    control_all: boolean;
+    control_all?: boolean;
 };
 
 
@@ -4860,23 +4852,23 @@ export interface ViewerGridSpec {
  */
 export interface SurfaceStyleSpec {
     /** sets the transparency: 0 to hide, 1 for fully opaque */
-    opacity: number;
+    opacity?: number;
     /** element based coloring */
-    colorscheme: ColorschemeSpec;
+    colorscheme?: ColorschemeSpec;
     /** fixed coloring, overrides colorscheme */
-    color: ColorSpec;
+    color?: ColorSpec;
     /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
-    voldata: VolumeData;
+    voldata?: VolumeData;
     /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
-    volscheme: Gradient;
+    volscheme?: Gradient;
     /** format of voldata if not a {VolumeData} object */
-    volformat: string;
+    volformat?: string;
     /* specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead. */
-    map: Record<string, unknown>
+    map?: Record<string, unknown>
 };
 
 
-    /** Style specification ofr unit cell shape.  */
+/** Style specification ofr unit cell shape.  */
 export interface UnitCellStyleSpec {
     /** line style used to draw box */
     box?: LineStyleSpec;
@@ -4885,7 +4877,7 @@ export interface UnitCellStyleSpec {
     /** arrow specification of the "b" axis */
     bstyle?: ArrowSpec;
     /** arrow specification of the "c" axis */
-    cstyle?: ArrowSpec;        
+    cstyle?: ArrowSpec;
     /** label for "a" axis */
     alabel?: string;
     /** label style for a axis */
@@ -4893,9 +4885,9 @@ export interface UnitCellStyleSpec {
     /** label for "b" axis */
     blabel?: string;
     /** label style for b axis */
-    blabelstyle?: LabelSpec;    
+    blabelstyle?: LabelSpec;
     /** label for "c" axis */
-    clabel?: string;        
+    clabel?: string;
     /** label style for c axis */
-    clabelstyle?: LabelSpec;    
+    clabelstyle?: LabelSpec;
 }
