@@ -79,8 +79,6 @@ export interface LabelSpec {
   inFront?: boolean;
   /** show background rounded rectangle, default true */
   showBackground?: boolean;
-  /** sets the label to change with the model when zooming */
-  fixed?: boolean;
   /** position is in screen (not model) coordinates which are pixel offsets from the upper left corner */
   useScreen?: boolean;
   /** An elment to draw into the label. Any CanvasImageSource is allowed.  Label is resized to size of image */

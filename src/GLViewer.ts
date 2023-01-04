@@ -40,7 +40,6 @@ export class GLViewer {
     private surfaces: any = {};
     private shapes = []; // Generic shapes
     private labels: Label[] = [];
-    private fixed_labels = [];
     private clickables = []; //things you can click on
     private hoverables = []; //things you can hover over
     private contextMenuEnabledAtoms = []; // atoms with context menu
@@ -2290,8 +2289,6 @@ export class GLViewer {
         var label = new Label(text, options);
         label.setContext();
         this.modelGroup.add(label.sprite);
-        if (options.fixed)
-            this.fixed_labels.push(this.labels.length);
         this.labels.push(label);
 
         if (!noshow) this.show();

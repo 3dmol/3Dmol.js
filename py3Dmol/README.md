@@ -2,7 +2,7 @@ py3Dmol
 =======
 
 A simple [IPython/Jupyter](http://jupyter.org/) widget to
-embed an interactive [3Dmol.js](http://3dmol.csb.pitt.edu) viewer in a notebook.
+embed an interactive [3Dmol.js](http://3dmol.org) viewer in a notebook.
 
 The widget is completely static, which means the viewer doesn't need a running
 IPython kernel to be useful and web pages and presentations generated from

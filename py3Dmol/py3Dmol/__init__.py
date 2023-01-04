@@ -115,11 +115,11 @@ if(warn) {
             if len(viewergrid) != 2:
                 raise ValueError("Incorrectly formated viewergrid arguments.  Must specify rows x columns",viewergrid)
             self.startjs += "var viewergrid_UNIQUEID = null;\n";
-            self.startjs += 'viewergrid_UNIQUEID = $3Dmol.createViewerGrid($("#%s"),{rows: %d, cols: %d, control_all: %s},{backgroundColor:"white"});\n' % (divid, viewergrid[0],viewergrid[1],'true' if linked else 'false')
+            self.startjs += 'viewergrid_UNIQUEID = $3Dmol.createViewerGrid(document.getElementById("%s"),{rows: %d, cols: %d, control_all: %s},{backgroundColor:"white"});\n' % (divid, viewergrid[0],viewergrid[1],'true' if linked else 'false')
             self.startjs += "viewer_UNIQUEID = viewergrid_UNIQUEID[0][0];\n"
             self.viewergrid = viewergrid
         else:
-            self.startjs += 'viewer_UNIQUEID = $3Dmol.createViewer($("#%s"),{backgroundColor:"white"});\n' % divid
+            self.startjs += 'viewer_UNIQUEID = $3Dmol.createViewer(document.getElementById("%s"),{backgroundColor:"white"});\n' % divid
         if query:
             if viewergrid:
                 for r in range(viewergrid[0]):
@@ -170,7 +170,7 @@ if(warn) {
         '''Instead of inserting into notebook here, insert html
         into existing container'''
         html = self._make_html()
-        html += '''<script>$("#%s").append($("#3dmolviewer_%s")); </script>'''%(containerid,self.uniqueid)
+        html += '''<script>document.getElementById("%s").append(document.getElementById("3dmolviewer_%s")); </script>'''%(containerid,self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':html, 'text/html': html},metadata={})
 
     def _make_html(self):
@@ -207,7 +207,7 @@ if(warn) {
         script = '''<img id="img_{0}">
             <script>
             var png = viewer_{0}.pngURI()
-            $('#img_{0}').attr('src', png)
+            document.getElementById('img_{0}').attr('src', png)
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
     
@@ -219,7 +219,7 @@ if(warn) {
         script = '''<img id="img_{0}">
             <script>
             viewer_{0}.apngURI({1}).then(png => {{
-            $('#img_{0}').attr('src', png); }});
+            document.getElementById('img_{0}').attr('src', png); }});
             </script>'''.format(self.uniqueid,nframes)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})    
         

@@ -18,3 +18,5 @@ A clear and concise description of any alternative solutions or features you've 
 
 **Additional context(Optional)**
 Add any other context or screenshots about the feature request here.
+
+**Please close your issue when you feel it has been adequately resolved**

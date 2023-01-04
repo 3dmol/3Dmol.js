@@ -23,13 +23,13 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.8.1',
+    version='2.0.0-1',
 
-    description='An IPython interface for embedding 3Dmol.js views',
+    description='An IPython interface for embedding 3Dmol.js views in Jupyter notebooks',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://3dmol.csb.pitt.edu',
+    url='https://3dmol.org',
 
     # Author details
     author='David Koes',
@@ -44,7 +44,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
