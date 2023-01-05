@@ -13,7 +13,7 @@ import { VolumeData } from "./VolumeData";
 import { ProteinSurface, SurfaceType, syncSurface } from "./ProteinSurface4";
 import { GLVolumetricRender, VolumetricRendererSpec } from "./VolumetricRender";
 import { AtomSelectionSpec, AtomSpec } from "./specs";
-import { UPNG } from 'upng-js'
+import { decode, toRGBA8, encode } from 'upng-js'
 
 
 /**
@@ -959,12 +959,12 @@ export class GLViewer {
                         let rgbas = [];
                         //have to convert png to rgba, before creating the apng
                         for (let i = 0; i < buffers.length; i++) {
-                            let img = UPNG.decode(buffers[i]);
-                            rgbas.push(UPNG.toRGBA8(img)[0]);
+                            let img = decode(buffers[i]);
+                            rgbas.push(toRGBA8(img)[0]);
                         }
                         let width = viewer.getCanvas().width;
                         let height = viewer.getCanvas().height;
-                        let apng = UPNG.encode(rgbas, width, height, 0, delays);
+                        let apng = encode(rgbas, width, height, 0, delays);
                         let blob = new Blob([apng], { type: 'image/png' });
                         let fr = new FileReader();
                         fr.onload = function (e) {
