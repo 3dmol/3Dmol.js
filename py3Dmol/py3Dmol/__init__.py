@@ -84,11 +84,20 @@ class view(object):
         self.startjs += """
 var loadScriptAsync = function(uri){
   return new Promise((resolve, reject) => {
+    //this is to ignore the existence of requirejs amd
+    var savedexports, savedmodule;
+    if (typeof exports !== 'undefined') savedexports = exports;
+    else exports = {}
+    if (typeof module !== 'undefined') savedmodule = module;
+    else module = {}
+
     var tag = document.createElement('script');
     tag.src = uri;
     tag.async = true;
     tag.onload = () => {
-      resolve();
+        exports = savedexports;
+        module = savedmodule;
+        resolve();
     };
   var firstScriptTag = document.getElementsByTagName('script')[0];
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -207,7 +216,7 @@ if(warn) {
         script = '''<img id="img_{0}">
             <script>
             var png = viewer_{0}.pngURI()
-            document.getElementById('img_{0}').attr('src', png)
+            document.getElementById('img_{0}').src = png;
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
     
@@ -219,7 +228,7 @@ if(warn) {
         script = '''<img id="img_{0}">
             <script>
             viewer_{0}.apngURI({1}).then(png => {{
-            document.getElementById('img_{0}').attr('src', png); }});
+            document.getElementById('img_{0}').src = png; }});
             </script>'''.format(self.uniqueid,nframes)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})    
         
