@@ -40,7 +40,8 @@ module.exports =  {
 
   plugins: [
     new webpack.ProvidePlugin({
-        MMTF: path.resolve(__dirname, "./src/vendor/mmtf.js")
+        MMTF: path.resolve(__dirname, "./src/vendor/mmtf.js"),
+        $: "jquery"
     }),
     new webpack.BannerPlugin({ banner }), 
     new ESLintPlugin()],

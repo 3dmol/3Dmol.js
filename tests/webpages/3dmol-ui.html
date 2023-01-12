@@ -17,6 +17,7 @@
   </head>
   <body>
     <script src="../../build/3Dmol.js"></script>
+    <script src="../../build/3Dmol.ui.js"></script>
 
     <!-- Different divs to test out different input to ui -->
     <!-- <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true'></div> -->
@@ -33,21 +34,6 @@
 
     <!-- <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A", "hetflag" : true}' data-style='{"sphere":{"radius": 0.4}, "stick" : {}}'></div> -->
 
-    <script type="text/javascript">
-      $3Dmol = (function(window) {
 
-          var my = window.$3Dmol || {};
-
-          return my;
-
-      })(window);
-
-
-      $(document).ready(()=>{
-        var viewer = $3Dmol.createViewer("new_canvas_test");
-        viewer.ui.initiateUI();
-      });
-
-    </script>
   </body>
 </html>
