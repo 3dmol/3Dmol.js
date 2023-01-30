@@ -768,8 +768,9 @@ export class GLModel {
                 var p2 = new Vector3(atom2.x, atom2.y, atom2.z);
 
                 // draw cylinders
-                if (atom.bondOrder[i] === 1 || singleBond || atom.bondOrder[i] > 3) { //TODO: aromatics at 4
+                if (atom.bondOrder[i] <= 1 || singleBond || atom.bondOrder[i] > 3) { //TODO: aromatics at 4
 
+                    if(atom.bondOrder[i] < 1) bondR *= atom.bondOrder[i];
                     if (!atom2.capDrawn && atom2.bonds.length < 4)
                         toCap = 2;
 
@@ -962,7 +963,7 @@ export class GLModel {
         if (differentradii) { //jmol style double/triple bonds - no sphere
             if (numsinglebonds > 0) drawSphere = true; //unless needed as a cap
         }
-        else if (numsinglebonds == 0 && atom.bonds.length > 0) {
+        else if (numsinglebonds == 0 && (atom.bonds.length > 0 || style.showNonBonded)) {
             drawSphere = true;
         }
 
@@ -2848,6 +2849,8 @@ export interface StickStyleSpec {
     color?: ColorSpec;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
+    /** display nonbonded atoms as spheres */
+    showNonBonded?: boolean;
 }
 
 

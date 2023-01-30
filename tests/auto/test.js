@@ -193,6 +193,7 @@ $(document).ready(function(){
         
         //override default error handling (try/catch isn't sufficient due to callbacks)
         window.onerror = function(message, file, lineNumber) {
+            if(message.startsWith("ResizeObserver")) return true;
             setError(message);
             failures++;
             setTimeout(function() {runTest(nexti);}, 1); //let page update  

@@ -47,7 +47,7 @@ var parseV2000 = function (lines, options) {
       line = lines[offset];
       var from = serialToIndex[parseInt(line.substr(0, 3)) - 1 + start];
       var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
-      var order = parseInt(line.substr(6, 3));
+      var order = parseFloat(line.substr(6));
       if (typeof from != "undefined" && typeof to != "undefined") {
         atoms[atoms.length - 1][from].bonds.push(to);
         atoms[atoms.length - 1][from].bondOrder.push(order);
@@ -137,7 +137,7 @@ var parseV3000 = function (lines, options) {
       if (bondParts.length > 3) {
         var from = serialToIndex[parseInt(bondParts[2]) - 1 + start];
         var to = serialToIndex[parseInt(bondParts[3]) - 1 + start];
-        var order = parseInt(bondParts[1]);
+        var order = parseFloat(bondParts[1]);
         if (typeof from != "undefined" && typeof to != "undefined") {
           atoms[atoms.length - 1][from].bonds.push(to);
           atoms[atoms.length - 1][from].bondOrder.push(order);
