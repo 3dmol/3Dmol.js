@@ -2894,6 +2894,7 @@ export class GLViewer {
     * @param {integer} B - number of times to replicate cell in Y dimension.  If absent, X value is used.
     * @param {integer} C - number of times to replicate cell in Z dimension.  If absent, Y value is used.
     * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
+    * @param {boolean} addBonds - Create bonds between unit cells based on distances.
       @example
            $3Dmol.get('data/icsd_200866.cif', function(data) {
              let m = viewer.addModel(data);
@@ -2904,7 +2905,7 @@ export class GLViewer {
              viewer.render();
        });
     */
-    public replicateUnitCell(A: number = 3, B: number = A, C: number = B, model?: GLModel | number) {
+    public replicateUnitCell(A: number = 3, B: number = A, C: number = B, model?: GLModel | number, addBonds?: boolean) {
         model = this.getModel(model);
         let cryst = model.getCrystData();
         if (cryst) {
@@ -2937,6 +2938,10 @@ export class GLViewer {
                         model.addAtoms(newatoms);
                     }
                 }
+            }
+
+            if(addBonds) {
+                model.assignBonds();
             }
         }
     };

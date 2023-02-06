@@ -18,9 +18,9 @@ import { inflate } from "pako"
 import { AtomSelectionSpec, AtomSpec } from "./specs";
 import { GLViewer } from "GLViewer";
 import { ArrowSpec } from "GLShape";
-import { ParserOptionsSpec } from "parsers/ParserOptionsSpec";
+import { ParserOptionsSpec } from "./parsers/ParserOptionsSpec";
 import { LabelSpec } from "Label";
-
+import { assignBonds } from "./parsers/utils/assignBonds";
 
 /**
  * GLModel represents a group of related atoms
@@ -2055,6 +2055,14 @@ export class GLModel {
             this.atoms.push(a);
         }
     };
+
+    /** Assign bonds based on atomic coordinates.
+     *  This currently uses a primitive distance-based algorithm that does not 
+     * consider valence constraints and will only create single bonds.
+     */
+    public assignBonds() {
+        assignBonds(this.atoms);
+    }
 
     /** Remove specified atoms from model
      * 
