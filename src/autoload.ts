@@ -30,7 +30,6 @@ export function autoload(viewer?, callback?) {
             var datauri = [];
             var datatypes = [];
             var uri = '';
-            var showUI = false;
 
             if (viewerdiv.style.position == 'static') {
                 //slight hack - canvas needs this element to be positioned
@@ -38,9 +37,6 @@ export function autoload(viewer?, callback?) {
             }
 
             var UI:any = null;
-            if (viewerdiv.dataset.ui) {
-                showUI = true;
-            }
 
             type = null;
             if (viewerdiv.dataset.pdb) {
@@ -150,7 +146,7 @@ export function autoload(viewer?, callback?) {
             var applyStyles = function (glviewer) {
                 glviewer.setStyle(select, style);
 
-                if (showUI) {
+                if (UI) {
                     UI.createSelectionAndStyle(select, style);
                 }
 
@@ -158,7 +154,7 @@ export function autoload(viewer?, callback?) {
                     let sel = selectstylelist[i][0] || {};
                     let sty = selectstylelist[i][1] || { "line": {} };
                     glviewer.setStyle(sel, sty);
-                    if (showUI) {
+                    if (UI) {
                         UI.createSelectionAndStyle(select, style);
                     }
                 }
@@ -167,7 +163,7 @@ export function autoload(viewer?, callback?) {
                     let sty = surfaces[i][1] || {};
                     let viewer = glviewer;
 
-                    if (showUI) {
+                    if (UI) {
                         viewer.addSurface(SurfaceType.VDW, sty, sel, sel).then((surfid) => {
                             UI.loadSurface("VDW", sel, sty, surfid);
                         });
@@ -205,7 +201,7 @@ export function autoload(viewer?, callback?) {
                         UI.initiateUI();
                 }
 
-                if(showUI) {
+                if(viewerdiv.dataset.ui && $3Dmol.StateManager) {
                     UI = new $3Dmol.StateManager(glviewer); // Creates the UI state management tool
                 }
             } catch (error) {
@@ -222,7 +218,7 @@ export function autoload(viewer?, callback?) {
                     uri = datauri[i]; //this is where the moldata came from
                     var type = viewerdiv.dataset.type || viewerdiv.dataset.datatype || datatypes[i];
                     glviewer.addModel(moldata, type, options);
-                    if (showUI) {
+                    if (UI) {
                         var modelName = viewerdiv.dataset[datatypes[i]];
                         UI.setModelTitle(modelName);
                     }
