@@ -53,7 +53,7 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/GLViewer.html
     '''
-    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol-min.min.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
@@ -281,35 +281,47 @@ if(warn) {
         if name.startswith('_') or name == 'getdoc': #object to ipython canary functions
             raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
             
+        print_result = False
+        if name.startswith('print_to_console_'):
+            print_result = True
+            name = name[17:]
+
         def makejs(*args,**kwargs):
+
+            def make_viewer_cmd(vname, name, *args, **kwargs):
+                cmd = '\t'
+                if print_result:
+                    cmd += 'console.log('
+                cmd += f'{vname}.{name}('
+                for arg in args:
+                    cmd += '%s,' % tostr(arg)
+                cmd = cmd.rstrip(',')
+                if print_result:
+                    cmd += ')'                         
+                cmd += ');\n'
+       
+                return cmd
+
             if self.viewergrid:
                 if kwargs and 'viewer' in kwargs:
                     coords = kwargs['viewer']
                     if len(coords) != 2 or coords[0] >= self.viewergrid[0] or coords[1] >= self.viewergrid[1] or coords[0] < 0 or coords[1] < 0:
                         raise ValueError("Incorrectly formated viewer argument.  Must specify row and column",self.viewergrid)
-                    cmd = '\tviewergrid_UNIQUEID[%d][%d].%s(' % (coords[0],coords[1],name);
-                    for arg in args:
-                        cmd += '%s,' % tostr(arg)
-                    cmd = cmd.rstrip(',')
-                    cmd += ');\n';
+                    cmd = make_viewer_cmd('viewergrid_UNIQUEID[%d][%d]'%(coords[0],coords[1]),name,*args,**kwargs)
                 else: #apply to every viewer
                     cmd = ''
                     for r in range(self.viewergrid[0]):
                         for c in range(self.viewergrid[1]):
-                            cmd += '\tviewergrid_UNIQUEID[%d][%d].%s(' % (r,c,name);
-                            for arg in args:
-                                cmd += '%s,' % tostr(arg)
-                            cmd = cmd.rstrip(',')
-                            cmd += ');\n';
+                            cmd += make_viewer_cmd('viewergrid_UNIQUEID[%d][%d]'%(r,c),name,*args,**kwargs)
             else:
-                cmd = '\tviewer_UNIQUEID.%s(' % name;
-                for arg in args:
-                    cmd += '%s,' % tostr(arg)
-                cmd = cmd.rstrip(',')
-                cmd += ');\n';
+                cmd = make_viewer_cmd('viewer_UNIQUEID',name,*args,**kwargs)
 
             self.startjs += cmd
             self.updatejs += cmd
-            return self
+            if print_result:
+                self.update()
+                return "Inspect the JavaScript console for your requested result."
+            else:
+                return self
 
         return makejs
