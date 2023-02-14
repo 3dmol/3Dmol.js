@@ -1,6 +1,6 @@
 import { Matrix4 } from "../../WebGL";
 import { atomNameToElem } from "./atomNameToElem";
-import { bondTable } from "./bondTable";
+import { bondTable } from "./bondLength";
 import { computeSecondaryStructure } from "./computeSecondaryStructure";
 import { isEmpty } from "./isEmpty";
 import { processSymmetries } from "./processSymmetries";

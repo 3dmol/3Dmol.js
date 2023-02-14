@@ -1,4 +1,4 @@
-import { bondTable } from "./bondTable";
+import { bondTable } from "./bondLength";
 
 //attempts to infer atomic element from an atom name
 export function atomNameToElem(name, nothetero) {

@@ -13,6 +13,8 @@ import { PRMTOP } from "./PRMTOP";
 import { GRO } from "./GRO";
 import { LAMMPSTRJ } from "./LAMMPSTRJ";
 
+export { bondLength, setBondLength } from './utils/bondLength';
+
 // @category Parsers
 export const Parsers = {
   vasp: VASP,
