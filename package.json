@@ -41,12 +41,12 @@
   "dependencies": {
     "iobuffer": "^5.3.1",
     "netcdfjs": "^2.0.2",
-    "npm": "^9.2.0",
     "pako": "^2.1.0",
     "upng-js": "^2.1.0",
     "utf8": "^3.0.0"
   },
   "devDependencies": {
+    "npm": "^9.2.0",
     "@babel/core": "^7.20.7",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/plugin-transform-typescript": "^7.20.7",
