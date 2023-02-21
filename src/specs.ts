@@ -110,9 +110,9 @@ export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index
     /** intersects the selection with the set of atoms within a given distance from another selection */
     within?: WithinSelectionSpec;
     /** take the intersection of the provided lists of {@link AtomSelectionSpec}s */
-    and?: AtomSelectionSpec[] & {__cached_results: any};
+    and?: AtomSelectionSpec[] & {__cached_results?: any};
     /** take the union of the provided lists of {@link AtomSelectionSpec}s */
-    or?: AtomSelectionSpec[] & {__cached_results: any};
+    or?: AtomSelectionSpec[] & {__cached_results?: any};
     /** take the inverse of the provided {@link AtomSelectionSpec} */
     not?: AtomSelectionSpec;
     contextMenuEnabled?: boolean;
