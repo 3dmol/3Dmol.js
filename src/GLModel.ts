@@ -93,7 +93,7 @@ export class GLModel {
         "Ra": 2.83,
         "U": 1.86
     };
- 
+
     // class functions
     // return true if a and b represent the same style
     static sameObj(a, b) {
@@ -140,12 +140,12 @@ export class GLModel {
         this.id = mid;
     }
     // return proper radius for atom given style
-    /** 
-     * 
+    /**
+     *
      * @param {AtomSpec} atom
      * @param {atomstyle} style
-     * @return {number} 
-     * 
+     * @return {number}
+     *
      */
     private getRadiusFromStyle(atom:AtomSpec, style:SphereStyleSpec|ClickSphereStyleSpec|CrossStyleSpec) {
         var r = this.defaultSphereRadius;
@@ -168,7 +168,7 @@ export class GLModel {
     // cross drawing
 
     /**
-     * 
+     *
      * @param {AtomSpec} atom
      * @param {Record<number, Geometry>} geos
      */
@@ -322,7 +322,7 @@ export class GLModel {
     // bonds - both atoms must match bond style
     // standardize on only drawing for lowest to highest
     /**
-     * 
+     *
      * @param {AtomSpec}
      *            atom
      * @param {AtomSpec[]} atoms
@@ -470,7 +470,7 @@ export class GLModel {
                     }
                 }
             }
-            else { //single bond                                    
+            else { //single bond
                 if (c1 == c2) {
                     geoGroup.vertices += 2;
                     this.addLine(vertexArray, colorArray, offset, p1, p2, c1);
@@ -487,8 +487,8 @@ export class GLModel {
 
     //sphere drawing
     //See also: drawCylinder
-    /** 
-     * 
+    /**
+     *
      * @param {AtomSpec} atom
      * @param {Geometry} geo
      */
@@ -567,7 +567,7 @@ export class GLModel {
     };
 
     private drawSphereImposter(geo: Geometry, center: XYZ, radius: number, C: Color) {
-        //create flat square                                   
+        //create flat square
         var geoGroup = geo.updateGeoGroup(4);
         var i;
         var startv = geoGroup.vertices;
@@ -743,7 +743,7 @@ export class GLModel {
                 // color
                 var style2 = atom2.style;
                 if (!style2.stick || style2.stick.hidden)
-                    continue; // don't sweat the details                     
+                    continue; // don't sweat the details
 
                 var C2 = getColorFromStyle(atom2, style2.stick);
 
@@ -1079,7 +1079,7 @@ export class GLModel {
 
         // add sphere geometry
         if (sphereGeometry && sphereGeometry.vertices > 0) {
-            //Initialize buffers in geometry                
+            //Initialize buffers in geometry
             sphereGeometry.initTypedArrays();
             var sphereMaterial = null;
             var sphere = null;
@@ -1129,7 +1129,7 @@ export class GLModel {
             var balls = stickGeometry.sphereGeometry;
             if (!balls || typeof (balls.vertices) === 'undefined' || balls.vertices == 0) balls = null; //no balls
 
-            //Initialize buffers in geometry                
+            //Initialize buffers in geometry
             stickGeometry.initTypedArrays();
             if (balls) balls.initTypedArrays();
 
@@ -1229,9 +1229,9 @@ export class GLModel {
 
 
     /**
-     * Return object representing internal state of 
+     * Return object representing internal state of
      * the model appropriate for passing to setInternalState
-     * 
+     *
     */
     public getInternalState() {
         return {
@@ -1242,7 +1242,7 @@ export class GLModel {
 
     /**
      * Overwrite the internal model state with the passed state.
-     * 
+     *
     */
     public setInternalState(state) {
         this.atoms = state.atoms;
@@ -1280,7 +1280,7 @@ export class GLModel {
      * @param {number} alpha - unit cell angle in degrees (default 90)
      * @param {number} beta - unit cell angle in degrees (default 90)
      * @param {number} gamma - unit cell angle in degrees (default 90)
-     
+
      */
     public setCrystData(a?: number, b?:number, c?:number, alpha?:number, beta?:number, gamma?:number) {
         //I am assuming these
@@ -1302,7 +1302,7 @@ export class GLModel {
     /**
      * Set the crystallographic matrix to the given matrix.
      *
-     * This function removes `a`, `b`, `c`, `alpha`, `beta`, `gamma` from 
+     * This function removes `a`, `b`, `c`, `alpha`, `beta`, `gamma` from
      * the crystal data.
      *
      * @param {Matrix3} matrix - unit cell matrix
@@ -1351,7 +1351,7 @@ export class GLModel {
 
     /**
      * Returns model id number
-     * 
+     *
      * @return {number} Model ID
      */
     public getID() {
@@ -1360,7 +1360,7 @@ export class GLModel {
 
     /**
      * Returns model's frames property, a list of atom lists
-     * 
+     *
      * @return {number}
      */
     public getNumFrames() {
@@ -1368,7 +1368,7 @@ export class GLModel {
     };
 
     private adjustCoord(x1:number, x2:number, margin:number, adjust:number) {
-        //return new value of x2 that isn't more than margin away  
+        //return new value of x2 that isn't more than margin away
         var dist = x2 - x1;
         if (dist < -margin) {
             return x2 + adjust;
@@ -1406,11 +1406,11 @@ export class GLModel {
     /**
      * Sets model's atomlist to specified frame
      * Sets to last frame if framenum out of range
-     * 
+     *
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @return {Promise}
      */
-    public setFrame(framenum: number, viewer?: GLViewer) { //viewer only passed internally for unit cell 
+    public setFrame(framenum: number, viewer?: GLViewer) { //viewer only passed internally for unit cell
         var numFrames = this.getNumFrames();
         let model = this;
         return new Promise<void>(function (resolve, reject) {
@@ -1455,7 +1455,7 @@ export class GLModel {
 
     /**
      * Add atoms as frames of model
-     * 
+     *
      * @param {AtomSpec[]} atoms - atoms to be added
      */
     public addFrame(atoms: AtomSpec[]) {
@@ -1466,22 +1466,22 @@ export class GLModel {
     /**
      * If model atoms have dx, dy, dz properties (in some xyz files), vibrate populates the model's frame property based on parameters.
      * Model can then be animated
-     * 
+     *
      * @param {number} numFrames - number of frames to be created, default to 10
      * @param {number} amplitude - amplitude of distortion, default to 1 (full)
      * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
      * @param {GLViewer} viewer - required if arrowSpec is provided
      * @param {ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
      *@example
-     
-      $3Dmol.download("pdb:4UAA",viewer,{},function(){  
+
+      $3Dmol.download("pdb:4UAA",viewer,{},function(){
         viewer.setStyle({},{stick:{}});
         viewer.vibrate(10, 1);
         viewer.animate({loop: "forward",reps: 1});
-     
+
         viewer.zoomTo();
               viewer.render();
-          });            
+          });
      */
     public vibrate(numFrames:number=10, amplitude:number=1, bothWays:boolean=false, viewer?:GLViewer, arrowSpec?:ArrowSpec) {
         var start = 0;
@@ -1562,7 +1562,7 @@ export class GLModel {
     };
 
     /** add atoms to this model from molecular data string
-     * 
+     *
      * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
      * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
      * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input format
@@ -1651,8 +1651,8 @@ export class GLModel {
     };
 
     // make a deep copy of a selection object and create caches of expensive
-    // selections.  We create a copy so caches are not attached to user 
-    // supplied objects where the user might change them invalidating the cache. 
+    // selections.  We create a copy so caches are not attached to user
+    // supplied objects where the user might change them invalidating the cache.
     // This does not support arbitrary
     // javascript objects, but support enough for eveything that is
     // used in selections: number, string, boolean, functions; as well
@@ -1728,7 +1728,7 @@ export class GLModel {
 
     /** given a selection specification, return true if atom is selected.
      * Does not support context-aware selectors like expand/within/byres.
-     * 
+     *
      * @param {AtomSpec} atom
      * @param {AtomSelectionSpec} sel
      * @return {boolean}
@@ -1783,7 +1783,7 @@ export class GLModel {
                 key != "expand" && key != "within" && key != "and" &&
                 key != "or" && key != "not" && !key.startsWith('__cache')) {
 
-                // if something is in sel, atom must have it                    
+                // if something is in sel, atom must have it
                 if (typeof (atom[key]) === "undefined") {
                     ret = false;
                     break;
@@ -1880,7 +1880,7 @@ export class GLModel {
             return parseFloat(val);
     }
     /** return list of atoms selected by sel, this is specific to glmodel
-     * 
+     *
      * @param {AtomSelectionSpec} sel
      * @return {Object[]}
      * @example
@@ -1914,7 +1914,7 @@ export class GLModel {
         // expand selection by some distance
         if (sel.hasOwnProperty("expand")) {
             // get atoms in expanded bounding box
-            const exdist:number = GLModel.getFloat(sel.expand);            
+            const exdist:number = GLModel.getFloat(sel.expand);
             let expand = this.expandAtomList(ret, exdist);
             let retlen = ret.length;
             const thresh = exdist * exdist;
@@ -2004,11 +2004,11 @@ export class GLModel {
 
 
     /** Add list of new atoms to model.  Adjusts bonds appropriately.
-     * 
+     *
      * @param {AtomSpec[]} newatoms
      * @example
      * var atoms = [{elem: 'C', x: 0, y: 0, z: 0, bonds: [1,2], bondOrder: [1,2]}, {elem: 'O', x: -1.5, y: 0, z: 0, bonds: [0]},{elem: 'O', x: 1.5, y: 0, z: 0, bonds: [0], bondOrder: [2]}];
-       
+
         viewer.setBackgroundColor(0xffffffff);
         var m = viewer.addModel();
         m.addAtoms(atoms);
@@ -2057,7 +2057,7 @@ export class GLModel {
     };
 
     /** Assign bonds based on atomic coordinates.
-     *  This currently uses a primitive distance-based algorithm that does not 
+     *  This currently uses a primitive distance-based algorithm that does not
      * consider valence constraints and will only create single bonds.
      */
     public assignBonds() {
@@ -2065,7 +2065,7 @@ export class GLModel {
     }
 
     /** Remove specified atoms from model
-     * 
+     *
      * @param {AtomSpec[]} badatoms - list of atoms
      */
     public removeAtoms(badatoms: AtomSpec[]) {
@@ -2093,14 +2093,14 @@ export class GLModel {
 
 
     /** Set atom style of selected atoms
-     * 
+     *
      * @param {AtomSelectionSpec} sel
      * @param {AtomStyleSpec} style
      * @param {boolean} add - if true, add to current style, don't replace
      @example
     $3Dmol.download("pdb:4UB9",viewer,{},function(){
               viewer.setBackgroundColor(0xffffffff);
-     
+
               viewer.setStyle({chain:'A'},{line:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
               viewer.setStyle({chain:'B'},{line:{colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
               viewer.setStyle({chain:'C'},{cross:{hidden:true,colorscheme:{prop:'b',gradient: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'b'))}}});
@@ -2123,7 +2123,7 @@ export class GLModel {
         //if type is just a string, promote it to an object
         if (typeof (style) === 'string') {
             style = specStringToObject(style);
-        }       
+        }
 
         var changedAtoms = false;
         // somethings we only calculate if there is a change in a certain
@@ -2163,11 +2163,11 @@ export class GLModel {
     };
 
     /** Set clickable and callback of selected atoms
-     * 
+     *
      * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
      * @param {boolean} clickable - whether click-handling is enabled for the selection
      * @param {function} callback - function called when an atom in the selection is clicked
-     
+
      */
     public setClickable(sel:AtomSelectionSpec, clickable:boolean, callback) {
 
@@ -2189,15 +2189,15 @@ export class GLModel {
 
         }
 
-        if (len > 0) this.molObj = null; // force rebuild to get correct intersection shapes         
+        if (len > 0) this.molObj = null; // force rebuild to get correct intersection shapes
     };
 
     /** Set hoverable and callback of selected atoms
-    * 
+    *
     * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
     * @param {boolean} hoverable - whether hover-handling is enabled for the selection
     * @param {function} hover_callback - function called when an atom in the selection is hovered over
-    * @param {function} unhover_callback - function called when the mouse moves out of the hover area               
+    * @param {function} unhover_callback - function called when the mouse moves out of the hover area
     */
     public setHoverable(sel:AtomSelectionSpec, hoverable:boolean, hover_callback, unhover_callback) {
 
@@ -2228,11 +2228,11 @@ export class GLModel {
 
         }
 
-        if (len > 0) this.molObj = null; // force rebuild to get correct intersection shapes         
+        if (len > 0) this.molObj = null; // force rebuild to get correct intersection shapes
     };
 
     /** enable context menu of selected atoms
-     * 
+     *
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
      */
@@ -2249,11 +2249,11 @@ export class GLModel {
             selected[i].contextMenuEnabled = contextMenuEnabled;
         }
 
-        if (len > 0) this.molObj = null; // force rebuild to get correct intersection shapes         
+        if (len > 0) this.molObj = null; // force rebuild to get correct intersection shapes
     };
 
     /** given a mapping from element to color, set atom colors
-     * 
+     *
      * @param {AtomSelectionSpec} sel
      * @param {object} colors
      */
@@ -2316,12 +2316,12 @@ export class GLModel {
               var colorAsSnake = function(atom) {
                 return atom.resi % 2 ? 'white': 'green'
               };
-     
+
               viewer.setStyle( {}, { cartoon: {colorfunc: colorAsSnake }});
-     
+
               viewer.render();
           });
-     
+
      */
     public setColorByFunction(sel: AtomSelectionSpec, colorfun) {
         var atoms = this.selectedAtoms(sel, atoms);
@@ -2394,7 +2394,7 @@ export class GLModel {
 
 
     /** manage the globj for this model in the possed modelGroup - if it has to be regenerated, remove and add
-     * 
+     *
      * @param {Object3D} group
      * @param Object options
      */
@@ -2424,7 +2424,7 @@ export class GLModel {
     };
 
     /** Remove any renderable mol object from scene
-     * 
+     *
      * @param {Object3D} group
      */
     public removegl(group) {
@@ -2441,13 +2441,13 @@ export class GLModel {
     /**
      * Don't show this model in future renderings. Keep all styles and state
      * so it can be efficiencly shown again.
-     *      
+     *
      * * @see GLModel#show
 
      * @example
-        $3Dmol.download("pdb:3ucr",viewer,{},function(){  
+        $3Dmol.download("pdb:3ucr",viewer,{},function(){
         viewer.setStyle({},{stick:{}});
-        viewer.getModel().hide();  
+        viewer.getModel().hide();
         viewer.render();
         });
      */
@@ -2458,12 +2458,12 @@ export class GLModel {
     };
 
     /**
-     * Unhide a hidden model 
+     * Unhide a hidden model
      * @see GLModel#hide
      * @example
-        $3Dmol.download("pdb:3ucr",viewer,{},function(){  
+        $3Dmol.download("pdb:3ucr",viewer,{},function(){
         viewer.setStyle({},{stick:{}});
-        viewer.getModel().hide();  
+        viewer.getModel().hide();
         viewer.render(  )
         viewer.getModel().show()
         viewer.render();
@@ -2477,7 +2477,7 @@ export class GLModel {
 
 
     /** Create labels for atoms that show the value of the passed property.
-     * 
+     *
      * @param {String} prop - property name
      * @param {AtomSelectionSpec} sel
      * @param {GLViewer} viewer
@@ -2506,7 +2506,7 @@ export class GLModel {
     /** Create labels for residues of selected atoms.
      * Will create a single label at the center of mass of all atoms
      * with the same chain,resn, and resi.
-     * 
+     *
      * @param {AtomSelectionSpec} sel
      * @param {GLViewer} viewer
      * @param {LabelSpec} options
@@ -2604,7 +2604,7 @@ export class GLModel {
     };
 
     /**
-    * Set coordinates from remote trajectory file. 
+    * Set coordinates from remote trajectory file.
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
     * @return {Promise}
@@ -2628,7 +2628,7 @@ export class GLModel {
 
 
     /**
-    * Set coordinates for the atoms from provided trajectory file. 
+    * Set coordinates for the atoms from provided trajectory file.
     * @param {string|ArrayBuffer} str - contains the data of the file
     * @param {string} format - contains the format of the file (mdcrd, inpcrd, pdb, netcdf, or array).  Arrays should be TxNx3 where T is the number of timesteps and N the number of atoms.
       @example
@@ -2639,7 +2639,7 @@ export class GLModel {
          viewer.animate({loop: "forward",reps: 1});
          viewer.zoomTo();
          viewer.zoom(0.5);
-         viewer.render();  
+         viewer.render();
     */
 
     public setCoordinates(str:string|ArrayBuffer, format:string) {
@@ -2692,7 +2692,7 @@ export class GLModel {
      * this is to prevent the 'Unknown Selector x' message on the console for the strings passed.
      * These messages are no longer generated as, in theory, typescript will catch problems at compile time.
      * In practice, there may still be issues at run-time but we don't check for them...
-     * 
+     *
      * What we should do is use something like https://github.com/woutervh-/typescript-is to do runtime
      * type checking, but it currently doesn't work with our types...
      */
@@ -2741,7 +2741,7 @@ export class GLModel {
         return values;
     };
 
-    static parseMolData(data, format:string="", options?) {
+    static parseMolData(data?, format: string="", options?) {
         if (!data)
             return []; //leave an empty model
 
@@ -2772,7 +2772,7 @@ export class GLModel {
                 } else if (data.match(/ITEM: TIMESTEP/gm)) {
                     format = "lammpstrj";
                 } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
-                    format = "sdf"; // could look at line 3 
+                    format = "sdf"; // could look at line 3
                 } else if (data.match(/^%VERSION\s+VERSION_STAMP/gm)) {
                     format = "prmtop";
                 } else {
@@ -2870,14 +2870,14 @@ export interface SphereStyleSpec {
     /** fixed radius of sphere */
     radius?: number;
     /** scale VDW radius by specified amount */
-    scale?: number;    
+    scale?: number;
     /** colorscheme to use on atoms */
     colorscheme?: ColorschemeSpec;
     /** fixed coloring, overrides colorscheme */
     color?: ColorSpec;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
-}    
+}
 
 /** Invisible click sphere style specification.  This lets you set
  * larger (or smaller) click targets on atoms then the default radii or
@@ -2889,8 +2889,8 @@ export interface ClickSphereStyleSpec {
     /** fixed radius of sphere */
     radius?: number;
     /** scale VDW radius by specified amount */
-    scale?: number;     
-}    
+    scale?: number;
+}
 
 /** Style for individual bond. */
 export interface BondStyle {

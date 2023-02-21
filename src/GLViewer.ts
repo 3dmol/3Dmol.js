@@ -3341,7 +3341,7 @@ export class GLViewer {
      *
      * @return {GLModel}
      */
-    public addModel(data, format, options?) {
+    public addModel(data?, format="", options?) {
         if (options && !options.defaultcolors) {
             options.defaultcolors = this.defaultcolors;
             options.cartoonQuality = options.cartoonQuality || this.config.cartoonQuality;
