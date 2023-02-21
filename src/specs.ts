@@ -2,6 +2,7 @@
 // This is primarily for documentation
 
 import { AtomStyleSpec, BondStyle, GLModel } from "./GLModel";
+import { GLViewer } from "./GLViewer";
 import { ColorSpec } from "./colors";
 
 
@@ -55,17 +56,11 @@ export interface AtomSpec  {
   /** Set this flag to true to enable click selection handling for this atom */
   clickable?: boolean;
   /** Callback click handler function to be executed on this atom and its parent viewer */
-  callback?: (
-    atom: AtomSpec,
-    viewer: unknown /** glviewer has not been ported yet */
-  ) => void;
+  callback?: (atom: AtomSpec, viewer: GLViewer) => void;
   /** Set this flag to true to enable hover selection handling for this atom */
   hoverable?: boolean;
-  /** Callback click handler function to be executed on this atom and its parent viewer */
-  hover_callback?: (
-    atom: AtomSpec,
-    viewer: unknown /** glviewer has not been ported yet */
-  ) => void;
+  /** Callback hover handler function to be executed on this atom and its parent viewer */
+  hover_callback?: (atom: AtomSpec, viewer: GLViewer) => void;
   /** for selection, inverts the meaning of the selection */
   invert?: boolean;
   /** style of atom */
