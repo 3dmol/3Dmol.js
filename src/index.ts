@@ -18,6 +18,7 @@ export * from "./glcartoon"
 export * from "./GLModel"
 export * from "./GLViewer"
 export * from "./autoload"
+export * from "./specs"
 
 //import * as $ from 'jquery';
 declare var __webpack_exports__: any;
