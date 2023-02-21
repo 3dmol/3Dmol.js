@@ -61,6 +61,8 @@ export interface AtomSpec  {
   hoverable?: boolean;
   /** Callback hover handler function to be executed on this atom and its parent viewer */
   hover_callback?: (atom: AtomSpec, viewer: GLViewer) => void;
+  /** Callback handling "unhover" to be executed on this atom and its parent viewer */
+  unhover_callback?: (atom: AtomSpec, viewer: GLViewer) => void;
   /** for selection, inverts the meaning of the selection */
   invert?: boolean;
   /** style of atom */
@@ -70,6 +72,7 @@ export interface AtomSpec  {
   intersectionShape?: any;
   capDrawn?: boolean;
   model?: number;
+  contextMenuEnabled?: boolean;
 };
 
 

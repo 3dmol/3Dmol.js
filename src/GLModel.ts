@@ -1893,7 +1893,7 @@ export class GLModel {
               viewer.render();
           });
      */
-    public selectedAtoms(sel: AtomSelectionSpec, from?: AtomSpec[]) {
+    public selectedAtoms(sel: AtomSelectionSpec, from?: AtomSpec[]): AtomSpec[] {
         var ret = [];
 
         // make a copy of the selection to allow caching results without
