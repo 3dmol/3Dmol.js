@@ -2,6 +2,7 @@
 // This is primarily for documentation
 
 import { AtomStyleSpec, BondStyle, GLModel } from "./GLModel";
+import { GLViewer } from "./GLViewer";
 import { ColorSpec } from "./colors";
 
 
@@ -35,7 +36,7 @@ export interface AtomSpec  {
   /** Atom's serial id number */
   serial?: number;
   /** Index of atom in molecule */
-  index?: number; 
+  index?: number;
   /** Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon) */
   atom?: string;
   /** Array of atom ids this atom is bonded to */
@@ -55,17 +56,13 @@ export interface AtomSpec  {
   /** Set this flag to true to enable click selection handling for this atom */
   clickable?: boolean;
   /** Callback click handler function to be executed on this atom and its parent viewer */
-  callback?: (
-    atom: AtomSpec,
-    viewer: unknown /** glviewer has not been ported yet */
-  ) => void;
+  callback?: (atom: AtomSpec, viewer: GLViewer) => void;
   /** Set this flag to true to enable hover selection handling for this atom */
   hoverable?: boolean;
-  /** Callback click handler function to be executed on this atom and its parent viewer */
-  hover_callback?: (
-    atom: AtomSpec,
-    viewer: unknown /** glviewer has not been ported yet */
-  ) => void;  
+  /** Callback hover handler function to be executed on this atom and its parent viewer */
+  hover_callback?: (atom: AtomSpec, viewer: GLViewer) => void;
+  /** Callback handling "unhover" to be executed on this atom and its parent viewer */
+  unhover_callback?: (atom: AtomSpec, viewer: GLViewer) => void;
   /** for selection, inverts the meaning of the selection */
   invert?: boolean;
   /** style of atom */
@@ -75,6 +72,7 @@ export interface AtomSpec  {
   intersectionShape?: any;
   capDrawn?: boolean;
   model?: number;
+  contextMenuEnabled?: boolean;
 };
 
 
@@ -94,9 +92,11 @@ export interface AtomSpec  {
  *  viewer.render();
  * });
  */
-export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"> {
+export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index"> {
     /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
     model?: GLModel | number |  GLModel[] | number[];
+    /** index of the atom or atoms to select */
+    index?: number | number[];
     /** overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms */
     bonds?: number;
     /** user supplied function that gets passed an {@link AtomSpec} and should return true if the atom should be selected */
@@ -110,9 +110,9 @@ export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"> {
     /** intersects the selection with the set of atoms within a given distance from another selection */
     within?: WithinSelectionSpec;
     /** take the intersection of the provided lists of {@link AtomSelectionSpec}s */
-    and?: AtomSelectionSpec[] & {__cached_results: any};
+    and?: AtomSelectionSpec[] & {__cached_results?: any};
     /** take the union of the provided lists of {@link AtomSelectionSpec}s */
-    or?: AtomSelectionSpec[] & {__cached_results: any};
+    or?: AtomSelectionSpec[] & {__cached_results?: any};
     /** take the inverse of the provided {@link AtomSelectionSpec} */
     not?: AtomSelectionSpec;
     contextMenuEnabled?: boolean;

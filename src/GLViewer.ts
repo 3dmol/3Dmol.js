@@ -929,7 +929,7 @@ export class GLViewer {
     };
 
     /**
-     * Return a promise that resolves to an animated PNG image URI of 
+     * Return a promise that resolves to an animated PNG image URI of
      viewer contents (base64 encoded) for nframes of viewer changes.
      * @return {Promise}
      */
@@ -1090,7 +1090,7 @@ export class GLViewer {
     };
 
     /** User specified function for handling a context menu event.
-     * Handler is passed the selected object, x and y in canvas coordinates, 
+     * Handler is passed the selected object, x and y in canvas coordinates,
      * and original event.
      */
     public userContextMenuHandler: Function | null = null;
@@ -1130,7 +1130,7 @@ export class GLViewer {
      *
      * @param {Object | string} element
      *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
-     
+
      */
     public setContainer(element) {
         let elem = getElement(element) || this.container;
@@ -1149,8 +1149,8 @@ export class GLViewer {
      * @example
      *
      * viewer.setBackgroundColor(0x000000);
-     
-     
+
+
      *
      */
     public setBackgroundColor(hex: ColorSpec, a: number) {
@@ -1183,7 +1183,7 @@ export class GLViewer {
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
               });
               viewer.zoomTo();
-     
+
               viewer.setProjection("orthographic");
               viewer.render(callback);
           });
@@ -1481,7 +1481,7 @@ export class GLViewer {
     viewer.rotate(90,'y',1);
     viewer.render(callback);
     });
-     
+
      *
      */
     public rotate(angle: number, axis: any = "y", animationDuration: number = 0, fixedPath: boolean = false) {
@@ -1846,7 +1846,7 @@ export class GLViewer {
     viewer.zoom(2,1000);
     viewer.render();
     });
-     
+
          */
     public zoom(factor: number = 2, animationDuration: number = 0, fixedPath: boolean = false) {
         var scale = (this.CAMERA_Z - this.rotationGroup.position.z) / factor;
@@ -2098,8 +2098,8 @@ export class GLViewer {
      * @param {Boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation         *
       * @example
-     
-     
+
+
           $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
               $3Dmol.get("data/1fas.cube",function(volumedata){
@@ -2108,7 +2108,7 @@ export class GLViewer {
                       voldata: new $3Dmol.VolumeData(volumedata, "cube"),
                       volscheme: new $3Dmol.Gradient.Sinebow($3Dmol.getPropertyRange(viewer.selectedAtoms(),'charge'))
                   },{});
-     
+
               viewer.render();
               });
               viewer.zoomTo();
@@ -2257,7 +2257,7 @@ export class GLViewer {
      *
      * @example
      *  $3Dmol.download("pdb:2EJ0",viewer,{},function(){
-     
+
               viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
               viewer.addLabel("Label",{font:'sans-serif',fontSize:18,fontColor:'white',fontOpacity:1,borderThickness:1.0,
                                        borderColor:'red',borderOpacity:0.5,backgroundColor:'black',backgroundOpacity:0.5,
@@ -2274,12 +2274,12 @@ export class GLViewer {
               viewer.setStyle({chain:'E'},{cross:{hidden:false,
                                                   linewidth:1.0,
                                                   color:'black'}});
-     
+
               viewer.render();
-     
-     
+
+
             });
-     
+
      */
     public addLabel(text: string, options: LabelSpec = {}, sel?: AtomSelectionSpec, noshow: boolean = false) {
         if (sel) {
@@ -2355,10 +2355,10 @@ export class GLViewer {
                                        position:{x:50.0,y:0.0,z:0.0},inFront:true,showBackground:true});
               viewer.removeLabel(toremove);
               viewer.render();
-     
-     
+
+
             });
-     
+
      */
     public removeLabel(label: Label) {
         //todo: don't do the linear search
@@ -2379,11 +2379,11 @@ export class GLViewer {
      *
      *         @example
     $3Dmol.download("pdb:1ubq",viewer,{},function(){
-     
+
            viewer.addResLabels();
            viewer.setStyle({},{stick:{}});
            viewer.render( ); //show labels
-     
+
            viewer.removeAllLabels();
            viewer.render(); //hide labels
     });
@@ -2503,9 +2503,9 @@ export class GLViewer {
      * @param {SphereShapeSpec} spec - Sphere shape style specification
      * @return {GLShape}
      @example
-     
+
      viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
-     
+
      viewer.render();
      */
     public addSphere(spec: SphereSpec) {
@@ -2528,11 +2528,11 @@ export class GLViewer {
      * @param {BoxSpec} spec - Box shape style specification
      * @return {GLShape}
      @example
-     
+
      viewer.addLine({color:'red',start:{x:0,y:0,z:0},end:{x:5,y:0,z:0}});
      viewer.addLine({color:'blue',start:{x:0,y:0,z:0},end:{x:0,y:5,z:0}});
      viewer.addLine({color:'green',start:{x:0,y:0,z:0},end:{x:0,y:0,z:5}});
-     
+
      viewer.addBox({center:{x:0,y:0,z:0},dimensions: {w:3,h:4,d:2},color:'magenta'});
      viewer.zoomTo();
      viewer.rotate(45, {x:1,y:1,z:1});
@@ -2563,7 +2563,7 @@ export class GLViewer {
      * @return {GLShape}
      @example
     $3Dmol.download("pdb:4DM7",viewer,{},function(){
-     
+
               viewer.setBackgroundColor(0xffffffff);
               viewer.addArrow({
                   start: {x:-10.0, y:0.0, z:0.0},
@@ -2599,7 +2599,7 @@ export class GLViewer {
      *
      * @param {CylinderSpec} spec - Style specification
      * @return {GLShape}
-     
+
       @example
      viewer.setBackgroundColor(0xffffffff);
           viewer.addCylinder({start:{x:0.0,y:0.0,z:0.0},
@@ -2650,7 +2650,7 @@ export class GLViewer {
      *
      * @param {CurveSpec} spec - Style specification
      * @return {GLShape}
-     
+
      @example
           viewer.addCurve({points: [{x:0.0,y:0.0,z:0.0}, {x:5.0,y:3.0,z:0.0}, {x:5.0,y:7.0,z:0.0}, {x:0.0,y:10.0,z:0.0}],
                               radius:0.5,
@@ -2686,7 +2686,7 @@ export class GLViewer {
      * @return {GLShape}
      @example
      $3Dmol.download("pdb:2ABJ",viewer,{},function(){
-     
+
               viewer.setViewStyle({style:"outline"});
               viewer.setStyle({chain:'A'},{sphere:{hidden:true}});
               viewer.setStyle({chain:'D'},{sphere:{radius:3.0}});
@@ -2695,7 +2695,7 @@ export class GLViewer {
               viewer.addLine({dashed:true,start:{x:0,y:0,z:0},end:{x:100,y:100,z:100}});
               viewer.render();
           });
-     
+
      */
     public addLine(spec: LineSpec = {}) {
 
@@ -2722,7 +2722,7 @@ export class GLViewer {
      * @param {GLModel|number} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
      * @param {UnitCellStyleSpec} spec - visualization style
        @example
-     
+
             $3Dmol.get('data/1jpy.cif', function(data) {
               let m = viewer.addModel(data);
               viewer.addUnitCell(m, {box:{color:'purple'},alabel:'X',blabel:'Y',clabel:'Z',alabelstyle: {fontColor: 'black',backgroundColor:'white',inFront:true,fontSize:40},astyle:{color:'darkred', radius:5,midpos: -10}});
@@ -3018,17 +3018,17 @@ export class GLViewer {
         vertices.push(new $3Dmol.Vector3(0,0,0));
         vertices.push(new $3Dmol.Vector3(r,0,0));
         vertices.push(new $3Dmol.Vector3(0,r,0));
-        
+
         normals.push(new $3Dmol.Vector3(0,0,1));
         normals.push(new $3Dmol.Vector3(0,0,1));
         normals.push(new $3Dmol.Vector3(0,0,1));
-        
+
         colors.push({r:1,g:0,b:0});
         colors.push({r:0,g:1,b:0});
         colors.push({r:0,g:0,b:1});
-        
+
         var faces = [ 0,1,2 ];
-        
+
         var spec = {vertexArr:vertices, normalArr: normals, faceArr:faces,color:colors};
         viewer.addCustom(spec);
     }
@@ -3054,17 +3054,17 @@ export class GLViewer {
      * @return {GLShape}
      *
      * @example
-     
-     
+
+
     $3Dmol.get('data/bohr.cube', function(data) {
-     
+
     viewer.addVolumetricData(data, "cube", {isoval: -0.01, color: "red", opacity: 0.95});
     viewer.setStyle({cartoon:{},stick:{}});
     viewer.zoomTo();
     viewer.render();
     });
-     
-     
+
+
      */
     public addVolumetricData(data, format:string, spec:VolumetricRendererSpec|IsoSurfaceSpec={}) {
 
@@ -3326,14 +3326,14 @@ export class GLViewer {
      * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
      * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
      * @example
-     
-     
+
+
           viewer.setViewStyle({style:"outline"});
           $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
               $3Dmol.get("data/1fas.cube",function(volumedata){
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.85,voldata: new $3Dmol.VolumeData(volumedata, "cube"), volscheme: new $3Dmol.Gradient.RWB(-10,10)},{});
-     
+
               viewer.render();
               });
               viewer.zoomTo();
@@ -3341,7 +3341,7 @@ export class GLViewer {
      *
      * @return {GLModel}
      */
-    public addModel(data, format, options?) {
+    public addModel(data?, format="", options?) {
         if (options && !options.defaultcolors) {
             options.defaultcolors = this.defaultcolors;
             options.cartoonQuality = options.cartoonQuality || this.config.cartoonQuality;
@@ -3421,8 +3421,8 @@ export class GLViewer {
      * @param {string} format - Input format (see {@link FileFormats})
      * @return {GLModel}
      @example
-     
-     
+
+
           $3Dmol.get('../test_structs/multiple.sdf', function(data){
               viewer.addAsOneMolecule(data, "sdf");
               viewer.zoomTo();
@@ -3576,7 +3576,7 @@ export class GLViewer {
      * @param {AtomSelectionSpec} sel - Atom selection specification.  Can be omitted to select all
      * @param {AtomStyleSpec} style - style spec to add to specified atoms
      @example
-     
+
     $3Dmol.download('pdb:5IRE',viewer,{doAssembly: false},function(m) {
     viewer.setStyle({cartoon:{}});
     //keep cartoon style, but show thick sticks for chain A
@@ -3586,7 +3586,7 @@ export class GLViewer {
     });
      */
     public addStyle(sel:AtomSelectionSpec, style:AtomStyleSpec);
-    public addStyle(sel:AtomStyleSpec);    
+    public addStyle(sel:AtomStyleSpec);
     public addStyle(sel:unknown, style?:unknown) {
         if (typeof (style) === 'undefined') {
             //if a single argument is provided, assume it is a style and select all
@@ -3607,7 +3607,7 @@ export class GLViewer {
      *
      * @example
         $3Dmol.download("cid:307900",viewer,{},function(){
-     
+
                viewer.setStyle({},{sphere:{}});
                viewer.setClickable({},true,function(atom,viewer,event,container) {
                    viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'darkgreen', backgroundOpacity: 0.8});
@@ -3627,7 +3627,7 @@ export class GLViewer {
      * @param {function} unhover_callback - function called when the mouse moves out of the hover area
     @example
     $3Dmol.download("pdb:1ubq",viewer,{},function(){
-     
+
            viewer.setHoverable({},true,function(atom,viewer,event,container) {
                if(!atom.label) {
                 atom.label = viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'mintcream', fontColor:'black'});
@@ -3643,7 +3643,7 @@ export class GLViewer {
            viewer.setStyle({},{stick:{}});
            viewer.render();
     });
-     
+
      */
     public setHoverable(sel:AtomSelectionSpec, hoverable:boolean, hover_callback, unhover_callback) {
         this.applyToModels("setHoverable", sel, hoverable, hover_callback, unhover_callback);
@@ -3654,7 +3654,7 @@ export class GLViewer {
      *
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
-     
+
      */
     public enableContextMenu(sel:AtomSelectionSpec, contextMenuEnabled:boolean) {
         this.applyToModels("enableContextMenu", sel, contextMenuEnabled);
@@ -4064,7 +4064,7 @@ export class GLViewer {
      * @param {function} surfacecallback - function to be called after setting the surface
      * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
      */
-    public addSurface(stype:SurfaceType|string, style:SurfaceStyleSpec={}, atomsel:AtomSelectionSpec={}, 
+    public addSurface(stype:SurfaceType|string, style:SurfaceStyleSpec={}, atomsel:AtomSelectionSpec={},
         allsel?:AtomSelectionSpec, focus?: AtomSelectionSpec, surfacecallback?) {
         // type 1: VDW 3: SAS 4: MS 2: SES
         // if sync is true, does all work in main thread, otherwise uses
@@ -4091,7 +4091,7 @@ export class GLViewer {
             }
         } else if(typeof stype == "number") {
             type = stype;
-        } 
+        }
 
         // atoms specified by this selection
         var atomlist = null, focusSele = null;
@@ -4607,7 +4607,7 @@ export class GLViewer {
        backgroundColor: 'black'
      }
    );
- *                        
+ *
  */
 export function createViewer(element, config?:ViewerSpec) {
     element = getElement(element);
@@ -4630,7 +4630,7 @@ export function createViewer(element, config?:ViewerSpec) {
  * @param {GridSpec} [config] - grid configuration
  * @param {ViewerGridSpec} [viewer_config] - Viewer specification to apply to all subviewers
  * @return [[GLViewer]] 2D array of GLViewers
- * @example                    
+ * @example
    var viewers = $3Dmol.createViewerGrid(
      'gldiv', //id of div to create canvas in
      {
@@ -4650,24 +4650,24 @@ export function createViewer(element, config?:ViewerSpec) {
      viewer = viewers[0][1];
      viewer.addModel(data,'cif');
      viewer.setStyle({stick:{}});
-     viewer.zoomTo();     
+     viewer.zoomTo();
      viewer.render( );
-     
+
      viewer = viewers[1][0];
      viewer.addModel(data,'cif');
      viewer.setStyle({cartoon:{color:'spectrum'}});
-     viewer.zoomTo();     
+     viewer.zoomTo();
      viewer.render( );
-     
+
      viewer = viewers[1][1];
      viewer.addModel(data,'cif');
      viewer.setStyle({cartoon:{colorscheme:'chain'}});
-     viewer.zoomTo();     
+     viewer.zoomTo();
      viewer.render();
-     
-     
+
+
    });
-     
+
  */
 export function createViewerGrid(element, config:ViewerGridSpec={}, viewer_config:ViewerSpec={}) {
     element = getElement(element);
@@ -4707,7 +4707,7 @@ export function createViewerGrid(element, config:ViewerGridSpec={}, viewer_confi
 
 /* StereoViewer for stereoscopic viewing
 * @param {Object | string} element - Either HTML element or string identifier
-* 
+*
 */
 export function createStereoViewer(element) {
     var that = this;
@@ -4776,14 +4776,14 @@ export interface ViewerSpec {
     /** Callback function to be executed with this viewer after setup is complete */
     callback?: (viewer: ViewerSpec) => void;
     /** Object defining default atom colors as atom => color property value pairs for all models within this viewer */
-    defaultcolors?: Record<string, string>;
-    /** 
+    defaultcolors?: Record<string, ColorSpec>;
+    /**
      * Whether to disable disable handling of mouse events.
-     * If you want to use your own mouse handlers, set this then bind your handlers to the canvas object.  
-                  The default 3Dmol.js handlers are available for use: 
+     * If you want to use your own mouse handlers, set this then bind your handlers to the canvas object.
+                  The default 3Dmol.js handlers are available for use:
                   'mousedown touchstart': viewer._handleMouseDown,
                   'DOMMouseScroll mousewheel': viewer._handleMouseScroll
-                  'mousemove touchmove': viewer._handleMouseMove   
+                  'mousemove touchmove': viewer._handleMouseMove
      */
     nomouse?: boolean | string;
     /** Color of the canvas background */
