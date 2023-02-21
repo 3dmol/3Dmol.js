@@ -35,7 +35,7 @@ export interface AtomSpec  {
   /** Atom's serial id number */
   serial?: number;
   /** Index of atom in molecule */
-  index?: number; 
+  index?: number;
   /** Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon) */
   atom?: string;
   /** Array of atom ids this atom is bonded to */
@@ -65,7 +65,7 @@ export interface AtomSpec  {
   hover_callback?: (
     atom: AtomSpec,
     viewer: unknown /** glviewer has not been ported yet */
-  ) => void;  
+  ) => void;
   /** for selection, inverts the meaning of the selection */
   invert?: boolean;
   /** style of atom */
@@ -94,9 +94,11 @@ export interface AtomSpec  {
  *  viewer.render();
  * });
  */
-export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"> {
+export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index"> {
     /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
     model?: GLModel | number |  GLModel[] | number[];
+    /** index of the atom or atoms to select */
+    index?: number | number[];
     /** overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms */
     bonds?: number;
     /** user supplied function that gets passed an {@link AtomSpec} and should return true if the atom should be selected */
