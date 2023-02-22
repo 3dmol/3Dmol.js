@@ -1846,7 +1846,7 @@ export class Renderer {
         !(this._gl = this._canvas.getContext("webgl2", {
           alpha: this._alpha,
           premultipliedAlpha: this._premultipliedAlpha,
-          antialias: false,
+          antialias: this._antialias,
           stencil: this._stencil,
           preserveDrawingBuffer: this._preserveDrawingBuffer,
         }))
@@ -1855,7 +1855,7 @@ export class Renderer {
           !(this._gl = this._canvas.getContext("experimental-webgl", {
             alpha: this._alpha,
             premultipliedAlpha: this._premultipliedAlpha,
-            antialias: false,
+            antialias: this._antialias,
             stencil: this._stencil,
             preserveDrawingBuffer: this._preserveDrawingBuffer,
           }))
@@ -1864,7 +1864,7 @@ export class Renderer {
             !(this._gl = this._canvas.getContext("webgl", {
               alpha: this._alpha,
               premultipliedAlpha: this._premultipliedAlpha,
-              antialias: false,
+              antialias: this._antialias,
               stencil: this._stencil,
               preserveDrawingBuffer: this._preserveDrawingBuffer,
             }))
