@@ -34,7 +34,7 @@ $3Dmol.workerString = function(){
 $3Dmol.workerString += ";\n"+$3Dmol.Vector3.toString();
 $3Dmol.workerString += ";\n"+$3Dmol.MarchingCubeInitializer.toString()+";\nvar MarchingCube = new MarchingCubeInitializer();";
 $3Dmol.workerString += ";\n"+$3Dmol.PointGrid.toString()+";\n";
-$3Dmol.workerString += ";\n"+$3Dmol.ProteinSurface.toString()+";\n";
+$3Dmol.workerString += ";\nvar ProteinSurface = "+$3Dmol.ProteinSurface.toString()+";\n";
 $3Dmol.workerString = $3Dmol.workerString.replace(/[a-zA-Z_$]{1}[0-9a-zA-Z_$]*WEBPACK_IMPORTED_MODULE_[0-9]__\./g,''); //replace webpack generated prefixes
 //console.log($3Dmol.workerString);
 $3Dmol.SurfaceWorker = window.URL ? window.URL.createObjectURL(new Blob([$3Dmol.workerString],{type: 'text/javascript'})) : undefined;
