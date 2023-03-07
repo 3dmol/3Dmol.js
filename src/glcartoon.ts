@@ -117,6 +117,7 @@ const coilWidth = 0.5;
 const helixSheetWidth = 1.3;
 const nucleicAcidWidth = 0.8;
 const defaultThickness = 0.4;
+const baseThickness    = 0.4;
 
 function drawThinStrip(geo: Geometry, p1, p2, colors) {
 
@@ -1126,7 +1127,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                                 curr.y, curr.z);
 
                         GLDraw.drawCylinder(shapeGeo, baseStartPt,
-                            baseEndPt, 0.4, CC
+                            baseEndPt, baseThickness, CC
                                 .color(baseEndPt.color), 0, 2);
                         addBackbonePoints(points, num,
                             true, terminalPt, termOrientPt,
@@ -1164,7 +1165,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                         baseStartPt.add(startFix);
 
                         GLDraw.drawCylinder(shapeGeo, baseStartPt,
-                            baseEndPt, 0.4, CC
+                            baseEndPt, baseThickness, CC
                                 .color(baseEndPt.color), 0, 2);
                         baseStartPt = null;
                         baseEndPt = null;
@@ -1247,7 +1248,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         else
             baseStartPt = new Vector3(curr.x, curr.y, curr.z);
 
-        GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, 0.4,
+        GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, baseThickness,
             CC.color(baseEndPt.color), 0, 2);
         addBackbonePoints(points, num, true, terminalPt,
             termOrientPt, prevOrientPt, curr, atoms, a);
