@@ -620,6 +620,32 @@ export class GLViewer {
     };
 
     /**
+     * @description Modify a list of intersection objects beyond the raycaster's distance sort.
+     * Initially, this just sorts clickspheres to the end.
+     * @param {Array<{clickable: any, distance: number}>} intersectsIn
+     *
+     * Use case:
+     * We'd like an interactive cloud (surface) around some atoms, but don't want to see the atoms.
+     * To make the cloud mouse-interactive, the atoms are given a clicksphere style.
+     * Give intersection priority to shapes and visible atoms so that when mousing over a compound
+     * inside a cloud, the interaction is with the compound, not the cloud.
+     */
+    private filterIntersects(intersectsIn: { clickable, distance: number }[]) {
+        const intersects = [...intersectsIn];
+        intersects.sort((a,b) => {
+            const isClickSphere = (x) => !!(x?.style?.clicksphere);
+            const aClickSphere = isClickSphere(a.clickable);
+            const bClickSphere = isClickSphere(b.clickable);
+            if (aClickSphere === bClickSphere) {
+                return 0; // keep the original order
+            } else {
+                return aClickSphere ? 1 : -1;
+            }
+        });
+        return intersects;
+    }
+
+    /**
     * Return a list of objects that intersect that at the specified viewer position.
     *
     * @param x - x position in screen coordinates
@@ -637,7 +663,7 @@ export class GLViewer {
         }
         if (objects.length == 0) return [];
         this.raycaster.setFromCamera(mouse, this.camera);
-        return this.raycaster.intersectObjects(this.modelGroup, objects);
+        return this.filterIntersects(this.raycaster.intersectObjects(this.modelGroup, objects));
     };
 
     /** Convert model coordinates to screen coordinates.
