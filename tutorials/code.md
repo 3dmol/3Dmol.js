@@ -1,5 +1,9 @@
 <script src="../build/3Dmol-min.js"></script>
-
+<script
+  src="https://code.jquery.com/jquery-3.6.4.min.js"
+  integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+  crossorigin="anonymous"></script>
+  
 <style>
 .mol-container {
   width: 100%;
@@ -142,7 +146,7 @@ jQuery(function() {
   let viewer = $3Dmol.createViewer( element, config );
 
   $('#btn-02').on('click', function() {
-    let pdbUri = './doc-data/1ycr.pdb';
+    let pdbUri = '../tutorials/doc-data/1ycr.pdb';
     jQuery.ajax( pdbUri, { 
       success: function(data) {
         let v = viewer;
@@ -200,7 +204,7 @@ jQuery(function() {
     return atom.resi % 2 == 0 ? 'white' : 'green';
   };
   $('#btn-03').on('click', function() {
-    let pdbUri = './doc-data/1ycr.pdb';
+    let pdbUri = '../tutorials/doc-data/1ycr.pdb';
     jQuery.ajax( pdbUri, { 
       success: function(data) {
         let v = viewer;
