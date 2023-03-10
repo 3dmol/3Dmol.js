@@ -329,6 +329,9 @@ export class GLViewer {
             if (shape && shape.hoverable) {
                 this.hoverables.push(shape);
             }
+            if (shape && shape.contextMenuEnabled) {
+                this.contextMenuEnabledAtoms.push(shape);
+            }
         }
     };
 

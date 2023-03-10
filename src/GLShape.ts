@@ -628,6 +628,7 @@ export class GLShape {
         shape.hoverable = stylespec.hoverable ? true : false;
         shape.hover_callback = makeFunction(stylespec.hover_callback);
         shape.unhover_callback = makeFunction(stylespec.unhover_callback);
+        shape.contextMenuEnabled = !!stylespec.contextMenuEnabled;
 
         shape.hidden = stylespec.hidden;
         shape.frame = stylespec.frame;
@@ -645,6 +646,7 @@ export class GLShape {
     hoverable = false;
     hover_callback: Func;
     unhover_callback: Func;
+    contextMenuEnabled: boolean = false;
     frame: any;
     side = DoubleSide;
     shapePosition: any;
@@ -1574,6 +1576,8 @@ export interface ShapeSpec {
     hover_callback?: Func;
     /** unhover callback */
     unhover_callback?: Func;
+    /** if true, user can right-click or long press to trigger callback */
+    contextMenuEnabled?: boolean;
     /** if set, only display in this frame of an animation */
     frame?: number;
     side?: number;
