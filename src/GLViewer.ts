@@ -408,6 +408,16 @@ export class GLViewer {
         }
     };
 
+    // Determine if a positioned event is "close enough" to be considered a click event
+    // With a mouse the position should be exact.
+    // But allow some wiggle room when using touch interface.
+    private closeEnoughForClick(event, tolerance: number=5) {
+        var deltaX = Math.abs(this.getX(event) - this.mouseStartX);
+        var deltaY = Math.abs(this.getY(event) - this.mouseStartY);
+        const toleranceToUse = event.targetTouches ? tolerance : 0;
+        return (deltaX <= toleranceToUse && deltaY <= toleranceToUse);
+    }
+
     private calcTouchDistance(ev) { // distance between first two
         // fingers
         var xdiff = ev.targetTouches[0].pageX -
@@ -883,7 +893,7 @@ export class GLViewer {
         if (this.isDragging && this.scene) { //saw mousedown, haven't moved
             var x = this.getX(ev);
             var y = this.getY(ev);
-            if (x == this.mouseStartX && y == this.mouseStartY) {
+            if (this.closeEnoughForClick(ev)) {
                 var offset = this.canvasOffset();
                 var mouseX = ((x - offset.left) / this.WIDTH) * 2 - 1;
                 var mouseY = -((y - offset.top) / this.HEIGHT) * 2 + 1;
