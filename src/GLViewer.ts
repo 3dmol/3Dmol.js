@@ -346,7 +346,16 @@ export class GLViewer {
                     selected.callback = makeFunction(selected.callback);
                 }
                 if (typeof (selected.callback) === "function") {
-                    selected.callback(selected, this._viewer, event, this.container, intersects);
+                    // Suppress click callbacks when context menu will be invoked.
+                    // This only applies to clicks from "mouseup" events after right-click.
+                    // Clicks from "touchend" after longtouch contextmenu are suppressed
+                    // in _handleContextMenu.
+                    const isContextMenu = this.mouseButton === 3
+                        && this.contextMenuEnabledAtoms.includes(selected)
+                        && this.userContextMenuHandler;
+                    if (!isContextMenu) {
+                        selected.callback(selected, this._viewer, event, this.container, intersects);
+                    }
                 }
             }
         }
