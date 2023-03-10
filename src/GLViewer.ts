@@ -411,10 +411,12 @@ export class GLViewer {
     // Determine if a positioned event is "close enough" to be considered a click event
     // With a mouse the position should be exact.
     // But allow some wiggle room when using touch interface.
-    private closeEnoughForClick(event, tolerance: number=5) {
+    private closeEnoughForClick(event, { allowWiggleRoom=null, tolerance=5}={}) {
         var deltaX = Math.abs(this.getX(event) - this.mouseStartX);
         var deltaY = Math.abs(this.getY(event) - this.mouseStartY);
-        const toleranceToUse = event.targetTouches ? tolerance : 0;
+        let allowingWiggling = event.targetTouches;
+        if (allowWiggleRoom != null) allowingWiggling = allowWiggleRoom;
+        const toleranceToUse = allowingWiggling ? tolerance : 0;
         return (deltaX <= toleranceToUse && deltaY <= toleranceToUse);
     }
 
