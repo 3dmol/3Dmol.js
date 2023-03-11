@@ -341,7 +341,7 @@ export class GLViewer {
                     selected.callback = makeFunction(selected.callback);
                 }
                 if (typeof (selected.callback) === "function") {
-                    selected.callback(selected, this._viewer, event, this.container);
+                    selected.callback(selected, this._viewer, event, this.container, intersects);
                 }
             }
         }
@@ -362,13 +362,13 @@ export class GLViewer {
     };
 
     //set current_hover to sel (which can be null), calling appropraite callbacks
-    private setHover(selected, event?) {
+    private setHover(selected, event?, intersects?) {
         if (this.current_hover == selected) return;
         if (this.current_hover) {
             if (typeof (this.current_hover.unhover_callback) != "function") {
                 this.current_hover.unhover_callback = makeFunction(this.current_hover.unhover_callback);
             }
-            this.current_hover.unhover_callback(this.current_hover, this._viewer, event, this.container);
+            this.current_hover.unhover_callback(this.current_hover, this._viewer, event, this.container, intersects);
         }
         this.current_hover = selected;
 
@@ -377,19 +377,19 @@ export class GLViewer {
                 selected.hover_callback = makeFunction(selected.hover_callback);
             }
             if (typeof (selected.hover_callback) === "function") {
-                selected.hover_callback(selected, this._viewer, event, this.container);
+                selected.hover_callback(selected, this._viewer, event, this.container, intersects);
             }
         }
 
     };
 
     //checks for selection intersects on hover
-    private handleHoverSelection(mouseX, mouseY) {
+    private handleHoverSelection(mouseX, mouseY, event) {
         if (this.hoverables.length == 0) return;
         let intersects = this.targetedObjects(mouseX, mouseY, this.hoverables);
         if (intersects.length) {
             var selected = intersects[0].clickable;
-            this.setHover(selected);
+            this.setHover(selected, event, intersects);
             this.current_hover = selected;
         }
         else {
@@ -1020,7 +1020,7 @@ export class GLViewer {
         if (this.hoverables.length > 0) {
             this.hoverTimeout = setTimeout(
                 function () {
-                    self.handleHoverSelection(mouseX, mouseY);
+                    self.handleHoverSelection(mouseX, mouseY, ev);
                 },
                 this.hoverDuration);
         }
@@ -1118,7 +1118,7 @@ export class GLViewer {
             var x = this.mouseStartX - offset.left;
             var y = this.mouseStartY - offset.top;
             if (this.userContextMenuHandler) {
-                this.userContextMenuHandler(selected, x, y,);
+                this.userContextMenuHandler(selected, x, y,intersects);
             }
         }
     };
@@ -3603,7 +3603,9 @@ export class GLViewer {
      *
      * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
      * @param {boolean} clickable - whether click-handling is enabled for the selection
-     * @param {function} callback - function called when an atom in the selection is clicked
+     * @param {function} callback - function called when an atom in the selection is clicked. The function is passed
+     * the selected (foremost) object, the viewer, the triggering event, the associated container, and a list
+     * of all intersecting objects with their distances from the viewer. 
      *
      * @example
         $3Dmol.download("cid:307900",viewer,{},function(){
@@ -3623,7 +3625,7 @@ export class GLViewer {
      *
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} hoverable - whether hover-handling is enabled for the selection
-     * @param {function} hover_callback - function called when an atom in the selection is hovered over
+     * @param {function} hover_callback - function called when an atom in the selection is hovered over.  The function has the same signature as a click handler.
      * @param {function} unhover_callback - function called when the mouse moves out of the hover area
     @example
     $3Dmol.download("pdb:1ubq",viewer,{},function(){
