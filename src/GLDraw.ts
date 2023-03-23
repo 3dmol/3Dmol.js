@@ -362,33 +362,36 @@ export namespace GLDraw {
                     z4 = e[5] * vertices[v4].y + e[8] * vertices[v4].z;
 
                     vertexArray[v1offset] = x1 + cap.x;
-                    vertexArray[v2offset] = x2 + cap.x;
-                    vertexArray[v3offset] = x3 + cap.x;
-                    vertexArray[v4offset] = x4 + cap.x;
-
                     vertexArray[v1offset + 1] = y1 + cap.y;
-                    vertexArray[v2offset + 1] = y2 + cap.y;
-                    vertexArray[v3offset + 1] = y3 + cap.y;
-                    vertexArray[v4offset + 1] = y4 + cap.y;
-
                     vertexArray[v1offset + 2] = z1 + cap.z;
+
+                    vertexArray[v2offset] = x2 + cap.x;
+                    vertexArray[v2offset + 1] = y2 + cap.y;
                     vertexArray[v2offset + 2] = z2 + cap.z;
+
+                    vertexArray[v3offset] = x3 + cap.x;
+                    vertexArray[v3offset + 1] = y3 + cap.y;
                     vertexArray[v3offset + 2] = z3 + cap.z;
+
+                    vertexArray[v4offset] = x4 + cap.x;
+                    vertexArray[v4offset + 1] = y4 + cap.y;
                     vertexArray[v4offset + 2] = z4 + cap.z;
 
+
                     colorArray[v1offset] = color.r;
-                    colorArray[v2offset] = color.r;
-                    colorArray[v3offset] = color.r;
-                    colorArray[v4offset] = color.r;
-
                     colorArray[v1offset + 1] = color.g;
-                    colorArray[v2offset + 1] = color.g;
-                    colorArray[v3offset + 1] = color.g;
-                    colorArray[v4offset + 1] = color.g;
-
                     colorArray[v1offset + 2] = color.b;
+
+                    colorArray[v2offset] = color.r;
+                    colorArray[v2offset + 1] = color.g;
                     colorArray[v2offset + 2] = color.b;
+
+                    colorArray[v3offset] = color.r;
+                    colorArray[v3offset + 1] = color.g;
                     colorArray[v3offset + 2] = color.b;
+
+                    colorArray[v4offset] = color.r;
+                    colorArray[v4offset + 1] = color.g;
                     colorArray[v4offset + 2] = color.b;
 
                     nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6] * normals[v1].z;
@@ -412,15 +415,11 @@ export namespace GLDraw {
                         // face = [v1, v3, v4];
                         // norm = [n1, n3, n4];
 
-                        normalArray[v1offset] = nx1;
-                        normalArray[v3offset] = nx3;
-                        normalArray[v4offset] = nx4;
-                        normalArray[v1offset + 1] = ny1;
-                        normalArray[v3offset + 1] = ny3;
-                        normalArray[v4offset + 1] = ny4;
-                        normalArray[v1offset + 2] = nz1;
-                        normalArray[v3offset + 2] = nz3;
-                        normalArray[v4offset + 2] = nz4;
+                        normalArray.set([nx1, ny1, nz1], v1offset);
+
+                        normalArray.set([nx3, ny3, nz3], v3offset);
+
+                        normalArray.set([nx4, ny4, nz4], v4offset);
 
                         faceArray.set([v1 + start, v3 + start, v4 + start], faceoffset);
 
@@ -434,15 +433,11 @@ export namespace GLDraw {
                         // face = [v1, v2, v3];
                         // norm = [n1, n2, n3];
 
-                        normalArray[v1offset] = nx1;
-                        normalArray[v2offset] = nx2;
-                        normalArray[v3offset] = nx3;
-                        normalArray[v1offset + 1] = ny1;
-                        normalArray[v2offset + 1] = ny2;
-                        normalArray[v3offset + 1] = ny3;
-                        normalArray[v1offset + 2] = nz1;
-                        normalArray[v2offset + 2] = nz2;
-                        normalArray[v3offset + 2] = nz3;
+                        normalArray.set([nx1, ny1, nz1], v1offset);
+
+                        normalArray.set([nx2, ny2, nz2], v2offset);
+
+                        normalArray.set([nx3, ny3, nz3], v3offset);
                         
                         faceArray.set([v1 + start, v2 + start, v3 + start], faceoffset);
 
@@ -454,25 +449,17 @@ export namespace GLDraw {
                         // face = [v1, v2, v3, v4];
                         // norm = [n1, n2, n3, n4];
 
-                        normalArray[v1offset] = nx1;
-                        normalArray[v2offset] = nx2;
-                        normalArray[v4offset] = nx4;
-                        normalArray[v1offset + 1] = ny1;
-                        normalArray[v2offset + 1] = ny2;
-                        normalArray[v4offset + 1] = ny4;
-                        normalArray[v1offset + 2] = nz1;
-                        normalArray[v2offset + 2] = nz2;
-                        normalArray[v4offset + 2] = nz4;
+                        normalArray.set([nx1, ny1, nz1], v1offset);
 
-                        normalArray[v2offset] = nx2;
-                        normalArray[v3offset] = nx3;
-                        normalArray[v4offset] = nx4;
-                        normalArray[v2offset + 1] = ny2;
-                        normalArray[v3offset + 1] = ny3;
-                        normalArray[v4offset + 1] = ny4;
-                        normalArray[v2offset + 2] = nz2;
-                        normalArray[v3offset + 2] = nz3;
-                        normalArray[v4offset + 2] = nz4;
+                        normalArray.set([nx2, ny2, nz2], v2offset);
+
+                        normalArray.set([nx4, ny4, nz4], v4offset);
+
+                        normalArray.set([nx2, ny2, nz2], v2offset);
+
+                        normalArray.set([nx3, ny3, nz3], v3offset);
+
+                        normalArray.set([nx4, ny4, nz4], v4offset);
 
                         faceArray.set([v1 + start, v2 + start, v4 + start, v2 + start, v3 + start, v4 + start], faceoffset);
 
@@ -678,7 +665,7 @@ export namespace GLDraw {
 
             vertexArray.set([(v.x + pos.x), (v.y + pos.y), (v.z + pos.z)], offset);
 
-            colorArray.set([r, g, b], offset);
+            colorArray.set([color.r, color.g, color.b], offset);
 
         }
 
@@ -707,15 +694,11 @@ export namespace GLDraw {
                     // face = [v1, v3, v4];
                     // norm = [n1, n3, n4];
 
-                    normalArray[v1offset] = n1.x;
-                    normalArray[v3offset] = n3.x;
-                    normalArray[v4offset] = n4.x;
-                    normalArray[v1offset + 1] = n1.y;
-                    normalArray[v3offset + 1] = n3.y;
-                    normalArray[v4offset + 1] = n4.y;
-                    normalArray[v1offset + 2] = n1.z;
-                    normalArray[v3offset + 2] = n3.z;
-                    normalArray[v4offset + 2] = n4.z;
+                    normalArray.set([n1.x, n1.y, n1.z], v1offset);
+
+                    normalArray.set([n3.x, n3.y, n3.z], v3offset);
+
+                    normalArray.set([n4.x, n4.y, n4.z], v4offset);
 
                     faceArray.set([v1, v3, v4], faceoffset);
 
@@ -728,15 +711,11 @@ export namespace GLDraw {
                     // face = [v1, v2, v3];
                     // norm = [n1, n2, n3];
 
-                    normalArray[v1offset] = n1.x;
-                    normalArray[v2offset] = n2.x;
-                    normalArray[v3offset] = n3.x;
-                    normalArray[v1offset + 1] = n1.y;
-                    normalArray[v2offset + 1] = n2.y;
-                    normalArray[v3offset + 1] = n3.y;
-                    normalArray[v1offset + 2] = n1.z;
-                    normalArray[v2offset + 2] = n2.z;
-                    normalArray[v3offset + 2] = n3.z;
+                    normalArray.set([n1.x, n1.y, n1.z], v1offset);
+
+                    normalArray.set([n2.x, n2.y, n2.z], v2offset);
+
+                    normalArray.set([n3.x, n3.y, n3.z], v3offset);
 
                     faceArray.set([v1, v2, v3], faceoffset);
 
@@ -749,15 +728,11 @@ export namespace GLDraw {
                     // face = [v1, v2, v3, v4];
                     // norm = [n1, n2, n3, n4];
 
-                    normalArray[v1offset] = n1.x;
-                    normalArray[v2offset] = n2.x;
-                    normalArray[v4offset] = n4.x;
-                    normalArray[v1offset + 1] = n1.y;
-                    normalArray[v2offset + 1] = n2.y;
-                    normalArray[v4offset + 1] = n4.y;
-                    normalArray[v1offset + 2] = n1.z;
-                    normalArray[v2offset + 2] = n2.z;
-                    normalArray[v4offset + 2] = n4.z;
+                    normalArray.set([n1.x, n1.y, n1.z], v1offset);
+
+                    normalArray.set([n2.x, n2.y, n2.z], v2offset);
+
+                    normalArray.set([n4.x, n4.y, n4.z], v4offset);
 
                     normalArray[v2offset] = n2.x;
                     normalArray[v3offset] = n3.x;
