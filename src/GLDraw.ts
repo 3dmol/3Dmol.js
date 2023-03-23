@@ -282,7 +282,7 @@ export namespace GLDraw {
         // add vertices, opposing vertices paired together
         for (i = 0; i < n; ++i) {
 
-            var vi = 2 * i;
+            let vi = 2 * i;
 
             x = e[0] * vertices[vi].x + e[3] * vertices[vi].y + e[6] * vertices[vi].z;
             y = e[1] * vertices[vi].x + e[4] * vertices[vi].y + e[7] * vertices[vi].z;
@@ -311,18 +311,18 @@ export namespace GLDraw {
         if (drawcaps) {
             // h - sphere rows, verticesRows.length - 2
 
-            var ystart = (toCap) ? 0 : h / 2;
-            var yend = (fromCap) ? h + 1 : h / 2 + 1;
-            var v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
+            const ystart = (toCap) ? 0 : h / 2;
+            const yend = (fromCap) ? h + 1 : h / 2 + 1;
+            let v1, v2, v3, v4, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, nx1, nx2, nx3, nx4, ny1, ny2, ny3, ny4, nz1, nz2, nz3, nz4, v1offset, v2offset, v3offset, v4offset;
 
             for (y = ystart; y < yend; y++) {
                 if (y === h / 2)
                     continue;
                 // n number of points for each level (verticesRows[i].length -
                 // 1)
-                var cap = (y <= h / 2) ? to : from;
-                var toObj = cylVertexCache.getVerticesForRadius(radius, toCap, "to");
-                var fromObj = cylVertexCache.getVerticesForRadius(radius, fromCap, "from");
+                const cap = (y <= h / 2) ? to : from;
+                const toObj = cylVertexCache.getVerticesForRadius(radius, toCap, "to");
+                const fromObj = cylVertexCache.getVerticesForRadius(radius, fromCap, "from");
                 if (cap === to) {
                     vertices = toObj.vertices;
                     normals = toObj.normals;
@@ -361,38 +361,21 @@ export namespace GLDraw {
                     z3 = e[5] * vertices[v3].y + e[8] * vertices[v3].z;
                     z4 = e[5] * vertices[v4].y + e[8] * vertices[v4].z;
 
-                    vertexArray[v1offset] = x1 + cap.x;
-                    vertexArray[v1offset + 1] = y1 + cap.y;
-                    vertexArray[v1offset + 2] = z1 + cap.z;
+                    vertexArray.set([(x1 + cap.x), (y1 + cap.y), (z1 + cap.z)], v1offset);
 
-                    vertexArray[v2offset] = x2 + cap.x;
-                    vertexArray[v2offset + 1] = y2 + cap.y;
-                    vertexArray[v2offset + 2] = z2 + cap.z;
+                    vertexArray.set([(x2 + cap.x), (y2 + cap.y), (z2 + cap.z)], v2offset);
 
-                    vertexArray[v3offset] = x3 + cap.x;
-                    vertexArray[v3offset + 1] = y3 + cap.y;
-                    vertexArray[v3offset + 2] = z3 + cap.z;
+                    vertexArray.set([(x3 + cap.x), (y3 + cap.y), (z3 + cap.z)], v3offset);
 
-                    vertexArray[v4offset] = x4 + cap.x;
-                    vertexArray[v4offset + 1] = y4 + cap.y;
-                    vertexArray[v4offset + 2] = z4 + cap.z;
+                    vertexArray.set([(x4 + cap.x), (y4 + cap.y), (z4 + cap.z)], v4offset);
 
+                    colorArray.set([color.r, color.g, color.b], v1offset);
 
-                    colorArray[v1offset] = color.r;
-                    colorArray[v1offset + 1] = color.g;
-                    colorArray[v1offset + 2] = color.b;
+                    colorArray.set([color.r, color.g, color.b], v2offset);
 
-                    colorArray[v2offset] = color.r;
-                    colorArray[v2offset + 1] = color.g;
-                    colorArray[v2offset + 2] = color.b;
+                    colorArray.set([color.r, color.g, color.b], v3offset);
 
-                    colorArray[v3offset] = color.r;
-                    colorArray[v3offset + 1] = color.g;
-                    colorArray[v3offset + 2] = color.b;
-
-                    colorArray[v4offset] = color.r;
-                    colorArray[v4offset + 1] = color.g;
-                    colorArray[v4offset + 2] = color.b;
+                    colorArray.set([color.r, color.g, color.b], v4offset);
 
                     nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6] * normals[v1].z;
                     nx2 = e[0] * normals[v2].x + e[3] * normals[v2].y + e[6] * normals[v2].z;
