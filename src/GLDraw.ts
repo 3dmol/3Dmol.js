@@ -1,5 +1,6 @@
 import { Vector3 } from "./WebGL/math";
 import { Geometry } from "./WebGL";
+import { piValue } from "./Constants";
 
 
 //define enum values
@@ -17,6 +18,10 @@ export enum CAP {
     ROUND = 2
 };
 
+export const phiStart = 0;
+export const phiLength = piValue * 2;
+export const thetaStart = 0;
+export const thetaLength = piValue;
 
 /**
  * Lower level utilities for creating WebGL shape geometries.
@@ -25,56 +30,19 @@ export enum CAP {
   */
 export namespace GLDraw {
 
-    // Rotation matrix around z and x axis -
-    // according to y basis vector
-    // TODO: Try to optimize this (square roots?)
+    // Rotation matrix around z and x axis - according to y basis vector
     function getRotationMatrix(dx: number, dy: number, dz: number) {
-        var dxy = Math.sqrt(dx * dx + dy * dy);
-        var dyz;
-
-        var sinA, cosA, sinB, cosB;
-
-        // about z axis - Phi
-        if (dxy < 0.0001) {
-            sinA = 0;
-            cosA = 1;
-        }
-
-        else {
-            sinA = -dx / dxy;
-            cosA = dy / dxy;
-        }
-
-        // recast dy in terms of new axes - z is the same
+        // Using Math.hypot(dx,dy) instead of Math.sqrt(dx * dx + dy * dy)
+        const dxy = Math.hypot(dx, dy);
+        const { sin: sinA, cos: cosA } = dxy < 0.0001 ? { sin: 0, cos: 1 } : { sin: -dx / dxy, cos: dy / dxy };
 
         dy = -sinA * dx + cosA * dy;
-        dyz = Math.sqrt(dy * dy + dz * dz);
+        const dyz = Math.hypot(dy, dz);
+        const { sin: sinB, cos: cosB } = dyz < 0.0001 ? { sin: 0, cos: 1 } : { sin: dz / dyz, cos: dy / dyz };
 
-        // about new x axis - Theta
-
-        if (dyz < 0.0001) {
-            sinB = 0;
-            cosB = 1;
-        }
-
-        else {
-            sinB = dz / dyz;
-            cosB = dy / dyz;
-        }
-
-        var rot = new Float32Array(9);
-        rot[0] = cosA;
-        rot[1] = sinA;
-        rot[2] = 0;
-        rot[3] = -sinA * cosB;
-        rot[4] = cosA * cosB;
-        rot[5] = sinB;
-        rot[6] = sinA * sinB;
-        rot[7] = -cosA * sinB;
-        rot[8] = cosB;
+        const rot = new Float32Array([cosA, sinA, 0, -sinA * cosB, cosA * cosB, sinB, sinA * sinB, -cosA * sinB, cosB]);
 
         return rot;
-
     };
 
 
@@ -94,10 +62,9 @@ export namespace GLDraw {
             //initialize basisVectors
             let nvecs = [];
 
-            let subdivisions = 4; // including the initial 2, eg. 4 => 16 subintervals
-            let N = Math.pow(2, subdivisions);  // eg. 2**4 = 16 subintervals in total
-            let i = 2;  // start with 2 subdivisions already done
-            let M = Math.pow(2, i); // 4
+            const subdivisions = 4; // including the initial 2, eg. 4 => 16 subintervals
+            const N = Math.pow(2, subdivisions);  // eg. 2**4 = 16 subintervals in total
+            let M = 4; // 4
             let spacing = N / M;  // 16/4 = 4; if there were 5 subdivs, then 32/4 = 8.
             let j: number;
 
@@ -106,7 +73,7 @@ export namespace GLDraw {
             nvecs[spacing * 2] = new Vector3(1, 0, 0);
             nvecs[spacing * 3] = new Vector3(0, 0, -1);
 
-            for (i = 3; i <= subdivisions; i++) {
+            for (let i = 3; i <= subdivisions; i++) {
                 // eg. i=3, we need to add 2**(3-1) = 4 new vecs. Call it M.
                 // their spacing is N/M, eg. N=16, M=4, N/M=4; M=8, N/M=2.
                 // they start off at half this spacing
@@ -125,23 +92,23 @@ export namespace GLDraw {
         };
 
         getVerticesForRadius(radius, cap, capType) {
-            if (typeof (this.cache) !== "undefined" && this.cache[radius] !== undefined)
-                if (this.cache[radius][cap + capType] !== undefined)
-                    return this.cache[radius][cap + capType];
+            if (this.cache != null && this.cache[radius] != null && this.cache[radius][cap + capType] != null) {
+                return this.cache[radius][cap + capType];
+            }
 
             var w = this.basisVectors.length;
             var nvecs = [], norms = [];
             var n;
 
-            for (var i = 0; i < w; i++) {
+            for (let i = 0; i < w; i++) {
                 // bottom
-                nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
+                nvecs.push(this.basisVectors[i].multiplyScalar(radius));
                 // top
                 nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
 
                 // NOTE: this normal is used for constructing sphere caps -
                 // cylinder normals taken care of in drawCylinder
-                n = this.basisVectors[i].clone().normalize();
+                n.copy(this.basisVectors[i]).normalize();
                 norms.push(n);
                 norms.push(n);
             }
@@ -158,23 +125,16 @@ export namespace GLDraw {
             // cylinder
 
             if (heightSegments % 2 !== 0 || !heightSegments) {
-                console.error("heightSegments must be even");
-                return null;
+                console.warn("heightSegments should be even");
             }
-
-            var phiStart = 0;
-            var phiLength = Math.PI * 2;
-
-            var thetaStart = 0;
-            var thetaLength = Math.PI;
 
             var x: number, y:number;
             var polar = false, equator = false;
 
             for (y = 0; y <= heightSegments; y++) {
 
-                polar = (y === 0 || y === heightSegments) ? true : false;
-                equator = (y === heightSegments / 2) ? true : false;
+                polar = (y === 0 || y === heightSegments);
+                equator = (y === heightSegments / 2);
 
                 var verticesRow = [], toRow = [];
 
@@ -199,8 +159,9 @@ export namespace GLDraw {
 
                         if (x < widthSegments) {
                             var vertex = new Vector3();
+                            const phiStartLength = phiStart + u * phiLength;
                             vertex.x = -radius *
-                                Math.cos(phiStart + u * phiLength) *
+                                Math.cos(phiStartLength) *
                                 Math.sin(thetaStart + v * thetaLength);
                             if (cap == 1)
                                 vertex.y = 0;
@@ -208,24 +169,19 @@ export namespace GLDraw {
                                 vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
 
                             vertex.z = radius *
-                                Math.sin(phiStart + u * phiLength) *
+                                Math.sin(phiStartLength) *
                                 Math.sin(thetaStart + v * thetaLength);
 
-                            if (Math.abs(vertex.x) < 1e-5)
-                                vertex.x = 0;
-                            if (Math.abs(vertex.y) < 1e-5)
-                                vertex.y = 0;
                             if (Math.abs(vertex.z) < 1e-5)
                                 vertex.z = 0;
 
                             if (cap == CAP.FLAT) {
                                 n = new Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
-                                n.normalize();
                             }
                             else {
                                 n = new Vector3(vertex.x, vertex.y, vertex.z);
-                                n.normalize();
                             }
+                            n.normalize()
 
                             nvecs.push(vertex);
                             norms.push(n);
@@ -332,45 +288,20 @@ export namespace GLDraw {
             y = e[1] * vertices[vi].x + e[4] * vertices[vi].y + e[7] * vertices[vi].z;
             z = e[5] * vertices[vi].y + e[8] * vertices[vi].z;
 
-            // var xn = x/radius, yn = y/radius, zn = z/radius;
-
             offset = 3 * (start + vi);
             faceoffset = geoGroup.faceidx;
 
-            // from
-            vertexArray[offset] = x + from.x;
-            vertexArray[offset + 1] = y + from.y;
-            vertexArray[offset + 2] = z + from.z;
-            // to
-            vertexArray[offset + 3] = x + to.x;
-            vertexArray[offset + 4] = y + to.y;
-            vertexArray[offset + 5] = z + to.z;
+            // From & To
+            vertexArray.set([x + from.x, y + from.y, z + from.z, x + to.x, y + to.y, z + to.z], offset)
 
-            // normals
-            normalArray[offset] = x;
-            normalArray[offset + 3] = x;
-            normalArray[offset + 1] = y;
-            normalArray[offset + 4] = y;
-            normalArray[offset + 2] = z;
-            normalArray[offset + 5] = z;
+            // Normals
+            normalArray.set([x,y,z,x,y,z], offset)
 
-            // colors
-            colorArray[offset] = color.r;
-            colorArray[offset + 3] = color.r;
-            colorArray[offset + 1] = color.g;
-            colorArray[offset + 4] = color.g;
-            colorArray[offset + 2] = color.b;
-            colorArray[offset + 5] = color.b;
+            // Colors
+            colorArray.set([color.r, color.g, color.b, color.r, color.g, color.b], offset);
 
-            // faces
-            // 0 - 2 - 1
-            faceArray[faceoffset] = fromRow[i] + start;
-            faceArray[faceoffset + 1] = fromRow[i + 1] + start;
-            faceArray[faceoffset + 2] = toRow[i] + start;
-            // 1 - 2 - 3
-            faceArray[faceoffset + 3] = toRow[i] + start;
-            faceArray[faceoffset + 4] = fromRow[i + 1] + start;
-            faceArray[faceoffset + 5] = toRow[i + 1] + start;
+            // Faces: 0 - 2 - 1, 1 - 2 - 3
+            faceArray.set([fromRow[i] + start, fromRow[i + 1] + start, toRow[i] + start, toRow[i] + start, fromRow[i + 1] + start, toRow[i + 1] + start], faceoffset)
 
             geoGroup.faceidx += 6;
 
@@ -491,9 +422,7 @@ export namespace GLDraw {
                         normalArray[v3offset + 2] = nz3;
                         normalArray[v4offset + 2] = nz4;
 
-                        faceArray[faceoffset] = v1 + start;
-                        faceArray[faceoffset + 1] = v3 + start;
-                        faceArray[faceoffset + 2] = v4 + start;
+                        faceArray.set([v1 + start, v3 + start, v4 + start], faceoffset);
 
                         geoGroup.faceidx += 3;
 
@@ -514,10 +443,8 @@ export namespace GLDraw {
                         normalArray[v1offset + 2] = nz1;
                         normalArray[v2offset + 2] = nz2;
                         normalArray[v3offset + 2] = nz3;
-
-                        faceArray[faceoffset] = v1 + start;
-                        faceArray[faceoffset + 1] = v2 + start;
-                        faceArray[faceoffset + 2] = v3 + start;
+                        
+                        faceArray.set([v1 + start, v2 + start, v3 + start], faceoffset);
 
                         geoGroup.faceidx += 3;
 
@@ -547,13 +474,7 @@ export namespace GLDraw {
                         normalArray[v3offset + 2] = nz3;
                         normalArray[v4offset + 2] = nz4;
 
-                        faceArray[faceoffset] = v1 + start;
-                        faceArray[faceoffset + 1] = v2 + start;
-                        faceArray[faceoffset + 2] = v4 + start;
-
-                        faceArray[faceoffset + 3] = v2 + start;
-                        faceArray[faceoffset + 4] = v3 + start;
-                        faceArray[faceoffset + 5] = v4 + start;
+                        faceArray.set([v1 + start, v2 + start, v4 + start, v2 + start, v3 + start, v4 + start], faceoffset);
 
                         geoGroup.faceidx += 6;
                     }
@@ -608,28 +529,15 @@ export namespace GLDraw {
         var faceArray = geoGroup.faceArray;
 
         offset = start * 3;
-        //base point first vertex
-        vertexArray[offset] = from.x;
-        vertexArray[offset + 1] = from.y;
-        vertexArray[offset + 2] = from.z;
-        normalArray[offset] = -ndir.x;
-        normalArray[offset + 1] = -ndir.y;
-        normalArray[offset + 2] = -ndir.z;
-        colorArray[offset] = color.r;
-        colorArray[offset + 1] = color.g;
-        colorArray[offset + 2] = color.b;
 
-        //second vertex top
-        vertexArray[offset + 3] = to.x;
-        vertexArray[offset + 4] = to.y;
-        vertexArray[offset + 5] = to.z;
+        // From & To
+        vertexArray.set([from.x, from.y, from.z, to.z, to.y, to.z], offset);
 
-        normalArray[offset + 3] = ndir.x;
-        normalArray[offset + 4] = ndir.y;
-        normalArray[offset + 5] = ndir.z;
-        colorArray[offset + 3] = color.r;
-        colorArray[offset + 4] = color.g;
-        colorArray[offset + 5] = color.b;
+        // Normals
+        normalArray.set([-ndir.x, -ndir.y, -ndir.z, ndir.x, ndir.y, ndir.z], offset);
+
+        //Colors
+        colorArray.set([color.r, color.g, color.b, color.r, color.g, color.b], offset);
 
         offset += 6;
 
@@ -641,20 +549,14 @@ export namespace GLDraw {
             y = e[1] * vec.x + e[4] * vec.y + e[7] * vec.z;
             z = e[5] * vec.y + e[8] * vec.z;
 
-            // from
-            vertexArray[offset] = x + from.x;
-            vertexArray[offset + 1] = y + from.y;
-            vertexArray[offset + 2] = z + from.z;
+            // From
+            vertexArray.set([x + from.x, y + from.y, z + from.z], offset);
 
-            // normals
-            normalArray[offset] = x;
-            normalArray[offset + 1] = y;
-            normalArray[offset + 2] = z;
+            // Normals
+            normalArray.set([x, y, z], offset);
 
-            // colors
-            colorArray[offset] = color.r;
-            colorArray[offset + 1] = color.g;
-            colorArray[offset + 2] = color.b;
+            // Colors
+            colorArray.set([color.r, color.g, color.b], offset);
 
             offset += 3;
 
@@ -667,13 +569,10 @@ export namespace GLDraw {
             var v1 = start + 2 + i;
             var v2 = start + 2 + ((i + 1) % n);
 
-            faceArray[faceoffset] = v1;
-            faceArray[faceoffset + 1] = v2;
-            faceArray[faceoffset + 2] = start;
+            faceArray.set([v1, v2, start], faceoffset)
             faceoffset += 3;
-            faceArray[faceoffset] = v1;
-            faceArray[faceoffset + 1] = v2;
-            faceArray[faceoffset + 2] = start + 1;
+
+            faceArray.set([v1, v2, start + 1], faceoffset)
             faceoffset += 3;
         }
         geoGroup.faceidx += 6 * n;
@@ -708,13 +607,7 @@ export namespace GLDraw {
                 heightSegments = 8 * sphereQuality;
             }
 
-            var phiStart = 0;
-            var phiLength = Math.PI * 2;
-
-            var thetaStart = 0;
-            var thetaLength = Math.PI;
-
-            var x, y;
+            let x, y;
 
             for (y = 0; y <= heightSegments; y++) {
 
@@ -723,11 +616,11 @@ export namespace GLDraw {
 
                     let u = x / widthSegments;
                     let v = y / heightSegments;
-
-                    let vx = -radius * Math.cos(phiStart + u * phiLength) *
+                    const phiStartLength = phiStart + u * phiLength;
+                    let vx = -radius * Math.cos(phiStartLength) *
                         Math.sin(thetaStart + v * thetaLength);
                     let vy = radius * Math.cos(thetaStart + v * thetaLength);
-                    let vz = radius * Math.sin(phiStart + u * phiLength) *
+                    let vz = radius * Math.sin(phiStartLength) *
                         Math.sin(thetaStart + v * thetaLength);
 
                     var n = new Vector3(vx, vy, vz);
@@ -783,13 +676,9 @@ export namespace GLDraw {
             let offset = 3 * (start + i);
             let v = vertices[i];
 
-            vertexArray[offset] = (v.x + pos.x);
-            vertexArray[offset + 1] = (v.y + pos.y);
-            vertexArray[offset + 2] = (v.z + pos.z);
+            vertexArray.set([(v.x + pos.x), (v.y + pos.y), (v.z + pos.z)], offset);
 
-            colorArray[offset] = color.r;
-            colorArray[offset + 1] = color.g;
-            colorArray[offset + 2] = color.b;
+            colorArray.set([r, g, b], offset);
 
         }
 
@@ -828,16 +717,9 @@ export namespace GLDraw {
                     normalArray[v3offset + 2] = n3.z;
                     normalArray[v4offset + 2] = n4.z;
 
-                    faceArray[faceoffset] = v1;
-                    faceArray[faceoffset + 1] = v3;
-                    faceArray[faceoffset + 2] = v4;
+                    faceArray.set([v1, v3, v4], faceoffset);
 
-                    lineArray[lineoffset] = v1;
-                    lineArray[lineoffset + 1] = v3;
-                    lineArray[lineoffset + 2] = v1;
-                    lineArray[lineoffset + 3] = v4;
-                    lineArray[lineoffset + 4] = v3;
-                    lineArray[lineoffset + 5] = v4;
+                    lineArray.set([v1, v3, v1, v4, v3, v4], lineoffset);
 
                     geoGroup.faceidx += 3;
                     geoGroup.lineidx += 6;
@@ -856,16 +738,9 @@ export namespace GLDraw {
                     normalArray[v2offset + 2] = n2.z;
                     normalArray[v3offset + 2] = n3.z;
 
-                    faceArray[faceoffset] = v1;
-                    faceArray[faceoffset + 1] = v2;
-                    faceArray[faceoffset + 2] = v3;
+                    faceArray.set([v1, v2, v3], faceoffset);
 
-                    lineArray[lineoffset] = v1;
-                    lineArray[lineoffset + 1] = v2;
-                    lineArray[lineoffset + 2] = v1;
-                    lineArray[lineoffset + 3] = v3;
-                    lineArray[lineoffset + 4] = v2;
-                    lineArray[lineoffset + 5] = v3;
+                    lineArray.set([v1, v2, v1, v3, v2, v1], lineoffset);
 
                     geoGroup.faceidx += 3;
                     geoGroup.lineidx += 6;
@@ -894,23 +769,9 @@ export namespace GLDraw {
                     normalArray[v3offset + 2] = n3.z;
                     normalArray[v4offset + 2] = n4.z;
 
-                    faceArray[faceoffset] = v1;
-                    faceArray[faceoffset + 1] = v2;
-                    faceArray[faceoffset + 2] = v4;
+                    faceArray.set([v1, v2, v4, v2, v3, v4], faceoffset);
 
-                    faceArray[faceoffset + 3] = v2;
-                    faceArray[faceoffset + 4] = v3;
-                    faceArray[faceoffset + 5] = v4;
-
-                    lineArray[lineoffset] = v1;
-                    lineArray[lineoffset + 1] = v2;
-                    lineArray[lineoffset + 2] = v1;
-                    lineArray[lineoffset + 3] = v4;
-
-                    lineArray[lineoffset + 4] = v2;
-                    lineArray[lineoffset + 5] = v3;
-                    lineArray[lineoffset + 6] = v3;
-                    lineArray[lineoffset + 7] = v4;
+                    lineArray.set([v1, v2, v1, v4, v2, v3, v3, v4], lineoffset);
 
                     geoGroup.faceidx += 6;
                     geoGroup.lineidx += 8;
