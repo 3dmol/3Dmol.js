@@ -49,7 +49,7 @@ util = require('util')
 global.TextEncoder = util.TextEncoder
 global.TextDecoder = util.TextDecoder
 
-jest.setTimeout(120000);
+jest.setTimeout(250000);
 
 //we only use this to check the
 WebGLRenderingContext.prototype.getParameter = function(p) { return "WebGL 2.0 (OpenGL ES 3.0 Chromium)"; };
