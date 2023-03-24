@@ -135,14 +135,10 @@ function drawThinStrip(geo: Geometry, p1, p2, colors) {
         var faceArray = geoGroup.faceArray;
         offset = geoGroup.vertices;
         vertoffset = offset * 3;
-
-        vertexArray[vertoffset] = p1[i].x;
-        vertexArray[vertoffset + 1] = p1[i].y;
-        vertexArray[vertoffset + 2] = p1[i].z;
-
-        vertexArray[vertoffset + 3] = p2[i].x;
-        vertexArray[vertoffset + 4] = p2[i].y;
-        vertexArray[vertoffset + 5] = p2[i].z;
+        const [x1, y1, z1] = p1[i];
+        const [x2, y2, z2] = p2[i];
+        const vertexView = new Float32Array(vertexArray.buffer, vertoffset * Float32Array.BYTES_PER_ELEMENT);
+        vertexView.set([x1, y1, z1, x2, y2, z2]);   
 
         for (var j = 0; j < 6; ++j) {
             colorArray[vertoffset + 3 * j] = color.r;
@@ -154,12 +150,9 @@ function drawThinStrip(geo: Geometry, p1, p2, colors) {
             var faces = [offset, offset + 1, offset - 1, offset - 2];
             var faceoffset = geoGroup.faceidx;
 
-            faceArray[faceoffset] = faces[0];
-            faceArray[faceoffset + 1] = faces[1];
-            faceArray[faceoffset + 2] = faces[3];
-            faceArray[faceoffset + 3] = faces[1];
-            faceArray[faceoffset + 4] = faces[2];
-            faceArray[faceoffset + 5] = faces[3];
+            for (let i = 0; i < 6; i++) {
+                faceArray[faceoffset + i] = faces[i % 4];
+            }
 
             geoGroup.faceidx += 6;
         }
@@ -333,7 +326,8 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
             colorArray[va_offset + 3 * j + 2] = color.b;
         }
 
-        if (i > 0 && !replicating) {
+        if (i > 0 && !replicating && (currentAtom.clickable || currentAtom.hoverable)) {
+            var faces = [];
 
             for (j = 0; j < num * 2; j++) {
 
@@ -357,36 +351,17 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
 
                 geoGroup.faceidx += 6;
 
-                // TODO implement clickable the right way. midpoints of
-                // strand between consecutive atoms
+                // calculate clickable faces
+                if (j % 2 === 1) {
+                    faces.push(new Triangle(faceArray[f_offset], faceArray[f_offset + 2], faceArray[f_offset + 4]));
+                    faces.push(new Triangle(faceArray[f_offset + 1], faceArray[f_offset + 3], faceArray[f_offset + 5]));
+                }
+
+                // TODO: implement clickable the right way. Midpoints of strand between consecutive atoms
             }
 
-            if (currentAtom.clickable || currentAtom.hoverable) {
-                var faces = [];
-
-                faces.push(new Triangle(last_cs_bottom[0],
-                    cs_bottom[0], cs_bottom[num - 1]));
-                faces.push(new Triangle(last_cs_bottom[0],
-                    cs_bottom[num - 1], last_cs_bottom[num - 1]));
-
-                faces.push(new Triangle(last_cs_bottom[num - 1],
-                    cs_bottom[num - 1], cs_top[num - 1]));
-                faces.push(new Triangle(last_cs_bottom[num - 1],
-                    cs_top[num - 1], last_cs_top[num - 1]));
-
-                faces.push(new Triangle(cs_top[0], last_cs_top[0],
-                    last_cs_top[num - 1]));
-                faces.push(new Triangle(cs_top[num - 1], cs_top[0],
-                    last_cs_top[num - 1]));
-
-                faces.push(new Triangle(cs_bottom[0],
-                    last_cs_bottom[0], last_cs_top[0]));
-                faces.push(new Triangle(cs_top[0], cs_bottom[0],
-                    last_cs_top[0]));
-
-                for (j in faces) {
-                    currentAtom.intersectionShape.triangle.push(faces[j]);
-                }
+            for (j in faces) {
+                currentAtom.intersectionShape.triangle.push(faces[j]);
             }
         }
 
@@ -495,30 +470,26 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
         offset = geoGroup.vertices;
         vertoffset = offset * 3;
 
-        vertexArray[vertoffset] = p1v.x;
-        vertexArray[vertoffset + 1] = p1v.y;
-        vertexArray[vertoffset + 2] = p1v.z;
-        vertexArray[vertoffset + 3] = p1v.x;
-        vertexArray[vertoffset + 4] = p1v.y;
-        vertexArray[vertoffset + 5] = p1v.z;
-        vertexArray[vertoffset + 6] = p2v.x;
-        vertexArray[vertoffset + 7] = p2v.y;
-        vertexArray[vertoffset + 8] = p2v.z;
-        vertexArray[vertoffset + 9] = p2v.x;
-        vertexArray[vertoffset + 10] = p2v.y;
-        vertexArray[vertoffset + 11] = p2v.z;
-        vertexArray[vertoffset + 12] = a1v.x;
-        vertexArray[vertoffset + 13] = a1v.y;
-        vertexArray[vertoffset + 14] = a1v.z;
-        vertexArray[vertoffset + 15] = a1v.x;
-        vertexArray[vertoffset + 16] = a1v.y;
-        vertexArray[vertoffset + 17] = a1v.z;
-        vertexArray[vertoffset + 18] = a2v.x;
-        vertexArray[vertoffset + 19] = a2v.y;
-        vertexArray[vertoffset + 20] = a2v.z;
-        vertexArray[vertoffset + 21] = a2v.x;
-        vertexArray[vertoffset + 22] = a2v.y;
-        vertexArray[vertoffset + 23] = a2v.z;
+        for (let i = 0; i < 6; i++) {
+            vertexArray[vertoffset + (i * 3)] = p1v.x;
+            vertexArray[vertoffset + (i * 3) + 1] = p1v.y;
+            vertexArray[vertoffset + (i * 3) + 2] = p1v.z;
+        }
+        for (let i = 0; i < 6; i++) {
+            vertexArray[vertoffset + (i * 3) + 6] = p2v.x;
+            vertexArray[vertoffset + (i * 3) + 7] = p2v.y;
+            vertexArray[vertoffset + (i * 3) + 8] = p2v.z;
+        }
+        for (let i = 0; i < 6; i++) {
+            vertexArray[vertoffset + (i * 3) + 12] = a1v.x;
+            vertexArray[vertoffset + (i * 3) + 13] = a1v.y;
+            vertexArray[vertoffset + (i * 3) + 14] = a1v.z;
+        }
+        for (let i = 0; i < 6; i++) {
+            vertexArray[vertoffset + (i * 3) + 18] = a2v.x;
+            vertexArray[vertoffset + (i * 3) + 19] = a2v.y;
+            vertexArray[vertoffset + (i * 3) + 20] = a2v.z;
+        }
 
         for (j = 0; j < 8; ++j) {
             colorArray[vertoffset + 3 * j] = color.r;
@@ -538,12 +509,8 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
 
                 faceoffset = geoGroup.faceidx;
 
-                faceArray[faceoffset] = face[0];
-                faceArray[faceoffset + 1] = face[1];
-                faceArray[faceoffset + 2] = face[3];
-                faceArray[faceoffset + 3] = face[1];
-                faceArray[faceoffset + 4] = face[2];
-                faceArray[faceoffset + 5] = face[3];
+                faceArray.set(face, faceoffset);
+                faceArray.set([face[1], face[2], face[3], face[1], face[3], face[0]], faceoffset + 3);
 
                 geoGroup.faceidx += 6;
 
@@ -562,68 +529,36 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
                     p2b.atom = vs[face[1]].atom || null;
 
                     if (diffAtoms) {
-                        var m1 = p1a.clone().add(p1b).multiplyScalar(0.5);
-                        var m2 = p2a.clone().add(p2b).multiplyScalar(0.5);
-                        var m = p1a.clone().add(p2b).multiplyScalar(0.5);
+                        const m1 = p1a.clone().add(p1b).multiplyScalar(0.5);
+                        const m2 = p2a.clone().add(p2b).multiplyScalar(0.5);
+                        const m = p1a.clone().add(p2b).multiplyScalar(0.5);
 
-                        if (j % 2 === 0) {
-                            if (lastAtom.clickable || lastAtom.hoverable) {
-                                face1 = new Triangle(m1, m, p1a);
-                                face2 = new Triangle(m2, p2a, m);
-                                face3 = new Triangle(m, p2a, p1a);
-                                lastAtom.intersectionShape.triangle
-                                    .push(face1);
-                                lastAtom.intersectionShape.triangle
-                                    .push(face2);
-                                lastAtom.intersectionShape.triangle
-                                    .push(face3);
-                            }
-
-                            if (currentAtom.clickable || currentAtom.hoverable) {
-                                face1 = new Triangle(p1b, p2b, m);
-                                face2 = new Triangle(p2b, m2, m);
-                                face3 = new Triangle(p1b, m, m1);
-                                currentAtom.intersectionShape.triangle
-                                    .push(face1);
-                                currentAtom.intersectionShape.triangle
-                                    .push(face2);
-                                currentAtom.intersectionShape.triangle
-                                    .push(face3);
-                            }
-                        } else {
-                            if (currentAtom.clickable || currentAtom.hoverable) {
-                                face1 = new Triangle(m1, m, p1a);
-                                face2 = new Triangle(m2, p2a, m);
-                                face3 = new Triangle(m, p2a, p1a);
-                                currentAtom.intersectionShape.triangle
-                                    .push(face1);
-                                currentAtom.intersectionShape.triangle
-                                    .push(face2);
-                                currentAtom.intersectionShape.triangle
-                                    .push(face3);
-                            }
-
-                            if (lastAtom.clickable || lastAtom.hoverable) {
-                                face1 = new Triangle(p1b, p2b, m);
-                                face2 = new Triangle(p2b, m2, m);
-                                face3 = new Triangle(p1b, m, m1);
-                                lastAtom.intersectionShape.triangle
-                                    .push(face1);
-                                lastAtom.intersectionShape.triangle
-                                    .push(face2);
-                                lastAtom.intersectionShape.triangle
-                                    .push(face3);
+                        const clickableOrHoverable = (atom) => atom.clickable || atom.hoverable;
+                        
+                        const isClickableOrHoverable = (atom, j) => (j % 2 === 0 && clickableOrHoverable(lastAtom)) || 
+                                                                        (j % 2 !== 0 && clickableOrHoverable(currentAtom));
+                        
+                        if (isClickableOrHoverable(lastAtom, j)) {
+                            const f1 = new Triangle(m1, m, p1a);
+                            const f2 = new Triangle(m2, p2a, m);
+                            const f3 = new Triangle(m, p2a, p1a);
+                            const f4 = new Triangle(p1b, p2b, m);
+                            const f5 = new Triangle(p2b, m2, m);
+                            const f6 = new Triangle(p1b, m, m1);
+                            if (j % 2 === 0) {
+                            lastAtom.intersectionShape.triangle.push(f1, f2, f3);
+                            currentAtom.intersectionShape.triangle.push(f4, f5, f6);
+                            } else {
+                            currentAtom.intersectionShape.triangle.push(f1, f2, f3);
+                            lastAtom.intersectionShape.triangle.push(f4, f5, f6);
                             }
                         }
-
-                    }
-
-                    // face for single atom
+                    } 
+                    // Face for Single Atom
                     else if (currentAtom.clickable || currentAtom.hoverable) {
-                        face1 = new Triangle(p1b, p2b, p1a);
-                        face2 = new Triangle(p2b, p2a, p1a);
-                        currentAtom.intersectionShape.triangle.push(face1);
-                        currentAtom.intersectionShape.triangle.push(face2);
+                        const face1 = new Triangle(p1b, p2b, p1a);
+                        const face2 = new Triangle(p2b, p2a, p1a);
+                        currentAtom.intersectionShape.triangle.push(face1, face2);
                     }
 
                 }
@@ -651,19 +586,13 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
 
         var v1 = vs[i * 2], v2 = vs[vsize + i * 2];
 
-        vertexArray[vertoffset + 6 * i] = v1.x;
-        vertexArray[vertoffset + 1 + 6 * i] = v1.y;
-        vertexArray[vertoffset + 2 + 6 * i] = v1.z;
-        vertexArray[vertoffset + 3 + 6 * i] = v2.x;
-        vertexArray[vertoffset + 4 + 6 * i] = v2.y;
-        vertexArray[vertoffset + 5 + 6 * i] = v2.z;
+        const [x1, y1, z1] = v1.toArray();
+        const [x2, y2, z2] = v2.toArray();
+        vertexArray.set([x1, y1, z1, x2, y2, z2], vertoffset + 6 * i);
 
-        colorArray[vertoffset + 6 * i] = color.r;
-        colorArray[vertoffset + 1 + 6 * i] = color.g;
-        colorArray[vertoffset + 2 + 6 * i] = color.b;
-        colorArray[vertoffset + 3 + 6 * i] = color.r;
-        colorArray[vertoffset + 4 + 6 * i] = color.g;
-        colorArray[vertoffset + 5 + 6 * i] = color.b;
+        for (let j = 0; j < 6; j++) {
+            colorArray[vertoffset + j + 6 * i] = color[j % 3];
+        }
 
     }
 
@@ -672,18 +601,8 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
     face1 = [offset, offset + 2, offset + 6, offset + 4];
     face2 = [offset + 1, offset + 5, offset + 7, offset + 3];
 
-    faceArray[faceoffset] = face1[0];
-    faceArray[faceoffset + 1] = face1[1];
-    faceArray[faceoffset + 2] = face1[3];
-    faceArray[faceoffset + 3] = face1[1];
-    faceArray[faceoffset + 4] = face1[2];
-    faceArray[faceoffset + 5] = face1[3];
-    faceArray[faceoffset + 6] = face2[0];
-    faceArray[faceoffset + 7] = face2[1];
-    faceArray[faceoffset + 8] = face2[3];
-    faceArray[faceoffset + 9] = face2[1];
-    faceArray[faceoffset + 10] = face2[2];
-    faceArray[faceoffset + 11] = face2[3];
+    const [f1v1, f1v2, f1v3, f2v1, f2v2, f2v3] = [...face1, ...face2];
+    faceArray.splice(faceoffset, 0, f1v1, f1v2, f1v3, f1v2, f1v3, f2v1, f2v2, f2v3, f2v2, f2v3, f1v1);  
 
     geoGroup.faceidx += 12;
     geoGroup.vertices += 8;
@@ -692,66 +611,71 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
 };
 
 
-function drawStrip(geo, points, colors, div, thickness, opacity, shape) {
-    if (!shape || shape === "default")
-        shape = "rectangle";
-    if (shape === 'edged')
-        drawPlainStrip(geo, points, colors, div, thickness, opacity);
-    else if (shape === "rectangle" || shape === "oval" || shape === "parabola")
-        drawShapeStrip(geo, points, colors, div, thickness, opacity, shape);
+function drawStrip(geo, points, colors, div, thickness, opacity, shape = "default") {
+    switch (shape) {
+        case "edged":
+            drawPlainStrip(geo, points, colors, div, thickness, opacity);
+            break;
+        case "rectangle":
+        case "oval":
+        case "parabola":
+            drawShapeStrip(geo, points, colors, div, thickness, opacity, shape);
+            break;
+        default:
+            drawShapeStrip(geo, points, colors, div, thickness, opacity, "rectangle");
+            break;
+    }
 };
 
 // check if given atom is an alpha carbon
 function isAlphaCarbon(atom) {
     return atom && atom.elem === "C" && atom.atom === "CA"; // note that
-    // calcium is
-    // also CA
+    // Calcium is also CA
 };
 
 // check whether two atoms are members of the same residue or subsequent,
 // connected residues (a before b)
 function inConnectedResidues(a, b) {
-    if (a && b && a.chain === b.chain) {
-        if (!a.hetflag && !b.hetflag && (a.reschain === b.reschain) &&
-            (a.resi === b.resi || a.resi === b.resi - 1))
+    if (!a || !b || a.chain !== b.chain) {
+        return false;
+    }
+
+    if (!a.hetflag && !b.hetflag && a.reschain === b.reschain) {
+        if (Math.abs(a.resi - b.resi) <= 1) {
             return true;
-        if (a.resi < b.resi) {
-            // some PDBs have gaps in the numbering but the residues are
-            // still connected
-            // assume if within 4A they are connected
-            var dx = a.x - b.x;
-            var dy = a.y - b.y;
-            var dz = a.z - b.z;
-            var dist = dx * dx + dy * dy + dz * dz;
-            if (a.atom == "CA" && b.atom == "CA" && dist < 16.0) //protein residues not connected
-                return true; // calpha dist
-            else if ((a.atom == "P" || b.atom == "P") && dist < 64.0) //dna
-                return true;
+        }
+
+        var distSq = (a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2;
+
+        if (a.atom === "CA" && b.atom === "CA" && distSq < 256.0) { //protein residues not connected
+            return true; // calpha dist
+        } else if ((a.atom === "P" || b.atom === "P") && distSq < 4096.0) { //dna
+            return true;
         }
     }
 
     return false;
-};
+}
 
-// add geo to the group
+// Add geo to the group
 function setGeo(group, geo, opacity, outline, setNormals) {
-
-    if (geo == null || geo.vertices == 0) return;
+    if (!geo || geo.vertices === 0) {
+        return;
+    }
     if (setNormals) {
         geo.initTypedArrays();
         geo.setUpNormals();
     }
-
     var cartoonMaterial = new MeshDoubleLambertMaterial();
     cartoonMaterial.vertexColors = Coloring.FaceColors;
-    if (typeof (opacity) === "number" && opacity >= 0 && opacity < 1) {
+    if (typeof opacity === 'number' && opacity >= 0 && opacity <= 1) {
         cartoonMaterial.transparent = true;
         cartoonMaterial.opacity = opacity;
     }
     cartoonMaterial.outline = outline;
     var cartoonMesh = new Mesh(geo, cartoonMaterial as Material);
     group.add(cartoonMesh);
-};
+}
 
 function addBackbonePoints(points, num, smoothen, backbonePt,
     orientPt, prevOrientPt, backboneAtom, atoms, atomi) {
