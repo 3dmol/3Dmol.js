@@ -175,82 +175,80 @@ export class GLModel {
     private drawAtomCross(atom:AtomSpec, geos: Record<number, Geometry>) {
         if (!atom.style.cross)
             return;
-        var style = atom.style.cross;
+        const style = atom.style.cross;
         if (style.hidden)
             return;
-        var linewidth = (style.linewidth || GLModel.defaultlineWidth);
+        const linewidth = (style.linewidth || GLModel.defaultlineWidth);
         if (!geos[linewidth])
             geos[linewidth] = new Geometry();
 
-        var geoGroup = geos[linewidth].updateGeoGroup(6);
+        const geoGroup = geos[linewidth].updateGeoGroup(6);
 
-        var delta = this.getRadiusFromStyle(atom, style);
+        const delta = this.getRadiusFromStyle(atom, style);
 
-        var points = [[delta, 0, 0], [-delta, 0, 0], [0, delta, 0],
+        const points = [[delta, 0, 0], [-delta, 0, 0], [0, delta, 0],
         [0, -delta, 0], [0, 0, delta], [0, 0, -delta]];
 
-        var clickable = atom.clickable || atom.hoverable;
+        const clickable = atom.clickable || atom.hoverable;
         if (clickable && atom.intersectionShape === undefined)
             atom.intersectionShape = { sphere: [], cylinder: [], line: [] };
 
-        var c = getColorFromStyle(atom, style);
+        const c = getColorFromStyle(atom, style);
 
-        var vertexArray = geoGroup.vertexArray;
-        var colorArray = geoGroup.colorArray;
+        const vertices = [];
+        const colors = [];
 
-        for (var j = 0; j < 6; j++) {
+        for (let j = 0; j < 6; j++) {
+            const offset = j * 3;
 
-            var offset = geoGroup.vertices * 3;
-
-            geoGroup.vertices++;
-            vertexArray[offset] = atom.x + points[j][0];
-            vertexArray[offset + 1] = atom.y + points[j][1];
-            vertexArray[offset + 2] = atom.z + points[j][2];
-            colorArray[offset] = c.r;
-            colorArray[offset + 1] = c.g;
-            colorArray[offset + 2] = c.b;
+            vertices[offset] = atom.x + points[j][0];
+            vertices[offset + 1] = atom.y + points[j][1];
+            vertices[offset + 2] = atom.z + points[j][2];
+            colors[offset] = c.r;
+            colors[offset + 1] = c.g;
+            colors[offset + 2] = c.b;
 
             if (clickable) {
-                var point = new Vector3(points[j][0], points[j][1], points[j][2]);
+                const point = new Vector3(points[j][0], points[j][1], points[j][2]);
 
                 //decrease cross size for selection to prevent misselection from atom overlap
                 point.multiplyScalar(0.1);
                 point.set(point.x + atom.x, point.y + atom.y, point.z + atom.z);
                 atom.intersectionShape.line.push(point);
             }
-
         }
 
+        const vertexArray = geoGroup.vertexArray;
+        const colorArray = geoGroup.colorArray;
+        const startOffset = geoGroup.vertices * 3;
+        const endOffset = startOffset + vertices.length;
+
+        vertexArray.set(vertices, startOffset);
+        colorArray.set(colors, startOffset);
+
+        geoGroup.vertices += vertices.length / 3;
     };
 
-    private getGoodCross(atom:AtomSpec, atom2:AtomSpec, p1, dir) {
-        // get vector 2 different neighboring atom
-        //find most divergent neighbor
-        var bestv = null;
-        var bestlen = -1;
-        for (var j = 0, n = atom.bonds.length; j < n; j++) {
-            if (atom.bonds[j] != atom2.index) {
-                let j2 = atom.bonds[j];
-                let atom3 = this.atoms[j2];
-                let p3 = new Vector3(atom3.x, atom3.y, atom3.z);
 
-                let dir2 = p3.clone();
-                dir2.sub(p1);
-
-                let v = dir2.clone();
-                v.cross(dir);
-                var l = v.lengthSq();
+    private getGoodCross(atom: AtomSpec, atom2: AtomSpec, p1: Vector3, dir: Vector3): Vector3 | null {
+        // Get vector to different neighboring atom and find most divergent neighbor
+        let bestv: Vector3 | null = null;
+        let bestlen = -1;
+        for (const bond of atom.bonds) {
+            if (bond !== atom2.index) {
+                const [j2, atom3] = [bond, this.atoms[bond]];
+                const p3 = new Vector3(atom3.x, atom3.y, atom3.z);
+                const dir2 = p3.clone().sub(p1);
+                const v = dir2.clone().cross(dir);
+                const l = v.lengthSq();
                 if (l > bestlen) {
                     bestlen = l;
                     bestv = v;
-                    if (bestlen > 0.1) {
-                        return bestv;
-                    }
                 }
             }
         }
-        return bestv;
-    };
+        return bestlen > 0.1 ? bestv : null;
+    }
 
     //from atom, return a normalized vector v that is orthogonal and along which
     //it is appropraite to draw multiple bonds
@@ -612,7 +610,7 @@ export class GLModel {
         //two faces
         var faceArray = geoGroup.faceArray;
         var faceoffset = geoGroup.faceidx; //not number faces, but index
-        faceArray[faceoffset + 0] = startv;
+        faceArray[faceoffset] = startv;
         faceArray[faceoffset + 1] = startv + 1;
         faceArray[faceoffset + 2] = startv + 2;
         faceArray[faceoffset + 3] = startv + 2;

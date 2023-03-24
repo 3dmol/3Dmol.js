@@ -150,9 +150,7 @@ function drawThinStrip(geo: Geometry, p1, p2, colors) {
             var faces = [offset, offset + 1, offset - 1, offset - 2];
             var faceoffset = geoGroup.faceidx;
 
-            for (let i = 0; i < 6; i++) {
-                faceArray[faceoffset + i] = faces[i % 4];
-            }
+            faceArray.set([faces[0], faces[1], faces[3], faces[1], faces[2], faces[3]], faceoffset);
 
             geoGroup.faceidx += 6;
         }
@@ -161,6 +159,7 @@ function drawThinStrip(geo: Geometry, p1, p2, colors) {
     }
 
 };
+
 
 function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, shape) {
 
@@ -329,10 +328,9 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
         if (i > 0 && !replicating && (currentAtom.clickable || currentAtom.hoverable)) {
             var faces = [];
 
+            // TODO: implement clickable the right way. Midpoints of strand between consecutive atoms
             for (j = 0; j < num * 2; j++) {
-
-                // get VERTEX indices of the 4 points of a rectangular face
-                // (as opposed to literal vertexArray indices)
+                // get VERTEX indices of the 4 points of a rectangular face (as opposed to literal vertexArray indices)
                 face = [v_offset + face_refs[j][0],
                 v_offset + face_refs[j][1],
                 v_offset + face_refs[j][2],
@@ -341,13 +339,7 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
                 f_offset = geoGroup.faceidx;
 
                 // need 2 triangles to draw a face between 4 points
-                faceArray[f_offset] = face[0];
-                faceArray[f_offset + 1] = face[1];
-                faceArray[f_offset + 2] = face[3];
-
-                faceArray[f_offset + 3] = face[1];
-                faceArray[f_offset + 4] = face[2];
-                faceArray[f_offset + 5] = face[3];
+                faceArray.push(face[0], face[1], face[3], face[1], face[2], face[3]);
 
                 geoGroup.faceidx += 6;
 
@@ -356,10 +348,7 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
                     faces.push(new Triangle(faceArray[f_offset], faceArray[f_offset + 2], faceArray[f_offset + 4]));
                     faces.push(new Triangle(faceArray[f_offset + 1], faceArray[f_offset + 3], faceArray[f_offset + 5]));
                 }
-
-                // TODO: implement clickable the right way. Midpoints of strand between consecutive atoms
             }
-
             for (j in faces) {
                 currentAtom.intersectionShape.triangle.push(faces[j]);
             }
@@ -376,19 +365,15 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
     va_offset = v_offset * 3;
     f_offset = geoGroup.faceidx;
 
+    const numMinusTwo = 2 * num - 2;
+
     for (i = 0; i < num - 1; i++) // "rear" face
     {
-        face = [i, i + 1, 2 * num - 2 - i, 2 * num - 1 - i];
+        face = [i, i + 1, numMinusTwo - i, numMinusTwo - 1 - i];
 
         f_offset = geoGroup.faceidx;
 
-        faceArray[f_offset] = face[0];
-        faceArray[f_offset + 1] = face[1];
-        faceArray[f_offset + 2] = face[3];
-
-        faceArray[f_offset + 3] = face[1];
-        faceArray[f_offset + 4] = face[2];
-        faceArray[f_offset + 5] = face[3];
+        faceArray.push(face[0], face[1], face[3], face[1], face[2], face[3]);
 
         geoGroup.faceidx += 6;
     }
@@ -400,13 +385,7 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
 
         f_offset = geoGroup.faceidx;
 
-        faceArray[f_offset] = face[0];
-        faceArray[f_offset + 1] = face[1];
-        faceArray[f_offset + 2] = face[3];
-
-        faceArray[f_offset + 3] = face[1];
-        faceArray[f_offset + 4] = face[2];
-        faceArray[f_offset + 5] = face[3];
+        faceArray.push(face[0], face[1], face[3], face[1], face[2], face[3]);
 
         geoGroup.faceidx += 6;
     }
@@ -546,11 +525,11 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
                             const f5 = new Triangle(p2b, m2, m);
                             const f6 = new Triangle(p1b, m, m1);
                             if (j % 2 === 0) {
-                            lastAtom.intersectionShape.triangle.push(f1, f2, f3);
-                            currentAtom.intersectionShape.triangle.push(f4, f5, f6);
+                                lastAtom.intersectionShape.triangle.push(f1, f2, f3);
+                                currentAtom.intersectionShape.triangle.push(f4, f5, f6);
                             } else {
-                            currentAtom.intersectionShape.triangle.push(f1, f2, f3);
-                            lastAtom.intersectionShape.triangle.push(f4, f5, f6);
+                                currentAtom.intersectionShape.triangle.push(f1, f2, f3);
+                                lastAtom.intersectionShape.triangle.push(f4, f5, f6);
                             }
                         }
                     } 
