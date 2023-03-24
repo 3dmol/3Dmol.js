@@ -40,7 +40,7 @@
   },
   "engines": {
     "npm": ">=8.11",
-    "node": ">=16.16.0"      
+    "node": ">=16.16.0"
   },
   "dependencies": {
     "iobuffer": "^5.3.1",
