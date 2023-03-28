@@ -7,7 +7,7 @@
             "../../node_modules/better-docs/category"],
     "source": {
         "includePattern": "\\.(jsx|js|ts|tsx)$"
-    },    
+    },
     "templates": {
         "cleverLinks": true,
         "monospaceLinks": false,
@@ -26,8 +26,8 @@
                     "label": "Github",
                     "href": "https://github.com/3dmol/3Dmol.js"
                 }
-            ]         
-        }        
+            ]
+        }
     },
     "markdown"  : {
         "parser"   : "gfm",
