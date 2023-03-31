@@ -20,6 +20,13 @@
     "coverageReporters": [
       "lcov",
       "text"
+    ],
+    "collectCoverage": true,
+    "reporters": [
+      "default",
+      ["./node_modules/jest-html-reporter", {
+        "pageTitle": "Test Report"
+      }]
     ]
   },
   "license": "BSD-3-Clause",
@@ -28,7 +35,7 @@
   "scripts": {
     "build": "webpack --config webpack.dev.js --mode development  && webpack --config webpack.prod.js --mode production && python3 tests/auto/generate_tests.py && npm run doc",
     "prepare": "npm run build",
-    "jest": "npx jest --ci --testPathIgnorePatterns=render.test.js",
+    "jest": "npx jest --testPathIgnorePatterns=render.test.js",
     "test": "npm run generate:jest && npm run jest && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
@@ -62,6 +69,7 @@
     "jest": "^29.3.1",
     "jest-environment-jsdom": "^29.3.1",
     "jest-webgl-canvas-mock": "^0.2.3",
+    "jest-html-reporter": "^3.7.1",
     "jquery": "^3.6.3",
     "jsdoc": "^4.0.0",
     "jsdom": "^20.0.3",
