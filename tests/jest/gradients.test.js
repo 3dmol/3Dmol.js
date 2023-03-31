@@ -80,9 +80,8 @@ describe("RWB Tests", () => {
 	});
 
 	test("RWB vth normal", () => {
-		const grad = new $3Dmol.Gradient.RWB([0, 100]);
-		const { range } = grad;
-		const hexVal = grad.valueToHex(10, range);
+		let grad = new $3Dmol.Gradient.RWB([0, 100]);
+		let hexVal = grad.valueToHex(10, grad.range());
 		expect(hexVal).toEqual(0xff7272);
 	});
 
