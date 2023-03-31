@@ -23,8 +23,32 @@ jobs:
           key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
       - name: Build
         run: npm install
-      - name: Test    
-        run: npm test
+      - name: Jest Tests   
+        run: npm test:jest
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Jest Test Report
+          branch: jest-test-report
+          commit_options: '--no-verify --signoff'
+          file_pattern: 'test-report.html'
+          repository: .
+
+          commit_user_name: My GitHub Actions Bot # defaults to "github-actions[bot]"
+          commit_user_email: my-github-actions-bot@example.org # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_author: Author <actions@github.com> # defaults to author of the commit that triggered the run
+
+          status_options: '--untracked-files=no'
+          add_options: '-u'
+          push_options: '--force'
+          skip_dirty_check: true
+          skip_fetch: true
+          skip_checkout: true
+          disable_globbing: true
+          create_branch: true
+
+      - name: glcheck Test    
+        run: npm run glcheck
+
       - name: Coverage
         env:
           NODE_OPTIONS: "--max_old_space_size=8192"      
