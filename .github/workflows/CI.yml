@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: npm install
       - name: Jest Tests   
-        run: npm test:jest
+        run: npm run test:jest
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Jest Test Report
