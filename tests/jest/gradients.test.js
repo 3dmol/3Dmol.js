@@ -8,55 +8,55 @@ let $3Dmol = require("3dmol");
 
 // Common Tests
 describe("Common Tests", () => {
-	it("Gradient normalize value, 0, 100, 50", () => {
+	test("Gradient normalize value, 0, 100, 50", () => {
 		let obj = $3Dmol.Gradient.normalizeValue(0, 100, 50);
 		expect(obj).toEqual({ lo: 0, hi: 100, val: 50 });
 	});
 
-	teitst("Gradient normalize value, 0, 100, -1 Return: 0, 100, 0", () => {
+	test("Gradient normalize value, 0, 100, -1 Return: 0, 100, 0", () => {
 		let obj = $3Dmol.Gradient.normalizeValue(0, 100, -1);
 		expect(obj).toEqual({ lo: 0, hi: 100, val: 0 });
 	});
 
-	it("Gradient normalize value, 0, 100, 101 Return: 0, 100, 100", () => {
+	test("Gradient normalize value, 0, 100, 101 Return: 0, 100, 100", () => {
 		let obj = $3Dmol.Gradient.normalizeValue(0, 100, 101);
 		expect(obj).toEqual({ lo: 0, hi: 100, val: 100 });
 	});
 
-	it("Gradient normalize value, 100, 0, 50", () => {
+	test("Gradient normalize value, 100, 0, 50", () => {
 		let obj = $3Dmol.Gradient.normalizeValue(100, 0, 50);
 		expect(obj).toEqual({ lo: 0, hi: 100, val: 50 });
 	});
 
-	it("Gradient normalize value, 100, 0, -1 Return: 0, 100, 100", () => {
+	test("Gradient normalize value, 100, 0, -1 Return: 0, 100, 100", () => {
 		let obj = $3Dmol.Gradient.normalizeValue(100, 0, -1);
 		expect(obj).toEqual({ lo: 0, hi: 100, val: 100 });
 	});
 
-	it("Gradient normalize value, 100, 0, 101, Return: 0, 100, 0", () => {
+	test("Gradient normalize value, 100, 0, 101, Return: 0, 100, 0", () => {
 		let obj = $3Dmol.Gradient.normalizeValue(100, 0, 101);
 		expect(obj).toEqual({ lo: 0, hi: 100, val: 0 });
 	});
 
-	it("Gradient get happy path", () => {
+	test("Gradient get happy path", () => {
 		let grad = new $3Dmol.Gradient();
 		let obj = $3Dmol.Gradient.getGradient(grad);
 		expect(obj).toEqual({});
 	});
 
-	it("Gradient get bogus", () => {
+	test("Gradient get bogus", () => {
 		let grad = 2;
 		expect($3Dmol.Gradient.getGradient(grad)).toBe(2);
 	});
 
-	it("Gradient get RWB", () => {
+	test("Gradient get RWB", () => {
 		let grad = {};
 		grad.gradient = "rwb";
 		grad = $3Dmol.Gradient.getGradient(grad);
 		expect(grad).toBeInstanceOf($3Dmol.Gradient.RWB);
 	});
 
-	it("Gradient get RWB predefine mid, max, and min", () => {
+	test("Gradient get RWB predefine mid, max, and min", () => {
 		let grad = {};
 		grad.gradient = "rwb";
 		grad.min = 0;
@@ -113,40 +113,40 @@ describe("RWB Tests", () => {
 
 // ROYGB Tests
 describe("ROYGB Tests", () => {
-	it("ROYGB no args", () => {
+	test("ROYGB no args", () => {
 		let grad = new $3Dmol.Gradient.ROYGB();
 		expect(grad.range()).toEqual(null);
 	})
-	it("ROYGB Constructor with range", () => {
+	test("ROYGB Constructor with range", () => {
 		let grad = new $3Dmol.Gradient.ROYGB([0, 100]);
 		expect(grad.range()).toEqual([0, 100]);
 	})
-	it("ROYGB vth normal", () => {
+	test("ROYGB vth normal", () => {
 		let grad = new $3Dmol.Gradient.ROYGB([0, 100]);
 		let hexVal = grad.valueToHex(10, grad.range());
 		expect(hexVal).toEqual(0xffa100);
 	})
-	it("ROYGB vth min max mid args", () => {
+	test("ROYGB vth min max mid args", () => {
 		let grad = new $3Dmol.Gradient.ROYGB(0, 100, 50);
 		let hexVal = grad.valueToHex(10, [0, 50, 100]);
 		expect(hexVal).toEqual(0xffe400);
 	})
-	it("ROYGB vth min max mid args no range", () => {
+	test("ROYGB vth min max mid args no range", () => {
 		let grad = new $3Dmol.Gradient.ROYGB(0, 100, 50);
 		let hexVal = grad.valueToHex(10);
 		expect(hexVal).toEqual(0xffa100);
 	})
-	it("ROYGB vth min max mid args, val < q3", () => {
+	test("ROYGB vth min max mid args, val < q3", () => {
 		let grad = new $3Dmol.Gradient.ROYGB(0, 100, 50);
 		let hexVal = grad.valueToHex(60, [0, 100, 50]);
 		expect(hexVal).toEqual(0xffa1);
 	})
-	it("ROYGB vth min max mid args, val < mid", () => {
+	test("ROYGB vth min max mid args, val < mid", () => {
 		let grad = new $3Dmol.Gradient.ROYGB(0, 100, 50);
 		let hexVal = grad.valueToHex(49, [0, 100, 50]);
 		expect(hexVal).toEqual(0x33ff00);
 	})
-	it("ROYGB vth min max mid args, val > max", () => {
+	test("ROYGB vth min max mid args, val > max", () => {
 		let grad = new $3Dmol.Gradient.ROYGB(0, 100, 50);
 		let hexVal = grad.valueToHex(101, [0, 100, 50]);
 		expect(hexVal).toEqual(0xff);
@@ -155,20 +155,20 @@ describe("ROYGB Tests", () => {
 
 // Sinebow Tests
 describe("Sinebow Tests", () => {
-	it("Sinebow no args", () => {
+	test("Sinebow no args", () => {
 		let grad = new $3Dmol.Gradient.Sinebow();
 		expect(grad.range()).toEqual(null);
 	})
-	it("Sinebow Constructor with range", () => {
+	test("Sinebow Constructor with range", () => {
 		let grad = new $3Dmol.Gradient.Sinebow([0, 100]);
 		expect(grad.range()).toEqual([0, 100]);
 	})
-	it("Sinebow vth normal", () => {
+	test("Sinebow vth normal", () => {
 		let grad = new $3Dmol.Gradient.Sinebow([100, 0]);
 		let hexVal = grad.valueToHex(10, grad.range());
 		expect(hexVal).toEqual(0x7f11ed);
 	})
-	it("Sinebow vth min max mid args no range", () => {
+	test("Sinebow vth min max mid args no range", () => {
 		let grad = new $3Dmol.Gradient.Sinebow(0, 100, 50);
 		expect(grad).toBeDefined();
 		let hexVal = grad.valueToHex(10);
