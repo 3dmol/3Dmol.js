@@ -8,7 +8,7 @@ var $3Dmol = require("3dmol");
 
 //A poorman's JS version of Python's range
 var range = (start, end) => [...Array.from(Array(end + 1).keys()).slice(start)];
-var nDigits = (digit, n) => Array.from(`${digit}`.repeat(n), Number)
+var nDigits = (digit, n) => Array.from(`${digit}`.repeat(n), Number);
 
 describe('Math Tests', () => {
 	describe('Clamp Tests', () => {
