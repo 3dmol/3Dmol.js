@@ -9,28 +9,31 @@ var $3Dmol = require("3dmol");
 //A poorman's JS version of Python's range
 var range = (start, end) => [...Array.from(Array(end + 1).keys()).slice(start)];
 var nDigits = (digit, n) => Array.from(`${digit}`.repeat(n), Number);
+const piValue = Math.PI
 
 describe('Math Tests', () => {
 	describe('Clamp Tests', () => {
-		test("X in the range of min and max", () => {
-			expect($3Dmol.clamp(12, 6, 25)).toBe(12);
+		describe.each([
+			[12, 6, 25, 12],
+			[1, 2, 3, 2],
+			[100, 25, 75, 75],
+		])('clamp(%i, %i, %i)', (x, min, max, expected) => {
+			test(`returns ${expected}`, () => {
+			expect($3Dmol.clamp(x, min, max)).toBe(expected);
+			});
 		});
-		test("X less than min", () => {
-			expect($3Dmol.clamp(1, 2, 3)).toBe(2);
-		});
-		test("X greater than max", () => {
-			expect($3Dmol.clamp(100, 25, 75)).toBe(75);
-		});
-	})
+	});
 
 	describe('DegtoRad Tests', () => {
-		test("180 degrees", () => {
-			expect($3Dmol.degToRad(180)).toBe(Math.PI);
-		})
-		test("45 degrees", () => {
-			expect($3Dmol.degToRad(45)).toBe(Math.PI / 4);
-		})
-	})
+		const testCases = [
+			[180, piValue],
+			[45, piValue / 4],
+		];
+
+		test.each(testCases)('degToRad(%i) returns %f', (input, expected) => {
+			expect($3Dmol.degToRad(input)).toBeCloseTo(expected);
+		});
+	});
 })
 
 describe("Quaternion Tests", () => {
@@ -38,12 +41,23 @@ describe("Quaternion Tests", () => {
 		test("Constructor all args given", () => {
 			const quat = new $3Dmol.Quaternion(1, 2, 3, 4);
 			expect(quat).toEqual({ x: 1, y: 2, z: 3, w: 4 });
-		})
+		});
+
 		test("Constructor no args given", () => {
 			const quat = new $3Dmol.Quaternion();
 			expect(quat).toEqual({ x: 0, y: 0, z: 0, w: 1 });
-		})
-	})
+		});
+
+		test("Constructor with partial args given", () => {
+			const quat = new $3Dmol.Quaternion(1, 2);
+			expect(quat).toEqual({ x: 1, y: 2, z: 0, w: 0 });
+		});
+
+		test("Constructor with invalid args", () => {
+			const quat = new $3Dmol.Quaternion("a", null, undefined, []);
+			expect(quat).toEqual({ x: 0, y: 0, z: 0, w: 1 });
+		});
+	});
 	describe("Quat Methods Tests", () => {
 		test("Set with 1, 2, 3, 4", () => {
 			let quat = new $3Dmol.Quaternion();
@@ -147,36 +161,40 @@ describe("Vectors Tests", () => {
 		test("Vector constructor: 1,2", () => {
 			const vec = new $3Dmol.Vector2(1, 2);
 			expect(vec).toEqual({ x: 1, y: 2 });
-		})
+		});
+
 		test("Vector constructor no args", () => {
 			const vec = new $3Dmol.Vector2();
-			expect(vec).toEqual({ x: 0.0, y: 0.0 })
-		})
+			expect(vec).toEqual({ x: 0, y: 0 });
+		});
+
 		test("Vector set: 1,2", () => {
 			const vec = new $3Dmol.Vector2();
 			vec.set(1, 2);
 			expect(vec).toEqual({ x: 1, y: 2 });
-		})
+		});
+
 		test("Vector subtraction: <3, 4> - <1, 2>", () => {
 			const a = new $3Dmol.Vector2(3, 4);
 			const b = new $3Dmol.Vector2(1, 2);
-			let c = new $3Dmol.Vector2();
-			c = c.subVectors(a, b);
-			expect(c).toEqual({ x: 2, y: 2 })
-		})
+			const c = a.clone().sub(b);
+			expect(c).toEqual({ x: 2, y: 2 });
+		});
+
 		test("Vector copy: <1, 2> Same values", () => {
-			let a = new $3Dmol.Vector2();
+			const a = new $3Dmol.Vector2();
 			const b = new $3Dmol.Vector2(1, 2);
-			a = a.copy(b);
+			a.copy(b);
 			expect(a).toEqual({ x: 1, y: 2 });
-		})
+		});
+
 		test("Vector clone: <1, 2> Same values, different reference", () => {
-			let a = new $3Dmol.Vector2(1, 2);
+			const a = new $3Dmol.Vector2(1, 2);
 			const aRef = a;
-			a = a.clone(a);
-			expect(a).toEqual({ x: 1, y: 2 });
-			expect(a).not.toBe(aRef);
-		})
+			const aClone = a.clone();
+			expect(aClone).toEqual({ x: 1, y: 2 });
+			expect(aClone).not.toBe(aRef);
+		});
 	})
 
 	describe("3D Vec Tests", () => {
@@ -368,17 +386,17 @@ describe("Vectors Tests", () => {
 			let a = new $3Dmol.Vector3(1, 2, 3);
 			let m = new $3Dmol.Matrix4(0, -1, 0, 24, 1, 0, 0, 24, 0, 0, 1, 24, 24, 24, 24, 24)
 			a = a.setEulerFromRotationMatrix(m, "XYZ");
-			expect(a).toEqual({ x: -0, y: 0, z: Math.PI / 2 });
+			expect(a).toEqual({ x: -0, y: 0, z: piValue / 2 });
 		})
 		test("Vector rotateAboutVector: <1, 2, 3>, ang = PI/2 rads, Return same vector with all divided by sqrt(14)", () => {
 			let a = new $3Dmol.Vector3(1, 2, 3);
 			let m = new $3Dmol.Matrix4(0, 0, 1, 24, 1, 0, 0, 24, 0, 1, 0, 24, 24, 24, 24, 24)
 			a = a.setEulerFromRotationMatrix(m, "XYZ");
-			expect(a).toEqual({ x: Math.PI / 2, y: Math.PI / 2, z: 0 });
+			expect(a).toEqual({ x: piValue / 2, y: piValue / 2, z: 0 });
 		})
 		test("Vector set position from matrix: [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15], Return <3, 7, 11>", () => {
 			let a = new $3Dmol.Vector3(1, 2, 3);
-			const ang = Math.PI / 2;
+			const ang = piValue / 2;
 			a = a.rotateAboutVector(a, ang);
 			const sqrt14 = Math.sqrt(14);
 			expect(a.x).toBeCloseTo(1 / sqrt14);
@@ -553,7 +571,7 @@ describe("Matrix Tests", () => {
 		})
 		test("Matrix 4 setRotationFromEuler with [1 - 16] and vec: <1, 2, 3>", () => {
 			let mat = new $3Dmol.Matrix4(...range(1, 16));
-			let vec = new $3Dmol.Vector3(Math.PI / 2, Math.PI / 2, Math.PI / 2);
+			let vec = new $3Dmol.Vector3(piValue / 2, piValue / 2, piValue / 2);
 			mat = mat.setRotationFromEuler(vec, "XYZ");
 
 			//Pretreat some math weirdness
@@ -725,69 +743,61 @@ describe("Matrix Tests", () => {
 
 
 describe("Ray Tests", () => {
+	const origin = new $3Dmol.Vector3(1, 2, 3);
+	const direction = new $3Dmol.Vector3(4, 5, 6);
+
 	test("Ray constructor, origin: <1, 2, 3>, direction: <4, 5, 6>", () => {
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		let ray = new $3Dmol.Ray(origin, direction);
-		expect({ ...ray.origin }).toEqual({ x: 1, y: 2, z: 3 });
-		expect({ ...ray.direction }).toEqual({ x: 4, y: 5, z: 6 });
-	})
+		const ray = new $3Dmol.Ray(origin, direction);
+		expect(ray.origin).toEqual(origin);
+		expect(ray.direction).toEqual(direction);
+	});
+
 	test("Ray set, origin: <1, 2, 3>, direction: <4, 5, 6>", () => {
-		let ray = new $3Dmol.Ray();
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		ray = ray.set(origin, direction);
-		expect({ ...ray.origin }).toEqual({ x: 1, y: 2, z: 3 });
-		expect({ ...ray.direction }).toEqual({ x: 4, y: 5, z: 6 });
-	})
+		const ray = new $3Dmol.Ray().set(origin, direction);
+		expect(ray.origin).toEqual(origin);
+		expect(ray.direction).toEqual(direction);
+	});
+
 	test("Ray copy, origin: <1, 2, 3> direction: <4, 5, 6>", () => {
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		let ray = new $3Dmol.Ray(origin, direction);
-		let newRay = ray.copy(ray);
-		expect({ ...newRay.origin }).toEqual({ x: 1, y: 2, z: 3 });
-		expect({ ...newRay.direction }).toEqual({ x: 4, y: 5, z: 6 });
-	})
+		const ray = new $3Dmol.Ray(origin, direction);
+		const newRay = ray.copy(ray);
+		expect(newRay.origin).toEqual(origin);
+		expect(newRay.direction).toEqual(direction);
+	});
+
 	test("Ray at, scalar: 24, origin: <1, 2, 3>, direction: <4, 5, 6>, No optional target, Return <97, 122, 147>", () => {
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		let ray = new $3Dmol.Ray(origin, direction);
-		let resultVec = ray.at(24);
-		expect(resultVec).toEqual({ x: 97, y: 122, z: 147 });
-	})
+		const ray = new $3Dmol.Ray(origin, direction);
+		const resultVec = ray.at(24);
+		expect(resultVec).toEqual(new $3Dmol.Vector3(97, 122, 147));
+	});
+
 	test("Ray at, scalar: 24, origin: <1, 2, 3>, direction: <4, 5, 6>, optional target <1, 1, 1>, Return <97, 122, 147>", () => {
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		let ray = new $3Dmol.Ray(origin, direction);
-		let opt = new $3Dmol.Vector3(1, 2, 3);
-		let resultVec = ray.at(24, opt);
-		expect(resultVec).toEqual({ x: 97, y: 122, z: 147 });
-	})
-	// Recast: Closure, not sure how to test
+		const ray = new $3Dmol.Ray(origin, direction);
+		const opt = new $3Dmol.Vector3(1, 2, 3);
+		const resultVec = ray.at(24, opt);
+		expect(resultVec).toEqual(new $3Dmol.Vector3(97, 122, 147));
+	});
+
 	test("Ray closestPointToPoint, origin: <1, 2, 3>, direction: <4, 5, 6>, point: <1, 1, 1>, Return <-67, -83, -99>", () => {
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		let ray = new $3Dmol.Ray(origin, direction);
-		let point = new $3Dmol.Vector3(1, 1, 1);
-		let result = ray.closestPointToPoint(point);
-		expect({ ...result }).toEqual({ x: -67, y: -83, z: -99 })
-	})
-	//distanceToPoint: Closure, not sure how to test
+		const ray = new $3Dmol.Ray(origin, direction);
+		const point = new $3Dmol.Vector3(1, 1, 1);
+		const result = ray.closestPointToPoint(point);
+		expect(result).toEqual(new $3Dmol.Vector3(-67, -83, -99));
+	});
+
 	test("Ray isIntersectionCylinder, Empty function, Return undefined", () => {
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		let ray = new $3Dmol.Ray(origin, direction);
-		expect(ray.isIntersectionCylinder()).toEqual(undefined);
-	})
+		const ray = new $3Dmol.Ray(origin, direction);
+		const result = ray.isIntersectionCylinder();
+		expect(result).toBeUndefined();
+	});
+
 	test("Ray isIntersectionSphere, origin: <1, 2, 3>, direction: <4, 5, 6>, center: <1, 2, 3>, radius: 9, Return true", () => {
-		let origin = new $3Dmol.Vector3(1, 2, 3);
-		let direction = new $3Dmol.Vector3(4, 5, 6);
-		let ray = new $3Dmol.Ray(origin, direction);
-		let sphCent = new $3Dmol.Vector3(1, 2, 3);
-		let sph = new $3Dmol.Sphere(sphCent, 9);
-		const res = ray.isIntersectionSphere(sph);
-		expect(res).toEqual(true);
-	})
+		const ray = new $3Dmol.Ray(origin, direction);
+		const sphCent = new $3Dmol.Vector3(1, 2, 3);
+		const sph = new $3Dmol.Sphere(sphCent, 9);
+		const result = ray.isIntersectionSphere(sph);
+		expect(result).toBe(true);
+	});
 	/*
 	* isIntersectionPlane
 	* distanceToPlane
