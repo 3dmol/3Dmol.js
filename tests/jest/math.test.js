@@ -166,8 +166,9 @@ describe("Vectors Tests", () => {
 		test("Vector subtraction: <3, 4> - <1, 2>", () => {
 			const a = new $3Dmol.Vector2(3, 4);
 			const b = new $3Dmol.Vector2(1, 2);
-			const c = a.clone().sub(b);
-			expect(c).toEqual({ x: 2, y: 2 });
+			let c = new $3Dmol.Vector2();
+			c = c.subVectors(a, b);
+			expect(c).toEqual({ x: 2, y: 2 })
 		});
 
 		test("Vector copy: <1, 2> Same values", () => {
