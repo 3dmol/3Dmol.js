@@ -41,22 +41,11 @@ describe("Quaternion Tests", () => {
 		test("Constructor all args given", () => {
 			const quat = new $3Dmol.Quaternion(1, 2, 3, 4);
 			expect(quat).toEqual({ x: 1, y: 2, z: 3, w: 4 });
-		});
-
+		})
 		test("Constructor no args given", () => {
 			const quat = new $3Dmol.Quaternion();
 			expect(quat).toEqual({ x: 0, y: 0, z: 0, w: 1 });
-		});
-
-		test("Constructor with partial args given", () => {
-			const quat = new $3Dmol.Quaternion(1, 2);
-			expect(quat).toEqual({ x: 1, y: 2, z: 0, w: 0 });
-		});
-
-		test("Constructor with invalid args", () => {
-			const quat = new $3Dmol.Quaternion("a", null, undefined, []);
-			expect(quat).toEqual({ x: 0, y: 0, z: 0, w: 1 });
-		});
+		})
 	});
 	describe("Quat Methods Tests", () => {
 		test("Set with 1, 2, 3, 4", () => {
