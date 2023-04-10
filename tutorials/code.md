@@ -30,7 +30,7 @@ Here we will use the API to create, load and style the 3Dmol instance. Note, thi
 First, make sure your HTML document links to the 3Dmol code.
 
 ```
-<script src="https://3Dmol.org/build/3Dmol-min.js""></script>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 ```
 
 Now create a container tag in the HTML document that will hold the vizualisation.
@@ -57,15 +57,13 @@ To make sure everything works, we are going to add a sphere, set the camera, ren
 
 ```
 <script>
-$(function() {
-  let element = $('#container-01');
+  let element = document.querySelector('#container-01');
   let config = { backgroundColor: 'orange' };
   let viewer = $3Dmol.createViewer( element, config );
   viewer.addSphere({ center: {x:0, y:0, z:0}, radius: 10.0, color: 'green' });
   viewer.zoomTo();
   viewer.render();
   viewer.zoom(0.8, 2000);
-});
 </script>
 ```
 
