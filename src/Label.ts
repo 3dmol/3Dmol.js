@@ -83,8 +83,10 @@ export interface LabelSpec {
   useScreen?: boolean;
   /** An elment to draw into the label. Any CanvasImageSource is allowed.  Label is resized to size of image */
   backgroundImage?: any;
-  /** how to orient the label w/respect to position: topLeft (default), topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight */
-  alignment?: string;
+  /** how to orient the label w/respect to position: "topLeft" (default),
+   * "topCenter", "topRight", "centerLeft", "center", "centerRight",
+   * "bottomLeft", "bottomCenter", "bottomRight", or an arbitrary offset */
+  alignment?: string | Vector2;
   /** if set, only display in this frame of an animation */
   frame?: number;
 }
@@ -272,7 +274,7 @@ export class Label {
       );
     }
 
-    if (style.backgroundImage) {      
+    if (style.backgroundImage) {
       this.context.drawImage(img, 0, 0, width, height);
     }
 
