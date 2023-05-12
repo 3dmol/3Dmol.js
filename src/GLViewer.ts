@@ -3623,7 +3623,7 @@ export class GLViewer {
      * @param {boolean} clickable - whether click-handling is enabled for the selection
      * @param {function} callback - function called when an atom in the selection is clicked. The function is passed
      * the selected (foremost) object, the viewer, the triggering event, the associated container, and a list
-     * of all intersecting objects with their distances from the viewer. 
+     * of all intersecting objects with their distances from the viewer.
      *
      * @example
         $3Dmol.download("cid:307900",viewer,{},function(){
@@ -4101,7 +4101,7 @@ export class GLViewer {
         let surfid = this.nextSurfID();
         let mat = null;
         let self = this;
-        let type:SurfaceType = SurfaceType.VDW;
+        let type: SurfaceType | 0 = SurfaceType.VDW;
 
         if (typeof stype == "string") {
             if (GLViewer.surfaceTypeMap[stype.toUpperCase()] !== undefined)
