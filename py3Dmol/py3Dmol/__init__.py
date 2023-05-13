@@ -1,6 +1,7 @@
 import time
 import json
 import sys
+import re
 
 try:
     import IPython.display
@@ -71,7 +72,7 @@ class view(object):
             width = '%dpx'%width
         if type(height) == int:
             height = '%dpx'%height
-        self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s">
+        self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s;">
         <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab (or JavaScript failed to load for some other reason).  You need to install the 3dmol extension: <br>
         <tt>jupyter labextension install jupyterlab_3dmol</tt></p>
         </div>\n''' % (divid,width,height,warnid)
@@ -208,6 +209,31 @@ if(warn) {
         self.updatejs = ''
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
 
+
+    def write_html(self, f=None, fullpage=False):
+      '''Write html to reproduce viewer in a web page to a file.
+      f -- file name (str) or writeable file object; if unspecified html string is returned
+      fullpage -- instead of specified width/height make viewer fill the web page
+      '''
+      
+      if f == None:
+        return self._make_html()
+        
+      if type(f) == str:
+        f = open(f,'wt')
+      html = self._make_html()
+      html = f'''<html>
+<body style="margin: 0; padding: 0; display: block;">
+{html}
+</body>
+</html>'''
+      if fullpage:
+        html = re.sub(r'width: (\S+);', 'width: 100%;', html)
+        html = re.sub(r'height: (\S+);', 'height: 100vh;', html)
+        
+      f.write(html)
+      
+      
     @using_ipython
     def png(self):
         '''output png image of viewer, which must already be instantiated'''
