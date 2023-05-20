@@ -33,9 +33,9 @@ jobs:
           file_pattern: 'test-report.html'
           repository: .
 
-          commit_user_name: My GitHub Actions Bot # defaults to "github-actions[bot]"
-          commit_user_email: my-github-actions-bot@example.org # defaults to "41898282+github-actions[bot]@users.noreply.github.com"
-          commit_author: Author <actions@github.com> # defaults to author of the commit that triggered the run
+          commit_user_name: My GitHub Actions Bot 
+          commit_user_email: my-github-actions-bot@example.org 
+          commit_author: Author <actions@github.com>
 
           status_options: '--untracked-files=no'
           add_options: '-u'

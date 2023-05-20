@@ -24,7 +24,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
       - run: npm ci
-      - run: npm test:all
+      - run: npm test
 
   publish-npm:
     needs: build
