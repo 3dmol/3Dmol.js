@@ -1,103 +1,109 @@
 <html>
-	<head>
-		<script>
-			/* This code illustrates a problem with zoom to all when there are spheres.
-			 */
-			var glviewer = null;
-			var clicked = {};
-			var boundingSpheres = [];
-			
-			var manySpheres = null;
-			
-			function onReady(viewer) {
-				glviewer = viewer;
-				glviewer.getModel(0).setClickable({}, true, clickAtom);
-				glviewer.render();
-				setupUI();
-			}
-			
-			function setupUI() {				
-				manySpheres = glviewer.addShape({color: 'red'});
-				$("#drawspheres").click( (evt) => {
-					const sphereCount = $("#spherecount").val();
-					drawManySpheres(parseInt(sphereCount));
-				});
-				
-				$("#clearspheres").click( (evt) => {
-					clearSpheres(true);
-				});
-				
-				$("#removespheres").click( (evt) => {
-					clearSpheres(false);
-				});
-				
-				$("#redisplay").click( (evt) => {
-					glviewer.render();
-				});
-			}
-			
-			function clickAtom(selected, _viewer, event, container) {
-				console.log(`Clicked on ${selected.atom} at (${selected.x}, ${selected.y}, ${selected.z})`);
-			}
-			
-			function drawManySpheres(sphereCount) {			
-				for (let i = 0; i < sphereCount; i++) {
-					drawOneSphere();
-				}
-				updateMonitor();
-			}
-			
-			function drawOneSphere(x=null, y=null, z=null) {
-				if (x == null) x = random();
-				if (y == null) y = random();
-				if (z == null) z = random();
-				
-				manySpheres.addSphere({center: {x: x, y: y, z: z}, radius: 1, color: 'red'});
-			}
-			
-			function clearSpheres(redisplayAfter=false) {
-				glviewer.removeShape(manySpheres) 
-				manySpheres = glviewer.addShape();
-				updateMonitor();
-				
-				if (redisplayAfter) {
-					glviewer.render();
-				}
-			}
-			
-			function random(min=-25, max=25) {
-				return (max - min) * Math.random() + min;
-			}
-			
-			function updateMonitor() {
-				$("#spheremonitor").text("X");
-			}
 
-		</script>
-		<style>
-			div {
-				height: 100%;
-				width: 100%;
+<head>
+	<script>
+		/* This code illustrates a problem with zoom to all when there are spheres.
+		 */
+		var glviewer = null;
+		var clicked = {};
+		var boundingSpheres = [];
+
+		var manySpheres = null;
+
+		function onReady(viewer) {
+			glviewer = viewer;
+			glviewer.getModel(0).setClickable({}, true, clickAtom);
+			glviewer.render();
+			setupUI();
+		}
+
+		function setupUI() {
+			manySpheres = glviewer.addShape({ color: 'red' });
+			$("#drawspheres").click((evt) => {
+				const sphereCount = $("#spherecount").val();
+				drawManySpheres(parseInt(sphereCount));
+			});
+
+			$("#clearspheres").click((evt) => {
+				clearSpheres(true);
+			});
+
+			$("#removespheres").click((evt) => {
+				clearSpheres(false);
+			});
+
+			$("#redisplay").click((evt) => {
+				glviewer.render();
+			});
+		}
+
+		function clickAtom(selected, _viewer, event, container) {
+			console.log(`Clicked on ${selected.atom} at (${selected.x}, ${selected.y}, ${selected.z})`);
+		}
+
+		function drawManySpheres(sphereCount) {
+			for (let i = 0; i < sphereCount; i++) {
+				drawOneSphere();
 			}
-			#viewer {
-				position: absolute;
-				height: 95%;
-				width: 100%;
+			updateMonitor();
+		}
+
+		function drawOneSphere(x = null, y = null, z = null) {
+			if (x == null) x = random();
+			if (y == null) y = random();
+			if (z == null) z = random();
+
+			manySpheres.addSphere({ center: { x: x, y: y, z: z }, radius: 1, color: 'red' });
+		}
+
+		function clearSpheres(redisplayAfter = false) {
+			glviewer.removeShape(manySpheres)
+			manySpheres = glviewer.addShape();
+			updateMonitor();
+
+			if (redisplayAfter) {
+				glviewer.render();
 			}
-		</style>
-	</head>
-	<body>
-		<div>
-			<h2>Many unrendered spheres crash the browser</h2>
-			<p>Process memory spikes to > 4G when adding 1000+ spheres, then subsides when rendering them. Crash a Chrome tab by clicking "Add Spheres" three times, adding 1500 unrendered spheres.</p>
-			<p>A successful way to add many spheres is to add and render in chunks of 500.</p>
-			<label><input id="spherecount" type="number" value=500	></input>Spheres to add</label> <button id="drawspheres">Add Spheres</button> <button id="removespheres">Remove All Spheres</button> 
-			<p>There are currently <span id="spheremonitor">0</span> spheres in memory. <button id="redisplay">Render</button></p>
-			<p>
+		}
+
+		function random(min = -25, max = 25) {
+			return (max - min) * Math.random() + min;
+		}
+
+		function updateMonitor() {
+			$("#spheremonitor").text("X");
+		}
+
+	</script>
+	<style>
+		div {
+			height: 100%;
+			width: 100%;
+		}
+
+		#viewer {
+			position: absolute;
+			height: 95%;
+			width: 100%;
+		}
+	</style>
+</head>
+
+<body>
+	<div>
+		<h2>Many unrendered spheres crash the browser</h2>
+		<p>Process memory spikes to > 4G when adding 1000+ spheres, then subsides when rendering them. Crash a Chrome
+			tab by clicking "Add Spheres" three times, adding 1500 unrendered spheres.</p>
+		<p>A successful way to add many spheres is to add and render in chunks of 500.</p>
+		<label><input id="spherecount" type="number" value=500></input>Spheres to add</label> <button
+			id="drawspheres">Add Spheres</button> <button id="removespheres">Remove All Spheres</button>
+		<p>There are currently <span id="spheremonitor">0</span> spheres in memory. <button
+				id="redisplay">Render</button></p>
+		<p>
 			<button id="clearspheres">Clear</button>
-			<div id="viewer" class="viewer_3Dmoljs" data-element="mydata" data-datatype='pdb' data-style="{&quot;cartoon&quot;:{}}" data-callback="onReady" data-backgroundcolor="0xf6f6f6"></div>
-		</div>
-		
+		<div id="viewer" class="viewer_3Dmoljs" data-element="mydata" data-datatype='pdb'
+			data-style="{&quot;cartoon&quot;:{}}" data-callback="onReady" data-backgroundcolor="0xf6f6f6"></div>
+	</div>
 	<textarea id="mydata" hidden>
 DBREF  2IKO A   -4   335  UNP    P00797   RENI_HUMAN      67    406
 DBREF  2IKO B   -4   335  UNP    P00797   RENI_HUMAN      67    406
@@ -5509,6 +5515,7 @@ ATOM   5103 HH21 ARG A 335      11.915  24.054   0.728  1.00 40.31           H
 ATOM   5104 HH22 ARG A 335      11.725  25.718   0.286  1.00 40.31           H   
 END		
 </textarea>
-		<script src="http://3dmol.org/build/3Dmol.js"></script>
-	</body>
+	<script src="http://3dmol.org/build/3Dmol.js"></script>
+</body>
+
 </html>
