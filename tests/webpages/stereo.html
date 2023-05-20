@@ -1,117 +1,114 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>$3Dmol Example</title>
-<script src="../../build/3Dmol.js"></script>
-
-<style>
-head, body {
-	margin: 0;
-	border: 0;
-	padding: 0;
-	max-height: 100vh
-}
-</style>
-<script>
-	var glviewer = null;
-	var glviewer2 = null;
-	var labels = [];
-
-	var addLabels = function() {
-		var atoms = glviewer.getModel().selectedAtoms({
-			atom : "CA"
-		});
-		for ( var a in atoms) {
-			var atom = atoms[a];
-
-			var l = glviewer.addLabel(atom.resn + " " + atom.resi, {
-				inFront : true,
-				fontSize : 12,
-				position : {
-					x : atom.x,
-					y : atom.y,
-					z : atom.z
-				}
-			});
-			atom.label = l;
-			labels.push(atom);
+	<title>$3Dmol Example</title>
+	<script src="../../build/3Dmol.js"></script>
+	<style>
+		head,
+		body {
+			margin: 0;
+			border: 0;
+			padding: 0;
+			max-height: 100vh
 		}
-	};
+	</style>
+	<script>
+		var glviewer = null;
+		var glviewer2 = null;
+		var labels = [];
 
-var readText = function(input,func) {
-			if(input.files.length > 0) {
-				var file = input.files[0];
-				var reader = new FileReader();
-			    reader.onload = function(evt) {
-			    	func(evt.target.result,file.name);
-			    };
-			    reader.readAsText(file);
-			    $(input).val('');
+		var addLabels = function () {
+			var atoms = glviewer.getModel().selectedAtoms({
+				atom: "CA"
+			});
+			for (var a in atoms) {
+				var atom = atoms[a];
+
+				var l = glviewer.addLabel(atom.resn + " " + atom.resi, {
+					inFront: true,
+					fontSize: 12,
+					position: {
+						x: atom.x,
+						y: atom.y,
+						z: atom.z
+					}
+				});
+				atom.label = l;
+				labels.push(atom);
 			}
 		};
-		
-	var setStyle = function(style) {
-		glviewer.setStyle(style); 
-		glviewer2.setStyle(style); 
-		glviewer.render();
-		glviewer2.render();
-	};
-	$(document).ready(function() {
 
-		moldata = data = $("#moldata_pdb_large").val();
-		glviewer = $3Dmol.createViewer("gldiv1", {
-			defaultcolors : $3Dmol.rasmolElementColors,
-			camerax: 3
-		});
-		glviewer2 = $3Dmol.createViewer("gldiv2", {
-			defaultcolors : $3Dmol.rasmolElementColors,
-			camerax: -3
-		});
-		
-		glviewer.setBackgroundColor(0xffffff);
-		glviewer2.setBackgroundColor(0xeeeeee);
+		var readText = function (input, func) {
+			if (input.files.length > 0) {
+				var file = input.files[0];
+				var reader = new FileReader();
+				reader.onload = function (evt) {
+					func(evt.target.result, file.name);
+				};
+				reader.readAsText(file);
+				$(input).val('');
+			}
+		};
 
-		receptorModel = m = glviewer.addModel(data, "pqr");
-		glviewer2.addModel(data, "pqr");
-		
-		glviewer.linkViewer(glviewer2);
-		glviewer2.linkViewer(glviewer);
-		
-		setStyle({cartoon:{color: 'spectrum'}})
-		glviewer.zoomTo();
-	});
-</script>
+		var setStyle = function (style) {
+			glviewer.setStyle(style);
+			glviewer2.setStyle(style);
+			glviewer.render();
+			glviewer2.render();
+		};
+		$(document).ready(function () {
+
+			moldata = data = $("#moldata_pdb_large").val();
+			glviewer = $3Dmol.createViewer("gldiv1", {
+				defaultcolors: $3Dmol.rasmolElementColors,
+				camerax: 3
+			});
+			glviewer2 = $3Dmol.createViewer("gldiv2", {
+				defaultcolors: $3Dmol.rasmolElementColors,
+				camerax: -3
+			});
+
+			glviewer.setBackgroundColor(0xffffff);
+			glviewer2.setBackgroundColor(0xeeeeee);
+
+			receptorModel = m = glviewer.addModel(data, "pqr");
+			glviewer2.addModel(data, "pqr");
+
+			glviewer.linkViewer(glviewer2);
+			glviewer2.linkViewer(glviewer);
+
+			setStyle({ cartoon: { color: 'spectrum' } })
+			glviewer.zoomTo();
+		});
+	</script>
 </head>
+
 <body>
 	<div id="gldiv1" style="float: left; width: 50%; height: 80vh; margin: 0; padding: 0; border: 0;"></div>
-	<div id="gldiv2" style="position: relative; float: right; width: 50%; height: 80vh; margin: 0; padding: 0; border: 0;"></div>
-
+	<div id="gldiv2"
+		style="position: relative; float: right; width: 50%; height: 80vh; margin: 0; padding: 0; border: 0;"></div>
 	<hr style="margin: 0;">
-
 	<br>
-	<input type="button" value="Stick"
-		onclick="setStyle({stick:{}});"></input>
-	<input type="button" value="Line"
-		onclick="setStyle({line:{}});"></input>
-	<input type="button" value="Cross"
-		onclick="setStyle({cross:{linewidth:2}});"></input>
-	<input type="button" value="Sphere"
-		onclick="setStyle({sphere:{}});"></input>
-	<input type="button" value="Cartoon"
-		onclick="setStyle({cartoon:{color: 'spectrum'}});"></input>
-
+	<input type="button" value="Stick" onclick="setStyle({stick:{}});"></input>
+	<input type="button" value="Line" onclick="setStyle({line:{}});"></input>
+	<input type="button" value="Cross" onclick="setStyle({cross:{linewidth:2}});"></input>
+	<input type="button" value="Sphere" onclick="setStyle({sphere:{}});"></input>
+	<input type="button" value="Cartoon" onclick="setStyle({cartoon:{color: 'spectrum'}});"></input>
 	<br>
 	<input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
-	<input type="button" value="Outline" onclick="glviewer.setViewStyle({style: 'outline'}); glviewer2.setViewStyle({style: 'outline'}); glviewer.render(); glviewer2.render();">
-	<input type="button" value="No Outline" onclick="glviewer.setViewStyle({}); glviewer2.setViewStyle({}); glviewer.render(); glviewer2.render();">
+	<input type="button" value="Outline"
+		onclick="glviewer.setViewStyle({style: 'outline'}); glviewer2.setViewStyle({style: 'outline'}); glviewer.render(); glviewer2.render();">
+	<input type="button" value="No Outline"
+		onclick="glviewer.setViewStyle({}); glviewer2.setViewStyle({}); glviewer.render(); glviewer2.render();">
 	<br>
 	<input id="pdbid" value="1UBQ" size=4>
 	<button
 		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer, {doAssembly:true});glviewer2.clear(); $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer2, {doAssembly:true});">Download</button>
 	<br>
-	<input type="file" onchange="readText(this, function(data, name) {glviewer.clear(); m= glviewer.addModel(data,name); glviewer.zoomTo(); glviewer.render();} );">
-
-	<textarea style="display: none;" id="moldata_pdb_large">           
+	<input type="file"
+		onchange="readText(this, function(data, name) {glviewer.clear(); m= glviewer.addModel(data,name); glviewer.zoomTo(); glviewer.render();} );">
+	<textarea style="display: none;" id="moldata_pdb_large">
 HEADER    COMPLEX (ONCOGENE PROTEIN/PEPTIDE)      30-SEP-96   1YCR              
 TITLE     MDM2 BOUND TO THE TRANSACTIVATION DOMAIN OF P53                       
 COMPND    MOL_ID: 1;                                                            
@@ -1245,6 +1242,6 @@ TER     820      ASN B  29
 MASTER      247    0    0    5    2    0    0    6  818    2    0   11          
 END                                                                                                                                                                                                               
 </textarea>
-
 </body>
+
 </html>
