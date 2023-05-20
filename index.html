@@ -1,185 +1,188 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
-	<meta charset="utf-8">
-	<title>3Dmol.js - A modern, object-oriented JavaScript library for visualizing molecular data</title>
+  <meta charset="utf-8">
+  <title>3Dmol.js - A modern, object-oriented JavaScript library for visualizing molecular data</title>
+  <link type="text/css" rel="stylesheet" href="css/index.css">
+  <script src="https://code.jquery.com/jquery-3.6.3.min.js"
+    integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+  <script src="build/3Dmol.js"></script>
+  <script>
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-	<link type="text/css" rel="stylesheet" href="css/index.css">
-  <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
-	<script src="build/3Dmol.js"></script>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-55629183-1', 'auto');
+    ga('send', 'pageview');
 
-  ga('create', 'UA-55629183-1', 'auto');
-  ga('send', 'pageview');
+  </script>
+  <script>
+    var $3Dmol = $3Dmol || {};
+    var initSDF = function (viewer) {
+      var s1 = viewer.addSphere({ radius: 1.25, center: { x: -6.89, y: 0.75, z: 0.35 } });
+      s1.wireframe = true; s1.color = $3Dmol.CC.color("purple");
+      viewer.addLabel("Aromatic", { position: { x: -6.89, y: 0.75, z: 0.35 }, backgroundColor: 0x800080, backgroundOpacity: 0.8 });
+      var s2 = viewer.addSphere({ radius: 1.25, center: { x: 1.32, y: 2.91, z: -1.49 } });
+      s2.wireframe = true; s2.color = $3Dmol.CC.color("purple");
+      viewer.addLabel("Aromatic", { position: { x: 1.32, y: 2.91, z: -1.49 }, backgroundColor: 0x800080, backgroundOpacity: 0.8 });
 
-</script>        
-        <script>
-            var $3Dmol = $3Dmol || {};
-            var initSDF = function(viewer) {
-                var s1 = viewer.addSphere({radius: 1.25, center: {x:-6.89, y:0.75, z:0.35}});
-                s1.wireframe = true; s1.color = $3Dmol.CC.color("purple");
-                viewer.addLabel("Aromatic", {position: {x:-6.89, y:0.75, z:0.35}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
-                var s2 = viewer.addSphere({radius: 1.25, center: {x:1.32, y:2.91, z:-1.49}});
-                s2.wireframe = true; s2.color = $3Dmol.CC.color("purple");
-                viewer.addLabel("Aromatic", {position: {x:1.32, y:2.91, z:-1.49}, backgroundColor: 0x800080, backgroundOpacity: 0.8});
+      var s3 = viewer.addSphere({ radius: 0.5, center: { x: -0.42, y: -0.48, z: 0.64 } });
+      s3.wireframe = true; s3.color = $3Dmol.CC.color(0xbbbbbb);
 
-                var s3 = viewer.addSphere({radius: 0.5, center: {x:-0.42, y:-0.48, z:0.64}});
-                s3.wireframe = true; s3.color = $3Dmol.CC.color(0xbbbbbb);
+      var a = viewer.addArrow({
+        start: { x: -0.4217, y: -0.4795, z: 0.6395 }, end: { x: -0.613, y: -0.891, z: -0.198 },
+        radius: 0.1
+      });
+      viewer.addLabel("Hydrogen Donor", { position: { x: -0.4217, y: -0.4795, z: 0.6395 }, backgroundColor: 0x808080, backgroundOpacity: 0.8 });
+      a.color = $3Dmol.CC.color(0xeeeeee);
 
-                var a = viewer.addArrow({start: {x:-0.4217, y:-0.4795, z:0.6395}, end: {x:-0.613, y:-0.891, z:-0.198},
-                                           radius: 0.1});
-                viewer.addLabel("Hydrogen Donor", {position: {x:-0.4217, y:-0.4795, z:0.6395}, backgroundColor: 0x808080, backgroundOpacity:0.8});
-                a.color = $3Dmol.CC.color(0xeeeeee);
+      viewer.render();
 
-                viewer.render();
-                
-            };
-            
-            var initShapes = function(viewer) {
-                $.get('tests/test_structs/benzene-homo.cube', function(data){
-                    var voldata = new $3Dmol.VolumeData(data, "cube");
-                    if(viewer.hasVolumetricRender()) {
-                        viewer.addVolumetricRender(voldata, {transferfn: [{color: "blue", opacity: .075, value: 0.1},
-                                                                        {color: "blue", opacity: .001, value: 0.01},
-                                                                        {color: "white", opacity: 0, value: 0},
-                                                                        {color: "red", opacity: .001, value: -0.01},
-                                                                        {color: "red", opacity: .075, value: -0.1}]});
-                    } else {
-                        viewer.addIsosurface(voldata, {isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10});              
-                        viewer.addIsosurface(voldata, {isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10}); 
-                    }
-                    viewer.setStyle({}, {stick:{}});
-                    viewer.zoomTo();
-                    viewer.render();
-                }, 'text');
-            };
-            
-            var init1YCR = function(viewer) {
-                viewer.addStyle({}, {"line":{}});
-                viewer.addSurface($3Dmol.SurfaceType.VDW, {'opacity':0.8, colorscheme: 'whiteCarbon'}, {"chain":"A"},{"chain":"A"});
-                viewer.addStyle({"chain":"B"}, {"stick":{colorscheme:'Jmol'}});
-                viewer.zoomTo({"chain":"B"});
-            };
+    };
 
-            var addSurf = function(viewer) {
-                viewer.addSurface($3Dmol.SurfaceType.VDW, {opacity:0.75},
-                                  {hetflag: false}, {hetflag:false}, {chain: 'B'});
-            };
+    var initShapes = function (viewer) {
+      $.get('tests/test_structs/benzene-homo.cube', function (data) {
+        var voldata = new $3Dmol.VolumeData(data, "cube");
+        if (viewer.hasVolumetricRender()) {
+          viewer.addVolumetricRender(voldata, {
+            transferfn: [{ color: "blue", opacity: .075, value: 0.1 },
+            { color: "blue", opacity: .001, value: 0.01 },
+            { color: "white", opacity: 0, value: 0 },
+            { color: "red", opacity: .001, value: -0.01 },
+            { color: "red", opacity: .075, value: -0.1 }]
+          });
+        } else {
+          viewer.addIsosurface(voldata, { isoval: 0.01, color: "blue", alpha: 0.95, smoothness: 10 });
+          viewer.addIsosurface(voldata, { isoval: -0.01, color: "red", alpha: 0.95, smoothness: 10 });
+        }
+        viewer.setStyle({}, { stick: {} });
+        viewer.zoomTo();
+        viewer.render();
+      }, 'text');
+    };
 
-$( document ).ready(function() {
-  var hidetext = function () {
-	  $("#text3Dmol").hide();
-	    $("#viewtext").hide();
-	    $("#embedtext").hide();
-	    $("#teachtext").hide();
-	    $("#jupytertext").hide();
-	    $("#developtext").hide();
-  };
-  $('#view').hover(
-  function () {
-	hidetext();
-    $("#viewtext").show();
-  }, 
-  function () {
-	    hidetext();
-		$("#text3Dmol").show();
-  });
-    $('#embed').hover(
-  function () {
-	    hidetext();
-    $("#embedtext").show();
-  }, 
-  function () {
-	    hidetext();
-		$("#text3Dmol").show();
-  });
-  
-    $('#teach').hover(
-  function () {
-	    hidetext();
-    $("#teachtext").show();
-  }, 
-  function () {
-	    hidetext();
-		$("#text3Dmol").show();
-  });
-    
-    $('#jupyter').hover(
-  function () {
-	    hidetext();
-    $("#jupytertext").show();
-  }, 
-  function () {
-	    hidetext();
-		$("#text3Dmol").show();
-  });  
+    var init1YCR = function (viewer) {
+      viewer.addStyle({}, { "line": {} });
+      viewer.addSurface($3Dmol.SurfaceType.VDW, { 'opacity': 0.8, colorscheme: 'whiteCarbon' }, { "chain": "A" }, { "chain": "A" });
+      viewer.addStyle({ "chain": "B" }, { "stick": { colorscheme: 'Jmol' } });
+      viewer.zoomTo({ "chain": "B" });
+    };
+
+    var addSurf = function (viewer) {
+      viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.75 },
+        { hetflag: false }, { hetflag: false }, { chain: 'B' });
+    };
+
+    $(document).ready(function () {
+      var hidetext = function () {
+        $("#text3Dmol").hide();
+        $("#viewtext").hide();
+        $("#embedtext").hide();
+        $("#teachtext").hide();
+        $("#jupytertext").hide();
+        $("#developtext").hide();
+      };
+      $('#view').hover(
+        function () {
+          hidetext();
+          $("#viewtext").show();
+        },
+        function () {
+          hidetext();
+          $("#text3Dmol").show();
+        });
+      $('#embed').hover(
+        function () {
+          hidetext();
+          $("#embedtext").show();
+        },
+        function () {
+          hidetext();
+          $("#text3Dmol").show();
+        });
+
+      $('#teach').hover(
+        function () {
+          hidetext();
+          $("#teachtext").show();
+        },
+        function () {
+          hidetext();
+          $("#text3Dmol").show();
+        });
+
+      $('#jupyter').hover(
+        function () {
+          hidetext();
+          $("#jupytertext").show();
+        },
+        function () {
+          hidetext();
+          $("#text3Dmol").show();
+        });
       $('#develop').hover(
-  function () {
-	    hidetext();
-    $("#developtext").show();
-  }, 
-  function () {
-	    hidetext();
-		$("#text3Dmol").show();
-  });
-});
-        </script>
-
+        function () {
+          hidetext();
+          $("#developtext").show();
+        },
+        function () {
+          hidetext();
+          $("#text3Dmol").show();
+        });
+    });
+  </script>
 </head>
 
 <body>
-<div id=content>
- <div class="header">
-  <div id="title3Dmol"><b>3D</b>mol<font style="font-weight:400">.js</font></div>
-  <div id="title3Dmolright" >
-   <div id="strip" class = "titlefont">
-    <a href="doc/tutorial-url.html" id="view" class="titletext">View</a>
-    <a href="doc/tutorial-embeddable.html" id="embed" class="titletext">Embed</a>
-    <a href="doc/tutorial-learning_environment.html" id="teach" class="titletext">Teach</a>
-    <a href="https://colab.research.google.com/drive/1T2zR59TXyWRcNxRgOAiqVPJWhep83NV_?usp=sharing" id="jupyter" class="titletext">Jupyter</a>
-    <a href="doc/index.html" id="develop" class="titletext">Develop</a>
-   </div>
-   <div id="infotext">
-    <span id="text3Dmol" class="floattext">A modern, object-oriented JavaScript library for visualizing molecular data</span>
-    <span id="viewtext" class="floattext">View structures through a declarative URL interface</span>
-    <span id="embedtext" class="floattext">Embed molecular viewers in webpages with two lines of code</span>
-    <span id="teachtext" class="floattext">Engage students while teaching molecular structures</span>
-    <span id="jupytertext" class="floattext">Include interactive 3D structures in Jupyter notebooks</span>
-    <span id="developtext" class="floattext">Develop web applications using a full featured API</span>
-
-   </div>
+  <div id=content>
+    <div class="header">
+      <div id="title3Dmol"><b>3D</b>mol<font style="font-weight:400">.js</font>
+      </div>
+      <div id="title3Dmolright">
+        <div id="strip" class="titlefont">
+          <a href="doc/tutorial-url.html" id="view" class="titletext">View</a>
+          <a href="doc/tutorial-embeddable.html" id="embed" class="titletext">Embed</a>
+          <a href="doc/tutorial-learning_environment.html" id="teach" class="titletext">Teach</a>
+          <a href="https://colab.research.google.com/drive/1T2zR59TXyWRcNxRgOAiqVPJWhep83NV_?usp=sharing" id="jupyter"
+            class="titletext">Jupyter</a>
+          <a href="doc/index.html" id="develop" class="titletext">Develop</a>
+        </div>
+        <div id="infotext">
+          <span id="text3Dmol" class="floattext">A modern, object-oriented JavaScript library for visualizing molecular
+            data</span>
+          <span id="viewtext" class="floattext">View structures through a declarative URL interface</span>
+          <span id="embedtext" class="floattext">Embed molecular viewers in webpages with two lines of code</span>
+          <span id="teachtext" class="floattext">Engage students while teaching molecular structures</span>
+          <span id="jupytertext" class="floattext">Include interactive 3D structures in Jupyter notebooks</span>
+          <span id="developtext" class="floattext">Develop web applications using a full featured API</span>
+        </div>
+      </div>
+      <div id="rightstrip" class="titlefont">
+        <a id="issues" href="https://github.com/3dmol/3Dmol.js/issues" class="titletext">Feedback</a>
+        <a id="help" href="https://github.com/3dmol/3Dmol.js" class="titletext">Download</a>
+      </div>
+    </div>
   </div>
-  <div id="rightstrip" class="titlefont">
-    <a id="issues" href="https://github.com/3dmol/3Dmol.js/issues" class="titletext">Feedback</a>
-    <a id="help" href="https://github.com/3dmol/3Dmol.js" class="titletext">Download</a>
-  </div>
- </div>
-</div>
-
-
-        <div id="viewercontainer" class = "body row">
-        
-        <div class="table">
-            <div class="tablerow">
-        <div id='viewer1' class='viewer_3Dmoljs' data-href='tests/test_structs/2por.pdb' data-backgroundcolor='0xffffff' data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div> 
-        <div id='viewer2' class='viewer_3Dmoljs' data-element='moldata_sdf' data-datatype='sdf' data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xf6f6f6'></div>           
-            </div>
-            
-            <div class="tablerow">
-        <div id='viewer4' class='viewer_3Dmoljs' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf" data-callback='initShapes' data-backgroundcolor='0xf6f6f6'></div>
-        <div id='viewer3' class='viewer_3Dmoljs' data-href='tests/test_structs/1YCR.pdb' data-backgroundcolor='0xffffff' data-style='{"cartoon":{}}' data-callback='init1YCR'></div>  
-            </div>
-        </div>           
-
-   
-  
-
-<textarea style="display: none;" id="moldata_sdf">v:U4C5Cr:4
+  <div id="viewercontainer" class="body row">
+    <div class="table">
+      <div class="tablerow">
+        <div id='viewer1' class='viewer_3Dmoljs' data-href='tests/test_structs/2por.pdb' data-backgroundcolor='0xffffff'
+          data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div>
+        <div id='viewer2' class='viewer_3Dmoljs' data-element='moldata_sdf' data-datatype='sdf'
+          data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xf6f6f6'></div>
+      </div>
+      <div class="tablerow">
+        <div id='viewer4' class='viewer_3Dmoljs' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf"
+          data-callback='initShapes' data-backgroundcolor='0xf6f6f6'></div>
+        <div id='viewer3' class='viewer_3Dmoljs' data-href='tests/test_structs/1YCR.pdb' data-backgroundcolor='0xffffff'
+          data-style='{"cartoon":{}}' data-callback='init1YCR'></div>
+      </div>
+    </div>
+    <textarea style="display: none;" id="moldata_sdf">v:U4C5Cr:4
   -OEChem-12201211493D
 
  43 44  0     1  0  0  0  0  0999 V2000
@@ -272,6 +275,7 @@ $( document ).ready(function() {
   8 35  2  0  0  0  0
 M  CHG  2  35   1  40  -1
 M  END
-</textarea> 	
+</textarea>
 </body>
+
 </html>
