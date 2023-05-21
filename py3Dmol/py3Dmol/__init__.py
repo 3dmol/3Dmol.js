@@ -52,7 +52,7 @@ class view(object):
 
        The API for the created object is exactly that for $3Dmol.GLViewer, with
        the exception that the functions all return None.
-       https://3dmol.org/doc/GLViewer.html
+       http://3dmol.org/doc/GLViewer.html
     '''
     def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.3/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
