@@ -496,9 +496,10 @@ export class GLViewer {
             if (z < upper) z = upper;
         }
 
-        if (z > this.CAMERA_Z) {
-            z = this.CAMERA_Z * 0.999; //avoid getting stuck
+        if (z > this.CAMERA_Z-1) {
+            z = this.CAMERA_Z - 1; //avoid getting stuck
         }
+
         return z;
     };
     //interpolate between two normalized quaternions (t between 0 and 1)
@@ -933,7 +934,9 @@ export class GLViewer {
         if (ev.detail) {
             this.rotationGroup.position.z += mult * scaleFactor * ev.detail / 10;
         } else if (ev.wheelDelta) {
-            this.rotationGroup.position.z -= mult * scaleFactor * ev.wheelDelta / 400;
+            //dampen the wheelDelta since some browser/OS/mouse combinations can be quite large
+            let wd = ev.wheelDelta*600/(ev.wheelDelta+600);
+            this.rotationGroup.position.z -= mult * scaleFactor * wd / 400;
         }
         this.rotationGroup.position.z = this.adjustZoomToLimits(this.rotationGroup.position.z);
         this.show();
