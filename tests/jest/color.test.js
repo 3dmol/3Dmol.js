@@ -73,4 +73,62 @@ describe("Color", () => {
         let color = new $3Dmol.Color();
         expect(color).toMatchObject({ r: 0, g: 0, b: 0 });
     })
+
+    test("should set the RGB values from the object when val is an object", () => {
+        const color = new $3Dmol.Color();
+        const obj = { r: 0.5, g: 0.8, b: 1.0 };
+
+        color.set(obj);
+
+        expect(color.r).toBe(0.5);
+        expect(color.g).toBe(0.8);
+        expect(color.b).toBe(1.0);
+    });
+
+    test("should return an array of hex values when input is an array", () => {
+        const color = new $3Dmol.Color();
+        const hexArray = ["#ff0000", "#00ff00", "#0000ff"];
+        const expectedResult = [0xff0000, 0x00ff00, 0x0000ff];
+
+        const result =  color.getHex(hexArray);
+
+        expect(result).toEqual(expectedResult);
+    });
+
+    test("should expand short hex strings to full hex number", () => {
+        const color = new $3Dmol.Color();
+        const hexString = "#abc";
+        const expectedResult = "#aabbcc";
+
+        const result = color.getHex(hexString);
+
+        expect(result).toBe(expectedResult);
+    });
+
+    test("should return the color value from htmlColors object when input is a string", () => {
+        const color = new $3Dmol.Color();
+        // Mocking the htmlColors object
+        const htmlColors = {
+            red: 0xff0000,
+            green: 0x00ff00,
+            blue: 0x0000ff,
+        };
+
+        // Mocking the window object
+        const mockWindow = {
+            $3Dmol: {
+                htmlColors,
+            },
+        };
+
+        // Providing the mock window object to the global scope
+        global.window = mockWindow;
+
+        const colorString = "green";
+        const expectedResult = 0x00ff00;
+
+        const result = color.getHex(colorString);
+
+        expect(result).toBe(expectedResult);
+    });
 })
