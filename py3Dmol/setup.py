@@ -23,7 +23,8 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='2.0.1.post1',
+    # Keep version in synce with 3Dmol.js version.  Use "postX" suffix if needed
+    version='2.0.3',
 
     description='An IPython interface for embedding 3Dmol.js views in Jupyter notebooks',
     long_description=long_description,

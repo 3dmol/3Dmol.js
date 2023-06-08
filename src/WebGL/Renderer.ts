@@ -28,7 +28,7 @@ export class Renderer {
   cols: any;
   context = null;
   devicePixelRatio = 1.0; //set in setSize
-  domElement: Element;
+  domElement: HTMLCanvasElement;
   autoClear = true;
   autoClearColor = true;
   autoClearDepth = true;
@@ -215,6 +215,7 @@ export class Renderer {
     return {
       supportsAIA: Boolean(this._extInstanced),
       supportsImposters: Boolean(this._extFragDepth) || !this.isWebGL1(),
+      regen: false
     };
   }
 
@@ -429,6 +430,7 @@ export class Renderer {
     // program
     // Also sets appropriate uniform variables
     program = this.setProgram(camera, lights, fog, material, object, this);
+    if(!program) return;
 
     attributes = program.attributes;
 
@@ -569,7 +571,7 @@ export class Renderer {
     }
   }
 
-  render(scene, camera, forceClear) {
+  render(scene, camera, forceClear?) {
     if (camera instanceof Camera === false) {
       console.error("Renderer.render: camera is not an instance of Camera.");
       return;
@@ -1196,6 +1198,8 @@ export class Renderer {
     if (type === "fragment") shader = this._gl.createShader(this._gl.FRAGMENT_SHADER);
     else if (type === "vertex") shader = this._gl.createShader(this._gl.VERTEX_SHADER);
 
+    if (shader == null) return null;
+
     this._gl.shaderSource(shader, str);
     this._gl.compileShader(shader);
 
@@ -1247,6 +1251,7 @@ export class Renderer {
     // Set up new program and compile shaders
 
     program = this._gl.createProgram();
+    if(program == null) return null;
 
     // set up precision
     var precision = this._precision;
@@ -1272,8 +1277,8 @@ export class Renderer {
     );
     var glVertexShader = this.getShader("vertex", prefix_vertex + vertexShader);
 
-    this._gl.attachShader(program, glVertexShader);
-    this._gl.attachShader(program, glFragmentShader);
+    if(glVertexShader != null)  this._gl.attachShader(program, glVertexShader);
+    if(glFragmentShader != null) this._gl.attachShader(program, glFragmentShader);
 
     this._gl.linkProgram(program);
 
@@ -1346,6 +1351,7 @@ export class Renderer {
       this.initMaterial(material, lights, fog, object);
       material.needsUpdate = false;
     }
+    if( material.program == null) return null;
 
     var refreshMaterial = false;
 

@@ -57,7 +57,7 @@ export class GLViewer {
     private fov = 20;
 
     private linkedViewers = [];
-    private renderer: any = null;
+    private renderer: Renderer|null = null;
 
     private row: number;
     private col: number;
