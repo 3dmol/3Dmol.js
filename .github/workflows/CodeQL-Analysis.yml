@@ -31,17 +31,17 @@ jobs:
         node-version: 20
 
     - name: Cache NPM Dependencies
-        id: cache-npm
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
-    - name: Check Cache & Install Dependencies
-        if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        run: npm install
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+    
+    - name: Check Cache
+      if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      run: npm install
 
     - name: Build Javascript file
       run: npm run build

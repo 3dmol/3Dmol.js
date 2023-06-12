@@ -16,9 +16,19 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-
-      - name: Build
-        run: npm install 
+      
+      - name: Cache NPM Dependencies
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+      
+      - name: Check Cache
+        if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        run: npm install
 
       - name: Test    
         run: npm test
