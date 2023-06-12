@@ -26,8 +26,8 @@ jobs:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
       
-      - name: Check Cache
-        if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      - name: Check Cache & Install Dependencies
+        # if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
         run: npm install
 
       - name: Test    

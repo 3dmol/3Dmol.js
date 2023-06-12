@@ -1,0 +1,8 @@
+paths-ignore:
+  - .github
+  - node_modules
+  - '**/*.md'
+  - '**/*.json'
+  - LICENSE
+  - '**/*.css'
+  
