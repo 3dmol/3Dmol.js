@@ -432,7 +432,7 @@ export class GLViewer {
             ev.targetTouches[1].pageX;
         var ydiff = ev.targetTouches[0].pageY -
             ev.targetTouches[1].pageY;
-        return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+        return Math.hypot(xdiff, ydiff);
     };
 
     //check targetTouches as well
@@ -1988,7 +1988,7 @@ export class GLViewer {
             y = tmp[1][1] - tmp[0][1],
             z = tmp[1][2] - tmp[0][2];
 
-        var maxD = Math.sqrt(x * x + y * y + z * z);
+        var maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2065,7 +2065,7 @@ export class GLViewer {
         var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1] -
             alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
 
-        var maxD = Math.sqrt(x * x + y * y + z * z);
+        var maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2077,7 +2077,7 @@ export class GLViewer {
         x = tmp[1][0] - tmp[0][0];
         y = tmp[1][1] - tmp[0][1];
         z = tmp[1][2] - tmp[0][2];
-        maxD = Math.sqrt(x * x + y * y + z * z);
+        maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2185,7 +2185,7 @@ export class GLViewer {
         var x = allbox[1][0] - allbox[0][0], y = allbox[1][1]
             - allbox[0][1], z = allbox[1][2] - allbox[0][2];
 
-        var maxD = Math.sqrt(x * x + y * y + z * z);
+        var maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2206,7 +2206,7 @@ export class GLViewer {
         x = atombox[1][0] - atombox[0][0];
         y = atombox[1][1] - atombox[0][1];
         z = atombox[1][2] - atombox[0][2];
-        maxD = Math.sqrt(x * x + y * y + z * z);
+        maxD = Math.hypot(x, y, z);
         if (maxD < MAXD)
             maxD = MAXD;
 
@@ -2784,8 +2784,8 @@ export class GLViewer {
                 var u, v, w;
 
                 u = Math.cos(beta);
-                v = (Math.cos(alpha) - Math.cos(beta) * Math.cos(gamma)) / Math.sin(gamma);
-                w = Math.sqrt(Math.max(0, 1 - u * u - v * v));
+                v = Math.cos(alpha) / Math.sin(gamma) - Math.cos(beta) * Math.tan(gamma);
+                w = Math.sqrt(1 - u * u - v * v);
 
                 matrix = new Matrix3(a, b * Math.cos(gamma), c * u,
                     0, b * Math.sin(gamma), c * v,
