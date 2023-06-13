@@ -48,7 +48,7 @@ view
 API
 ---
 
-The returned view object has the exact same API as [$3Dmol.GLViewer](http://3dmol.org/doc/GLViewer.html)
+The returned view object has the exact same API as [$3Dmol.GLViewer](https://3dmol.org/doc/GLViewer.html)
 with the exception that functions return None.
 
 

@@ -8,7 +8,7 @@
  
  ## Feature Request
  
- 1. Please go through the 3Dmol.js [js documentation](http://3dmol.org/doc/index.html) to check whether the feature is already present.
+ 1. Please go through the 3Dmol.js [js documentation](https://3dmol.org/doc/index.html) to check whether the feature is already present.
  2. Ensure that the feature request is new and is not already proposed.
  3. If the feature request is new, follow the feature request template to submit an issue.
  4. Please close your issue when you think it has been adequately resolved.
