@@ -17,8 +17,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Build
+      - name: Install Dependencies
         run: npm install 
+      
+      - name: Build 3Dmol.js
+        run: |
+          npm run build:dev
+          npm run build:prod
+          npm run generate:tests
 
       - name: Test    
         run: npm test
