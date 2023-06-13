@@ -1082,7 +1082,7 @@ export class GLViewer {
         var ratioY = this.renderer.getYRatio();
         dx *= ratioX;
         dy *= ratioY;
-        var r = Math.sqrt(dx * dx + dy * dy);
+        var r = Math.hypot(dx, dy);
         var scaleFactor;
         if (mode == 3 || (this.mouseButton == 3 && ev.ctrlKey)) { // Slab
             this.slabNear = this.cslabNear + dx * 100;
