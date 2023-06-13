@@ -298,10 +298,7 @@ var initSessions = function() {
     //return information about what is currently clicked for the server
     var getClicked = function() {
         var ret = [];
-        for(let i = 0; i < clicked_labels.length; i++) {
-            let p = clicked_labels[i].stylespec.position;
-            ret.push([p.x,p.y,p.z]);
-        }
+        const ret = Array.from(clicked_labels, ({ stylespec }) => [stylespec.position.x, stylespec.position.y, stylespec.position.z]);
         return ret;
     };
     socket.on('query start response', function() {
@@ -386,22 +383,20 @@ var initSessions = function() {
     });
     
     socket.on('query fetch response', function(query_result) {
-            // first clear existing labels
-            clearResultLabels();
-            var max = 1;
-            //calc max
-            for (let i = 0; i < query_result.length; i++) {
-              let val = parseInt(query_result[i][1]);
-              if(val > max) max = val;
-            }
+        // first clear existing labels
+        clearResultLabels();
+        var max = 1;
+        //calc max
+        for (let i = 0; i < query_result.length; i++) {
+            let val = parseInt(query_result[i][1]);
+            if(val > max) max = val;
+        }
 
-            for (let i = 0; i < query_result.length; i++) {
-                let pos = query_result[i][0];
-                let p = {x: pos[0], y: pos[1], z: pos[2]};
-                let val = parseInt(query_result[i][1]);                
-                let l = glviewer.addLabel(val, {position : p,backgroundOpacity:0.5+(val/max)*.5});                
-                result_labels.push(l);                
-            }
+        const result_labels = Array.from(query_result, ([pos, val]) => {
+            const p = { x: pos[0], y: pos[1], z: pos[2] };
+            const label = glviewer.addLabel(val, { position: p, backgroundOpacity: 0.5 + (val / max) * 0.5 });
+            return label;
+        });
     });
     
 };

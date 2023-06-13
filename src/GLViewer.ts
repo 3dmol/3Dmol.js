@@ -301,33 +301,21 @@ export class GLViewer {
                 });
 
                 let contextMenuEnabled_atom = model.selectedAtoms({ contextMenuEnabled: true });
-                // Array.prototype.push.apply(hoverables,hoverable_atoms);
-                for (let n = 0; n < hoverable_atoms.length; n++) {
-                    this.hoverables.push(hoverable_atoms[n]);
-                }
 
-                // Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
-                for (let m = 0; m < atoms.length; m++) {
-                    this.clickables.push(atoms[m]);
-                }
+                // Add atoms into hoverable
+                this.hoverables = Array.from(hoverable_atoms);
+
+                // Add atoms into clickables
+                this.clickables = Array.from(atoms);
 
                 // add atoms into contextMenuEnabledAtoms
-                for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
-                    this.contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
-                }
+                this.contextMenuEnabledAtoms = Array.from(contextMenuEnabled_atom);
 
             }
         }
-        for (let i = 0, il = this.shapes.length; i < il; i++) {
 
-            let shape = this.shapes[i];
-            if (shape && shape.clickable) {
-                this.clickables.push(shape);
-            }
-            if (shape && shape.hoverable) {
-                this.hoverables.push(shape);
-            }
-        }
+        this.clickables = Array.from(this.shapes, shape => shape && shape.clickable ? shape : null).filter(Boolean);
+        this.hoverables = Array.from(this.shapes, shape => shape && shape.hoverable ? shape : null).filter(Boolean);
     };
 
     // Checks for selection intersects on mousedown
@@ -979,10 +967,10 @@ export class GLViewer {
                         //convert to apng
                         let rgbas = [];
                         //have to convert png to rgba, before creating the apng
-                        for (let i = 0; i < buffers.length; i++) {
-                            let img = decode(buffers[i]);
-                            rgbas.push(toRGBA8(img)[0]);
-                        }
+                        const rgbas = Array.from(buffers, buffer => {
+                            const img = decode(buffer);
+                            return toRGBA8(img)[0];
+                        });
                         let width = viewer.getCanvas().width;
                         let height = viewer.getCanvas().height;
                         let apng = encode(rgbas, width, height, 0, delays);
@@ -1733,26 +1721,21 @@ export class GLViewer {
     private getModelList(sel: any): GLModel[] {
         let ms: GLModel[] = [];
         if (typeof sel === 'undefined' || typeof sel.model === "undefined") {
-            for (let i = 0; i < this.models.length; i++) {
-                if (this.models[i])
-                    ms.push(this.models[i]);
-            }
+            ms = Array.from(this.models, model => model ? model : null).filter(Boolean);
         } else { // specific to some models
             let selm: any = sel.model;
             if (!Array.isArray(selm))
                 selm = [selm];
 
-            for (let i = 0; i < selm.length; i++) {
-                //allow referencing models by order of creation
-                if (typeof selm[i] === 'number') {
-                    var index = selm[i];
-                    //support python backward indexing
+            ms = Array.from(selm, sel => {
+                if (typeof sel === 'number') {
+                    let index = sel;
                     if (index < 0) index += this.models.length;
-                    ms.push(this.models[index]);
+                    return this.models[index];
                 } else {
-                    ms.push(selm[i]);
+                    return sel;
                 }
-            }
+            });
         }
 
         return ms;
@@ -2946,16 +2929,13 @@ export class GLViewer {
                         offset.applyMatrix3(matrix);
 
                         let newatoms = [];
-                        for (let a = 0; a < atoms.length; a++) {
-                            let newAtom: any = {};
-                            for (let p in atoms[a]) {
-                                newAtom[p] = atoms[a][p];
-                            }
+                        const newatoms = Array.from(atoms, atom => {
+                            const newAtom = { ...atom };
                             newAtom.x += offset.x;
                             newAtom.y += offset.y;
                             newAtom.z += offset.z;
-                            newatoms.push(newAtom);
-                        }
+                            return newAtom;
+                        });
                         model.addAtoms(newatoms);
                     }
                 }
@@ -3391,16 +3371,19 @@ export class GLViewer {
 
         var modelatoms = GLModel.parseMolData(data, format, options);
 
-        for (var i = 0; i < modelatoms.length; i++) {
-            var newModel = new GLModel(this.models.length, this.defaultcolors);
-            newModel.setAtomDefaults(modelatoms[i]);
-            newModel.addFrame(modelatoms[i]);
+        const newModels = Array.from(modelatoms, (atom, index) => {
+            const newModel = new GLModel(this.models.length, this.defaultcolors);
+            newModel.setAtomDefaults(atom);
+            newModel.addFrame(atom);
             newModel.setFrame(0);
-            if (modelatoms.modelData)
-                newModel.setModelData(modelatoms.modelData[i]);
+            if (atom.modelData)
+                newModel.setModelData(atom.modelData);
             newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
-            this.models.push(newModel);
-        }
+            return newModel;
+        });
+
+        this.models.push(...newModels);
+
 
         return this.models;
     };
@@ -3728,19 +3711,19 @@ export class GLViewer {
     private static getAtomsWithin(atomlist:AtomSpec[], extent) {
         var ret = [];
 
-        for (let i = 0; i < atomlist.length; i++) {
-            var atom = atomlist[i];
-            if (typeof (atom) == "undefined")
-                continue;
+        const ret = Array.from(atomlist, atom => {
+            if (typeof atom === "undefined")
+                return;
 
-            if (atom.x < extent[0][0] || atom.x > extent[1][0])
-                continue;
-            if (atom.y < extent[0][1] || atom.y > extent[1][1])
-                continue;
-            if (atom.z < extent[0][2] || atom.z > extent[1][2])
-                continue;
-            ret.push(atom);
-        }
+            if (
+                atom.x < extent[0][0] || atom.x > extent[1][0] ||
+                atom.y < extent[0][1] || atom.y > extent[1][1] ||
+                atom.z < extent[0][2] || atom.z > extent[1][2]
+            )
+                return;
+
+            return atom;
+        }).filter(Boolean);
         return ret;
     };
 
@@ -4237,9 +4220,7 @@ export class GLViewer {
                     });
                 };
                 var promises = [];
-                for (let i = 0; i < extents.length; i++) {
-                    promises.push(callSyncHelper(i));
-                }
+                const promises = Array.from(extents, (extent, i) => callSyncHelper(i));
                 return Promise.all(promises)
                     .then(function () {
                         surfobj.done = true;
@@ -4253,15 +4234,16 @@ export class GLViewer {
                 var workers = [];
                 if (type < 0)
                     type = 0; // negative reserved for atom data
-                for (let i = 0, il = GLViewer.numWorkers; i < il; i++) {
-                    var w = new Worker($3Dmol.SurfaceWorker);
-                    workers.push(w);
+                const workers = Array.from({ length: GLViewer.numWorkers }, () => {
+                    const w = new Worker($3Dmol.SurfaceWorker);
                     w.postMessage({
                         'type': -1,
                         'atoms': reducedAtoms,
                         'volume': totalVol
                     });
-                }
+                    return w;
+                });
+
 
                 return new Promise(function (resolve, reject) {
                     var cnt = 0;
@@ -4337,14 +4319,22 @@ export class GLViewer {
                 modelsAtomList[n] = [];
                 modelsAtomsToShow[n] = [];
             }
-            for (n = 0; n < atomlist.length; n++) {
-                modelsAtomList[atomlist[n].model].push(atomlist[n]);
-            }
-            for (n = 0; n < atomsToShow.length; n++) {
-                modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
-            }
+            const modelsAtomList = Array.from({ length: atomlist.length }, () => []);
+            const modelsAtomsToShow = Array.from({ length: atomsToShow.length }, () => []);
+
+            atomlist.forEach((atom, n) => {
+                modelsAtomList[atom.model].push(atom);
+            });
+
+            atomsToShow.forEach((atom, n) => {
+                modelsAtomsToShow[atom.model].push(atom);
+            });
+
             var promises = [];
-            for (n = 0; n < this.models.length; n++) {
+            const surfobj = [];
+            const promises = [];
+
+            Array.from({ length: this.models.length }, (_, n) => n).forEach(n => {
                 if (modelsAtomsToShow[n].length > 0) {
                     surfobj.push({
                         geo: new Geometry(true),
@@ -4356,7 +4346,8 @@ export class GLViewer {
                     });
                     promises.push(addSurfaceHelper(surfobj[surfobj.length - 1], modelsAtomList[n], modelsAtomsToShow[n]));
                 }
-            }
+            });
+
             promise = Promise.all(promises);
         }
         else {
@@ -4709,15 +4700,18 @@ export function createViewerGrid(element, config:ViewerGridSpec={}, viewer_confi
     try {
         for (var r = 0; r < config.rows; r++) {
             var row = [];
-            for (var c = 0; c < config.cols; c++) {
-                viewer_config.row = r;
-                viewer_config.col = c;
-                viewer_config.canvas = canvas;
-                viewer_config.viewers = viewers;
-                viewer_config.control_all = config.control_all;
-                var viewer = createViewer(element, viewer_config);
-                row.push(viewer);
-            }
+            const row = Array.from({ length: config.cols }, (_, c) => {
+                const viewer_config = {
+                    row: r,
+                    col: c,
+                    canvas: canvas,
+                    viewers: viewers,
+                    control_all: config.control_all
+                };
+                const viewer = createViewer(element, viewer_config);
+                return viewer;
+            });
+
             viewers.unshift(row); //compensate for weird ordering in renderer
         }
     } catch (e) {
