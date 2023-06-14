@@ -29,7 +29,7 @@ export namespace GLDraw {
     // according to y basis vector
     // TODO: Try to optimize this (square roots?)
     function getRotationMatrix(dx: number, dy: number, dz: number) {
-        var dxy = Math.sqrt(dx * dx + dy * dy);
+        var dxy = Math.hypot(dx, dy);
         var dyz;
 
         var sinA, cosA, sinB, cosB;
@@ -48,7 +48,7 @@ export namespace GLDraw {
         // recast dy in terms of new axes - z is the same
 
         dy = -sinA * dx + cosA * dy;
-        dyz = Math.sqrt(dy * dy + dz * dz);
+        dyz = Math.hypot(dy, dz);
 
         // about new x axis - Theta
 

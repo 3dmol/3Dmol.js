@@ -432,7 +432,7 @@ export class GLViewer {
             ev.targetTouches[1].pageX;
         var ydiff = ev.targetTouches[0].pageY -
             ev.targetTouches[1].pageY;
-        return Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+        return Math.hypot(xdiff, ydiff);
     };
 
     //check targetTouches as well
@@ -1082,7 +1082,7 @@ export class GLViewer {
         var ratioY = this.renderer.getYRatio();
         dx *= ratioX;
         dy *= ratioY;
-        var r = Math.sqrt(dx * dx + dy * dy);
+        var r = Math.hypot(dx, dy);
         var scaleFactor;
         if (mode == 3 || (this.mouseButton == 3 && ev.ctrlKey)) { // Slab
             this.slabNear = this.cslabNear + dx * 100;
@@ -1988,7 +1988,7 @@ export class GLViewer {
             y = tmp[1][1] - tmp[0][1],
             z = tmp[1][2] - tmp[0][2];
 
-        var maxD = Math.sqrt(x * x + y * y + z * z);
+        var maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2065,7 +2065,7 @@ export class GLViewer {
         var x = alltmp[1][0] - alltmp[0][0], y = alltmp[1][1] -
             alltmp[0][1], z = alltmp[1][2] - alltmp[0][2];
 
-        var maxD = Math.sqrt(x * x + y * y + z * z);
+        var maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2077,7 +2077,7 @@ export class GLViewer {
         x = tmp[1][0] - tmp[0][0];
         y = tmp[1][1] - tmp[0][1];
         z = tmp[1][2] - tmp[0][2];
-        maxD = Math.sqrt(x * x + y * y + z * z);
+        maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2185,7 +2185,7 @@ export class GLViewer {
         var x = allbox[1][0] - allbox[0][0], y = allbox[1][1]
             - allbox[0][1], z = allbox[1][2] - allbox[0][2];
 
-        var maxD = Math.sqrt(x * x + y * y + z * z);
+        var maxD = Math.hypot(x, y, z);
         if (maxD < 5)
             maxD = 5;
 
@@ -2206,7 +2206,7 @@ export class GLViewer {
         x = atombox[1][0] - atombox[0][0];
         y = atombox[1][1] - atombox[0][1];
         z = atombox[1][2] - atombox[0][2];
-        maxD = Math.sqrt(x * x + y * y + z * z);
+        maxD = Math.hypot(x, y, z);
         if (maxD < MAXD)
             maxD = MAXD;
 
