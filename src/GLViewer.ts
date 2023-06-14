@@ -301,20 +301,14 @@ export class GLViewer {
                 });
 
                 let contextMenuEnabled_atom = model.selectedAtoms({ contextMenuEnabled: true });
-                // Array.prototype.push.apply(hoverables,hoverable_atoms);
-                for (let n = 0; n < hoverable_atoms.length; n++) {
-                    this.hoverables.push(hoverable_atoms[n]);
-                }
+                // Add atoms into hoverable
+                this.hoverables = Array.from(hoverable_atoms);
 
-                // Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
-                for (let m = 0; m < atoms.length; m++) {
-                    this.clickables.push(atoms[m]);
-                }
+                // Add atoms into clickables
+                this.clickables = Array.from(atoms);
 
                 // add atoms into contextMenuEnabledAtoms
-                for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
-                    this.contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
-                }
+                this.contextMenuEnabledAtoms = Array.from(contextMenuEnabled_atom);
 
             }
         }
