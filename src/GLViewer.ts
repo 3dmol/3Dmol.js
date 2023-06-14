@@ -2784,8 +2784,8 @@ export class GLViewer {
                 var u, v, w;
 
                 u = Math.cos(beta);
-                v = Math.cos(alpha) / Math.sin(gamma) - Math.cos(beta) * Math.tan(gamma);
-                w = Math.sqrt(1 - u * u - v * v);
+                v = (Math.cos(alpha) - Math.cos(beta) * Math.cos(gamma)) / Math.sin(gamma);
+                w = Math.sqrt(Math.max(0, 1 - u * u - v * v));
 
                 matrix = new Matrix3(a, b * Math.cos(gamma), c * u,
                     0, b * Math.sin(gamma), c * v,
