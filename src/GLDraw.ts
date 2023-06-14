@@ -130,21 +130,23 @@ export namespace GLDraw {
                     return this.cache[radius][cap + capType];
 
             var w = this.basisVectors.length;
-            var nvecs = [], norms = [];
+            var nvecs = []
+            var norms = [];
             var n;
 
-            for (var i = 0; i < w; i++) {
+            nvecs = Array.from({ length: w }, (_, i) => {
                 // bottom
-                nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
+                const bottomVec = this.basisVectors[i].clone().multiplyScalar(radius);
                 // top
-                nvecs.push(this.basisVectors[i].clone().multiplyScalar(radius));
+                const topVec = this.basisVectors[i].clone().multiplyScalar(radius);
+                return [bottomVec, topVec];
+            }).flat();
 
-                // NOTE: this normal is used for constructing sphere caps -
-                // cylinder normals taken care of in drawCylinder
-                n = this.basisVectors[i].clone().normalize();
-                norms.push(n);
-                norms.push(n);
-            }
+            norms = Array.from({ length: w }, (_, i) => {
+                const n = this.basisVectors[i].clone().normalize();
+                return [n, n];
+            }).flat();
+
 
             // norms[0]
 
