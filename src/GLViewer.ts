@@ -972,11 +972,11 @@ export class GLViewer {
                     Promise.all(bufpromise).then((buffers) => {
                         //convert to apng
                         let rgbas = [];
-                        //have to convert png to rgba, before creating the apng
-                        for (let i = 0; i < buffers.length; i++) {
-                            let img = decode(buffers[i]);
-                            rgbas.push(toRGBA8(img)[0]);
-                        }
+                        // Have to convert png to rgba, before creating the apng
+                        rgbas = Array.from(buffers, buffer => {
+                            const img = decode(buffer);
+                            return toRGBA8(img)[0];
+                        });
                         let width = viewer.getCanvas().width;
                         let height = viewer.getCanvas().height;
                         let apng = encode(rgbas, width, height, 0, delays);
