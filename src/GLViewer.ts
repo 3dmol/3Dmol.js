@@ -1727,26 +1727,20 @@ export class GLViewer {
     private getModelList(sel: any): GLModel[] {
         let ms: GLModel[] = [];
         if (typeof sel === 'undefined' || typeof sel.model === "undefined") {
-            for (let i = 0; i < this.models.length; i++) {
-                if (this.models[i])
-                    ms.push(this.models[i]);
-            }
+            ms = Array.from(this.models, model => model ? model : null).filter(Boolean);
         } else { // specific to some models
             let selm: any = sel.model;
-            if (!Array.isArray(selm))
-                selm = [selm];
+            if (!Array.isArray(selm)) selm = [selm];
 
-            for (let i = 0; i < selm.length; i++) {
-                //allow referencing models by order of creation
-                if (typeof selm[i] === 'number') {
-                    var index = selm[i];
-                    //support python backward indexing
+            ms = Array.from(selm, sel => {
+                if (typeof sel === 'number') {
+                    let index = sel;
                     if (index < 0) index += this.models.length;
-                    ms.push(this.models[index]);
+                    return this.models[index];
                 } else {
-                    ms.push(selm[i]);
+                    return sel;
                 }
-            }
+            }) as GLModel[];
         }
 
         return ms;
