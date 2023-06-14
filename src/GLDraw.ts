@@ -135,14 +135,15 @@ export namespace GLDraw {
             var n;
 
             nvecs = Array.from({ length: w }, (_, i) => {
-                // bottom
+                // Bottom
                 const bottomVec = this.basisVectors[i].clone().multiplyScalar(radius);
-                // top
+                // Top
                 const topVec = this.basisVectors[i].clone().multiplyScalar(radius);
                 return [bottomVec, topVec];
             }).flat();
 
             norms = Array.from({ length: w }, (_, i) => {
+                // Note: This normal is used for constructing sphere caps - cylinder normals taken care of in drawCylinder
                 const n = this.basisVectors[i].clone().normalize();
                 return [n, n];
             }).flat();
