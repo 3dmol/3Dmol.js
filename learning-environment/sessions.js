@@ -297,7 +297,6 @@ var initSessions = function() {
     
     //return information about what is currently clicked for the server
     var getClicked = function() {
-        var ret = [];
         const ret = Array.from(clicked_labels, ({ stylespec }) => [stylespec.position.x, stylespec.position.y, stylespec.position.z]);
         return ret;
     };
@@ -383,20 +382,28 @@ var initSessions = function() {
     });
     
     socket.on('query fetch response', function(query_result) {
-        // first clear existing labels
+        
+        // First clear existing labels
         clearResultLabels();
-        var max = 1;
-        //calc max
-        for (let i = 0; i < query_result.length; i++) {
-            let val = parseInt(query_result[i][1]);
-            if(val > max) max = val;
+        
+        let max = 1;
+        let i = 0;
+      
+        // Calculate max
+        while (i < query_result.length) {
+          const val = parseInt(query_result[i][1]);
+          if (val > max) max = val;
+          i++;
         }
-
-        const result_labels = Array.from(query_result, ([pos, val]) => {
-            const p = { x: pos[0], y: pos[1], z: pos[2] };
-            const label = glviewer.addLabel(val, { position: p, backgroundOpacity: 0.5 + (val / max) * 0.5 });
-            return label;
+      
+        i = 0;
+        result_labels = Array.from(query_result, function(item) {
+          const pos = item[0];
+          const p = { x: pos[0], y: pos[1], z: pos[2] };
+          const val = parseInt(item[1]);
+          return glviewer.addLabel(val, { position: p, backgroundOpacity: 0.5 + (val / max) * 0.5 });
         });
-    });
+      });
+      
     
 };
