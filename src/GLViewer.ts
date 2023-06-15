@@ -3712,21 +3712,20 @@ export class GLViewer {
      * @return {Array}
      */
     private static getAtomsWithin(atomlist:AtomSpec[], extent) {
-        var ret = [];
 
-        for (let i = 0; i < atomlist.length; i++) {
-            var atom = atomlist[i];
-            if (typeof (atom) == "undefined")
-                continue;
+        const ret = Array.from(atomlist, atom => {
+            if (typeof atom === "undefined")
+                return;
 
-            if (atom.x < extent[0][0] || atom.x > extent[1][0])
-                continue;
-            if (atom.y < extent[0][1] || atom.y > extent[1][1])
-                continue;
-            if (atom.z < extent[0][2] || atom.z > extent[1][2])
-                continue;
-            ret.push(atom);
-        }
+            if (
+                atom.x < extent[0][0] || atom.x > extent[1][0] ||
+                atom.y < extent[0][1] || atom.y > extent[1][1] ||
+                atom.z < extent[0][2] || atom.z > extent[1][2]
+            )
+                return;
+
+            return atom;
+        }).filter(Boolean);
         return ret;
     };
 
