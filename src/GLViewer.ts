@@ -2933,17 +2933,13 @@ export class GLViewer {
                         let offset = new Vector3(makeoff(i), makeoff(j), makeoff(k));
                         offset.applyMatrix3(matrix);
 
-                        let newatoms = [];
-                        for (let a = 0; a < atoms.length; a++) {
-                            let newAtom: any = {};
-                            for (let p in atoms[a]) {
-                                newAtom[p] = atoms[a][p];
-                            }
+                        const newatoms = Array.from(atoms, atom => {
+                            const newAtom = { ...atom };
                             newAtom.x += offset.x;
                             newAtom.y += offset.y;
                             newAtom.z += offset.z;
-                            newatoms.push(newAtom);
-                        }
+                            return newAtom;
+                        });
                         model.addAtoms(newatoms);
                     }
                 }
@@ -3377,18 +3373,20 @@ export class GLViewer {
         options.multimodel = true;
         options.frames = true;
 
-        var modelatoms = GLModel.parseMolData(data, format, options);
+        let modelatoms = GLModel.parseMolData(data, format, options);
 
-        for (var i = 0; i < modelatoms.length; i++) {
-            var newModel = new GLModel(this.models.length, this.defaultcolors);
-            newModel.setAtomDefaults(modelatoms[i]);
-            newModel.addFrame(modelatoms[i]);
+        const newModels = Array.from(modelatoms, (atom: AtomSpec[], index) => {
+            const newModel = new GLModel(this.models.length, this.defaultcolors);
+            newModel.setAtomDefaults(atom);
+            newModel.addFrame(atom);
             newModel.setFrame(0);
-            if (modelatoms.modelData)
-                newModel.setModelData(modelatoms.modelData[i]);
+            if (modelatoms[index].modelData)
+                newModel.setModelData(modelatoms[index].modelData);
             newModel.setDontDuplicateAtoms(!options.duplicateAssemblyAtoms);
-            this.models.push(newModel);
-        }
+            return newModel;
+        });
+        
+        this.models.push(...newModels);        
 
         return this.models;
     };
