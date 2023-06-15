@@ -4221,10 +4221,7 @@ export class GLViewer {
                         resolve();
                     });
                 };
-                var promises = [];
-                for (let i = 0; i < extents.length; i++) {
-                    promises.push(callSyncHelper(i));
-                }
+                const promises = Array.from(extents, (extent, i) => callSyncHelper(i));
                 return Promise.all(promises)
                     .then(function () {
                         surfobj.done = true;
@@ -4235,18 +4232,15 @@ export class GLViewer {
                 // meshes) and merge them into a single geometry
             } else { // use worker
 
-                var workers = [];
-                if (type < 0)
-                    type = 0; // negative reserved for atom data
-                for (let i = 0, il = GLViewer.numWorkers; i < il; i++) {
-                    var w = new Worker($3Dmol.SurfaceWorker);
-                    workers.push(w);
+                const workers = Array.from({ length: GLViewer.numWorkers }, () => {
+                    const w = new Worker($3Dmol.SurfaceWorker);
                     w.postMessage({
-                        'type': -1,
-                        'atoms': reducedAtoms,
-                        'volume': totalVol
+                      type: type < 0 ? 0 : type,
+                      atoms: reducedAtoms,
+                      volume: totalVol
                     });
-                }
+                    return w;
+                  });                  
 
                 return new Promise(function (resolve, reject) {
                     var cnt = 0;
@@ -4315,34 +4309,40 @@ export class GLViewer {
         surfobj.allsel = allsel;
         surfobj.focus = focus;
         var promise = null;
-        if (symmetries) { //do preprocessing
-            var modelsAtomList = {};
-            var modelsAtomsToShow = {};
-            for (n = 0; n < this.models.length; n++) {
-                modelsAtomList[n] = [];
-                modelsAtomsToShow[n] = [];
-            }
-            for (n = 0; n < atomlist.length; n++) {
-                modelsAtomList[atomlist[n].model].push(atomlist[n]);
-            }
-            for (n = 0; n < atomsToShow.length; n++) {
-                modelsAtomsToShow[atomsToShow[n].model].push(atomsToShow[n]);
-            }
-            var promises = [];
-            for (n = 0; n < this.models.length; n++) {
-                if (modelsAtomsToShow[n].length > 0) {
-                    surfobj.push({
-                        geo: new Geometry(true),
-                        mat: mat,
-                        done: false,
-                        finished: false,
-                        symmetries: this.models[n].getSymmetries()
-                        // also webgl initialized
-                    });
-                    promises.push(addSurfaceHelper(surfobj[surfobj.length - 1], modelsAtomList[n], modelsAtomsToShow[n]));
-                }
-            }
+        if (symmetries) { 
+            // Do preprocessing
+            const modelsAtomList = Array.from({ length: this.models.length }, () => []);
+            const modelsAtomsToShow = Array.from({ length: this.models.length }, () => []);
+
+            atomlist.forEach((atom) => {
+                modelsAtomList[atom.model].push(atom);
+            });
+
+            atomsToShow.forEach((atom) => {
+                modelsAtomsToShow[atom.model].push(atom);
+            });
+
+            const nonEmptyModels = this.models
+                .map((model, index) => ({ model, index }))
+                .filter(({ index }) => modelsAtomsToShow[index].length > 0);
+
+            const surfobj = nonEmptyModels.reduce((acc, { model, index }) => {
+                acc.push({
+                    geo: new Geometry(true),
+                    mat: mat,
+                    done: false,
+                    finished: false,
+                    symmetries: model.getSymmetries(),
+                    // also webgl initialized
+                });
+                return acc;
+            }, []);
+
+            const promises = nonEmptyModels.map(({ index }) =>
+                addSurfaceHelper(surfobj[surfobj.length - 1], modelsAtomList[index], modelsAtomsToShow[index])
+            );
             promise = Promise.all(promises);
+
         }
         else {
             surfobj.push({
