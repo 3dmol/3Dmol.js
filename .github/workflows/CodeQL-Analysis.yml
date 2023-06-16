@@ -43,7 +43,7 @@ jobs:
 
     - name: Check Cache & Install Dependencies
       if: steps.cache-npm.outputs.cache-hit != 'true'
-      run: npm install --prefer-offline --no-audit
+      run: npm install --no-audit
 
     - name: Build 3dmol.js
       run: |
