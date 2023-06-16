@@ -8,4 +8,5 @@ paths-ignore:
   - 'README.md'
   - 'css/**'
   - 'paper/**'
+  - 'build/**'
 
