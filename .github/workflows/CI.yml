@@ -1,11 +1,11 @@
 name: 3Dmol.js CI
 
 on:
+  workflow_dispatch:
   pull_request:
+    branches: [master]
   push:
     branches: [master]
-  workflow_dispatch:
-  
 
 jobs:
   build_and_test:
@@ -16,9 +16,18 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
+          cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm install 
+      - name: Cache NPM Dependencies
+        id: cache-npm
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Check Cache & Install Dependencies
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: npm install --prefer-offline --no-audit
       
       - name: Build 3Dmol.js
         run: |
