@@ -15,18 +15,25 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 16.16.0
           cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
 
-      - name: Cache NPM Dependencies
-        id: cache-npm
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
+        id: npm-cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Check Cache & Install Dependencies
-        if: steps.cache-npm.outputs.cache-hit != 'true'
+        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm install --no-audit
       
       - name: Build 3Dmol.js
