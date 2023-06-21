@@ -37,7 +37,7 @@
     "jest": "npx jest --testPathIgnorePatterns=render.test.js --maxWorkers=50%",
     "jest:ci": "npx jest --testPathIgnorePatterns=render.test.js --runInBand",
     "test": "npm run generate:jest && npm run jest && npm run glcheck",
-    "test:co": "npm run generate:jest && npm run jest:ci && npm run glcheck",
+    "test:ci": "npm run generate:jest && npm run jest:ci && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
