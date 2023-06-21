@@ -32,9 +32,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Check Cache & Install Dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm install --no-audit
+      - name: Install Dependencies
+        run: npm ci --cache .npm --prefer-offline
       
       - name: Build 3Dmol.js
         run: npm run build
