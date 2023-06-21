@@ -169,7 +169,7 @@ export function getPropertyRange(atomlist, prop) {
 };
 
 
-// Adapted from https://stackoverflow.com/questions/3969475/javascript-pause-settimeout
+//adapted from https://stackoverflow.com/questions/3969475/javascript-pause-settimeout
 export class PausableTimer {
     ident: any;
     total_time_run = 0;
@@ -278,25 +278,22 @@ export function specStringToObject(str) {
 
     }
 
-    // Copy/pasting URLs sometimes does this
-    str = str.replace(/%7E/g, '~');
-    
-    // Convert things that look like numbers into numbers
+    str = str.replace(/%7E/, '~'); //copy/pasting urls sometimes does this
+    //convert things that look like numbers into numbers
     var massage = function (val) {
         if (isNumeric(val)) {
-            // Hexadecimal does not parse as float
+            //hexadecimal does not parse as float
             if (Math.floor(parseFloat(val)) == parseInt(val)) {
                 return parseFloat(val);
             }
             else if (val.indexOf('.') >= 0) {
-                // ".7" for example, does not parseInt
-                return parseFloat(val);
+                return parseFloat(val); // ".7" for example, does not parseInt
             }
             else {
                 return parseInt(val);
             }
         }
-        // Boolean conversions
+        //boolean conversions
         else if (val === 'true') {
             return true;
         }
@@ -317,7 +314,7 @@ export function specStringToObject(str) {
         if (vstr) {
             vstr = vstr.replace(/~/g, "=");
             if (vstr.indexOf('=') !== -1) {
-                // Has key=value pairs, must be object
+                //has key=value pairs, must be object
                 var kvs = vstr.split(',');
                 for (var j = 0; j < kvs.length; j++) {
                     var kv = kvs[j].split('=', 2);
@@ -325,12 +322,11 @@ export function specStringToObject(str) {
                 }
             }
             else if (vstr.indexOf(',') !== -1) {
-                // Has multiple values, must list
+                //has multiple values, must list
                 val = vstr.split(',');
             }
             else {
-                // Value itself
-                val = massage(vstr); 
+                val = massage(vstr); //value itself
             }
         }
         ret[f] = val;
