@@ -18,7 +18,7 @@ import {
 } from "./materials";
 import { Matrix4, Vector3, Matrix3 } from "./math";
 import { Mesh, Line, Sprite } from "./objects";
-import { ShaderLib, ShaderUtils } from "./shaders";
+import { Shader, ShaderLib, ShaderUtils, Uniform } from "./shaders";
 import { SpritePlugin } from "./SpritePlugin";
 
 export class Renderer {
@@ -26,7 +26,7 @@ export class Renderer {
   col: any;
   rows: any;
   cols: any;
-  context = null;
+  context = null as RenderingContext;
   devicePixelRatio = 1.0; //set in setSize
   domElement: HTMLCanvasElement;
   autoClear = true;
@@ -57,23 +57,23 @@ export class Renderer {
   // webgl rednering context
   private _gl: WebGLRenderingContext | WebGL2RenderingContext;
   // internal properties
-  private _programs = [];
+  private _programs: any[] = [];
   private _programs_counter = 0;
   private _webglversion = 1;
   // internal state cache
-  private _currentProgram = null;
+  private _currentProgram: Shader = null;
   private _currentMaterialId = -1;
-  private _currentGeometryGroupHash = null;
-  private _currentCamera = null;
+  private _currentGeometryGroupHash: number = null;
+  private _currentCamera: Camera = null ;
   private _geometryGroupCounter = 0;
   // GL state cache
-  private _oldDoubleSided = -1 as number | boolean;
-  private _oldFlipSided = -1 as number | boolean;
-  private _oldBlending = -1;
-  private _oldDepthTest = -1;
-  private _oldDepthWrite = -1;
-  private _oldPolygonOffset = null;
-  private _oldLineWidth = null;
+  private _oldDoubleSided: number | boolean = -1;
+  private _oldFlipSided: number | boolean = -1;
+  private _oldBlending: number | boolean = -1;
+  private _oldDepthTest: number | boolean = -1;
+  private _oldDepthWrite: number | boolean = -1;
+  private _oldPolygonOffset: number = null;
+  private _oldLineWidth: number = null;
   private _viewportWidth = 0;
   private _viewportHeight = 0;
   private _currentWidth = 0;
@@ -120,15 +120,15 @@ export class Renderer {
 
   sprites = new SpritePlugin();
 
-  //screensshader related variables
-  private _screenshader = null;
-  private _vertexattribpos = null;
-  private _screenQuadVBO = null;
+  // ScreenShader related variables
+  private _screenshader = null as Shader;
+  private _vertexattribpos: number = null;
+  private _screenQuadVBO: WebGLBuffer = null;
 
   //framebuffer variables
-  private _fb = null;
-  private _targetTexture = null;
-  private _depthTexture = null;
+  private _fb: WebGLFramebuffer = null;
+  private _targetTexture: WebGLTexture = null;
+  private _depthTexture: WebGLTexture = null;
   private _canvas: any;
   private _precision: any;
   private _alpha: any;
@@ -143,11 +143,11 @@ export class Renderer {
   private _outlineStickImposterMaterial: StickImposterOutlineMaterial;
   private _outlineEnabled: boolean;
   private _extInstanced: any;
-  private _extFragDepth: ReturnType<WebGL2RenderingContext["getExtension"]>;
-  private _extFloatLinear: ReturnType<WebGL2RenderingContext["getExtension"]>;
-  private _extColorBufferFloat: ReturnType<WebGL2RenderingContext["getExtension"]>;
+  private _extFragDepth: Partial<ReturnType<WebGL2RenderingContext["getExtension"]>>;
+  private _extFloatLinear: Partial<ReturnType<WebGL2RenderingContext["getExtension"]>>;
+  private _extColorBufferFloat: Partial<ReturnType<WebGL2RenderingContext["getExtension"]>>;
 
-  constructor(parameters) {
+  constructor(parameters: { antialias?: any; preserveDrawingBuffer?: any; premultipliedAlpha?: any; id?: any; row?: any; col?: any; rows?: any; cols?: any; canvas?: any; containerWidth?: number; containerHeight?: number; precision?: any; alpha?: any; stencil?: any; clearColor?: any; clearAlpha?: any; outline?: any; }) {
     parameters = parameters || {};
     this.row = parameters.row;
     this.col = parameters.col;
@@ -231,14 +231,14 @@ export class Renderer {
     return this._precision;
   }
 
-  setClearColorHex(hex, alpha) {
+  setClearColorHex(hex: number, alpha: number) {
     this._clearColor.setHex(hex);
     this._clearAlpha = alpha;
 
     this._gl.clearColor(this._clearColor.r, this._clearColor.g, this._clearColor.b, this._clearAlpha);
   }
 
-  enableOutline(parameters) {
+  enableOutline(parameters: Record<keyof StickImposterOutlineMaterial, unknown> & { width?: number; pushback?: number; }) {
     this._outlineMaterial = new MeshOutlineMaterial(parameters);
     this._outlineSphereImposterMaterial = new SphereImposterOutlineMaterial(
       parameters
@@ -272,7 +272,7 @@ export class Renderer {
     }
   }
 
-  setSize(width, height) {
+  setSize(width: number, height: number) {
     //zooming (in the browser) changes the pixel ratio and width/height
     this.devicePixelRatio =
       window.devicePixelRatio !== undefined ? window.devicePixelRatio : 1;
@@ -310,7 +310,7 @@ export class Renderer {
     this.initFrameBuffer();
   }
 
-  clear(color, depth, stencil) {
+  clear(color: boolean, depth: boolean, stencil: boolean) {
     var bits = 0;
     if (color === undefined || color) bits |= this._gl.COLOR_BUFFER_BIT;
     if (depth === undefined || depth) bits |= this._gl.DEPTH_BUFFER_BIT;
@@ -318,11 +318,11 @@ export class Renderer {
     this._gl.clear(bits);
   }
 
-  clearTarget(color, depth, stencil) {
+  clearTarget(color: boolean, depth: boolean, stencil: boolean) {
     this.clear(color, depth, stencil);
   }
 
-  setMaterialFaces(material, reflected) {
+  setMaterialFaces(material: { side: number; imposter: any; }, reflected: any) {
     var doubleSided = material.side === DoubleSide;
     var flipSided = material.side === BackSide;
 
@@ -353,7 +353,7 @@ export class Renderer {
     this._gl.cullFace(this._gl.BACK);
   }
 
-  setDepthTest(depthTest) {
+  setDepthTest(depthTest: number | boolean) {
     if (this._oldDepthTest !== depthTest) {
       if (depthTest) {
         this._gl.enable(this._gl.DEPTH_TEST);
@@ -365,14 +365,14 @@ export class Renderer {
     }
   }
 
-  setDepthWrite(depthWrite) {
+  setDepthWrite(depthWrite: number | boolean) {
     if (this._oldDepthWrite !== depthWrite) {
       this._gl.depthMask(depthWrite);
       this._oldDepthWrite = depthWrite;
     }
   }
 
-  setBlending(blending) {
+  setBlending(blending: number | boolean) {
     if (!blending) {
       this._gl.disable(this._gl.BLEND);
     } else {
@@ -392,7 +392,7 @@ export class Renderer {
   // material object after attaching prgm
   // We need to attach appropriate uniform variables to material after shaders
   // have been chosen
-  initMaterial(material, lights, fog, objects) {
+  initMaterial(material: { addEventListener: (arg0: string, arg1: any) => void; shaderID: any; vertexShader: string; fragmentShader: string; uniforms: Uniform; wireframe: any; imposter: any; volumetric: any; program: any; }, lights: any, fog: any, objects: any) {
     material.addEventListener("dispose", this.onMaterialDispose.bind(this));
 
     var parameters, shaderID;
@@ -421,7 +421,7 @@ export class Renderer {
     );
   }
 
-  renderBuffer(camera, lights, fog, material, geometryGroup, object) {
+  renderBuffer(camera: any, lights: any, fog: any, material: MeshOutlineMaterial | SphereImposterOutlineMaterial | StickImposterOutlineMaterial, geometryGroup: { id: number; __webglVertexBuffer: WebGLBuffer; __webglColorBuffer: WebGLBuffer; __webglNormalBuffer: WebGLBuffer; __webglOffsetBuffer: WebGLBuffer; __webglRadiusBuffer: WebGLBuffer; __webglFaceBuffer: WebGLBuffer; radiusArray: string | any[]; lineidx: any; __webglLineBuffer: WebGLBuffer; faceidx: any; vertices: any; }, object: any) {
     if (!material.visible) return;
 
     var program, attributes;
@@ -571,7 +571,7 @@ export class Renderer {
     }
   }
 
-  render(scene, camera, forceClear?) {
+  render(scene: { __lights: any; fog: any; updateMatrixWorld: () => void; __webglObjects: any; }, camera: Camera, forceClear?: undefined) {
     if (camera instanceof Camera === false) {
       console.error("Renderer.render: camera is not an instance of Camera.");
       return;
@@ -872,7 +872,7 @@ export class Renderer {
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
   }
 
-  initWebGLObjects(scene) {
+  initWebGLObjects(scene: { __lights?: any; fog?: any; updateMatrixWorld?: () => void; __webglObjects: any; __webglObjectsImmediate?: any; __webglSprites?: any; __webglFlares?: any; __objectsAdded?: any; __objectsRemoved?: any; }) {
     if (!scene.__webglObjects) {
       scene.__webglObjects = [];
       scene.__webglObjectsImmediate = [];
@@ -915,7 +915,7 @@ export class Renderer {
     return 1;
   }
 
-  getAspect(width, height) {
+  getAspect(width: number, height: number) {
     if (width == undefined || height == undefined) {
       width = this._canvas.width;
       height = this._canvas.height;
@@ -934,7 +934,7 @@ export class Renderer {
     return aspect;
   }
 
-  setTexture(texture, slot, is3D) {
+  setTexture(texture: { needsUpdate: boolean; __webglInit: boolean; addEventListener: (arg0: string, arg1: any) => void; __webglTexture: WebGLTexture; flipY: number | boolean; premultiplyAlpha: number | boolean; unpackAlignment: number | boolean; format: any; type: any; image: any; onUpdate: () => void; }, slot: number, is3D: any) {
     if (texture.needsUpdate) {
       if (!texture.__webglInit) {
         texture.__webglInit = true;
@@ -1024,7 +1024,7 @@ export class Renderer {
     return !this.isWebGL1();
   }
 
-  private enableAttribute(attribute) {
+  private enableAttribute(attribute: number) {
     if (!this._enabledAttributes[attribute]) {
       this._gl.enableVertexAttribArray(attribute);
       this._enabledAttributes[attribute] = true;
@@ -1040,7 +1040,7 @@ export class Renderer {
     }
   }
 
-  private setPolygonOffset(polygonOffset, offsetFactor, offsetUnits) {
+  private setPolygonOffset(polygonOffset: number, offsetFactor: any, offsetUnits: any) {
     if (this._oldPolygonOffset !== polygonOffset) {
       if (polygonOffset) this._gl.enable(this._gl.POLYGON_OFFSET_FILL);
       else this._gl.disable(this._gl.POLYGON_OFFSET_FILL);
@@ -1054,7 +1054,7 @@ export class Renderer {
     }
   }
 
-  private deallocateGeometry(geometry) {
+  private deallocateGeometry(geometry: { __webglInit: any; __webglVertexBuffer: WebGLBuffer; __webglColorBuffer: WebGLBuffer; geometryGroups: any[]; groups: any; }) {
     geometry.__webglInit = undefined;
 
     if (geometry.__webglVertexBuffer !== undefined)
@@ -1085,7 +1085,7 @@ export class Renderer {
     }
   }
 
-  private deallocateMaterial(material) {
+  private deallocateMaterial(material: { program: any; }) {
     var program = material.program;
 
     if (program === undefined) return;
@@ -1136,7 +1136,7 @@ export class Renderer {
     }
   }
 
-  private deallocateTexture(texture) {
+  private deallocateTexture(texture: { image: { __webglTextureCube: WebGLTexture; }; __webglInit: boolean; __webglTexture: WebGLTexture; }) {
     if (texture.image && texture.image.__webglTextureCube) {
       // cube texture
 

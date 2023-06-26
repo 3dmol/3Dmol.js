@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "declarationDir": "build/types",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "outDir": "tmp",
     "module": "esnext",
     "target": "ES2015",
@@ -9,6 +9,7 @@
     "sourceMap": true,
     "declaration": true,
     "suppressImplicitAnyIndexErrors": true,
+    "ignoreDeprecations": "5.0",
     "noUnusedLocals": false,
     "moduleResolution": "node",
     "lib": [
