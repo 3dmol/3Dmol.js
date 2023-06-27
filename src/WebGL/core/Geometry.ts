@@ -17,6 +17,13 @@ export class GeometryGroup {
   lineidx: number = 0;
   __inittedArrays = false;
   useOffset: unknown;
+  __webglVertexBuffer: WebGLBuffer;
+  __webglColorBuffer: WebGLBuffer;
+  __webglNormalBuffer: WebGLBuffer;
+  __webglOffsetBuffer: WebGLBuffer;
+  __webglRadiusBuffer: WebGLBuffer;
+  __webglFaceBuffer: WebGLBuffer;
+  __webglLineBuffer: WebGLBuffer;
 
   constructor(id = 0) {
     this.id = id;

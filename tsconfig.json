@@ -35,5 +35,6 @@
       "./src/WebGL/shaders/shaders.d.ts"
     ],
     "out": "doc/typescript"
-  }
+  },
+  "skipLibCheck": true,
 }

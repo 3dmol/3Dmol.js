@@ -9,9 +9,10 @@ import {
   RGBAFormat,
   NearestFilter,
 } from "./constants/TextureConstants";
-import { Light } from "./core";
+import { GeometryGroup, Light, Scene } from "./core";
 import { Color } from "../colors";
 import {
+  Material,
   MeshOutlineMaterial,
   SphereImposterOutlineMaterial,
   StickImposterOutlineMaterial,
@@ -92,29 +93,29 @@ export class Renderer {
     ambient: [0, 0, 0],
     directional: {
       length: 0,
-      colors: [],
-      positions: [],
+      colors: Color,
+      positions: Array,
     },
     point: {
       length: 0,
-      colors: [],
-      positions: [],
-      distances: [],
+      colors: Color,
+      positions: Array,
+      distances: Array,
     },
     spot: {
       length: 0,
-      colors: [],
-      positions: [],
-      distances: [],
-      directions: [],
-      anglesCos: [],
-      exponents: [],
+      colors: Color,
+      positions: Array,
+      distances: Array,
+      directions: Array,
+      anglesCos: Array,
+      exponents: Array,
     },
     hemi: {
       length: 0,
-      skyColors: [],
-      groundColors: [],
-      positions: [],
+      skyColors: Color,
+      groundColors: Color,
+      positions: Array,
     },
   };
 
@@ -365,7 +366,7 @@ export class Renderer {
     }
   }
 
-  setDepthWrite(depthWrite: number | boolean) {
+  setDepthWrite(depthWrite: boolean) {
     if (this._oldDepthWrite !== depthWrite) {
       this._gl.depthMask(depthWrite);
       this._oldDepthWrite = depthWrite;
@@ -404,7 +405,12 @@ export class Renderer {
       material.vertexShader = shader.vertexShader;
       material.fragmentShader = shader.fragmentShader;
       material.uniforms = ShaderUtils.clone(shader.uniforms);
-      // TODO: set material uniforms to shader uniform variables
+      // Set material uniforms to shader uniform variables
+      for (var uniformName in material.uniforms) {
+        if (shader.uniforms.hasOwnProperty(uniformName)) {
+          shader.uniforms[uniformName].value = material.uniforms[uniformName].value;
+        }
+      }
     }
 
     parameters = {
@@ -426,8 +432,7 @@ export class Renderer {
 
     var program, attributes;
 
-    // Sets up proper vertex and fragment shaders and attaches them to webGL
-    // program
+    // Sets up proper vertex and fragment shaders and attaches them to webGL program
     // Also sets appropriate uniform variables
     program = this.setProgram(camera, lights, fog, material, object, this);
     if(!program) return;
@@ -444,8 +449,7 @@ export class Renderer {
       updateBuffers = true;
     }
 
-    // rebind shader attributes to appropriate (and already initialized) gl
-    // buffers
+    // Rebind shader attributes to appropriate (and already initialized) gl buffers
     if (updateBuffers) {
       this.disableAttributes();
 
@@ -858,7 +862,7 @@ export class Renderer {
     this._currentProgram = this._screenshader;
     // disable depth test
     this.setDepthTest(-1);
-    this.setDepthWrite(-1);
+    this.setDepthWrite(false);
 
     // bind vertexarray buffer and texture
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._screenQuadVBO);
@@ -1151,7 +1155,7 @@ export class Renderer {
     }
   }
 
-  private onGeometryDispose(event) {
+  private onGeometryDispose(event: { target: any; }) {
     var geometry = event.target;
     geometry.removeEventListener("dispose", this.onGeometryDispose);
 
@@ -1160,7 +1164,7 @@ export class Renderer {
     this.info.memory.geometries--;
   }
 
-  private onTextureDispose(event) {
+  private onTextureDispose(event: { target: any; }) {
     var texture = event.target;
 
     texture.removeEventListener("dispose", this.onTextureDispose);
@@ -1170,7 +1174,7 @@ export class Renderer {
     this.info.memory.textures--;
   }
 
-  private onMaterialDispose(event) {
+  private onMaterialDispose(event: { target: any; }) {
     var material = event.target;
     material.removeEventListener("dispose", this.onMaterialDispose);
 
@@ -1178,7 +1182,7 @@ export class Renderer {
   }
 
   // Compile and return shader
-  private getShader(type, str) {
+  private getShader(type: string, str: string) {
     var shader;
 
     if (!this.isWebGL1() && !str.startsWith("#version")) {
@@ -1214,7 +1218,7 @@ export class Renderer {
 
   // Compile appropriate shaders (if necessary) from source code and attach to
   // gl program.
-  private buildProgram(fragmentShader, vertexShader, uniforms, parameters) {
+  private buildProgram(fragmentShader: string, vertexShader: string, uniforms: Record<string, any>, parameters: { [x: string]: any; wireframe?: any; fragdepth?: any; volumetric?: any; }) {
     var p, pl, program, code;
     var chunks = [];
 
@@ -1344,7 +1348,7 @@ export class Renderer {
     return program;
   }
 
-  private setProgram(camera, lights, fog, material, object, renderer) {
+  private setProgram(camera: Camera, lights: Light, fog: { color: any; near: any; far: any; }, material: any | Material, object: { _modelViewMatrix: Matrix4; _normalMatrix: { elements: Iterable<number>; }; material: { texmatrix: { elements: any; }; unit: number; maxdepth: number; transfermax: any; transfermin: any; subsamples: any; transferfn: any; map: any; }; }, renderer: this) {
     if (material.needsUpdate) {
       if (material.program) this.deallocateMaterial(material);
 
@@ -1507,7 +1511,7 @@ export class Renderer {
 
   // Objects adding
 
-  private addObject(object, scene) {
+  private addObject(object: Texture.properties, scene: { fog?: any; updateMatrixWorld?: () => void; }) {
     var g, gl, geometry, material, geometryGroup;
 
     if (!object.__webglInit) {
@@ -1567,7 +1571,7 @@ export class Renderer {
     }
   }
 
-  private updateObject(object) {
+  private updateObject(object: { geometry: any; }) {
     var geometry = object.geometry,
       geometryGroup;
 
@@ -1594,7 +1598,7 @@ export class Renderer {
     }
   }
 
-  private removeObject(object, scene) {
+  private removeObject(object: Mesh | Line | Sprite, scene: { fog?: any; updateMatrixWorld?: () => void; }) {
     if (object instanceof Mesh || object instanceof Line)
       this.removeInstances(scene.__webglObjects, object);
     else if (object instanceof Sprite)
@@ -1603,19 +1607,19 @@ export class Renderer {
     object.__webglActive = false;
   }
 
-  private removeInstances(objList, object) {
+  private removeInstances(objList: any[], object: Mesh | Line) {
     for (var o = objList.length - 1; o >= 0; --o) {
       if (objList[o].object === object) objList.splice(o, 1);
     }
   }
 
-  private removeInstancesDirect(objList, object) {
+  private removeInstancesDirect(objList: any[], object: Sprite) {
     for (var o = objList.length - 1; o >= 0; --o) {
       if (objList[o] === object) objList.splice(o, 1);
     }
   }
 
-  private unrollBufferMaterial(globject) {
+  private unrollBufferMaterial(globject: { object: any; opaque: any; transparent: any; volumetric: any; blank: any; }) {
     var object = globject.object;
     var material = object.material;
 
@@ -1639,7 +1643,7 @@ export class Renderer {
     }
   }
 
-  private setBuffers(geometryGroup, hint) {
+  private setBuffers(geometryGroup: GeometryGroup, hint: number) {
     var vertexArray = geometryGroup.vertexArray;
     var colorArray = geometryGroup.colorArray;
 
@@ -1699,7 +1703,7 @@ export class Renderer {
   // Creates appropriate gl buffers for geometry chunk
   // TODO: do we need line buffer for mesh objects?
   // Also, can we integrate this with createLineBuffers?
-  private createMeshBuffers(geometryGroup) {
+  private createMeshBuffers(geometryGroup: GeometryGroup) {
     if (geometryGroup.radiusArray) {
       geometryGroup.__webglRadiusBuffer = this._gl.createBuffer();
     }
@@ -1716,14 +1720,14 @@ export class Renderer {
     this.info.memory.geometries++;
   }
 
-  private createLineBuffers(geometry) {
+  private createLineBuffers(geometry: GeometryGroup) {
     geometry.__webglVertexBuffer = this._gl.createBuffer();
     geometry.__webglColorBuffer = this._gl.createBuffer();
 
     this.info.memory.geometries++;
   }
 
-  private addBuffer(objlist, buffer, object) {
+  private addBuffer(objlist: { buffer: any; object: any; opaque: any; transparent: any; }[], buffer: GeometryGroup, object: Mesh | Line) {
     objlist.push({
       buffer: buffer,
       object: object,
@@ -1732,7 +1736,7 @@ export class Renderer {
     });
   }
 
-  private setupMatrices(object, camera) {
+  private setupMatrices(object: { _modelViewMatrix: { multiplyMatrices: (arg0: any, arg1: any) => void; }; matrixWorld: any; _normalMatrix: { getInverse: (arg0: any) => void; transpose: () => void; }; }, camera: Camera) {
     object._modelViewMatrix.multiplyMatrices(
       camera.matrixWorldInverse,
       object.matrixWorld
@@ -1743,11 +1747,11 @@ export class Renderer {
   }
 
   // Fallback filters for non-power-of-2 textures
-  private filterFallback(filter) {
+  private filterFallback(filter: any) {
     return this._gl.LINEAR;
   }
 
-  private setTextureParameters(textureType, texture) {
+  private setTextureParameters(textureType: number, texture: { needsUpdate?: boolean; addEventListener?: (arg0: string, arg1: any) => void; flipY?: number | boolean; premultiplyAlpha?: number | boolean; unpackAlignment?: number | boolean; format?: any; type?: any; image?: any; onUpdate?: () => void; magFilter?: any; minFilter?: any; }) {
     if (textureType == this._gl.TEXTURE_2D) {
       this._gl.texParameteri(textureType, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
       this._gl.texParameteri(textureType, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
@@ -1780,7 +1784,7 @@ export class Renderer {
 
   // Map constants to WebGL constants
 
-  private paramToGL(p) {
+  private paramToGL(p: number) {
     if (p === UnsignedByteType) return this._gl.UNSIGNED_BYTE;
     if (p === RGBAFormat) return this._gl.RGBA;
     if (p === NearestFilter) return this._gl.NEAREST;
@@ -1788,7 +1792,7 @@ export class Renderer {
     return 0;
   }
 
-  private setupLights(program, lights) {
+  private setupLights(program: any, lights: any) {
     var l,
       ll,
       light,
@@ -1911,14 +1915,14 @@ export class Renderer {
 
   // rendering
   private renderObjects(
-    renderList,
-    reverse,
-    materialType,
-    camera,
-    lights,
-    fog,
-    useBlending,
-    material
+    renderList: string | any[],
+    reverse: boolean,
+    materialType: string,
+    camera: Camera,
+    lights: any,
+    fog: any,
+    useBlending: boolean,
+    material: MeshOutlineMaterial | SphereImposterOutlineMaterial | StickImposterOutlineMaterial
   ) {
     var webglObject, object, buffer, material, start, end, delta;
 
@@ -1997,7 +2001,7 @@ export class Renderer {
     }
   }
 
-  private renderSprites(scene, camera, inFront) {
+  private renderSprites(scene: Scene, camera: Camera, inFront: boolean) {
     // Reset state once regardless
     // This should also fix cartoon render bug (after transparent surface
     // render)

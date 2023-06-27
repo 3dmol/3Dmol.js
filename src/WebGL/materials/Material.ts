@@ -3,6 +3,7 @@ import { EventDispatcher } from "../core";
 import type { Texture } from "../core";
 import { Vector2, Vector3 } from "../math";
 import { Color } from "../../colors";
+import { Sphere } from "WebGL/shapes";
 /*
  * Line and Mesh material types
  * @constructor
@@ -34,6 +35,11 @@ export class Material extends EventDispatcher {
   visible = true;
   needsUpdate = true;
   outline = false;
+  wireframe: any;
+  shaderID = null as string | null;
+  wireframeLinewidth?: number;
+  linewidth?: number;
+  sphere?: Sphere;
 
   setValues(
     values: Partial<Record<keyof Material, any>> = {} as any
