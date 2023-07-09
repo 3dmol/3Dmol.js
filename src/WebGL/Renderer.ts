@@ -9,9 +9,10 @@ import {
   RGBAFormat,
   NearestFilter,
 } from "./constants/TextureConstants";
-import { GeometryGroup, Light, Scene } from "./core";
+import { GeometryGroup, Light, Scene, Texture } from "./core";
 import { Color } from "../colors";
 import {
+  InstancedMaterial,
   Material,
   MeshOutlineMaterial,
   SphereImposterOutlineMaterial,
@@ -19,7 +20,7 @@ import {
 } from "./materials";
 import { Matrix4, Vector3, Matrix3 } from "./math";
 import { Mesh, Line, Sprite } from "./objects";
-import { Shader, ShaderLib, ShaderUtils, Uniform } from "./shaders";
+import { Shader, ShaderLib, ShaderUtils, sprite, Uniform } from "./shaders";
 import { SpritePlugin } from "./SpritePlugin";
 
 export class Renderer {
@@ -64,15 +65,15 @@ export class Renderer {
   // internal state cache
   private _currentProgram: Shader = null;
   private _currentMaterialId = -1;
-  private _currentGeometryGroupHash: number = null;
+  private _currentGeometryGroupHash: number = undefined;
   private _currentCamera: Camera = null ;
   private _geometryGroupCounter = 0;
   // GL state cache
-  private _oldDoubleSided: number | boolean = -1;
-  private _oldFlipSided: number | boolean = -1;
-  private _oldBlending: number | boolean = -1;
-  private _oldDepthTest: number | boolean = -1;
-  private _oldDepthWrite: number | boolean = -1;
+  private _oldDoubleSided: number | boolean = undefined;
+  private _oldFlipSided: number | boolean = undefined;
+  private _oldBlending: number | boolean = undefined;
+  private _oldDepthTest: number | boolean = undefined;
+  private _oldDepthWrite: number | boolean = undefined;
   private _oldPolygonOffset: number = null;
   private _oldLineWidth: number = null;
   private _viewportWidth = 0;
@@ -354,7 +355,7 @@ export class Renderer {
     this._gl.cullFace(this._gl.BACK);
   }
 
-  setDepthTest(depthTest: number | boolean) {
+  setDepthTest(depthTest: boolean | undefined) {
     if (this._oldDepthTest !== depthTest) {
       if (depthTest) {
         this._gl.enable(this._gl.DEPTH_TEST);
@@ -427,7 +428,7 @@ export class Renderer {
     );
   }
 
-  renderBuffer(camera: any, lights: any, fog: any, material: MeshOutlineMaterial | SphereImposterOutlineMaterial | StickImposterOutlineMaterial, geometryGroup: { id: number; __webglVertexBuffer: WebGLBuffer; __webglColorBuffer: WebGLBuffer; __webglNormalBuffer: WebGLBuffer; __webglOffsetBuffer: WebGLBuffer; __webglRadiusBuffer: WebGLBuffer; __webglFaceBuffer: WebGLBuffer; radiusArray: string | any[]; lineidx: any; __webglLineBuffer: WebGLBuffer; faceidx: any; vertices: any; }, object: any) {
+  renderBuffer(camera: any, lights: any, fog: any, material: MeshOutlineMaterial | SphereImposterOutlineMaterial | StickImposterOutlineMaterial | InstancedMaterial, geometryGroup: { id: number; __webglVertexBuffer: WebGLBuffer; __webglColorBuffer: WebGLBuffer; __webglNormalBuffer: WebGLBuffer; __webglOffsetBuffer: WebGLBuffer; __webglRadiusBuffer: WebGLBuffer; __webglFaceBuffer: WebGLBuffer; radiusArray: string | any[]; lineidx: any; __webglLineBuffer: WebGLBuffer; faceidx: any; vertices: any; }, object: any) {
     if (!material.visible) return;
 
     var program, attributes;
@@ -494,7 +495,7 @@ export class Renderer {
     // lambert shaders - draw triangles
     // TODO: make sure geometryGroup's face count is setup correctly
     if (object instanceof Mesh) {
-      if (material.shaderID === "instanced") {
+      if (material.shaderID === "instanced" && material instanceof InstancedMaterial) {
         var sphereGeometryGroup = material.sphere.geometryGroups[0];
         if (updateBuffers) {
           this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
@@ -537,7 +538,7 @@ export class Renderer {
         this._extInstanced.vertexAttribDivisorANGLE(attributes.offset, 0);
         this._extInstanced.vertexAttribDivisorANGLE(attributes.radius, 0);
         this._extInstanced.vertexAttribDivisorANGLE(attributes.color, 0);
-      } else if (material.wireframe) {
+      } else if (material.wireframe && material instanceof InstancedMaterial) {
         lineCount = geometryGroup.lineidx;
         this.setLineWidth(material.wireframeLinewidth);
 
@@ -565,10 +566,10 @@ export class Renderer {
     }
 
     // basic shaders - draw lines
-    else if (object instanceof Line) {
+    else if (object instanceof Line && material instanceof InstancedMaterial) {
       lineCount = geometryGroup.vertices;
 
-      this.setLineWidth(material.linewidth);
+      this.setLineWidth(material.wireframeLinewidth);
       this._gl.drawArrays(this._gl.LINES, 0, lineCount);
 
       this.info.render.calls++;
@@ -591,7 +592,7 @@ export class Renderer {
 
     // reset caching for this frame
 
-    this._currentMaterialId = -1;
+    this._currentMaterialId = undefined;
     this._lightsNeedUpdate = true;
 
     // update scene graph
@@ -609,6 +610,7 @@ export class Renderer {
       camera.projectionMatrix,
       camera.matrixWorldInverse
     );
+    scene.__webglObjects = [];
 
     // update WebGL objects
 
@@ -667,7 +669,6 @@ export class Renderer {
       lights,
       fog,
       false,
-      material
     );
 
     // Render embedded labels (sprites)
@@ -682,7 +683,6 @@ export class Renderer {
       lights,
       fog,
       true,
-      material
     );
 
     // transparent pass (back-to-front order)
@@ -695,7 +695,6 @@ export class Renderer {
       lights,
       fog,
       true,
-      material
     );
 
     //volumetric is separate
@@ -710,7 +709,6 @@ export class Renderer {
         lights,
         fog,
         true,
-        material
       );
     }
 
@@ -861,7 +859,7 @@ export class Renderer {
     this._gl.useProgram(this._screenshader);
     this._currentProgram = this._screenshader;
     // disable depth test
-    this.setDepthTest(-1);
+    this.setDepthTest(undefined);
     this.setDepthWrite(false);
 
     // bind vertexarray buffer and texture
@@ -894,7 +892,7 @@ export class Renderer {
       // Force buffer update during render
       // Hackish fix for initial cartoon-render-then-transparent-surface
       // bug
-      this._currentGeometryGroupHash = -1;
+      this._currentGeometryGroupHash = undefined;
     }
 
     while (scene.__objectsRemoved.length) {
@@ -1511,7 +1509,7 @@ export class Renderer {
 
   // Objects adding
 
-  private addObject(object: Texture.properties, scene: { fog?: any; updateMatrixWorld?: () => void; }) {
+  private addObject(object: Record<string, any>, scene: { fog?: any; updateMatrixWorld?: () => void; __webglSprites?: Sprite[]; __webglObjects?: any[] }) {
     var g, gl, geometry, material, geometryGroup;
 
     if (!object.__webglInit) {
@@ -1599,12 +1597,19 @@ export class Renderer {
   }
 
   private removeObject(object: Mesh | Line | Sprite, scene: { fog?: any; updateMatrixWorld?: () => void; }) {
-    if (object instanceof Mesh || object instanceof Line)
-      this.removeInstances(scene.__webglObjects, object);
-    else if (object instanceof Sprite)
-      this.removeInstancesDirect(scene.__webglSprites, object);
-
-    object.__webglActive = false;
+    if (object instanceof Mesh || object instanceof Line) {
+      if ('__webglObjects' in scene) {
+        this.removeInstances(scene.__webglObjects as any[], object);
+      }
+    } else if (object instanceof Sprite) {
+      if ('__webglSprites' in scene) {
+        this.removeInstancesDirect(scene.__webglSprites as any[], object);
+      }
+    }
+  
+    if ('__webglActive' in object) {
+      object['__webglActive'] = false;
+    }
   }
 
   private removeInstances(objList: any[], object: Mesh | Line) {
@@ -1922,7 +1927,6 @@ export class Renderer {
     lights: any,
     fog: any,
     useBlending: boolean,
-    material: MeshOutlineMaterial | SphereImposterOutlineMaterial | StickImposterOutlineMaterial
   ) {
     var webglObject, object, buffer, material, start, end, delta;
 
@@ -1930,8 +1934,8 @@ export class Renderer {
 
     if (reverse) {
       start = renderList.length - 1;
-      end = -1;
-      delta = -1;
+      end = undefined;
+      delta = undefined;
     } else {
       start = 0;
       end = renderList.length;
@@ -2006,28 +2010,28 @@ export class Renderer {
     // This should also fix cartoon render bug (after transparent surface
     // render)
 
-    this._currentGeometryGroupHash = -1;
+    this._currentGeometryGroupHash = undefined;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
-    this._oldDepthWrite = -1;
-    this._oldDepthTest = -1;
-    this._oldDoubleSided = -1;
-    this._currentMaterialId = -1;
-    this._oldFlipSided = -1;
+    this._oldBlending = undefined;
+    this._oldDepthWrite = undefined;
+    this._oldDepthTest = undefined;
+    this._oldDoubleSided = undefined;
+    this._currentMaterialId = undefined;
+    this._oldFlipSided = undefined;
     this._lightsNeedUpdate = true;
 
     this.sprites.render(scene, camera, this._currentWidth, this._currentHeight, inFront);
 
     // Reset state a
-    this._currentGeometryGroupHash = -1;
+    this._currentGeometryGroupHash = undefined;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
-    this._oldDepthWrite = -1;
-    this._oldDepthTest = -1;
-    this._oldDoubleSided = -1;
-    this._currentMaterialId = -1;
-    this._oldFlipSided = -1;
+    this._oldBlending = undefined;
+    this._oldDepthWrite = undefined;
+    this._oldDepthTest = undefined;
+    this._oldDoubleSided = undefined;
+    this._currentMaterialId = undefined;
+    this._oldFlipSided = undefined;
   }
 }

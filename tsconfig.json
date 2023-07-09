@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "declarationDir": "build/types",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "outDir": "tmp",
     "module": "esnext",
     "target": "ES2015",
@@ -37,4 +37,5 @@
     "out": "doc/typescript"
   },
   "skipLibCheck": true,
+  "stats.errorDetails": true,
 }

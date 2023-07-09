@@ -35,11 +35,6 @@ export class Material extends EventDispatcher {
   visible = true;
   needsUpdate = true;
   outline = false;
-  wireframe: any;
-  shaderID = null as string | null;
-  wireframeLinewidth?: number;
-  linewidth?: number;
-  sphere?: Sphere;
 
   setValues(
     values: Partial<Record<keyof Material, any>> = {} as any
