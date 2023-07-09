@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: '3Dmol.js: molecular visualization with WebGL'
+message: If you use 3Dmol.js, please cite our Bioinformatics paper
+type: software
+authors:
+  - given-names: David
+    family-names: Koes
+    email: dkoes@pitt.edu
+    affiliation: University of Pittsburgh
+    orcid: 'https://orcid.org/0000-0002-6892-6614'
+  - given-names: Nicholas
+    family-names: Rego
+    affiliation: University of Pittsburgh
+    orcid: 'https://orcid.org/0000-0002-3164-6803'
+identifiers:
+  - type: doi
+    value: 10.1093/bioinformatics/btu829
+repository-code: 'https://github.com/3dmol/3Dmol.js'
+url: 'https://3dmol.org/'
+abstract: >-
+  3Dmol.js is a modern, object-oriented JavaScript library
+  that uses the latest web technologies to provide
+  interactive, hardware-accelerated three-dimensional
+  representations of molecular data without the need to
+  install browser plugins or Java. 3Dmol.js provides a full
+  featured API for developers as well as a straightforward
+  declarative interface that lets users easily share and
+  embed molecular data in websites.
+license: BSD-3-Clause
