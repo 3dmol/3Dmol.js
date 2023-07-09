@@ -3,18 +3,19 @@
 import { FrontSide } from "../constants/Sides";
 import { Color } from "../../colors";
 import { Material } from "./Material";
+import { Texture } from "WebGL/core";
 
 /* @constructor */
 export class VolumetricMaterial extends Material {
   transparent = false;
   volumetric = true;
   color = new Color(0xffffff);
-  transferfn = null;
-  map = undefined;
-  extent = [];
+  transferfn: any = null;
+  map: Texture = undefined;
+  extent: any[] = [];
   maxdepth = 100.0;
   unit = 0;
-  texmatrix = null;
+  texmatrix: any = null;
   transfermin = -1.0;
   transfermax = 1.0;
   subsamples = 5.0;

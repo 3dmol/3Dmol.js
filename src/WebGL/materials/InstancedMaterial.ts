@@ -3,6 +3,7 @@ import { Shading } from "../constants/Shading";
 import { Color } from "../../colors";
 import { Vector3 } from "../math";
 import { Material } from "./Material";
+import { Texture } from "WebGL/core";
 
 export class InstancedMaterial extends Material {
   combine: any;
@@ -13,13 +14,13 @@ export class InstancedMaterial extends Material {
   ambient = new Color(0xfffff);
   emissive = new Color(0x000000);
 
-  //TODO: Which of these instance variables do I really need?
+  // TODO: Which of these instance variables do I really need?
   wrapAround = false;
   wrapRGB = new Vector3(1, 1, 1);
-  map = undefined;
-  lightMap = null;
-  specularMap = null;
-  envMap = null;
+  map: Texture = undefined;
+  lightMap: any = null;
+  specularMap: any = null;
+  envMap: any = null;
   reflectivity = 1;
   refractionRatio = 0.98;
   fog = true;
@@ -31,7 +32,7 @@ export class InstancedMaterial extends Material {
   shaderID = "instanced";
   vertexColors = Coloring.NoColors;
   skinning = false;
-  sphere = null;
+  sphere: { geometryGroups: any[]; } = null;
   constructor(parameters?: any) {
     super();
     this.setValues(parameters);

@@ -3,6 +3,7 @@ import { Shading } from "./../constants/Shading";
 import { Color } from "../../colors";
 import { Vector3 } from "../math";
 import { Material } from "./Material";
+import { Texture } from "WebGL/core";
 //Imposter material
 /* @constructor */
 export class ImposterMaterial extends Material {
@@ -14,13 +15,13 @@ export class ImposterMaterial extends Material {
   emissive = new Color(0x000000);
   imposter = true;
 
-  //TODO: Which of these instance variables do I really need?
+  // TODO: Which of these instance variables do I really need?
   wrapAround = false;
   wrapRGB = new Vector3(1, 1, 1);
-  map = undefined;
-  lightMap = null;
-  specularMap = null;
-  envMap = null;
+  map: any = undefined;
+  lightMap: any = null;
+  specularMap: any = null;
+  envMap: any = null;
   reflectivity = 1;
   refractionRatio = 0.98;
   fog = true;
