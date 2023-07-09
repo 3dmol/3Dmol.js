@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 20
 
-      # As our package has a postInstall script, we dont need a explicit job for that
+      # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
       - name: Install & Build Dependencies
         run: npm install 
 
