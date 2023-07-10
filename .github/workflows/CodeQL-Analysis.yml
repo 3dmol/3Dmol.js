@@ -2,10 +2,14 @@ name: "CodeQL"
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
+  push:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -27,20 +31,24 @@ jobs:
 
     - uses: actions/setup-node@v3
       with:
-        cache: npm
         node-version: 20
+        cache: 'npm'
 
-    - name: Cache NPM Dependencies
-      id: cache-npm
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-node-modules
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: bash
+      run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+    - uses: actions/cache@v3
+      id: npm-cache
       with:
-        path: node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
 
     - name: Install Dependencies
-      run: npm install
+      run: npm ci --cache .npm --prefer-offline
 
     - name: Build 3dmol.js
       run: |
@@ -50,6 +58,7 @@ jobs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
+        config-file: ./.github/codeql/codeql-config.yml
         languages: ${{ matrix.language }}
 
     - name: Perform CodeQL Analysis

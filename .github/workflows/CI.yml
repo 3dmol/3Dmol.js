@@ -1,11 +1,11 @@
 name: 3Dmol.js CI
 
 on:
+  workflow_dispatch:
   pull_request:
+    branches: [master]
   push:
     branches: [master]
-  workflow_dispatch:
-  
 
 jobs:
   build_and_test:
@@ -16,18 +16,30 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: Install Dependencies
-        run: npm install 
+        run: npm ci --cache .npm --prefer-offline
       
       - name: Build 3Dmol.js
-        run: |
-          npm run build:dev
-          npm run build:prod
-          npm run generate:tests
+        run: npm run build
 
       - name: Test    
-        run: npm test
+        run: npm run test:ci
 
       - name: Coverage
         env:
