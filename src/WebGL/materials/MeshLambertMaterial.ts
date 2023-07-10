@@ -5,7 +5,6 @@ import { Material } from "./Material";
 
 import { Color } from "../../colors";
 import { Vector3 } from "../math";
-import { Texture } from "WebGL/core";
 
 /* @constructor */
 export class MeshLambertMaterial extends Material {
@@ -17,13 +16,13 @@ export class MeshLambertMaterial extends Material {
   ambient = new Color(0xfffff);
   emissive = new Color(0x000000);
 
-  // TODO: Which of these instance variables do I really need?
+  //TODO: Which of these instance variables do I really need?
   wrapAround = false;
   wrapRGB = new Vector3(1, 1, 1);
-  map: Texture = undefined;
-  lightMap: any = null;
-  specularMap: any = null;
-  envMap: any = null;
+  map = undefined;
+  lightMap = null;
+  specularMap = null;
+  envMap = null;
   reflectivity = 1;
   refractionRatio = 0.98;
   fog = true;
