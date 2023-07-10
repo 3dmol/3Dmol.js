@@ -18,7 +18,7 @@ jobs:
           node-version: 20
 
       # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
-      - name: Install & Build Dependencies
+      - name: Install Dependencies & Build 3dmol.js
         run: npm install 
 
       - name: Test    
