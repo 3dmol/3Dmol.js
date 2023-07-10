@@ -16,5 +16,4 @@ export const uniforms = {
     projinv: { type: 'mat4', value: [] as Matrix4[] },
     transfermin: {type: 'f', value: -0.2 },
     transfermax: {type: 'f', value: 0.2},
-
 }
