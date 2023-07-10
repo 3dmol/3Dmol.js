@@ -1,4 +1,3 @@
-import { Matrix4 } from "WebGL/math";
 import { Color } from "../../../../colors";
 
 export const uniforms = {
@@ -12,8 +11,8 @@ export const uniforms = {
     step: { type: 'f', value: 1.0 }, //length of a step
     maxdepth: {type: 'f',value: 100.0}, //how far to step along ray before stopping
     subsamples: { type: 'f', value: 5.0}, //how many substeps to take
-    textmat: { type: 'mat4', value: [] as Matrix4[]  },
-    projinv: { type: 'mat4', value: [] as Matrix4[] },
+    textmat: { type: 'mat4', value: []},
+    projinv: { type: 'mat4', value: []},
     transfermin: {type: 'f', value: -0.2 },
     transfermax: {type: 'f', value: 0.2},
 
