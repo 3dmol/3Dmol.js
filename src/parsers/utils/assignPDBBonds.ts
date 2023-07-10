@@ -9,7 +9,7 @@ import { standardResidues } from "./standardResidues";
  * @param {AtomSpec[]}
  *            atomsarray
  */
-export function assignPDBBonds(atomsarray) {
+export function assignPDBBonds(atomsarray: string | any[]) {
   // assign bonds - yuck, can't count on connect records
   var protatoms: any[] = [];
   var hetatoms: any[] = [];

@@ -6,9 +6,10 @@ import { isEmpty } from "./isEmpty";
 import { processSymmetries } from "./processSymmetries";
 import { assignPDBBonds } from "./assignPDBBonds";
 import { validateBonds } from "./validateBonds";
+import { ParserOptionsSpec } from "parsers/ParserOptionsSpec";
 
 //return one model worth of pdb, returns atoms, modelData, and remaining lines
-export function getSinglePDB(lines, options, sslookup) {
+export function getSinglePDB(lines: any[], options: ParserOptionsSpec, sslookup: { [x: string]: { [x: string]: any; }; hasOwnProperty?: any; }) {
   var atoms: any[] = [];
   var assignbonds =
     options.assignBonds === undefined ? true : options.assignBonds;
