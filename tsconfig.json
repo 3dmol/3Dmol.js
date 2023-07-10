@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
     "declarationDir": "build/types",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "outDir": "tmp",
     "module": "esnext",
     "target": "ES2015",
     "allowJs": true,
     "sourceMap": true,
     "declaration": true,
-    "suppressImplicitAnyIndexErrors": false,
-    "ignoreDeprecations": "5.0",
+    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": false,
     "moduleResolution": "node",
     "lib": [
@@ -35,6 +34,5 @@
       "./src/WebGL/shaders/shaders.d.ts"
     ],
     "out": "doc/typescript"
-  },
-  "skipLibCheck": true,
+  }
 }
