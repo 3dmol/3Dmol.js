@@ -24,7 +24,7 @@ export function conversionMatrix3(
   alpha = (alpha * Math.PI) / 180;
   beta = (beta * Math.PI) / 180;
   gamma = (gamma * Math.PI) / 180;
-  const sqr = (x) => x*x;
+  const sqr = (x: number) => x*x;
   const cosAlpha = Math.cos(alpha);
   const cosBeta = Math.cos(beta);
   const cosGamma = Math.cos(gamma);
