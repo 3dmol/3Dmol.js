@@ -30,10 +30,7 @@ jobs:
         run: npm install --no-audit
       
       - name: Build 3Dmol.js
-        run: |
-          npm run build:dev
-          npm run build:prod
-          npm run generate:tests
+        run: npm run build
 
       - name: Test    
         run: npm test
