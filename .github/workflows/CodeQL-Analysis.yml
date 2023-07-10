@@ -39,13 +39,9 @@ jobs:
         path: node_modules
         key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
-    - name: Install Dependencies
+    # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
+    - name: Install & Build Dependencies
       run: npm install
-
-    - name: Build 3dmol.js
-      run: |
-        npm run build:dev
-        npm run build:prod
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
