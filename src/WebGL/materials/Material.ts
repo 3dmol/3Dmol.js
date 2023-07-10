@@ -3,7 +3,6 @@ import { EventDispatcher } from "../core";
 import type { Texture } from "../core";
 import { Vector2, Vector3 } from "../math";
 import { Color } from "../../colors";
-import { Sphere } from "WebGL/shapes";
 /*
  * Line and Mesh material types
  * @constructor
