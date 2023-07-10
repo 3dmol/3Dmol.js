@@ -1,9 +1,11 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
+
 /*
  * @param {!Array.<string>} lines
  * @param {ParserOptionsSpec} options
  * @returns {!Array.<Array<Object>>}
  */
-var parseV2000 = function (lines, options) {
+var parseV2000 = function (lines: any[], options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   var noH = false;
   if (typeof options.keepH !== "undefined") noH = !options.keepH;
@@ -71,7 +73,7 @@ var parseV2000 = function (lines, options) {
  * @param {ParserOptionsSpec} options
  * @returns {!Array.<!Array<!Object>>}
  */
-var parseV3000 = function (lines, options) {
+var parseV3000 = function (lines: any[], options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   var noH = false;
   if (typeof options.keepH !== "undefined") noH = !options.keepH;
@@ -170,16 +172,16 @@ var parseV3000 = function (lines, options) {
  * @category Parsers
 
  */
-export function SDF(str, options) {
+export function SDF(str: string, options: any) {
   var molformat = "V2000";
   var lines = str.split(/\r?\n|\r/);
   if (lines.length > 3 && lines[3].length > 38) {
-    molformat = lines[3].substr(34, 5);
+    molformat = lines[3].substring(34, 5);
   }
   if (molformat === "V2000") {
     return parseV2000(lines, options);
   } else if (molformat === "V3000") {
     return parseV3000(lines, options);
   }
-  return [[]];
+  return [['']];
 }

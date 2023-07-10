@@ -10,7 +10,7 @@
  * @category Parsers
 
  */
-export function PRMTOP(str /*, options*/) {
+export function PRMTOP(str: string /*, options*/) {
   var atoms = [];
   var atomIndex;
   var count = 0;

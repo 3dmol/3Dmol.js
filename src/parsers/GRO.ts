@@ -11,7 +11,7 @@ import { atomNameToElem } from "./utils/atomNameToElem";
   * @category Parsers
 
  */
-export function GRO(str /*, options*/) {
+export function GRO(str: string /*, options*/) {
   var allatoms: any[][] & Record<string, any> = [];
   var lines = str.split(/\r?\n|\r/);
   while (lines.length > 0) {
@@ -53,7 +53,7 @@ export function GRO(str /*, options*/) {
       var box = last.trim().split(/\s+/);
       if (box.length == 3) {
         for (var b = 0; b < 3; b++) {
-          box[b] = parseFloat(box[b]) * 10.0;
+          (box[b] as any) = parseFloat(box[b]) * 10.0;
         }
         allatoms.box = box;
       }

@@ -3,6 +3,7 @@
 // analysis,
 // otherwise only do analysis of SHEET/HELIX comments are missing
 
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { getSinglePDB } from "./utils/getSinglePDB";
 
 /**
@@ -13,7 +14,7 @@ import { getSinglePDB } from "./utils/getSinglePDB";
  * @category Parsers
  * 
  */
-export function PDB(str, options) {
+export function PDB(str: string, options: ParserOptionsSpec) {
   options = options || {};
   var atoms: any[] & Record<string, any> = []; //a separate list for each model
   var sslookup = {}; //stores SHEET and HELIX info, which is shared across models
