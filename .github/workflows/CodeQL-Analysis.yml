@@ -39,9 +39,11 @@ jobs:
         path: node_modules
         key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
+    # For CodeQL, we don't need to generate tests or doc, hence running only install
     - name: Install Dependencies
-      run: npm install
-
+      run: npm install --ignore-scripts
+      
+    # Build for dev and prod
     - name: Build 3dmol.js
       run: |
         npm run build:dev
