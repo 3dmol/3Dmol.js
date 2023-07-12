@@ -1,3 +1,4 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { assignPDBBonds } from "./utils/assignPDBBonds";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 
@@ -11,7 +12,7 @@ import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
      *            options - noSecondaryStructure (do not compute ss)
     * @category Parsers 
      */
-export function PQR(str, options) {
+export function PQR(str: string, options: ParserOptionsSpec) {
 
       var atoms: any[][] & Record<string, any> = [[]];
       var computeStruct = !options.noSecondaryStructure;

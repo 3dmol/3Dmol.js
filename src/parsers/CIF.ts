@@ -4,7 +4,7 @@ import { ParserOptionsSpec } from './ParserOptionsSpec';
 import { assignBonds } from "./utils/assignBonds";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 import { processSymmetries } from "./utils/processSymmetries";
-import { conversionMatrix3, Matrix4, Vector3,  } from "../WebGL"
+import { conversionMatrix3, Matrix3, Matrix4, Vector3,  } from "../WebGL"
 
 /**
  * @param {string} str
@@ -20,18 +20,18 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
     options.assignBonds === undefined ? true : options.assignBonds;
 
   //coordinate conversion
-  var fractionalToCartesian = function (cmat, x, y, z) {
+  var fractionalToCartesian = function (cmat: Matrix3, x: number, y: number, z: number) {
     return new Vector3(x, y, z).applyMatrix3(cmat);
   };
 
   // Used to handle quotes correctly
-  function splitRespectingQuotes(string, separator) {
+  function splitRespectingQuotes(string: string, separator: string | any[]) {
     var sections: any[] = [];
     var sectionStart = 0;
     var sectionEnd = 0;
     while (sectionEnd < string.length) {
       while (
-        string.substr(sectionEnd, separator.length) !== separator &&
+        string.substring(sectionEnd, separator.length) !== separator &&
         sectionEnd < string.length
       ) {
         // currently does not support escaping quotes
@@ -318,7 +318,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         modelData[modelData.length - 1].symmetries.push(matrix);
       }
     }
-    var parseTerm = function (term) {
+    var parseTerm = function (term: string) {
       var negative = term.match("-");
       term = term.replace(/[-xyz]/g, "");
       var fractionParts = term.split("/");
@@ -342,7 +342,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
           /["' ]/g,
           ""
         );
-        var componentStrings = transform.split(",").map(function (val) {
+        var componentStrings = transform.split(",").map(function (val: string) {
           return val.replace(/-/g, "+-");
         });
         let matrix = new Matrix4(

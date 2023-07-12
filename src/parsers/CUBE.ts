@@ -1,6 +1,7 @@
 import { Vector3, Matrix4 } from "../WebGL";
 import { assignBonds } from "./utils/assignBonds";
 import { anumToSymbol } from "./utils/anumToSymbol";
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 
 /**
      * @param {string}
@@ -10,7 +11,7 @@ import { anumToSymbol } from "./utils/anumToSymbol";
  * @category Parsers
      
 */
-export function CUBE(str, options) {
+export function CUBE(str: string, options: ParserOptionsSpec) {
   options = options || {};
   var atoms: any[][] & Record<string, any> = [[]];
   var lines = str.split(/\r?\n/);
@@ -37,22 +38,22 @@ export function CUBE(str, options) {
   // always assume bohr: openbabel source code
   // always assume angstrom: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
   // we are going to go with n<0 means angstrom - note this is just the first n
-  var convFactor = (lineArr[0] > 0) ? 0.529177 : 1;
+  var convFactor = ((lineArr[0] as any) > 0) ? 0.529177 : 1;
   origin.multiplyScalar(convFactor);
 
-  var nX = Math.abs(lineArr[0]);
+  var nX = Math.abs((lineArr[0] as any));
   var xVec = new Vector3(parseFloat(lineArr[1]),
           parseFloat(lineArr[2]), parseFloat(lineArr[3]))
           .multiplyScalar(convFactor);
 
   lineArr = lines[4].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-  var nY = Math.abs(lineArr[0]);
+  var nY = Math.abs((lineArr[0] as any));
   var yVec = new Vector3(parseFloat(lineArr[1]),
           parseFloat(lineArr[2]), parseFloat(lineArr[3]))
           .multiplyScalar(convFactor);
 
   lineArr = lines[5].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
-  var nZ = Math.abs(lineArr[0]);
+  var nZ = Math.abs((lineArr[0] as any));
   var zVec = new Vector3(parseFloat(lineArr[1]),
           parseFloat(lineArr[2]), parseFloat(lineArr[3]))
           .multiplyScalar(convFactor);
