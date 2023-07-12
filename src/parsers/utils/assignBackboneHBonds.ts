@@ -1,4 +1,4 @@
-// this will identify all hydrogen bonds between backbone
+// This will identify all hydrogen bonds between backbone
 // atoms; assume atom names are correct, only identifies
 // single closest hbond
 export function assignBackboneHBonds(atomsarray: string | any[], hbondCutoff: number) {

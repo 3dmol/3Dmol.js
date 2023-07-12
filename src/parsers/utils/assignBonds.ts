@@ -4,7 +4,7 @@ import { areConnected } from "./areConnected";
  * @param {AtomSpec[]} atoms
  */
 export function assignBonds(atoms: string | any[]) {
-  // assign bonds - yuck, can't count on connect records
+  // Assign bonds - yuck, can't count on connect records
 
   for (var i = 0, n = atoms.length; i < n; i++) {
     // Don't reindex if atoms are already indexed
