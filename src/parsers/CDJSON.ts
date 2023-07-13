@@ -9,7 +9,8 @@ import { ParserOptionsSpec } from "./ParserOptionsSpec";
  * @param {string} str
  * @param {ParserOptionsSpec} options
  * @category Parsers
- */
+*/
+
 export function CDJSON(str: string, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   if (typeof str === "string") {

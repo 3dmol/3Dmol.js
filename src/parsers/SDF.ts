@@ -13,7 +13,7 @@ var parseV2000 = function (lines: any, options: ParserOptionsSpec) {
     var offset = 4;
     if (lines.length < 4 + atomCount + bondCount) break;
 
-    // serial is atom's index in file; index is atoms index in 'atoms'
+    // Serial is atom's index in file; index is atoms index in 'atoms'
     var serialToIndex: number[] = [];
     var start = atoms[atoms.length - 1].length;
     var end = start + atomCount;
@@ -63,11 +63,12 @@ var parseV2000 = function (lines: any, options: ParserOptionsSpec) {
   return atoms;
 };
 
-/*
+/**
  * @param {!Array.<string>} lines
  * @param {ParserOptionsSpec} options
  * @returns {!Array.<!Array<!Object>>}
- */
+*/
+
 var parseV3000 = function (lines: any, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   var noH = false;
@@ -158,6 +159,13 @@ var parseV3000 = function (lines: any, options: ParserOptionsSpec) {
   return atoms;
 };
 
+/**
+ * @param {string}
+ *            str
+ * @param {ParserOptionsSpec}
+ *            options
+ * @category Parsers
+*/
 
 export function SDF(str: string, options: ParserOptionsSpec) {
   var molformat = "V2000";

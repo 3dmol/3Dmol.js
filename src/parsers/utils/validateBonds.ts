@@ -1,4 +1,4 @@
-//make sure bonds are actually two way
+// Make sure bonds are actually two way
 export function validateBonds (atomsarray: string[] | any[], serialToIndex: number[]) {
   for (var i = 0, n = atomsarray.length; i < n; i++) {
       var atom = atomsarray[i];

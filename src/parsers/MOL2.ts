@@ -51,8 +51,15 @@ let SYBYLtoElem:any = {
   'So2':'S'
 };
 
-// parse SYBYL mol2 file from string - assumed to only contain one molecule
-// tag
+// Parse SYBYL mol2 file from string - assumed to only contain one molecule tag
+
+/**
+ * @param {string}
+ *            str
+ * @param {ParserOptionsSpec}
+ *            options
+ * @category Parsers
+*/
 
 export function MOL2(str: string, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string,any> = [[]];

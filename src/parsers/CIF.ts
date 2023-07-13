@@ -1,5 +1,4 @@
 import { ParserOptionsSpec } from './ParserOptionsSpec';
-// puts atoms specified in mmCIF fromat in str into atoms
 
 import { assignBonds } from "./utils/assignBonds";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
@@ -7,11 +6,13 @@ import { processSymmetries } from "./utils/processSymmetries";
 import { conversionMatrix3, Matrix3, Matrix4, Vector3,  } from "../WebGL"
 
 /**
+ * Puts atoms specified in mmCIF fromat in str into atoms
+ * 
  * @param {string} str
  * @param {ParserOptionsSpec} options
  * @category Parsers
+*/
 
- */
 export function CIF(str: string, options: ParserOptionsSpec = {}) {
   var atoms: any[] & Record<string, any> = [];
   var noAssembly = !options.doAssembly; // don't assemble by default

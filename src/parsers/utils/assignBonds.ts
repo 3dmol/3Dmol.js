@@ -1,8 +1,9 @@
 import { areConnected } from "./areConnected";
 
-/*
+/**
  * @param {AtomSpec[]} atoms
- */
+*/
+
 export function assignBonds(atoms: string | any[]) {
   // Assign bonds - yuck, can't count on connect records
 

@@ -1,14 +1,15 @@
-// This is optimized for proteins where it is assumed connected
-// Atoms are on the same or next residue
+// This is optimized for proteins where it is assumed connected atoms are on the same or next residue
 
 import { areConnected } from "./areConnected";
 import { assignBonds } from "./assignBonds";
 import { standardResidues } from "./standardResidues";
 
-/*
+
+/** 
  * @param {AtomSpec[]}
  *            atomsarray
- */
+*/
+
 export function assignPDBBonds(atomsarray: string | any[]) {
   // assign bonds - yuck, can't count on connect records
   var protatoms: any[] = [];

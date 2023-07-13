@@ -4,12 +4,11 @@ import { anumToSymbol } from "./utils/anumToSymbol";
 import { ParserOptionsSpec } from "./ParserOptionsSpec";
 
 /**
-     * @param {string}
-     *            str
-     * @param {ParserOptionsSpec}
-     *            options
+ * @param {string}
+ *            str
+ * @param {ParserOptionsSpec}
+ *            options
  * @category Parsers
-     
 */
 export function CUBE(str: string, options: ParserOptionsSpec) {
   options = options || {};
