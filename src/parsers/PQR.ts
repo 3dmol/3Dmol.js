@@ -2,16 +2,6 @@ import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { assignPDBBonds } from "./utils/assignPDBBonds";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 
-    /**
-     * Parse a pqr file from str and create atoms. A pqr file is assumed to be a
-     * whitespace delimited PDB with charge and radius fields.
-     *
-     * @param {string}
-     *            str
-     * @param {ParserOptionsSpec}
-     *            options - noSecondaryStructure (do not compute ss)
-    * @category Parsers 
-     */
 export function PQR(str: string, options: ParserOptionsSpec) {
 
       var atoms: any[][] & Record<string, any> = [[]];

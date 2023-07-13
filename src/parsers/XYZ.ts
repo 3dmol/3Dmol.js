@@ -1,14 +1,9 @@
 import { ParserOptionsSpec } from './ParserOptionsSpec';
-// read an XYZ file from str and return result
+// Read an XYZ file from str and return result
 
 import { Matrix3 } from "../WebGL";
 import { assignBonds } from "./utils/assignBonds";
 
-/**
- * @param {string} str
- * @param {ParserOptionsSpec} options
- * @category Parsers
- */
 export function XYZ(str: string, options: ParserOptionsSpec) {
   options = options || {};
   var atoms: any[][] & Record<string, any> = [[]];

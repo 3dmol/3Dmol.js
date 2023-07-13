@@ -1,10 +1,5 @@
 import { ParserOptionsSpec } from "./ParserOptionsSpec";
 
-/*
- * @param {!Array.<string>} lines
- * @param {ParserOptionsSpec} options
- * @returns {!Array.<Array<Object>>}
- */
 var parseV2000 = function (lines: any[], options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   var noH = false;

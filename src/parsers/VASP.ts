@@ -1,12 +1,5 @@
 import { Matrix3 } from "../WebGL";
 
-/**
- * @param {string}
- *            str
- * @param {ParserOptionsSpec}
- *            options
- * @category Parsers
- */
 export function VASP(str: string /*,options*/) {
   var atoms: any[][] & Record<string, any> = [[]];
   var lattice: Record<string, number | Float32Array> = {};
