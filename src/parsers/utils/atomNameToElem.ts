@@ -7,7 +7,7 @@ export function atomNameToElem(name: string, nothetero: boolean) {
       elem = 'H'; //workaround weird hydrogen names from MD, note mercury must use lowercase
   }
   if(elem.length > 1) {
-      elem = elem[0].toUpperCase() + elem.substring(1).toLowerCase();   
+      elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();   
       if(typeof(bondTable[elem]) === 'undefined') {
           //not a known element, probably should just use first letter
           elem = elem[0];

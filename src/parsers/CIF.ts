@@ -31,7 +31,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
     var sectionEnd = 0;
     while (sectionEnd < string.length) {
       while (
-        string.substring(sectionEnd, separator.length) !== separator &&
+        string.substr(sectionEnd, separator.length) !== separator &&
         sectionEnd < string.length
       ) {
         // currently does not support escaping quotes
