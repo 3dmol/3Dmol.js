@@ -1,5 +1,6 @@
 import { base64ToArray } from "../utilities";
 import { Matrix4 } from "../WebGL";
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 import { processSymmetries } from "./utils/processSymmetries";
 
@@ -8,12 +9,12 @@ interface MMTFobj {
 }
 declare var MMTF: MMTFobj;
 
-var fromCharCode = function (charCodeArray) {
+var fromCharCode = function (charCodeArray: any) {
     return String.fromCharCode.apply(null, charCodeArray).replace(/\0/g, '');
 };
 
-var convertSS = function (val) {
-    //convert mmtf code to 3dmol code
+var convertSS = function (val: number | boolean) {
+    // Convert mmtf code to 3dmol code
     /*    
       0:  pi helix
       1:  bend
@@ -41,11 +42,13 @@ let mmtfHETATMtypes = new Set([
     "PEPTIDE-LIKE",
     "SACCHARIDE"]);
 
-/** @param bindata - binary UInt8Array buffer or a base64 encoded string
- *  @param ParserOptionsSpec
- *  @category Parsers
+/** 
+ * @param bindata - binary UInt8Array buffer or a base64 encoded string
+ * @param ParserOptionsSpec
+ * @category Parsers
 */
-export function MMTFparser(bindata, options) {
+
+export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
 
     var noH = !options.keepH; // suppress hydrogens by default
     var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
@@ -108,7 +111,7 @@ export function MMTFparser(bindata, options) {
     }
 
     let chainIsPolymer: boolean[] = [];
-    mmtfData.entityList.forEach(entity => {
+    mmtfData.entityList.forEach((entity: { chainIndexList: any[]; type: string; }) => {
         entity.chainIndexList.forEach(ch => {
             chainIsPolymer[ch] = entity.type == "polymer";
         });

@@ -6,9 +6,10 @@ import { isEmpty } from "./isEmpty";
 import { processSymmetries } from "./processSymmetries";
 import { assignPDBBonds } from "./assignPDBBonds";
 import { validateBonds } from "./validateBonds";
+import { ParserOptionsSpec } from "parsers/ParserOptionsSpec";
 
-//return one model worth of pdb, returns atoms, modelData, and remaining lines
-export function getSinglePDB(lines, options, sslookup) {
+// Return one model worth of pdb, returns atoms, modelData, and remaining lines
+export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslookup: { [x: string]: { [x: string]: any; }; hasOwnProperty?: any; }) {
   var atoms: any[] = [];
   var assignbonds =
     options.assignBonds === undefined ? true : options.assignBonds;
@@ -18,18 +19,18 @@ export function getSinglePDB(lines, options, sslookup) {
   var noAssembly = !options.doAssembly; // don't assemble by default
   var selAltLoc = options.altLoc ? options.altLoc : "A"; //default alternate location to select if present
   var modelData: Record<string, any> = { symmetries: [] };
-  var atom;
+  var atom: any;
   var remainingLines = [];
 
   var hasStruct = false;
   var serialToIndex: number[] = []; // map from pdb serial to index in atoms
-  var line;
+  var line: string | string[];
   var seenbonds: Record<any, any> = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
 
   for (let i = 0; i < lines.length; i++) {
     line = lines[i].replace(/^\s*/, ""); // remove indent
     var recordName = line.substr(0, 6);
-    var startChain, startResi, endChain, endResi;
+    var startChain: string, startResi: number, endChain: any, endResi: number;
 
     if (recordName.indexOf("END") == 0) {
       remainingLines = lines.slice(i + 1);
@@ -44,7 +45,7 @@ export function getSinglePDB(lines, options, sslookup) {
       }
       break;
     } else if (recordName == "ATOM  " || recordName == "HETATM") {
-      var resn, chain, resi, icode, x, y, z, hetflag, elem, serial, altLoc, b;
+      var resn: any, chain: any, resi: string | number, icode: string, x: number, y: number, z: number, hetflag: boolean, elem: string | string[], serial: number, altLoc: string, b: number;
       altLoc = line.substr(16, 1);
       if (altLoc != " " && altLoc != selAltLoc && selAltLoc != "*") continue;
       serial = parseInt(line.substr(6, 5));
@@ -169,7 +170,7 @@ export function getSinglePDB(lines, options, sslookup) {
       recordName == "REMARK" &&
       line.substr(13, 5) == "BIOMT"
     ) {
-      var n;
+      var n: number;
       var matrix = new Matrix4();
       for (n = 1; n <= 3; n++) {
         line = lines[i].replace(/^\s*/, "");
@@ -198,7 +199,7 @@ export function getSinglePDB(lines, options, sslookup) {
       modelData.symmetries.push(matrix);
       i--; // set i back
     } else if (recordName == "CRYST1") {
-      let a, b, c, alpha, beta, gamma;
+      let a: number, b: number, c: number, alpha: number, beta: number, gamma: number;
       a = parseFloat(line.substr(7, 8));
       b = parseFloat(line.substr(16, 8));
       c = parseFloat(line.substr(25, 8));

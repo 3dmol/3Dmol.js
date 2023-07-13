@@ -1,5 +1,6 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 
-let SYBYLtoElem = {
+let SYBYLtoElem:any = {
   'C.1': 'C',
   'C1': 'C',
   'C.2': 'C',
@@ -50,16 +51,17 @@ let SYBYLtoElem = {
   'So2':'S'
 };
 
-// parse SYBYL mol2 file from string - assumed to only contain one molecule
-// tag
+// Parse SYBYL mol2 file from string - assumed to only contain one molecule tag
+
 /**
  * @param {string}
  *            str
  * @param {ParserOptionsSpec}
  *            options
  * @category Parsers
- */
-export function MOL2(str, options) {
+*/
+
+export function MOL2(str: string, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string,any> = [[]];
   var noH = false;
   if (typeof options.keepH !== "undefined") noH = !options.keepH;

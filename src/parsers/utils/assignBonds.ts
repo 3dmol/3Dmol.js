@@ -1,10 +1,11 @@
 import { areConnected } from "./areConnected";
 
-/*
+/**
  * @param {AtomSpec[]} atoms
- */
-export function assignBonds(atoms) {
-  // assign bonds - yuck, can't count on connect records
+*/
+
+export function assignBonds(atoms: string | any[]) {
+  // Assign bonds - yuck, can't count on connect records
 
   for (var i = 0, n = atoms.length; i < n; i++) {
     // Don't reindex if atoms are already indexed
@@ -32,7 +33,7 @@ export function assignBonds(atoms) {
     grid[x][y][z].push(atom);
   }
 
-  var findConnections = function (points, otherPoints) {
+  var findConnections = function (points: string | any[], otherPoints: string | any[]) {
     for (var i = 0; i < points.length; i++) {
       var atom1 = points[i];
       for (var j = 0; j < otherPoints.length; j++) {
