@@ -1,15 +1,15 @@
 import { ParserOptionsSpec } from "./ParserOptionsSpec";
 
-var parseV2000 = function (lines: any[], options: ParserOptionsSpec) {
-  var atoms: any[][] & Record<string, any> = [[]];
+var parseV2000 = function (lines: any, options: ParserOptionsSpec) {
+  var atoms: any & Record<string, any> = [[]];
   var noH = false;
   if (typeof options.keepH !== "undefined") noH = !options.keepH;
 
   while (lines.length > 0) {
     if (lines.length < 4) break;
-    var atomCount = parseInt(lines[3].substr(0, 3));
+    var atomCount = parseInt(lines[3].substring(0, 3));
     if (isNaN(atomCount) || atomCount <= 0) break;
-    var bondCount = parseInt(lines[3].substr(3, 3));
+    var bondCount = parseInt(lines[3].substring(3, 3));
     var offset = 4;
     if (lines.length < 4 + atomCount + bondCount) break;
 
@@ -17,20 +17,20 @@ var parseV2000 = function (lines: any[], options: ParserOptionsSpec) {
     var serialToIndex: number[] = [];
     var start = atoms[atoms.length - 1].length;
     var end = start + atomCount;
-    var i, line;
+    var i: number, line: string;
     for (i = start; i < end; i++, offset++) {
       line = lines[offset];
       var atom: Record<string, any> = {};
-      var elem = line.substr(31, 3).replace(/ /g, "");
+      var elem = line.substring(31, 3).replace(/ /g, "");
       atom.atom = atom.elem =
-        elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+        elem[0].toUpperCase() + elem.substring(1).toLowerCase();
 
       if (atom.elem !== "H" || !noH) {
         atom.serial = i;
         serialToIndex[i] = atoms[atoms.length - 1].length;
-        atom.x = parseFloat(line.substr(0, 10));
-        atom.y = parseFloat(line.substr(10, 10));
-        atom.z = parseFloat(line.substr(20, 10));
+        atom.x = parseFloat(line.substring(0, 10));
+        atom.y = parseFloat(line.substring(10, 10));
+        atom.z = parseFloat(line.substring(20, 10));
         atom.hetflag = true;
         atom.bonds = [];
         atom.bondOrder = [];
@@ -42,9 +42,9 @@ var parseV2000 = function (lines: any[], options: ParserOptionsSpec) {
 
     for (i = 0; i < bondCount; i++, offset++) {
       line = lines[offset];
-      var from = serialToIndex[parseInt(line.substr(0, 3)) - 1 + start];
-      var to = serialToIndex[parseInt(line.substr(3, 3)) - 1 + start];
-      var order = parseFloat(line.substr(6));
+      var from = serialToIndex[parseInt(line.substring(0, 3)) - 1 + start];
+      var to = serialToIndex[parseInt(line.substring(3, 3)) - 1 + start];
+      var order = parseFloat(line.substring(6));
       if (typeof from != "undefined" && typeof to != "undefined") {
         atoms[atoms.length - 1][from].bonds.push(to);
         atoms[atoms.length - 1][from].bondOrder.push(order);
@@ -68,7 +68,7 @@ var parseV2000 = function (lines: any[], options: ParserOptionsSpec) {
  * @param {ParserOptionsSpec} options
  * @returns {!Array.<!Array<!Object>>}
  */
-var parseV3000 = function (lines: any[], options: ParserOptionsSpec) {
+var parseV3000 = function (lines: any, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   var noH = false;
   if (typeof options.keepH !== "undefined") noH = !options.keepH;
@@ -96,15 +96,15 @@ var parseV3000 = function (lines: any[], options: ParserOptionsSpec) {
     var serialToIndex: number[] = [];
     var start = atoms[atoms.length - 1].length;
     var end = start + atomCount;
-    var i, line;
+    var i: number, line: string;
     for (i = start; i < end; i++, offset++) {
       line = lines[offset];
-      var atomParts = line.substr(6).match(/\S+/g);
+      var atomParts = line.substring(6).match(/\S+/g);
       if (atomParts.length > 4) {
         var atom: Record<string, any> = {};
         var elem = atomParts[1].replace(/ /g, "");
         atom.atom = atom.elem =
-          elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+          elem[0].toUpperCase() + elem.substring(1).toLowerCase();
 
         if (atom.elem !== "H" || !noH) {
           atom.serial = i;
@@ -159,15 +159,7 @@ var parseV3000 = function (lines: any[], options: ParserOptionsSpec) {
 };
 
 
-/**
- * @param {string}
- *            str
- * @param {ParserOptionsSpec}
- *            options
- * @category Parsers
-
- */
-export function SDF(str: string, options: any) {
+export function SDF(str: string, options: ParserOptionsSpec) {
   var molformat = "V2000";
   var lines = str.split(/\r?\n|\r/);
   if (lines.length > 3 && lines[3].length > 38) {
