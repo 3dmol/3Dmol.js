@@ -74,7 +74,7 @@ export function MOL2(str: string, options: ParserOptionsSpec) {
   // Assuming both Molecule and Atom sections exist
   if (mol_pos == -1 || atom_pos == -1) return atoms;
 
-  var lines = str.substr(mol_pos, str.length).split(/\r?\n|\r/);
+  var lines = str.substring(mol_pos).split(/\r?\n|\r/);
   while (lines.length > 0) {
     // serial is atom's index in file; index is atoms index in 'atoms'
     var serialToIndex: number[] = [];
@@ -108,7 +108,7 @@ export function MOL2(str: string, options: ParserOptionsSpec) {
         elem = SYBYLtoElem[elem];
       } else {
         elem = elem.split(".")[0];
-        elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+        elem = elem[0].toUpperCase() + elem.substring(1).toLowerCase();
       }
 
       atom.atom = tokens[1];

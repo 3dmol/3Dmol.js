@@ -51,7 +51,7 @@ export function XYZ(str: string, options: ParserOptionsSpec) {
       atom.serial = i;
       var elem = tokens[0];
       atom.atom = atom.elem =
-        elem[0].toUpperCase() + elem.substr(1, 1).toLowerCase();
+        elem[0].toUpperCase() + elem.substring(1, 2).toLowerCase();
       atom.x = parseFloat(tokens[1]);
       atom.y = parseFloat(tokens[2]);
       atom.z = parseFloat(tokens[3]);

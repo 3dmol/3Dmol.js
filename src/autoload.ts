@@ -73,7 +73,7 @@ export function autoload(viewer?, callback?) {
                 } else if (i.substring(0, 4) === "href" && (i !== "href")) {
                     uri = divdata[i];
                     datauri.push(uri);
-                    datatypes.push(uri.substr(uri.lastIndexOf('.') + 1));
+                    datatypes.push(uri.substring(uri.lastIndexOf('.') + 1));
                 } else if (i.substring(0, 3) === "cid" && (i !== "cid")) {
                     datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] + "/SDF?record_type=3d");
                     datatypes.push('sdf');
