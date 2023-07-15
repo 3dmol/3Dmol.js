@@ -1,4 +1,4 @@
-export const standardResidues = new Set([
+export const standardResidues: Set<string> = new Set([
   "ABU",
   "ACD",
   "ALA",

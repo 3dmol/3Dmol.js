@@ -1,7 +1,6 @@
 
-/* Covalent radii lookup table used to identify bonds in assignBonds 
- */
-export let bondTable = {
+// Covalent radii lookup table used to identify bonds in assignBonds
+export let bondTable:any = {
   H :0.37,                                                                                                                                He:0.32,
   Li:1.34,Be:0.90,                                                                                B :0.82,C :0.77,N :0.75,O :0.73,F :0.71,Ne:0.69,
   Na:1.54,Mg:1.30,                                                                                Al:1.18,Si:1.11,P :1.06,S :1.02,Cl:0.99,Ar:0.97,
@@ -13,16 +12,12 @@ export let bondTable = {
 };
 
 
-/** Get the length used for bond identification for the specified element.
- * 
- */
-export function bondLength(elem) {
+// Get the length used for bond identification for the specified element.
+export function bondLength(elem: string | number) {
   return bondTable[elem] || 1.6;
 };
 
-/** Set the length used for bond identification for the specified element.
- * 
- */
+// Set the length used for bond identification for the specified element.
 export function setBondLength(elem:string, radius:number) {
   if(radius < 0) radius = 0;
   bondTable[elem] = radius;

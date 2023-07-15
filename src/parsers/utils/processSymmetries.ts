@@ -1,11 +1,12 @@
+import { ParserOptionsSpec } from 'parsers/ParserOptionsSpec';
 import { Matrix3, conversionMatrix3, Vector3 } from '../../WebGL';
-//adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
-//matrices may be modified if normalization is requested
-export function processSymmetries(copyMatrices, atoms, options, cryst) {
+// Adds symmetry info to either duplicate and rotate/translate biological unit later or add extra atoms now
+// matrices may be modified if normalization is requested
+export function processSymmetries(copyMatrices: string[] | any[], atoms: any[], options: ParserOptionsSpec, cryst: { a: any; b: number; c: number; alpha: number; beta: number; gamma: number; }) {
   var dontDuplicate = !options.duplicateAssemblyAtoms;
   var end = atoms.length;
   var offset = end;
-  var t, l, n; // Used in for loops
+  var t: any, l: number, n: number; // Used in for loops
 
   let modifiedIdentity = -1;
   if (options.normalizeAssembly && cryst) {
@@ -109,7 +110,7 @@ export function processSymmetries(copyMatrices, atoms, options, cryst) {
       }
     }
     //we have explicitly duplicated the atoms, remove model symmetry information
-    copyMatrices.length = 0;
+    (copyMatrices as any).length = 0;
   } else if (copyMatrices.length > 1) {
     for (t = 0; t < atoms.length; t++) {
       var symmetries: Vector3[] = [];

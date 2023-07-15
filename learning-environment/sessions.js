@@ -8,15 +8,15 @@ var joinSession = function(name) {
     });
 };
 
-// setup socket handlers and session related event handlers
+// Setup socket handlers and session related event handlers
 var initSessions = function() {
     var initiator = false;
     var joined = false;
 
-    //webserver needs to have appropriate rules to forward to flask
-    //https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
+    // Webserver needs to have appropriate rules to forward to flask
+    // https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
     if(window.location.hostname == 'localhost') {
-      //for debugging on localhost go straight to port to avoid having to setup webserver
+      // For debugging on localhost go straight to port to avoid having to setup webserver
       socket = io.connect(window.location.hostname+":5000");
     } else {
       socket = io.connect(window.location.hostname);
@@ -25,7 +25,7 @@ var initSessions = function() {
         socket.send('User has connected!');
     });
 
-    // show only the connect button, make sure sidebar is back
+    // Show only the connect button, make sure sidebar is back
     var resetUpperRight = function() {
         $('#sessionbutton').show();
         $('#sessionconnect').hide();
@@ -35,7 +35,7 @@ var initSessions = function() {
         $("#sidenav").show();
     };
 
-    // open session connection dialog
+    // Open session connection dialog
     $('#sessionbutton').on('click', function() {
         $('#sessionbutton').hide();
         $('#sessionconnect').show();
@@ -46,7 +46,7 @@ var initSessions = function() {
     };
     setNumConnections(0);
 
-    // close dialog and show sessions button
+    // Close dialog and show sessions button
     $('#sessionconnectclose').on('click', function() {
         resetUpperRight();
     });
@@ -63,7 +63,7 @@ var initSessions = function() {
         }
     });
 
-    // update button based on existance of name
+    // Update button based on existance of name
     socket.on('check session name response', function(msg) {
         $('#sessionconnectbutton').prop('disabled', false);
         if (msg == 'exists') {
@@ -73,7 +73,7 @@ var initSessions = function() {
         }
     });
 
-    // handle connecting to a session
+    // Handle connecting to a session
     var connectSession = function() {
         session_name = $('#session_name_input').val();
         if ($('#sessionconnectbutton').text() == "Create") {
@@ -96,7 +96,7 @@ var initSessions = function() {
         }
     });
 
-    // register change callbacks
+    // Register change callbacks
     var viewUpdateCallback = function(new_view) {
         socket.emit('viewer view change event', {
             name : session_name,
@@ -116,13 +116,12 @@ var initSessions = function() {
             console.log("session created successfully")
             $('.sessionname').html(session_name);
 
-            // setup callbacks
+            // Setup callbacks
             glviewer.setViewChangeCallback(viewUpdateCallback);
             glviewer.setStateChangeCallback(stateUpdateCallback);
             initiator = parseInt(msg);
     
-            // close the connection create pane and open the
-            // connection monitoring
+            // Close the connection create pane and open the connection monitoring
             $('#sessionbutton').hide();
             $('#sessionconnect').hide();
             $('#sessioncontrol').show();
@@ -135,13 +134,13 @@ var initSessions = function() {
     socket.on('join session response', function(msg) {
         if (msg != "0") {
             joined = msg;
-            // close the connection create pane and open the connection
-            // monitoring
-            // disable the sidebar
+            // Close the connection create pane and open the connection monitoring
             $('.sessionname').html(session_name);
             $('#sessionbutton').hide();
             $('#sessionconnect').hide();
             $("#menu").hide();
+            
+            // Disable the sidebar
             $("#sidenav").hide();
             $('#sessionmonitor').show();
 
@@ -170,7 +169,7 @@ var initSessions = function() {
     $('#sessiondestroy').on('click', deleteSession);
     $('#sessionleave').on('click', leaveSession);
 
-    // make sure to unregister a session if user closes window
+    // Make sure to unregister a session if user closes window
     $(window).on('beforeunload', function() {
         if (initiator)
             deleteSession();
@@ -187,7 +186,7 @@ var initSessions = function() {
     socket.on('delete session response', function() {
         $('#createSession,#joinSession').prop('disabled', false);
         initiator = 0;
-        // remove callbacks
+        // Remove callbacks
         glviewer.setViewChangeCallback(null);
         glviewer.setStateChangeCallback(null);
         resetUpperRight();
@@ -197,7 +196,7 @@ var initSessions = function() {
     socket.on('leave session response', sessionEnded);
     socket.on('disconnect', function(reason) {
       console.log("disconnect: "+reason);
-      //do NOT end session since we will attempt to reconnect
+      // Do NOT end session since we will attempt to reconnect
     });
 
     socket.on('error: restart connection', function() {
@@ -237,7 +236,7 @@ var initSessions = function() {
 
     var result_labels = []; // array of labels
 
-    // remove result labels
+    // Remove result labels
     var clearResultLabels = function() {
         if (result_labels) {
             for (let i = 0; i < result_labels.length; i++) {
@@ -295,13 +294,9 @@ var initSessions = function() {
       }
     };
     
-    //return information about what is currently clicked for the server
+    // Return information about what is currently clicked for the server
     var getClicked = function() {
-        var ret = [];
-        for(let i = 0; i < clicked_labels.length; i++) {
-            let p = clicked_labels[i].stylespec.position;
-            ret.push([p.x,p.y,p.z]);
-        }
+        const ret = Array.from(clicked_labels, ({ stylespec }) => [stylespec.position.x, stylespec.position.y, stylespec.position.z]);
         return ret;
     };
     socket.on('query start response', function() {
@@ -309,7 +304,7 @@ var initSessions = function() {
             $('#askbutton').html('Show Results');
             $('#responseinfo').html('Responses: 0');
         } else {
-            // show message to select atoms, setup callbacks
+            // Show message to select atoms, setup callbacks
             $('#selectmessage').show();
             
             //how to label an atom
@@ -337,14 +332,15 @@ var initSessions = function() {
             
             glviewer.setClickable({},true, function(atom, viewer) {
                if(atom.clicklabel) {
-                   //already clicked, deselect
+                   // If already clicked, deselect
                    let idx = clicked_labels.indexOf(atom.clicklabel);
                    if(idx >= 0) {
                        clicked_labels.splice(idx,1);
                    }
                    viewer.removeLabel(atom.clicklabel);
                    delete atom.clicklabel;
-               } else { //select
+               } else { 
+                   // Select
                    atom.clicklabel = viewer.addLabel(atomLabel(atom), {position: atom, backgroundColor: 0x800080, backgroundOpacity: 1.0, fontColor: 'white'});
                    clicked_labels.push(atom.clicklabel);
                    if(atom.hoverlabel) {
@@ -353,7 +349,7 @@ var initSessions = function() {
                        delete atom.hoverlabel;
                    }                  
                }
-               //send clicked atoms to server
+               // Send clicked atoms to server
                socket.emit('query update', {
                    name : session_name,
                    selected : getClicked()
@@ -372,13 +368,12 @@ var initSessions = function() {
 
             clearResultLabels();
         } else {
-            // remove message, callbacks
+            // Remove message, callbacks
             clientFinishQuery();
         }
     });
 
-    // update number of responses - result is list of {'cnt': N, 'position':
-    // (x,y,z}
+    // Update number of responses - result is list of {'cnt': N, 'position': (x,y,z)}
     socket.on('query update response', function(result) {
         if (initiator) {
             $('#responseinfo').html('Responses: ' + result);            
@@ -386,22 +381,27 @@ var initSessions = function() {
     });
     
     socket.on('query fetch response', function(query_result) {
-            // first clear existing labels
-            clearResultLabels();
-            var max = 1;
-            //calc max
-            for (let i = 0; i < query_result.length; i++) {
-              let val = parseInt(query_result[i][1]);
-              if(val > max) max = val;
-            }
-
-            for (let i = 0; i < query_result.length; i++) {
-                let pos = query_result[i][0];
-                let p = {x: pos[0], y: pos[1], z: pos[2]};
-                let val = parseInt(query_result[i][1]);                
-                let l = glviewer.addLabel(val, {position : p,backgroundOpacity:0.5+(val/max)*.5});                
-                result_labels.push(l);                
-            }
-    });
+        
+        // First clear existing labels
+        clearResultLabels();
+        
+        let max = 1;
+        let i = 0;
+      
+        // Calculate max
+        query_result.forEach((result) => {
+            const val = parseInt(result[1]);
+            if (val > max) max = val;
+          });
+      
+        i = 0;
+        result_labels = Array.from(query_result, function(item) {
+          const pos = item[0];
+          const p = { x: pos[0], y: pos[1], z: pos[2] };
+          const val = parseInt(item[1]);
+          return glviewer.addLabel(val, { position: p, backgroundOpacity: 0.5 + (val / max) * 0.5 });
+        });
+      });
+      
     
 };

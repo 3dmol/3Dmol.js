@@ -1726,6 +1726,8 @@ export class GLModel {
         return copy;
     };
 
+    private static readonly ignoredKeys = new Set<string>(["props", "invert", "model", "frame", "byres", "expand", "within", "and", "or", "not"]);
+
     /** given a selection specification, return true if atom is selected.
      * Does not support context-aware selectors like expand/within/byres.
      *
@@ -1778,10 +1780,7 @@ export class GLModel {
                     }
                 }
             }
-            else if (sel.hasOwnProperty(key) && key != "props" &&
-                key != "invert" && key != "model" && key != "byres" &&
-                key != "expand" && key != "within" && key != "and" &&
-                key != "or" && key != "not" && !key.startsWith('__cache')) {
+            else if (sel.hasOwnProperty(key) && !GLModel.ignoredKeys.has(key) && !key.startsWith('__cache')) {
 
                 // if something is in sel, atom must have it
                 if (typeof (atom[key]) === "undefined") {
@@ -2119,7 +2118,7 @@ export class GLModel {
             style = sel as AtomStyleSpec|string;
             sel = {};
         }
-
+        sel = sel as AtomSelectionSpec;
         //if type is just a string, promote it to an object
         if (typeof (style) === 'string') {
             style = specStringToObject(style);
@@ -2152,11 +2151,16 @@ export class GLModel {
             }
         };
 
-        setStyleHelper(this.atoms);
-        for (var i = 0; i < this.frames.length; i++) {
-            if (this.frames[i] !== this.atoms) setStyleHelper(this.frames[i]);
+        if(sel.frame !== undefined && sel.frame < this.frames.length) { //set specific frame only
+            let frame = sel.frame;
+            if(frame < 0) frame = this.frames.length+frame;
+            setStyleHelper(this.frames[frame]);
+        } else {
+            setStyleHelper(this.atoms);
+            for (var i = 0; i < this.frames.length; i++) {
+                if (this.frames[i] !== this.atoms) setStyleHelper(this.frames[i]);
+            }
         }
-
         if (changedAtoms)
             this.molObj = null; //force rebuild
 

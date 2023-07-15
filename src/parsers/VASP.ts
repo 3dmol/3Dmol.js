@@ -6,8 +6,9 @@ import { Matrix3 } from "../WebGL";
  * @param {ParserOptionsSpec}
  *            options
  * @category Parsers
- */
-export function VASP(str /*,options*/) {
+*/
+
+export function VASP(str: string /*,options*/) {
   var atoms: any[][] & Record<string, any> = [[]];
   var lattice: Record<string, number | Float32Array> = {};
 
@@ -33,9 +34,9 @@ export function VASP(str /*,options*/) {
     return atoms;
   }
 
-  lattice.xVec = new Float32Array(lines[2].replace(/^\s+/, "").split(/\s+/));
-  lattice.yVec = new Float32Array(lines[3].replace(/^\s+/, "").split(/\s+/));
-  lattice.zVec = new Float32Array(lines[4].replace(/^\s+/, "").split(/\s+/));
+  lattice.xVec = new Float32Array((lines[2] as any).replace(/^\s+/, "").split(/\s+/));
+  lattice.yVec = new Float32Array((lines[3] as any).replace(/^\s+/, "").split(/\s+/));
+  lattice.zVec = new Float32Array((lines[4] as any).replace(/^\s+/, "").split(/\s+/));
 
   var matrix = new Matrix3(
     lattice.xVec[0],
@@ -56,7 +57,7 @@ export function VASP(str /*,options*/) {
     .replace(/\s+$/, "")
     .split(/\s+/);
   var atomSpeciesNumber = new Int16Array(
-    lines[6].replace(/^\s+/, "").split(/\s+/)
+    (lines[6] as any).replace(/^\s+/, "").split(/\s+/)
   );
   var vaspMode = lines[7].replace(/\s+/, "");
 
@@ -86,11 +87,11 @@ export function VASP(str /*,options*/) {
     var atomSymbol = atomSymbols[i];
     for (var j = 0, atomLen = atomSpeciesNumber[i]; j < atomLen; j++) {
       var coords = new Float32Array(
-        lines[atomCounter + j].replace(/^\s+/, "").split(/\s+/)
+        (lines[atomCounter + j] as any).replace(/^\s+/, "").split(/\s+/)
       );
 
       var atom: Record<string, number | []> = {};
-      atom.elem = atomSymbol;
+      (atom.elem as any) = atomSymbol;
       if (vaspMode == "cartesian") {
         atom.x = lattice.length * coords[0];
         atom.y = lattice.length * coords[1];

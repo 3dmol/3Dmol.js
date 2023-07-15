@@ -1,24 +1,24 @@
-// parse pdb file from str and create atoms
-// if computeStruct is true will always perform secondary structure
-// analysis,
-// otherwise only do analysis of SHEET/HELIX comments are missing
-
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { getSinglePDB } from "./utils/getSinglePDB";
 
 /**
+ * Parse pdb file from str and create atoms if computeStruct is true will always perform secondary structure analysis, 
+ * otherwise only do analysis of SHEET/HELIX comments are missing
+ * 
  * @param {string} str
  * @param {ParserOptionsSpec} options - keepH (do not strip hydrogens), noSecondaryStructure,
  *            assignbonds (default true, calculate implicit bonds)
  *            (do not compute ss), altLoc (which alternate location to select, if present; '*' to load all)
  * @category Parsers
  * 
- */
-export function PDB(str, options) {
+*/
+
+export function PDB(str: string, options: ParserOptionsSpec) {
   options = options || {};
   var atoms: any[] & Record<string, any> = []; //a separate list for each model
   var sslookup = {}; //stores SHEET and HELIX info, which is shared across models
   atoms.modelData = [];
-  var lines = str.split(/\r?\n|\r/);
+  var lines: any = str.split(/\r?\n|\r/);
   while (lines.length > 0) {
     var pdbinfo = getSinglePDB(lines, options, sslookup);
     var modelatoms = pdbinfo[0];

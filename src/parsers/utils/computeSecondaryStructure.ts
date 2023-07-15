@@ -1,12 +1,12 @@
 import { assignBackboneHBonds } from "./assignBackboneHBonds";
 
-export function computeSecondaryStructure(atomsarray, hbondCutoff) {
-  assignBackboneHBonds(atomsarray, hbondCutoff);
+export function computeSecondaryStructure(atomsarray: string | any[], hbondCutoff: number | undefined) {
+  assignBackboneHBonds(atomsarray, hbondCutoff!);
 
   // compute, per residue, what the secondary structure is
   var chres = {}; // lookup by chain and resid
-  var i, il, c, r; // i: used in for loop, il: length of atomsarray
-  var atom, val;
+  var i: number, il: number, c: string | number, r: number; // i: used in for loop, il: length of atomsarray
+  var atom: { chain: string | number; hbondDistanceSq: number; hbondOther: any; resi: number; ss: string; ssbegin: boolean; ssend: boolean; }, val: string;
 
   //identify helices first
   for (i = 0, il = atomsarray.length; i < il; i++) {

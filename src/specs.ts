@@ -95,6 +95,8 @@ export interface AtomSpec  {
 export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index"> {
     /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
     model?: GLModel | number |  GLModel[] | number[];
+    /** frame index of individual frame to style; will apply to all frames if not set */
+    frame?: number;
     /** index of the atom or atoms to select */
     index?: number | number[];
     /** overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms */

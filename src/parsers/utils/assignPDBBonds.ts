@@ -1,19 +1,20 @@
-// this is optimized for proteins where it is assumed connected
-// atoms are on the same or next residue
+// This is optimized for proteins where it is assumed connected atoms are on the same or next residue
 
 import { areConnected } from "./areConnected";
 import { assignBonds } from "./assignBonds";
 import { standardResidues } from "./standardResidues";
 
-/*
+
+/** 
  * @param {AtomSpec[]}
  *            atomsarray
- */
-export function assignPDBBonds(atomsarray) {
+*/
+
+export function assignPDBBonds(atomsarray: string | any[]) {
   // assign bonds - yuck, can't count on connect records
   var protatoms: any[] = [];
   var hetatoms: any[] = [];
-  var i, n;
+  var i: number, n: number;
   for (i = 0, n = atomsarray.length; i < n; i++) {
     var atom: any = atomsarray[i];
     atom.index = i;
@@ -32,7 +33,7 @@ export function assignPDBBonds(atomsarray) {
   // for identifying connected residues
   var currentResi = -1;
   var reschain = -1;
-  var lastResConnected;
+  var lastResConnected: boolean;
 
   for (i = 0, n = protatoms.length; i < n; i++) {
     var ai = protatoms[i];
