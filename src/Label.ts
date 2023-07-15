@@ -15,7 +15,7 @@ import {XYZ} from "./WebGL/math"
 export let LabelCount = 0;
 
 // function for drawing rounded rectangles - for Label drawing
-function roundRect(ctx, x, y, w, h, r, drawBorder) {
+function roundRect(ctx: { beginPath: () => void; moveTo: (arg0: any, arg1: any) => void; lineTo: (arg0: number, arg1: number) => void; quadraticCurveTo: (arg0: any, arg1: any, arg2: number, arg3: number) => void; closePath: () => void; fill: () => void; stroke: () => void; }, x: any, y: any, w: number, h: number, r: number, drawBorder: boolean) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -32,7 +32,7 @@ function roundRect(ctx, x, y, w, h, r, drawBorder) {
 }
 
 //do all the checks to figure out what color is desired
-function getColor(style, stylealpha?: any, init?: any) {
+function getColor(style: any, stylealpha?: any, init?: any) {
   var ret = init;
   if (typeof style != "undefined") {
     //convet regular colors
@@ -105,7 +105,7 @@ export class Label {
   sprite: any;
   text: any;
   frame: any;
-  constructor(text, parameters) {
+  constructor(text: string, parameters: LabelSpec) {
     this.id = LabelCount++;
     this.stylespec = parameters || {};
 
