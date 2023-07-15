@@ -187,7 +187,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         ? mmCIF._atom_site_id.length
         : mmCIF._atom_site_label.length;
 
-    var conversionMatrix;
+    var conversionMatrix: Matrix3;
     if (mmCIF._cell_length_a !== undefined) {
       var a = parseFloat(mmCIF._cell_length_a);
       var b = parseFloat(mmCIF._cell_length_b);
@@ -324,7 +324,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
       term = term.replace(/[-xyz]/g, "");
       var fractionParts = term.split("/");
 
-      var numerator, denominator;
+      var numerator: number, denominator: number;
       if (fractionParts[1] === undefined) {
         denominator = 1;
       } else {
