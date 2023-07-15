@@ -13,7 +13,7 @@ import { Matrix3 } from "../math";
  * @returns {Matrix3}
  */
 export function conversionMatrix3(
-  a: any,
+  a: number,
   b: number,
   c: number,
   alpha: number,
