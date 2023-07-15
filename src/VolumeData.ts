@@ -172,7 +172,7 @@ export class VolumeData {
      * cube data. It has been adapted from 'chg2cube.pl' found in
      * http://theory.cm.utexas.edu/vtsttools/
      */
-    vasp = function (str) {
+    vasp = function (str: string) {
 
         var lines = str.replace(/^\s+/, "").split(/[\n\r]/);
 
@@ -196,7 +196,7 @@ export class VolumeData {
         // compute the volume of the cell. Afterwards to obtain the axis for the
         // voxels we have to remove this unit and divide by the number of voxels in
         // each dimension
-        var v;
+        var v: string[];
         v = lines[2].replace(/^\s+/, "").split(/\s+/);
         var xVec = new Vector3(parseFloat(v[0]), parseFloat(v[1]), parseFloat(v[2])).multiplyScalar(convFactor * l_units);
         v = lines[3].replace(/^\s+/, "").split(/\s+/);
@@ -217,9 +217,10 @@ export class VolumeData {
 
         var lineArr = lines[0].replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
 
-        var nX = Math.abs(lineArr[0]);
-        var nY = Math.abs(lineArr[1]);
-        var nZ = Math.abs(lineArr[2]);
+        var nX = Math.abs(parseFloat(lineArr[0]));
+        var nY = Math.abs(parseFloat(lineArr[1]));
+        var nZ = Math.abs(parseFloat(lineArr[2]));
+
 
         var origin = this.origin = new Vector3(0, 0, 0);
 
@@ -244,14 +245,14 @@ export class VolumeData {
         }
 
 
-        lines.splice(0, 1); //Remove the dimension line
+        lines.splice(0, 1); // Remove the dimension line
         var raw = lines.join(" ");
 
         raw = raw.replace(/^\s+/, '');
-        raw = raw.split(/[\s\r]+/);
-        raw.splice(nX * nY * nZ + 1);
+        var rawArray = raw.split(/[\s\r]+/);
+        rawArray.splice(nX * nY * nZ + 1);
 
-        var preConvertedData = new Float32Array(raw); //We still have to format it to get the density
+        var preConvertedData = Float32Array.from(rawArray, parseFloat); //We still have to format it to get the density
 
         for (var i = 0; i < preConvertedData.length; i++) {
             preConvertedData[i] = preConvertedData[i] * vol_scale * e_units;
@@ -270,9 +271,9 @@ export class VolumeData {
     };
 
     // parse dx data - does not support all features of the file format
-    dx = function (str) {
+    dx = function (str: string) {
         var lines = str.split(/[\n\r]+/);
-        var m;
+        var m: string[];
         var recounts = /gridpositions\s+counts\s+(\d+)\s+(\d+)\s+(\d+)/;
         var reorig = /^origin\s+(\S+)\s+(\S+)\s+(\S+)/;
         var redelta = /^delta\s+(\S+)\s+(\S+)\s+(\S+)/;
@@ -334,12 +335,12 @@ export class VolumeData {
             return;
         }
         var raw = lines.splice(i).join(" ");
-        raw = raw.split(/[\s\r]+/);
-        this.data = new Float32Array(raw);
+        var rawArray = raw.split(/[\s\r]+/);
+        this.data = Float32Array.from(rawArray, parseFloat);
     };
 
     // parse cube data
-    cube(str) {
+    cube(str: string) {
         var lines = str.split(/\r?\n/);
 
         if (lines.length < 6)
@@ -361,15 +362,15 @@ export class VolumeData {
         if (atomsnum < 0) headerlines++; //see: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
         var raw = lines.splice(natoms + headerlines).join(" ");
         raw = raw.replace(/^\s+/, '');
-        raw = raw.split(/[\s\r]+/);
-        this.data = new Float32Array(raw);
+        var rawArray = raw.split(/[\s\r]+/);
+        this.data = Float32Array.from(rawArray, parseFloat);
 
     };
 
 
 
     //parse cp4 files
-    ccp4(bin) {
+    ccp4(bin: Int8Array) {
 
         // http://www.ccp4.ac.uk/html/maplib.html#description
         //code from ngl: https://github.com/arose/ngl/blob/master/js/ngl/parser.js
