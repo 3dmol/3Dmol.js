@@ -9,7 +9,8 @@ import { ParserOptionsSpec } from "./ParserOptionsSpec";
  * @param {string} str
  * @param {ParserOptionsSpec} options
  * @category Parsers
- */
+*/
+
 export function CDJSON(str: string, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   if (typeof str === "string") {
@@ -42,7 +43,7 @@ export function CDJSON(str: string, options: ParserOptionsSpec) {
     atom.bondOrder = [];
 
     var elem = currentAtom.l || "C";
-    atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+    atom.elem = elem[0].toUpperCase() + elem.substring(1).toLowerCase();
 
     atom.serial = atoms[atoms.length - 1].length;
     if (parseStyle) {

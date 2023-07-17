@@ -14,7 +14,7 @@ var fromCharCode = function (charCodeArray: any) {
 };
 
 var convertSS = function (val: number | boolean) {
-    //convert mmtf code to 3dmol code
+    // Convert mmtf code to 3dmol code
     /*    
       0:  pi helix
       1:  bend
@@ -42,10 +42,12 @@ let mmtfHETATMtypes = new Set([
     "PEPTIDE-LIKE",
     "SACCHARIDE"]);
 
-/** @param bindata - binary UInt8Array buffer or a base64 encoded string
- *  @param ParserOptionsSpec
- *  @category Parsers
+/** 
+ * @param bindata - binary UInt8Array buffer or a base64 encoded string
+ * @param ParserOptionsSpec
+ * @category Parsers
 */
+
 export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
 
     var noH = !options.keepH; // suppress hydrogens by default

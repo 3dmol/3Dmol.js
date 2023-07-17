@@ -1104,10 +1104,10 @@ function run() {
             type = 'mmtf';
         } else { // url
             // try to extract extension
-            type = data.substr(data.lastIndexOf('.') + 1);
+            type = data.substring(data.lastIndexOf('.') + 1);
             if (type == 'gz') {
-                var base = data.substr(0, data.lastIndexOf('.'));
-                type = base.substr(base.lastIndexOf('.')) + '.gz';
+                var base = data.substring(0, data.lastIndexOf('.'));
+                type = base.substring(base.lastIndexOf('.')) + '.gz';
             }
         }
         if (cmds[0] && cmds[0].indexOf('type=') == 0) {

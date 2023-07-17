@@ -3,14 +3,14 @@ import { atomNameToElem } from "./utils/atomNameToElem";
 
 /**
  * Parse a gro file from str and create atoms
-  * 
-  * @param {string}
-  *            str
-  * @param {ParserOptionsSpec}
-  *            options* 
-  * @category Parsers
+ * 
+ * @param {string}
+ *            str
+ * @param {ParserOptionsSpec}
+ *            options* 
+ * @category Parsers
+*/
 
- */
 export function GRO(str: string /*, options*/) {
   var allatoms: any[][] & Record<string, any> = [];
   var lines = str.split(/\r?\n|\r/);

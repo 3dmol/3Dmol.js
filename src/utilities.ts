@@ -419,9 +419,9 @@ export function download(query, viewer, options, callback?) {
             query = 'url:' + query;
         }
     }
-    if (query.substr(0, 5) === 'mmtf:') {
+    if (query.substring(0, 5) === 'mmtf:') {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
-        query = query.substr(5).toUpperCase();
+        query = query.substring(5).toUpperCase();
         uri = pdbUri + query;
         if (options && typeof options.noComputeSecondaryStructure === 'undefined') {
             //when fetch directly from pdb, trust structure annotations
@@ -438,7 +438,7 @@ export function download(query, viewer, options, callback?) {
         });
     }
     else {
-        if (query.substr(0, 4) === 'pdb:') {
+        if (query.substring(0, 4) === 'pdb:') {
             type = 'mmtf';
             if (options && options.format) {
                 type = options.format; //can override and require pdb
@@ -448,7 +448,7 @@ export function download(query, viewer, options, callback?) {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
             }
-            query = query.substr(4).toUpperCase();
+            query = query.substring(4).toUpperCase();
             if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                 alert("Wrong PDB ID");
                 return;
@@ -462,16 +462,16 @@ export function download(query, viewer, options, callback?) {
                 uri = pdbUri + query + "." + type;
             }
 
-        } else if (query.substr(0, 4) == 'cid:') {
+        } else if (query.substring(0, 4) == 'cid:') {
             type = "sdf";
-            query = query.substr(4);
+            query = query.substring(4);
             if (!query.match(/^[0-9]+$/)) {
                 alert("Wrong Compound ID"); return;
             }
             uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query +
                 "/SDF?record_type=3d";
-        } else if (query.substr(0, 4) == 'url:') {
-            uri = query.substr(4);
+        } else if (query.substring(0, 4) == 'url:') {
+            uri = query.substring(4);
             type = uri;
         }
 

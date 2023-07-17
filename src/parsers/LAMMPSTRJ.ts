@@ -3,9 +3,10 @@ import { assignBonds } from "./utils/assignBonds";
 
 /**
  * Parse a lammps trajectory file from str and create atoms
+ * 
  * @category Parsers
+*/
 
- */
 export function LAMMPSTRJ(str: string, options: ParserOptionsSpec) {
   var atoms: any[] = [];
   var dic:any = {
