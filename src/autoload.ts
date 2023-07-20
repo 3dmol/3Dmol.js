@@ -212,7 +212,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
 
             if (datauri.length != 0) {
                 //load multiple data elements in serial
-                i = 0;
+                let i = 0;
                 var process = function (moldata: any) {
                     //add moldata to viewer and load next model
                     uri = datauri[i]; //this is where the moldata came from
@@ -222,7 +222,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                         var modelName = viewerdiv.dataset[datatypes[i]];
                         UI.setModelTitle(modelName);
                     }
-                    i = (i as number) + 1;
+                    i +=1;
                     if (i < datauri.length) {
                         get(datauri[i]).then(process);
                     }

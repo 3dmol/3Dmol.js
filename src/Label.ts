@@ -15,7 +15,7 @@ import {XYZ} from "./WebGL/math"
 export let LabelCount = 0;
 
 // function for drawing rounded rectangles - for Label drawing
-function roundRect(ctx: { beginPath: () => void; moveTo: (arg0: any, arg1: any) => void; lineTo: (arg0: number, arg1: number) => void; quadraticCurveTo: (arg0: any, arg1: any, arg2: number, arg3: number) => void; closePath: () => void; fill: () => void; stroke: () => void; }, x: any, y: any, w: number, h: number, r: number, drawBorder: boolean) {
+function roundRect(ctx: CanvasRenderingContext2D, x: any, y: any, w: number, h: number, r: number, drawBorder: boolean) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
