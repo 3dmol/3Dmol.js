@@ -83,7 +83,7 @@ export class RWB extends GradientType {
   }
 
   //map value to hex color, range is provided
-  valueToHex(val: number, range: undefined) {
+  valueToHex(val: number, range?: number[]) {
     var lo: number, hi: number;
     val = this.mult * val; //reverse if necessary
     if (range) {
@@ -133,9 +133,9 @@ export class RWB extends GradientType {
 export class ROYGB extends GradientType {
   gradient = "ROYGB";
   mult: number;
-  max: number | undefined;
-  min: number | undefined;
-  constructor(min: number | undefined, max: number | undefined) {
+  max?: number;
+  min?: number;
+  constructor(min?: number, max?: number) {
     super();
     this.mult = 1.0;
     this.min = min;
@@ -150,7 +150,7 @@ export class ROYGB extends GradientType {
     }
   };
   //map value to hex color, range is provided
-  valueToHex(val: number, range: undefined) {
+  valueToHex(val: number, range?: any[]) {
     var lo: number, hi: number;
     val = this.mult * val;
     if (range) {
@@ -247,7 +247,7 @@ export class Sinebow extends GradientType {
   };
 
   //map value to hex color, range is provided
-  valueToHex(val: number, range: undefined) {
+  valueToHex(val: number, range?: any[]) {
     var lo: number, hi: number;
     val = this.mult * val;
     if (range) {
@@ -347,7 +347,7 @@ export class CustomLinear extends GradientType {
   }
 
   //map value to hex color, range is provided
-  valueToHex(val: number, range: undefined) {
+  valueToHex(val: number, range?: any[]) {
     var lo: number, hi: number;
     if (range) {
       lo = range[0];
