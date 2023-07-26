@@ -181,7 +181,7 @@ export class Label {
       typeof spriteAlignment == "string" &&
       spriteAlignment in SpriteAlignment
     ) {
-      spriteAlignment = SpriteAlignment[spriteAlignment];
+      spriteAlignment = (SpriteAlignment as any)[spriteAlignment] ;
     }
 
     var bold = "";
