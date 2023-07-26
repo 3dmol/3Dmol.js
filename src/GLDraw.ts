@@ -1,5 +1,6 @@
 import { Vector3 } from "./WebGL/math";
 import { Geometry } from "./WebGL";
+import { Color } from "colors";
 
 
 //define enum values
@@ -124,7 +125,7 @@ export namespace GLDraw {
             this.basisVectors = nvecs;
         };
 
-        getVerticesForRadius(radius, cap, capType) {
+        getVerticesForRadius(radius: any, cap: CAP, capType: any) {
             if (typeof (this.cache) !== "undefined" && this.cache[radius] !== undefined)
                 if (this.cache[radius][cap + capType] !== undefined)
                     return this.cache[radius][cap + capType];
@@ -290,13 +291,13 @@ export namespace GLDraw {
      * @param {CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
-    export function drawCylinder(geo: Geometry, from, to, radius: number, color, fromCap:CAP = 0, toCap:CAP = 0) {
+    export function drawCylinder(geo: Geometry, from: any, to: any, radius: number, color: Color, fromCap:CAP = 0, toCap:CAP = 0) {
         if (!from || !to)
             return;
 
         // vertices
         var drawcaps = toCap || fromCap;
-        color = color || { r: 0, g: 0, b: 0 };
+        color = color || ({ r: 0, g: 0, b: 0 } as Color);
 
         var e = getRotationMatrix(to.x-from.x, to.y-from.y, to.z-from.z);
         // get orthonormal vectors from cache
@@ -580,13 +581,13 @@ export namespace GLDraw {
      * @param {Color}
      *            color
      *            */
-    export function drawCone (geo: Geometry, from, to, radius: number, color?) {
+    export function drawCone (geo: Geometry, from: any, to: any, radius: number, color?: Color) {
         if (!from || !to)
             return;
 
-        //TODO: check if from and to do not contain x,y,z and if  so generate a center based on the passed selections
+        // TODO: check if from and to do not contain x,y,z and if  so generate a center based on the passed selections
 
-        color = color || { r: 0, g: 0, b: 0 };
+        color = color || ({ r: 0, g: 0, b: 0 } as Color);
 
         let ndir = new Vector3(to.x-from.x, to.y-from.y, to.z-from.z);
         var e = getRotationMatrix(ndir.x, ndir.y, ndir.z);
@@ -679,13 +680,18 @@ export namespace GLDraw {
         geoGroup.faceidx += 6 * n;
     };
 
+    interface MyObject {
+        vertices: any[];
+        verticesRows: any[][];
+        normals: any[];
+     }
 
     // Sphere component sphereVertexCache
     class  SphereVertexCache {
         private cache = new Map<number, Map<number, any>>(); //sphereQuality then radius
         constructor() {}
 
-        getVerticesForRadius(radius, sphereQuality) {
+        getVerticesForRadius(radius: number, sphereQuality: any) {
             sphereQuality = sphereQuality || 2;
 
             if (!this.cache.has(sphereQuality))  {
@@ -695,7 +701,7 @@ export namespace GLDraw {
             if (radiusCache.has(radius))
                 return radiusCache.get(radius);
 
-            var obj = {
+            var obj: MyObject = {
                 vertices: [],
                 verticesRows: [],
                 normals: []
@@ -763,7 +769,7 @@ export namespace GLDraw {
      *            color
      * @param {number} quality of sphere (default 2, higher increases number of triangles)
      */
-    export function drawSphere(geo:Geometry, pos, radius, color, sphereQuality?) {
+    export function drawSphere(geo:Geometry, pos: any, radius: number, color: Color, sphereQuality?: number) {
 
         var vobj = sphereVertexCache.getVerticesForRadius(radius, sphereQuality);
 
