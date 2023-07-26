@@ -175,7 +175,7 @@ export function applyPartialCharges(atom: Record<string, any>, keepexisting: boo
     if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
         if(atom.resn && atom.atom) {
             var key = atom.resn+":"+atom.atom;
-            atom.properties.partialCharge = partialCharges[key];
+            atom.properties.partialCharge = (partialCharges as any)[key];
         }
     }
 };
