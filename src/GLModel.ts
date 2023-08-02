@@ -14,13 +14,30 @@ import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPro
 import { Gradient } from "./Gradient";
 import { Parsers } from "./parsers";
 import { NetCDFReader } from "netcdfjs"
-import { inflate } from "pako"
+import { inflate, InflateFunctionOptions, Data } from "pako"
 import { AtomSelectionSpec, AtomSpec } from "./specs";
 import { GLViewer } from "GLViewer";
 import { ArrowSpec } from "GLShape";
 import { ParserOptionsSpec } from "./parsers/ParserOptionsSpec";
 import { LabelSpec } from "Label";
 import { assignBonds } from "./parsers/utils/assignBonds";
+
+function inflateString(str: string | ArrayBuffer): (string | ArrayBuffer) {
+    let data: Data;
+  
+    if (typeof str === 'string') {
+      const encoder = new TextEncoder();
+      data = encoder.encode(str);
+    } else {
+      data = new Uint8Array(str);
+    }
+  
+    const inflatedData = inflate(data, {
+      to: 'string'
+    } as InflateFunctionOptions & { to: 'string' });
+  
+    return inflatedData;
+  }
 
 /**
  * GLModel represents a group of related atoms
@@ -2646,7 +2663,7 @@ export class GLModel {
          viewer.render();
     */
 
-    public setCoordinates(str:string|ArrayBuffer, format:string) {
+    public setCoordinates(str: string | ArrayBuffer, format:string) {
         format = format || "";
         if (!str)
             return []; // leave an empty model
@@ -2655,9 +2672,7 @@ export class GLModel {
             // unzip gzipped files
             format = format.replace(/\.gz$/, '');
             try {
-                str = inflate(str, {
-                    to: 'string'
-                });
+                str = inflateString(str)
             } catch (err) {
                 console.log(err);
             }
@@ -2745,7 +2760,7 @@ export class GLModel {
         return values;
     };
 
-    static parseMolData(data?, format: string="", options?) {
+    static parseMolData(data?: string | ArrayBuffer, format: string = "", options?: ParserOptionsSpec) {
         if (!data)
             return []; //leave an empty model
 
@@ -2753,7 +2768,7 @@ export class GLModel {
             //unzip gzipped files
             format = format.replace(/\.gz$/, '');
             try {
-                data = inflate(data, { to: 'string' });
+                data = inflateString(data);
             } catch (err) {
                 console.log(err);
             }
@@ -2767,17 +2782,17 @@ export class GLModel {
                 // try to guess correct format from data contents
                 if (data instanceof Uint8Array) {
                     format = "mmtf"; //currently only supported binary format?
-                } else if (data.match(/^@<TRIPOS>MOLECULE/gm)) {
+                } else if ((data as string).match(/^@<TRIPOS>MOLECULE/gm)) {
                     format = "mol2";
-                } else if (data.match(/^data_/gm) && data.match(/^loop_/gm)) {
+                } else if ((data as string).match(/^data_/gm) && data.match(/^loop_/gm)) {
                     format = "cif";
-                } else if (data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
+                } else if ((data as string).match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
                     format = "pdb";
-                } else if (data.match(/ITEM: TIMESTEP/gm)) {
+                } else if ((data as string).match(/ITEM: TIMESTEP/gm)) {
                     format = "lammpstrj";
-                } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
+                } else if ((data as string).match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
                     format = "sdf"; // could look at line 3
-                } else if (data.match(/^%VERSION\s+VERSION_STAMP/gm)) {
+                } else if ((data as string).match(/^%VERSION\s+VERSION_STAMP/gm)) {
                     format = "prmtop";
                 } else {
                     format = "xyz";
@@ -2786,7 +2801,7 @@ export class GLModel {
             }
         }
         var parse = Parsers[format];
-        var parsedAtoms = parse(data, options);
+        var parsedAtoms = parse((data as string), options);
 
         return parsedAtoms;
     };
