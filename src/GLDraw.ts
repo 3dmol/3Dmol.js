@@ -24,7 +24,6 @@ export interface Point {
     z: number;
 }
 
-
 /**
  * Lower level utilities for creating WebGL shape geometries.
  * These are not intended for general consumption.
@@ -296,7 +295,7 @@ export namespace GLDraw {
      * @param {CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
-    export function drawCylinder(geo: Geometry, from: any, to: any, radius: number, color: Color, fromCap:CAP = 0, toCap:CAP = 0) {
+    export function drawCylinder(geo: Geometry, from: any, to: any, radius: number, color: Color | Color[], fromCap:CAP = 0, toCap:CAP = 0) {
         if (!from || !to)
             return;
 
@@ -361,12 +360,12 @@ export namespace GLDraw {
             normalArray[offset + 5] = z;
 
             // colors
-            colorArray[offset] = color.r;
-            colorArray[offset + 3] = color.r;
-            colorArray[offset + 1] = color.g;
-            colorArray[offset + 4] = color.g;
-            colorArray[offset + 2] = color.b;
-            colorArray[offset + 5] = color.b;
+            colorArray[offset] = (color as Color).r;
+            colorArray[offset + 3] = (color as Color).r;
+            colorArray[offset + 1] = (color as Color).g;
+            colorArray[offset + 4] = (color as Color).g;
+            colorArray[offset + 2] = (color as Color).b;
+            colorArray[offset + 5] = (color as Color).b;
 
             // faces
             // 0 - 2 - 1
@@ -451,20 +450,20 @@ export namespace GLDraw {
                     vertexArray[v3offset + 2] = z3 + cap.z;
                     vertexArray[v4offset + 2] = z4 + cap.z;
 
-                    colorArray[v1offset] = color.r;
-                    colorArray[v2offset] = color.r;
-                    colorArray[v3offset] = color.r;
-                    colorArray[v4offset] = color.r;
+                    colorArray[v1offset] = (color as Color).r;
+                    colorArray[v2offset] = (color as Color).r;
+                    colorArray[v3offset] = (color as Color).r;
+                    colorArray[v4offset] = (color as Color).r;
 
-                    colorArray[v1offset + 1] = color.g;
-                    colorArray[v2offset + 1] = color.g;
-                    colorArray[v3offset + 1] = color.g;
-                    colorArray[v4offset + 1] = color.g;
+                    colorArray[v1offset + 1] = (color as Color).g;
+                    colorArray[v2offset + 1] = (color as Color).g;
+                    colorArray[v3offset + 1] = (color as Color).g;
+                    colorArray[v4offset + 1] = (color as Color).g;
 
-                    colorArray[v1offset + 2] = color.b;
-                    colorArray[v2offset + 2] = color.b;
-                    colorArray[v3offset + 2] = color.b;
-                    colorArray[v4offset + 2] = color.b;
+                    colorArray[v1offset + 2] = (color as Color).b;
+                    colorArray[v2offset + 2] = (color as Color).b;
+                    colorArray[v3offset + 2] = (color as Color).b;
+                    colorArray[v4offset + 2] = (color as Color).b;
 
                     nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6] * normals[v1].z;
                     nx2 = e[0] * normals[v2].x + e[3] * normals[v2].y + e[6] * normals[v2].z;
@@ -772,7 +771,8 @@ export namespace GLDraw {
      *            radius
      * @param {Color}
      *            color
-     * @param {number} quality of sphere (default 2, higher increases number of triangles)
+     * @param {number} 
+     *            sphereQuality - Quality of sphere (default 2, higher increases number of triangles)
      */
     export function drawSphere(geo:Geometry, pos: any, radius: number, color: Color, sphereQuality?: number) {
 
