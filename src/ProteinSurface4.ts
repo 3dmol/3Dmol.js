@@ -18,7 +18,6 @@ by Euclidean Distance Transform. PLoS ONE 4(12): e8140.
 
 
  */
-import { AtomSpec } from "specs";
 import {Vector3} from "./WebGL/math"
 
 
@@ -81,7 +80,7 @@ export class MarchingCubeInitializer {
 
     }
 
-    march(data: number[] | Uint8Array, verts: any[], faces: any[], spec: { smooth?: number; nX: any; nY: any; nZ: any; fulltable?: any; voxel?: any; unitCube?: any; origin?: any; matrix?: any; hasOwnProperty?: any; scale?: any; }) {
+    march(data, verts, faces, spec) {
 
         let fulltable = !!(spec.fulltable);
         let origin = (spec.hasOwnProperty('origin') && spec.origin.hasOwnProperty('x')) ? spec.origin : {x:0, y:0, z:0};
@@ -93,7 +92,7 @@ export class MarchingCubeInitializer {
         let nZ = spec.nZ || 0;
         
         let scale = spec.scale || 1.0;
-        let unitCube: { x: any; y: any; z: any; } = null;
+        let unitCube = null;
         if(spec.unitCube) {
             unitCube = spec.unitCube;
         } else {
@@ -111,7 +110,7 @@ export class MarchingCubeInitializer {
         // create (or retrieve) a vertex at the appropriate point for
         // the edge (p1,p2)
         
-        let getVertex = function(i: number, j: number, k: number, code: number, p1: number, p2: number) {
+        let getVertex = function(i, j, k, code, p1, p2) {
             let pt = {x:0,y:0,z:0};
             let val1 = !!(code & (1 << p1));
             let val2 = !!(code & (1 << p2));
@@ -244,7 +243,7 @@ export class MarchingCubeInitializer {
         
     };
 
-    laplacianSmooth (numiter: number, verts: string | any[], faces: string | any[]) {
+    laplacianSmooth (numiter, verts, faces) {
             let tps = new Array(verts.length);
             let i, il, j, jl, k;
             for (i = 0, il = verts.length; i < il; i++)
@@ -695,7 +694,7 @@ export class PointGrid  {
     width: number;
     height: number;
 
-    constructor(length: number, width: number, height: number) {
+    constructor(length, width, height) {
         // the standard says this is zero initialized
         this.data = new Int32Array(length * width * height * 3);
         this.width = width;
@@ -703,7 +702,7 @@ export class PointGrid  {
     }
 
     // set position x,y,z to pt, which has ix,iy,and iz
-    set(x:number, y:number, z:number, pt: { ix: any; iy: any; iz: any; }) {
+    set(x:number, y:number, z:number, pt) {
         let index = ((((x * this.width) + y) * this.height) + z) * 3;
         this.data[index] = pt.ix;
         this.data[index + 1] = pt.iy;
@@ -754,12 +753,12 @@ export class ProteinSurface {
     pmaxy:number = 0;
     pmaxz:number = 0;
 
-    depty: any = {};
-    widxz: any = {};
+    depty = {};
+    widxz = {};
     faces: number[] = [];
-    verts: string | any[] = [];
+    verts = [];
 
-    readonly vdwRadii: any = {
+    readonly vdwRadii = {
             "H" : 1.2,
             "Li" : 1.82,
             "Na" : 2.27,
@@ -780,7 +779,7 @@ export class ProteinSurface {
         };
     
     private getVDWIndex(atom:any) {
-        if(!atom.elem || typeof((this.vdwRadii as any)[atom.elem]) == "undefined") {
+        if(!atom.elem || typeof(this.vdwRadii[atom.elem]) == "undefined") {
             return "X";
         }
         return atom.elem;
@@ -816,7 +815,7 @@ export class ProteinSurface {
     public getFacesAndVertices(atomlist: any[]) {
         let atomsToShow = {};
         for (let i = 0, il = atomlist.length; i < il; i++)
-            (atomsToShow as Array<any>)[atomlist[i]] = true;
+            atomsToShow[atomlist[i]] = true;
         let vertices = this.verts;
         for (let i = 0, il = vertices.length; i < il; i++) {
             vertices[i].x = vertices[i].x / this.scaleFactor - this.ptranx;
@@ -836,7 +835,7 @@ export class ProteinSurface {
                 which = b;
             if (c < which)
                 which = c;
-            if (!(atomsToShow as Array<any>)[which]) {
+            if (!atomsToShow[which]) {
                 continue;
             }
 
@@ -860,7 +859,7 @@ export class ProteinSurface {
     };
 
 
-    public initparm (extent: number[][], btype: boolean, volume: number) {
+    public initparm (extent: number[][], btype, volume) {
         if(volume > 1000000) //heuristical decrease resolution to avoid large memory consumption
             this.scaleFactor = this.defaultScaleFactor/2;
         
@@ -915,8 +914,8 @@ export class ProteinSurface {
         this.vpAtomID = new Int32Array(this.pLength * this.pWidth * this.pHeight);
     };
 
-    public boundingatom(btype: boolean) {
-        let tradius: any = {};
+    public boundingatom(btype) {
+        let tradius = {};
 
         for ( const i in this.vdwRadii) {
             let r = this.vdwRadii[i];
@@ -944,7 +943,7 @@ export class ProteinSurface {
         }
     };
 
-    public fillvoxels(atoms: AtomSpec[], atomlist: Array<any>) { // (int seqinit,int
+    public fillvoxels(atoms, atomlist) { // (int seqinit,int
         // seqterm,bool
         // atomtype,atom*
         // proseq,bool bcolor)
@@ -968,7 +967,7 @@ export class ProteinSurface {
     };
 
 
-    public fillAtom(atom: AtomSpec, atoms: { [x: string]: any; }) {
+    public fillAtom(atom, atoms) {
 
         let cx = Math.floor(0.5 + this.scaleFactor * (atom.x + this.ptranx));
         let cy = Math.floor(0.5 + this.scaleFactor * (atom.y + this.ptrany));
@@ -1029,7 +1028,7 @@ export class ProteinSurface {
         }// i
     };
 
-    public fillvoxelswaals(atoms: AtomSpec[], atomlist: Array<any>) {
+    public fillvoxelswaals(atoms, atomlist) {
         for (let i = 0, il = this.vpBits.length; i < il; i++)
             this.vpBits[i] &= ~this.ISDONE; // not isdone
 
@@ -1042,7 +1041,7 @@ export class ProteinSurface {
         }
     };
 
-    public fillAtomWaals(atom: AtomSpec, atoms: { [x: string]: any; }) {
+    public fillAtomWaals(atom, atoms) {
         let nind = 0;
         let cx = Math.floor(0.5 + this.scaleFactor * (atom.x + this.ptranx));
         let cy = Math.floor(0.5 + this.scaleFactor * (atom.y + this.ptrany));
@@ -1204,7 +1203,7 @@ export class ProteinSurface {
 
     };
 
-    public fastoneshell(inarray: string | any[], boundPoint: PointGrid) { // (int* innum,int
+    public fastoneshell(inarray, boundPoint) { // (int* innum,int
         // *allocout,voxel2
         // ***boundPoint, int*
         // outnum, int *elimi)
@@ -1212,7 +1211,7 @@ export class ProteinSurface {
         let dx, dy, dz;
         let square;
         let bp, index;
-        let outarray: { ix: number; iy: number; iz: number; }[] = [];
+        let outarray = [];
         if (inarray.length === 0)
             return outarray;
 
@@ -1387,7 +1386,7 @@ export class ProteinSurface {
         return outarray;
     };
 
-    public marchingcubeinit(stype: number) {
+    public marchingcubeinit(stype) {
         for ( let i = 0, lim = this.vpBits.length; i < lim; i++) {
             if (stype == 1) {// vdw
                 this.vpBits[i] &= ~this.ISBOUND;
@@ -1407,7 +1406,7 @@ export class ProteinSurface {
         }
     };
     
-    public marchingcube(stype: SurfaceType) {
+    public marchingcube(stype) {
         this.marchingcubeinit(stype);
         this.verts = []; this.faces = [];   
         MarchingCube.march(this.vpBits, this.verts, this.faces, {
