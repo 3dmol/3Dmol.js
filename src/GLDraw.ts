@@ -1,6 +1,6 @@
 import { Vector3 } from "./WebGL/math";
 import { Geometry } from "./WebGL";
-import { Color } from "colors";
+import { Color, Colored } from "colors";
 
 
 //define enum values
@@ -774,7 +774,7 @@ export namespace GLDraw {
      * @param {number} 
      *            sphereQuality - Quality of sphere (default 2, higher increases number of triangles)
      */
-    export function drawSphere(geo:Geometry, pos: any, radius: number, color: Color | Color[], sphereQuality?: number) {
+    export function drawSphere(geo:Geometry, pos: any, radius: number, color: Colored, sphereQuality?: number) {
 
         var vobj = sphereVertexCache.getVerticesForRadius(radius, sphereQuality);
 
@@ -798,9 +798,9 @@ export namespace GLDraw {
             vertexArray[offset + 1] = (v.y + pos.y);
             vertexArray[offset + 2] = (v.z + pos.z);
 
-            colorArray[offset] = (color as Color).r;
-            colorArray[offset + 1] = (color as Color).g;
-            colorArray[offset + 2] = (color as Color).b;
+            colorArray[offset] = (color as Colored).r;
+            colorArray[offset + 1] = (color as Colored).g;
+            colorArray[offset + 2] = (color as Colored).b;
 
         }
 
