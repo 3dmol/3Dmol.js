@@ -56,6 +56,7 @@
     "@babel/core": "^7.20.7",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/plugin-transform-typescript": "^7.20.7",
+    "@types/pako": "^2.0.0",
     "better-docs": "github:3dmol/better-docs#master",
     "canvas": "^2.11.0",
     "codecov": "^3.8.3",
