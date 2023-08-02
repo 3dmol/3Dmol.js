@@ -2,7 +2,7 @@ import { base64ToArray } from "./utilities";
 import { Vector3, Matrix4 } from "./WebGL/math";
 import { VASP } from "./parsers/VASP";
 import { CUBE } from "./parsers/CUBE";
-import {inflate} from "pako";
+import { inflate } from "pako";
 
 
 interface VolumeDataOptions {
@@ -52,7 +52,7 @@ export class VolumeData {
             //unzip gzipped files
             format = format.replace(/\.gz$/, '');
             try {
-                if (this[format] && this.isbinary.has(format)) {
+                if ((this as any)[format] && this.isbinary.has(format)) {
                     if (typeof (str) == "string") {
                         //assume base64 encoded
                         str = base64ToArray(str);
@@ -67,11 +67,11 @@ export class VolumeData {
             }
         }
 
-        if (this[format]) {
+        if ((this as any)[format]) {
             if (this.isbinary.has(format) && typeof (str) == "string") {
                 str = base64ToArray(str);
             }
-            this[format](str);
+            (this as any)[format](str);
         }
 
         if (options) {
@@ -488,19 +488,19 @@ export class VolumeData {
 
         //create transformation matrix, code mostly copied from ngl
         var h = header;
-        var basisX = [
+        var basisX: Array<any> = [
             h.xlen,
             0,
             0
         ];
 
-        var basisY = [
+        var basisY: Array<any> = [
             h.ylen * Math.cos(Math.PI / 180.0 * h.gamma),
             h.ylen * Math.sin(Math.PI / 180.0 * h.gamma),
             0
         ];
 
-        var basisZ = [
+        var basisZ: Array<any> = [
             h.zlen * Math.cos(Math.PI / 180.0 * h.beta),
             h.zlen * (
                 Math.cos(Math.PI / 180.0 * h.alpha)
@@ -514,9 +514,9 @@ export class VolumeData {
             Math.sin(Math.PI / 180.0 * h.beta) - basisZ[1] * basisZ[1]
         );
 
-        var basis = [0, basisX, basisY, basisZ];
-        var nxyz = [0, h.MX, h.MY, h.MZ];
-        var mapcrs = [0, h.MAPC, h.MAPR, h.MAPS];
+        var basis: Array<any> = [0, basisX, basisY, basisZ];
+        var nxyz: Array<any> = [0, h.MX, h.MY, h.MZ];
+        var mapcrs: Array<any> = [0, h.MAPC, h.MAPR, h.MAPS];
 
         this.matrix = new Matrix4();
 
