@@ -18,6 +18,12 @@ export enum CAP {
     ROUND = 2
 };
 
+export interface Point {
+    x: number;
+    y: number;
+    z: number;
+}
+
 
 /**
  * Lower level utilities for creating WebGL shape geometries.
@@ -273,17 +279,16 @@ export namespace GLDraw {
 
     var cylVertexCache = new CylVertexCache();
 
-
     /** 
      * Create a cylinder 
      * @memberof GLDraw 
-     * @param {geometry}
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            from
      * @param {Point}
      *            to
-     * @param {float}
+     * @param {number}
      *            radius
      * @param {Color}
      *            color
@@ -570,13 +575,13 @@ export namespace GLDraw {
 
     /** Create a cone 
      * @memberof GLDraw
-     * @param {geometry}
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            from
      * @param {Point}
      *            to
-     * @param {float}
+     * @param {number}
      *            radius
      * @param {Color}
      *            color
@@ -759,11 +764,11 @@ export namespace GLDraw {
 
     /** Create a sphere.
      * @memberof GLDraw
-     * @param {geometry}
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            pos
-     * @param {float}
+     * @param {number}
      *            radius
      * @param {Color}
      *            color
