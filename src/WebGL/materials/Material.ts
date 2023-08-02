@@ -61,7 +61,7 @@ export class Material extends EventDispatcher {
         ) {
           currentValue.copy(newValue);
         } else {
-          this[key] = newValue;
+          (this as any)[key] = newValue;
         }
       }
     }

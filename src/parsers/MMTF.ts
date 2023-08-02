@@ -90,7 +90,7 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
     if (numModels == 0) return atoms;
     if (!options.multimodel) numModels = 1; //first only
     // hoisted loop variables
-    var i, j, k, kl, m, n;
+    var i: number, j: number, k: number, kl: number, m: number, n: number;
 
 
 
