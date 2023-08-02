@@ -2784,9 +2784,9 @@ export class GLModel {
                     format = "mmtf"; //currently only supported binary format?
                 } else if ((data as string).match(/^@<TRIPOS>MOLECULE/gm)) {
                     format = "mol2";
-                } else if ((data as string).match(/^data_/gm) && data.match(/^loop_/gm)) {
+                } else if ((data as string).match(/^data_/gm) && (data as string).match(/^loop_/gm)) {
                     format = "cif";
-                } else if ((data as string).match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
+                } else if ((data as string).match(/^HETATM/gm) || (data as string).match(/^ATOM/gm)) {
                     format = "pdb";
                 } else if ((data as string).match(/ITEM: TIMESTEP/gm)) {
                     format = "lammpstrj";
