@@ -972,7 +972,7 @@ export class GLShape {
         var radius = cylinderSpec.radius || 0.1;
         var color = CC.color(cylinderSpec.color);
 
-        var cylinderLength = Math.sqrt(Math.pow((start.x - end.x), 2) + Math.pow((start.y - end.y), 2) + Math.pow((start.z - end.z), 2));
+        var cylinderLength = GLShape.distance_from(start,end);
 
         var count = cylinderLength / (cylinderSpec.gapLength + cylinderSpec.dashLength);
 
@@ -1204,7 +1204,10 @@ export class GLShape {
 
 
     static distance_from(c1: XYZ, c2: XYZ) {
-        return Math.sqrt(Math.pow((c1.x - c2.x), 2) + Math.pow((c1.y - c2.y), 2) + Math.pow((c1.z - c2.z), 2));
+        let xdiff = c1.x-c2.x;
+        let ydiff = c1.y-c2.y;
+        let zdiff = c1.z-c2.z;
+        return Math.sqrt(xdiff*xdiff+ydiff*ydiff+zdiff*zdiff);
     };
 
     static inSelectedRegion(coordinate: XYZ, selectedRegion, radius: number) {
