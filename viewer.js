@@ -1117,8 +1117,7 @@ var runcmds = function (cmds, viewer, renderSurface) {
           let dist = $3Dmol.GLShape.distance_from(start,end);
           let mid = start.add(end).multiplyScalar(.5);
           dlabel = viewer.addLabel(dist.toFixed(3),{position: mid, fontSize: 12, backgroundColor: "blue", 
-            backgroundOpacity: 0.75, alignment: "bottomCenter", clickable: true,
-            callback: function() { console.log('hi');}});          
+            backgroundOpacity: 0.75, alignment: "bottomCenter"});          
         }
         lastclicked = null;
       }
