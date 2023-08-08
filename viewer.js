@@ -1051,7 +1051,79 @@ var runcmds = function (cmds, viewer, renderSurface) {
         }
 
     }
-
+    
+    let getlabel = function(atom) {
+      let label = atom.elem;
+      if(atom.resn && atom.resi) {
+        label = atom.resn+atom.resi+":"+atom.atom
+      } 
+      return label;
+    }
+    
+    //hover labels
+    var hover_label = null;
+    viewer.setHoverable({},true, 
+        function(atom){  //hover
+          if(atom._clicklabel == undefined) {
+            label = getlabel(atom);
+            hover_label = viewer.addLabel(label,
+                    {position: atom, fontSize: 12, backgroundColor: "black", backgroundOpacity: 0.5, alignment: "bottomCenter"});
+            viewer.render();          
+          }
+        },
+        function(){ 
+          if(hover_label) {
+           viewer.removeLabel(hover_label);
+           viewer.render();
+          }
+        } //unhover
+    );
+    
+    var lastclicked = null;
+    viewer.setClickable({}, true, function(atom) {      
+        if(hover_label) {
+         viewer.removeLabel(hover_label);
+        }
+        if(lastclicked == null) {
+        let label = getlabel(atom);
+        atom._clicklabel =
+          viewer.addLabel(label,
+                    {position: atom, fontSize: 12, backgroundColor: "blue", backgroundOpacity: 0.75, alignment: "bottomCenter"});
+        lastclicked = atom;
+      } else {
+        viewer.removeLabel(lastclicked._clicklabel);
+        lastclicked._clicklabel = null;
+        if(lastclicked != atom) {
+          let start = new $3Dmol.Vector3(lastclicked.x, lastclicked.y, lastclicked.z);
+          let end = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+          let dlabel = null;
+          viewer.addCylinder({
+              dashed:true,
+              radius:.05,
+              dashLength:0.25,
+              gapLength:.15,
+              start:start,
+              end:end,
+              fromCap:2,
+              toCap:2,
+              color:"blue",
+              clickable: true,
+              callback: function(shape) {
+                viewer.removeShape(shape);
+                viewer.removeLabel(dlabel);
+              }
+          });
+          
+          let dist = $3Dmol.GLShape.distance_from(start,end);
+          let mid = start.add(end).multiplyScalar(.5);
+          dlabel = viewer.addLabel(dist.toFixed(3),{position: mid, fontSize: 12, backgroundColor: "blue", 
+            backgroundOpacity: 0.75, alignment: "bottomCenter", clickable: true,
+            callback: function() { console.log('hi');}});          
+        }
+        lastclicked = null;
+      }
+      viewer.render();
+    });
 };
 function run() {
     try {
