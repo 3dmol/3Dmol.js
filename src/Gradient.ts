@@ -381,15 +381,14 @@ export class CustomLinear extends GradientType {
   }
 }
 
-
 //map from names to gradient constructors
-export const builtinGradients = {
-  rwb: RWB,
-  RWB: RWB,
-  roygb: ROYGB,
-  ROYGB: ROYGB,
-  sinebow: Sinebow,
-  linear: CustomLinear
+export const builtinGradients  = {
+  "rwb": RWB,
+  "RWB": RWB,
+  "roygb": ROYGB,
+  "ROYGB": ROYGB,
+  "sinebow": Sinebow,
+  "linear": CustomLinear
 };
 
 export class Gradient extends GradientType {

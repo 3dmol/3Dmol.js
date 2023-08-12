@@ -12,13 +12,13 @@
         "cleverLinks": true,
         "monospaceLinks": false,
         "footer": "",
-        "copyright":"3Dmol.js © 2019-2022",
+        "copyright":"3Dmol.js © 2019-2023",
         "linenums"              : true,
         "collapseSymbols"       : false,
         "inverseNav"            : true,
         "highlightTutorialCode" : true,
          "better-docs": {
-             "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a>",
+             "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a><script async src=\"https://cse.google.com/cse.js?cx=5192956647d8a4a4b\"></script><div class=\"gcse-search\"></div>",
              "title": "3Dmol.js Documentation",
              "css": "../tutorials/style.css",
             "navLinks": [
