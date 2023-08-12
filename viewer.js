@@ -1015,7 +1015,7 @@ var glviewer = null;
 // http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
 // Process commands, in order, and run on viewer (array of strings split on '&')
 var runcmds = function (cmds, viewer, renderSurface) {
-    console.log("rendering")
+    //console.log("rendering")
     renderSurface = renderSurface == undefined ? true : renderSurface;
     if (renderSurface)
         viewer.removeAllSurfaces();
@@ -1154,7 +1154,7 @@ function run() {
             if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                 return;
             }
-            data = "http://files.rcsb.org/view/" + data
+            data = "https://files.rcsb.org/view/" + data
                 + ".pdb";
             type = "pdb";
         } if (src == 'cif') {
@@ -1162,7 +1162,7 @@ function run() {
             if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                 return;
             }
-            data = "http://files.rcsb.org/view/" + data
+            data = "https://files.rcsb.org/view/" + data
                 + ".cif";
             type = "cif";
         } else if (src == 'cid') {
@@ -1171,7 +1171,7 @@ function run() {
                 + data + "/SDF?record_type=3d";
         } else if (src == 'mmtf') {
             data = data.toUpperCase();
-            data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
+            data = 'https://mmtf.rcsb.org/full/' + data ;
             type = 'mmtf';
         } else { // url
             // try to extract extension
