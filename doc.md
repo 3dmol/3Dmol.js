@@ -15,20 +15,21 @@
 </script>
 
 3Dmol.js is an object-oriented, WebGL based JavaScript library for online molecular visualization - No Java required!
-With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. Features include:
+With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. 
 
-* support for pdb, sdf, mol2, xyz, and cube formats
-* parallelized molecular surface computation
-* sphere, stick, line, cross, cartoon, and surface styles
-* atom property based selection and styling
-* labels
-* clickable interactivity with molecular data
-* geometric shapes including spheres and arrows
+Features include:
+
+1. Support for pdb, sdf, mol2, xyz, and cube formats
+2. Parallelized molecular surface computation
+3. Sphere, stick, line, cross, cartoon, and surface styles
+4. Atom property based selection and styling
+5. Labels
+6. Clickable interactivity with molecular data
+7. Geometric shapes including spheres and arrows
 
 ## Getting Started
 
-Molecular data can be shared and visualized without writing any HTML
- using only a declarative URL specification and our hosted viewer (see {@tutorial url}).
+Molecular data can be shared and visualized without writing any HTML using only a declarative URL specification and our hosted viewer (see {@tutorial url}).
 
 Viewers can be quickly embedded in any HTML document using just two lines of source code (see {@tutorial embeddable}).
 

@@ -51,12 +51,15 @@
             "includeFilesListInHomepage": true,
             "homepageTitle": "3Dmol.js",
             "tutorials": "tutorials",
-            "title": "3Dmol.js Documentation",
+            "title": "3Dmol.js",
             "menu": [
                 {
-                    "title": "Home",
-                    "link": "https://3dmol.org/",
-                    "target": "_blank"
+                    "title": " Documentation",
+                    "link": "https://3dmol.org/doc/index.html"
+                },
+                {
+                    "title": "Tutorials",
+                    "link": "/doc/tutorial-code.html"
                 },
                 {
                   "title": "Github",
