@@ -22,6 +22,10 @@
       "text"
     ]
   },
+  "engines": {
+    "npm": ">=8.11",
+    "node": ">=16.16.0"
+  },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol.js",
   "types": "build/types/index.d.ts",
@@ -42,11 +46,8 @@
     "cover": "npm run generate:jest && npx jest --coverage",
     "doc": "npx jsdoc -c jsdoc.conf.json src doc.md"
   },
-  "engines": {
-    "npm": ">=8.11",
-    "node": ">=16.16.0"
-  },
   "dependencies": {
+    "clean-jsdoc-theme": "^4.2.9",
     "iobuffer": "^5.3.1",
     "netcdfjs": "^2.0.2",
     "pako": "^2.1.0",

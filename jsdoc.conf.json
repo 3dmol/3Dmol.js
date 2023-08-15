@@ -2,13 +2,17 @@
     "tags": {
         "allowUnknownTags": true
     },
-    "plugins": ["plugins/markdown",
-            "../../node_modules/better-docs/typescript",
-            "../../node_modules/better-docs/category"],
+    "plugins": [
+        "plugins/markdown",
+        "../../node_modules/better-docs/typescript",
+        "../../node_modules/better-docs/category"
+    ],
+    "recurseDepth": 10,
     "source": {
         "includePattern": "\\.(jsx|js|ts|tsx)$"
     },
     "templates": {
+        "search": true,
         "cleverLinks": true,
         "monospaceLinks": false,
         "footer": "",
@@ -18,9 +22,9 @@
         "inverseNav"            : true,
         "highlightTutorialCode" : true,
          "better-docs": {
-             "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a><script async src=\"https://cse.google.com/cse.js?cx=5192956647d8a4a4b\"></script><div class=\"gcse-search\"></div>",
-             "title": "3Dmol.js Documentation",
-             "css": "../tutorials/style.css",
+            "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a>",
+            "title": "3Dmol.js Documentation",
+            "css": "../tutorials/style.css",
             "navLinks": [
                 {
                     "label": "Github",
@@ -31,15 +35,36 @@
     },
     "markdown"  : {
         "parser"   : "gfm",
-        "hardwrap" : true
+        "hardwrap": true,
+        "idInHeadings": true
     },
     "opts":{
-        "recurse": true,
         "encoding": "utf8",
-        "template": "./node_modules/better-docs",
-        "destination": "doc",
+        "destination": "doc/",
+        "recurse": true,
+        "verbose": true,
+        "template": "./node_modules/clean-jsdoc-theme",
+        "copyright": "3Dmol.js © 2019-2023",
         "tutorials": "tutorials",
-        "search": true
-     },
-     "tutorials": "tutorials/"
+        "theme_opts": {
+            "default_theme": "light",
+            "includeFilesListInHomepage": true,
+            "homepageTitle": "3Dmol.js",
+            "tutorials": "tutorials",
+            "title": "3Dmol.js Documentation",
+            "menu": [
+                {
+                    "title": "Home",
+                    "link": "https://3dmol.org/",
+                    "target": "_blank"
+                },
+                {
+                  "title": "Github",
+                  "link": "https://github.com/3dmol/3Dmol.js",
+                  "target": "_blank"
+                }
+            ]
+        }
+    },
+    "tutorials": "tutorials/"
 }
