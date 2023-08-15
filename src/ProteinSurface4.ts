@@ -39,10 +39,14 @@ export enum SurfaceType {
 
 /** 
  * Render surface synchronously if true
- * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @param {boolean} [$3Dmol.syncSurface=false]
  * @type {boolean} */
 export var syncSurface = false;
 
+/**
+ * 
+ * @param {boolean} val - Whether surfaces should be rendered synchronously or in parallel.
+ */
 export function setSyncSurface(val:boolean) {
     syncSurface = val;
 }

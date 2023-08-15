@@ -31,6 +31,7 @@ $3Dmol.workerString = function(){
 
 // NOTE: variable replacement is simplified
 // (See: http://stackoverflow.com/questions/1661197/what-characters-are-valid-for-javascript-variable-names)
+$3Dmol.workerString += ";\nfunction _classCallCheck() {};"; //hack for babel
 $3Dmol.workerString += ";\n"+$3Dmol.Vector3.toString();
 $3Dmol.workerString += ";\n"+$3Dmol.MarchingCubeInitializer.toString()+";\nvar MarchingCube = new "+$3Dmol.MarchingCubeInitializer.name+"();";
 $3Dmol.workerString += ";\n"+$3Dmol.PointGrid.toString()+";\n";
