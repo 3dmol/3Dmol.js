@@ -22,6 +22,7 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
   var atom: any;
   var remainingLines = [];
 
+  // @ts-ignore
   var hasStruct = false;
   var serialToIndex: number[] = []; // map from pdb serial to index in atoms
   var line: string | string[];
@@ -30,6 +31,7 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
   for (let i = 0; i < lines.length; i++) {
     line = lines[i].replace(/^\s*/, ""); // remove indent
     var recordName = line.substring(0, 6);
+    // @ts-ignore
     var startChain: string, startResi: number, endChain: any, endResi: number;
 
     if (recordName.indexOf("END") == 0) {

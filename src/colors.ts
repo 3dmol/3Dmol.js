@@ -1,4 +1,4 @@
-import { Gradient, GradientType } from "./Gradient";
+import { GradientType } from "./Gradient";
 
 /* @interface
  *

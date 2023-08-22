@@ -71,6 +71,7 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
     var modelData: any[] = atoms.modelData = [];
 
     // setup index counters
+    // @ts-ignore
     var modelIndex = 0;
     var chainIndex = 0;
     var groupIndex = 0;
@@ -158,10 +159,12 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
                         secStructEnd = true;
                     }
                 }
+                // @ts-ignore
                 var insCode = null as string | null;
                 if (mmtfData.insCodeList) {
                     insCode = String.fromCharCode(insCodeList[groupIndex]);
                 }
+                // @ts-ignore
                 var sequenceIndex = null;
                 if (sequenceIndexList) {
                     sequenceIndex = sequenceIndexList[groupIndex];
@@ -171,8 +174,8 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
                 var groupName = groupData.groupName;
                 let groupType = groupData.chemCompType;
                 var startAtom = atomIndex;
-                //note the following is not identical to respecting HETATM records
-                //this information isn't available in MMTF.  
+                // Note the following is not identical to respecting HETATM records
+                // this information isn't available in MMTF.  
                 let isHETATM = mmtfHETATMtypes.has(groupType) || !chainIsPolymer[chainIndex];
 
                 for (k = 0; k < groupAtomCount; ++k) {

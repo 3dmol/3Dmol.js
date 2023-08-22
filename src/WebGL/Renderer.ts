@@ -69,6 +69,7 @@ export class Renderer {
   // GL state cache
   private _oldDoubleSided = -1 as number | boolean;
   private _oldFlipSided = -1 as number | boolean;
+  // @ts-ignore
   private _oldBlending = -1;
   private _oldDepthTest = -1;
   private _oldDepthWrite = -1;
@@ -1508,6 +1509,7 @@ export class Renderer {
   // Objects adding
 
   private addObject(object, scene) {
+    // @ts-ignore
     var g, gl, geometry, material, geometryGroup;
 
     if (!object.__webglInit) {
@@ -1797,10 +1799,12 @@ export class Renderer {
       b = 0,
       color,
       intensity,
+      // @ts-ignore
       distance,
       zlights = this._lights,
       dirColors = zlights.directional.colors,
       dirPositions = zlights.directional.positions,
+      // @ts-ignore
       dirCount = 0,
       dirLength = 0,
       dirOffset = 0;

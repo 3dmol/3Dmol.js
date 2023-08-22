@@ -2,7 +2,7 @@ import type { Material } from './../materials/Material';
 import { LineBasicMaterial } from '../materials/LineBasicMaterial';
 import { EventDispatcher } from "./EventDispatcher";
 import { Vector3 } from "../math";
-import { CC, Color, Colored } from "../../colors";
+import { CC, Color } from "../../colors";
 const BUFFERSIZE = 65535; //limited to 16bit indices
 export class GeometryGroup {
   id: number;
