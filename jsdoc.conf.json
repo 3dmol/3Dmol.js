@@ -20,18 +20,7 @@
         "linenums"              : true,
         "collapseSymbols"       : false,
         "inverseNav"            : true,
-        "highlightTutorialCode" : true,
-         "better-docs": {
-            "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a>",
-            "title": "3Dmol.js Documentation",
-            "css": "../tutorials/style.css",
-            "navLinks": [
-                {
-                    "label": "Github",
-                    "href": "https://github.com/3dmol/3Dmol.js"
-                }
-            ]
-        }
+        "highlightTutorialCode" : true
     },
     "markdown"  : {
         "parser"   : "gfm",
@@ -45,12 +34,10 @@
         "verbose": true,
         "template": "./node_modules/clean-jsdoc-theme",
         "copyright": "3Dmol.js © 2019-2023",
-        "tutorials": "tutorials",
         "theme_opts": {
             "default_theme": "light",
             "includeFilesListInHomepage": true,
             "homepageTitle": "3Dmol.js",
-            "tutorials": "tutorials",
             "title": "3Dmol.js",
             "menu": [
                 {
@@ -59,15 +46,14 @@
                 },
                 {
                     "title": "Tutorials",
-                    "link": "/doc/tutorial-code.html"
+                    "link": "/doc/tutorial-home.html"
                 },
                 {
-                  "title": "Github",
+                  "title": "GitHub",
                   "link": "https://github.com/3dmol/3Dmol.js",
                   "target": "_blank"
                 }
             ]
         }
-    },
-    "tutorials": "tutorials/"
+    }
 }

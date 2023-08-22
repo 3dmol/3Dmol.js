@@ -1,5 +1,4 @@
 
-
 You can view a PDB structure immediately by visiting the 3Dmol.js server.  Simply type `https://3Dmol.org/viewer.html` with an appropriately formatted [URL query string](http://en.wikipedia.org/wiki/Query_string) into your browser.
 
 A 3Dmol viewer URL takes the form `https://3Dmol.org/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific 3Dmol styles to apply.  Click the URL below for an example.
@@ -23,7 +22,6 @@ The URL query can be composed of three types of specifiers: a single **structure
 Specifiers are read in the order they are added, and are separated by an '&' character.
 
 
-
 #### Specifying a Structure ####
 
 The **structure identifier** portion of the URL is a single selector formatted as `pdb=[PDB ID]`, `cid=[PubChem CID]`, or `url=[URL]`
@@ -44,7 +42,6 @@ Arbitrary URLs can also be provided.
 
 Be default, the file format will be inferred by any extension (e.g., `.sdf`) present in the URL.  The file format may be
 manually specified using the type parameter, as shown above.
-
 
 
 </br>
