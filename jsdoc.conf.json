@@ -23,7 +23,6 @@
         "highlightTutorialCode" : true
     },
     "markdown"  : {
-        "parser"   : "gfm",
         "hardwrap": true,
         "idInHeadings": true
     },
@@ -38,6 +37,8 @@
             "default_theme": "light",
             "includeFilesListInHomepage": true,
             "homepageTitle": "3Dmol.js",
+            "displayModuleHeader": true,
+            "footer":"3Dmol.js © 2019-2023 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburg</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
             "title": "3Dmol.js",
             "menu": [
                 {
@@ -46,14 +47,25 @@
                 },
                 {
                     "title": "Tutorials",
-                    "link": "/doc/tutorial-home.html"
+                    "link": "tutorial-home.html"
                 },
                 {
                   "title": "GitHub",
                   "link": "https://github.com/3dmol/3Dmol.js",
                   "target": "_blank"
                 }
+            ],
+            "meta": [
+                {
+                    "name": "Author",
+                    "content": "David Koes & 3Dmoljs Contributors"
+                },
+                {
+                    "name": "Description",
+                    "content": "A modern, object-oriented JavaScript library for visualizing molecular data"
+                }
             ]
-        }
+        },
+        "tutorials": "tutorials/"
     }
 }
