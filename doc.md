@@ -19,13 +19,13 @@ With 3Dmol.js, you can add beautifully rendered molecular visualizations to your
 
 Features include:
 
-1. Support for pdb, sdf, mol2, xyz, and cube formats
-2. Parallelized molecular surface computation
-3. Sphere, stick, line, cross, cartoon, and surface styles
-4. Atom property based selection and styling
-5. Labels
-6. Clickable interactivity with molecular data
-7. Geometric shapes including spheres and arrows
+- Support for pdb, sdf, mol2, xyz, and cube formats
+- Parallelized molecular surface computation
+- Sphere, stick, line, cross, cartoon, and surface styles
+- Atom property based selection and styling
+- Labels
+- Clickable interactivity with molecular data
+- Geometric shapes including spheres and arrows
 
 ## Getting Started
 

@@ -40,6 +40,7 @@
             "displayModuleHeader": true,
             "footer":"3Dmol.js © 2019-2023 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburg</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
             "title": "3Dmol.js",
+            "create_style": "article ul li { list-style: disc}",
             "menu": [
                 {
                     "title": " Documentation",
