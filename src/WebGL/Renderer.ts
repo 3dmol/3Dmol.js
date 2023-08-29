@@ -69,7 +69,6 @@ export class Renderer {
   // GL state cache
   private _oldDoubleSided = -1 as number | boolean;
   private _oldFlipSided = -1 as number | boolean;
-  private _oldBlending = -1;
   private _oldDepthTest = -1;
   private _oldDepthWrite = -1;
   private _oldPolygonOffset = null;
@@ -327,7 +326,7 @@ export class Renderer {
     var flipSided = material.side === BackSide;
 
     if (!material.imposter)
-      //ignore reflection with imposters
+      // Ignore reflection with imposters
       flipSided = reflected ? !flipSided : flipSided;
 
     if (this._oldDoubleSided !== doubleSided) {
@@ -385,7 +384,6 @@ export class Renderer {
         this._gl.ONE_MINUS_SRC_ALPHA
       );
     }
-    this._oldBlending = blending;
   }
 
   // TODO: need to set up shader attributes and uniforms as attributes on
@@ -1508,7 +1506,7 @@ export class Renderer {
   // Objects adding
 
   private addObject(object, scene) {
-    var g, gl, geometry, material, geometryGroup;
+    var g, gl, geometry, geometryGroup;
 
     if (!object.__webglInit) {
       object.__webglInit = true;
@@ -1526,7 +1524,6 @@ export class Renderer {
 
       if (object instanceof Mesh || object instanceof Line) {
         geometry = object.geometry;
-        material = object.material;
 
         for (g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
           geometryGroup = geometry.geometryGroups[g];
@@ -1797,11 +1794,9 @@ export class Renderer {
       b = 0,
       color,
       intensity,
-      distance,
       zlights = this._lights,
       dirColors = zlights.directional.colors,
       dirPositions = zlights.directional.positions,
-      dirCount = 0,
       dirLength = 0,
       dirOffset = 0;
 
@@ -1810,10 +1805,8 @@ export class Renderer {
 
       color = light.color;
       intensity = light.intensity;
-      distance = light.distance;
 
       if (light instanceof Light) {
-        dirCount++;
 
         this._direction.getPositionFromMatrix(light.matrixWorld);
         this._vector3.getPositionFromMatrix(light.target.matrixWorld);
@@ -2005,7 +1998,6 @@ export class Renderer {
     this._currentGeometryGroupHash = -1;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
     this._oldDepthWrite = -1;
     this._oldDepthTest = -1;
     this._oldDoubleSided = -1;
@@ -2019,7 +2011,6 @@ export class Renderer {
     this._currentGeometryGroupHash = -1;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
     this._oldDepthWrite = -1;
     this._oldDepthTest = -1;
     this._oldDoubleSided = -1;

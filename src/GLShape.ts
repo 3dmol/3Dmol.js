@@ -10,9 +10,7 @@ import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mes
 import { CAP, GLDraw } from "./GLDraw"
 import { subdivide_spline } from "./glcartoon";
 import { adjustVolumeStyle, extend, Func, makeFunction } from "./utilities";
-import { Gradient, GradientType } from "./Gradient";
-import { LineStyleSpec } from "GLModel";
-import { VolumetricRendererSpec } from "VolumetricRender";
+import { GradientType } from "./Gradient";
 
 
 /**

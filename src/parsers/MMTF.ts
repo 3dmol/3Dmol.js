@@ -71,15 +71,12 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
     var modelData: any[] = atoms.modelData = [];
 
     // setup index counters
-    var modelIndex = 0;
     var chainIndex = 0;
     var groupIndex = 0;
     var atomIndex = 0;
 
     // setup optional fields
     var secStructList = mmtfData.secStructList;
-    var insCodeList = mmtfData.insCodeList;
-    var sequenceIndexList = mmtfData.sequenceIndexList;
     var bFactorList = mmtfData.bFactorList;
     var altLocList = mmtfData.altLocList;
     var occupancyList = mmtfData.occupancyList;
@@ -158,21 +155,12 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
                         secStructEnd = true;
                     }
                 }
-                var insCode = null as string | null;
-                if (mmtfData.insCodeList) {
-                    insCode = String.fromCharCode(insCodeList[groupIndex]);
-                }
-                var sequenceIndex = null;
-                if (sequenceIndexList) {
-                    sequenceIndex = sequenceIndexList[groupIndex];
-                }
-
                 var groupId = mmtfData.groupIdList[groupIndex];
                 var groupName = groupData.groupName;
                 let groupType = groupData.chemCompType;
                 var startAtom = atomIndex;
-                //note the following is not identical to respecting HETATM records
-                //this information isn't available in MMTF.  
+                // Note the following is not identical to respecting HETATM records
+                // this information isn't available in MMTF.  
                 let isHETATM = mmtfHETATMtypes.has(groupType) || !chainIsPolymer[chainIndex];
 
                 for (k = 0; k < groupAtomCount; ++k) {
@@ -303,8 +291,6 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
         if (options.multimodel) {
             if (!options.onemol) atoms.push([]);
         }
-
-        modelIndex += 1;
     }
 
     if (!noAssembly) {

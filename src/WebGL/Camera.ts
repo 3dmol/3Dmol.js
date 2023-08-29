@@ -1,4 +1,3 @@
-import type { Quaternion } from "./math";
 import { Object3D } from "./core";
 import { Matrix4, Vector3 } from "./math";
 /*

@@ -3,18 +3,17 @@ import {
   Texture,
   SpriteMaterial,
   Sprite,
-  Vector3,
   Vector2,
 } from "./WebGL";
 import { Gradient } from "./Gradient";
 import { Color, CC, ColorSpec } from "./colors";
 import {XYZ} from "./WebGL/math"
 
-//Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
+// Adapted from the text sprite example from http://stemkoski.github.io/Three.js/index.html
 
 export let LabelCount = 0;
 
-// function for drawing rounded rectangles - for Label drawing
+// Function for drawing rounded rectangles - for Label drawing
 function roundRect(ctx, x, y, w, h, r, drawBorder) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);

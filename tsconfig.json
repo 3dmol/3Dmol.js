@@ -8,7 +8,7 @@
     "allowJs": true,
     "sourceMap": true,
     "declaration": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "moduleResolution": "node",
     "lib": [
       "dom",
