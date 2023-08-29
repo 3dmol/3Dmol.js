@@ -1,0 +1,13 @@
+{
+    "postCreateCommand": "nvm install 16.16.0 && npm run build",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ritwickdey.LiveServer",
+                "github.vscode-github-actions",
+                "GitHub.vscode-pull-request-github",
+                "waderyan.gitblame"
+            ]
+        }
+    }
+}
