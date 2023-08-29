@@ -1506,7 +1506,6 @@ export class Renderer {
   // Objects adding
 
   private addObject(object, scene) {
-    // Remove
     var g, gl, geometry, geometryGroup;
 
     if (!object.__webglInit) {

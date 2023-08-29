@@ -71,8 +71,6 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
     var modelData: any[] = atoms.modelData = [];
 
     // setup index counters
-    // Remove
-    var modelIndex = 0;
     var chainIndex = 0;
     var groupIndex = 0;
     var atomIndex = 0;
@@ -293,8 +291,6 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
         if (options.multimodel) {
             if (!options.onemol) atoms.push([]);
         }
-
-        modelIndex += 1;
     }
 
     if (!noAssembly) {
