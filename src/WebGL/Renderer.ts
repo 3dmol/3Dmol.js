@@ -69,7 +69,7 @@ export class Renderer {
   // GL state cache
   private _oldDoubleSided = -1 as number | boolean;
   private _oldFlipSided = -1 as number | boolean;
-  // @ts-ignore
+  // Remove
   private _oldBlending = -1;
   private _oldDepthTest = -1;
   private _oldDepthWrite = -1;
@@ -328,7 +328,7 @@ export class Renderer {
     var flipSided = material.side === BackSide;
 
     if (!material.imposter)
-      //ignore reflection with imposters
+      // Ignore reflection with imposters
       flipSided = reflected ? !flipSided : flipSided;
 
     if (this._oldDoubleSided !== doubleSided) {
@@ -1509,7 +1509,7 @@ export class Renderer {
   // Objects adding
 
   private addObject(object, scene) {
-    // @ts-ignore
+    // Remove
     var g, gl, geometry, material, geometryGroup;
 
     if (!object.__webglInit) {
@@ -1799,13 +1799,9 @@ export class Renderer {
       b = 0,
       color,
       intensity,
-      // @ts-ignore
-      distance,
       zlights = this._lights,
       dirColors = zlights.directional.colors,
       dirPositions = zlights.directional.positions,
-      // @ts-ignore
-      dirCount = 0,
       dirLength = 0,
       dirOffset = 0;
 
@@ -1814,10 +1810,8 @@ export class Renderer {
 
       color = light.color;
       intensity = light.intensity;
-      distance = light.distance;
 
       if (light instanceof Light) {
-        dirCount++;
 
         this._direction.getPositionFromMatrix(light.matrixWorld);
         this._vector3.getPositionFromMatrix(light.target.matrixWorld);

@@ -22,8 +22,6 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
   var atom: any;
   var remainingLines = [];
 
-  // @ts-ignore
-  var hasStruct = false;
   var serialToIndex: number[] = []; // map from pdb serial to index in atoms
   var line: string | string[];
   var seenbonds: Record<any, any> = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
@@ -31,8 +29,8 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
   for (let i = 0; i < lines.length; i++) {
     line = lines[i].replace(/^\s*/, ""); // remove indent
     var recordName = line.substring(0, 6);
-    // @ts-ignore
-    var startChain: string, startResi: number, endChain: any, endResi: number;
+
+    var startChain: string, startResi: number, endResi: number;
 
     if (recordName.indexOf("END") == 0) {
       remainingLines = lines.slice(i + 1);
@@ -97,10 +95,8 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
         pdbline: line,
       });
     } else if (recordName == "SHEET ") {
-      hasStruct = true;
       startChain = line.substring(21, 22);
       startResi = parseInt(line.substring(22, 26));
-      endChain = line.substring(32, 33);
       endResi = parseInt(line.substring(33, 37));
       if (!(startChain in sslookup)) {
         sslookup[startChain] = {};
@@ -154,10 +150,8 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
         }
       }
     } else if (recordName == "HELIX ") {
-      hasStruct = true;
       startChain = line.substring(19, 20);
       startResi = parseInt(line.substring(21, 25));
-      endChain = line.substring(31, 32);
       endResi = parseInt(line.substring(33, 37));
       if (!(startChain in sslookup)) {
         sslookup[startChain] = {};
