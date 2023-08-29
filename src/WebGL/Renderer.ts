@@ -69,8 +69,6 @@ export class Renderer {
   // GL state cache
   private _oldDoubleSided = -1 as number | boolean;
   private _oldFlipSided = -1 as number | boolean;
-  // Remove
-  private _oldBlending = -1;
   private _oldDepthTest = -1;
   private _oldDepthWrite = -1;
   private _oldPolygonOffset = null;
@@ -386,7 +384,6 @@ export class Renderer {
         this._gl.ONE_MINUS_SRC_ALPHA
       );
     }
-    this._oldBlending = blending;
   }
 
   // TODO: need to set up shader attributes and uniforms as attributes on
@@ -1510,7 +1507,7 @@ export class Renderer {
 
   private addObject(object, scene) {
     // Remove
-    var g, gl, geometry, material, geometryGroup;
+    var g, gl, geometry, geometryGroup;
 
     if (!object.__webglInit) {
       object.__webglInit = true;
@@ -1528,7 +1525,6 @@ export class Renderer {
 
       if (object instanceof Mesh || object instanceof Line) {
         geometry = object.geometry;
-        material = object.material;
 
         for (g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
           geometryGroup = geometry.geometryGroups[g];
@@ -2003,7 +1999,6 @@ export class Renderer {
     this._currentGeometryGroupHash = -1;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
     this._oldDepthWrite = -1;
     this._oldDepthTest = -1;
     this._oldDoubleSided = -1;
@@ -2017,7 +2012,6 @@ export class Renderer {
     this._currentGeometryGroupHash = -1;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
     this._oldDepthWrite = -1;
     this._oldDepthTest = -1;
     this._oldDoubleSided = -1;

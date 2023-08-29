@@ -79,8 +79,6 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
 
     // setup optional fields
     var secStructList = mmtfData.secStructList;
-    var insCodeList = mmtfData.insCodeList;
-    var sequenceIndexList = mmtfData.sequenceIndexList;
     var bFactorList = mmtfData.bFactorList;
     var altLocList = mmtfData.altLocList;
     var occupancyList = mmtfData.occupancyList;
@@ -159,17 +157,6 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
                         secStructEnd = true;
                     }
                 }
-                // Remove
-                var insCode = null as string | null;
-                if (mmtfData.insCodeList) {
-                    insCode = String.fromCharCode(insCodeList[groupIndex]);
-                }
-                // Remove
-                var sequenceIndex = null;
-                if (sequenceIndexList) {
-                    sequenceIndex = sequenceIndexList[groupIndex];
-                }
-
                 var groupId = mmtfData.groupIdList[groupIndex];
                 var groupName = groupData.groupName;
                 let groupType = groupData.chemCompType;
