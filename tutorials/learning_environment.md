@@ -49,6 +49,3 @@ ProxyPassReverse /socket.io http://localhost:5000/socket.io
 
 The [flask-SocketIO documentation](https://flask-socketio.readthedocs.io/en/latest/) provides more information for running in other setups such as gunicorn, uwsgi, and nginx.
 
-
-
- 
