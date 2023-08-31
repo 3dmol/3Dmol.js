@@ -19,7 +19,7 @@ export function PQR(str: string, options: ParserOptionsSpec) {
       atoms.modelData = [{symmetries:[]}];
       var serialToIndex: number[] = []; // map from pdb serial to index in atoms
       var lines = str.split(/\r?\n|\r/);
-      var line: string | string[];
+      var line;
       for (let i = 0; i < lines.length; i++) {
           line = lines[i].replace(/^\s*/, ''); // remove indent
           var recordName = line.substring(0, 6);
@@ -38,7 +38,7 @@ export function PQR(str: string, options: ParserOptionsSpec) {
               // I would have liked to split based solely on whitespace, but
               // it seems that there is no guarantee that all the fields will
               // be filled out (e.g. the chain) so this doesn't work
-              var hetflag: boolean;
+              var hetflag;
               let serial = parseInt(line.substring(6, 11));
               let atom = line.substring(12, 16).replace(/ /g, "");
               let resn = line.substring(17, 20).trim();

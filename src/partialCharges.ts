@@ -171,11 +171,11 @@ export const partialCharges = {
 };
     
 //this can be supplied to mapAtomProperties
-export function applyPartialCharges(atom: Record<string, any>, keepexisting: boolean) {
+export function applyPartialCharges(atom, keepexisting) {
     if(!keepexisting || typeof(atom.partialCharge) === "undefined") {
         if(atom.resn && atom.atom) {
             var key = atom.resn+":"+atom.atom;
-            atom.properties.partialCharge = (partialCharges as any)[key];
+            atom.properties.partialCharge = partialCharges[key];
         }
     }
 };
