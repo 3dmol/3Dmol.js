@@ -49,7 +49,7 @@
   "dependencies": {
     "clean-jsdoc-theme": "^4.2.9",
     "iobuffer": "^5.3.1",
-    "netcdfjs": "^2.0.2",
+    "netcdfjs": "^3.0.0",
     "pako": "^2.1.0",
     "upng-js": "^2.1.0"
   },
