@@ -3,7 +3,7 @@ import { Sphere, Cylinder, Triangle } from "./WebGL/shapes";
 import { Vector3, XYZ } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
 import { DoubleSide } from "./WebGL";
-import { Color, CC, ColorSpec } from "./colors";
+import { Color, CC, ColorSpec, Colored } from "./colors";
 import { MarchingCube } from "./ProteinSurface4";
 import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
@@ -748,9 +748,9 @@ export class GLShape {
         sphereSpec.color = CC.color(sphereSpec.color);
 
         this.intersectionShape.sphere.push(new Sphere(sphereSpec.center, sphereSpec.radius));
-
-        GLDraw.drawSphere(this.geo, sphereSpec.center,
-            sphereSpec.radius, sphereSpec.color, sphereSpec.quality);
+ 
+         GLDraw.drawSphere(this.geo, sphereSpec.center,
+           sphereSpec.radius, sphereSpec.color as Colored, sphereSpec.quality);
 
         this.components.push({
             centroid: new Vector3(sphereSpec.center.x,

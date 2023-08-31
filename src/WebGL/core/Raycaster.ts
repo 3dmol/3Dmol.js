@@ -6,8 +6,6 @@ const descSort = (a: { distance: number; }, b: { distance: number; }) => {
   return a.distance - b.distance;
 };
 
-
-
 const viewProjectionMatrix = new Matrix4();
 
 export class Raycaster {
@@ -102,20 +100,20 @@ export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { i
   }
 
   //Iterate through intersection objects
-  var i,
-    il,
-    norm,
-    normProj,
-    cylProj,
-    rayProj,
-    distance,
-    closestDistSq,
-    denom,
-    discriminant,
-    s,
-    t,
-    s_c,
-    t_c;
+  var i: number,
+    il: number,
+    norm: Vector3,
+    normProj: number,
+    cylProj: number,
+    rayProj: number,
+    distance: number,
+    closestDistSq: number,
+    denom: number,
+    discriminant: number,
+    s: number,
+    t: number,
+    s_c: number,
+    t_c: number;
   //triangle faces
   for (i = 0, il = intersectionShape.triangle.length; i < il; i++) {
     if (intersectionShape.triangle[i] instanceof Triangle) {
