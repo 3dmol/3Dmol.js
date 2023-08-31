@@ -254,7 +254,7 @@ export class Scene extends Object3D {
   }
 
   __removeObject<T extends Object3D>(object: T) {
-    var idx: number;
+    var idx;
     if (object instanceof Light) {
       idx = this.__lights.indexOf(object as unknown as Light);
 

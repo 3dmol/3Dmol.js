@@ -96,7 +96,7 @@ export function MOL2(str: string, options: ParserOptionsSpec) {
 
     var start = atoms[atoms.length - 1].length;
     var end = start + natoms;
-    var line: string;
+    var line;
     // Process ATOMS
     for (i = start; i < end; i++) {
       line = lines[offset++];
