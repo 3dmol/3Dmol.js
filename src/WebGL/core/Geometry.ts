@@ -54,7 +54,7 @@ export class GeometryGroup {
   getCentroid() {
     if (!this.vertexArray) throw new Error("vertex array not initialized");
     var centroid = new Vector3();
-    var offset, x, y, z;
+    var offset: number, x: number, y: number, z: number;
 
     for (var i = 0; i < this.vertices; ++i) {
       offset = i * 3;
@@ -86,14 +86,14 @@ export class GeometryGroup {
     if (!norms) throw new Error("normal array not initialized");
 
     //vertex indices
-    var a,
-      b,
-      c,
+    var a: number,
+      b: number,
+      c: number,
       //and actual vertices
-      vA,
-      vB,
-      vC,
-      norm;
+      vA: Vector3,
+      vB: Vector3,
+      vC: Vector3,
+      norm: { normalize: () => void; x: number; y: number; z: number; };
 
     for (var i = 0; i < faces.length / 3; ++i) {
       a = faces[i * 3] * 3;
@@ -196,7 +196,7 @@ export class GeometryGroup {
         " coord Coordinate {\n" +
         indent +
         "  point [\n";
-      let x, y, z;
+      let x: string | number, y: string | number, z: string | number;
       for (let i = 0; i < this.vertices; ++i) {
         let offset = i * 3;
         x = this.vertexArray?.[offset];
@@ -240,7 +240,7 @@ export class GeometryGroup {
 
       //vertices
       ret += indent + " coord Coordinate {\n" + indent + "  point [\n";
-      let x, y, z;
+      let x: string | number, y: string | number, z: string | number;
       for (let i = 0; i < this.vertices; ++i) {
         let offset = i * 3;
         x = this.vertexArray?.[offset];

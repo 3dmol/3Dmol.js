@@ -1,6 +1,6 @@
 import { Sphere } from "./WebGL/shapes";
 import { Vector3, Matrix4 } from "./WebGL/math";
-import { VolumetricMaterial, Mesh, Texture, Object3D } from "./WebGL";
+import { VolumetricMaterial, Mesh, Texture, Object3D, Material } from "./WebGL";
 import { CC } from "./colors";
 import { GLShape } from "./GLShape";
 
@@ -31,8 +31,8 @@ export interface VolumetricRendererSpec {
  */
 export class GLVolumetricRender {
 
-    static interpolateArray(data, fitCount) {
-        function linearInterpolate(before, after, atPoint) {
+    static interpolateArray(data: string | any[], fitCount: number) {
+        function linearInterpolate(before: number, after: number, atPoint: number) {
             return before + (after - before) * atPoint;
         }
         var newData = [];
@@ -65,7 +65,7 @@ export class GLVolumetricRender {
     texmatrix: any;
     minunit: any;
 
-    constructor(data, spec) {
+    constructor(data: { matrix: { elements: any; }; size: { x: number; y: number; z: number; }; unit: { x: number; y: number; z: number; }; origin: { x: number; y: number; z: number; }; data: number[]; getIndex: (arg0: number, arg1: number, arg2: number) => number; }, spec: VolumetricRendererSpec) {
         spec = spec || {};
         var transferfn = Object.assign([], spec.transferfn);
         this.subsamples = spec.subsamples || 5.0;
@@ -73,8 +73,8 @@ export class GLVolumetricRender {
         let TRANSFER_BUFFER_SIZE = 256;
 
         // arrange points based on position property
-        transferfn.forEach(function (a) { a.value = parseFloat(a.value); });
-        transferfn.sort(function (a, b) { return a.value - b.value; });
+        transferfn.forEach(function (a: { value: any; }) { a.value = parseFloat(a.value); });
+        transferfn.sort(function (a: { value: number; }, b: { value: number; }) { return a.value - b.value; });
         this.min = transferfn[0].value;
         if (transferfn.length == 0) transferfn.push(transferfn[0]); //need at least two
         this.max = transferfn[transferfn.length - 1].value;
@@ -229,7 +229,7 @@ export class GLVolumetricRender {
      * @param {Object3D} group
      *
      */
-    globj(group) {
+    globj(group: { remove: (arg0: any) => void; add: (arg0: any) => void; }) {
 
         if (this.renderedShapeObj) {
             group.remove(this.renderedShapeObj);
@@ -260,14 +260,14 @@ export class GLVolumetricRender {
             subsamples: this.subsamples,
         });
 
-        var mesh = new Mesh(this.geo, material);
+        var mesh = new Mesh(this.geo, (material as Material));
         this.shapeObj.add(mesh);
 
         this.renderedShapeObj = this.shapeObj.clone();
         group.add(this.renderedShapeObj);
     };
 
-    removegl(group) {
+    removegl(group: { remove: (arg0: any) => void; }) {
         if (this.renderedShapeObj) {
             // dispose of geos and materials
             if (this.renderedShapeObj.geometry !== undefined)
