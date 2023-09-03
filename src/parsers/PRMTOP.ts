@@ -12,7 +12,7 @@
 
 export function PRMTOP(str: string /*, options*/) {
   var atoms = [];
-  var atomIndex;
+  var atomIndex: number;
   var count = 0;
   var lines = str.split(/\r?\n|\r/);
   if (lines.length > 0 && lines[0].includes("VERSION")) {
