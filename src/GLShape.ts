@@ -147,7 +147,7 @@ export class GLShape {
         nvecs[15] = nvecs[14].clone().add(nvecs[0]).normalize();
 
         var start = geoGroup.vertices;
-        var vertexArray = geoGroup.vertexArray;
+        var vertexArray = geoGroup.vertexArray as Float32Array;
         var faceArray = geoGroup.faceArray;
         var normalArray = geoGroup.normalArray;
         var lineArray = geoGroup.lineArray;
