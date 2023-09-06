@@ -4,11 +4,12 @@
 
 import { Vector3 } from "./WebGL/math";
 import { Triangle, Sphere } from "./WebGL/shapes";
-import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring } from "./WebGL";
+import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring, Object3D } from "./WebGL";
 import { Gradient } from "./Gradient";
-import { CC, ColorSpec } from "./colors";
+import { CC, Color, ColorSpec } from "./colors";
 import { GLDraw } from "./GLDraw";
 import { isNumeric, getColorFromStyle } from "./utilities";
+import { AtomSpec } from "specs";
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
@@ -53,7 +54,7 @@ export interface CartoonStyleSpec {
 
 // helper functions
 // Catmull-Rom subdivision
-export function subdivide_spline(_points, DIV) { // points as Vector3
+export function subdivide_spline(_points: string | any[], DIV: number) { // points as Vector3
     var ret = [];
     var points = _points;
     points = []; // Smoothing test
@@ -119,7 +120,7 @@ const nucleicAcidWidth = 0.8;
 const defaultThickness = 0.4;
 const baseThickness    = 0.4;
 
-function drawThinStrip(geo: Geometry, p1, p2, colors) {
+function drawThinStrip(geo: Geometry, p1: string | any[], p2: any[], colors: ColorSpec[]) {
 
     var offset, vertoffset;
     var color, colori;
@@ -169,7 +170,7 @@ function drawThinStrip(geo: Geometry, p1, p2, colors) {
 
 };
 
-function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, shape) {
+function drawShapeStrip(geo: Geometry, points: any[], colors: ColorSpec[], div: number, thickness: number, opacity: any, shape: string) {
 
     // points is a 2D array, dimensionality given by [num = cross-sectional
     // resolution][len = length of strip]
@@ -438,7 +439,7 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
 
 };
 
-function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
+function drawPlainStrip(geo: Geometry, points: any[], colors: ColorSpec[], div: number, thickness: number, opacity: number) {
     if ((points.length) < 2)
         return;
 
@@ -692,7 +693,7 @@ function drawPlainStrip(geo, points, colors, div, thickness, opacity) {
 };
 
 
-function drawStrip(geo, points, colors, div, thickness, opacity, shape) {
+function drawStrip(geo: Geometry, points: any[], colors: ColorSpec[], div: number, thickness: number, opacity: number, shape: string) {
     if (!shape || shape === "default")
         shape = "rectangle";
     if (shape === 'edged')
@@ -702,7 +703,7 @@ function drawStrip(geo, points, colors, div, thickness, opacity, shape) {
 };
 
 // check if given atom is an alpha carbon
-function isAlphaCarbon(atom) {
+function isAlphaCarbon(atom: AtomSpec) {
     return atom && atom.elem === "C" && atom.atom === "CA"; // note that
     // calcium is
     // also CA
@@ -710,7 +711,7 @@ function isAlphaCarbon(atom) {
 
 // check whether two atoms are members of the same residue or subsequent,
 // connected residues (a before b)
-function inConnectedResidues(a, b) {
+function inConnectedResidues(a: { chain: any; hetflag: any; reschain: any; resi: number; x: number; y: number; z: number; atom: string; }, b: { chain: any; hetflag: any; reschain: any; resi: number; x: number; y: number; z: number; atom: string; }) {
     if (a && b && a.chain === b.chain) {
         if (!a.hetflag && !b.hetflag && (a.reschain === b.reschain) &&
             (a.resi === b.resi || a.resi === b.resi - 1))
@@ -734,7 +735,7 @@ function inConnectedResidues(a, b) {
 };
 
 // add geo to the group
-function setGeo(group, geo, opacity, outline, setNormals) {
+function setGeo(group: Object3D, geo: Geometry, opacity: number, outline: boolean, setNormals: boolean) {
 
     if (geo == null || geo.vertices == 0) return;
     if (setNormals) {
@@ -753,8 +754,8 @@ function setGeo(group, geo, opacity, outline, setNormals) {
     group.add(cartoonMesh);
 };
 
-function addBackbonePoints(points, num, smoothen, backbonePt,
-    orientPt, prevOrientPt, backboneAtom, atoms, atomi) {
+function addBackbonePoints(points: Vector3[][], num: number, smoothen: boolean, backbonePt: Vector3,
+    orientPt: string | Vector3, prevOrientPt: Vector3, backboneAtom: AtomSpec, atoms: string | any[], atomi: number) {
     var widthScalar, i, delta, v, addArrowPoints, testStyle;
 
     if (!backbonePt || !orientPt || !backboneAtom)
@@ -887,17 +888,17 @@ const pyrResns = { "DT": true, "DC": true, "U": true, "C": true, "T": true };
 const naResns = { "DA": true, "DG": true, "A": true, "G": true, "DT": true, "DC": true, "U": true, "C": true, "T": true };
 
 
-export function drawCartoon(group, atomList, gradientrange, quality = 10) {
+export function drawCartoon(group: Object3D, atomList: AtomSpec[], gradientrange: any[], quality = 10) {
 
     let num = quality;
     let div = quality;
 
-    var cartoon, prev, curr, next, currColor, nextColor, thickness, i;
+    var cartoon, prev, curr, next, currColor, nextColor, thickness: number, i;
     var backbonePt, orientPt, prevOrientPt, terminalPt, termOrientPt, baseStartPt, baseEndPt;
     var tubeStart, tubeEnd, drawingTube;
     var shapeGeo = new Geometry(true); // for shapes that don't need normals computed
     var geo = new Geometry(true);
-    var colors = [];
+    var colors: ColorSpec[] = [];
     var points: any = [];
     var opacity = 1;
     var outline = false;
@@ -910,7 +911,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         }
     }
 
-    var cartoonColor = function (next, cartoon) { //atom and cartoon style object
+    var cartoonColor = function (next: AtomSpec, cartoon: CartoonStyleSpec) { //atom and cartoon style object
         if (gradientrange && cartoon.color === 'spectrum') {
             if (cartoon.colorscheme in gradients) {
                 return gradients[cartoon.colorscheme].valueToHex(next.resi);
@@ -972,7 +973,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         inHelix = false;
     }
 
-    var flushGeom = function (connect) {
+    var flushGeom = function (connect: boolean) {
         //write out points, update geom,etc
         if (points[0].length > 0) {
             drawStrip(geo, points, colors, div, thickness, opacity, points.style);
