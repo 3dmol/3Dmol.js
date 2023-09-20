@@ -466,7 +466,7 @@ export class GLViewer {
 
     //for grid viewers, return true if point is in this viewer
     private isInViewer(x: number, y: number) {
-        if (this.viewers != undefined && !this.control_all) {
+        if (this.viewers != undefined) {
             var width = this.WIDTH / this.cols;
             var height = this.HEIGHT / this.rows;
             var offset = this.canvasOffset();
@@ -590,8 +590,8 @@ export class GLViewer {
 
         this.setupRenderer();
 
-        this.row = this.config.row;
-        this.col = this.config.col;
+        this.row = this.config.row == undefined ? 0 : this.config.row;
+        this.col = this.config.col == undefined ? 0 : this.config.col;
         this.cols = this.config.cols;
         this.rows = this.config.rows;
         this.viewers = this.config.viewers;
@@ -670,14 +670,23 @@ export class GLViewer {
             returnsingle = true;
         }
 
+        let ratioX = this.renderer.getXRatio();
+        let ratioY = this.renderer.getYRatio();
+
+        let col = this.col;
+        let row = this.row;
+        let viewxoff = col*(this.WIDTH/ratioX);
+        //row is from bottom 
+        let viewyoff = (ratioY-row-1)*(this.HEIGHT/ratioY);
+
         let results = [];
         let offset = this.canvasOffset();
         coords.forEach(coord => {
             let t = new Vector3(coord.x, coord.y, coord.z);
             t.applyMatrix4(this.modelGroup.matrixWorld);
             this.projector.projectVector(t, this.camera);
-            let screenX = this.WIDTH * (t.x + 1) / 2.0 + offset.left;
-            let screenY = -this.HEIGHT * (t.y - 1) / 2.0 + offset.top;
+            let screenX = (this.WIDTH/ratioX) * (t.x + 1) / 2.0 + offset.left + viewxoff;
+            let screenY = -(this.HEIGHT/ratioY) * (t.y - 1) / 2.0 + offset.top + viewyoff;
             results.push({ x: screenX, y: screenY });
         });
         if (returnsingle) results = results[0];
@@ -902,11 +911,9 @@ export class GLViewer {
         if (this.isDragging && this.scene) { //saw mousedown, haven't moved
             var x = this.getX(ev);
             var y = this.getY(ev);
-            if (this.closeEnoughForClick(ev)) {
-                var offset = this.canvasOffset();
-                var mouseX = ((x - offset.left) / this.WIDTH) * 2 - 1;
-                var mouseY = -((y - offset.top) / this.HEIGHT) * 2 + 1;
-                this.handleClickSelection(mouseX, mouseY, ev);
+            if (this.closeEnoughForClick(ev) && this.isInViewer(x,y)) {
+                let mouse = this.mouseXY(x,y);
+                this.handleClickSelection(mouse.x, mouse.y, ev);
             }
         }
 
@@ -922,7 +929,7 @@ export class GLViewer {
         var y = this.getY(ev);
         if (x === undefined)
             return;
-        if (!this.isInViewer(x, y)) {
+        if (!this.control_all && !this.isInViewer(x, y)) {
             return;
         }
 
@@ -1026,43 +1033,64 @@ export class GLViewer {
         this.hoverDuration = duration;
     };
 
+    private mouseXY(x,y) {
+        //convert to -1..1 coordinates
+        let offset = this.canvasOffset();
+        let ratioX = this.renderer.getXRatio();
+        let ratioY = this.renderer.getYRatio();
+
+        let col = this.col;
+        let row = this.row;
+        let viewxoff = col*(this.WIDTH/ratioX);
+        //row is from bottom 
+        let viewyoff = (ratioY-row-1)*(this.HEIGHT/ratioY);
+
+        let mouseX = ((x - offset.left-viewxoff) / (this.WIDTH/ratioX)) * 2 - 1;
+        let mouseY = -((y - offset.top - viewyoff) / (this.HEIGHT/ratioY)) * 2 + 1; 
+
+        return {x: mouseX, y: mouseY};
+    }
+
     public _handleMouseMove(ev) { // touchmove
 
         clearTimeout(this.hoverTimeout);
-        var offset = this.canvasOffset();
-        var mouseX = ((this.getX(ev) - offset.left) / this.WIDTH) * 2 - 1;
-        var mouseY = -((this.getY(ev) - offset.top) / this.HEIGHT) * 2 + 1;
+        ev.preventDefault();
+
+
+        let x = this.getX(ev);
+        let y = this.getY(ev);
+        if (x === undefined)
+            return;
+
+        let ratioX = this.renderer.getXRatio();
+        let ratioY = this.renderer.getYRatio();
+
+        let mouse = this.mouseXY(x,y);
+
         let self = this;
         // hover timeout
         if (this.current_hover !== null) {
-            this.handleHoverContinue(mouseX, mouseY);
+            this.handleHoverContinue(mouse.x, mouse.y);
         }
+
+        var mode = 0;
+        if (!this.control_all && !this.isInViewer(x, y)) {
+            return;
+        }
+
+        if (!this.scene)
+            return;
 
         if (this.hoverables.length > 0) {
             this.hoverTimeout = setTimeout(
                 function () {
-                    self.handleHoverSelection(mouseX, mouseY, ev);
+                    self.handleHoverSelection(mouse.x, mouse.y, ev);
                 },
                 this.hoverDuration);
         }
 
-        ev.preventDefault();
-        if (!this.scene)
-            return;
         if (!this.isDragging)
             return;
-        var mode = 0;
-
-        var x = this.getX(ev);
-        var y = this.getY(ev);
-        if (x === undefined)
-            return;
-
-        if (!this.isInViewer(x, y)) {
-            return;
-        }
-
-
         var dx = (x - this.mouseStartX) / this.WIDTH;
         var dy = (y - this.mouseStartY) / this.HEIGHT;
         // check for pinch
@@ -1078,8 +1106,7 @@ export class GLViewer {
             // translate
             mode = 1;
         }
-        var ratioX = this.renderer.getXRatio();
-        var ratioY = this.renderer.getYRatio();
+
         dx *= ratioX;
         dy *= ratioY;
         var r = Math.hypot(dx, dy);
@@ -1127,8 +1154,10 @@ export class GLViewer {
             var x = this.mouseStartX;
             var y = this.mouseStartY;
             var offset = this.canvasOffset();
-            var mouseX = ((x - offset.left) / this.WIDTH) * 2 - 1;
-            var mouseY = -((y - offset.top) / this.HEIGHT) * 2 + 1;
+            let mouse = this.mouseXY(x,y);
+            let mouseX = mouse.x;
+            let mouseY = mouse.y;            
+
             let intersects = this.targetedObjects(mouseX, mouseY, this.contextMenuEnabledAtoms);
             var selected = null;
             if (intersects.length) {
@@ -4715,7 +4744,7 @@ export function createViewerGrid(element, config:ViewerGridSpec={}, viewer_confi
                 viewer_config.canvas = canvas;
                 viewer_config.viewers = viewers;
                 viewer_config.control_all = config.control_all;
-                var viewer = createViewer(element, viewer_config);
+                var viewer = createViewer(element, extend({},viewer_config));
                 row.push(viewer);
             }
             viewers.unshift(row); //compensate for weird ordering in renderer
