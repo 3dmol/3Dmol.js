@@ -39,10 +39,9 @@ view0.setHoverable(
     {},
     true,
     function(atom,viewer,event,container) {
-        console.log();
         if(!atom.label) {
         atom.label = viewer.addLabel(atom.atom,{position: atom, backgroundColor: 'mintcream', fontColor:'black'});
-        viewer.render();
+        viewer.render( );
         }},
     function(atom,viewer) {
         if(atom.label) {
@@ -56,10 +55,9 @@ view1.setHoverable(
     {},
     true,
     function(atom,viewer,event,container) {
-        console.log();
         if(!atom.label) {
         atom.label = viewer.addLabel(atom.atom,{position: atom, backgroundColor: 'cyan', fontColor:'black'});
-        viewer.render();
+        viewer.render( );
         }},
     function(atom,viewer) {
         if(atom.label) {
@@ -72,13 +70,13 @@ view1.setHoverable(
 view0.setClickable({},true,function(atom,viewer) {
     viewer.removeAllShapes();
     viewer.addSphere({center:atom,radius:1.0,color:'red',alpha:0.4});
-    viewer.render();
+    viewer.render( );
 });
 
 view1.setClickable({},true,function(atom,viewer) {
     viewer.removeAllShapes();
     viewer.addSphere({center:atom,radius:1.0,color:'purple',alpha:0.4});
-    viewer.render( );
+    viewer.render();
 });
 
 view0.zoomTo();
@@ -86,10 +84,17 @@ view1.zoomTo();
 view0.render( );
 view1.render( );
 
-let xy = view0.modelToScreen(view0.models[0].atoms[1])
+let xy = view0.modelToScreen(view0.models[0].atoms[1]);
+
 view0._handleMouseDown({pageX: xy.x, pageY: xy.y, preventDefault: function(){}});
 view0._handleMouseUp({pageX: xy.x, pageY: xy.y, preventDefault: function(){}});
 
-xy = view1.modelToScreen(view1.models[0].atoms[0])
+xy = view1.modelToScreen(view1.models[0].atoms[0]);
+
 view1._handleMouseDown({pageX: xy.x, pageY: xy.y, preventDefault: function(){}});
 view1._handleMouseUp({pageX: xy.x, pageY: xy.y, preventDefault: function(){}});
+
+if(isNaN(xy.x) || xy.x == 0) {
+    let viewer = view1;
+    viewer.render( callback); //presumably in coverage
+}
