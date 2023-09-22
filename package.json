@@ -34,7 +34,6 @@
     "build:dev": "webpack --config webpack.dev.js --mode development",
     "build:prod": "webpack --config webpack.prod.js --mode production",
     "prepare": "npm run build:dev  && npm run build:prod",
-    "postinstall": "npm run build",
     "jest": "npx jest --testPathIgnorePatterns=render.test.js",
     "test": "npm run generate:jest && npm run jest && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
