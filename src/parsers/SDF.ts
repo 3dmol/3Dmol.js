@@ -54,7 +54,7 @@ var parseV2000 = function (lines: any, options: ParserOptionsSpec) {
     }
     if (options.multimodel) {
       if (!options.onemol) atoms.push([]);
-      while (lines[offset] !== "$$$$") offset++;
+      while (lines[offset] !== "$$$$" && offset < lines.length) offset++;
       lines.splice(0, ++offset);
     } else {
       break;
@@ -148,7 +148,7 @@ var parseV3000 = function (lines: any, options: ParserOptionsSpec) {
       if (!options.onemol) {
         atoms.push([]);
       }
-      while (lines[offset] !== "$$$$") {
+      while (lines[offset] !== "$$$$" && offset < lines.length) {
         offset++;
       }
       lines.splice(0, ++offset);
