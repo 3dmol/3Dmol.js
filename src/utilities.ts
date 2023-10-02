@@ -1,12 +1,19 @@
 //a collection of miscellaneous utility functions
 
+import { AtomStyleSpec } from "GLModel";
+import { LabelSpec } from "Label";
+import { AtomSpec, AtomSelectionSpec } from "specs";
+import { Mesh } from "WebGL";
+import { LineStyleSpec, StickStyleSpec, SphereStyleSpec } from "GLModel";
+import { SurfaceStyleSpec } from "GLViewer";
+import { CartoonStyleSpec } from "glcartoon";
 import { builtinGradients, Gradient } from "./Gradient";
 import { VolumeData } from "./VolumeData";
 import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
-import { IsoSurfaceSpec } from "GLShape";
+import { ArrowSpec, BoxSpec, IsoSurfaceSpec } from "GLShape";
 
 //simplified version of jquery extend
-export function extend(obj1, src1) {
+export function extend(obj1: { [x: string]: any; }, src1: AtomSpec | BoxSpec | ArrowSpec) {
     for (var key in src1) {
         if (src1.hasOwnProperty(key) && src1[key] !== undefined) {
             obj1[key] = src1[key];
@@ -17,7 +24,7 @@ export function extend(obj1, src1) {
 
 //deep copy, cannot deal with circular refs; undefined input becomes an empty object
 //https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
-export function deepCopy(inObject) {
+export function deepCopy(inObject: AtomStyleSpec | LabelSpec) {
     let outObject, value, key;
 
     if (inObject == undefined) {
@@ -39,14 +46,14 @@ export function deepCopy(inObject) {
     return outObject;
 };
 
-export function isNumeric(obj) {
+export function isNumeric(obj: string | number) {
 
     var type = typeof (obj);
     return (type === "number" || type === "string") &&
         !isNaN(obj - parseFloat(obj));
 };
 
-export function isEmptyObject(obj) {
+export function isEmptyObject(obj: AtomSelectionSpec) {
     var name;
     for (name in obj) {
         return false;
@@ -88,7 +95,7 @@ export function adjustVolumeStyle(style: IsoSurfaceSpec) {
  * @param {AtomSpec[]} atomlist
  * @return {Array}
  */
-export function getExtent(atomlist, ignoreSymmetries?) {
+export function getExtent(atomlist: string | any[], ignoreSymmetries?: boolean) {
     var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
     var includeSym = !ignoreSymmetries;
 
@@ -142,7 +149,7 @@ export function getExtent(atomlist, ignoreSymmetries?) {
 * @param {string} prop - name of property 
 * @return {Array} - [min, max] values
 */
-export function getPropertyRange(atomlist, prop) {
+export function getPropertyRange(atomlist: string | any[], prop: unknown) {
     var min = Number.POSITIVE_INFINITY;
     var max = Number.NEGATIVE_INFINITY;
 
@@ -178,7 +185,7 @@ export class PausableTimer {
     fn: any;
     arg: any;
 
-    constructor(fn, countdown, arg?) {
+    constructor(fn: { (direction: any): void; (direction: any): void; (args_0: any): void; }, countdown: number, arg?: string) {
         this.fn = fn;
         this.arg = arg;
         this.countdown = countdown;
@@ -205,7 +212,7 @@ export class PausableTimer {
  * Convert a base64 encoded string to a Uint8Array
  * @param {string} base64 encoded string
  */
-export function base64ToArray(base64) {
+export function base64ToArray(base64: string) {
     var binary_string = window.atob(base64);
     var len = binary_string.length;
     var bytes = new Uint8Array(len);
@@ -217,7 +224,7 @@ export function base64ToArray(base64) {
 
 //return the value of an atom property prop, or null if non existent
 // looks first in properties, then in the atom itself
-export function getAtomProperty(atom, prop) {
+export function getAtomProperty(atom: AtomSpec, prop: string) {
     var val = null;
     if (atom.properties &&
         typeof (atom.properties[prop]) != "undefined") {
@@ -235,7 +242,7 @@ export function getAtomProperty(atom, prop) {
  * @param {$3Dmol.Mesh} mesh
  * @returns {undefined}
  */
-export function mergeGeos(geometry, mesh) {
+export function mergeGeos(geometry: { geometryGroups: any[]; }, mesh: Mesh) {
 
     var meshGeo = mesh.geometry;
 
@@ -262,7 +269,7 @@ export function mergeGeos(geometry, mesh) {
  * @param (String) str
  * @returns {Object}
  */
-export function specStringToObject(str) {
+export function specStringToObject(str: string) {
     if (typeof (str) === "object") {
         return str; //not string, assume was converted already
     }
@@ -280,7 +287,7 @@ export function specStringToObject(str) {
 
     str = str.replace(/%7E/g, '~'); //copy/pasting urls sometimes does this
     //convert things that look like numbers into numbers
-    var massage = function (val) {
+    var massage = function (val: string | string[]) {
         if (isNumeric(val)) {
             //hexadecimal does not parse as float
             if (Math.floor(parseFloat(val)) == parseInt(val)) {
@@ -337,7 +344,7 @@ export function specStringToObject(str) {
 
 
 
-function checkStatus(response) {
+function checkStatus(response: Response) {
     if (!response.ok) {
         throw new Error(`HTTP ${response.status} - ${response.statusText}`);
     }
@@ -350,7 +357,7 @@ function checkStatus(response) {
  * @param uri URL
  * @param callback Function to call with data 
  */
-export function get(uri, callback?) {
+export function get(uri: RequestInfo | URL, callback?: { (numFrames: any): Promise<void>; (value: any): any; }) {
     var promise = fetch(uri).then(checkStatus).then((response) => response.text());
     if (callback)
         return promise.then(callback);
@@ -367,7 +374,7 @@ export function get(uri, callback?) {
  * @param {string} [postdata] - data for POST request
  * @return {Promise}
  */
-export function getbin(uri, callback?, request?, postdata?) {
+export function getbin(uri: RequestInfo | URL, callback?: (value: any) => any, request?: string, postdata?: undefined) {
     var promise;
     if (request == "POST") {
         promise = fetch(uri, { method: 'POST', body: postdata })
@@ -401,7 +408,7 @@ export function getbin(uri, callback?, request?, postdata?) {
        viewer.render(callback);
     });
  */
-export function download(query, viewer, options, callback?) {
+export function download(query: string | number, viewer: { addModel: () => any; zoomTo: () => void; render: () => void; }, options: { pdbUri: string; noComputeSecondaryStructure: boolean; format: string; mmtfUri: string; }, callback?: (arg0: unknown) => void) {
     var type = "";
     var pdbUri = "";
     var mmtfUri = "";
@@ -475,7 +482,7 @@ export function download(query, viewer, options, callback?) {
             type = uri;
         }
 
-        var handler = function (ret) {
+        var handler = function (ret: string) {
             m.addMolData(ret, type, options);
             viewer.zoomTo();
             viewer.render();
@@ -529,7 +536,7 @@ export function download(query, viewer, options, callback?) {
  * @param {AtomStyle} style
  * @return {Color}
  */
-export function getColorFromStyle(atom, style): Color {
+export function getColorFromStyle(atom: AtomSpec, style: CartoonStyleSpec | LineStyleSpec | StickStyleSpec | SphereStyleSpec | SurfaceStyleSpec): Color {
     let scheme = style.colorscheme;
     if (typeof builtinColorSchemes[scheme] != "undefined") {
         scheme = builtinColorSchemes[scheme];
@@ -606,7 +613,7 @@ export function getColorFromStyle(atom, style): Color {
 };
 
 //given a string selector, element, or jquery object, return the HTMLElement
-export function getElement(element): HTMLElement | null {
+export function getElement(element: string): HTMLElement | null {
     let ret = element;
     if (typeof (element) === "string") {
         ret = document.querySelector("#" + element);
