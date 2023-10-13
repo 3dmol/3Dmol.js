@@ -46,7 +46,6 @@
     "doc": "rm -rf doc/ && npx jsdoc -c jsdoc.conf.json src doc.md"
   },
   "dependencies": {
-    "clean-jsdoc-theme": "^4.2.9",
     "iobuffer": "^5.3.1",
     "netcdfjs": "^3.0.0",
     "pako": "^2.1.0",
@@ -59,6 +58,7 @@
     "@types/pako": "^2.0.0",
     "better-docs": "github:3dmol/better-docs#master",
     "canvas": "^2.11.0",
+    "clean-jsdoc-theme": "^4.2.9",    
     "codecov": "^3.8.3",
     "del": "^7.0.0",
     "eslint": "^8.30.0",
