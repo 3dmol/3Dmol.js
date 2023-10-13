@@ -341,8 +341,6 @@ export type ColorschemeSpec = string | {
   /** map of a certain {@link AtomSpec} property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
  */
   map?: Record<string, unknown>
-  /**  Allows the user to provide a function for setting the colorschemes. */
-  colorfunc?: Function;
 };
 
 /** Preset secondary structure color scheme

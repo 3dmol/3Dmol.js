@@ -30,6 +30,8 @@ export interface CartoonStyleSpec {
     hidden?: boolean;
     /** strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;    
     /**  style of cartoon rendering (trace, oval, rectangle (default), parabola, edged) */
     style?: string;
     /**  whether to use constant strand width, disregarding

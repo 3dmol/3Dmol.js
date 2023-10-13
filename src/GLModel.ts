@@ -2835,6 +2835,8 @@ export interface LineStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring, overrides colorscheme */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;    
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
     /** wireframe style */
@@ -2857,6 +2859,8 @@ export interface CrossStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring, overrides colorscheme */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;        
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
 }
@@ -2874,6 +2878,8 @@ export interface StickStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring, overrides colorscheme */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;        
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
     /** display nonbonded atoms as spheres */
@@ -2894,6 +2900,8 @@ export interface SphereStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring, overrides colorscheme */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;        
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
 }
