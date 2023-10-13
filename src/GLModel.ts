@@ -2831,9 +2831,9 @@ export interface LineStyleSpec {
     hidden?: boolean;
     /** *deprecated due to vanishing browser support*  */
     linewidth?: number;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
     colorfunc?: Function;    
@@ -2855,9 +2855,9 @@ export interface CrossStyleSpec {
     radius?: number;
     /** scale VDW radius by specified amount */
     scale?: number;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
     colorfunc?: Function;        
@@ -2874,9 +2874,9 @@ export interface StickStyleSpec {
     radius?: number;
     /** draw all bonds as single bonds */
     singleBonds?: boolean;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
     colorfunc?: Function;        
@@ -2896,9 +2896,9 @@ export interface SphereStyleSpec {
     radius?: number;
     /** scale VDW radius by specified amount */
     scale?: number;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
     colorfunc?: Function;        

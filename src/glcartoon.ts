@@ -6,7 +6,7 @@ import { Vector3 } from "./WebGL/math";
 import { Triangle, Sphere } from "./WebGL/shapes";
 import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring } from "./WebGL";
 import { Gradient } from "./Gradient";
-import { CC, ColorSpec } from "./colors";
+import { CC, ColorSpec, ColorschemeSpec } from "./colors";
 import { GLDraw } from "./GLDraw";
 import { isNumeric, getColorFromStyle } from "./utilities";
 
@@ -28,6 +28,8 @@ import { isNumeric, getColorFromStyle } from "./utilities";
 export interface CartoonStyleSpec {
     /** do not show  */
     hidden?: boolean;
+    /** colorscheme to use on atoms; overrides color */
+    colorscheme?: ColorschemeSpec;    
     /** strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
