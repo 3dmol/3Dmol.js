@@ -75,7 +75,6 @@ export interface AtomSpec  {
   contextMenuEnabled?: boolean;
 };
 
-
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include
  * any field from {@link AtomSpec} in which case atoms must equal the specified value.
@@ -92,33 +91,35 @@ export interface AtomSpec  {
  *  viewer.render();
  * });
  */
-export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index"> {
-    /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
-    model?: GLModel | number |  GLModel[] | number[];
-    /** frame index of individual frame to style; will apply to all frames if not set */
-    frame?: number;
-    /** index of the atom or atoms to select */
-    index?: number | number[];
-    /** overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms */
-    bonds?: number;
-    /** user supplied function that gets passed an {@link AtomSpec} and should return true if the atom should be selected */
-    predicate?: (atom: AtomSpec) => boolean;
-    /** if set, inverts the meaning of the selection */
-    invert?: boolean;
-    /** if set, expands the selection to include all atoms of any residue that has any atom selected */
-    byres?: boolean;
-    /** expands the selection to include all atoms within a given distance from the selection */
-    expand?: number|string;
-    /** intersects the selection with the set of atoms within a given distance from another selection */
-    within?: WithinSelectionSpec;
-    /** take the intersection of the provided lists of {@link AtomSelectionSpec}s */
-    and?: AtomSelectionSpec[] & {__cached_results?: any};
-    /** take the union of the provided lists of {@link AtomSelectionSpec}s */
-    or?: AtomSelectionSpec[] & {__cached_results?: any};
-    /** take the inverse of the provided {@link AtomSelectionSpec} */
-    not?: AtomSelectionSpec;
-    contextMenuEnabled?: boolean;
-  };
+export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index"|"resi"> {
+  /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
+  model?: GLModel | number |  GLModel[] | number[];
+  /** frame index of individual frame to style; will apply to all frames if not set */
+  frame?: number;
+  /** index of the atom or atoms to select */
+  index?: number | number[];
+  /** overloaded to select number of bonds, e.g. {bonds: 0} will select all nonbonded atoms */
+  bonds?: number;
+  /** overloaded to allow ranges and lists of residues, e.g. {resi: "5-10"} or {resi: [5,10,32]} */
+  resi?: number | SelectionRange | (number | SelectionRange)[];
+  /** user supplied function that gets passed an {@link AtomSpec} and should return true if the atom should be selected */
+  predicate?: (atom: AtomSpec) => boolean;
+  /** if set, inverts the meaning of the selection */
+  invert?: boolean;
+  /** if set, expands the selection to include all atoms of any residue that has any atom selected */
+  byres?: boolean;
+  /** expands the selection to include all atoms within a given distance from the selection */
+  expand?: number|string;
+  /** intersects the selection with the set of atoms within a given distance from another selection */
+  within?: WithinSelectionSpec;
+  /** take the intersection of the provided lists of {@link AtomSelectionSpec}s */
+  and?: AtomSelectionSpec[] & {__cached_results?: any};
+  /** take the union of the provided lists of {@link AtomSelectionSpec}s */
+  or?: AtomSelectionSpec[] & {__cached_results?: any};
+  /** take the inverse of the provided {@link AtomSelectionSpec} */
+  not?: AtomSelectionSpec;
+  contextMenuEnabled?: boolean;
+};
 
 
 
@@ -142,3 +143,5 @@ export interface WithinSelectionSpec {
   /** the selection of atoms against which to measure the distance from the parent atom selection */
   sel?: AtomSelectionSpec;
 };
+
+export type SelectionRange = `${number}-${number}`;
