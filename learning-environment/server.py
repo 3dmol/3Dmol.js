@@ -8,7 +8,7 @@ eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio =  SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
+socketio =  SocketIO(app, async_mode='eventlet', cors_allowed_origins="*", max_http_buffer_size=1e8)
 
 sessions = {} # indexed by session name
 
