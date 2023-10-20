@@ -633,7 +633,7 @@ export class GLShape {
 
     boundingSphere: Sphere;
     intersectionShape: any;
-    color: any;
+    color: any = 0xffffff;
     hidden = false;
     wireframe = false;
     opacity = 1;

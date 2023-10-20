@@ -732,6 +732,9 @@ export class GLModel {
             return;
 
         var atomBondR = style.radius || this.defaultStickRadius;
+        var doubleBondScale = style.doubleBondScaling || 0.4;
+        var tripleBondScale = style.tripleBondScaling || 0.25;
+
         var bondR = atomBondR;
         var atomSingleBond = style.singleBonds || false;
         var fromCap = 0, toCap = 0;
@@ -839,7 +842,7 @@ export class GLModel {
                     v = this.getSideBondV(atom, atom2, i);
 
                     if (atom.bondOrder[i] == 2) {
-                        r = bondR / 2.5;
+                        r = bondR * doubleBondScale;
 
                         v.multiplyScalar(r * 1.5);
                         p1a = p1.clone();
@@ -889,7 +892,7 @@ export class GLModel {
                         }
                     }
                     else if (atom.bondOrder[i] == 3) {
-                        r = bondR / 4;
+                        r = bondR * tripleBondScale;
                         v.cross(dir);
                         v.normalize();
                         v.multiplyScalar(r * 3);
@@ -2872,6 +2875,10 @@ export interface StickStyleSpec {
     hidden?: boolean;
     /** radius of stick */
     radius?: number;
+    /** radius scaling factor for drawing double bonds (default 0.4) */
+    doubleBondScaling?: number;
+    /** radius scaling factor for drawing triple bonds (default 0.25) */
+    tripleBondScaling?: number;    
     /** draw all bonds as single bonds */
     singleBonds?: boolean;
     /** colorscheme to use on atoms; overrides color */
