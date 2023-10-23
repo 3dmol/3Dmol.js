@@ -54,7 +54,7 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/GLViewer.html
     '''
-    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.4/3Dmol-min.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.5/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
@@ -73,8 +73,7 @@ class view(object):
         if type(height) == int:
             height = '%dpx'%height
         self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s;">
-        <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab (or JavaScript failed to load for some other reason).  You need to install the 3dmol extension: <br>
-        <tt>jupyter labextension install jupyterlab_3dmol</tt></p>
+        <p id="%s" style="background-color:#ffcccc;color:black">3Dmol.js failed to load for some reason.  Please check your browser console for error messages.<br></p>
         </div>\n''' % (divid,width,height,warnid)
         self.startjs += '<script>\n'
         self.endjs = '</script>'
