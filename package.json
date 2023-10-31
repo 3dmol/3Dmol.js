@@ -58,7 +58,7 @@
     "@types/pako": "^2.0.0",
     "better-docs": "github:3dmol/better-docs#master",
     "canvas": "^2.11.0",
-    "clean-jsdoc-theme": "^4.2.9",    
+    "clean-jsdoc-theme": "github:3dmol/clean-jsdoc-theme#master",    
     "codecov": "^3.8.3",
     "del": "^7.0.0",
     "eslint": "^8.30.0",
