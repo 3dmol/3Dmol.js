@@ -706,30 +706,6 @@ export class GLModel {
         geoGroup.faceidx += 6;
     };
 
-    static drawDashedStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, dashLength: number, gapLength: number) {
-        dashLength = dashLength || 0.1;
-        gapLength = gapLength || 0.25;
-
-        var cylinderLength = Math.sqrt(Math.pow((from.x - to.x), 2) + Math.pow((from.y - to.y), 2) + Math.pow((from.z - to.z), 2));
-        var numDashes = Math.floor(cylinderLength / (gapLength + dashLength)) + 1;
-        var numGaps = numDashes - 1;
-
-        gapLength = (cylinderLength - (numDashes * dashLength)) / numGaps;
-
-        var new_from = new Vector3(from.x, from.y, from.z);
-        var new_to = new Vector3(to.x, to.y, to.z);
-
-        var gapVector = new Vector3((to.x - from.x) / (cylinderLength / gapLength), (to.y - from.y) / (cylinderLength / gapLength), (to.z - from.z) / (cylinderLength / gapLength));
-        var dashVector = new Vector3((to.x - from.x) / (cylinderLength / dashLength), (to.y - from.y) / (cylinderLength / dashLength), (to.z - from.z) / (cylinderLength / dashLength));
-
-        for (var place = 0; place < numDashes + numGaps; place++) {
-            new_to = new Vector3(new_from.x + dashVector.x, new_from.y + dashVector.y, new_from.z + dashVector.z);
-            // this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(new_from, new_to, radius));
-            GLModel.drawStickImposter(geo, new_from, new_to, radius, color);
-            new_from = new Vector3(new_to.x + gapVector.x, new_to.y + gapVector.y, new_to.z + gapVector.z);
-        }
-    };
-    
     // draws cylinders and small spheres (at bond radius)
     private drawBondSticks(atom: AtomSpec, atoms: AtomSpec[], geo: Geometry) {
         if (!atom.style.stick)
@@ -752,10 +728,10 @@ export class GLModel {
         if (!atom.capDrawn && atom.bonds.length < 4)
             fromCap = 2;
 
-        var drawCyl = function (bondOrder) {
-            if (geo.imposter) return (bondOrder < 1) ? GLModel.drawDashedStickImposter : GLModel.drawStickImposter;
-            return GLDraw.drawCylinder;
-        };
+        var drawCyl = GLDraw.drawCylinder; //mesh cylinder
+        if (geo.imposter)
+            drawCyl = GLModel.drawStickImposter;
+
 
         for (i = 0; i < atom.bonds.length; i++) {
             var j = atom.bonds[i]; // our neighbor
@@ -801,10 +777,10 @@ export class GLModel {
                     if (C1 != C2) {
                         mp = new Vector3().addVectors(p1, p2)
                             .multiplyScalar(0.5);
-                        drawCyl(atom.bondOrder[i])(geo, p1, mp, bondR, C1, fromCap, 0);
-                        drawCyl(atom.bondOrder[i])(geo, mp, p2, bondR, C2, 0, toCap);
+                        drawCyl(geo, p1, mp, bondR, C1, fromCap, 0);
+                        drawCyl(geo, mp, p2, bondR, C2, 0, toCap);
                     } else {
-                        drawCyl(atom.bondOrder[i])(geo, p1, p2, bondR, C1, fromCap, toCap);
+                        drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap);
                     }
 
 
@@ -864,13 +840,13 @@ export class GLModel {
                                 .multiplyScalar(0.5);
                             mp2 = new Vector3().addVectors(p1b, p2b)
                                 .multiplyScalar(0.5);
-                            drawCyl(atom.bondOrder[i])(geo, p1a, mp, r, C1, mfromCap, 0);
-                            drawCyl(atom.bondOrder[i])(geo, mp, p2a, r, C2, 0, mtoCap);
-                            drawCyl(atom.bondOrder[i])(geo, p1b, mp2, r, C1, mfromCap, 0);
-                            drawCyl(atom.bondOrder[i])(geo, mp2, p2b, r, C2, 0, mtoCap);
+                            drawCyl(geo, p1a, mp, r, C1, mfromCap, 0);
+                            drawCyl(geo, mp, p2a, r, C2, 0, mtoCap);
+                            drawCyl(geo, p1b, mp2, r, C1, mfromCap, 0);
+                            drawCyl(geo, mp2, p2b, r, C2, 0, mtoCap);
                         } else {
-                            drawCyl(atom.bondOrder[i])(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
-                            drawCyl(atom.bondOrder[i])(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
+                            drawCyl(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
+                            drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
                         }
 
                         atomneedsi = atom.clickable || atom.hoverable;
@@ -918,16 +894,16 @@ export class GLModel {
                                 .multiplyScalar(0.5);
                             mp3 = new Vector3().addVectors(p1, p2)
                                 .multiplyScalar(0.5);
-                            drawCyl(atom.bondOrder[i])(geo, p1a, mp, r, C1, mfromCap, 0);
-                            drawCyl(atom.bondOrder[i])(geo, mp, p2a, r, C2, 0, mtoCap);
-                            drawCyl(atom.bondOrder[i])(geo, p1, mp3, r, C1, fromCap, 0);
-                            drawCyl(atom.bondOrder[i])(geo, mp3, p2, r, C2, 0, toCap);
-                            drawCyl(atom.bondOrder[i])(geo, p1b, mp2, r, C1, mfromCap, 0);
-                            drawCyl(atom.bondOrder[i])(geo, mp2, p2b, r, C2, 0, mtoCap);
+                            drawCyl(geo, p1a, mp, r, C1, mfromCap, 0);
+                            drawCyl(geo, mp, p2a, r, C2, 0, mtoCap);
+                            drawCyl(geo, p1, mp3, r, C1, fromCap, 0);
+                            drawCyl(geo, mp3, p2, r, C2, 0, toCap);
+                            drawCyl(geo, p1b, mp2, r, C1, mfromCap, 0);
+                            drawCyl(geo, mp2, p2b, r, C2, 0, mtoCap);
                         } else {
-                            drawCyl(atom.bondOrder[i])(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
-                            drawCyl(atom.bondOrder[i])(geo, p1, p2, r, C1, fromCap, toCap);
-                            drawCyl(atom.bondOrder[i])(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
+                            drawCyl(geo, p1a, p2a, r, C1, mfromCap, mtoCap);
+                            drawCyl(geo, p1, p2, r, C1, fromCap, toCap);
+                            drawCyl(geo, p1b, p2b, r, C1, mfromCap, mtoCap);
                         }
 
                         atomneedsi = atom.clickable || atom.hoverable;
