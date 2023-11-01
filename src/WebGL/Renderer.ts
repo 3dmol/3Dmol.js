@@ -28,7 +28,7 @@ export class Renderer {
   cols: any;
   context = null;
   devicePixelRatio = 1.0; //set in setSize
-  domElement: Element;
+  domElement: HTMLCanvasElement;
   autoClear = true;
   autoClearColor = true;
   autoClearDepth = true;
@@ -69,7 +69,6 @@ export class Renderer {
   // GL state cache
   private _oldDoubleSided = -1 as number | boolean;
   private _oldFlipSided = -1 as number | boolean;
-  private _oldBlending = -1;
   private _oldDepthTest = -1;
   private _oldDepthWrite = -1;
   private _oldPolygonOffset = null;
@@ -215,6 +214,7 @@ export class Renderer {
     return {
       supportsAIA: Boolean(this._extInstanced),
       supportsImposters: Boolean(this._extFragDepth) || !this.isWebGL1(),
+      regen: false
     };
   }
 
@@ -326,7 +326,7 @@ export class Renderer {
     var flipSided = material.side === BackSide;
 
     if (!material.imposter)
-      //ignore reflection with imposters
+      // Ignore reflection with imposters
       flipSided = reflected ? !flipSided : flipSided;
 
     if (this._oldDoubleSided !== doubleSided) {
@@ -384,7 +384,6 @@ export class Renderer {
         this._gl.ONE_MINUS_SRC_ALPHA
       );
     }
-    this._oldBlending = blending;
   }
 
   // TODO: need to set up shader attributes and uniforms as attributes on
@@ -429,6 +428,7 @@ export class Renderer {
     // program
     // Also sets appropriate uniform variables
     program = this.setProgram(camera, lights, fog, material, object, this);
+    if(!program) return;
 
     attributes = program.attributes;
 
@@ -569,7 +569,7 @@ export class Renderer {
     }
   }
 
-  render(scene, camera, forceClear) {
+  render(scene, camera, forceClear?) {
     if (camera instanceof Camera === false) {
       console.error("Renderer.render: camera is not an instance of Camera.");
       return;
@@ -1196,6 +1196,8 @@ export class Renderer {
     if (type === "fragment") shader = this._gl.createShader(this._gl.FRAGMENT_SHADER);
     else if (type === "vertex") shader = this._gl.createShader(this._gl.VERTEX_SHADER);
 
+    if (shader == null) return null;
+
     this._gl.shaderSource(shader, str);
     this._gl.compileShader(shader);
 
@@ -1247,6 +1249,7 @@ export class Renderer {
     // Set up new program and compile shaders
 
     program = this._gl.createProgram();
+    if(program == null) return null;
 
     // set up precision
     var precision = this._precision;
@@ -1272,8 +1275,8 @@ export class Renderer {
     );
     var glVertexShader = this.getShader("vertex", prefix_vertex + vertexShader);
 
-    this._gl.attachShader(program, glVertexShader);
-    this._gl.attachShader(program, glFragmentShader);
+    if(glVertexShader != null)  this._gl.attachShader(program, glVertexShader);
+    if(glFragmentShader != null) this._gl.attachShader(program, glFragmentShader);
 
     this._gl.linkProgram(program);
 
@@ -1346,6 +1349,7 @@ export class Renderer {
       this.initMaterial(material, lights, fog, object);
       material.needsUpdate = false;
     }
+    if( material.program == null) return null;
 
     var refreshMaterial = false;
 
@@ -1502,7 +1506,7 @@ export class Renderer {
   // Objects adding
 
   private addObject(object, scene) {
-    var g, gl, geometry, material, geometryGroup;
+    var g, gl, geometry, geometryGroup;
 
     if (!object.__webglInit) {
       object.__webglInit = true;
@@ -1520,7 +1524,6 @@ export class Renderer {
 
       if (object instanceof Mesh || object instanceof Line) {
         geometry = object.geometry;
-        material = object.material;
 
         for (g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
           geometryGroup = geometry.geometryGroups[g];
@@ -1791,11 +1794,9 @@ export class Renderer {
       b = 0,
       color,
       intensity,
-      distance,
       zlights = this._lights,
       dirColors = zlights.directional.colors,
       dirPositions = zlights.directional.positions,
-      dirCount = 0,
       dirLength = 0,
       dirOffset = 0;
 
@@ -1804,10 +1805,8 @@ export class Renderer {
 
       color = light.color;
       intensity = light.intensity;
-      distance = light.distance;
 
       if (light instanceof Light) {
-        dirCount++;
 
         this._direction.getPositionFromMatrix(light.matrixWorld);
         this._vector3.getPositionFromMatrix(light.target.matrixWorld);
@@ -1846,7 +1845,7 @@ export class Renderer {
         !(this._gl = this._canvas.getContext("webgl2", {
           alpha: this._alpha,
           premultipliedAlpha: this._premultipliedAlpha,
-          antialias: false,
+          antialias: this._antialias,
           stencil: this._stencil,
           preserveDrawingBuffer: this._preserveDrawingBuffer,
         }))
@@ -1855,7 +1854,7 @@ export class Renderer {
           !(this._gl = this._canvas.getContext("experimental-webgl", {
             alpha: this._alpha,
             premultipliedAlpha: this._premultipliedAlpha,
-            antialias: false,
+            antialias: this._antialias,
             stencil: this._stencil,
             preserveDrawingBuffer: this._preserveDrawingBuffer,
           }))
@@ -1864,7 +1863,7 @@ export class Renderer {
             !(this._gl = this._canvas.getContext("webgl", {
               alpha: this._alpha,
               premultipliedAlpha: this._premultipliedAlpha,
-              antialias: false,
+              antialias: this._antialias,
               stencil: this._stencil,
               preserveDrawingBuffer: this._preserveDrawingBuffer,
             }))
@@ -1999,7 +1998,6 @@ export class Renderer {
     this._currentGeometryGroupHash = -1;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
     this._oldDepthWrite = -1;
     this._oldDepthTest = -1;
     this._oldDoubleSided = -1;
@@ -2013,7 +2011,6 @@ export class Renderer {
     this._currentGeometryGroupHash = -1;
     this._currentProgram = null;
     this._currentCamera = null;
-    this._oldBlending = -1;
     this._oldDepthWrite = -1;
     this._oldDepthTest = -1;
     this._oldDoubleSided = -1;

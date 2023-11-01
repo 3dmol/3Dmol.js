@@ -1,26 +1,25 @@
 
-
 You can view a PDB structure immediately by visiting the 3Dmol.js server.  Simply type `https://3Dmol.org/viewer.html` with an appropriately formatted [URL query string](http://en.wikipedia.org/wiki/Query_string) into your browser.
 
 A 3Dmol viewer URL takes the form `https://3Dmol.org/viewer.html?[query string]`, where the `query string` specifies a structure (i.e. a PDB ID) and specific 3Dmol styles to apply.  Click the URL below for an example.
 
-[`https://3Dmol.org/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=stick&labelres=backgroundOpacity:0.8;fontSize:14`](../viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14)
+<a href="../viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=cartoon;stick&labelres=backgroundOpacity:0.8;fontSize:14" style="word-wrap: break-word;">https://3Dmol.org/viewer.html?pdb=1YCR&select=chain:A&style=cartoon;stick:radius~0.1&surface=opacity:0.8;colorscheme:whiteCarbon&select=chain:B&style=cartoon;line&select=resi:19,23,26;chain:B&style=stick&labelres=backgroundOpacity:0.8;fontSize:14</a>
+
 
 #### Mouse Controls ####
 
-Movement | &nbsp;&nbsp;&nbsp;&nbsp; | Mouse Input | &nbsp;&nbsp;&nbsp;&nbsp; | Touch Input
----------|-|:------------|------------
-Rotation | |   Primary Mouse Button | | Single touch
-Translation | |    Middle Mouse Button or Ctrl+Primary | | Triple touch
-Zoom | | Scroll Wheel or Second Mouse Button or Shift+Primary | | Pinch (double touch)
-Slab | | Ctrl+Second | | Not Available
+| Movement    | Mouse Input                                          | Touch Input          |
+| ----------- | ---------------------------------------------------- | -------------------- |
+| Rotation    | Primary Mouse Button                                 | Single touch         |
+| Translation | Middle Mouse Button or Ctrl+Primary                  | Triple touch         |
+| Zoom        | Scroll Wheel or Second Mouse Button or Shift+Primary | Pinch (double touch) |
+| Slab        | Ctrl+Second                                          | Not Available        |
 
 
 ### Building a Query String ###
 
 The URL query can be composed of three types of specifiers: a single **structure identifier** that is optionally followed by a number of alternating **atom selectors** and **style specifications**. The viewer will load the specified structure, and then apply the selectors and style specifications.
 Specifiers are read in the order they are added, and are separated by an '&' character.
-
 
 
 #### Specifying a Structure ####
@@ -43,7 +42,6 @@ Arbitrary URLs can also be provided.
 
 Be default, the file format will be inferred by any extension (e.g., `.sdf`) present in the URL.  The file format may be
 manually specified using the type parameter, as shown above.
-
 
 
 </br>

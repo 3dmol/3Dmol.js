@@ -1,9 +1,10 @@
 import { bondLength } from "./bondLength";
 
 /*
- * return true if atom1 and atom2 are probably bonded to each other based on distance alone
- */
-export function areConnected(atom1, atom2) {
+ * Return true if atom1 and atom2 are probably bonded to each other based on distance alone
+*/
+
+export function areConnected(atom1: { elem: any; x: number; y: number; z: number; altLoc: string; }, atom2: { elem: any; x: number; y: number; z: number; altLoc: string; }) {
   var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
   maxsq += 0.25; // fudge factor, especially important for md frames, also see 1i3d
   maxsq *= maxsq;

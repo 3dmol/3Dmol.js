@@ -1,112 +1,110 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>3Dmol.js Viewer</title>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<script src="build/3Dmol-min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
- 
-<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
-<script src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.min.js"></script>
-
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="viewer.css">
-  <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
-  <script src="viewer.js"></script>
-  <script src="learning-environment/sessions.js"></script>
-  
-<script>
-    (function(i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r;
-        i[r] = i[r] || function() {
-            (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date();
-        a = s.createElement(o), m = s.getElementsByTagName(o)[0];
-        a.async = 1;
-        a.src = g;
-        m.parentNode.insertBefore(a, m)
-    })(window, document, 'script', '//www.google-analytics.com/analytics.js',
+    <title>3Dmol.js Viewer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <script src="build/3Dmol-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.js" integrity="sha512-jMNwWSmjje4fjYut9MBGKXw5FZA6D67NHAuC9szpjbbjg51KefquNfvn4DalCbGfkcv/jHsHnPo1o47+8u4biA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"
+        integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" integrity="sha512-Qlv6VSKh1gDKGoJbnyA5RMXYcvnpIqhO++MhIM2fStMcGT9i2T//tSwYFlcyoRRDcDZ+TYHpH8azBBCyhpSeqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.css" integrity="sha512-LDB28UFxGU7qq5q67S1iJbTIU33WtOJ61AVuiOnM6aTNlOLvP+sZORIHqbS9G+H40R3Pn2wERaAeJrXg+/nu6g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="viewer.css">
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+        integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=" crossorigin="anonymous"></script>
+    <script src="viewer.js"></script>
+    <script src="learning-environment/sessions.js"></script>
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js',
             'ga');
 
-    ga('create', 'UA-55629183-1', 'auto');
-    ga('send', 'pageview');
-</script>
-
+        ga('create', 'UA-55629183-1', 'auto');
+        ga('send', 'pageview');
+    </script>
 </head>
+
 <body>
-<span id="menu"  onclick="toggleHide();">&#9776;</span>
-<div id="sessionbutton"><img src="learning-environment/share.png" width=32></div>
-<div id="sessionconnect" class="rightdialog">
-<div>
-<button id="sessionconnectbutton" disabled>Create</button> Session: <input type=text size=10 id="session_name_input">
-<span id="sessionconnectclose" class="close">&times;</span>
-</div>
-</div>
-
-<div id="sessioncontrol" class="rightdialog">
-    <div class="sessionname">Session</div>
-<div>
-    <button id="askbutton">Query Atoms</button>
-	<div id="sessioncontrolinfo">
-	    <div id = "userinfo" class="infotext">Users: 0</div>
-	    <div style="display:inline-block"><span id = "responseinfo" class="infotext"></span><span id="refreshresults">&#8635;</span></div>
-	</div>
-
-<span id="sessiondestroy" class="close">&times;</span>
-</div>
-</div>
-
-<div id="sessionmonitor" class="rightdialog">
-    <div class="sessionname">Session</div>
-<div>
-<span id = "sessionmonitorinfo"></span>
-<span id="sessionleave" class="close">&times;</span>
-</div>
-</div>
-
-<div id="selectmessage">Select atom(s)</div>
-
-<div id="sidenav" class="ui-widget-content">
-  <div class="header">
-    <div class="heading">
-    <span>3Dmol Viewer</span>
-      <a href="javascript:void(0)" class="closebtn" onclick="toggleHide()">&#x2715;</a>
-    </div>
-  </div>
-  <div class="center">
-  <ul id="list">
-    <li class="option"  style="pointer-events:auto;">
-        <h3>File/PDB/URL</h3>
-        <div class="container">
-            <label>Model Type: </label>
-            <select id="model_type">
-                <option value="pdb">PDB</option>
-                <option value="url">URL</option>
-                <option value="cid">CID</option>
-            </select>
-            <br>
-            <span><label>Query: </label><input id="model_input"></input></span>
+    <span id="menu" onclick="toggleHide();">&#9776;</span>
+    <div id="sessionbutton"><img src="learning-environment/share.png" width=32></div>
+    <div id="sessionconnect" class="rightdialog">
+        <div>
+            <button id="sessionconnectbutton" disabled>Create</button> Session: <input type=text size=10
+                id="session_name_input">
+            <span id="sessionconnectclose" class="close">&times;</span>
         </div>
-        <br>
-    </li>
-    <li id="selections" class="option" style="pointer-events:auto">
-        <h3>Selections</h3>
-        <div id="container">
-            <ul id="selection_list">
-
+    </div>
+    <div id="sessioncontrol" class="rightdialog">
+        <div class="sessionname">Session</div>
+        <div>
+            <button id="askbutton">Query Atoms</button>
+            <div id="sessioncontrolinfo">
+                <div id="userinfo" class="infotext">Users: 0</div>
+                <div style="display:inline-block"><span id="responseinfo" class="infotext"></span><span
+                        id="refreshresults">&#8635;</span></div>
+            </div>
+            <span id="sessiondestroy" class="close">&times;</span>
+        </div>
+    </div>
+    <div id="sessionmonitor" class="rightdialog">
+        <div class="sessionname">Session</div>
+        <div>
+            <span id="sessionmonitorinfo"></span>
+            <span id="sessionleave" class="close">&times;</span>
+        </div>
+    </div>
+    <div id="selectmessage">Select atom(s)</div>
+    <div id="sidenav" class="ui-widget-content">
+        <div class="header">
+            <div class="heading">
+                <span>3Dmol Viewer</span>
+                <a href="javascript:void(0)" class="closebtn" onclick="toggleHide()">&#x2715;</a>
+            </div>
+        </div>
+        <div class="center">
+            <ul id="list">
+                <li class="option" style="pointer-events:auto;">
+                    <h3>File/PDB/URL</h3>
+                    <div class="container">
+                        <label>Model Type: </label>
+                        <select id="model_type">
+                            <option value="pdb">PDB</option>
+                            <option value="url">URL</option>
+                            <option value="cid">CID</option>
+                        </select>
+                        <br>
+                        <span><label>Query: </label><input id="model_input"></input></span>
+                    </div>
+                    <br>
+                </li>
+                <li id="selections" class="option" style="pointer-events:auto">
+                    <h3>Selections</h3>
+                    <div id="container">
+                        <ul id="selection_list">
+                        </ul>
+                    </div>
+                </li>
             </ul>
         </div>
-    </li>
-     
-</ul>
-</div>
-<div class="footer">
-    <button id="addStyle" onclick="addSelection('style')">Add Style</button><button id="addSurface" onclick="addSelection('surface')">Add Surface</button><button id="addLabelRes" onclick="addSelection('labelres')">Add LabelRes</button>
-    <button id="savePng" onclick="savePng();">Save PNG</button><button onclick="center();" id="centerModel">Center</button><button onclick="vrml();" id="vrmlExport">VRML</button>
-</div>
-</div>
-<div id='gldiv' style="width: 100%; height: 100vh;"></div>
+        <div class="footer">
+            <button id="addStyle" onclick="addSelection('style')">Add Style</button><button id="addSurface"
+                onclick="addSelection('surface')">Add Surface</button><button id="addLabelRes"
+                onclick="addSelection('labelres')">Add LabelRes</button>
+            <button id="savePng" onclick="savePng();">Save PNG</button><button onclick="center();"
+                id="centerModel">Center</button><button onclick="vrml();" id="vrmlExport">VRML</button>
+        </div>
+    </div>
+    <div id='gldiv' style="width: 100%; height: 100vh;"></div>
 </body>
+
 </html>

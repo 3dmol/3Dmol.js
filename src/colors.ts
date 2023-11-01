@@ -1,7 +1,7 @@
-import { Gradient, GradientType } from "./Gradient";
+import { GradientType } from "./Gradient";
 
 /* @interface
- * 
+ *
  */
 export interface Colored {
   r: number;
@@ -13,14 +13,14 @@ export interface Colored {
 export type ColorConstructorArg = number | Color | Colored | undefined;
 
 
-/** 
+/**
  * @class
-   * 
+   *
    * @param r red 8bit number or numeric value of full color
    * @param g green 8bit number
    * @param b blue 8bit number
    */
- 
+
 export class Color implements Colored {
   r: number = 0.0;
   g: number = 0.0;
@@ -168,7 +168,7 @@ export class CC {
 }
 
 
-export const htmlColors = {
+export const htmlColors: Record<string, ColorSpec> = {
   aliceblue: 0xf0f8ff,
   antiquewhite: 0xfaebd7,
   aqua: 0x00ffff,
@@ -319,13 +319,13 @@ export const htmlColors = {
   yellowgreen: 0x9acd32,
 };
 
-/** 
+/**
  * Color representation. A hex number, html color name, or object with r/g/b properties
  */
 export type ColorSpec =  number | string | Colored;
 
 /**
-*  Colorscheme specification. 
+*  Colorscheme specification.
 *  @see builtinColorSchemes
 */
 export type ColorschemeSpec = string | {
@@ -335,14 +335,12 @@ export type ColorschemeSpec = string | {
   /**  {AtomSpec} property to use for gradient calculation.  E.g., 'b' for temperature factors of a PDB. */
   prop?: string;
   /** mid point value for gradient (for rwb) */
-  mid?: number; 
+  mid?: number;
   /** Custom colors for gradient (for {@link CustomLinear}) */
-  colors?: Array<ColorSpec>; 
+  colors?: Array<ColorSpec>;
   /** map of a certain {@link AtomSpec} property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
  */
   map?: Record<string, unknown>
-  /**  Allows the user to provide a function for setting the colorschemes. */
-  colorfunc?: Function; 
 };
 
 /** Preset secondary structure color scheme
@@ -354,7 +352,7 @@ export const ssColors = {
   Jmol: { h: 0xff0080, s: 0xffc800, c: 0xffffff },
 };
 
-const rasmol = {
+const rasmol: Record<string, ColorSpec> = {
   H: 0xffffff,
   He: 0xffc0cb,
   HE: 0xffc0cb,
@@ -615,44 +613,44 @@ export const elementColors = {
     HS: 0xe6002e,
     Mt: 0xeb0026,
     MT: 0xeb0026,
-  },
+  } as Record<string, ColorSpec>,
   /** rasmol-like element colors */
   rasmol,
   defaultColors: {
     ...rasmol,
-  },
+  } as Record<string, ColorSpec>,
   greenCarbon: {
     ...rasmol,
     C: 0x00ff00,
-  },
+  } as Record<string, ColorSpec>,
   cyanCarbon: {
     ...rasmol,
     C: 0x00ffff,
-  },
+  } as Record<string, ColorSpec>,
   magentaCarbon: {
     ...rasmol,
     C: 0xff00ff,
-  },
+  } as Record<string, ColorSpec>,
   yellowCarbon: {
     ...rasmol,
     C: 0xffff00,
-  },
+  } as Record<string, ColorSpec>,
   whiteCarbon: {
     ...rasmol,
     C: 0xffffff,
-  },
+  } as Record<string, ColorSpec>,
   orangeCarbon: {
     ...rasmol,
     C: 0xffa500,
-  },
+  } as Record<string, ColorSpec>,
   purpleCarbon: {
     ...rasmol,
     C: 0x800080,
-  },
+  } as Record<string, ColorSpec>,
   blueCarbon: {
     ...rasmol,
     C: 0x0000ff,
-  },
+  } as Record<string, ColorSpec>,
 };
 
 export const residues = {
@@ -681,7 +679,7 @@ export const residues = {
     VAL: 0x0f820f,
     ASX: 0xff69b4,
     GLX: 0xff69b4,
-  },
+  } as Record<string, ColorSpec>,
 
   /** @property shapely amino acid color scheme*/
   shapely: {
@@ -707,7 +705,7 @@ export const residues = {
     VAL: 0xff8cff,
     ASX: 0xff00ff,
     GLX: 0xff00ff,
-  },
+  } as Record<string, ColorSpec>,
 
   /** @property nucleic acid color scheme*/
   nucleic: {
@@ -717,7 +715,7 @@ export const residues = {
     C: 0xff8c4b,
     T: 0xa0ffa0,
     U: 0xff8080,
-  },
+  } as Record<string, ColorSpec>,
 };
 
 export const chains = {
@@ -749,7 +747,7 @@ export const chains = {
     X: 0x008080,
     Y: 0xb8860b,
     Z: 0xb22222,
-  },
+  } as Record<string, ColorSpec>,
 
   /** @property hetatm color scheme */
   hetatm: {
@@ -779,7 +777,7 @@ export const chains = {
     X: 0x00b0b0,
     Y: 0xe8b613,
     Z: 0xc23232,
-  },
+  } as Record<string, ColorSpec>,
 };
 
 /**
@@ -792,7 +790,7 @@ export const chains = {
    @prop shapely - amino acid coloring
    @prop nucleic - nucleic acid coloring
    @prop chain - color by chain
-   @prop rasmol - rasmol default element coloring 
+   @prop rasmol - rasmol default element coloring
    @prop default - default element coloring
    @prop greenCarbon - default element coloring with green carbon
    @prop cyanCarbon - default element coloring with cyan carbon
@@ -803,7 +801,7 @@ export const chains = {
    @prop yellowCarbon - default element coloring with yellow carbon
    @prop blueCarbon - default element coloring with blue carbon
    @prop chainHetatm - color chains
- * 
+ *
  * @example window.$3Dmol.download("pdb:4UAA",viewer,{},function(){
  *    viewer.setBackgroundColor(0xffffffff);
  *    var colorAsSnake = function(atom) {

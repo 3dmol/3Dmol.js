@@ -1,3 +1,5 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
+
 /** 
  * This parses the ChemDoodle json file format. Although this is registered
  * for the json file extension, other chemical json file formats exist that
@@ -7,14 +9,15 @@
  * @param {string} str
  * @param {ParserOptionsSpec} options
  * @category Parsers
- */
-export function CDJSON(str, options) {
+*/
+
+export function CDJSON(str: string, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   if (typeof str === "string") {
     // Str is usually automatically parsed by JQuery
     str = JSON.parse(str);
   }
-  var molecules = str.m;
+  var molecules = (str as any).m;
   var atomsInFile = molecules[0].a; // Assumes there is at least one
   var bondsInFile = molecules[0].b; // molecule and ignores any more
   // Ignores any shapes
@@ -40,7 +43,7 @@ export function CDJSON(str, options) {
     atom.bondOrder = [];
 
     var elem = currentAtom.l || "C";
-    atom.elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+    atom.elem = elem[0].toUpperCase() + elem.substring(1).toLowerCase();
 
     atom.serial = atoms[atoms.length - 1].length;
     if (parseStyle) {

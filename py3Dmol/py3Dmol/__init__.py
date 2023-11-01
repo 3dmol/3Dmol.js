@@ -1,6 +1,7 @@
 import time
 import json
 import sys
+import re
 
 try:
     import IPython.display
@@ -53,7 +54,7 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/GLViewer.html
     '''
-    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdn.jsdelivr.net/npm/3dmol@latest/build/3Dmol-min.min.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.5/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
@@ -71,9 +72,8 @@ class view(object):
             width = '%dpx'%width
         if type(height) == int:
             height = '%dpx'%height
-        self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s">
-        <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab (or JavaScript failed to load for some other reason).  You need to install the 3dmol extension: <br>
-        <tt>jupyter labextension install jupyterlab_3dmol</tt></p>
+        self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s;">
+        <p id="%s" style="background-color:#ffcccc;color:black">3Dmol.js failed to load for some reason.  Please check your browser console for error messages.<br></p>
         </div>\n''' % (divid,width,height,warnid)
         self.startjs += '<script>\n'
         self.endjs = '</script>'
@@ -208,6 +208,31 @@ if(warn) {
         self.updatejs = ''
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
 
+
+    def write_html(self, f=None, fullpage=False):
+      '''Write html to reproduce viewer in a web page to a file.
+      f -- file name (str) or writeable file object; if unspecified html string is returned
+      fullpage -- instead of specified width/height make viewer fill the web page
+      '''
+      
+      if f == None:
+        return self._make_html()
+        
+      if type(f) == str:
+        f = open(f,'wt')
+      html = self._make_html()
+      html = f'''<html>
+<body style="margin: 0; padding: 0; display: block;">
+{html}
+</body>
+</html>'''
+      if fullpage:
+        html = re.sub(r'width: (\S+);', 'width: 100%;', html)
+        html = re.sub(r'height: (\S+);', 'height: 100vh;', html)
+        
+      f.write(html)
+      
+      
     @using_ipython
     def png(self):
         '''output png image of viewer, which must already be instantiated'''
@@ -281,35 +306,47 @@ if(warn) {
         if name.startswith('_') or name == 'getdoc': #object to ipython canary functions
             raise AttributeError("%r object has no attribute %r" %  (self.__class__, name))
             
+        print_result = False
+        if name.startswith('print_to_console_'):
+            print_result = True
+            name = name[17:]
+
         def makejs(*args,**kwargs):
+
+            def make_viewer_cmd(vname, name, *args, **kwargs):
+                cmd = '\t'
+                if print_result:
+                    cmd += 'console.log('
+                cmd += f'{vname}.{name}('
+                for arg in args:
+                    cmd += '%s,' % tostr(arg)
+                cmd = cmd.rstrip(',')
+                if print_result:
+                    cmd += ')'                         
+                cmd += ');\n'
+       
+                return cmd
+
             if self.viewergrid:
                 if kwargs and 'viewer' in kwargs:
                     coords = kwargs['viewer']
                     if len(coords) != 2 or coords[0] >= self.viewergrid[0] or coords[1] >= self.viewergrid[1] or coords[0] < 0 or coords[1] < 0:
                         raise ValueError("Incorrectly formated viewer argument.  Must specify row and column",self.viewergrid)
-                    cmd = '\tviewergrid_UNIQUEID[%d][%d].%s(' % (coords[0],coords[1],name);
-                    for arg in args:
-                        cmd += '%s,' % tostr(arg)
-                    cmd = cmd.rstrip(',')
-                    cmd += ');\n';
+                    cmd = make_viewer_cmd('viewergrid_UNIQUEID[%d][%d]'%(coords[0],coords[1]),name,*args,**kwargs)
                 else: #apply to every viewer
                     cmd = ''
                     for r in range(self.viewergrid[0]):
                         for c in range(self.viewergrid[1]):
-                            cmd += '\tviewergrid_UNIQUEID[%d][%d].%s(' % (r,c,name);
-                            for arg in args:
-                                cmd += '%s,' % tostr(arg)
-                            cmd = cmd.rstrip(',')
-                            cmd += ');\n';
+                            cmd += make_viewer_cmd('viewergrid_UNIQUEID[%d][%d]'%(r,c),name,*args,**kwargs)
             else:
-                cmd = '\tviewer_UNIQUEID.%s(' % name;
-                for arg in args:
-                    cmd += '%s,' % tostr(arg)
-                cmd = cmd.rstrip(',')
-                cmd += ');\n';
+                cmd = make_viewer_cmd('viewer_UNIQUEID',name,*args,**kwargs)
 
             self.startjs += cmd
             self.updatejs += cmd
-            return self
+            if print_result:
+                self.update()
+                return "Inspect the JavaScript console for your requested result."
+            else:
+                return self
 
         return makejs

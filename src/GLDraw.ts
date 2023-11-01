@@ -1,5 +1,6 @@
 import { Vector3 } from "./WebGL/math";
 import { Geometry } from "./WebGL";
+import { Color, Colored } from "colors";
 
 
 //define enum values
@@ -17,6 +18,11 @@ export enum CAP {
     ROUND = 2
 };
 
+export interface Point {
+    x: number;
+    y: number;
+    z: number;
+}
 
 /**
  * Lower level utilities for creating WebGL shape geometries.
@@ -29,7 +35,7 @@ export namespace GLDraw {
     // according to y basis vector
     // TODO: Try to optimize this (square roots?)
     function getRotationMatrix(dx: number, dy: number, dz: number) {
-        var dxy = Math.sqrt(dx * dx + dy * dy);
+        var dxy = Math.hypot(dx, dy);
         var dyz;
 
         var sinA, cosA, sinB, cosB;
@@ -48,7 +54,7 @@ export namespace GLDraw {
         // recast dy in terms of new axes - z is the same
 
         dy = -sinA * dx + cosA * dy;
-        dyz = Math.sqrt(dy * dy + dz * dz);
+        dyz = Math.hypot(dy, dz);
 
         // about new x axis - Theta
 
@@ -124,7 +130,7 @@ export namespace GLDraw {
             this.basisVectors = nvecs;
         };
 
-        getVerticesForRadius(radius, cap, capType) {
+        getVerticesForRadius(radius: any, cap: CAP, capType: any) {
             if (typeof (this.cache) !== "undefined" && this.cache[radius] !== undefined)
                 if (this.cache[radius][cap + capType] !== undefined)
                     return this.cache[radius][cap + capType];
@@ -272,17 +278,16 @@ export namespace GLDraw {
 
     var cylVertexCache = new CylVertexCache();
 
-
     /** 
      * Create a cylinder 
      * @memberof GLDraw 
-     * @param {geometry}
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            from
      * @param {Point}
      *            to
-     * @param {float}
+     * @param {number}
      *            radius
      * @param {Color}
      *            color
@@ -290,13 +295,13 @@ export namespace GLDraw {
      * @param {CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
-    export function drawCylinder(geo: Geometry, from, to, radius: number, color, fromCap:CAP = 0, toCap:CAP = 0) {
+    export function drawCylinder(geo: Geometry, from: any, to: any, radius: number, color: Color | Color[], fromCap:CAP = 0, toCap:CAP = 0) {
         if (!from || !to)
             return;
 
         // vertices
         var drawcaps = toCap || fromCap;
-        color = color || { r: 0, g: 0, b: 0 };
+        color = color || ({ r: 0, g: 0, b: 0 } as Color);
 
         var e = getRotationMatrix(to.x-from.x, to.y-from.y, to.z-from.z);
         // get orthonormal vectors from cache
@@ -355,12 +360,12 @@ export namespace GLDraw {
             normalArray[offset + 5] = z;
 
             // colors
-            colorArray[offset] = color.r;
-            colorArray[offset + 3] = color.r;
-            colorArray[offset + 1] = color.g;
-            colorArray[offset + 4] = color.g;
-            colorArray[offset + 2] = color.b;
-            colorArray[offset + 5] = color.b;
+            colorArray[offset] = (color as Color).r;
+            colorArray[offset + 3] = (color as Color).r;
+            colorArray[offset + 1] = (color as Color).g;
+            colorArray[offset + 4] = (color as Color).g;
+            colorArray[offset + 2] = (color as Color).b;
+            colorArray[offset + 5] = (color as Color).b;
 
             // faces
             // 0 - 2 - 1
@@ -445,20 +450,20 @@ export namespace GLDraw {
                     vertexArray[v3offset + 2] = z3 + cap.z;
                     vertexArray[v4offset + 2] = z4 + cap.z;
 
-                    colorArray[v1offset] = color.r;
-                    colorArray[v2offset] = color.r;
-                    colorArray[v3offset] = color.r;
-                    colorArray[v4offset] = color.r;
+                    colorArray[v1offset] = (color as Color).r;
+                    colorArray[v2offset] = (color as Color).r;
+                    colorArray[v3offset] = (color as Color).r;
+                    colorArray[v4offset] = (color as Color).r;
 
-                    colorArray[v1offset + 1] = color.g;
-                    colorArray[v2offset + 1] = color.g;
-                    colorArray[v3offset + 1] = color.g;
-                    colorArray[v4offset + 1] = color.g;
+                    colorArray[v1offset + 1] = (color as Color).g;
+                    colorArray[v2offset + 1] = (color as Color).g;
+                    colorArray[v3offset + 1] = (color as Color).g;
+                    colorArray[v4offset + 1] = (color as Color).g;
 
-                    colorArray[v1offset + 2] = color.b;
-                    colorArray[v2offset + 2] = color.b;
-                    colorArray[v3offset + 2] = color.b;
-                    colorArray[v4offset + 2] = color.b;
+                    colorArray[v1offset + 2] = (color as Color).b;
+                    colorArray[v2offset + 2] = (color as Color).b;
+                    colorArray[v3offset + 2] = (color as Color).b;
+                    colorArray[v4offset + 2] = (color as Color).b;
 
                     nx1 = e[0] * normals[v1].x + e[3] * normals[v1].y + e[6] * normals[v1].z;
                     nx2 = e[0] * normals[v2].x + e[3] * normals[v2].y + e[6] * normals[v2].z;
@@ -569,24 +574,24 @@ export namespace GLDraw {
 
     /** Create a cone 
      * @memberof GLDraw
-     * @param {geometry}
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            from
      * @param {Point}
      *            to
-     * @param {float}
+     * @param {number}
      *            radius
      * @param {Color}
      *            color
      *            */
-    export function drawCone (geo: Geometry, from, to, radius: number, color?) {
+    export function drawCone (geo: Geometry, from: any, to: any, radius: number, color?: Color) {
         if (!from || !to)
             return;
 
-        //TODO: check if from and to do not contain x,y,z and if  so generate a center based on the passed selections
+        // TODO: check if from and to do not contain x,y,z and if  so generate a center based on the passed selections
 
-        color = color || { r: 0, g: 0, b: 0 };
+        color = color || ({ r: 0, g: 0, b: 0 } as Color);
 
         let ndir = new Vector3(to.x-from.x, to.y-from.y, to.z-from.z);
         var e = getRotationMatrix(ndir.x, ndir.y, ndir.z);
@@ -679,13 +684,18 @@ export namespace GLDraw {
         geoGroup.faceidx += 6 * n;
     };
 
+    interface MyObject {
+        vertices: any[];
+        verticesRows: any[][];
+        normals: any[];
+     }
 
     // Sphere component sphereVertexCache
     class  SphereVertexCache {
         private cache = new Map<number, Map<number, any>>(); //sphereQuality then radius
         constructor() {}
 
-        getVerticesForRadius(radius, sphereQuality) {
+        getVerticesForRadius(radius: number, sphereQuality: any) {
             sphereQuality = sphereQuality || 2;
 
             if (!this.cache.has(sphereQuality))  {
@@ -695,7 +705,7 @@ export namespace GLDraw {
             if (radiusCache.has(radius))
                 return radiusCache.get(radius);
 
-            var obj = {
+            var obj: MyObject = {
                 vertices: [],
                 verticesRows: [],
                 normals: []
@@ -753,17 +763,18 @@ export namespace GLDraw {
 
     /** Create a sphere.
      * @memberof GLDraw
-     * @param {geometry}
+     * @param {Geometry}
      *            geo
      * @param {Point}
      *            pos
-     * @param {float}
+     * @param {number}
      *            radius
      * @param {Color}
      *            color
-     * @param {number} quality of sphere (default 2, higher increases number of triangles)
+     * @param {number} 
+     *            sphereQuality - Quality of sphere (default 2, higher increases number of triangles)
      */
-    export function drawSphere(geo:Geometry, pos, radius, color, sphereQuality?) {
+    export function drawSphere(geo:Geometry, pos: any, radius: number, color: Colored, sphereQuality?: number) {
 
         var vobj = sphereVertexCache.getVerticesForRadius(radius, sphereQuality);
 
@@ -787,9 +798,9 @@ export namespace GLDraw {
             vertexArray[offset + 1] = (v.y + pos.y);
             vertexArray[offset + 2] = (v.z + pos.z);
 
-            colorArray[offset] = color.r;
-            colorArray[offset + 1] = color.g;
-            colorArray[offset + 2] = color.b;
+            colorArray[offset] = (color as Colored).r;
+            colorArray[offset + 1] = (color as Colored).g;
+            colorArray[offset + 2] = (color as Colored).b;
 
         }
 

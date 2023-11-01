@@ -39,10 +39,14 @@ export enum SurfaceType {
 
 /** 
  * Render surface synchronously if true
- * @param {boolean} [$3Dmol.SyncSurface=false]
+ * @param {boolean} [$3Dmol.syncSurface=false]
  * @type {boolean} */
 export var syncSurface = false;
 
+/**
+ * 
+ * @param {boolean} val - Whether surfaces should be rendered synchronously or in parallel.
+ */
 export function setSyncSurface(val:boolean) {
     syncSurface = val;
 }
@@ -754,6 +758,15 @@ export class ProteinSurface {
     faces: number[] = [];
     verts = [];
 
+    static MarchingCube = new MarchingCubeInitializer();
+
+    constructor() {
+        if(!ProteinSurface.MarchingCube) {
+            //this is needed by webworkers
+            ProteinSurface.MarchingCube = new MarchingCubeInitializer();
+        }
+    }
+
     readonly vdwRadii = {
             "H" : 1.2,
             "Li" : 1.82,
@@ -1402,10 +1415,10 @@ export class ProteinSurface {
         }
     };
     
-    public marchingcube(stype) {
+    public marchingcube(stype:number) {
         this.marchingcubeinit(stype);
         this.verts = []; this.faces = [];   
-        MarchingCube.march(this.vpBits, this.verts, this.faces, {
+        ProteinSurface.MarchingCube.march(this.vpBits, this.verts, this.faces, {
             smooth : 1,
             nX : this.pLength,
             nY : this.pWidth,
@@ -1418,7 +1431,7 @@ export class ProteinSurface {
                     this.verts[i].y + this.verts[i].z];
         }  
 
-        MarchingCube.laplacianSmooth(1, this.verts, this.faces);
+        ProteinSurface.MarchingCube.laplacianSmooth(1, this.verts, this.faces);
 
     };
 

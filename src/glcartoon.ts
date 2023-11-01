@@ -6,7 +6,7 @@ import { Vector3 } from "./WebGL/math";
 import { Triangle, Sphere } from "./WebGL/shapes";
 import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring } from "./WebGL";
 import { Gradient } from "./Gradient";
-import { CC, ColorSpec } from "./colors";
+import { CC, ColorSpec, ColorschemeSpec } from "./colors";
 import { GLDraw } from "./GLDraw";
 import { isNumeric, getColorFromStyle } from "./utilities";
 
@@ -28,8 +28,12 @@ import { isNumeric, getColorFromStyle } from "./utilities";
 export interface CartoonStyleSpec {
     /** do not show  */
     hidden?: boolean;
+    /** colorscheme to use on atoms; overrides color */
+    colorscheme?: ColorschemeSpec;    
     /** strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;    
     /**  style of cartoon rendering (trace, oval, rectangle (default), parabola, edged) */
     style?: string;
     /**  whether to use constant strand width, disregarding
@@ -117,6 +121,7 @@ const coilWidth = 0.5;
 const helixSheetWidth = 1.3;
 const nucleicAcidWidth = 0.8;
 const defaultThickness = 0.4;
+const baseThickness    = 0.4;
 
 function drawThinStrip(geo: Geometry, p1, p2, colors) {
 
@@ -1126,7 +1131,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                                 curr.y, curr.z);
 
                         GLDraw.drawCylinder(shapeGeo, baseStartPt,
-                            baseEndPt, 0.4, CC
+                            baseEndPt, baseThickness, CC
                                 .color(baseEndPt.color), 0, 2);
                         addBackbonePoints(points, num,
                             true, terminalPt, termOrientPt,
@@ -1164,7 +1169,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                         baseStartPt.add(startFix);
 
                         GLDraw.drawCylinder(shapeGeo, baseStartPt,
-                            baseEndPt, 0.4, CC
+                            baseEndPt, baseThickness, CC
                                 .color(baseEndPt.color), 0, 2);
                         baseStartPt = null;
                         baseEndPt = null;
@@ -1247,7 +1252,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         else
             baseStartPt = new Vector3(curr.x, curr.y, curr.z);
 
-        GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, 0.4,
+        GLDraw.drawCylinder(shapeGeo, baseStartPt, baseEndPt, baseThickness,
             CC.color(baseEndPt.color), 0, 2);
         addBackbonePoints(points, num, true, terminalPt,
             termOrientPt, prevOrientPt, curr, atoms, a);

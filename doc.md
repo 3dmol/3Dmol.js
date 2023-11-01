@@ -15,20 +15,21 @@
 </script>
 
 3Dmol.js is an object-oriented, WebGL based JavaScript library for online molecular visualization - No Java required!
-With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. Features include:
+With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. 
 
-* support for pdb, sdf, mol2, xyz, and cube formats
-* parallelized molecular surface computation
-* sphere, stick, line, cross, cartoon, and surface styles
-* atom property based selection and styling
-* labels
-* clickable interactivity with molecular data
-* geometric shapes including spheres and arrows
+Features include:
+
+- Support for pdb, sdf, mol2, xyz, and cube formats
+- Parallelized molecular surface computation
+- Sphere, stick, line, cross, cartoon, and surface styles
+- Atom property based selection and styling
+- Labels
+- Clickable interactivity with molecular data
+- Geometric shapes including spheres and arrows
 
 ## Getting Started
 
-Molecular data can be shared and visualized without writing any HTML
- using only a declarative URL specification and our hosted viewer (see {@tutorial url}).
+Molecular data can be shared and visualized without writing any HTML using only a declarative URL specification and our hosted viewer (see {@tutorial url}).
 
 Viewers can be quickly embedded in any HTML document using just two lines of source code (see {@tutorial embeddable}).
 
@@ -64,11 +65,11 @@ An un-minified file is also provided for debugging purposes:
 
 #### Method 2: using a CDN
 
-The files hosted by 3Dmol.org closely track the development version and so will change frequently. If you desire more stability you may copy the files into your own project or, alternatively, we host release snapshots on the <a href="https://cdnjs.com/libraries/3Dmol">cdnjs</a> content delivery network (note that you must specify the release version).
+The files hosted by 3Dmol.org closely track the development version and so will change frequently. If you desire more stability you may copy the files into your own project or, alternatively, we host release snapshots on the <a href="https://cdnjs.com/libraries/3Dmol">cdnjs</a> content delivery network (note that you must specify the release version). **Do not use the CDN minified version** (3Dmol-min.min.js).  The CDN autominifier does not generate correct code and `3Dmol-min.js` is alread minified.
 
 ```{@lang html}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.8.0/3Dmol-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/1.8.0/3Dmol.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol.js"></script>
 ```
 
 Using the CDN will likely provide the best network performance to your users, but features will lag behind the development branch as we only plan to tag new releases a few times a year.

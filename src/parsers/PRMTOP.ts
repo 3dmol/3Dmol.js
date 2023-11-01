@@ -1,18 +1,18 @@
 // @ts-nocheck
+
 /**
  * Parse a prmtop file from str and create atoms
  * 
-  * @param {string}
-  *            str
-  * @param {ParserOptionsSpec}
-  *            options - noSecondaryStructure (do not compute ss)
-  *  
+ * @param {string}
+ *            str
+ * @param {ParserOptionsSpec}
+ *            options - noSecondaryStructure (do not compute ss)
  * @category Parsers
+*/
 
- */
-export function PRMTOP(str /*, options*/) {
+export function PRMTOP(str: string /*, options*/) {
   var atoms = [];
-  var atomIndex;
+  var atomIndex: number;
   var count = 0;
   var lines = str.split(/\r?\n|\r/);
   if (lines.length > 0 && lines[0].includes("VERSION")) {

@@ -12,19 +12,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
-          node-version: lts/*
-      - name: Build
-        run: |
-          npm i npm@latest
-          npm install
+          node-version: 20
+
+      # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
+      - name: Install Dependencies & Build 3dmol.js
+        run: npm install 
+
       - name: Test    
         run: npm test
+
       - name: Coverage
         env:
-          NODE_OPTIONS: "--max_old_space_size=8192"      
+          NODE_OPTIONS: "--max_old_space_size=8192"   
+        # coverage has trouble fetching data for some reason in the CI,
+        # I don't actually care about the test results (that's tested above)
+        # so ignore any failure here
         run: npm run cover
+        continue-on-error: true
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
 

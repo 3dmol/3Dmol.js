@@ -1,6 +1,6 @@
 {
   "name": "3dmol",
-  "version": "2.0.0",
+  "version": "2.0.6",
   "description": "JavaScript/TypeScript molecular visualization library",
   "repository": {
     "type": "git",
@@ -22,36 +22,43 @@
       "text"
     ]
   },
+  "engines": {
+    "npm": ">=8.11",
+    "node": ">=16.16.0"
+  },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol.js",
   "types": "build/types/index.d.ts",
   "scripts": {
-    "build": "webpack --config webpack.dev.js --mode development  && webpack --config webpack.prod.js --mode production && python3 tests/auto/generate_tests.py && npm run doc",
-    "prepare": "npm run build",
+    "build": "npm run build:dev  && npm run build:prod && npm run generate:tests && npm run doc",
+    "build:dev": "webpack --config webpack.dev.js --mode development",
+    "build:prod": "webpack --config webpack.prod.js --mode production",
+    "prepare": "npm run build:dev  && npm run build:prod",
     "jest": "npx jest --testPathIgnorePatterns=render.test.js",
     "test": "npm run generate:jest && npm run jest && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",
+    "generate:tests": "python3 tests/auto/generate_tests.py",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py -min",
     "generate:jest": "python3 tests/jest/generate_jest_render_tests.py",
     "cover": "npm run generate:jest && npx jest --coverage",
-    "doc": "npx jsdoc -c jsdoc.conf.json src doc.md"
+    "doc": "rm -rf doc/ && npx jsdoc -c jsdoc.conf.json src doc.md"
   },
   "dependencies": {
     "iobuffer": "^5.3.1",
-    "netcdfjs": "^2.0.2",
-    "npm": "^9.2.0",
+    "netcdfjs": "^3.0.0",
     "pako": "^2.1.0",
-    "upng-js": "^2.1.0",
-    "utf8": "^3.0.0"
+    "upng-js": "^2.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.7",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/plugin-transform-typescript": "^7.20.7",
+    "@types/pako": "^2.0.0",
     "better-docs": "github:3dmol/better-docs#master",
     "canvas": "^2.11.0",
+    "clean-jsdoc-theme": "github:3dmol/clean-jsdoc-theme#master",    
     "codecov": "^3.8.3",
     "del": "^7.0.0",
     "eslint": "^8.30.0",

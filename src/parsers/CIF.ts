@@ -1,17 +1,18 @@
 import { ParserOptionsSpec } from './ParserOptionsSpec';
-// puts atoms specified in mmCIF fromat in str into atoms
 
 import { assignBonds } from "./utils/assignBonds";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 import { processSymmetries } from "./utils/processSymmetries";
-import { conversionMatrix3, Matrix4, Vector3,  } from "../WebGL"
+import { conversionMatrix3, Matrix3, Matrix4, Vector3,  } from "../WebGL"
 
 /**
+ * Puts atoms specified in mmCIF fromat in str into atoms
+ * 
  * @param {string} str
  * @param {ParserOptionsSpec} options
  * @category Parsers
+*/
 
- */
 export function CIF(str: string, options: ParserOptionsSpec = {}) {
   var atoms: any[] & Record<string, any> = [];
   var noAssembly = !options.doAssembly; // don't assemble by default
@@ -20,18 +21,18 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
     options.assignBonds === undefined ? true : options.assignBonds;
 
   //coordinate conversion
-  var fractionalToCartesian = function (cmat, x, y, z) {
+  var fractionalToCartesian = function (cmat: Matrix3, x: number, y: number, z: number) {
     return new Vector3(x, y, z).applyMatrix3(cmat);
   };
 
   // Used to handle quotes correctly
-  function splitRespectingQuotes(string, separator) {
+  function splitRespectingQuotes(string: string, separator: string | any[]) {
     var sections: any[] = [];
     var sectionStart = 0;
     var sectionEnd = 0;
     while (sectionEnd < string.length) {
       while (
-        string.substr(sectionEnd, separator.length) !== separator &&
+        string.substring(sectionEnd, sectionEnd + separator.length) !== separator &&
         sectionEnd < string.length
       ) {
         // currently does not support escaping quotes
@@ -48,7 +49,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         }
         sectionEnd++;
       }
-      sections.push(string.substr(sectionStart, sectionEnd - sectionStart));
+      sections.push(string.substring(sectionStart, sectionEnd));
       sectionStart = sectionEnd = sectionEnd + separator.length;
     }
     return sections;
@@ -88,7 +89,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
             let lineArr = line.split('')
             lineArr[dot] = "_";
             line = lineArr.join('');
-            line = line.substr(0, dot) + "_" + line.substr(dot + 1);
+            line = line.substring(0, dot) + "_" + line.substring(dot + 1);
           }
         }
       }
@@ -119,13 +120,13 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         var dataItem = (mmCIF[dataItemName] = mmCIF[dataItemName] || []);
 
         // if nothing left on the line go to the next one
-        var restOfLine = linesFiltered[lineNum].substr(
+        var restOfLine = linesFiltered[lineNum].substring(
           linesFiltered[lineNum].indexOf(dataItemName) + dataItemName.length
         );
         if (restOfLine === "") {
           lineNum++;
           if (linesFiltered[lineNum][0] === ";") {
-            var dataBlock = linesFiltered[lineNum].substr(1);
+            var dataBlock = linesFiltered[lineNum].substring(1);
             lineNum++;
             while (linesFiltered[lineNum] !== ";") {
               dataBlock = dataBlock + "\n" + linesFiltered[lineNum];
@@ -139,7 +140,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
           dataItem.push(restOfLine.trim());
         }
         lineNum++;
-      } else if (linesFiltered[lineNum].substr(0, 5) === "loop_") {
+      } else if (linesFiltered[lineNum].substring(0, 5) === "loop_") {
         lineNum++;
         var dataItems: any[] = [];
         while (
@@ -186,7 +187,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         ? mmCIF._atom_site_id.length
         : mmCIF._atom_site_label.length;
 
-    var conversionMatrix;
+    var conversionMatrix: Matrix3;
     if (mmCIF._cell_length_a !== undefined) {
       var a = parseFloat(mmCIF._cell_length_a);
       var b = parseFloat(mmCIF._cell_length_b);
@@ -259,7 +260,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         //best I can do is assume second component, if present, starts with a number
         elem = mmCIF._atom_site_label[i].split("_")[0].replace(/\(?\d+.*/, "");
       }
-      atom.elem = elem[0].toUpperCase() + elem.substr(1, 1).toLowerCase();
+      atom.elem = elem[0].toUpperCase() + elem.substring(1, 2).toLowerCase();
       atom.bonds = [];
       atom.ss = "c";
       atom.serial = i;
@@ -318,12 +319,12 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         modelData[modelData.length - 1].symmetries.push(matrix);
       }
     }
-    var parseTerm = function (term) {
+    var parseTerm = function (term: string) {
       var negative = term.match("-");
       term = term.replace(/[-xyz]/g, "");
       var fractionParts = term.split("/");
 
-      var numerator, denominator;
+      var numerator: number, denominator: number;
       if (fractionParts[1] === undefined) {
         denominator = 1;
       } else {
@@ -342,7 +343,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
           /["' ]/g,
           ""
         );
-        var componentStrings = transform.split(",").map(function (val) {
+        var componentStrings = transform.split(",").map(function (val: string) {
           return val.replace(/-/g, "+-");
         });
         let matrix = new Matrix4(

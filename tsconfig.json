@@ -8,8 +8,7 @@
     "allowJs": true,
     "sourceMap": true,
     "declaration": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "moduleResolution": "node",
     "lib": [
       "dom",

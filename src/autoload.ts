@@ -1,6 +1,6 @@
 //auto-initialization
 
-import { createViewer } from "./GLViewer";
+import { GLViewer, createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
 import { get, specStringToObject } from "./utilities";
 import { CC } from "./colors";
@@ -17,8 +17,8 @@ export var viewers: any = {};
 
 //Create embedded viewer from HTML attributes if true
 //viewer and callback are used by the testing harness
-export function autoload(viewer?, callback?) {
-    var i, dataname, type;
+export function autoload(viewer?: any, callback?: (arg0: any) => void) {
+    var i: string | number, dataname: string, type: string;
     if (document.querySelector(".viewer_3Dmoljs") != null)
         autoinit = true;
 
@@ -30,7 +30,6 @@ export function autoload(viewer?, callback?) {
             var datauri = [];
             var datatypes = [];
             var uri = '';
-            var showUI = false;
 
             if (viewerdiv.style.position == 'static') {
                 //slight hack - canvas needs this element to be positioned
@@ -38,9 +37,6 @@ export function autoload(viewer?, callback?) {
             }
 
             var UI:any = null;
-            if (viewerdiv.dataset.ui) {
-                showUI = true;
-            }
 
             type = null;
             if (viewerdiv.dataset.pdb) {
@@ -77,7 +73,7 @@ export function autoload(viewer?, callback?) {
                 } else if (i.substring(0, 4) === "href" && (i !== "href")) {
                     uri = divdata[i];
                     datauri.push(uri);
-                    datatypes.push(uri.substr(uri.lastIndexOf('.') + 1));
+                    datatypes.push(uri.substring(uri.lastIndexOf('.') + 1));
                 } else if (i.substring(0, 3) === "cid" && (i !== "cid")) {
                     datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] + "/SDF?record_type=3d");
                     datatypes.push('sdf');
@@ -117,7 +113,7 @@ export function autoload(viewer?, callback?) {
             for (i = 0; i < keys.length; i++) {
                 dataname = keys[i];
                 var m = stylere.exec(dataname);
-                var selname, newsel, styleobj;
+                var selname: string, newsel: any, styleobj: any;
                 if (m) {
                     selname = "select" + m[1];
                     newsel = specStringToObject(d[selname]);
@@ -147,10 +143,10 @@ export function autoload(viewer?, callback?) {
             }
 
             //apply all the selections/styles parsed out above to the passed viewer
-            var applyStyles = function (glviewer) {
+            var applyStyles = function (glviewer: GLViewer) {
                 glviewer.setStyle(select, style);
 
-                if (showUI) {
+                if (UI) {
                     UI.createSelectionAndStyle(select, style);
                 }
 
@@ -158,7 +154,7 @@ export function autoload(viewer?, callback?) {
                     let sel = selectstylelist[i][0] || {};
                     let sty = selectstylelist[i][1] || { "line": {} };
                     glviewer.setStyle(sel, sty);
-                    if (showUI) {
+                    if (UI) {
                         UI.createSelectionAndStyle(select, style);
                     }
                 }
@@ -167,8 +163,8 @@ export function autoload(viewer?, callback?) {
                     let sty = surfaces[i][1] || {};
                     let viewer = glviewer;
 
-                    if (showUI) {
-                        viewer.addSurface(SurfaceType.VDW, sty, sel, sel).then((surfid) => {
+                    if (UI) {
+                        viewer.addSurface(SurfaceType.VDW, sty, sel, sel).then((surfid: any) => {
                             UI.loadSurface("VDW", sel, sty, surfid);
                         });
                     }
@@ -205,7 +201,7 @@ export function autoload(viewer?, callback?) {
                         UI.initiateUI();
                 }
 
-                if(showUI) {
+                if(viewerdiv.dataset.ui && $3Dmol.StateManager) {
                     UI = new $3Dmol.StateManager(glviewer); // Creates the UI state management tool
                 }
             } catch (error) {
@@ -216,17 +212,17 @@ export function autoload(viewer?, callback?) {
 
             if (datauri.length != 0) {
                 //load multiple data elements in serial
-                i = 0;
-                var process = function (moldata) {
+                let i = 0;
+                var process = function (moldata: any) {
                     //add moldata to viewer and load next model
                     uri = datauri[i]; //this is where the moldata came from
                     var type = viewerdiv.dataset.type || viewerdiv.dataset.datatype || datatypes[i];
                     glviewer.addModel(moldata, type, options);
-                    if (showUI) {
+                    if (UI) {
                         var modelName = viewerdiv.dataset[datatypes[i]];
                         UI.setModelTitle(modelName);
                     }
-                    i += 1;
+                    i +=1;
                     if (i < datauri.length) {
                         get(datauri[i]).then(process);
                     }

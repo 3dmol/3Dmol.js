@@ -1,5 +1,6 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 
-let SYBYLtoElem = {
+let SYBYLtoElem:any = {
   'C.1': 'C',
   'C1': 'C',
   'C.2': 'C',
@@ -50,16 +51,17 @@ let SYBYLtoElem = {
   'So2':'S'
 };
 
-// parse SYBYL mol2 file from string - assumed to only contain one molecule
-// tag
+// Parse SYBYL mol2 file from string - assumed to only contain one molecule tag
+
 /**
  * @param {string}
  *            str
  * @param {ParserOptionsSpec}
  *            options
  * @category Parsers
- */
-export function MOL2(str, options) {
+*/
+
+export function MOL2(str: string, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string,any> = [[]];
   var noH = false;
   if (typeof options.keepH !== "undefined") noH = !options.keepH;
@@ -72,7 +74,7 @@ export function MOL2(str, options) {
   // Assuming both Molecule and Atom sections exist
   if (mol_pos == -1 || atom_pos == -1) return atoms;
 
-  var lines = str.substr(mol_pos, str.length).split(/\r?\n|\r/);
+  var lines = str.substring(mol_pos).split(/\r?\n|\r/);
   while (lines.length > 0) {
     // serial is atom's index in file; index is atoms index in 'atoms'
     var serialToIndex: number[] = [];
@@ -94,7 +96,7 @@ export function MOL2(str, options) {
 
     var start = atoms[atoms.length - 1].length;
     var end = start + natoms;
-    var line;
+    var line: string;
     // Process ATOMS
     for (i = start; i < end; i++) {
       line = lines[offset++];
@@ -106,7 +108,7 @@ export function MOL2(str, options) {
         elem = SYBYLtoElem[elem];
       } else {
         elem = elem.split(".")[0];
-        elem = elem[0].toUpperCase() + elem.substr(1).toLowerCase();
+        elem = elem[0].toUpperCase() + elem.substring(1).toLowerCase();
       }
 
       atom.atom = tokens[1];
