@@ -7,7 +7,7 @@ import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3, XYZ } from "./WebGL/math";
 import { Color, CC, ColorschemeSpec, ColorSpec } from "./colors";
 import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
-import { GLDraw } from "./GLDraw"
+import { CAP, GLDraw } from "./GLDraw"
 import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
 import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
@@ -659,7 +659,7 @@ export class GLModel {
     };
 
 
-    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color) {
+    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap:CAP = 0, toCap:CAP = 0) {
         //we need the four corners - two have from coord, two have to coord, the normal
         //is the opposing point, from which we can get the normal and length
         //also need the radius
