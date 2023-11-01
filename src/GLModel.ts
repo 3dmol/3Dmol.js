@@ -665,8 +665,8 @@ export class GLModel {
         dashLength = Math.min(dashLength, cylinderLength);
         gapLength = Math.min(gapLength, cylinderLength);
 
-        // Initial calculations for totalSegments based on input dashLength and gapLength
-        var totalSegments = Math.floor(cylinderLength / (dashLength + gapLength));
+        // Initial calculations for totalSegments based on input dashLength, gapLength, and radius
+        var totalSegments = Math.floor(cylinderLength / (dashLength + gapLength + radius));
 
         // Make totalSegments odd to ensure dashed segments at both ends
         totalSegments += totalSegments % 2 === 0 ? 1 : 0;
