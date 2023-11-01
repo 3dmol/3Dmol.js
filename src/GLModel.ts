@@ -773,8 +773,12 @@ export class GLModel {
         var doubleBondScale = style.doubleBondScaling || 0.4;
         var tripleBondScale = style.tripleBondScaling || 0.25;
 
+        var bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
+        var bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
+
         var bondR = atomBondR;
         var atomSingleBond = style.singleBonds || false;
+        var atomDashedBonds = style.dashedBonds || false;
         var fromCap = 0, toCap = 0;
         var atomneedsi, atom2needsi, i, singleBond, bstyle;
         var cylinder1a, cylinder1b, cylinder1c, cylinder2a, cylinder2b, cylinder2c;
@@ -787,7 +791,7 @@ export class GLModel {
             fromCap = 2;
 
         var selectCylDrawMethod = function (bondOrder) {
-            if (geo.imposter) return (bondOrder < 1) ? GLModel.drawDashedStickImposter : GLModel.drawStickImposter;
+            if (geo.imposter) return (atomDashedBonds || bondOrder < 1) ? GLModel.drawDashedStickImposter : GLModel.drawStickImposter;
 
             return GLDraw.drawCylinder;  //mesh cylinder
         };
@@ -837,10 +841,10 @@ export class GLModel {
                     if (C1 != C2) {
                         mp = new Vector3().addVectors(p1, p2)
                             .multiplyScalar(0.5);
-                        drawCyl(geo, p1, mp, bondR, C1, fromCap, 0);
-                        drawCyl(geo, mp, p2, bondR, C2, 0, toCap);
+                        drawCyl(geo, p1, mp, bondR, C1, fromCap, 0, bondDashLength, bondGapLength);
+                        drawCyl(geo, mp, p2, bondR, C2, 0, toCap, bondDashLength, bondGapLength);
                     } else {
-                        drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap);
+                        drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap, bondDashLength, bondGapLength);
                     }
 
 
@@ -2908,6 +2912,15 @@ export interface CrossStyleSpec {
     opacity?: number;
 }
 
+/** Dashed Bond style specification
+ */
+export interface DashedBondSpec {
+    /** length of dash (default 0.1) */
+    dashLength?: number;
+    /** length of gap (default 0.25) */
+    gapLength?: number;
+}
+
 /** Stick (cylinder) style specification
  */
 export interface StickStyleSpec {
@@ -2919,6 +2932,10 @@ export interface StickStyleSpec {
     doubleBondScaling?: number;
     /** radius scaling factor for drawing triple bonds (default 0.25) */
     tripleBondScaling?: number;    
+    /** dashed bond properties */
+    dashedBondConfig?: DashedBondSpec;
+    /** draw all bonds as dashed bonds */
+    dashedBonds?: boolean;
     /** draw all bonds as single bonds */
     singleBonds?: boolean;
     /** colorscheme to use on atoms; overrides color */
