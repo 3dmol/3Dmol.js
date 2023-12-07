@@ -666,10 +666,6 @@ export class GLModel {
         gapLength = Math.max(gapLength, 0) + 2 * radius;
         dashLength = Math.max(dashLength, 0.001);
 
-        // Constrain dash and gap lengths to not exceed cylinder length
-        dashLength = Math.min(dashLength, cylinderLength);
-        gapLength = Math.min(gapLength, cylinderLength);
-
         // Handle cases where dashLength + gapLength exceeds cylinderLength
         if (dashLength + gapLength > cylinderLength) {
             dashLength = cylinderLength;
