@@ -659,24 +659,34 @@ export class GLModel {
     };
 
     private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number) {
-        var cylinderLength = Math.sqrt(Math.pow((from.x - to.x), 2) + Math.pow((from.y - to.y), 2) + Math.pow((from.z - to.z), 2));
-
-        // Ensure non-negative values and set a minimum dash length
+        // Calculate the length of a cylinder defined by two points 'from' and 'to'.
+        var cylinderLength = Math.sqrt(
+            Math.pow((from.x - to.x), 2) + 
+            Math.pow((from.y - to.y), 2) + 
+            Math.pow((from.z - to.z), 2)
+        );
+        
+        // Ensure non-negative values for radius, dashLength, and gapLength.
+        // Adjust gapLength to include the radius of the cylinder.
         radius = Math.max(radius, 0);
         gapLength = Math.max(gapLength, 0) + 2 * radius;
         dashLength = Math.max(dashLength, 0.001);
-
-        // Handle cases where dashLength + gapLength exceeds cylinderLength
+        
+        // Handle cases where the combined length of dash and gap exceeds the cylinder's length.
+        // In such cases, use a single dash to represent the entire cylinder with no gaps.
         if (dashLength + gapLength > cylinderLength) {
             dashLength = cylinderLength;
-            gapLength = 0; // No gap as the dash fills the cylinder
+            gapLength = 0; // No gap as the dash fills the entire cylinder.
         }
-
-        // Initial calculations for totalSegments based on input dashLength and gapLength
+        
+        // Calculate the total number of dash-gap segments that can fit within the cylinder.
         var totalSegments = Math.floor((cylinderLength - dashLength) / (dashLength + gapLength)) + 1;
+        
+        // Compute the total length covered by dashes.
         var totalDashLength = totalSegments * dashLength;
-
-        // Recalculate gapLength based on final totalSegments and totalDashLength
+        
+        // Recalculate gap length to evenly distribute remaining space among gaps.
+        // This ensures dashes and gaps are evenly spaced within the cylinder.
         gapLength = (cylinderLength - totalDashLength) / totalSegments;
 
         var new_to;
