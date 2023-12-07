@@ -658,7 +658,7 @@ export class GLModel {
         this.drawSphereImposter(geo, atom as XYZ, radius, C);
     };
 
-    static drawDashedStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color:  Color, fromCap: CAP = 0, toCap: CAP = 0, dashLength: number = 0.1, gapLength: number = 0.25) {
+    private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number) {
         var cylinderLength = Math.sqrt(Math.pow((from.x - to.x), 2) + Math.pow((from.y - to.y), 2) + Math.pow((from.z - to.z), 2));
 
         // Constrain dash and gap lengths to not exceed cylinder length
@@ -683,19 +683,21 @@ export class GLModel {
         // Recalculate gapLength based on final totalSegments and totalDashLength
         gapLength = (cylinderLength - totalDashLength) / totalSegments;
 
+        var new_to;
         var new_from = new Vector3(from.x, from.y, from.z);
-        var new_to = new Vector3(to.x, to.y, to.z);
 
         var gapVector = new Vector3((to.x - from.x) / (cylinderLength / gapLength), (to.y - from.y) / (cylinderLength / gapLength), (to.z - from.z) / (cylinderLength / gapLength));
         var dashVector = new Vector3((to.x - from.x) / (cylinderLength / dashLength), (to.y - from.y) / (cylinderLength / dashLength), (to.z - from.z) / (cylinderLength / dashLength));
 
+        var segments = [];
         for (var place = 0; place < totalSegments; place++) {
             new_to = new Vector3(new_from.x + dashVector.x, new_from.y + dashVector.y, new_from.z + dashVector.z);
-            // this.intersectionShape.cylinder.push(new $3Dmol.Cylinder(new_from, new_to, radius));
-            GLModel.drawStickImposter(geo, new_from, new_to, radius, color);
+            segments.push({ from: new_from, to: new_to });
             new_from = new Vector3(new_to.x + gapVector.x, new_to.y + gapVector.y, new_to.z + gapVector.z);
         }
-    };
+
+        return segments;
+    }
 
     static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap:CAP = 0, toCap:CAP = 0) {
         //we need the four corners - two have from coord, two have to coord, the normal
@@ -790,10 +792,20 @@ export class GLModel {
         if (!atom.capDrawn && atom.bonds.length < 4)
             fromCap = 2;
 
-        var selectCylDrawMethod = function (bondOrder) {
-            if (geo.imposter) return (atomDashedBonds || bondOrder < 1) ? GLModel.drawDashedStickImposter : GLModel.drawStickImposter;
+        var selectCylDrawMethod = (bondOrder) => {
+            var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
 
-            return GLDraw.drawCylinder;  //mesh cylinder
+            if (!atomDashedBonds && bondOrder >= 1) {
+                return drawMethod;
+            }
+
+            // draw dashes
+            return (geo, from, to, radius, color, fromCap = 0, toCap = 0, dashLength = 0.1, gapLength = 0.25) => {
+                var segments = this.calculateDashes(from, to, radius, dashLength, gapLength);
+                segments.forEach(segment => {
+                    drawMethod(geo, segment.from, segment.to, radius, color, fromCap, toCap);
+                });
+            };
         };
 
         for (i = 0; i < atom.bonds.length; i++) {
