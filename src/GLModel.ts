@@ -661,24 +661,24 @@ export class GLModel {
     private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number) {
         var cylinderLength = Math.sqrt(Math.pow((from.x - to.x), 2) + Math.pow((from.y - to.y), 2) + Math.pow((from.z - to.z), 2));
 
+        // Ensure non-negative values and set a minimum dash length
+        radius = Math.max(radius, 0);
+        gapLength = Math.max(gapLength, 0) + 2 * radius;
+        dashLength = Math.max(dashLength, 0.001);
+
         // Constrain dash and gap lengths to not exceed cylinder length
         dashLength = Math.min(dashLength, cylinderLength);
         gapLength = Math.min(gapLength, cylinderLength);
 
-        // Initial calculations for totalSegments based on input dashLength, gapLength, and radius
-        var totalSegments = Math.floor(cylinderLength / (dashLength + gapLength + radius));
-
-        // Make totalSegments odd to ensure dashed segments at both ends
-        totalSegments += totalSegments % 2 === 0 ? 1 : 0;
-
-        var totalDashLength = totalSegments * dashLength;
-
-        // If totalDashLength exceeds cylinder length, adjust it
-        if (totalDashLength > cylinderLength) {
-            totalSegments = Math.floor(cylinderLength / dashLength);
-            totalSegments -= totalSegments % 2 === 0 ? 1 : 0;  // Make it odd
-            totalDashLength = totalSegments * dashLength;  // Recalculate totalDashLength
+        // Handle cases where dashLength + gapLength exceeds cylinderLength
+        if (dashLength + gapLength > cylinderLength) {
+            dashLength = cylinderLength;
+            gapLength = 0; // No gap as the dash fills the cylinder
         }
+
+        // Initial calculations for totalSegments based on input dashLength and gapLength
+        var totalSegments = Math.floor((cylinderLength - dashLength) / (dashLength + gapLength)) + 1;
+        var totalDashLength = totalSegments * dashLength;
 
         // Recalculate gapLength based on final totalSegments and totalDashLength
         gapLength = (cylinderLength - totalDashLength) / totalSegments;
