@@ -295,10 +295,27 @@ export namespace GLDraw {
      * @param {CAP} toCap = 0 for none, 1 for flat, 2 for round
      *            
      * */
-    export function drawCylinder(geo: Geometry, from: any, to: any, radius: number, color: Color | Color[], fromCap:CAP = 0, toCap:CAP = 0) {
+    export function drawCylinder(geo: Geometry, from: any, to: any, radius: number, color: Color | Color[], fromCap:CAP|string = 0, toCap:CAP|string = 0) {
         if (!from || !to)
             return;
 
+        let getcap = function(c: CAP|string): CAP {
+            if(typeof c === "string") {
+                let s = <string>c;
+                if(s.toLowerCase() == 'flat') {
+                    return CAP.FLAT;
+                } else if(s.toLowerCase() == 'round') {
+                    return CAP.ROUND;
+                } else {
+                    return CAP.NONE;
+                }
+            } else {
+                return <CAP>c;
+            }
+        }
+        fromCap = getcap(fromCap);
+        toCap = getcap(toCap);
+        
         // vertices
         var drawcaps = toCap || fromCap;
         color = color || ({ r: 0, g: 0, b: 0 } as Color);

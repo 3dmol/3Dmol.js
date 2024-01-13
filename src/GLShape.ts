@@ -1649,9 +1649,9 @@ export interface CylinderSpec extends ShapeSpec {
     /** radius */
     radius?: number;
     /** Place a cap at the start (none, flat or round) */
-    fromCap?: CAP;
+    fromCap?: CAP | string;
     /** Place a cap at the end (none, flat or round) */
-    toCap?: CAP;
+    toCap?: CAP | string;
     /** Make the cylinder dashed. */
     dashed?: boolean;
     /** Length of dashes (default 0.25) */
