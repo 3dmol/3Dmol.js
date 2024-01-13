@@ -7,7 +7,7 @@ import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3, XYZ } from "./WebGL/math";
 import { Color, CC, ColorschemeSpec, ColorSpec } from "./colors";
 import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
-import { GLDraw } from "./GLDraw"
+import { CAP, GLDraw } from "./GLDraw"
 import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
 import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
@@ -658,8 +658,54 @@ export class GLModel {
         this.drawSphereImposter(geo, atom as XYZ, radius, C);
     };
 
+    private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number) {
+        // Calculate the length of a cylinder defined by two points 'from' and 'to'.
+        var cylinderLength = Math.sqrt(
+            Math.pow((from.x - to.x), 2) + 
+            Math.pow((from.y - to.y), 2) + 
+            Math.pow((from.z - to.z), 2)
+        );
+        
+        // Ensure non-negative values for radius, dashLength, and gapLength.
+        // Adjust gapLength to include the radius of the cylinder.
+        radius = Math.max(radius, 0);
+        gapLength = Math.max(gapLength, 0) + 2 * radius;
+        dashLength = Math.max(dashLength, 0.001);
+        
+        // Handle cases where the combined length of dash and gap exceeds the cylinder's length.
+        // In such cases, use a single dash to represent the entire cylinder with no gaps.
+        if (dashLength + gapLength > cylinderLength) {
+            dashLength = cylinderLength;
+            gapLength = 0; // No gap as the dash fills the entire cylinder.
+        }
+        
+        // Calculate the total number of dash-gap segments that can fit within the cylinder.
+        var totalSegments = Math.floor((cylinderLength - dashLength) / (dashLength + gapLength)) + 1;
+        
+        // Compute the total length covered by dashes.
+        var totalDashLength = totalSegments * dashLength;
+        
+        // Recalculate gap length to evenly distribute remaining space among gaps.
+        // This ensures dashes and gaps are evenly spaced within the cylinder.
+        gapLength = (cylinderLength - totalDashLength) / totalSegments;
 
-    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color) {
+        var new_to;
+        var new_from = new Vector3(from.x, from.y, from.z);
+
+        var gapVector = new Vector3((to.x - from.x) / (cylinderLength / gapLength), (to.y - from.y) / (cylinderLength / gapLength), (to.z - from.z) / (cylinderLength / gapLength));
+        var dashVector = new Vector3((to.x - from.x) / (cylinderLength / dashLength), (to.y - from.y) / (cylinderLength / dashLength), (to.z - from.z) / (cylinderLength / dashLength));
+
+        var segments = [];
+        for (var place = 0; place < totalSegments; place++) {
+            new_to = new Vector3(new_from.x + dashVector.x, new_from.y + dashVector.y, new_from.z + dashVector.z);
+            segments.push({ from: new_from, to: new_to });
+            new_from = new Vector3(new_to.x + gapVector.x, new_to.y + gapVector.y, new_to.z + gapVector.z);
+        }
+
+        return segments;
+    }
+
+    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap:CAP = 0, toCap:CAP = 0) {
         //we need the four corners - two have from coord, two have to coord, the normal
         //is the opposing point, from which we can get the normal and length
         //also need the radius
@@ -735,8 +781,12 @@ export class GLModel {
         var doubleBondScale = style.doubleBondScaling || 0.4;
         var tripleBondScale = style.tripleBondScaling || 0.25;
 
+        var bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
+        var bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
+
         var bondR = atomBondR;
         var atomSingleBond = style.singleBonds || false;
+        var atomDashedBonds = style.dashedBonds || false;
         var fromCap = 0, toCap = 0;
         var atomneedsi, atom2needsi, i, singleBond, bstyle;
         var cylinder1a, cylinder1b, cylinder1c, cylinder2a, cylinder2b, cylinder2c;
@@ -748,12 +798,24 @@ export class GLModel {
         if (!atom.capDrawn && atom.bonds.length < 4)
             fromCap = 2;
 
-        var drawCyl = GLDraw.drawCylinder; //mesh cylinder
-        if (geo.imposter)
-            drawCyl = GLModel.drawStickImposter;
+        var selectCylDrawMethod = (bondOrder) => {
+            var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
 
+            if (!atomDashedBonds && bondOrder >= 1) {
+                return drawMethod;
+            }
+
+            // draw dashes
+            return (geo, from, to, radius, color, fromCap = 0, toCap = 0, dashLength = 0.1, gapLength = 0.25) => {
+                var segments = this.calculateDashes(from, to, radius, dashLength, gapLength);
+                segments.forEach(segment => {
+                    drawMethod(geo, segment.from, segment.to, radius, color, fromCap, toCap);
+                });
+            };
+        };
 
         for (i = 0; i < atom.bonds.length; i++) {
+            var drawCyl = selectCylDrawMethod(atom.bondOrder[i]);
             var j = atom.bonds[i]; // our neighbor
             var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
             mp = mp2 = mp3 = null;
@@ -797,10 +859,10 @@ export class GLModel {
                     if (C1 != C2) {
                         mp = new Vector3().addVectors(p1, p2)
                             .multiplyScalar(0.5);
-                        drawCyl(geo, p1, mp, bondR, C1, fromCap, 0);
-                        drawCyl(geo, mp, p2, bondR, C2, 0, toCap);
+                        drawCyl(geo, p1, mp, bondR, C1, fromCap, 0, bondDashLength, bondGapLength);
+                        drawCyl(geo, mp, p2, bondR, C2, 0, toCap, bondDashLength, bondGapLength);
                     } else {
-                        drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap);
+                        drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap, bondDashLength, bondGapLength);
                     }
 
 
@@ -2868,6 +2930,15 @@ export interface CrossStyleSpec {
     opacity?: number;
 }
 
+/** Dashed Bond style specification
+ */
+export interface DashedBondSpec {
+    /** length of dash (default 0.1) */
+    dashLength?: number;
+    /** length of gap (default 0.25) */
+    gapLength?: number;
+}
+
 /** Stick (cylinder) style specification
  */
 export interface StickStyleSpec {
@@ -2879,6 +2950,10 @@ export interface StickStyleSpec {
     doubleBondScaling?: number;
     /** radius scaling factor for drawing triple bonds (default 0.25) */
     tripleBondScaling?: number;    
+    /** dashed bond properties */
+    dashedBondConfig?: DashedBondSpec;
+    /** draw all bonds as dashed bonds */
+    dashedBonds?: boolean;
     /** draw all bonds as single bonds */
     singleBonds?: boolean;
     /** colorscheme to use on atoms; overrides color */
