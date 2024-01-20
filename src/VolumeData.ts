@@ -53,7 +53,7 @@ export class VolumeData {
             format = format.replace(/\.gz$/, '');
             try {
                 if ((this as any)[format] && this.isbinary.has(format)) {
-                    if (typeof (str) == "string") {
+                    if (typeof (str) === "string") {
                         //assume base64 encoded
                         str = base64ToArray(str);
                     }
@@ -68,7 +68,7 @@ export class VolumeData {
         }
 
         if ((this as any)[format]) {
-            if (this.isbinary.has(format) && typeof (str) == "string") {
+            if (this.isbinary.has(format) && typeof (str) === "string") {
                 str = base64ToArray(str);
             }
             (this as any)[format](str);
@@ -110,7 +110,7 @@ export class VolumeData {
 
         if (this.matrix) {
             //all transformation is done through matrix multiply
-            if (this.inversematrix == null) {
+            if (this.inversematrix === null) {
                 this.inversematrix = new Matrix4().getInverse(this.matrix);
             }
             var pt = new Vector3(x, y, z);
@@ -179,7 +179,7 @@ export class VolumeData {
         var atomicData = VASP(str)[0];
         var natoms = atomicData.length;
 
-        if (natoms == 0) {
+        if (natoms === 0) {
             console.log("No good formating of CHG or CHGCAR file, not atomic information provided in the file.");
             this.data = [];
             return;
@@ -232,8 +232,8 @@ export class VolumeData {
         yVec = yVec.multiplyScalar(1 / (l_units * nY));
         zVec = zVec.multiplyScalar(1 / (l_units * nZ));
 
-        if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
-            || zVec.y != 0) {
+        if (xVec.y !== 0 || xVec.z !== 0 || yVec.x !== 0 || yVec.z !== 0 || zVec.x !== 0
+            || zVec.y !== 0) {
             //need a transformation matrix
             this.matrix = new Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0, 0, 0, 1);
             //include translation in matrix
@@ -290,32 +290,32 @@ export class VolumeData {
             }
             else if ((m = redelta.exec(line))) {
                 var xunit = parseFloat(m[1]);
-                if (parseFloat(m[2]) != 0 || parseFloat(m[3]) != 0) {
+                if (parseFloat(m[2]) !== 0 || parseFloat(m[3]) !== 0) {
                     console.log("Non-orthogonal delta matrix not currently supported in dx format");
                 }
                 i += 1;
                 line = lines[i];
                 m = redelta.exec(line);
-                if (m == null) {
+                if (m === null) {
                     console.log("Parse error in dx delta matrix");
                     return;
                 }
 
                 var yunit = parseFloat(m[2]);
-                if (parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
+                if (parseFloat(m[1]) !== 0 || parseFloat(m[3]) !== 0) {
                     console.log("Non-orthogonal delta matrix not currently supported in dx format");
                 }
 
                 i += 1;
                 line = lines[i];
                 m = redelta.exec(line);
-                if (m == null) {
+                if (m === null) {
                     console.log("Parse error in dx delta matrix");
                     return;
                 }
 
                 var zunit = parseFloat(m[3]);
-                if (parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
+                if (parseFloat(m[1]) !== 0 || parseFloat(m[2]) !== 0) {
                     console.log("Non-orthogonal delta matrix not currently supported in dx format");
                 }
                 this.unit = new Vector3(xunit, yunit, zunit);
@@ -457,7 +457,7 @@ export class VolumeData {
 
         // 26-34  SKWMAT  Skew matrix S (in order S11, S12, S13, S21 etc) if
         //                LSKFLG .ne. 0.
-        // 35-37  SKWTRN  Skew translation t if LSKFLG != 0.
+        // 35-37  SKWTRN  Skew translation t if LSKFLG !== 0.
         //                Skew transformation is from standard orthogonal
         //                coordinate frame (as used for atoms) to orthogonal
         //                map frame, as Xo(map) = S * (Xo(atoms) - t)

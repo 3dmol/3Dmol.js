@@ -262,7 +262,7 @@ export class MarchingCubeInitializer {
                 let aoffset = i*3, boffset = i*3 + 1, coffset = i*3 + 2;
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[aoffset]]; j < jl; j++) {
-                    if (faces[boffset] == vertdeg[j + 1][faces[aoffset]]) {
+                    if (faces[boffset] === vertdeg[j + 1][faces[aoffset]]) {
                         flagvert = false;
                         break;
                     }
@@ -273,7 +273,7 @@ export class MarchingCubeInitializer {
                 }
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[aoffset]]; j < jl; j++) {
-                    if (faces[coffset] == vertdeg[j + 1][faces[aoffset]]) {
+                    if (faces[coffset] === vertdeg[j + 1][faces[aoffset]]) {
                         flagvert = false;
                         break;
                     }
@@ -285,7 +285,7 @@ export class MarchingCubeInitializer {
                 // b
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[boffset]]; j < jl; j++) {
-                    if (faces[aoffset] == vertdeg[j + 1][faces[boffset]]) {
+                    if (faces[aoffset] === vertdeg[j + 1][faces[boffset]]) {
                         flagvert = false;
                         break;
                     }
@@ -296,7 +296,7 @@ export class MarchingCubeInitializer {
                 }
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[boffset]]; j < jl; j++) {
-                    if (faces[coffset] == vertdeg[j + 1][faces[boffset]]) {
+                    if (faces[coffset] === vertdeg[j + 1][faces[boffset]]) {
                         flagvert = false;
                         break;
                     }
@@ -308,7 +308,7 @@ export class MarchingCubeInitializer {
                 // c
                 flagvert = true;
                 for (j = 0; j < vertdeg[0][faces[coffset]]; j++) {
-                    if (faces[aoffset] == vertdeg[j + 1][faces[coffset]]) {
+                    if (faces[aoffset] === vertdeg[j + 1][faces[coffset]]) {
                         flagvert = false;
                         break;
                     }
@@ -319,7 +319,7 @@ export class MarchingCubeInitializer {
                 }
                 flagvert = true;
                 for (j = 0, jl = vertdeg[0][faces[coffset]]; j < jl; j++) {
-                    if (faces[boffset] == vertdeg[j + 1][faces[coffset]]) {
+                    if (faces[boffset] === vertdeg[j + 1][faces[coffset]]) {
                         flagvert = false;
                         break;
                     }
@@ -339,7 +339,7 @@ export class MarchingCubeInitializer {
                                     tps[i].x = verts[i].x;
                                     tps[i].y = verts[i].y;
                                     tps[i].z = verts[i].z;
-                            } else if (vertdeg[0][i] == 3 || vertdeg[0][i] == 4) {
+                            } else if (vertdeg[0][i] === 3 || vertdeg[0][i] === 4) {
                                     tps[i].x = 0;
                                     tps[i].y = 0;
                                     tps[i].z = 0;
@@ -788,7 +788,7 @@ export class ProteinSurface {
         };
     
     private getVDWIndex(atom:any) {
-        if(!atom.elem || typeof(this.vdwRadii[atom.elem]) == "undefined") {
+        if(!atom.elem || typeof(this.vdwRadii[atom.elem]) === "undefined") {
             return "X";
         }
         return atom.elem;
@@ -988,7 +988,7 @@ export class ProteinSurface {
         
         for (let i = 0, n = this.widxz[at]; i < n; i++) {
             for (let j = 0; j < n; j++) {
-                if (this.depty[at][nind] != -1) {
+                if (this.depty[at][nind] !== -1) {
                     for (let ii = -1; ii < 2; ii++) {
                         for (let jj = -1; jj < 2; jj++) {
                             for (let kk = -1; kk < 2; kk++) {
@@ -1013,7 +1013,7 @@ export class ProteinSurface {
                                             this.vpAtomID[index] = atom.serial;
                                         } else {
                                             let atom2 = atoms[this.vpAtomID[index]];
-                                            if(atom2.serial != atom.serial) {
+                                            if(atom2.serial !== atom.serial) {
                                                 let ox = cx + mi - Math.floor(0.5 + this.scaleFactor *
                                                         (atom2.x + this.ptranx));
                                                 let oy = cy + mj - Math.floor(0.5 + this.scaleFactor *
@@ -1060,7 +1060,7 @@ export class ProteinSurface {
         let pWH = this.pWidth*this.pHeight;
         for (let i = 0, n = this.widxz[at]; i < n; i++) {
             for (let j = 0; j < n; j++) {
-                if (this.depty[at][nind] != -1) {
+                if (this.depty[at][nind] !== -1) {
                     for (let ii = -1; ii < 2; ii++) {
                         for (let jj = -1; jj < 2; jj++) {
                             for (let kk = -1; kk < 2; kk++) {
@@ -1084,7 +1084,7 @@ export class ProteinSurface {
                                             this.vpAtomID[index] = atom.serial;
                                         }  else {
                                             let atom2 = atoms[this.vpAtomID[index]];
-                                            if(atom2.serial != atom.serial) {
+                                            if(atom2.serial !== atom.serial) {
                                                 let ox = cx + mi - Math.floor(0.5 + this.scaleFactor *
                                                         (atom2.x + this.ptranx));
                                                 let oy = cy + mj - Math.floor(0.5 + this.scaleFactor *
@@ -1397,19 +1397,19 @@ export class ProteinSurface {
 
     public marchingcubeinit(stype) {
         for ( let i = 0, lim = this.vpBits.length; i < lim; i++) {
-            if (stype == 1) {// vdw
+            if (stype === 1) {// vdw
                 this.vpBits[i] &= ~this.ISBOUND;
-            } else if (stype == 4) { // ses
+            } else if (stype === 4) { // ses
                 this.vpBits[i] &= ~this.ISDONE;
                 if (this.vpBits[i] & this.ISBOUND)
                     this.vpBits[i] |= this.ISDONE;
                 this.vpBits[i] &= ~this.ISBOUND;
-            } else if (stype == 2) {// after vdw
+            } else if (stype === 2) {// after vdw
                 if ((this.vpBits[i] & this.ISBOUND) && (this.vpBits[i] & this.ISDONE))
                     this.vpBits[i] &= ~this.ISBOUND;
                 else if ((this.vpBits[i] & this.ISBOUND) && !(this.vpBits[i] & this.ISDONE))
                     this.vpBits[i] |= this.ISDONE;
-            } else if (stype == 3) { // sas
+            } else if (stype === 3) { // sas
                 this.vpBits[i] &= ~this.ISBOUND;
             }
         }

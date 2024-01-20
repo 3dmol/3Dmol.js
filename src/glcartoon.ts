@@ -240,7 +240,7 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
         let gnum = geo.groups;
         let replicating = false;
         geoGroup = geo.updateGeoGroup(2 * num); // ensure vertex capacity
-        if (gnum != geo.groups && i > 0) {
+        if (gnum !== geo.groups && i > 0) {
             //we created a new geo - need to replicate vertices at edge 
             //(but not faces)
             i = i - 1;
@@ -727,9 +727,9 @@ function inConnectedResidues(a, b) {
             var dy = a.y - b.y;
             var dz = a.z - b.z;
             var dist = dx * dx + dy * dy + dz * dz;
-            if (a.atom == "CA" && b.atom == "CA" && dist < 16.0) //protein residues not connected
+            if (a.atom === "CA" && b.atom === "CA" && dist < 16.0) //protein residues not connected
                 return true; // calpha dist
-            else if ((a.atom == "P" || b.atom == "P") && dist < 64.0) //dna
+            else if ((a.atom === "P" || b.atom === "P") && dist < 64.0) //dna
                 return true;
         }
     }
@@ -740,7 +740,7 @@ function inConnectedResidues(a, b) {
 // add geo to the group
 function setGeo(group, geo, opacity, outline, setNormals) {
 
-    if (geo == null || geo.vertices == 0) return;
+    if (geo === null || geo.vertices === 0) return;
     if (setNormals) {
         geo.initTypedArrays();
         geo.setUpNormals();
@@ -773,7 +773,7 @@ function addBackbonePoints(points, num, smoothen, backbonePt,
     var forwardVec = atoms[atomi];
     for (i = atomi + 1; i < atoms.length; i++) {
         forwardVec = atoms[i];
-        if (forwardVec.atom == backboneAtom.atom)
+        if (forwardVec.atom === backboneAtom.atom)
             break;
     }
     // the forward vector points along the axis from backbone atom to next
@@ -826,7 +826,7 @@ function addBackbonePoints(points, num, smoothen, backbonePt,
     }
 
     // make sure the strand orientation doesn't twist more than 90 degrees
-    if (prevOrientPt != null && sideVec.dot(prevOrientPt) < 0)
+    if (prevOrientPt !== null && sideVec.dot(prevOrientPt) < 0)
         sideVec.negate();
 
     sideVec.multiplyScalar(widthScalar);
@@ -863,7 +863,7 @@ function addBackbonePoints(points, num, smoothen, backbonePt,
     // make sure the strand is all the same style
     testStyle = backboneAtom.style.cartoon.style || 'default';
     if (points.style) {
-        if (points.style != testStyle) {
+        if (points.style !== testStyle) {
             console
                 .log("Warning: a cartoon chain's strand-style is ambiguous");
             points.style = 'default';
@@ -951,8 +951,8 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
             }
 
             // first and last residues in a helix are used to draw tube
-            if (connected && (curr.ss === "h" || curr.ss == "tube start") && curr.style.cartoon.tubes) {
-                if (!inHelix && curr.ss != "tube start" && next.style.cartoon.tubes) {
+            if (connected && (curr.ss === "h" || curr.ss === "tube start") && curr.style.cartoon.tubes) {
+                if (!inHelix && curr.ss !== "tube start" && next.style.cartoon.tubes) {
                     next.ss = "tube start";
                     inHelix = true;
                 }
@@ -1027,8 +1027,8 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         //this should work fine if opacity is set by chain, but will
         //break if it changes within the chain
         if (curr && curr.style.cartoon && (!next.style.cartoon ||
-            curr.style.cartoon.opacity != next.style.cartoon.opacity)) {
-            flushGeom(curr.chain == next.chain);
+            curr.style.cartoon.opacity !== next.style.cartoon.opacity)) {
+            flushGeom(curr.chain === next.chain);
         }
 
         if (cartoon.style === "trace") // draw cylinders connecting
@@ -1055,7 +1055,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
 
                 if (inConnectedResidues(curr, next)) {
                     // if both atoms are same color, draw single cylinder
-                    if (nextColor == currColor) {
+                    if (nextColor === currColor) {
                         var color = CC.color(nextColor);
                         GLDraw.drawCylinder(shapeGeo, curr, next,
                             thickness, color, 2, 2);
@@ -1088,7 +1088,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         } else // draw default-style cartoons based on secondary structure
         {
             // draw backbone through these atoms
-            if (isAlphaCarbon(next) || inNucleicAcid && (next.atom === "P" || next.atom.indexOf('O5') == 0)) {
+            if (isAlphaCarbon(next) || inNucleicAcid && (next.atom === "P" || next.atom.indexOf('O5') === 0)) {
                 if (drawingTube) {
                     if (next.ss === "tube end") {
                         drawingTube = false;
@@ -1099,7 +1099,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                         next.ss = "h";
 
                     }
-                    else if (curr.chain != next.chain || curr.ss === "tube end") { //don't span chains no matter what, check for short tubes (less than ideal)
+                    else if (curr.chain !== next.chain || curr.ss === "tube end") { //don't span chains no matter what, check for short tubes (less than ideal)
                         drawingTube = false;
                         curr.ss = "h";
                         tubeEnd = new Vector3(curr.x, curr.y, curr.z);
@@ -1155,8 +1155,8 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                 }
 
                 // reached next residue (potentially the first residue)
-                if (curr === undefined || curr.rescode != next.rescode || curr.resi != next.resi) {
-                    if (baseEndPt && curr != undefined) // draw last NA residue's base
+                if (curr === undefined || curr.rescode !== next.rescode || curr.resi !== next.resi) {
+                    if (baseEndPt && curr !== undefined) // draw last NA residue's base
                     {
                         // start the cylinder at the midpoint between
                         // consecutive backbone atoms
@@ -1201,11 +1201,11 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                     };
             }
             // atoms used to orient the backbone strand
-            else if (curr != undefined && (isAlphaCarbon(curr) && next.atom === "O" ||
+            else if (curr !== undefined && (isAlphaCarbon(curr) && next.atom === "O" ||
                 inNucleicAcid && curr.atom === "P" &&
                 (next.atom === "OP2" || next.atom === "O2P") ||
-                inNucleicAcid && curr.atom.indexOf("O5") == 0 &&
-                next.atom.indexOf("C5") == 0)) {
+                inNucleicAcid && curr.atom.indexOf("O5") === 0 &&
+                next.atom.indexOf("C5") === 0)) {
                 orientPt = new Vector3(next.x, next.y, next.z);
                 orientPt.resi = next.resi;
                 if (next.atom === "OP2" || next.atom === "O2P") // for NA 3'
@@ -1216,7 +1216,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
 
             // NA 3' terminus is an edge case, need a vector for most recent
             // O3'
-            else if (inNucleicAcid && next.atom.indexOf("O3") == 0) {
+            else if (inNucleicAcid && next.atom.indexOf("O3") === 0) {
                 terminalPt = new Vector3(next.x, next.y, next.z);
             }
 

@@ -208,7 +208,7 @@ export namespace GLDraw {
                             vertex.x = -radius *
                                 Math.cos(phiStart + u * phiLength) *
                                 Math.sin(thetaStart + v * thetaLength);
-                            if (cap == 1)
+                            if (cap === 1)
                                 vertex.y = 0;
                             else
                                 vertex.y = radius * Math.cos(thetaStart + v * thetaLength);
@@ -224,7 +224,7 @@ export namespace GLDraw {
                             if (Math.abs(vertex.z) < 1e-5)
                                 vertex.z = 0;
 
-                            if (cap == CAP.FLAT) {
+                            if (cap === CAP.FLAT) {
                                 n = new Vector3(0, Math.cos(thetaStart + v * thetaLength), 0);
                                 n.normalize();
                             }
@@ -302,9 +302,9 @@ export namespace GLDraw {
         let getcap = function(c: CAP|string): CAP {
             if(typeof c === "string") {
                 let s = <string>c;
-                if(s.toLowerCase() == 'flat') {
+                if(s.toLowerCase() === 'flat') {
                     return CAP.FLAT;
-                } else if(s.toLowerCase() == 'round') {
+                } else if(s.toLowerCase() === 'round') {
                     return CAP.ROUND;
                 } else {
                     return CAP.NONE;
@@ -418,7 +418,7 @@ export namespace GLDraw {
                     vertices = toObj.vertices;
                     normals = toObj.normals;
                     verticesRows = toObj.verticesRows;
-                } else if (cap == from) {
+                } else if (cap === from) {
                     vertices = fromObj.vertices;
                     normals = fromObj.normals;
                     verticesRows = fromObj.verticesRows;

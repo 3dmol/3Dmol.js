@@ -33,18 +33,18 @@ function roundRect(ctx: CanvasRenderingContext2D, x: any, y: any, w: number, h: 
 //do all the checks to figure out what color is desired
 function getColor(style: any, stylealpha?: any, init?: any) {
   var ret = init;
-  if (typeof style != "undefined") {
+  if (typeof style !== "undefined") {
     //convet regular colors
     if (style instanceof Color) ret = style.scaled();
     else {
       //hex or name
       ret = CC.color(style);
-      if (typeof ret.scaled != "undefined") {
+      if (typeof ret.scaled !== "undefined") {
         ret = ret.scaled(); //not already scaled to 255
       }
     }
   }
-  if (typeof stylealpha != "undefined") {
+  if (typeof stylealpha !== "undefined") {
     ret.a = parseFloat(stylealpha);
   }
   return ret;
@@ -125,12 +125,12 @@ export class Label {
   setContext() {
     var style = this.stylespec;
     var useScreen =
-      typeof style.useScreen == "undefined" ? false : style.useScreen;
+      typeof style.useScreen === "undefined" ? false : style.useScreen;
 
     var showBackground = style.showBackground;
     if (showBackground === "0" || showBackground === "false")
       showBackground = false;
-    if (typeof showBackground == "undefined") showBackground = true; //default
+    if (typeof showBackground === "undefined") showBackground = true; //default
     var font = style.font ? style.font : "sans-serif";
 
     var fontSize = parseInt(style.fontSize) ? parseInt(style.fontSize) : 18;
@@ -178,7 +178,7 @@ export class Label {
 
     var spriteAlignment = style.alignment || SpriteAlignment.topLeft;
     if (
-      typeof spriteAlignment == "string" &&
+      typeof spriteAlignment === "string" &&
       spriteAlignment in SpriteAlignment
     ) {
       spriteAlignment = (SpriteAlignment as any)[spriteAlignment] ;

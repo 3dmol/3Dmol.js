@@ -19,19 +19,19 @@ export var viewers: any = {};
 //viewer and callback are used by the testing harness
 export function autoload(viewer?: any, callback?: (arg0: any) => void) {
     var i: string | number, dataname: string, type: string;
-    if (document.querySelector(".viewer_3Dmoljs") != null)
+    if (document.querySelector(".viewer_3Dmoljs") !== null)
         autoinit = true;
 
     if (autoinit) {
         processing_autoinit = true;
-        viewer = (viewer != undefined) ? viewer : null;
+        viewer = (viewer !== undefined) ? viewer : null;
         var nviewers = 0;
         document.querySelectorAll<HTMLInputElement>(".viewer_3Dmoljs").forEach(viewerdiv => {
             var datauri = [];
             var datatypes = [];
             var uri = '';
 
-            if (viewerdiv.style.position == 'static') {
+            if (viewerdiv.style.position === 'static') {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.style.position = 'relative';
             }
@@ -58,7 +58,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 datatypes.push(type);
 
                 var molName = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
-                if (molName == '/')
+                if (molName === '/')
                     molName = uri.substring(uri.lastIndexOf('/') + 1);
 
                 viewerdiv.dataset[datatypes[datatypes.length - 1]] = molName;
@@ -86,7 +86,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
             //note that data tags must be lowercase
             var bgcolor = CC.color(viewerdiv.dataset.backgroundcolor);
             var bgalpha: string | number = viewerdiv.dataset.backgroundalpha;
-            bgalpha = (bgalpha == undefined) ? 1.0 : parseFloat(bgalpha);
+            bgalpha = (bgalpha === undefined) ? 1.0 : parseFloat(bgalpha);
             var style = { line: {} };
             if (viewerdiv.dataset.style) style = specStringToObject(viewerdiv.dataset.style);
             var select = {};
@@ -134,10 +134,10 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     styleobj = specStringToObject(d[dataname]);
                     labels.push([newsel, styleobj]);
                 }
-                if (dataname == "zoomto") {
+                if (dataname === "zoomto") {
                     zoomto = specStringToObject(d[dataname]);
                 }
-                if (dataname == "spin") {
+                if (dataname === "spin") {
                     spin = specStringToObject(d[dataname]);
                 }
             }
@@ -192,7 +192,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 var config: any = specStringToObject(viewerdiv.dataset.config) || {};
                 if (config.backgroundColor === undefined) config.backgroundColor = bgcolor;
                 if (config.backgroundAlpha === undefined) config.backgroundAlpha = bgalpha;
-                if (glviewer == null) {
+                if (glviewer === null) {
                     glviewer = viewers[viewerdiv.id || nviewers++] = createViewer(viewerdiv, config);
                 } else {
                     glviewer.setBackgroundColor(bgcolor, bgalpha);
@@ -210,7 +210,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 viewerdiv.textContent = "WebGL appears to be disabled.";
             }
 
-            if (datauri.length != 0) {
+            if (datauri.length !== 0) {
                 //load multiple data elements in serial
                 let i = 0;
                 var process = function (moldata: any) {
@@ -233,7 +233,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                             //evaluate javascript in the string, if it resolves to a function,
                             //call it with the viewer
                             /*jshint -W061 */ var runres = eval(viewerdiv.dataset.callback);
-                            if (typeof (runres) == 'function') {
+                            if (typeof (runres) === 'function') {
                                 runres(glviewer);
                             }
                         }
@@ -259,7 +259,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     //evaluate javascript in the string, if it resolves to a function,
                     //call it with the viewer
                     /*jshint -W061 */ var runres = eval(viewerdiv.dataset.callback);
-                    if (typeof (runres) == 'function') {
+                    if (typeof (runres) === 'function') {
                         runres(glviewer);
                     }
                 }

@@ -136,17 +136,17 @@ export class CC {
       if (!isNaN(parseInt(hexs))) return parseInt(hexs);
       hexs = hexs.trim();
 
-      if (hexs.length == 4 && hexs[0] == "#") {
+      if (hexs.length === 4 && hexs[0] === "#") {
         hexs = "#" + hexs[1] + hexs[1] + hexs[2] + hexs[2] + hexs[3] + hexs[3]; //expand to full hex number
       }
 
-      if (hexs.length == 7 && hexs[0] == "#") {
+      if (hexs.length === 7 && hexs[0] === "#") {
         return parseInt(hexs.substring(1), 16);
       }
 
       let m = CC.rgbRegEx.exec(hexs);
       if (m) {
-        if (m[1] != "") {
+        if (m[1] !== "") {
           console.log(
             "WARNING: Opacity value in rgba ignored.  Specify separately as opacity attribute."
           );
