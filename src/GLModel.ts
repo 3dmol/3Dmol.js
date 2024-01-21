@@ -115,7 +115,7 @@ export class GLModel {
     // return true if a and b represent the same style
     static sameObj(a, b) {
         if (a && b)
-            return JSON.stringify(a) === JSON.stringify(b);
+            return JSON.stringify(a) == JSON.stringify(b);
         else
             return a == b;
     };
