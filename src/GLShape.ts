@@ -582,7 +582,7 @@ export class GLShape {
         }
 
         var color = customSpec.color;
-        if (typeof (color) == 'undefined') {
+        if (typeof (color) === 'undefined') {
             color = shape.color;
         }
         color = CC.color(color);
@@ -604,7 +604,7 @@ export class GLShape {
      * @returns {undefined}
      */
     static updateFromStyle(shape: GLShape, stylespec: ShapeSpec) {
-        if (typeof (stylespec.color) != 'undefined') {
+        if (typeof (stylespec.color) !== 'undefined') {
             shape.color = stylespec.color || new Color();
             if (!(stylespec.color instanceof Color))
                 shape.color = CC.color(stylespec.color);
@@ -615,11 +615,11 @@ export class GLShape {
         //opacity is the preferred nomenclature, support alpha for backwards compat
         shape.opacity = stylespec.alpha ? clamp(stylespec.alpha, 0.0,
             1.0) : 1.0;
-        if (typeof (stylespec.opacity) != 'undefined') {
+        if (typeof (stylespec.opacity) !== 'undefined') {
             shape.opacity = clamp(stylespec.opacity, 0.0, 1.0);
         }
         shape.side = (stylespec.side !== undefined) ? stylespec.side : DoubleSide;
-        shape.linewidth = typeof (stylespec.linewidth) == 'undefined' ? 1 : stylespec.linewidth;
+        shape.linewidth = typeof (stylespec.linewidth) === 'undefined' ? 1 : stylespec.linewidth;
         // Click handling
         shape.clickable = stylespec.clickable ? true : false;
         shape.callback = makeFunction(stylespec.callback);
@@ -783,19 +783,19 @@ export class GLShape {
 
         //dimensions may be scalar or vector quantities
         var w: XYZ;
-        if (typeof (dim.w) == "number") {
+        if (typeof (dim.w) === "number") {
             w = { x: dim.w, y: 0, z: 0 };
         } else {
             w = dim.w;
         }
         var h: XYZ;
-        if (typeof (dim.h) == "number") {
+        if (typeof (dim.h) === "number") {
             h = { x: 0, y: dim.h, z: 0 };
         } else {
             h = dim.h;
         }
         var d: XYZ;
-        if (typeof (dim.d) == "number") {
+        if (typeof (dim.d) === "number") {
             d = { x: 0, y: 0, z: dim.d };
         } else {
             d = dim.d;
@@ -924,7 +924,7 @@ export class GLShape {
         } else {
             end = new Vector3(cylinderSpec.end.x,
                 cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
-            if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+            if (typeof (end.x) === 'undefined') end.x = 3; //show something even if undefined
         }
         var radius = cylinderSpec.radius || 0.1;
         var color = CC.color(cylinderSpec.color);
@@ -964,7 +964,7 @@ export class GLShape {
         else {
             end = new Vector3(cylinderSpec.end.x,
                 cylinderSpec.end.y || 0, cylinderSpec.end.z || 0);
-            if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+            if (typeof (end.x) === 'undefined') end.x = 3; //show something even if undefined
         }
 
         var radius = cylinderSpec.radius || 0.1;
@@ -1009,8 +1009,8 @@ export class GLShape {
 
         curveSpec.points = curveSpec.points || [];
         curveSpec.smooth = curveSpec.smooth || 10;
-        if (typeof (curveSpec.fromCap) == "undefined") curveSpec.fromCap = 2;
-        if (typeof (curveSpec.toCap) == "undefined") curveSpec.toCap = 2;
+        if (typeof (curveSpec.fromCap) === "undefined") curveSpec.fromCap = 2;
+        if (typeof (curveSpec.toCap) === "undefined") curveSpec.toCap = 2;
 
         //subdivide into smoothed spline points
         var points = subdivide_spline(curveSpec.points, curveSpec.smooth);
@@ -1103,7 +1103,7 @@ export class GLShape {
         } else {
             end = new Vector3(lineSpec.end.x,
                 lineSpec.end.y || 0, lineSpec.end.z || 0);
-            if (typeof (end.x) == 'undefined') end.x = 3; //show something even if undefined
+            if (typeof (end.x) === 'undefined') end.x = 3; //show something even if undefined
         }
 
         var geoGroup = this.geo.updateGeoGroup(2);
@@ -1178,7 +1178,7 @@ export class GLShape {
         } else {
             arrowSpec.end = new Vector3(arrowSpec.end.x,
                 arrowSpec.end.y || 0, arrowSpec.end.z || 0);
-            if (typeof (arrowSpec.end.x) == 'undefined') arrowSpec.end.x = 3; //show something even if undefined
+            if (typeof (arrowSpec.end.x) === 'undefined') arrowSpec.end.x = 3; //show something even if undefined
         }
 
         arrowSpec.radius = arrowSpec.radius || 0.1;
@@ -1390,7 +1390,7 @@ export class GLShape {
         var len2 = total.distanceTo(maxv);
         this.boundingSphere.center = total;
         this.boundingSphere.radius = Math.max(len1, len2);
-        if (typeof callback == "function")
+        if (typeof callback === "function")
             callback();
     };
 
@@ -1434,7 +1434,7 @@ export class GLShape {
             this.geo.setUpWireframe();
         }
 
-        if (typeof (this.color) != 'undefined')
+        if (typeof (this.color) !== 'undefined')
             GLShape.updateColor(this.geo, this.color);
 
         this.shapeObj = new Object3D();

@@ -240,7 +240,7 @@ function drawShapeStrip(geo: Geometry, points, colors, div, thickness, opacity, 
         let gnum = geo.groups;
         let replicating = false;
         geoGroup = geo.updateGeoGroup(2 * num); // ensure vertex capacity
-        if (gnum != geo.groups && i > 0) {
+        if (gnum !== geo.groups && i > 0) {
             //we created a new geo - need to replicate vertices at edge 
             //(but not faces)
             i = i - 1;
@@ -727,9 +727,9 @@ function inConnectedResidues(a, b) {
             var dy = a.y - b.y;
             var dz = a.z - b.z;
             var dist = dx * dx + dy * dy + dz * dz;
-            if (a.atom == "CA" && b.atom == "CA" && dist < 16.0) //protein residues not connected
+            if (a.atom === "CA" && b.atom === "CA" && dist < 16.0) //protein residues not connected
                 return true; // calpha dist
-            else if ((a.atom == "P" || b.atom == "P") && dist < 64.0) //dna
+            else if ((a.atom === "P" || b.atom === "P") && dist < 64.0) //dna
                 return true;
         }
     }
@@ -951,8 +951,8 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
             }
 
             // first and last residues in a helix are used to draw tube
-            if (connected && (curr.ss === "h" || curr.ss == "tube start") && curr.style.cartoon.tubes) {
-                if (!inHelix && curr.ss != "tube start" && next.style.cartoon.tubes) {
+            if (connected && (curr.ss === "h" || curr.ss === "tube start") && curr.style.cartoon.tubes) {
+                if (!inHelix && curr.ss !== "tube start" && next.style.cartoon.tubes) {
                     next.ss = "tube start";
                     inHelix = true;
                 }
@@ -1088,7 +1088,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         } else // draw default-style cartoons based on secondary structure
         {
             // draw backbone through these atoms
-            if (isAlphaCarbon(next) || inNucleicAcid && (next.atom === "P" || next.atom.indexOf('O5') == 0)) {
+            if (isAlphaCarbon(next) || inNucleicAcid && (next.atom === "P" || next.atom.indexOf('O5') === 0)) {
                 if (drawingTube) {
                     if (next.ss === "tube end") {
                         drawingTube = false;
@@ -1155,7 +1155,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                 }
 
                 // reached next residue (potentially the first residue)
-                if (curr === undefined || curr.rescode != next.rescode || curr.resi != next.resi) {
+                if (curr === undefined || curr.rescode !== next.rescode || curr.resi !== next.resi) {
                     if (baseEndPt && curr != undefined) // draw last NA residue's base
                     {
                         // start the cylinder at the midpoint between
@@ -1204,8 +1204,8 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
             else if (curr != undefined && (isAlphaCarbon(curr) && next.atom === "O" ||
                 inNucleicAcid && curr.atom === "P" &&
                 (next.atom === "OP2" || next.atom === "O2P") ||
-                inNucleicAcid && curr.atom.indexOf("O5") == 0 &&
-                next.atom.indexOf("C5") == 0)) {
+                inNucleicAcid && curr.atom.indexOf("O5") === 0 &&
+                next.atom.indexOf("C5") === 0)) {
                 orientPt = new Vector3(next.x, next.y, next.z);
                 orientPt.resi = next.resi;
                 if (next.atom === "OP2" || next.atom === "O2P") // for NA 3'
@@ -1216,7 +1216,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
 
             // NA 3' terminus is an edge case, need a vector for most recent
             // O3'
-            else if (inNucleicAcid && next.atom.indexOf("O3") == 0) {
+            else if (inNucleicAcid && next.atom.indexOf("O3") === 0) {
                 terminalPt = new Vector3(next.x, next.y, next.z);
             }
 

@@ -115,7 +115,7 @@ export class GLModel {
     // return true if a and b represent the same style
     static sameObj(a, b) {
         if (a && b)
-            return JSON.stringify(a) == JSON.stringify(b);
+            return JSON.stringify(a) === JSON.stringify(b);
         else
             return a == b;
     };
@@ -166,7 +166,7 @@ export class GLModel {
      */
     private getRadiusFromStyle(atom:AtomSpec, style:SphereStyleSpec|ClickSphereStyleSpec|CrossStyleSpec) {
         var r = this.defaultSphereRadius;
-        if (typeof (style.radius) != "undefined")
+        if (typeof (style.radius) !== "undefined")
             r = style.radius;
         else if (GLModel.vdwRadii[atom.elem])
             r = GLModel.vdwRadii[atom.elem];
@@ -177,7 +177,7 @@ export class GLModel {
                 r = GLModel.vdwRadii[e];
         }
 
-        if (typeof (style.scale) != "undefined")
+        if (typeof (style.scale) !== "undefined")
             r *= style.scale;
         return r;
     };
@@ -403,10 +403,10 @@ export class GLModel {
                     continue;
                 }
                 if (bstyle.singleBond) singleBond = true;
-                if (typeof (bstyle.color1) != "undefined") {
+                if (typeof (bstyle.color1) !== "undefined") {
                     c1 = CC.color(bstyle.color1) as Color;
                 }
-                if (typeof (bstyle.color2) != "undefined") {
+                if (typeof (bstyle.color2) !== "undefined") {
                     c2 = CC.color(bstyle.color2) as Color;
                 }
             }
@@ -724,7 +724,7 @@ export class GLModel {
         var negateColor = function (c) {
             //set sign bit
             var n = -c;
-            if (n == 0) n = -0.0001;
+            if (n === 0) n = -0.0001;
             return n;
         };
 
@@ -839,10 +839,10 @@ export class GLModel {
                     }
                     if (bstyle.radius) bondR = bstyle.radius;
                     if (bstyle.singleBond) singleBond = true;
-                    if (typeof (bstyle.color1) != "undefined") {
+                    if (typeof (bstyle.color1) !== "undefined") {
                         C1 = CC.color(bstyle.color1) as Color;
                     }
-                    if (typeof (bstyle.color2) != "undefined") {
+                    if (typeof (bstyle.color2) !== "undefined") {
                         C2 = CC.color(bstyle.color2) as Color;
                     }
                 }
@@ -903,7 +903,7 @@ export class GLModel {
                     var r, p1a, p1b, p2a, p2b;
                     v = this.getSideBondV(atom, atom2, i);
 
-                    if (atom.bondOrder[i] == 2) {
+                    if (atom.bondOrder[i] === 2) {
                         r = bondR * doubleBondScale;
 
                         v.multiplyScalar(r * 1.5);
@@ -953,7 +953,7 @@ export class GLModel {
                             }
                         }
                     }
-                    else if (atom.bondOrder[i] == 3) {
+                    else if (atom.bondOrder[i] === 3) {
                         r = bondR * tripleBondScale;
                         v.cross(dir);
                         v.normalize();
@@ -1033,11 +1033,11 @@ export class GLModel {
             if (atom.bondStyles && atom.bondStyles[i]) {
                 bstyle = atom.bondStyles[i];
                 if (bstyle.singleBond) singleBond = true;
-                if (bstyle.radius && bstyle.radius != atomBondR) {
+                if (bstyle.radius && bstyle.radius !== atomBondR) {
                     differentradii = true;
                 }
             }
-            if (singleBond || atom.bondOrder[i] == 1) {
+            if (singleBond || atom.bondOrder[i] === 1) {
                 numsinglebonds++;
             }
         }
@@ -1045,7 +1045,7 @@ export class GLModel {
         if (differentradii) { //jmol style double/triple bonds - no sphere
             if (numsinglebonds > 0) drawSphere = true; //unless needed as a cap
         }
-        else if (numsinglebonds == 0 && (atom.bonds.length > 0 || style.showNonBonded)) {
+        else if (numsinglebonds === 0 && (atom.bonds.length > 0 || style.showNonBonded)) {
             drawSphere = true;
         }
 
@@ -1209,7 +1209,7 @@ export class GLModel {
             var stickMaterial = null;
             var ballMaterial = null;
             var balls = stickGeometry.sphereGeometry;
-            if (!balls || typeof (balls.vertices) === 'undefined' || balls.vertices == 0) balls = null; //no balls
+            if (!balls || typeof (balls.vertices) === 'undefined' || balls.vertices === 0) balls = null; //no balls
 
             //Initialize buffers in geometry
             stickGeometry.initTypedArrays();
@@ -1410,7 +1410,7 @@ export class GLModel {
      */
     public getSymmetries() {
 
-        if (typeof (this.modelData.symmetries) == 'undefined') {
+        if (typeof (this.modelData.symmetries) === 'undefined') {
             this.modelData.symmetries = [this.idMatrix];
         }
         return this.modelData.symmetries;
@@ -1423,7 +1423,7 @@ export class GLModel {
      *
      */
     public setSymmetries(list) {
-        if (typeof (list) == "undefined") { //delete sym data
+        if (typeof (list) === "undefined") { //delete sym data
             this.modelData.symmetries = [this.idMatrix];
         }
         else {
@@ -1586,7 +1586,7 @@ export class GLModel {
         for (var i = start; i < end; i++) {
             var newAtoms = [];
             var currframe = this.frames.length;
-            if (i == 0 && !arrowSpec) { //still need to calculate if drawing arrows
+            if (i === 0 && !arrowSpec) { //still need to calculate if drawing arrows
                 this.frames.push(this.atoms);
                 continue;
             }
@@ -1670,7 +1670,7 @@ export class GLModel {
             this.box = null;
         }
 
-        if (this.frames.length == 0) { //first call
+        if (this.frames.length === 0) { //first call
             for (let i = 0; i < parsedAtoms.length; i++) {
                 if (parsedAtoms[i].length != 0)
                     this.frames.push(parsedAtoms[i]);
@@ -1718,7 +1718,7 @@ export class GLModel {
     private propertyMatches(atomval, val) {
         if (atomval == val) {
             return true;
-        } else if (typeof (val) == 'string' && typeof (atomval) == 'number') {
+        } else if (typeof (val) === 'string' && typeof (atomval) === 'number') {
             //support numerical integer ranges, e.g. resi: 3-7
             var match = val.match(/(-?\d+)\s*-\s*(-?\d+)/);
             if (match) {
@@ -1741,7 +1741,7 @@ export class GLModel {
     // as arrays and nested objects with values of the aformentioned
     // types.
     private static deepCopyAndCache(selobject, model) {
-        if (typeof selobject != 'object' || selobject == null) return selobject;
+        if (typeof selobject !== 'object' || selobject == null) return selobject;
         if (selobject.__cache_created) return selobject; //already done
         const copy: any = {};
         for (const key in selobject) {
@@ -1753,7 +1753,7 @@ export class GLModel {
                 for (let i = 0; i < item.length; i++) {
                     copy[key].push(GLModel.deepCopyAndCache(item[i], model));
                 }
-            } else if (typeof item === "object" && key != "properties" && key != "model") {
+            } else if (typeof item === "object" && key !== "properties" && key !== "model") {
                 copy[key] = GLModel.deepCopyAndCache(item, model);
             } else {
                 copy[key] = item;
@@ -1761,7 +1761,7 @@ export class GLModel {
 
             //create caches of expensive selection types - the cache
             //stores the atoms matching the selection type
-            if (key == "and" || key == "or") {
+            if (key === "and" || key === "or") {
                 // create a list of sets of matching atoms indexes for
                 // each sub-selection
                 const results = [];
@@ -1773,7 +1773,7 @@ export class GLModel {
                     results.push(set);
                 }
 
-                if (key == "and") {
+                if (key === "and") {
                     // get the intersection of two sets
                     const intersect = function (first, other) {
                         const result = new Set();
@@ -1791,7 +1791,7 @@ export class GLModel {
                     }
                     copy[key].__cached_results = intersection;
 
-                } else if (key == "or") {
+                } else if (key === "or") {
                     const union = new Set();
                     for (const set of results) {
                         for (const elem of set) {
@@ -1823,8 +1823,8 @@ export class GLModel {
         var invert = !!sel.invert;
         var ret = true;
         for (var key in sel) {
-            if (key == "and" || key == "or" || key == "not") {  //boolean operators
-                if (key == "not") {
+            if (key === "and" || key === "or" || key === "not") {  //boolean operators
+                if (key === "not") {
                     if (this.atomIsSelected(atom, sel[key])) {
                         ret = false;
                         break;
@@ -1849,7 +1849,7 @@ export class GLModel {
                     break;
                 }
             }
-            else if (key == "properties" && atom[key]) {
+            else if (key === "properties" && atom[key]) {
                 for (var propkey in sel.properties) {
                     if (propkey.startsWith("__cache")) continue;
                     if (typeof (atom.properties[propkey]) === 'undefined') {
@@ -1873,7 +1873,7 @@ export class GLModel {
                 if (key === "bonds") {
                     //special case counting number of bonds, for selecting nonbonded mostly
                     var val = sel[key];
-                    if (val != atom.bonds.length) {
+                    if (val !== atom.bonds.length) {
                         ret = false;
                         break;
                     }
@@ -2104,9 +2104,9 @@ export class GLModel {
         // mapping from old index to new index
         var i;
         for (i = 0; i < newatoms.length; i++) {
-            if (typeof (newatoms[i].index) == "undefined")
+            if (typeof (newatoms[i].index) === "undefined")
                 newatoms[i].index = i;
-            if (typeof (newatoms[i].serial) == "undefined")
+            if (typeof (newatoms[i].serial) === "undefined")
                 newatoms[i].serial = i;
             indexmap[newatoms[i].index] = start + i;
         }
@@ -2121,14 +2121,14 @@ export class GLModel {
             a.bondOrder = [];
             a.model = this.id;
             a.style = a.style || deepCopy(GLModel.defaultAtomStyle);
-            if (typeof (a.color) == "undefined")
+            if (typeof (a.color) === "undefined")
                 a.color = this.ElementColors[a.elem] || this.defaultColor;
             // copy over all bonds contained in selection,
             // updating indices appropriately
             var nbonds = olda.bonds ? olda.bonds.length : 0;
             for (var j = 0; j < nbonds; j++) {
                 var neigh = indexmap[olda.bonds[j]];
-                if (typeof (neigh) != "undefined") {
+                if (typeof (neigh) !== "undefined") {
                     a.bonds.push(neigh);
                     a.bondOrder.push(olda.bondOrder ? olda.bondOrder[j] : 1);
                 }
@@ -2195,7 +2195,7 @@ export class GLModel {
      */
     public setStyle(sel:AtomSelectionSpec|AtomStyleSpec|string, style?:AtomStyleSpec|string, add?) {
 
-        if (typeof (style) === 'undefined' && typeof (add) == 'undefined') {
+        if (typeof (style) === 'undefined' && typeof (add) === 'undefined') {
             //if a single argument is provided, assume it is a style and select all
             style = sel as AtomStyleSpec|string;
             sel = {};
@@ -2371,7 +2371,7 @@ export class GLModel {
         if (atoms.length > 0)
             this.molObj = null; // force rebuild
 
-        if (typeof scheme === 'string' && typeof (Gradient.builtinGradients[scheme]) != "undefined") {
+        if (typeof scheme === 'string' && typeof (Gradient.builtinGradients[scheme]) !== "undefined") {
             scheme = new Gradient.builtinGradients[scheme]();
         }
         scheme = scheme as Gradient;
@@ -2440,7 +2440,7 @@ export class GLModel {
             atomJSON.x = atom.x;
             atomJSON.y = atom.y;
             atomJSON.z = atom.z;
-            if (atom.elem != "C") {
+            if (atom.elem !== "C") {
                 atomJSON.l = atom.elem;
             }
             if (includeStyles) {
@@ -2469,7 +2469,7 @@ export class GLModel {
                     e: secondAtom
                 };
                 let bondOrder = atom.bondOrder[b];
-                if (bondOrder != 1) {
+                if (bondOrder !== 1) {
                     bond.o = bondOrder;
                 }
                 out.b.push(bond);
@@ -2575,9 +2575,9 @@ export class GLModel {
         for (var i = 0; i < atoms.length; i++) {
             var a = atoms[i];
             var label = null;
-            if (typeof (a[prop]) != 'undefined') {
+            if (typeof (a[prop]) !== 'undefined') {
                 label = String(a[prop]);
-            } else if (typeof (a.properties[prop]) != 'undefined') {
+            } else if (typeof (a.properties[prop]) !== 'undefined') {
                 label = String(a.properties[prop]);
             }
 
@@ -2789,7 +2789,7 @@ export class GLModel {
         var values = []; // this will contain the all the float values in the
         // file.
         var counter = 0;
-        if (format == "pdb") {
+        if (format === "pdb") {
             var index = data.indexOf("\nATOM");
             while (index != -1) {
                 while (data.slice(index, index + 5) == "\nATOM" ||
@@ -2807,15 +2807,15 @@ export class GLModel {
                 index = data.indexOf("\nATOM", index);
             }
 
-        } else if (format == "netcdf") {
+        } else if (format === "netcdf") {
             var reader = new NetCDFReader(data);
             values = [].concat.apply([], reader.getDataVariable('coordinates'));
 
-        } else if (format == "array" || Array.isArray(data)) {
+        } else if (format === "array" || Array.isArray(data)) {
             return data.flat(2);
         } else {
             let index = data.indexOf("\n"); // remove the first line containing title
-            if (format == 'inpcrd') {
+            if (format === 'inpcrd') {
                 index = data.indexOf("\n", index + 1); //remove second line w/#atoms
             }
 
@@ -2839,10 +2839,10 @@ export class GLModel {
             }
         }
 
-        if (typeof (Parsers[format]) == "undefined") {
+        if (typeof (Parsers[format]) === "undefined") {
             // let someone provide a file name and get format from extension
             format = format.split('.').pop();
-            if (typeof (Parsers[format]) == "undefined") {
+            if (typeof (Parsers[format]) === "undefined") {
                 console.log("Unknown format: " + format);
                 // try to guess correct format from data contents
                 if (data instanceof Uint8Array) {

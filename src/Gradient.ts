@@ -64,7 +64,7 @@ export class RWB extends GradientType {
     this.mid = mid;
     this.min = min as number;
     this.max = max as number;
-    if (typeof max == "undefined" && Array.isArray(min) && min.length >= 2) {
+    if (typeof max === "undefined" && Array.isArray(min) && min.length >= 2) {
       //we were passed a single range
       this.max = min[1];
       this.min = min[0];
@@ -76,7 +76,7 @@ export class RWB extends GradientType {
 
   //return range used for color mapping, null if none set
   range() {
-    if (typeof this.min != "undefined" && typeof this.max != "undefined") {
+    if (typeof this.min !== "undefined" && typeof this.max !== "undefined") {
       return [this.min, this.max] as [number, number];
     }
     return null;
@@ -102,8 +102,8 @@ export class RWB extends GradientType {
     val = norm.val;
 
     var middle = (hi + lo) / 2;
-    if (range && typeof range[2] != "undefined") middle = range[2];
-    else if (typeof this.mid != "undefined")
+    if (range && typeof range[2] !== "undefined") middle = range[2];
+    else if (typeof this.mid !== "undefined")
       middle = this.mid; //allow user to specify midpoint
     else middle = (lo + hi) / 2;
     var scale: number, color: number;
@@ -140,7 +140,7 @@ export class ROYGB extends GradientType {
     this.mult = 1.0;
     this.min = min;
     this.max = max;
-    if (typeof max == "undefined" && Array.isArray(min) && min.length >= 2) {
+    if (typeof max === "undefined" && Array.isArray(min) && min.length >= 2) {
       //we were passed a single range
       this.max = min[1];
       this.min = min[0];
@@ -161,7 +161,7 @@ export class ROYGB extends GradientType {
       hi = this.max!;
     }
 
-    if (typeof val == "undefined") return 0xffffff;
+    if (typeof val === "undefined") return 0xffffff;
 
     var norm = normalizeValue(lo, hi, val);
     lo = norm.lo;
@@ -198,7 +198,7 @@ export class ROYGB extends GradientType {
 
   //return range used for color mapping, null if none set
   range() {
-    if (typeof this.min != "undefined" && typeof this.max != "undefined") {
+    if (typeof this.min !== "undefined" && typeof this.max !== "undefined") {
       return [this.min, this.max] as [number, number];
     }
     return null;
@@ -233,7 +233,7 @@ export class Sinebow extends GradientType {
     this.mult = 1.0;
     this.min = min;
     this.max = max;
-    if (typeof max == "undefined" && Array.isArray(min) && min.length >= 2) {
+    if (typeof max === "undefined" && Array.isArray(min) && min.length >= 2) {
       //we were passed a single range
       this.max = min[1];
       this.min = min[0];
@@ -258,7 +258,7 @@ export class Sinebow extends GradientType {
       hi = this.max;
     }
 
-    if (typeof val == "undefined") return 0xffffff;
+    if (typeof val === "undefined") return 0xffffff;
     var norm = Gradient.normalizeValue(lo, hi, val);
     lo = norm.lo;
     hi = norm.hi;
@@ -280,7 +280,7 @@ export class Sinebow extends GradientType {
 
   //return range used for color mapping, null if none set
   range() {
-    if (typeof this.min != "undefined" && typeof this.max != "undefined") {
+    if (typeof this.min !== "undefined" && typeof this.max !== "undefined") {
       return [this.min, this.max] as [number, number];
     }
     return null;
@@ -340,7 +340,7 @@ export class CustomLinear extends GradientType {
 
   //return range used for color mapping, null if none set
   range() {
-    if (typeof this.min != "undefined" && typeof this.max != "undefined") {
+    if (typeof this.min !== "undefined" && typeof this.max !== "undefined") {
       return [this.min, this.max] as [number, number];
     }
     return null;

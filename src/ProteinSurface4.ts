@@ -788,7 +788,7 @@ export class ProteinSurface {
         };
     
     private getVDWIndex(atom:any) {
-        if(!atom.elem || typeof(this.vdwRadii[atom.elem]) == "undefined") {
+        if(!atom.elem || typeof(this.vdwRadii[atom.elem]) === "undefined") {
             return "X";
         }
         return atom.elem;
