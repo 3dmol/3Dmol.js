@@ -29,5 +29,6 @@ export function areConnected(atom1: Atom, atom2: Atom) {
   )
     return false;
 
+    
   return true;
 }
