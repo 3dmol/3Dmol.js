@@ -1,34 +1,33 @@
+import { Atom } from "./assignBackboneHBonds";
 import { bondLength } from "./bondLength";
 
 /*
  * Return true if atom1 and atom2 are probably bonded to each other based on distance alone
-*/
-
-export function areConnected(atom1: { elem: any; x: number; y: number; z: number; altLoc: string; }, atom2: { elem: any; x: number; y: number; z: number; altLoc: string; }) {
-  var maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
+ */
+export function areConnected(atom1: Atom, atom2: Atom) {
+  let maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
   maxsq += 0.25; // fudge factor, especially important for md frames, also see 1i3d
   maxsq *= maxsq;
 
-  var xdiff = atom1.x - atom2.x;
-  xdiff *= xdiff;
+  let xdiff = atom1.x - atom2.x;
+  xdiff = Math.pow(xdiff, 2);
   if (xdiff > maxsq) return false;
-  var ydiff = atom1.y - atom2.y;
+  let ydiff = atom1.y - atom2.y;
   ydiff *= ydiff;
   if (ydiff > maxsq) return false;
-  var zdiff = atom1.z - atom2.z;
+  let zdiff = atom1.z - atom2.z;
   zdiff *= zdiff;
   if (zdiff > maxsq) return false;
 
-  var distSquared = xdiff + ydiff + zdiff;
+  const distSquared = xdiff + ydiff + zdiff;
 
-  if (isNaN(distSquared)) return false;
-  else if (distSquared < 0.5) return false; // maybe duplicate position.
-  else if (distSquared > maxsq) return false;
-  else if (
-    atom1.altLoc != atom2.altLoc &&
-    atom1.altLoc != " " &&
-    atom2.altLoc != " "
+  if (
+    isNaN(distSquared) ||
+    distSquared < 0.5 ||
+    distSquared > maxsq ||
+    (atom1.altLoc != atom2.altLoc && atom1.altLoc != " " && atom2.altLoc != " ")
   )
-    return false; // don't connect across alternate locations
-  else return true;
+    return false;
+
+  return true;
 }

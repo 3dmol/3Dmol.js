@@ -1,12 +1,12 @@
-import { assignBackboneHBonds } from "./assignBackboneHBonds";
+import { Atom, assignBackboneHBonds } from "./assignBackboneHBonds";
 
-export function computeSecondaryStructure(atomsarray: string | any[], hbondCutoff: number | undefined) {
+export function computeSecondaryStructure(atomsarray: Array<Atom>, hbondCutoff: number | undefined) {
   assignBackboneHBonds(atomsarray, hbondCutoff!);
 
   // compute, per residue, what the secondary structure is
-  var chres = {}; // lookup by chain and resid
-  var i: number, il: number, c: string | number, r: number; // i: used in for loop, il: length of atomsarray
-  var atom: { chain: string | number; hbondDistanceSq: number; hbondOther: any; resi: number; ss: string; ssbegin: boolean; ssend: boolean; }, val: string;
+  const chres = {}; // lookup by chain and resid
+  let i: number, il: number, c: string | number, r: number; // i: used in for loop, il: length of atomsarray
+  let atom: Atom, val: string;
 
   //identify helices first
   for (i = 0, il = atomsarray.length; i < il; i++) {
@@ -15,7 +15,7 @@ export function computeSecondaryStructure(atomsarray: string | any[], hbondCutof
     if (typeof chres[atom.chain] === "undefined") chres[atom.chain] = [];
 
     if (isFinite(atom.hbondDistanceSq)) {
-      var other = atom.hbondOther;
+      const other = atom.hbondOther;
       if (typeof chres[other.chain] === "undefined") chres[other.chain] = [];
 
       if (Math.abs(other.resi - atom.resi) === 4) {
@@ -28,8 +28,8 @@ export function computeSecondaryStructure(atomsarray: string | any[], hbondCutof
   // plug gaps in helices
   for (c in chres) {
     for (r = 1; r < chres[c].length - 1; r++) {
-      var valbefore = chres[c][r - 1];
-      var valafter = chres[c][r + 1];
+      const valbefore = chres[c][r - 1];
+      const valafter = chres[c][r + 1];
       val = chres[c][r];
       if (valbefore == "h" && valbefore == valafter && val != valbefore) {
         chres[c][r] = valbefore;
@@ -44,7 +44,7 @@ export function computeSecondaryStructure(atomsarray: string | any[], hbondCutof
     if (
       isFinite(atom.hbondDistanceSq) &&
       chres[atom.chain][atom.resi] != "h" &&
-      atom.ss != "h"
+      atom.ss !== "h"
     ) {
       chres[atom.chain][atom.resi] = "maybesheet";
     }
@@ -71,15 +71,15 @@ export function computeSecondaryStructure(atomsarray: string | any[], hbondCutof
   // plug gaps in sheets and remove singletons
   for (let c in chres) {
     for (let r = 1; r < chres[c].length - 1; r++) {
-      let valbefore = chres[c][r - 1];
-      let valafter = chres[c][r + 1];
+      const valbefore = chres[c][r - 1];
+      const valafter = chres[c][r + 1];
       val = chres[c][r];
       if (valbefore == "s" && valbefore == valafter && val != valbefore) {
         chres[c][r] = valbefore;
       }
     }
     for (let r = 0; r < chres[c].length; r++) {
-      let val = chres[c][r];
+      const val = chres[c][r];
       if (val == "h" || val == "s") {
         if (chres[c][r - 1] != val && chres[c][r + 1] != val)
           delete chres[c][r];
@@ -95,7 +95,7 @@ export function computeSecondaryStructure(atomsarray: string | any[], hbondCutof
     //clear hbondOther to eliminate circular references that prohibit serialization
     delete atom.hbondOther;
     delete atom.hbondDistanceSq;
-    if (typeof val == "undefined" || val == "maybesheet") continue;
+    if (typeof val === "undefined" || val === "maybesheet") continue;
     atom.ss = val;
     if (chres[atom.chain][atom.resi - 1] != val) atom.ssbegin = true;
     if (chres[atom.chain][atom.resi + 1] != val) atom.ssend = true;
