@@ -23,7 +23,7 @@ export interface Atom {
   ssend: boolean;
   bondOrder: any[];
   properties: any;
-  b: number;
+  b: number | string;
   pdbline: string;
   index: number;
   hbondDistanceSq: number;

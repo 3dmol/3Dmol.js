@@ -47,7 +47,6 @@ let mmtfHETATMtypes = new Set([
  * @param ParserOptionsSpec
  * @category Parsers
 */
-
 export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
 
     var noH = !options.keepH; // suppress hydrogens by default
@@ -300,7 +299,7 @@ export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
     }
 
     if (computeStruct && !ignoreStruct) {
-        computeSecondaryStructure(atoms, options.hbondCutoff);
+        computeSecondaryStructure(atoms as any, options.hbondCutoff);
     }
 
     return atoms;
