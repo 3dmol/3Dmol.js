@@ -1,22 +1,23 @@
-import { Atom, assignBackboneHBonds } from "./assignBackboneHBonds";
+import { AtomSpec } from "specs";
+import { assignBackboneHBonds } from "./assignBackboneHBonds";
 
-export function computeSecondaryStructure(atomsarray: Array<Atom>, hbondCutoff: number | undefined) {
-  assignBackboneHBonds(atomsarray, hbondCutoff!);
+export function computeSecondaryStructure(atomsarray: Array<AtomSpec>, hbondCutoff: number) {
+  assignBackboneHBonds(atomsarray, hbondCutoff);
 
   // compute, per residue, what the secondary structure is
   const chres = {}; // lookup by chain and resid
   let i: number, il: number, c: string | number, r: number; // i: used in for loop, il: length of atomsarray
-  let atom: Atom, val: string;
+  let atom: AtomSpec, val: string;
 
   //identify helices first
   for (i = 0, il = atomsarray.length; i < il; i++) {
     atom = atomsarray[i];
 
-    if (typeof chres[atom.chain] === "undefined") chres[atom.chain] = [];
+    if (chres[atom.chain] === undefined) chres[atom.chain] = [];
 
     if (isFinite(atom.hbondDistanceSq)) {
       const other = atom.hbondOther;
-      if (typeof chres[other.chain] === "undefined") chres[other.chain] = [];
+      if (chres[other.chain] === undefined) chres[other.chain] = [];
 
       if (Math.abs(other.resi - atom.resi) === 4) {
         // helix

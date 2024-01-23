@@ -1,16 +1,16 @@
-import { Atom } from "./assignBackboneHBonds";
+import { AtomSpec } from "specs";
 import { bondLength } from "./bondLength";
 
 /*
  * Return true if atom1 and atom2 are probably bonded to each other based on distance alone
  */
-export function areConnected(atom1: Atom, atom2: Atom) {
+export function areConnected(atom1: AtomSpec, atom2: AtomSpec) {
   let maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
   maxsq += 0.25; // fudge factor, especially important for md frames, also see 1i3d
   maxsq *= maxsq;
 
   let xdiff = atom1.x - atom2.x;
-  xdiff = Math.pow(xdiff, 2);
+  xdiff *= xdiff;
   if (xdiff > maxsq) return false;
   let ydiff = atom1.y - atom2.y;
   ydiff *= ydiff;
@@ -25,7 +25,7 @@ export function areConnected(atom1: Atom, atom2: Atom) {
     isNaN(distSquared) ||
     distSquared < 0.5 ||
     distSquared > maxsq ||
-    (atom1.altLoc != atom2.altLoc && atom1.altLoc != " " && atom2.altLoc != " ")
+    (atom1.altLoc !== atom2.altLoc && atom1.altLoc !== " " && atom2.altLoc !== " ")
   )
     return false;
 

@@ -1,5 +1,5 @@
+import { AtomSpec } from "specs";
 import { areConnected } from "./areConnected";
-import { Atom } from "./assignBackboneHBonds";
 
 /**
  * @param {AtomSpec[]} atoms
@@ -49,8 +49,8 @@ export function assignBonds(atoms: string | any[]) {
   }
 
   function findConnections(
-    points: Array<Atom>,
-    otherPoints: Array<Atom>
+    points: Array<AtomSpec>,
+    otherPoints: Array<AtomSpec>
   ) {
     for (let i = 0; i < points.length; i++) {
       const atom1 = points[i];

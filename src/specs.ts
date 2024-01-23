@@ -43,6 +43,8 @@ export interface AtomSpec  {
   bonds?: number[];
   /** Secondary structure identifier (for cartoon render; e.g. 'h' for helix) */
   ss?: string;
+  ssbegin?: boolean;
+  ssend?: boolean;
   /** true if this atom forms only single bonds or no bonds at all */
   singleBonds?: boolean;
   /** Array of this atom's bond orders, corresponding to bonds identfied by 'bonds' */
@@ -73,6 +75,9 @@ export interface AtomSpec  {
   capDrawn?: boolean;
   model?: number;
   contextMenuEnabled?: boolean;
+  hbondDistanceSq?: number;
+  hbondOther?: any;
+  altLoc?: string;
 };
 
 /**

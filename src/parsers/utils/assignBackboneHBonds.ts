@@ -1,37 +1,11 @@
 // This will identify all hydrogen bonds between backbone
 // atoms; assume atom names are correct, only identifies
 // single closest hbond
+
+import { AtomSpec } from "specs";
 // interface Atoms {index: number; atom: string; hbondDistanceSq: number; hbondOther: any; hetflag:any}
-
-export interface Atom {
-  resn: string;
-  x: number;
-  y: number;
-  z: number;
-  elem: string;
-  hetflag: boolean;
-  altLoc: string;
-  chain: string;
-  resi: number;
-  icode: string;
-  rescode: string;
-  serial: number;
-  atom: string;
-  bonds: any[];
-  ss: string;
-  ssbegin: boolean; 
-  ssend: boolean;
-  bondOrder: any[];
-  properties: any;
-  b: number | string;
-  pdbline: string;
-  index: number;
-  hbondDistanceSq: number;
-  hbondOther: any;
-}
-
 export function assignBackboneHBonds(
-  atomsarray: Array<Atom>,
+  atomsarray: Array<AtomSpec>,
   hbondCutoff: number
 ) {
   const maxlength = hbondCutoff || 3.2;
