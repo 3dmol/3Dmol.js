@@ -16,7 +16,7 @@ export function atomNameToElem(name: string, nothetero: boolean) {
   }
   if (elem.length > 1) {
     elem = elem[0].toUpperCase() + elem.substring(1).toLowerCase();
-    if (bondTable[elem] !== undefined) {
+    if (bondTable[elem] === undefined) {
       //not a known element, probably should just use first letter
       elem = elem[0];
     } else if (nothetero) {
