@@ -96,7 +96,7 @@ export function computeSecondaryStructure(atomsarray: Array<AtomSpec>, hbondCuto
     //clear hbondOther to eliminate circular references that prohibit serialization
     delete atom.hbondOther;
     delete atom.hbondDistanceSq;
-    if (typeof val === "undefined" || val === "maybesheet") continue;
+    if (val === undefined || val === "maybesheet") continue;
     atom.ss = val;
     if (chres[atom.chain][atom.resi - 1] != val) atom.ssbegin = true;
     if (chres[atom.chain][atom.resi + 1] != val) atom.ssend = true;
