@@ -166,7 +166,7 @@ export class GLModel {
      */
     private getRadiusFromStyle(atom:AtomSpec, style:SphereStyleSpec|ClickSphereStyleSpec|CrossStyleSpec) {
         var r = this.defaultSphereRadius;
-        if (typeof (style.radius) !== "undefined")
+        if (style.radius !== undefined)
             r = style.radius;
         else if (GLModel.vdwRadii[atom.elem])
             r = GLModel.vdwRadii[atom.elem];
@@ -177,7 +177,7 @@ export class GLModel {
                 r = GLModel.vdwRadii[e];
         }
 
-        if (typeof (style.scale) !== "undefined")
+        if (style.scale !== undefined)
             r *= style.scale;
         return r;
     };
@@ -403,10 +403,10 @@ export class GLModel {
                     continue;
                 }
                 if (bstyle.singleBond) singleBond = true;
-                if (typeof (bstyle.color1) !== "undefined") {
+                if (bstyle.color1 !== undefined) {
                     c1 = CC.color(bstyle.color1) as Color;
                 }
-                if (typeof (bstyle.color2) !== "undefined") {
+                if (bstyle.color2 !== undefined) {
                     c2 = CC.color(bstyle.color2) as Color;
                 }
             }
@@ -839,10 +839,10 @@ export class GLModel {
                     }
                     if (bstyle.radius) bondR = bstyle.radius;
                     if (bstyle.singleBond) singleBond = true;
-                    if (typeof (bstyle.color1) !== "undefined") {
+                    if (bstyle.color1 !== undefined) {
                         C1 = CC.color(bstyle.color1) as Color;
                     }
-                    if (typeof (bstyle.color2) !== "undefined") {
+                    if (bstyle.color2 !== undefined) {
                         C2 = CC.color(bstyle.color2) as Color;
                     }
                 }
@@ -1141,7 +1141,7 @@ export class GLModel {
                 this.drawBondLines(atom, atoms, lineGeometries);
                 this.drawBondSticks(atom, atoms, stickGeometry);
 
-                if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
+                if (atom.style.cartoon !== undefined && !atom.style.cartoon.hidden) {
                     //gradient color scheme range
                     if (atom.style.cartoon.color === "spectrum" && typeof (atom.resi) === "number" && !atom.hetflag) {
                         if (atom.resi < range[0])
@@ -1209,7 +1209,7 @@ export class GLModel {
             var stickMaterial = null;
             var ballMaterial = null;
             var balls = stickGeometry.sphereGeometry;
-            if (!balls || typeof (balls.vertices) === 'undefined' || balls.vertices === 0) balls = null; //no balls
+            if (!balls || balls.vertices === undefined || balls.vertices === 0) balls = null; //no balls
 
             //Initialize buffers in geometry
             stickGeometry.initTypedArrays();
@@ -1410,7 +1410,7 @@ export class GLModel {
      */
     public getSymmetries() {
 
-        if (typeof (this.modelData.symmetries) === 'undefined') {
+        if (this.modelData.symmetries === undefined) {
             this.modelData.symmetries = [this.idMatrix];
         }
         return this.modelData.symmetries;
@@ -1423,7 +1423,7 @@ export class GLModel {
      *
      */
     public setSymmetries(list) {
-        if (typeof (list) === "undefined") { //delete sym data
+        if (list === undefined) { //delete sym data
             this.modelData.symmetries = [this.idMatrix];
         }
         else {
@@ -1818,7 +1818,7 @@ export class GLModel {
      * @return {boolean}
      */
     public atomIsSelected(atom:AtomSpec, sel?:AtomSelectionSpec) {
-        if (typeof (sel) === "undefined")
+        if (sel === undefined)
             return true; // undef gets all
         var invert = !!sel.invert;
         var ret = true;
@@ -1852,7 +1852,7 @@ export class GLModel {
             else if (key === "properties" && atom[key]) {
                 for (var propkey in sel.properties) {
                     if (propkey.startsWith("__cache")) continue;
-                    if (typeof (atom.properties[propkey]) === 'undefined') {
+                    if (atom.properties[propkey] === undefined) {
                         ret = false;
                         break;
                     }
@@ -1865,7 +1865,7 @@ export class GLModel {
             else if (sel.hasOwnProperty(key) && !GLModel.ignoredKeys.has(key) && !key.startsWith('__cache')) {
 
                 // if something is in sel, atom must have it
-                if (typeof (atom[key]) === "undefined") {
+                if (atom[key] === undefined) {
                     ret = false;
                     break;
                 }
@@ -2104,9 +2104,9 @@ export class GLModel {
         // mapping from old index to new index
         var i;
         for (i = 0; i < newatoms.length; i++) {
-            if (typeof (newatoms[i].index) === "undefined")
+            if (newatoms[i].index === undefined)
                 newatoms[i].index = i;
-            if (typeof (newatoms[i].serial) === "undefined")
+            if (newatoms[i].serial === undefined)
                 newatoms[i].serial = i;
             indexmap[newatoms[i].index] = start + i;
         }
@@ -2121,14 +2121,14 @@ export class GLModel {
             a.bondOrder = [];
             a.model = this.id;
             a.style = a.style || deepCopy(GLModel.defaultAtomStyle);
-            if (typeof (a.color) === "undefined")
+            if (a.color === undefined)
                 a.color = this.ElementColors[a.elem] || this.defaultColor;
             // copy over all bonds contained in selection,
             // updating indices appropriately
             var nbonds = olda.bonds ? olda.bonds.length : 0;
             for (var j = 0; j < nbonds; j++) {
                 var neigh = indexmap[olda.bonds[j]];
-                if (typeof (neigh) !== "undefined") {
+                if (neigh !== undefined) {
                     a.bonds.push(neigh);
                     a.bondOrder.push(olda.bondOrder ? olda.bondOrder[j] : 1);
                 }
@@ -2195,7 +2195,7 @@ export class GLModel {
      */
     public setStyle(sel:AtomSelectionSpec|AtomStyleSpec|string, style?:AtomStyleSpec|string, add?) {
 
-        if (typeof (style) === 'undefined' && typeof (add) === 'undefined') {
+        if (style === undefined && add === undefined) {
             //if a single argument is provided, assume it is a style and select all
             style = sel as AtomStyleSpec|string;
             sel = {};
@@ -2353,7 +2353,7 @@ export class GLModel {
             this.molObj = null; // force rebuild
         for (var i = 0; i < atoms.length; i++) {
             var a = atoms[i];
-            if (typeof (colors[a.elem]) !== "undefined") {
+            if (colors?.[a.elem] !== undefined) {
                 a.color = colors[a.elem];
             }
         }
@@ -2371,7 +2371,7 @@ export class GLModel {
         if (atoms.length > 0)
             this.molObj = null; // force rebuild
 
-        if (typeof scheme === 'string' && typeof (Gradient.builtinGradients[scheme]) !== "undefined") {
+        if (typeof scheme === 'string' && Gradient.builtinGradients[scheme] !== undefined) {
             scheme = new Gradient.builtinGradients[scheme]();
         }
         scheme = scheme as Gradient;
@@ -2575,9 +2575,9 @@ export class GLModel {
         for (var i = 0; i < atoms.length; i++) {
             var a = atoms[i];
             var label = null;
-            if (typeof (a[prop]) !== 'undefined') {
+            if (a[prop] !== undefined) {
                 label = String(a[prop]);
-            } else if (typeof (a.properties[prop]) !== 'undefined') {
+            } else if (a.properties?.[prop] !== undefined) {
                 label = String(a.properties[prop]);
             }
 
@@ -2839,10 +2839,10 @@ export class GLModel {
             }
         }
 
-        if (typeof (Parsers[format]) === "undefined") {
+        if (Parsers[format] === undefined) {
             // let someone provide a file name and get format from extension
             format = format.split('.').pop();
-            if (typeof (Parsers[format]) === "undefined") {
+            if (Parsers[format] === undefined) {
                 console.log("Unknown format: " + format);
                 // try to guess correct format from data contents
                 if (data instanceof Uint8Array) {

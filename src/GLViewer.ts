@@ -567,13 +567,13 @@ export class GLViewer {
         this.nomouse = this.config.nomouse;
         this.bgColor = 0;
         this.config.backgroundColor = this.config.backgroundColor || "#ffffff";
-        if (typeof (this.config.backgroundColor) !== 'undefined') {
+        if (this.config?.backgroundColor !== undefined) {
             this.bgColor = CC.color(this.config.backgroundColor).getHex();
         }
         this.config.backgroundAlpha = this.config.backgroundAlpha == undefined ? 1.0 : this.config.backgroundAlpha;
 
         this.camerax = 0;
-        if (typeof (this.config.camerax) !== 'undefined') {
+        if (this.config?.camerax !== undefined) {
             this.camerax = parseFloat(this.config.camerax);
         }
         this._viewer = this;
@@ -623,7 +623,7 @@ export class GLViewer {
 
         window.addEventListener("resize", this.resize.bind(this));
 
-        if (typeof (window.ResizeObserver) !== "undefined") {
+        if (window.ResizeObserver !== undefined) {
             this.divwatcher = new window.ResizeObserver(this.resize.bind(this));
             this.divwatcher.observe(this.container);
         }
@@ -825,7 +825,7 @@ export class GLViewer {
         });
     */
     public setZoomLimits(lower, upper) {
-        if (typeof (lower) !== 'undefined') this.config.lowerZoomLimit = lower;
+        if (lower !== undefined) this.config.lowerZoomLimit = lower;
         if (upper) this.config.upperZoomLimit = upper;
         this.rotationGroup.position.z = this.adjustZoomToLimits(this.rotationGroup.position.z);
         this.show();
@@ -1204,7 +1204,7 @@ export class GLViewer {
      *
      */
     public setBackgroundColor(hex: ColorSpec, a: number) {
-        if (typeof (a) === "undefined") {
+        if (a === undefined) {
             a = 1.0;
         }
         else if (a < 0 || a > 1.0) {
@@ -1387,7 +1387,7 @@ export class GLViewer {
      */
     public spin(axis, speed: number = 1) {
         clearInterval(this.spinInterval);
-        if (typeof axis === 'undefined')
+        if (axis === undefined)
             axis = 'y';
         if (typeof axis === "boolean") {
             if (!axis)
@@ -1471,7 +1471,7 @@ export class GLViewer {
             if (mpos) {
                 delta.mpos = mpos.clone().sub(curr.mpos).multiplyScalar(frac);
             }
-            if (typeof (rz) !== 'undefined' && rz != null) {
+            if (rz !== undefined && rz != null) {
                 delta.rz = frac * (rz - curr.rz);
             }
             if (rot) {
@@ -1553,7 +1553,7 @@ export class GLViewer {
             axis = { vx: 0, vy: 0, vz: 1 };
         }
 
-        if (typeof (axis.vx) !== 'undefined') {
+        if (axis.vx !== undefined) {
             var vaxis = new Vector3(axis.vx, axis.vy, axis.vz);
             vaxis.applyQuaternion(this.rotationGroup.quaternion);
             axis = { x: vaxis.x, y: vaxis.y, z: vaxis.z };
@@ -1630,7 +1630,7 @@ export class GLViewer {
         this.rotationGroup.quaternion.y = arg[5];
         this.rotationGroup.quaternion.z = arg[6];
         this.rotationGroup.quaternion.w = arg[7];
-        if (typeof (arg[8]) !== "undefined") {
+        if (arg[8] !== undefined) {
             this.rotationGroup.position.x = arg[8];
             this.rotationGroup.position.y = arg[9];
         }
@@ -1666,8 +1666,8 @@ export class GLViewer {
 
         for (i = 0; i < this.shapes.length; i++) {
             if (this.shapes[i]) { //exists
-                if ((typeof (this.shapes[i].frame) === 'undefined' || this.viewer_frame < 0 ||
-                    this.shapes[i].frame < 0 || this.shapes[i].frame == this.viewer_frame)) {
+                if (this.shapes[i].frame === undefined || this.viewer_frame < 0 ||
+                    this.shapes[i].frame < 0 || this.shapes[i].frame == this.viewer_frame) {
                     this.shapes[i].globj(this.modelGroup, exts);
                 } else { //should not be displayed in current frame
                     this.shapes[i].removegl(this.modelGroup);
@@ -1676,7 +1676,7 @@ export class GLViewer {
         }
 
         for (i = 0; i < this.labels.length; i++) {
-            if (this.labels[i] && typeof (this.labels[i].frame) !== 'undefined' && this.labels[i].frame >= 0) { //exists and has frame specifier
+            if (this.labels[i] && this.labels[i].frame !== undefined && this.labels[i].frame >= 0) { //exists and has frame specifier
                 this.modelGroup.remove(this.labels[i].sprite);
                 if (this.viewer_frame < 0 || this.labels[i].frame == this.viewer_frame) {
                     this.modelGroup.add(this.labels[i].sprite);
@@ -1761,7 +1761,7 @@ export class GLViewer {
      */
     private getModelList(sel: any): GLModel[] {
         let ms: GLModel[] = [];
-        if (typeof sel === 'undefined' || typeof sel.model === "undefined") {
+        if (sel === undefined ||  sel.model === undefined) {
             for (let i = 0; i < this.models.length; i++) {
                 if (this.models[i])
                     ms.push(this.models[i]);
@@ -1794,7 +1794,7 @@ export class GLViewer {
      */
     private getAtomsFromSel(sel: AtomSelectionSpec): AtomSpec[] {
         var atoms = [];
-        if (typeof (sel) === "undefined")
+        if (sel === undefined)
             sel = {};
 
         var ms = this.getModelList(sel);
@@ -1815,7 +1815,7 @@ export class GLViewer {
      * @return {boolean}
      */
     private atomIsSelected(atom: AtomSpec, sel: AtomSelectionSpec) {
-        if (typeof (sel) === "undefined")
+        if (sel === undefined)
             sel = {};
 
         var ms = this.getModelList(sel);
@@ -1846,7 +1846,7 @@ export class GLViewer {
     *
     */
     public getUniqueValues(attribute: string, sel?: AtomSelectionSpec) {
-        if (typeof (sel) === "undefined")
+        if (sel === undefined)
             sel = {};
         var atoms = this.getAtomsFromSel(sel);
         var values = {};
@@ -2517,7 +2517,7 @@ export class GLViewer {
         delete this.shapes[shape.shapePosition];
         // clear off back of model array
         while (this.shapes.length > 0
-            && typeof (this.shapes[this.shapes.length - 1]) === "undefined")
+            && this.shapes[this.shapes.length - 1] === undefined)
             this.shapes.pop();
         return this;
     };
@@ -3395,7 +3395,7 @@ export class GLViewer {
         if (options && !options.defaultcolors) {
             options.defaultcolors = this.defaultcolors;
             options.cartoonQuality = options.cartoonQuality || this.config.cartoonQuality;
-        } else if (typeof (options) === 'undefined') {
+        } else if (options === undefined) {
             options = { defaultcolors: this.defaultcolors, cartoonQuality: this.config.cartoonQuality };
         }
         var m = new GLModel(this.models.length, options);
@@ -3504,7 +3504,7 @@ export class GLViewer {
         delete this.models[model.getID()];
         // clear off back of model array
         while (this.models.length > 0
-            && typeof (this.models[this.models.length - 1]) === "undefined")
+            && this.models[this.models.length - 1] === undefined)
             this.models.pop();
         return this;
     };
@@ -3610,7 +3610,7 @@ export class GLViewer {
     public setStyle(sel:AtomSelectionSpec, style:AtomStyleSpec);
     public setStyle(sel:AtomStyleSpec);
     public setStyle(sel:unknown, style?:unknown) {
-        if (typeof (style) === 'undefined') {
+        if (style === undefined) {
             //if a single argument is provided, assume it is a style and select all
             style = sel as AtomStyleSpec;
             sel = {};
@@ -3638,7 +3638,7 @@ export class GLViewer {
     public addStyle(sel:AtomSelectionSpec, style:AtomStyleSpec);
     public addStyle(sel:AtomStyleSpec);
     public addStyle(sel:unknown, style?:unknown) {
-        if (typeof (style) === 'undefined') {
+        if (style === undefined) {
             //if a single argument is provided, assume it is a style and select all
             style = sel;
             sel = {};
@@ -3759,7 +3759,7 @@ export class GLViewer {
 
         for (let i = 0; i < atomlist.length; i++) {
             var atom = atomlist[i];
-            if (typeof (atom) === "undefined")
+            if (atom === undefined)
                 continue;
 
             if (atom.x < extent[0][0] || atom.x > extent[1][0])
@@ -3902,7 +3902,7 @@ export class GLViewer {
         for (let i = 0, il = atoms.length; i < il; i++) {
             var atom = atoms[i];
             if (atom) {
-                if (typeof (atom.surfaceColor) !== "undefined") {
+                if (atom.surfaceColor !== undefined) {
                     colors[i] = atom.surfaceColor;
                 } else if (atom.color) // map from atom
                     colors[i] = CC.color(atom.color);

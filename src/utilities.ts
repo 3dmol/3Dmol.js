@@ -100,7 +100,7 @@ export function getExtent(atomlist, ignoreSymmetries?) {
         return [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
     for (var i = 0; i < atomlist.length; i++) {
         var atom = atomlist[i];
-        if (typeof atom === 'undefined' || !isFinite(atom.x) ||
+        if (atom === undefined || !isFinite(atom.x) ||
             !isFinite(atom.y) || !isFinite(atom.z))
             continue;
         cnt++;
@@ -220,9 +220,9 @@ export function base64ToArray(base64) {
 export function getAtomProperty(atom, prop) {
     var val = null;
     if (atom.properties &&
-        typeof (atom.properties[prop]) !== "undefined") {
+        atom.properties[prop] !== undefined) {
         val = atom.properties[prop];
-    } else if (typeof (atom[prop]) !== 'undefined') {
+    } else if (atom?.[prop] !== undefined) {
         val = atom[prop];
     }
     return val;
@@ -266,7 +266,7 @@ export function specStringToObject(str) {
     if (typeof (str) === "object") {
         return str; //not string, assume was converted already
     }
-    else if (typeof (str) === "undefined" || str == null) {
+    else if (str === undefined || str == null) {
         return str;
     }
 
@@ -423,7 +423,7 @@ export function download(query, viewer, options, callback?) {
         pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
         query = query.substring(5).toUpperCase();
         uri = pdbUri + query;
-        if (options && typeof options.noComputeSecondaryStructure === 'undefined') {
+        if (options && options.noComputeSecondaryStructure === undefined) {
             //when fetch directly from pdb, trust structure annotations
             options.noComputeSecondaryStructure = true;
         }
@@ -444,7 +444,7 @@ export function download(query, viewer, options, callback?) {
                 type = options.format; //can override and require pdb
             }
 
-            if (options && typeof options.noComputeSecondaryStructure === 'undefined') {
+            if (options && options.noComputeSecondaryStructure === undefined) {
                 //when fetch directly from pdb, trust structure annotations
                 options.noComputeSecondaryStructure = true;
             }
@@ -531,14 +531,14 @@ export function download(query, viewer, options, callback?) {
  */
 export function getColorFromStyle(atom, style): Color {
     let scheme = style.colorscheme;
-    if (typeof builtinColorSchemes[scheme] !== "undefined") {
+    if (builtinColorSchemes[scheme] !== undefined) {
         scheme = builtinColorSchemes[scheme];
     } else if (typeof scheme === "string" && scheme.endsWith("Carbon")) {
         //any color you want of carbon
         let ccolor = scheme
             .substring(0, scheme.lastIndexOf("Carbon"))
             .toLowerCase();
-        if (typeof htmlColors[ccolor] !== "undefined") {
+        if (htmlColors[ccolor] !== undefined) {
             let newscheme = { ...elementColors.defaultColors };
             newscheme.C = htmlColors[ccolor];
             builtinColorSchemes[scheme] = { prop: "elem", map: newscheme };
@@ -547,27 +547,27 @@ export function getColorFromStyle(atom, style): Color {
     }
 
     let color = atom.color;
-    if (typeof style.color !== "undefined" && style.color !== "spectrum")
+    if (style.color !== undefined && style.color !== "spectrum")
         color = style.color;
-    if (typeof scheme !== "undefined") {
+    if (scheme !== undefined) {
         let prop, val;
-        if (typeof elementColors[scheme] !== "undefined") {
+        if (elementColors[scheme] !== undefined) {
             //name of builtin colorscheme
             scheme = elementColors[scheme];
-            if (typeof scheme[atom[scheme.prop]] !== "undefined") {
+            if (scheme[atom[scheme.prop]] !== undefined) {
                 color = scheme.map[atom[scheme.prop]];
             }
-        } else if (typeof scheme[atom[scheme.prop]] !== "undefined") {
+        } else if (scheme[atom[scheme.prop]] !== undefined) {
             //actual color scheme provided
             color = scheme.map[atom[scheme.prop]];
         } else if (
-            typeof scheme.prop !== "undefined" &&
-            typeof scheme.gradient !== "undefined"
+            scheme.prop !== undefined &&
+            scheme.gradient !== undefined
         ) {
             //apply a property mapping
             prop = scheme.prop;
             var grad = scheme.gradient; //redefining scheme
-            if (typeof builtinGradients[grad] !== "undefined") {
+            if (builtinGradients[grad] !== undefined) {
                 grad = new builtinGradients[grad](
                     scheme.min,
                     scheme.max,
@@ -581,22 +581,22 @@ export function getColorFromStyle(atom, style): Color {
                 color = grad.valueToHex(val, range);
             }
         } else if (
-            typeof scheme.prop !== "undefined" &&
-            typeof scheme.map !== "undefined"
+            scheme.prop !== undefined &&
+            scheme.map !== undefined
         ) {
             //apply a discrete property mapping
             prop = scheme.prop;
             val = getAtomProperty(atom, prop);
-            if (typeof scheme.map[val] !== "undefined") {
+            if (scheme.map[val] !== undefined) {
                 color = scheme.map[val];
             }
-        } else if (typeof style.colorscheme[atom.elem] !== "undefined") {
+        } else if (style.colorscheme[atom.elem] !== undefined) {
             //actual color scheme provided
             color = style.colorscheme[atom.elem];
         } else {
             console.log("Could not interpret colorscheme " + scheme);
         }
-    } else if (typeof style.colorfunc !== "undefined") {
+    } else if (style.colorfunc !== undefined) {
         //this is a user provided function for turning an atom into a color
         color = style.colorfunc(atom);
     }
