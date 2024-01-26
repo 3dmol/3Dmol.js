@@ -7,47 +7,63 @@ import { processSymmetries } from "./processSymmetries";
 import { assignPDBBonds } from "./assignPDBBonds";
 import { validateBonds } from "./validateBonds";
 import { ParserOptionsSpec } from "../ParserOptionsSpec";
-
+import { AtomSpec, Cryst } from "specs";
 // Return one model worth of pdb, returns atoms, modelData, and remaining lines
-export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslookup: { [x: string]: { [x: string]: any; }; hasOwnProperty?: any; }) {
-  var atoms: any[] = [];
-  var assignbonds =
+export function getSinglePDB(
+  lines: string[],
+  options: ParserOptionsSpec,
+  sslookup: { [x: string]: { [x: string]: string }; hasOwnProperty?: any }
+): [AtomSpec[], { symmetries: Matrix4[]; cryst: Cryst }, string[]]{
+  const atoms: AtomSpec[] = [];
+  const assignbonds =
     options.assignBonds === undefined ? true : options.assignBonds;
-  var noH = !options.keepH; // suppress hydrogens by default
-  var ignoreStruct = !!options.noSecondaryStructure;
-  var computeStruct = !options.noComputeSecondaryStructure;
-  var noAssembly = !options.doAssembly; // don't assemble by default
-  var selAltLoc = options.altLoc ? options.altLoc : "A"; //default alternate location to select if present
-  var modelData: Record<string, any> = { symmetries: [] };
-  var atom: any;
-  var remainingLines = [];
+  const noH = !options.keepH; // suppress hydrogens by default
+  const ignoreStruct = !!options.noSecondaryStructure;
+  const computeStruct = !options.noComputeSecondaryStructure;
+  const noAssembly = !options.doAssembly; // don't assemble by default
+  const selAltLoc = options.altLoc ? options.altLoc : "A"; //default alternate location to select if present
+  let modelData: { symmetries: Matrix4[]; cryst: Cryst };
+  //atom name
+  let atom: string;
+  let remainingLines = [];
 
-  var serialToIndex: number[] = []; // map from pdb serial to index in atoms
-  var line: string | string[];
-  var seenbonds: Record<any, any> = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
+  const serialToIndex: number[] = []; // map from pdb serial to index in atoms
+  let line: string | string[];
+  const seenbonds: Record<string, number> = {}; //sometimes connect records are duplicated as an unofficial means of relaying bond orders
 
   for (let i = 0; i < lines.length; i++) {
     line = lines[i].replace(/^\s*/, ""); // remove indent
-    var recordName = line.substring(0, 6);
+    const recordName = line.substring(0, 6);
 
-    var startChain: string, startResi: number, endResi: number;
+    let startChain: string, startResi: number, endResi: number;
 
-    if (recordName.indexOf("END") == 0) {
+    if (recordName.indexOf("END") === 0) {
       remainingLines = lines.slice(i + 1);
-      if (recordName == "END") {
+      if (recordName === "END") {
         //as opposed to ENDMDL
         //reset secondary structure
-        for (var prop in sslookup) {
+        for (const prop in sslookup) {
           if (sslookup.hasOwnProperty(prop)) {
             delete sslookup[prop];
           }
         }
       }
       break;
-    } else if (recordName == "ATOM  " || recordName == "HETATM") {
-      var resn: any, chain: any, resi: string | number, icode: string, x: number, y: number, z: number, hetflag: boolean, elem: string | string[], serial: number, altLoc: string, b: number;
+    } else if (recordName === "ATOM  " || recordName === "HETATM") {
+      let resn: string,
+        chain: any,
+        resi: string | number,
+        icode: string,
+        x: number,
+        y: number,
+        z: number,
+        hetflag: boolean,
+        elem: string | string[],
+        serial: number,
+        altLoc: string,
+        b: number;
       altLoc = line.substring(16, 17);
-      if (altLoc != " " && altLoc != selAltLoc && selAltLoc != "*") continue;
+      if (altLoc !== " " && altLoc !== selAltLoc && selAltLoc !== "*") continue;
       serial = parseInt(line.substring(6, 11));
       atom = line.substring(12, 16).replace(/ /g, "");
       resn = line.substring(17, 20).replace(/ /g, "");
@@ -59,42 +75,42 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
       z = parseFloat(line.substring(46, 54));
       b = parseFloat(line.substring(60, 68));
       elem = line.substring(76, 78).replace(/ /g, "");
-      if (elem === "" || typeof bondTable[elem] === "undefined") {
+      if (elem === "" || bondTable[elem] === undefined) {
         // for some incorrect PDB files
         elem = atomNameToElem(line.substring(12, 14), line[0] == "A");
       } else {
         elem = elem[0].toUpperCase() + elem.substring(1).toLowerCase();
       }
 
-      if (elem == "H" && noH) continue;
+      if (elem === "H" && noH) continue;
       if (recordName[0] == "H") hetflag = true;
       else hetflag = false;
       serialToIndex[serial] = atoms.length;
       atoms.push({
-        resn: resn,
-        x: x,
-        y: y,
-        z: z,
-        elem: elem,
-        hetflag: hetflag,
-        altLoc: altLoc,
-        chain: chain,
-        resi: resi,
+        resn,
+        x,
+        y,
+        z,
+        elem,
+        hetflag,
+        altLoc,
+        chain,
+        resi,
         icode: icode,
-        rescode: resi + (icode != " " ? "^" + icode : ""), // combo
+        rescode: resi + (icode !== " " ? "^" + icode : ""), // combo
         // resi
         // and
         // icode
-        serial: serial,
-        atom: atom,
+        serial,
+        atom,
         bonds: [],
         ss: "c",
         bondOrder: [],
         properties: {},
-        b: b,
+        b,
         pdbline: line,
       });
-    } else if (recordName == "SHEET ") {
+    } else if (recordName === "SHEET ") {
       startChain = line.substring(21, 22);
       startResi = parseInt(line.substring(22, 26));
       endResi = parseInt(line.substring(33, 37));
@@ -103,30 +119,30 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
       }
       //mark start and end with additional character
       sslookup[startChain][startResi] = "s1";
-      for (var res = startResi + 1; res < endResi; res++) {
+      for (let res = startResi + 1; res < endResi; res++) {
         sslookup[startChain][res] = "s";
       }
       sslookup[startChain][endResi] = "s2";
-    } else if (recordName == "CONECT") {
+    } else if (recordName === "CONECT") {
       // MEMO: We don't have to parse SSBOND, LINK because both are
       // also
       // described in CONECT. But what about 2JYT???
-      var from = parseInt(line.substring(6, 11));
-      var fromindex = serialToIndex[from];
-      var fromAtom = atoms[fromindex];
-      var coffsets = [11, 16, 21, 26];
+      const from = parseInt(line.substring(6, 11));
+      const fromindex = serialToIndex[from];
+      const fromAtom = atoms[fromindex];
+      const coffsets = [11, 16, 21, 26];
       for (let j = 0; j < 4; j++) {
-        var to = parseInt(line.substring(coffsets[j], coffsets[j]+5));
-        var toindex = serialToIndex[to];
-        let from_to = fromindex+":"+toindex;
-        var toAtom = atoms[toindex];
+        const to = parseInt(line.substring(coffsets[j], coffsets[j] + 5));
+        const toindex = serialToIndex[to];
+        let from_to = fromindex + ":" + toindex;
+        const toAtom = atoms[toindex];
         if (fromAtom !== undefined && toAtom !== undefined) {
           // duplicated conect records indicate bond order
           if (!seenbonds[from_to]) {
             seenbonds[from_to] = 1;
             if (
               fromAtom.bonds.length == 0 ||
-              fromAtom.bonds[fromAtom.bonds.length - 1] != toindex
+              fromAtom.bonds[fromAtom.bonds.length - 1] !== toindex
             ) {
               fromAtom.bonds.push(toindex);
               fromAtom.bondOrder.push(1);
@@ -137,7 +153,7 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
 
             for (let bi = 0; bi < fromAtom.bonds.length; bi++) {
               if (fromAtom.bonds[bi] == toindex) {
-                var newbo = seenbonds[from_to];
+                const newbo = seenbonds[from_to];
                 if (newbo >= 4) {
                   //aromatic
                   fromAtom.bondOrder[bi] = 1;
@@ -149,7 +165,7 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
           }
         }
       }
-    } else if (recordName == "HELIX ") {
+    } else if (recordName === "HELIX ") {
       startChain = line.substring(19, 20);
       startResi = parseInt(line.substring(21, 25));
       endResi = parseInt(line.substring(33, 37));
@@ -163,11 +179,11 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
       sslookup[startChain][endResi] = "h2";
     } else if (
       !noAssembly &&
-      recordName == "REMARK" &&
-      line.substring(13, 18) == "BIOMT"
+      recordName === "REMARK" &&
+      line.substring(13, 18) === "BIOMT"
     ) {
-      var n: number;
-      var matrix = new Matrix4();
+      let n: number;
+      let matrix = new Matrix4();
       for (n = 1; n <= 3; n++) {
         line = lines[i].replace(/^\s*/, "");
         if (parseInt(line.substring(18, 19)) == n) {
@@ -182,7 +198,7 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
           matrix.elements[n - 1 + 12] = parseFloat(line.substring(53));
           i++;
         } else {
-          while (line.substring(13, 18) == "BIOMT") {
+          while (line.substring(13, 18) === "BIOMT") {
             i++;
             line = lines[i].replace(/^\s*/, "");
           }
@@ -194,8 +210,13 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
       matrix.elements[15] = 1;
       modelData.symmetries.push(matrix);
       i--; // set i back
-    } else if (recordName == "CRYST1") {
-      let a: number, b: number, c: number, alpha: number, beta: number, gamma: number;
+    } else if (recordName === "CRYST1") {
+      let a: number,
+        b: number,
+        c: number,
+        alpha: number,
+        beta: number,
+        gamma: number;
       a = parseFloat(line.substring(7, 15));
       b = parseFloat(line.substring(16, 24));
       c = parseFloat(line.substring(25, 33));
@@ -203,20 +224,20 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
       beta = parseFloat(line.substring(41, 47));
       gamma = parseFloat(line.substring(48, 54));
       modelData.cryst = {
-        a: a,
-        b: b,
-        c: c,
-        alpha: alpha,
-        beta: beta,
-        gamma: gamma,
+        a,
+        b,
+        c,
+        alpha,
+        beta,
+        gamma,
       };
-    } else if (recordName == "ANISOU") {
-      let serial = parseInt(line.substring(6, 11));
-      var anisouAtomIndex = serialToIndex[serial];
-      var anisouAtom = atoms[anisouAtomIndex];
+    } else if (recordName === "ANISOU") {
+      const serial = parseInt(line.substring(6, 11));
+      const anisouAtomIndex = serialToIndex[serial];
+      const anisouAtom = atoms[anisouAtomIndex];
       if (anisouAtom) {
-        var vals = line.substring(30).trim().split(/\s+/);
-        var uMat = {
+        const vals = line.substring(30).trim().split(/\s+/);
+        const uMat = {
           u11: parseInt(vals[0]),
           u22: parseInt(vals[1]),
           u33: parseInt(vals[2]),
@@ -245,10 +266,10 @@ export function getSinglePDB(lines: string[], options: ParserOptionsSpec, sslook
   // Assign secondary structures from pdb file
   if (!isEmpty(sslookup)) {
     for (let i = 0; i < atoms.length; i++) {
-      atom = atoms[i];
+      const atom = atoms[i];
       if (atom === undefined) continue;
       if (atom.chain in sslookup && atom.resi in sslookup[atom.chain]) {
-        var code = sslookup[atom.chain][atom.resi];
+        const code = sslookup[atom.chain][atom.resi];
         atom.ss = code[0];
         if (code.length > 1) {
           if (code[1] == "1") atom.ssbegin = true;
