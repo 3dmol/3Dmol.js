@@ -1,6 +1,8 @@
-export function isEmpty(obj: { [x: string]: { [x: string]: any; }; hasOwnProperty?: any; }) {
-  var name: string;
-  for (name in obj) {
+export function isEmpty(obj: {
+  [x: string]: { [x: string]: unknown };
+  hasOwnProperty?: any;
+}) {
+  for (const _ in obj) {
     return false;
   }
   return true;

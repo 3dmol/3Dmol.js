@@ -21,7 +21,7 @@ const OFFSETS = [
 ];
 const MAX_BOND_LENGTH = 4.95; // (largest bond length, Cs) 2.25 * 2 * 1.1 (fudge factor)
 
-export function assignBonds(atoms: string | any[]) {
+export function assignBonds(atoms: AtomSpec[]) {
   // Assign bonds - yuck, can't count on connect records
 
   for (let i = 0, n = atoms.length; i < n; i++) {
@@ -29,7 +29,20 @@ export function assignBonds(atoms: string | any[]) {
     if (!atoms[i].index) atoms[i].index = i;
   }
 
-  const grid = {};
+  const grid: {
+    x: {
+      y: {
+        z: AtomSpec[];
+      };
+    };
+  } = {
+    x: {
+      y: {
+        z: [],
+      },
+    },
+  };
+
   for (let index = 0; index < atoms.length; index++) {
     const atom = atoms[index];
     const x = Math.floor(atom.x / MAX_BOND_LENGTH);
@@ -76,7 +89,7 @@ export function assignBonds(atoms: string | any[]) {
         }
       }
     }
-  };
+  }
 
   for (let xg in grid) {
     const x = parseInt(xg);
