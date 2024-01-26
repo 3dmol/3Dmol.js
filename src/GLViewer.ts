@@ -337,9 +337,8 @@ export class GLViewer {
         if (intersects.length) {
             var selected = intersects[0].clickable;
             if (selected.callback !== undefined) {
-                if (typeof (selected.callback) !== "function") {
-                    selected.callback = makeFunction(selected.callback);
-                }
+                if (typeof (selected.callback) !== "function") selected.callback = makeFunction(selected.callback);
+                
                 if (typeof (selected.callback) === "function") {
                     selected.callback(selected, this._viewer, event, this.container, intersects);
                 }
@@ -385,7 +384,7 @@ export class GLViewer {
 
     //checks for selection intersects on hover
     private handleHoverSelection(mouseX, mouseY, event) {
-        if (this.hoverables.length === 0) return;
+        if (this.hoverables.length == 0) return;
         let intersects = this.targetedObjects(mouseX, mouseY, this.hoverables);
         if (intersects.length) {
             var selected = intersects[0].clickable;
@@ -400,7 +399,7 @@ export class GLViewer {
     //sees if the mouse is still on the object that invoked a hover event and if not then the unhover callback is called
     private handleHoverContinue(mouseX: number, mouseY: number) {
         let intersects = this.targetedObjects(mouseX, mouseY, this.hoverables);
-        if (intersects.length === 0 || intersects[0] === undefined) {
+        if (intersects.length == 0 || intersects[0] === undefined) {
             this.setHover(null);
         }
         if (intersects[0] !== undefined && intersects[0].clickable !== this.current_hover) {
@@ -623,7 +622,7 @@ export class GLViewer {
 
         window.addEventListener("resize", this.resize.bind(this));
 
-        if (window.ResizeObserver !== undefined) {
+        if (typeof window.ResizeObserver !== "undefined") {
             this.divwatcher = new window.ResizeObserver(this.resize.bind(this));
             this.divwatcher.observe(this.container);
         }
@@ -1316,7 +1315,7 @@ export class GLViewer {
             this.initContainer(this.container);
             regen = true;
         }
-        if (this.WIDTH === 0 || this.HEIGHT === 0) {
+        if (this.WIDTH == 0 || this.HEIGHT == 0) {
             if (this.animated) this._viewer.pauseAnimate();
         } else if (this.animated) {
             this._viewer.resumeAnimate();
@@ -1387,8 +1386,7 @@ export class GLViewer {
      */
     public spin(axis, speed: number = 1) {
         clearInterval(this.spinInterval);
-        if (axis === undefined)
-            axis = 'y';
+        if (axis === undefined) axis = 'y';
         if (typeof axis === "boolean") {
             if (!axis)
                 return;
@@ -1630,7 +1628,7 @@ export class GLViewer {
         this.rotationGroup.quaternion.y = arg[5];
         this.rotationGroup.quaternion.z = arg[6];
         this.rotationGroup.quaternion.w = arg[7];
-        if (arg[8] !== undefined) {
+        if (typeof arg[8] !== "undefined") {
             this.rotationGroup.position.x = arg[8];
             this.rotationGroup.position.y = arg[9];
         }
@@ -1815,7 +1813,7 @@ export class GLViewer {
      * @return {boolean}
      */
     private atomIsSelected(atom: AtomSpec, sel: AtomSelectionSpec) {
-        if (sel === undefined)
+        if (typeof sel === "undefined")
             sel = {};
 
         var ms = this.getModelList(sel);
@@ -1846,7 +1844,7 @@ export class GLViewer {
     *
     */
     public getUniqueValues(attribute: string, sel?: AtomSelectionSpec) {
-        if (sel === undefined)
+        if (typeof sel === "undefined")
             sel = {};
         var atoms = this.getAtomsFromSel(sel);
         var values = {};
@@ -3759,8 +3757,7 @@ export class GLViewer {
 
         for (let i = 0; i < atomlist.length; i++) {
             var atom = atomlist[i];
-            if (atom === undefined)
-                continue;
+            if (atom === undefined) continue;
 
             if (atom.x < extent[0][0] || atom.x > extent[1][0])
                 continue;
@@ -4321,7 +4318,7 @@ export class GLViewer {
 
                         //    console.log("async mesh generation " + (+new Date() - time) + "ms");
                         cnt++;
-                        if (cnt === extents.length) {
+                        if (cnt == extents.length) {
                             surfobj.done = true;
                             releaseMemory();
                             resolve(surfid); //caller of helper will resolve callback if present
