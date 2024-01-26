@@ -53,7 +53,7 @@ export class VolumeData {
             format = format.replace(/\.gz$/, '');
             try {
                 if ((this as any)[format] && this.isbinary.has(format)) {
-                    if (typeof (str) == "string") {
+                    if (typeof (str) === "string") {
                         //assume base64 encoded
                         str = base64ToArray(str);
                     }
@@ -68,7 +68,7 @@ export class VolumeData {
         }
 
         if ((this as any)[format]) {
-            if (this.isbinary.has(format) && typeof (str) == "string") {
+            if (this.isbinary.has(format) && typeof (str) === "string") {
                 str = base64ToArray(str);
             }
             (this as any)[format](str);
@@ -179,7 +179,7 @@ export class VolumeData {
         var atomicData = VASP(str)[0];
         var natoms = atomicData.length;
 
-        if (natoms == 0) {
+        if (natoms === 0) {
             console.log("No good formating of CHG or CHGCAR file, not atomic information provided in the file.");
             this.data = [];
             return;
@@ -232,8 +232,8 @@ export class VolumeData {
         yVec = yVec.multiplyScalar(1 / (l_units * nY));
         zVec = zVec.multiplyScalar(1 / (l_units * nZ));
 
-        if (xVec.y != 0 || xVec.z != 0 || yVec.x != 0 || yVec.z != 0 || zVec.x != 0
-            || zVec.y != 0) {
+        if (xVec.y !== 0 || xVec.z !== 0 || yVec.x !== 0 || yVec.z !== 0 || zVec.x !== 0
+            || zVec.y !== 0) {
             //need a transformation matrix
             this.matrix = new Matrix4(xVec.x, yVec.x, zVec.x, 0, xVec.y, yVec.y, zVec.y, 0, xVec.z, yVec.z, zVec.z, 0, 0, 0, 0, 1);
             //include translation in matrix
@@ -290,7 +290,7 @@ export class VolumeData {
             }
             else if ((m = redelta.exec(line))) {
                 var xunit = parseFloat(m[1]);
-                if (parseFloat(m[2]) != 0 || parseFloat(m[3]) != 0) {
+                if (parseFloat(m[2]) !== 0 || parseFloat(m[3]) !== 0) {
                     console.log("Non-orthogonal delta matrix not currently supported in dx format");
                 }
                 i += 1;
@@ -302,7 +302,7 @@ export class VolumeData {
                 }
 
                 var yunit = parseFloat(m[2]);
-                if (parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
+                if (parseFloat(m[1]) !== 0 || parseFloat(m[3]) !== 0) {
                     console.log("Non-orthogonal delta matrix not currently supported in dx format");
                 }
 
@@ -315,7 +315,7 @@ export class VolumeData {
                 }
 
                 var zunit = parseFloat(m[3]);
-                if (parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
+                if (parseFloat(m[1]) !== 0 || parseFloat(m[2]) !== 0) {
                     console.log("Non-orthogonal delta matrix not currently supported in dx format");
                 }
                 this.unit = new Vector3(xunit, yunit, zunit);

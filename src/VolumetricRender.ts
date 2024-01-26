@@ -76,7 +76,7 @@ export class GLVolumetricRender {
         transferfn.forEach(function (a: { value: any; }) { a.value = parseFloat(a.value); });
         transferfn.sort(function (a: { value: number; }, b: { value: number; }) { return a.value - b.value; });
         this.min = transferfn[0].value;
-        if (transferfn.length == 0) transferfn.push(transferfn[0]); //need at least two
+        if (transferfn.length === 0) transferfn.push(transferfn[0]); //need at least two
         this.max = transferfn[transferfn.length - 1].value;
 
         // create and fill an array of interpolated values per 2 colors
@@ -88,7 +88,7 @@ export class GLVolumetricRender {
             alpha2 = transferfn[i + 1].opacity;
             pos1 = Math.floor((transferfn[i].value - this.min) * TRANSFER_BUFFER_SIZE / (this.max - this.min));
             pos2 = Math.floor((transferfn[i + 1].value - this.min) * TRANSFER_BUFFER_SIZE / (this.max - this.min));
-            if (pos1 == pos2)
+            if (pos1 === pos2)
                 continue;
             R = GLVolumetricRender.interpolateArray([color1.r * 255, color2.r * 255], pos2 - pos1);
             G = GLVolumetricRender.interpolateArray([color1.g * 255, color2.g * 255], pos2 - pos1);

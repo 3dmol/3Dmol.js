@@ -31,7 +31,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
             var datatypes = [];
             var uri = '';
 
-            if (viewerdiv.style.position == 'static') {
+            if (viewerdiv.style.position === 'static') {
                 //slight hack - canvas needs this element to be positioned
                 viewerdiv.style.position = 'relative';
             }
@@ -58,7 +58,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 datatypes.push(type);
 
                 var molName = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
-                if (molName == '/')
+                if (molName === '/')
                     molName = uri.substring(uri.lastIndexOf('/') + 1);
 
                 viewerdiv.dataset[datatypes[datatypes.length - 1]] = molName;
@@ -134,10 +134,10 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     styleobj = specStringToObject(d[dataname]);
                     labels.push([newsel, styleobj]);
                 }
-                if (dataname == "zoomto") {
+                if (dataname === "zoomto") {
                     zoomto = specStringToObject(d[dataname]);
                 }
-                if (dataname == "spin") {
+                if (dataname === "spin") {
                     spin = specStringToObject(d[dataname]);
                 }
             }
@@ -210,7 +210,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 viewerdiv.textContent = "WebGL appears to be disabled.";
             }
 
-            if (datauri.length != 0) {
+            if (datauri.length !== 0) {
                 //load multiple data elements in serial
                 let i = 0;
                 var process = function (moldata: any) {
@@ -233,7 +233,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                             //evaluate javascript in the string, if it resolves to a function,
                             //call it with the viewer
                             /*jshint -W061 */ var runres = eval(viewerdiv.dataset.callback);
-                            if (typeof (runres) == 'function') {
+                            if (typeof (runres) === 'function') {
                                 runres(glviewer);
                             }
                         }
@@ -259,7 +259,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     //evaluate javascript in the string, if it resolves to a function,
                     //call it with the viewer
                     /*jshint -W061 */ var runres = eval(viewerdiv.dataset.callback);
-                    if (typeof (runres) == 'function') {
+                    if (typeof (runres) === 'function') {
                         runres(glviewer);
                     }
                 }
