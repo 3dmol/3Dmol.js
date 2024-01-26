@@ -22,7 +22,7 @@ export function getSinglePDB(
   const computeStruct = !options.noComputeSecondaryStructure;
   const noAssembly = !options.doAssembly; // don't assemble by default
   const selAltLoc = options.altLoc ? options.altLoc : "A"; //default alternate location to select if present
-  let modelData: { symmetries: Matrix4[]; cryst: Cryst };
+  const modelData: { symmetries: Matrix4[]; cryst: Cryst } = {symmetries:[], cryst: undefined};
   //atom name
   let atom: string;
   let remainingLines = [];

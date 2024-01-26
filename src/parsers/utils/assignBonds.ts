@@ -29,12 +29,18 @@ export function assignBonds(atoms: AtomSpec[]) {
     if (!atoms[i].index) atoms[i].index = i;
   }
 
-  let grid: {
+  const grid: {
     x: {
       y: {
         z: AtomSpec[];
       };
     };
+  } = {
+    x: {
+      y: {
+        z: [],
+      },
+    },
   };
 
   for (let index = 0; index < atoms.length; index++) {
