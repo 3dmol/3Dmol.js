@@ -4,6 +4,7 @@ import { GLViewer, createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
 import { get, specStringToObject } from "./utilities";
 import { CC } from "./colors";
+import { NCBI_PUBCHEM_URL, RCSB_FILES_URL } from "URLs";
 
 export var autoinit = false;
 export var processing_autoinit = false;
@@ -40,12 +41,12 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
 
             type = null;
             if (viewerdiv.dataset.pdb) {
-                datauri.push("https://files.rcsb.org/view/" + viewerdiv.dataset.pdb + ".pdb");
+                datauri.push(RCSB_FILES_URL + viewerdiv.dataset.pdb + ".pdb");
                 datatypes.push("pdb");
             } else if (viewerdiv.dataset.cid) {
                 //this doesn't actually work since pubchem does have CORS enabled
                 datatypes.push("sdf");
-                datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + viewerdiv.dataset.cid +
+                datauri.push(NCBI_PUBCHEM_URL + viewerdiv.dataset.cid +
                     "/SDF?record_type=3d");
             }
             else if (viewerdiv.dataset.href || viewerdiv.dataset.url) {
@@ -67,7 +68,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
             var divdata = viewerdiv.dataset;
             for (i in divdata) {
                 if ((i.substring(0, 3) === "pdb" && (i !== "pdb"))) {
-                    datauri.push("https://files.rcsb.org/view/" + divdata[i] + ".pdb");
+                    datauri.push(RCSB_FILES_URL + divdata[i] + ".pdb");
                     datatypes.push('pdb');
 
                 } else if (i.substring(0, 4) === "href" && (i !== "href")) {
@@ -75,7 +76,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     datauri.push(uri);
                     datatypes.push(uri.substring(uri.lastIndexOf('.') + 1));
                 } else if (i.substring(0, 3) === "cid" && (i !== "cid")) {
-                    datauri.push("https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + divdata[i] + "/SDF?record_type=3d");
+                    datauri.push(NCBI_PUBCHEM_URL + divdata[i] + "/SDF?record_type=3d");
                     datatypes.push('sdf');
                 }
             }

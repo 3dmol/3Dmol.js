@@ -1,5 +1,6 @@
 //a collection of miscellaneous utility functions
 
+import { NCBI_PUBCHEM_URL, RCSB_FILES_URL, RCSB_MMTF_URL } from "URLs";
 import { builtinGradients, Gradient } from "./Gradient";
 import { VolumeData } from "./VolumeData";
 import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
@@ -344,20 +345,22 @@ function checkStatus(response) {
     return response;
 }
 
+let isRequestProcessing = false;
 /**
  * Fetch data from URL
  * 
  * @param uri URL
  * @param callback Function to call with data 
  */
-export function get(uri, callback?) {
-    var promise = fetch(uri).then(checkStatus).then((response) => response.text());
+export function get(uri:string, callback?:(value: unknown) => unknown) {
+    const promise = fetch(uri).then(checkStatus).then((response) => response.text()).finally(()=>isRequestProcessing = false);
     if (callback)
         return promise.then(callback);
-    else
-        return promise;
+    return promise;
 }
 
+
+type RequestMethod = "GET"|"POST"|"PUT"|"DELETE"|"HEAD"|"OPTIONS"|"PATCH";
 /**
  * Download binary data (e.g. a gzipped file) into an array buffer and provide
  * arraybuffer to callback.
@@ -367,19 +370,17 @@ export function get(uri, callback?) {
  * @param {string} [postdata] - data for POST request
  * @return {Promise}
  */
-export function getbin(uri, callback?, request?, postdata?) {
-    var promise;
-    if (request == "POST") {
-        promise = fetch(uri, { method: 'POST', body: postdata })
-            .then((response) => checkStatus(response))
-            .then((response) => response.arrayBuffer());
-    } else {
-        promise = fetch(uri).then((response) => checkStatus(response))
-            .then((response) => response.arrayBuffer());
-    }
 
+export function getbin(uri:string, callback?:(value: unknown) => unknown, request?: RequestMethod, postdata?) {
+    const promise = fetch(uri, { method: request || "GET", body: postdata })
+            .then((response) => checkStatus(response))
+            .then((response) => response.arrayBuffer())
+            .catch(err=>console.log(err))
+            .finally(()=>isRequestProcessing = false);
+    
+    
     if (callback) return promise.then(callback);
-    else return promise;
+    return promise;
 };
 
 
@@ -409,6 +410,11 @@ export function download(query, viewer, options, callback?) {
     var promise = null;
     var m = viewer.addModel();
 
+    if(isRequestProcessing){
+        alert("Request already processing, please wait");
+        return;
+    }
+
     if (query.indexOf(':') < 0) {
         //no type specifier, guess
         if (query.length == 4) {
@@ -420,13 +426,14 @@ export function download(query, viewer, options, callback?) {
         }
     }
     if (query.substring(0, 5) === 'mmtf:') {
-        pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
+        pdbUri = options && options.pdbUri ? options.pdbUri : RCSB_MMTF_URL;
         query = query.substring(5).toUpperCase();
         uri = pdbUri + query;
         if (options && typeof options.noComputeSecondaryStructure === 'undefined') {
             //when fetch directly from pdb, trust structure annotations
             options.noComputeSecondaryStructure = true;
         }
+        isRequestProcessing = true;
         promise = new Promise(function (resolve) {
             getbin(uri)
                 .then(function (ret) {
@@ -454,11 +461,11 @@ export function download(query, viewer, options, callback?) {
                 return;
             }
             if (type == 'mmtf') {
-                mmtfUri = options && options.mmtfUri ? options.mmtfUri : 'https://mmtf.rcsb.org/v1.0/full/';
+                mmtfUri = options && options.mmtfUri ? options.mmtfUri : RCSB_MMTF_URL;
                 uri = mmtfUri + query.toUpperCase();
             }
             else {
-                pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+                pdbUri = options && options.pdbUri ? options.pdbUri : RCSB_FILES_URL;
                 uri = pdbUri + query + "." + type;
             }
 
@@ -468,7 +475,7 @@ export function download(query, viewer, options, callback?) {
             if (!query.match(/^[0-9]+$/)) {
                 alert("Wrong Compound ID"); return;
             }
-            uri = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/" + query +
+            uri = NCBI_PUBCHEM_URL + query +
                 "/SDF?record_type=3d";
         } else if (query.substring(0, 4) == 'url:') {
             uri = query.substring(4);
@@ -480,6 +487,7 @@ export function download(query, viewer, options, callback?) {
             viewer.zoomTo();
             viewer.render();
         };
+        isRequestProcessing = true;
         promise = new Promise(function (resolve) {
             if (type == 'mmtf') { //binary data
                 getbin(uri)
@@ -488,7 +496,7 @@ export function download(query, viewer, options, callback?) {
                         resolve(m);
                     }).catch(function () {
                         //if mmtf server is being annoying, fallback to text
-                        pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+                        pdbUri = options && options.pdbUri ? options.pdbUri : RCSB_FILES_URL;
                         uri = pdbUri + query + ".pdb";
                         type = "pdb";
                         console.log("falling back to pdb format");
@@ -520,7 +528,8 @@ export function download(query, viewer, options, callback?) {
         });
         return m;
     }
-    else return promise;
+    
+    return promise;
 };
 
 
