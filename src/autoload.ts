@@ -4,7 +4,7 @@ import { GLViewer, createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
 import { get, specStringToObject } from "./utilities";
 import { CC } from "./colors";
-import { NCBI_PUBCHEM_URL, RCSB_FILES_URL } from "URLs";
+import { NCBI_PUBCHEM_URL, RCSB_FILES_URL } from "./URLs";
 
 export var autoinit = false;
 export var processing_autoinit = false;

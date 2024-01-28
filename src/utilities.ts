@@ -1,6 +1,6 @@
 //a collection of miscellaneous utility functions
 
-import { NCBI_PUBCHEM_URL, RCSB_FILES_URL, RCSB_MMTF_URL } from "URLs";
+import { NCBI_PUBCHEM_URL, RCSB_FILES_URL, RCSB_MMTF_URL } from "./URLs";
 import { builtinGradients, Gradient } from "./Gradient";
 import { VolumeData } from "./VolumeData";
 import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
@@ -352,7 +352,7 @@ let isRequestProcessing = false;
  * @param uri URL
  * @param callback Function to call with data 
  */
-export function get(uri:string, callback?:(value: unknown) => unknown) {
+export function get(uri:string, callback?) {
     const promise = fetch(uri).then(checkStatus).then((response) => response.text()).finally(()=>isRequestProcessing = false);
     if (callback)
         return promise.then(callback);
@@ -371,7 +371,7 @@ type RequestMethod = "GET"|"POST"|"PUT"|"DELETE"|"HEAD"|"OPTIONS"|"PATCH";
  * @return {Promise}
  */
 
-export function getbin(uri:string, callback?:(value: unknown) => unknown, request?: RequestMethod, postdata?) {
+export function getbin(uri:string, callback?, request?: RequestMethod, postdata?) {
     const promise = fetch(uri, { method: request || "GET", body: postdata })
             .then((response) => checkStatus(response))
             .then((response) => response.arrayBuffer())
