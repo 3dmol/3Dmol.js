@@ -375,7 +375,6 @@ export function getbin(uri:string, callback?, request?: RequestMethod, postdata?
     const promise = fetch(uri, { method: request || "GET", body: postdata })
             .then((response) => checkStatus(response))
             .then((response) => response.arrayBuffer())
-            .catch(err=>console.log(err))
             .finally(()=>isRequestProcessing = false);
     
     
@@ -473,7 +472,7 @@ export function download(query, viewer, options, callback?) {
             type = "sdf";
             query = query.substring(4);
             if (!query.match(/^[0-9]+$/)) {
-                alert("Wrong Compound ID"); return;
+                return alert("Wrong Compound ID"); 
             }
             uri = NCBI_PUBCHEM_URL + query +
                 "/SDF?record_type=3d";
@@ -489,7 +488,7 @@ export function download(query, viewer, options, callback?) {
         };
         isRequestProcessing = true;
         promise = new Promise(function (resolve) {
-            if (type == 'mmtf') { //binary data
+            if (type === 'mmtf') { //binary data
                 getbin(uri)
                     .then(function (ret) {
                         handler(ret);
