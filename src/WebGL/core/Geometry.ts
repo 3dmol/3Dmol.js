@@ -178,6 +178,11 @@ export class GeometryGroup {
       " " +
       material?.color?.b +
       "\n";
+    if (material.wireframe && this.colorArray) {
+      //per vertex colors don't seem to work
+      let c = this.colorArray;
+      ret += indent + "    emissiveColor " + c[0] + " " + c[1] + " " + c[2] + "\n";
+    }
     if (material?.transparent) {
       ret += indent + "   transparency " + (1.0 - material.opacity) + "\n";
     }
@@ -186,7 +191,7 @@ export class GeometryGroup {
 
     var oldindent = indent;
     indent += " "; //inshape
-    if (material instanceof LineBasicMaterial) {
+    if (material instanceof LineBasicMaterial || material.wireframe) {
       ret +=
         indent +
         "geometry IndexedLineSet {\n" +
@@ -207,7 +212,7 @@ export class GeometryGroup {
       ret += indent + "  ]\n";
       ret += indent + " }\n"; //end coordinate
 
-      if (this.colorArray) {
+      if (this.colorArray && !material.wireframe) {
         ret += indent + " color Color {\n" + indent + "  color [\n";
         for (let i = 0; i < this.vertices; ++i) {
           let offset = i * 3;
@@ -221,8 +226,17 @@ export class GeometryGroup {
       }
 
       ret += indent + " coordIndex [\n";
-      for (let i = 0; i < this.vertices; i += 2) {
-        ret += indent + "  " + i + ", " + (i + 1) + ", -1,\n";
+      if(material.wireframe && this.faceArray) {
+        for (let i = 0; i < this.faceidx; i += 3) {
+          x = this.faceArray?.[i];
+          y = this.faceArray?.[i + 1];
+          z = this.faceArray?.[i + 2];
+          ret += indent + "  " + x + ", " + y + ", " + z + ", -1,\n";
+        }
+      }  else {
+        for (let i = 0; i < this.vertices-1; i += 2) {
+          ret += indent + "  " + i + ", " + (i + 1) + ", -1,\n";
+        }
       }
       ret += indent + " ]\n";
       ret += indent + "}\n"; //geometry
@@ -279,7 +293,7 @@ export class GeometryGroup {
 
       //faces
       ret += indent + " coordIndex [\n";
-      for (var i = 0; i < this.faceidx; i += 3) {
+      for (let i = 0; i < this.faceidx; i += 3) {
         x = this.faceArray?.[i];
         y = this.faceArray?.[i + 1];
         z = this.faceArray?.[i + 2];

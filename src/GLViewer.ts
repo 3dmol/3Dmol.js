@@ -3398,6 +3398,16 @@ export class GLViewer {
     };
 
 
+    //setup options dict
+    private getModelOpt(options) {
+        if (options && !options.defaultcolors) {
+            options.defaultcolors = this.defaultcolors;
+            options.cartoonQuality = options.cartoonQuality || this.config.cartoonQuality;
+        } else if (typeof (options) === 'undefined') {
+            options = { defaultcolors: this.defaultcolors, cartoonQuality: this.config.cartoonQuality };
+        }
+        return options;
+    }
     /**
      * Create and add model to viewer, given molecular data and its format
      *
@@ -3421,12 +3431,8 @@ export class GLViewer {
      * @return {GLModel}
      */
     public addModel(data?, format = "", options?) {
-        if (options && !options.defaultcolors) {
-            options.defaultcolors = this.defaultcolors;
-            options.cartoonQuality = options.cartoonQuality || this.config.cartoonQuality;
-        } else if (typeof (options) === 'undefined') {
-            options = { defaultcolors: this.defaultcolors, cartoonQuality: this.config.cartoonQuality };
-        }
+        options = this.getModelOpt(options);
+
         var m = new GLModel(this.models.length, options);
         m.addMolData(data, format, options);
         this.models.push(m);
@@ -3443,14 +3449,14 @@ export class GLViewer {
      * @return {Array<GLModel>}
      */
     public addModels(data, format: string, options?) {
-        options = options || {};
+        options = this.getModelOpt(options);
         options.multimodel = true;
         options.frames = true;
 
         var modelatoms = GLModel.parseMolData(data, format, options);
 
         for (var i = 0; i < modelatoms.length; i++) {
-            var newModel = new GLModel(this.models.length, this.defaultcolors);
+            var newModel = new GLModel(this.models.length, options);
             newModel.setAtomDefaults(modelatoms[i]);
             newModel.addFrame(modelatoms[i]);
             newModel.setFrame(0);
@@ -3482,10 +3488,10 @@ export class GLViewer {
           });
      */
     public addModelsAsFrames(data, format: string, options?) {
-        options = options || {};
+        options = this.getModelOpt(options);
         options.multimodel = true;
         options.frames = true;
-        var m = new GLModel(this.models.length, this.defaultcolors);
+        var m = new GLModel(this.models.length, options);
         m.addMolData(data, format, options);
         this.models.push(m);
 
@@ -3509,10 +3515,10 @@ export class GLViewer {
           });
      */
     public addAsOneMolecule(data, format: string, options?) {
-        options = options || {};
+        options = this.getModelOpt(options);
         options.multimodel = true;
         options.onemol = true;
-        var m = new GLModel(this.models.length, this.defaultcolors);
+        var m = new GLModel(this.models.length, options);
         m.addMolData(data, format, options);
         this.models.push(m);
 
