@@ -268,6 +268,7 @@ export class GLModel {
         }
         return bestv;
     };
+    
 
     //from atom, return a normalized vector v that is orthogonal and along which
     //it is appropraite to draw multiple bonds
@@ -279,6 +280,7 @@ export class GLModel {
         var dir = p2.clone();
         var v = null;
         dir.sub(p1);
+
 
         if (atom.bonds.length === 1) {
             if (atom2.bonds.length === 1) {

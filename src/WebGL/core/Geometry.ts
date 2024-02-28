@@ -227,7 +227,7 @@ export class GeometryGroup {
 
       ret += indent + " coordIndex [\n";
       if(material.wireframe && this.faceArray) {
-        for (var i = 0; i < this.faceidx; i += 3) {
+        for (let i = 0; i < this.faceidx; i += 3) {
           x = this.faceArray?.[i];
           y = this.faceArray?.[i + 1];
           z = this.faceArray?.[i + 2];
@@ -293,7 +293,7 @@ export class GeometryGroup {
 
       //faces
       ret += indent + " coordIndex [\n";
-      for (var i = 0; i < this.faceidx; i += 3) {
+      for (let i = 0; i < this.faceidx; i += 3) {
         x = this.faceArray?.[i];
         y = this.faceArray?.[i + 1];
         z = this.faceArray?.[i + 2];
