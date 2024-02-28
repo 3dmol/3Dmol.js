@@ -1,16 +1,15 @@
 // Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation
 
+import { Vector3 } from "WebGL";
 import { AtomStyleSpec, BondStyle, GLModel } from "./GLModel";
 import { GLViewer } from "./GLViewer";
 import { ColorSpec } from "./colors";
 
-
-
 /**
  * Atom representation. Depending on the input file format, not all fields may be defined.
  */
-export interface AtomSpec  {
+export interface AtomSpec {
   /** Parent residue name */
   resn?: string;
   /**  Atom's x coordinate  */
@@ -31,8 +30,8 @@ export interface AtomSpec  {
   chain?: string;
   /**  Residue number */
   resi?: number;
-  icode?: number;
-  rescode?: number;
+  icode?: string;
+  rescode?: string;
   /** Atom's serial id number */
   serial?: number;
   /** Index of atom in molecule */
@@ -43,6 +42,8 @@ export interface AtomSpec  {
   bonds?: number[];
   /** Secondary structure identifier (for cartoon render; e.g. 'h' for helix) */
   ss?: string;
+  ssbegin?: boolean;
+  ssend?: boolean;
   /** true if this atom forms only single bonds or no bonds at all */
   singleBonds?: boolean;
   /** Array of this atom's bond orders, corresponding to bonds identfied by 'bonds' */
@@ -73,7 +74,14 @@ export interface AtomSpec  {
   capDrawn?: boolean;
   model?: number;
   contextMenuEnabled?: boolean;
-};
+  hbondDistanceSq?: number;
+  hbondOther?: any;
+  altLoc?: string;
+  reschain?: number;
+  uMat?: Record<string, number>;
+  symmetries?: Vector3[];
+  sym?: any;
+}
 
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include
@@ -91,9 +99,10 @@ export interface AtomSpec  {
  *  viewer.render();
  * });
  */
-export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index"|"resi"> {
+export interface AtomSelectionSpec
+  extends Omit<AtomSpec, "bonds" | "model" | "index" | "resi"> {
   /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
-  model?: GLModel | number |  GLModel[] | number[];
+  model?: GLModel | number | GLModel[] | number[];
   /** frame index of individual frame to style; will apply to all frames if not set */
   frame?: number;
   /** index of the atom or atoms to select */
@@ -109,19 +118,17 @@ export interface AtomSelectionSpec extends Omit<AtomSpec, "bonds"|"model"|"index
   /** if set, expands the selection to include all atoms of any residue that has any atom selected */
   byres?: boolean;
   /** expands the selection to include all atoms within a given distance from the selection */
-  expand?: number|string;
+  expand?: number | string;
   /** intersects the selection with the set of atoms within a given distance from another selection */
   within?: WithinSelectionSpec;
   /** take the intersection of the provided lists of {@link AtomSelectionSpec}s */
-  and?: AtomSelectionSpec[] & {__cached_results?: any};
+  and?: AtomSelectionSpec[] & { __cached_results?: any };
   /** take the union of the provided lists of {@link AtomSelectionSpec}s */
-  or?: AtomSelectionSpec[] & {__cached_results?: any};
+  or?: AtomSelectionSpec[] & { __cached_results?: any };
   /** take the inverse of the provided {@link AtomSelectionSpec} */
   not?: AtomSelectionSpec;
   contextMenuEnabled?: boolean;
-};
-
-
+}
 
 /**
  * Within selection object. Used to find the subset of an atom selection that is within
@@ -142,6 +149,14 @@ export interface WithinSelectionSpec {
   invert?: boolean;
   /** the selection of atoms against which to measure the distance from the parent atom selection */
   sel?: AtomSelectionSpec;
-};
+}
 
+export type Cryst = {
+  a: number;
+  b: number;
+  c: number;
+  alpha: number;
+  beta: number;
+  gamma: number;
+};
 export type SelectionRange = `${number}-${number}`;

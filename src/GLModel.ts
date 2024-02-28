@@ -291,6 +291,11 @@ export class GLModel {
                 i2 = (i + 1) % atom2.bonds.length;
                 j2 = atom2.bonds[i2];
                 atom3 = this.atoms[j2];
+                if(atom3.index == atom.index) { // get distinct atom
+                    i2 = (i2 + 1) % atom2.bonds.length;
+                    j2 = atom2.bonds[i2];
+                    atom3 = this.atoms[j2];
+                }
                 p3 = new Vector3(atom3.x, atom3.y, atom3.z);
 
                 dir2 = p3.clone();
@@ -322,9 +327,6 @@ export class GLModel {
         v.normalize();
 
         return v;
-
-        //v.multiplyScalar(r * 1.5);
-
     };
 
     private addLine(vertexArray, colorArray, offset, p1: Vector3, p2: Vector3, c1: Color) {
