@@ -345,7 +345,6 @@ function checkStatus(response) {
     return response;
 }
 
-let isRequestProcessing = false;
 /**
  * Fetch data from URL
  * 
@@ -353,7 +352,7 @@ let isRequestProcessing = false;
  * @param callback Function to call with data 
  */
 export function get(uri:string, callback?) {
-    const promise = fetch(uri).then(checkStatus).then((response) => response.text()).finally(()=>isRequestProcessing = false);
+    const promise = fetch(uri).then(checkStatus).then((response) => response.text());
     if (callback)
         return promise.then(callback);
     return promise;
@@ -374,9 +373,7 @@ type RequestMethod = "GET"|"POST"|"PUT"|"DELETE"|"HEAD"|"OPTIONS"|"PATCH";
 export function getbin(uri:string, callback?, request?: RequestMethod, postdata?) {
     const promise = fetch(uri, { method: request || "GET", body: postdata })
             .then((response) => checkStatus(response))
-            .then((response) => response.arrayBuffer())
-            .finally(()=>isRequestProcessing = false);
-    
+            .then((response) => response.arrayBuffer());
     
     if (callback) return promise.then(callback);
     return promise;
@@ -409,11 +406,6 @@ export function download(query, viewer, options, callback?) {
     var promise = null;
     var m = viewer.addModel();
 
-    if(isRequestProcessing){
-        alert("Request already processing, please wait");
-        return;
-    }
-
     if (query.indexOf(':') < 0) {
         //no type specifier, guess
         if (query.length == 4) {
@@ -432,7 +424,7 @@ export function download(query, viewer, options, callback?) {
             //when fetch directly from pdb, trust structure annotations
             options.noComputeSecondaryStructure = true;
         }
-        isRequestProcessing = true;
+
         promise = new Promise(function (resolve) {
             getbin(uri)
                 .then(function (ret) {
@@ -486,7 +478,7 @@ export function download(query, viewer, options, callback?) {
             viewer.zoomTo();
             viewer.render();
         };
-        isRequestProcessing = true;
+
         promise = new Promise(function (resolve) {
             if (type === 'mmtf') { //binary data
                 getbin(uri)
