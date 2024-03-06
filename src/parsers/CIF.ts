@@ -41,13 +41,20 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
           while (sectionEnd < string.length && string[sectionEnd] !== "'") {
             sectionEnd++;
           }
+          //biopython apparently generates invalid string literals so if we think we are done but aren't at a separator keep going
+          while (string.substring(sectionEnd, sectionEnd + separator.length) !== separator &&
+            sectionEnd < string.length) {
+            sectionEnd++;
+          }
         } else if (string[sectionEnd] === '"') {
           sectionEnd++;
           while (sectionEnd < string.length && string[sectionEnd] !== '"') {
             sectionEnd++;
           }
+          sectionEnd++; 
+        } else {
+          sectionEnd++;        
         }
-        sectionEnd++;
       }
       sections.push(string.substring(sectionStart, sectionEnd));
       sectionStart = sectionEnd = sectionEnd + separator.length;
