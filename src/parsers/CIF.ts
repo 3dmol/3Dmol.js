@@ -1,9 +1,9 @@
 import { ParserOptionsSpec } from './ParserOptionsSpec';
 
-import { assignBonds } from "./utils/assignBonds";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 import { processSymmetries } from "./utils/processSymmetries";
 import { conversionMatrix3, Matrix3, Matrix4, Vector3,  } from "../WebGL"
+import { assignPDBBonds } from './utils/assignPDBBonds';
 
 /**
  * Puts atoms specified in mmCIF fromat in str into atoms
@@ -406,7 +406,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
     }
   }
   for (let i = 0; i < atoms.length; i++) {
-    if (assignbonds) assignBonds(atoms[i]);
+    if (assignbonds) assignPDBBonds(atoms[i]);
     computeSecondaryStructure(atoms[i],options.hbondCutoff);
     processSymmetries(
       modelData[i].symmetries,
@@ -419,7 +419,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
       !options.dontConnectDuplicatedAtoms &&
       assignbonds
     )
-      assignBonds(atoms[i]);
+    assignPDBBonds(atoms[i]);
   }
 
   return atoms;
