@@ -45,6 +45,8 @@ import { AtomStyleSpec } from "GLModel";
   doAssembly?: boolean;
   /**  Set to true if you wish to duplicate assembly atoms otherwise false ; supported by all formats with symmetries.  Not duplicating will result in faster rendering but it will not be possible to individually style symmetries. */
   duplicateAssemblyAtoms?: boolean;
+  /** Set to true with duplicateAssemblyAtoms to individually wrap atoms (from symmetries) into unit cell  */
+  wrapAtoms?: boolean;
   /** shift symmetry mates so their centroid is in the unit cell */
   normalizeAssembly?: boolean;
   /** do not detect bonds between symmetries generated with duplicateAssemblyAtoms (cif only - other formats never make bonds between symmetries) */

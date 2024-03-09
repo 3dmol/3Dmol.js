@@ -15,13 +15,11 @@ export function processSymmetries(
   let offset = end;
 
   let modifiedIdentity = -1;
-  if (options.normalizeAssembly && cryst) {
-    //to normalize, translate every symmetry so that the centroid is
-    //in the unit cell.  To do this, convert back to fractional coordinates,
-    //compute the centroid, calculate any adjustment needed to get it in [0,1],
-    //convert the adjustment to a cartesian translation, and then add it to
-    //the symmetry matrix
-    const conversionMatrix = conversionMatrix3(
+  let conversionMatrix = null;
+  let toFrac = null;
+
+  if ((options.normalizeAssembly || options.wrapAtoms) && cryst) {
+    conversionMatrix = conversionMatrix3(
       cryst.a,
       cryst.b,
       cryst.c,
@@ -29,8 +27,40 @@ export function processSymmetries(
       cryst.beta,
       cryst.gamma
     );
-    const toFrac = new Matrix3();
+    toFrac = new Matrix3();
     toFrac.getInverse3(conversionMatrix);
+  }
+
+  let getAdjustment = function(v: Vector3) {
+    let c = v.clone().applyMatrix3(toFrac);
+    const coord = [c.x, c.y, c.z];
+    const adjustment = [0.0, 0.0, 0.0];
+    for (let i = 0; i < 3; i++) {
+      while (coord[i] < -0.001) {
+        coord[i] += 1.0;
+        adjustment[i] += 1.0;
+      }
+      while (coord[i] > 1.001) {
+        coord[i] -= 1.0;
+        adjustment[i] -= 1.0;
+      }
+    }
+    //convert adjustment to non-fractional
+    const adjustmentVec = new Vector3(
+      adjustment[0],
+      adjustment[1],
+      adjustment[2]
+    );    
+    adjustmentVec.applyMatrix3(conversionMatrix);
+    return adjustmentVec;
+  };
+  
+  if (options.normalizeAssembly && cryst) {
+    //to normalize, translate every symmetry so that the centroid is
+    //in the unit cell.  To do this, convert back to fractional coordinates,
+    //compute the centroid, calculate any adjustment needed to get it in [0,1],
+    //convert the adjustment to a cartesian translation, and then add it to
+    //the symmetry matrix
 
     for (let t = 0; t < copyMatrices.length; t++) {
       //transform with the symmetry, and then back to fractional coordinates
@@ -38,30 +68,12 @@ export function processSymmetries(
       for (let n = 0; n < end; n++) {
         const xyz = new Vector3(atoms[n].x, atoms[n].y, atoms[n].z);
         xyz.applyMatrix4(copyMatrices[t]);
-        xyz.applyMatrix3(toFrac);
         //figure out
         center.add(xyz);
       }
       center.divideScalar(end);
-      const centerCoord = [center.x, center.y, center.z];
-      const adjustment = [0.0, 0.0, 0.0];
-      for (let i = 0; i < 3; i++) {
-        while (centerCoord[i] < -0.001) {
-          centerCoord[i] += 1.0;
-          adjustment[i] += 1.0;
-        }
-        while (centerCoord[i] > 1.001) {
-          centerCoord[i] -= 1.0;
-          adjustment[i] -= 1.0;
-        }
-      }
-      //convert adjustment to non-fractional
-      const adjustmentVec = new Vector3(
-        adjustment[0],
-        adjustment[1],
-        adjustment[2]
-      );
-      adjustmentVec.applyMatrix3(conversionMatrix);
+            
+      const adjustmentVec = getAdjustment(center); 
       //modify symmetry matrix to include translation
       if (
         copyMatrices[t].isNearlyIdentity() &&
@@ -79,7 +91,7 @@ export function processSymmetries(
     }
     for (let t = 0; t < copyMatrices.length; t++) {
       if (!copyMatrices[t].isNearlyIdentity() && modifiedIdentity != t) {
-        const xyz = new Vector3();
+        let xyz = new Vector3();
         for (let n = 0; n < end; n++) {
           const bondsArr: number[] = [];
           for (let l = 0; l < atoms[n].bonds.length; l++) {
@@ -87,6 +99,12 @@ export function processSymmetries(
           }
           xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
           xyz.applyMatrix4(copyMatrices[t]);
+
+          if (options.wrapAtoms && cryst) {
+            //wrap per-atom instead of per matrix using the centroid
+            let adjustment = getAdjustment(xyz);
+            xyz.add(adjustment);            
+          }
 
           const newAtom: Record<string, unknown> = {};
           for (const i in atoms[n]) {
