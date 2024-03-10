@@ -125,6 +125,20 @@ export function processSymmetries(
         }
       }
     }
+    if (options.wrapAtoms && cryst) {
+      //wrap reference coordinates, because the world isn't kind enough
+      //to ensure these are in the box
+      let xyz = new Vector3();
+      for (let n = 0; n < end; n++) {
+        xyz.set(atoms[n].x, atoms[n].y, atoms[n].z);
+        //wrap per-atom instead of per matrix using the centroid
+        let adjustment = getAdjustment(xyz);
+        xyz.add(adjustment);
+        atoms[n].x = xyz.x;
+        atoms[n].y = xyz.y;
+        atoms[n].z = xyz.z;
+      }      
+    }
     if (modifiedIdentity >= 0) {
       //after applying the other transformations, apply this one in place
       const xyz = new Vector3();

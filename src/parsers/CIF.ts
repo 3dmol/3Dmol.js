@@ -406,7 +406,9 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
     }
   }
   for (let i = 0; i < atoms.length; i++) {
-    if (assignbonds) assignPDBBonds(atoms[i]);
+    if (assignbonds && !(options.duplicateAssemblyAtoms && !options.dontConnectDuplicatedAtoms)) {
+      assignPDBBonds(atoms[i]);
+    }
     computeSecondaryStructure(atoms[i],options.hbondCutoff);
     processSymmetries(
       modelData[i].symmetries,
