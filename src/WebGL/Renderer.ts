@@ -222,6 +222,10 @@ export class Renderer {
     return this._gl;
   }
 
+  getCanvas() {
+    return this._canvas;
+  }
+  
   isLost() {
     return this._gl.isContextLost();
   }

@@ -1311,15 +1311,24 @@ export class GLViewer {
         let regen = false;
         if (this.renderer.isLost() && this.WIDTH > 0 && this.HEIGHT > 0) {
             //create new context
-            if(this.container.querySelector('canvas')) {
-                this.container.querySelector('canvas').remove(); //remove existing
+            let resetcanvas = false;
+            let currentcanvas = this.container.querySelector('canvas');
+            if(currentcanvas && currentcanvas != this.renderer.getCanvas()) {
+                //canvas has been replaced, use new one
+                this.config.canvas = currentcanvas;
+            } else {
+                currentcanvas.remove(); //remove existing
                 if(this.config && this.config.canvas != undefined) {
                     delete this.config.canvas;
+                    resetcanvas = true;
                 }
             }
             this.setupRenderer();
             this.initContainer(this.container);
             regen = true;
+            if(resetcanvas) {
+                this.config.canvas = this.renderer.getCanvas();
+            }
         }
         if (this.WIDTH == 0 || this.HEIGHT == 0) {
             if (this.animated) this._viewer.pauseAnimate();
@@ -1332,6 +1341,13 @@ export class GLViewer {
         if (regen) { //restored rendere, need to regenerate scene
             let options = this.renderer.supportedExtensions();
             options.regen = true;
+            if(this.viewers) {
+                for(let i = 0, n = this.viewers.length; i < n; i++) {
+                    for(let j = 0, m = this.viewers[i].length; j < m; j++) {
+                       this.viewers[i][j].render(null, options);
+                    }
+                }
+            }
             this._viewer.render(null, options);
         } else {
             this.show();
@@ -1681,6 +1697,12 @@ export class GLViewer {
         }
 
         for (i = 0; i < this.labels.length; i++) {
+            if(exts.regen) {
+                this.labels[i].dispose();
+                this.modelGroup.remove(this.labels[i].sprite);
+                this.labels[i].setContext();
+                this.modelGroup.add(this.labels[i].sprite);
+            }
             if (this.labels[i] && typeof (this.labels[i].frame) != 'undefined' && this.labels[i].frame >= 0) { //exists and has frame specifier
                 this.modelGroup.remove(this.labels[i].sprite);
                 if (this.viewer_frame < 0 || this.labels[i].frame == this.viewer_frame) {
@@ -1698,8 +1720,7 @@ export class GLViewer {
                     // async surface generation can cause
                     // the geometry to be webgl initialized before it is fully
                     // formed; force various recalculations until full surface
-                    // is
-                    // available
+                    // is available
                     if (!surfArr[n].finished || exts.regen) {
                         geo.verticesNeedUpdate = true;
                         geo.elementsNeedUpdate = true;
@@ -1707,6 +1728,7 @@ export class GLViewer {
                         geo.colorsNeedUpdate = true;
                         geo.buffersNeedUpdate = true;
                         geo.boundingSphere = null;
+                        surfArr[n].mat.needsUpdate = true;
 
                         if (surfArr[n].done)
                             surfArr[n].finished = true;
