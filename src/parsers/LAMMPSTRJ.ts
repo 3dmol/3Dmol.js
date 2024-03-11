@@ -66,7 +66,7 @@ export function LAMMPSTRJ(str: string, options: ParserOptionsSpec) {
     start = offset + atomCount - 1;
   }
   if (options.assignBonds) {
-    for (var i = 0; i < atoms.length; i++) assignBonds(atoms[i]);
+    for (var i = 0; i < atoms.length; i++) assignBonds(atoms[i], options);
   }
   return atoms;
 }

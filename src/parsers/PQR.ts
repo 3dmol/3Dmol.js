@@ -106,7 +106,7 @@ export function PQR(str: string, options: ParserOptionsSpec) {
 
       // assign bonds - yuck, can't count on connect records
       for (let i = 0; i < atoms.length; i++) {
-          assignPDBBonds(atoms[i]);
+          assignPDBBonds(atoms[i],options);
           if (computeStruct)
               computeSecondaryStructure(atoms[i],options.hbondCutoff);
       }

@@ -1,5 +1,6 @@
 import { AtomSpec } from "specs";
 import { areConnected } from "./areConnected";
+import { ParserOptionsSpec } from "parsers/ParserOptionsSpec";
 
 /**
  * @param {AtomSpec[]} atoms
@@ -21,7 +22,7 @@ const OFFSETS = [
 ];
 const MAX_BOND_LENGTH = 4.95; // (largest bond length, Cs) 2.25 * 2 * 1.1 (fudge factor)
 
-export function assignBonds(atoms: AtomSpec[]) {
+export function assignBonds(atoms: AtomSpec[], options: ParserOptionsSpec) {
   // Assign bonds - yuck, can't count on connect records
 
   for (let i = 0, n = atoms.length; i < n; i++) {
@@ -70,7 +71,7 @@ export function assignBonds(atoms: AtomSpec[]) {
       for (let j = 0; j < otherPoints.length; j++) {
         const atom2 = otherPoints[j];
 
-        if (areConnected(atom1, atom2)) {
+        if (areConnected(atom1, atom2, options)) {
           //gracefully handle one-sided bonds
           const a2i = atom1.bonds.indexOf(atom2.index);
           const a1i = atom2.bonds.indexOf(atom1.index);
@@ -103,7 +104,7 @@ export function assignBonds(atoms: AtomSpec[]) {
           const atom1 = points[i];
           for (let j = i + 1; j < points.length; j++) {
             const atom2 = points[j];
-            if (areConnected(atom1, atom2)) {
+            if (areConnected(atom1, atom2,options)) {
               if (atom1.bonds.indexOf(atom2.index) == -1) {
                 atom1.bonds.push(atom2.index);
                 atom1.bondOrder.push(1);

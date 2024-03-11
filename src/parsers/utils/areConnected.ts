@@ -1,10 +1,16 @@
 import { AtomSpec } from "specs";
 import { bondLength } from "./bondLength";
+import { ParserOptionsSpec } from "parsers/ParserOptionsSpec";
+
+const cations = new Set(["Na","K","Ca","Mg","Mn","Sr"]);
 
 /*
  * Return true if atom1 and atom2 are probably bonded to each other based on distance alone
  */
-export function areConnected(atom1: AtomSpec, atom2: AtomSpec) {
+export function areConnected(atom1: AtomSpec, atom2: AtomSpec, options: ParserOptionsSpec) {
+  if(options && options.unboundCations && (cations.has(atom1.elem) || cations.has(atom2.elem))) {
+    return false;
+  }
   let maxsq = bondLength(atom1.elem) + bondLength(atom2.elem);
   maxsq += 0.25; // fudge factor, especially important for md frames, also see 1i3d
   maxsq *= maxsq;
