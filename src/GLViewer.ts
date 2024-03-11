@@ -1311,7 +1311,12 @@ export class GLViewer {
         let regen = false;
         if (this.renderer.isLost() && this.WIDTH > 0 && this.HEIGHT > 0) {
             //create new context
-            this.container.querySelector('canvas').remove(); //remove existing
+            if(this.container.querySelector('canvas')) {
+                this.container.querySelector('canvas').remove(); //remove existing
+                if(this.config && this.config.canvas != undefined) {
+                    delete this.config.canvas;
+                }
+            }
             this.setupRenderer();
             this.initContainer(this.container);
             regen = true;
