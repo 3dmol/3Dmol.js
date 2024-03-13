@@ -13,7 +13,14 @@ export function getSinglePDB(
   lines: string[],
   options: ParserOptionsSpec,
   sslookup: { [x: string]: { [x: string]: string }; hasOwnProperty?: any }
-): [AtomSpec[], { symmetries: Matrix4[]; cryst: Cryst }, string[]]{
+): [
+  AtomSpec[],
+  {
+    symmetries: Matrix4[];
+    cryst: Omit<Cryst, "origin" | "size" | "unit" | "matrix4" | "matrix">;
+  },
+  string[]
+] {
   const atoms: AtomSpec[] = [];
   const assignbonds =
     options.assignBonds === undefined ? true : options.assignBonds;
@@ -22,7 +29,10 @@ export function getSinglePDB(
   const computeStruct = !options.noComputeSecondaryStructure;
   const noAssembly = !options.doAssembly; // don't assemble by default
   const selAltLoc = options.altLoc ? options.altLoc : "A"; //default alternate location to select if present
-  const modelData: { symmetries: Matrix4[]; cryst: Cryst } = {symmetries:[], cryst: undefined};
+  const modelData: {
+    symmetries: Matrix4[];
+    cryst: Omit<Cryst, "origin" | "size" | "unit" | "matrix4" | "matrix">;
+  } = { symmetries: [], cryst: undefined };
   //atom name
   let atom: string;
   let remainingLines = [];

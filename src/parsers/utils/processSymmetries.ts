@@ -8,7 +8,7 @@ export function processSymmetries(
   copyMatrices: string[] | any[],
   atoms: AtomSpec[],
   options: ParserOptionsSpec,
-  cryst: Cryst
+  cryst: Omit<Cryst, "origin" | "size" | "unit" | "matrix4" | "matrix">
 ) {
   const dontDuplicate = !options.duplicateAssemblyAtoms;
   const end = atoms.length;
@@ -31,7 +31,7 @@ export function processSymmetries(
     toFrac.getInverse3(conversionMatrix);
   }
 
-  let getAdjustment = function(v: Vector3) {
+  let getAdjustment = function (v: Vector3) {
     let c = v.clone().applyMatrix3(toFrac);
     const coord = [c.x, c.y, c.z];
     const adjustment = [0.0, 0.0, 0.0];
@@ -50,11 +50,11 @@ export function processSymmetries(
       adjustment[0],
       adjustment[1],
       adjustment[2]
-    );    
+    );
     adjustmentVec.applyMatrix3(conversionMatrix);
     return adjustmentVec;
   };
-  
+
   if (options.normalizeAssembly && cryst) {
     //to normalize, translate every symmetry so that the centroid is
     //in the unit cell.  To do this, convert back to fractional coordinates,
@@ -72,8 +72,8 @@ export function processSymmetries(
         center.add(xyz);
       }
       center.divideScalar(end);
-            
-      const adjustmentVec = getAdjustment(center); 
+
+      const adjustmentVec = getAdjustment(center);
       //modify symmetry matrix to include translation
       if (
         copyMatrices[t].isNearlyIdentity() &&
@@ -103,7 +103,7 @@ export function processSymmetries(
           if (options.wrapAtoms && cryst) {
             //wrap per-atom instead of per matrix using the centroid
             let adjustment = getAdjustment(xyz);
-            xyz.add(adjustment);            
+            xyz.add(adjustment);
           }
 
           const newAtom: Record<string, unknown> = {};
@@ -137,7 +137,7 @@ export function processSymmetries(
         atoms[n].x = xyz.x;
         atoms[n].y = xyz.y;
         atoms[n].z = xyz.z;
-      }      
+      }
     }
     if (modifiedIdentity >= 0) {
       //after applying the other transformations, apply this one in place
