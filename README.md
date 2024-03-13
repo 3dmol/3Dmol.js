@@ -22,6 +22,8 @@ See the [documentation](https://3dmol.org/doc/index.html) to learn how to use 3D
 
 ### [HTML](https://3dmol.org/doc/tutorial-embeddable.html)
 
+<img src="examples/embed.png" width=400>
+
 ```html
 <script src="https://3Dmol.org/build/3Dmol-min.js"></script>     
  
@@ -29,7 +31,6 @@ See the [documentation](https://3dmol.org/doc/index.html) to learn how to use 3D
         class='viewer_3Dmoljs' data-pdb='4N8T' data-style='cartoon:color=spectrum'
         data-surface='opacity:.7;color:white'></div>
 ```
-![Alt Text](examples/embed.png | width=400)
 
 #### JavaScript
 We support the use of both PDB queries as well as PDB files.
