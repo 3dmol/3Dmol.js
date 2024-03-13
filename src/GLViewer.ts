@@ -111,30 +111,39 @@ export class GLViewer {
     private spinInterval: any;
 
 
-    //reimplement jquery getwidth/height
-    private getRect() {
+    private getWidth() {
         let div = this.container;
-        let rect = div.getBoundingClientRect();
-        if (rect.width == 0 && rect.height == 0 && div.style.display === 'none') {
+        //offsetwidth accounts for scaling
+        let w = div.offsetWidth; 
+        if(w == 0 && div.style.display === 'none') {
             let oldpos = div.style.position;
             let oldvis = div.style.visibility;
             div.style.display = 'block';
             div.style.visibility = 'hidden';
             div.style.position = 'absolute';
-            rect = div.getBoundingClientRect();
+            w = div.offsetWidth;
             div.style.display = 'none';
             div.style.visibility = oldvis;
-            div.style.position = oldpos;
+            div.style.position = oldpos;            
         }
-        return rect;
-    };
-
-    private getWidth() {
-        return this.getRect().width;
+        return w;
     };
 
     private getHeight() {
-        return this.getRect().height;
+        let div = this.container;
+        let h = div.offsetHeight; 
+        if(h == 0 && div.style.display === 'none') {
+            let oldpos = div.style.position;
+            let oldvis = div.style.visibility;
+            div.style.display = 'block';
+            div.style.visibility = 'hidden';
+            div.style.position = 'absolute';
+            h = div.offsetHeight;
+            div.style.display = 'none';
+            div.style.visibility = oldvis;
+            div.style.position = oldpos;            
+        }
+        return h;
     };
 
     private setupRenderer() {

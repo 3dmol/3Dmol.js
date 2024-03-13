@@ -45,8 +45,8 @@ export function PRMTOP(str: string /*, options*/) {
         atom.x = 0;
         atom.y = 0;
         atom.z = 0;
-        atom.atom = lines[index + 1].slice(col[1] * j, col[1] * (j + 1));
-        atom.elem = lines[index + 1].slice(col[1] * j, col[1] * j + 1);
+        atom.atom = lines[index + 1].slice(col[1] * j, col[1] * (j + 1)).trim();
+        atom.elem = lines[index + 1].slice(col[1] * j, col[1] * j + 1).trim();
         atom.properties = properties;
         atom.bonds = [];
         atom.bondOrder = [];
