@@ -24,7 +24,13 @@ export function CUBE(str: string, options: ParserOptionsSpec) {
 
   const natoms = Math.abs(parseFloat(lineArr[0]));
 
-  let cryst: Omit<Cryst, "a" | "b" | "c" | "alpha" | "beta" | "gamma">;
+  let cryst: Omit<Cryst, "a" | "b" | "c" | "alpha" | "beta" | "gamma"> = {
+    origin: undefined,
+    size: undefined,
+    unit: undefined,
+    matrix4: undefined,
+    matrix: undefined,
+  };
   const origin = (cryst.origin = new Vector3(
     parseFloat(lineArr[1]),
     parseFloat(lineArr[2]),
