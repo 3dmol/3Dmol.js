@@ -29,7 +29,7 @@ See the [documentation](https://3dmol.org/doc/index.html) to learn how to use 3D
         class='viewer_3Dmoljs' data-pdb='4N8T' data-style='cartoon:color=spectrum'
         data-surface='opacity:.7;color:white'></div>
 ```
-![Alt Text](examples/embed.png)
+![Alt Text](examples/embed.png | width=400)
 
 #### JavaScript
 We support the use of both PDB queries as well as PDB files.
