@@ -31,6 +31,7 @@ export function CUBE(str: string, options: ParserOptionsSpec) {
     matrix4: undefined,
     matrix: undefined,
   };
+
   const origin = (cryst.origin = new Vector3(
     parseFloat(lineArr[1]),
     parseFloat(lineArr[2]),
