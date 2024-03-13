@@ -1,3 +1,4 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { assignPDBBonds } from "./utils/assignPDBBonds";
 import { atomNameToElem } from "./utils/atomNameToElem";
 
@@ -11,7 +12,7 @@ import { atomNameToElem } from "./utils/atomNameToElem";
  * @category Parsers
 */
 
-export function GRO(str: string /*, options*/) {
+export function GRO(str: string,  options: ParserOptionsSpec) {
   var allatoms: any[][] & Record<string, any> = [];
   var lines = str.split(/\r?\n|\r/);
   while (lines.length > 0) {
@@ -62,7 +63,7 @@ export function GRO(str: string /*, options*/) {
   }
 
   for (let i = 0; i < allatoms.length; i++) {
-    assignPDBBonds(allatoms[i]);
+    assignPDBBonds(allatoms[i], options);
   }
   return allatoms;
 }

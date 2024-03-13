@@ -4,13 +4,15 @@ import { AtomSpec } from "specs";
 import { areConnected } from "./areConnected";
 import { assignBonds } from "./assignBonds";
 import { standardResidues } from "./standardResidues";
+import { ParserOptionsSpec } from "parsers/ParserOptionsSpec";
+
 
 /**
  * @param {AtomSpec[]}
  *            atomsarray
  */
 
-export function assignPDBBonds(atomsarray: AtomSpec[]) {
+export function assignPDBBonds(atomsarray: AtomSpec[], options: ParserOptionsSpec) {
   // assign bonds - yuck, can't count on connect records
   const protatoms: Array<AtomSpec> = [];
   const hetatoms: Array<AtomSpec> = [];
@@ -21,7 +23,7 @@ export function assignPDBBonds(atomsarray: AtomSpec[]) {
     else protatoms.push(atom);
   }
 
-  assignBonds(hetatoms);
+  assignBonds(hetatoms, options);
 
   // sort by resid
   protatoms.sort(function (a, b) {
@@ -50,7 +52,7 @@ export function assignPDBBonds(atomsarray: AtomSpec[]) {
       const aj = protatoms[j];
       if (aj.chain !== ai.chain || aj.resi - ai.resi > 1) break;
 
-      if (areConnected(ai, aj)) {
+      if (areConnected(ai, aj, options)) {
         if (ai.bonds.indexOf(aj.index) === -1) {
           // only add if not already there
           ai.bonds.push(aj.index);

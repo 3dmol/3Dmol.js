@@ -254,7 +254,7 @@ export function getSinglePDB(
   //fix any "one-way" bonds in CONECT records
   validateBonds(atoms, serialToIndex);
   // assign bonds - yuck, can't count on connect records
-  if (assignbonds) assignPDBBonds(atoms);
+  if (assignbonds) assignPDBBonds(atoms, options);
 
   if (!noAssembly)
     processSymmetries(modelData.symmetries, atoms, options, modelData.cryst);

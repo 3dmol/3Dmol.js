@@ -2146,7 +2146,7 @@ export class GLModel {
      * consider valence constraints and will only create single bonds.
      */
     public assignBonds() {
-        assignBonds(this.atoms);
+        assignBonds(this.atoms, {assignBonds: true});
     }
 
     /** Remove specified atoms from model

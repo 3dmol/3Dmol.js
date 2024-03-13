@@ -63,6 +63,8 @@ import { AtomStyleSpec } from "GLModel";
   assemblyIndex?: number;
   /** for formats without explicit bonds (e.g. PDB, xyz) infer bonding (default true).  */
   assignBonds?: boolean;
+  /** for formats without explicit bonds, if assigning bonds to not assign bonds to common cations */
+  unboundCations?: boolean;
   /** set model to this style after parsing */
   style?: AtomStyleSpec;
  };

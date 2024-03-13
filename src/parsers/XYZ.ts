@@ -77,7 +77,7 @@ export function XYZ(str: string, options: ParserOptionsSpec) {
 
   if (assignbonds) {
     for (let i = 0; i < atoms.length; i++) {
-      assignBonds(atoms[i]);
+      assignBonds(atoms[i], options);
     }
   }
 
