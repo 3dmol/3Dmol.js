@@ -11,6 +11,8 @@ import { CAP, GLDraw } from "./GLDraw"
 import { subdivide_spline } from "./glcartoon";
 import { adjustVolumeStyle, extend, Func, makeFunction } from "./utilities";
 import { GradientType } from "./Gradient";
+import { AtomSelectionSpec } from "specs";
+import { GLViewer } from "GLViewer";
 
 
 /**
@@ -1215,7 +1217,7 @@ export class GLShape {
     };
 
     /**
-     * Create isosurface from voluemetric data.
+     * Create isosurface from volumetric data.
      * @param {VolumeData} data - volumetric input data
      * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
      * @example //the user can specify a selected region for the isosurface 
@@ -1241,7 +1243,7 @@ export class GLShape {
               viewer.render();
             });
      */
-    addIsosurface(data, volSpec:IsoSurfaceSpec, callback?) {//may want to cache the arrays geneerated when selectedRegion ==true
+    addIsosurface(data, volSpec:IsoSurfaceSpec, callback?, viewer?: GLViewer) {//may want to cache the arrays generated when selectedRegion ==true
 
         var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
             : 0.0;
@@ -1289,6 +1291,13 @@ export class GLShape {
 
         if (volSpec.selectedRegion && volSpec.coords === undefined) {
             volSpec.coords = volSpec.selectedRegion; //backwards compat for incorrectly documented feature
+        }
+        if (volSpec.coords === undefined && volSpec.selection !== undefined) {
+            if(!viewer) {
+                console.log("addIsosurface needs viewer is selection provided.");
+            } else {
+                volSpec.coords = viewer.selectedAtoms(volSpec.selection) as XYZ[];
+            }
         }
         if (volSpec.coords !== undefined) {
 
@@ -1593,6 +1602,8 @@ export interface IsoSurfaceSpec extends ShapeSpec {
     smoothness?: number;
     /** coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
     coords?: XYZ[];
+    /** selection around which to include data (alternative to coords) */
+    selection?: AtomSelectionSpec;
     /** distance around coords to include data [default = 2.0] */
     seldist?: number;
     /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */

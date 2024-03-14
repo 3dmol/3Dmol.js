@@ -1,6 +1,6 @@
 //a molecular viewer based on GLMol
 
-import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide, Material } from "./WebGL";
+import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide, Material, MeshDoubleLambertMaterial } from "./WebGL";
 import { Vector3, Matrix4, Matrix3, Quaternion, XYZ } from "./WebGL/math";
 import { MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line } from "./WebGL";
 import { elementColors, CC, ColorSpec, ColorschemeSpec } from "./colors";
@@ -3212,7 +3212,7 @@ export class GLViewer {
     public addIsosurface(data, spec: IsoSurfaceSpec = {}, callback?) {
         var s = new GLShape(spec);
         s.shapePosition = this.shapes.length;
-        s.addIsosurface(data, spec, callback);
+        s.addIsosurface(data, spec, callback, this);
         this.shapes.push(s);
         return s;
     };
@@ -3227,7 +3227,7 @@ export class GLViewer {
      */
     public addVolumetricRender(data, spec: VolumetricRendererSpec) {
         spec = spec || {};
-        var s = new GLVolumetricRender(data, spec);
+        var s = new GLVolumetricRender(data, spec, this);
         s.shapePosition = this.shapes.length;
         this.shapes.push(s);
         return s;
@@ -4123,7 +4123,12 @@ export class GLViewer {
      * @return {MeshLambertMaterial}
      */
     private static getMatWithStyle(style: SurfaceStyleSpec) {
-        var mat = new MeshLambertMaterial();
+        let mat = null;
+        if(style.onesided) {
+            mat = new MeshLambertMaterial();
+        } else {
+            mat = new MeshDoubleLambertMaterial();
+        }
         mat.vertexColors = Coloring.VertexColors;
 
         for (var prop in style) {
@@ -4978,6 +4983,8 @@ export interface ViewerGridSpec {
  * });
  */
 export interface SurfaceStyleSpec {
+    /** one sided material - back is transparent */
+    onesided?: boolean;
     /** sets the transparency: 0 to hide, 1 for fully opaque */
     opacity?: number;
     /** element based coloring */

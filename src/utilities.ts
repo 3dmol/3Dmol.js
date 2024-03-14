@@ -1,6 +1,6 @@
 //a collection of miscellaneous utility functions
 
-import { builtinGradients, Gradient } from "./Gradient";
+import { getGradient, Gradient, GradientType } from "./Gradient";
 import { VolumeData } from "./VolumeData";
 import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
 import { IsoSurfaceSpec } from "GLShape";
@@ -567,14 +567,9 @@ export function getColorFromStyle(atom, style): Color {
             //apply a property mapping
             prop = scheme.prop;
             var grad = scheme.gradient; //redefining scheme
-            if (typeof builtinGradients[grad] != "undefined") {
-                grad = new builtinGradients[grad](
-                    scheme.min,
-                    scheme.max,
-                    scheme.mid ? scheme.mid : scheme.colors
-                );
+            if(!(grad instanceof GradientType)) {
+                grad = getGradient(scheme);
             }
-
             let range = grad.range() || [-1, 1]; //sensible default
             val = getAtomProperty(atom, prop);
             if (val != null) {

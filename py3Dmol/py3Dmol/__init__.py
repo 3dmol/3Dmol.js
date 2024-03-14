@@ -54,13 +54,14 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/GLViewer.html
     '''
-    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),format=None,js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
             query -- optional argument to provide to $3Dmol.download
             viewergrid -- optional tuple (rows,columns) to define grid
-            data -- molecular data to provide to addModel, wit viewer grid can be indexed (r,c)
+            data -- molecular data to provide to addModel, with viewer grid can be indexed (r,c)
+            format -- format of provided data
             style -- style to apply, with viewer grid can be indexed (r,c)
             options -- optional options to provide to $3Dmol.download
             js -- url for 3Dmol.js'''
@@ -148,7 +149,11 @@ if(warn) {
                             d = data[r][c]
                         except:
                             d = data
-                        self.startjs += "viewergrid_UNIQUEID[%d][%d].addModel(%s);\n"%(r,c,json.dumps(d))
+                        try:
+                            f = format[r][c]
+                        except:
+                            f = format
+                        self.startjs += f"viewergrid_UNIQUEID[{r}][{c}].addModel({json.dumps(d)}{','+json.dumps(f) if f else ''});\n"
                     if style:
                         try:
                             s = style[r][c]
@@ -160,7 +165,7 @@ if(warn) {
         else:
             cmds = ''
             if data:
-                cmds = "viewer_UNIQUEID.addModel(%s);\n"%json.dumps(data)
+                cmds = f"viewer_UNIQUEID.addModel({json.dumps(data)}{','+json.dumps(format) if format else ''});\n"                
             if style:
                 cmds += "viewer_UNIQUEID.setStyle(%s);\n"%json.dumps(style)
             self.startjs += cmds + "viewer_UNIQUEID.zoomTo();\n"

@@ -1,8 +1,10 @@
 import { Sphere } from "./WebGL/shapes";
-import { Vector3, Matrix4 } from "./WebGL/math";
+import { Vector3, Matrix4, XYZ } from "./WebGL/math";
 import { VolumetricMaterial, Mesh, Texture, Object3D, Material } from "./WebGL";
 import { CC } from "./colors";
 import { GLShape } from "./GLShape";
+import { AtomSelectionSpec } from "specs";
+import { GLViewer } from "GLViewer";
 
 
 
@@ -15,7 +17,9 @@ export interface VolumetricRendererSpec {
     /** number of times to sample each voxel approximately (default 5) */
     subsamples?: number;
     /**  coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
-    coords?: Array<Vector3>;
+    coords?: XYZ[];
+    /** selection around which to include data */
+    selection?: AtomSelectionSpec;
     /** distance around coords to include data [default = 2.0] */
     seldist?: number; 
 };
@@ -65,7 +69,9 @@ export class GLVolumetricRender {
     texmatrix: any;
     minunit: any;
 
-    constructor(data: { matrix: { elements: any; }; size: { x: number; y: number; z: number; }; unit: { x: number; y: number; z: number; }; origin: { x: number; y: number; z: number; }; data: number[]; getIndex: (arg0: number, arg1: number, arg2: number) => number; }, spec: VolumetricRendererSpec) {
+    constructor(data: { matrix: { elements: any; }; size: XYZ; 
+                unit: XYZ; origin: XYZ; data: number[]; getIndex: (arg0: number, arg1: number, arg2: number) => number; }, 
+        spec: VolumetricRendererSpec, viewer?: GLViewer) {
         spec = spec || {};
         var transferfn = Object.assign([], spec.transferfn);
         this.subsamples = spec.subsamples || 5.0;
@@ -186,6 +192,13 @@ export class GLVolumetricRender {
         );
         this.boundingSphere.radius = this.maxdepth / 2;
 
+        if (spec.coords === undefined && spec.selection !== undefined) {
+            if(viewer) {
+                spec.coords = viewer.selectedAtoms(spec.selection) as XYZ[];
+            } else {
+                console.log('Need to provide viewer to volumetric renderer if selection specified.');
+            }
+        }
         // volume selectivity based on given coords and distance
         if (spec.coords !== undefined && spec.seldist !== undefined) {
             let mask = new Uint8Array(data.data.length);
