@@ -158,9 +158,9 @@ export class GLViewer {
             rows: this.config.rows,
             cols: this.config.cols,
             canvas: this.config.canvas,
-            //cannot initialize with zero size
-            containerWidth: this.WIDTH || 1,
-            containerHeight: this.HEIGHT || 1,
+            //cannot initialize with zero size - render will start out lost
+            containerWidth: this.WIDTH,
+            containerHeight: this.HEIGHT
         });
         this.renderer.domElement.style.width = "100%";
         this.renderer.domElement.style.height = "100%";
@@ -1334,6 +1334,8 @@ export class GLViewer {
             }
             this.setupRenderer();
             this.initContainer(this.container);
+            this.renderer.setClearColorHex(this.bgColor, this.config.backgroundAlpha);
+
             regen = true;
             if(resetcanvas) {
                 this.config.canvas = this.renderer.getCanvas();

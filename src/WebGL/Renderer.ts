@@ -189,6 +189,9 @@ export class Renderer {
 
     this._canvas.id = parameters.id;
 
+    if(parameters.containerWidth == 0 || parameters.containerHeight == 0) {
+      return; //start lost
+    }
     this.initGL();
     this.setDefaultGLState();
 
@@ -227,7 +230,7 @@ export class Renderer {
   }
   
   isLost() {
-    return this._gl.isContextLost();
+    return this._gl == null || this._gl.isContextLost();
   }
 
   getPrecision() {
@@ -237,8 +240,9 @@ export class Renderer {
   setClearColorHex(hex, alpha) {
     this._clearColor.setHex(hex);
     this._clearAlpha = alpha;
-
-    this._gl.clearColor(this._clearColor.r, this._clearColor.g, this._clearColor.b, this._clearAlpha);
+    if(!this.isLost()) {
+      this._gl.clearColor(this._clearColor.r, this._clearColor.g, this._clearColor.b, this._clearAlpha);
+    }
   }
 
   enableOutline(parameters) {
@@ -269,9 +273,11 @@ export class Renderer {
       this._viewportWidth = wid;
       this._viewportHeight = hei;
 
-      this._gl.enable(this._gl.SCISSOR_TEST);
-      this._gl.scissor(wid * this.col, hei * this.row, wid, hei);
-      this._gl.viewport(wid * this.col, hei * this.row, wid, hei);
+      if(!this.isLost()) {
+        this._gl.enable(this._gl.SCISSOR_TEST);
+        this._gl.scissor(wid * this.col, hei * this.row, wid, hei);
+        this._gl.viewport(wid * this.col, hei * this.row, wid, hei);
+      }
     }
   }
 
@@ -308,7 +314,9 @@ export class Renderer {
       this._canvas.style.width = width + "px";
       this._canvas.style.height = height + "px";
 
-      this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
+      if(!this.isLost()) {
+        this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
+      }
     }
     this.initFrameBuffer();
   }
@@ -578,7 +586,9 @@ export class Renderer {
       console.error("Renderer.render: camera is not an instance of Camera.");
       return;
     }
-
+    if(this.isLost()) {
+      return;
+    }
     var i,
       il,
       webglObject,
