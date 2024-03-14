@@ -1,0 +1,36 @@
+full screen correct
+zoom correct on cif grid
+autozoom at end
+
+# Molecular Dynamics Trajectories
+
+Topology (.gro, .prmtop, .pdb) loaded separately from trajectory (.mdcr, netcdf, mdserv URL).
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+%%html
+<div style="height: 400px; width: 100%; z-index: -1;" class='viewerbackground' id='mdsim' ></div>       
+
+<script>
+$3Dmolpromise.then(function() {
+var mdviewer = $3Dmol.createViewer('mdsim');
+    $3Dmol.get("https://3dmol.csb.pitt.edu/mdsrv/file/data/md.gro",  function (data){
+        var m = mdviewer.addModel(data, "gro");
+        m.setStyle({cartoon:{},stick:{}});
+        m.setStyle({resn:"SOL"},{sphere:{opacity:0.5}});
+        
+        mdviewer.zoomTo();
+        mdviewer.render(  );
+        var url = "https://3dmol.csb.pitt.edu/mdsrv/";
+        var pathToFile = "data/md.xtc";
+        
+        m.setCoordinatesFromURL(url, pathToFile)
+        .then(function() {
+            mdviewer.zoomTo();
+            mdviewer.animate();
+        }).catch().then(function() {});
+});
+});
+$(".jp-InputArea .o:contains(html)").closest('.jp-InputArea').hide();
+</script>

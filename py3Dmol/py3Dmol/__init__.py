@@ -146,11 +146,17 @@ if(warn) {
                     cmds = ''
                     if data:
                         try:
-                            d = data[r][c]
+                            if type(data) == str:
+                              d = data
+                            else:
+                              d = data[r][c]
                         except:
                             d = data
                         try:
-                            f = format[r][c]
+                            if type(format) == str:
+                              f = format
+                            else:
+                              f = format[r][c]
                         except:
                             f = format
                         self.startjs += f"viewergrid_UNIQUEID[{r}][{c}].addModel({json.dumps(d)}{','+json.dumps(f) if f else ''});\n"
