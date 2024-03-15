@@ -3323,12 +3323,12 @@ export class GLViewer {
         this.incAnim();
         var interval = 100;
         var loop = "forward";
-        var reps = 0;
+        var reps = Infinity;
         options = options || {};
         if (options.interval) {
             interval = options.interval;
         }
-        if (options.loop) {
+        if (options.loop) {``
             loop = options.loop;
         }
         if (options.reps) {
@@ -3381,7 +3381,7 @@ export class GLViewer {
                 //we no longer exist as part of the DOM
                 self.stopAnimate();
             }
-            else if (++displayCount == displayMax || !self.isAnimated()) {
+            else if (++displayCount >= displayMax || !self.isAnimated()) {
                 timer.cancel();
                 self.animationTimers.delete(timer);
                 self.decAnim();
