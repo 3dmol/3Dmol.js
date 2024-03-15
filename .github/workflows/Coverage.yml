@@ -11,9 +11,9 @@ jobs:
   cover:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -22,8 +22,8 @@ jobs:
         run: npm install 
 
       - name: Coverage
-        env:
-          NODE_OPTIONS: "--max_old_space_size=8192"   
+        #env:
+        #  NODE_OPTIONS: "--max_old_space_size=8192"   
         # coverage has trouble fetching data for some reason in the CI,
         # I don't actually care about the test results (that's tested above)
         # so ignore any failure here
