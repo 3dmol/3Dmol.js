@@ -586,9 +586,7 @@ export class Renderer {
       console.error("Renderer.render: camera is not an instance of Camera.");
       return;
     }
-    if(this.isLost()) {
-      return;
-    }
+
     var i,
       il,
       webglObject,
@@ -618,6 +616,9 @@ export class Renderer {
       camera.matrixWorldInverse
     );
 
+    if(this.isLost()) {
+      return;
+    }
     // update WebGL objects
 
     if (this.autoUpdateObjects) this.initWebGLObjects(scene);
