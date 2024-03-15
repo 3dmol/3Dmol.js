@@ -22,8 +22,8 @@ jobs:
         run: npm install 
 
       - name: Coverage
-        #env:
-        #  NODE_OPTIONS: "--max_old_space_size=8192"   
+        env:
+          NODE_OPTIONS: "--max_old_space_size=15000"   
         # coverage has trouble fetching data for some reason in the CI,
         # I don't actually care about the test results (that's tested above)
         # so ignore any failure here
