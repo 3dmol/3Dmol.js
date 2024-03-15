@@ -54,7 +54,7 @@ model.setStyle(
   if(txt.length < 100) {
       throw "Where's the VRML?";
   }
-  console.log(txt);                    
+  //console.log(txt);                    
 
 model.setStyle(
       {},
