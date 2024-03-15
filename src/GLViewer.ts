@@ -2190,6 +2190,7 @@ export class GLViewer {
 
           $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
+	      viewer.zoomTo();
               $3Dmol.get("data/1fas.cube",function(volumedata){
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {
                       opacity:0.85,
@@ -2199,7 +2200,6 @@ export class GLViewer {
 
               viewer.render();
               });
-              viewer.zoomTo();
             });
      */
     public zoomTo(sel: AtomSelectionSpec = {}, animationDuration: number = 0, fixedPath: boolean = false) {

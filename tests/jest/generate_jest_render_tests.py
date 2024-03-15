@@ -93,6 +93,7 @@ beforeAll(() => {
         });
 
     });
+    server.maxRequestsPerSocket = 1; //workaround weird race condition
     server.listen(8125);
 }
 );
