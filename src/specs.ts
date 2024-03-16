@@ -1,7 +1,7 @@
 // Specifications for various object types used in 3Dmol.js
 // This is primarily for documentation
 
-import { Vector3 } from "WebGL";
+import { Matrix4, Vector3 } from "WebGL";
 import { AtomStyleSpec, BondStyle, GLModel } from "./GLModel";
 import { GLViewer } from "./GLViewer";
 import { ColorSpec } from "./colors";
@@ -158,5 +158,10 @@ export type Cryst = {
   alpha: number;
   beta: number;
   gamma: number;
+  origin: Vector3;
+  size: { x: number; y: number; z: number };
+  unit: Vector3;
+  matrix4: Matrix4;
+  matrix: unknown;
 };
 export type SelectionRange = `${number}-${number}`;
