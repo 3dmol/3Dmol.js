@@ -6,7 +6,7 @@ import { Vector3 } from "./WebGL/math";
 import { Triangle, Sphere } from "./WebGL/shapes";
 import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring } from "./WebGL";
 import { Gradient } from "./Gradient";
-import { CC, ColorSpec } from "./colors";
+import { CC, ColorSpec, ColorschemeSpec } from "./colors";
 import { GLDraw } from "./GLDraw";
 import { isNumeric, getColorFromStyle } from "./utilities";
 
@@ -28,8 +28,12 @@ import { isNumeric, getColorFromStyle } from "./utilities";
 export interface CartoonStyleSpec {
     /** do not show  */
     hidden?: boolean;
+    /** colorscheme to use on atoms; overrides color */
+    colorscheme?: ColorschemeSpec;    
     /** strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;    
     /**  style of cartoon rendering (trace, oval, rectangle (default), parabola, edged) */
     style?: string;
     /**  whether to use constant strand width, disregarding
@@ -1152,7 +1156,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
 
                 // reached next residue (potentially the first residue)
                 if (curr === undefined || curr.rescode != next.rescode || curr.resi != next.resi) {
-                    if (baseEndPt) // draw last NA residue's base
+                    if (baseEndPt && curr != undefined) // draw last NA residue's base
                     {
                         // start the cylinder at the midpoint between
                         // consecutive backbone atoms
@@ -1197,11 +1201,11 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
                     };
             }
             // atoms used to orient the backbone strand
-            else if (isAlphaCarbon(curr) && next.atom === "O" ||
+            else if (curr != undefined && (isAlphaCarbon(curr) && next.atom === "O" ||
                 inNucleicAcid && curr.atom === "P" &&
                 (next.atom === "OP2" || next.atom === "O2P") ||
                 inNucleicAcid && curr.atom.indexOf("O5") == 0 &&
-                next.atom.indexOf("C5") == 0) {
+                next.atom.indexOf("C5") == 0)) {
                 orientPt = new Vector3(next.x, next.y, next.z);
                 orientPt.resi = next.resi;
                 if (next.atom === "OP2" || next.atom === "O2P") // for NA 3'

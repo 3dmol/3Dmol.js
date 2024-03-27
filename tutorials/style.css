@@ -1,7 +1,14 @@
-  .prettyprint {
+.prettyprint {
     background-color: #f3f3f3;
-  }
-  .content pre.prettyprint {
+}
+.content pre.prettyprint {
     padding: 1px;
     background-color: black;
-  }
+}
+
+h1.navbar-item #___gcse_0 div.gsc-control-cse  {
+  padding: 0 ; 
+  padding-left: 1em;
+  width: 20em;
+  line-height: 1;
+}

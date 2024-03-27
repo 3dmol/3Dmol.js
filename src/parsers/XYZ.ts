@@ -1,14 +1,16 @@
 import { ParserOptionsSpec } from './ParserOptionsSpec';
-// read an XYZ file from str and return result
 
 import { Matrix3 } from "../WebGL";
 import { assignBonds } from "./utils/assignBonds";
 
 /**
+ * Read an XYZ file from str and return result
+ * 
  * @param {string} str
  * @param {ParserOptionsSpec} options
  * @category Parsers
- */
+*/
+
 export function XYZ(str: string, options: ParserOptionsSpec) {
   options = options || {};
   var atoms: any[][] & Record<string, any> = [[]];
@@ -49,7 +51,7 @@ export function XYZ(str: string, options: ParserOptionsSpec) {
       atom.serial = i;
       var elem = tokens[0];
       atom.atom = atom.elem =
-        elem[0].toUpperCase() + elem.substr(1, 1).toLowerCase();
+        elem[0].toUpperCase() + elem.substring(1, 2).toLowerCase();
       atom.x = parseFloat(tokens[1]);
       atom.y = parseFloat(tokens[2]);
       atom.z = parseFloat(tokens[3]);
@@ -75,7 +77,7 @@ export function XYZ(str: string, options: ParserOptionsSpec) {
 
   if (assignbonds) {
     for (let i = 0; i < atoms.length; i++) {
-      assignBonds(atoms[i]);
+      assignBonds(atoms[i], options);
     }
   }
 

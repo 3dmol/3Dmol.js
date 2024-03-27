@@ -1,4 +1,3 @@
-/tests
 /node_modules
 /tmp
 /coverage
@@ -7,6 +6,20 @@ script.map
 .DS_Store
 .settings
 .ipynb
+
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+doc.md
+echo.cgi
+examples/
+index.html
+learning-environment/
+paper/
+py3Dmol/
+tests/
+track/
+tutorials/
+/viewer.*
 
 #Ignoring Virtual Environments for the Active Learning Environment Project
 .env

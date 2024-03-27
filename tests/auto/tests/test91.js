@@ -5,7 +5,7 @@ $.get("data/model1.prmtop",  function (data){
         m.setCoordinates(ret, "netcdf");
         viewer.setStyle({},{sphere:{}});
         viewer.zoomTo();
-        viewer.animate({loop:"forward",reps:1});
+        viewer.animate({loop:"forward",reps:1,step:9});
         viewer.render();
     });
 });

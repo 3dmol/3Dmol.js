@@ -1,17 +1,18 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { assignPDBBonds } from "./utils/assignPDBBonds";
 import { atomNameToElem } from "./utils/atomNameToElem";
 
 /**
  * Parse a gro file from str and create atoms
-  * 
-  * @param {string}
-  *            str
-  * @param {ParserOptionsSpec}
-  *            options* 
-  * @category Parsers
+ * 
+ * @param {string}
+ *            str
+ * @param {ParserOptionsSpec}
+ *            options* 
+ * @category Parsers
+*/
 
- */
-export function GRO(str /*, options*/) {
+export function GRO(str: string,  options: ParserOptionsSpec) {
   var allatoms: any[][] & Record<string, any> = [];
   var lines = str.split(/\r?\n|\r/);
   while (lines.length > 0) {
@@ -53,7 +54,7 @@ export function GRO(str /*, options*/) {
       var box = last.trim().split(/\s+/);
       if (box.length == 3) {
         for (var b = 0; b < 3; b++) {
-          box[b] = parseFloat(box[b]) * 10.0;
+          (box[b] as any) = parseFloat(box[b]) * 10.0;
         }
         allatoms.box = box;
       }
@@ -62,7 +63,7 @@ export function GRO(str /*, options*/) {
   }
 
   for (let i = 0; i < allatoms.length; i++) {
-    assignPDBBonds(allatoms[i]);
+    assignPDBBonds(allatoms[i], options);
   }
   return allatoms;
 }

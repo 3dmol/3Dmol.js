@@ -1,0 +1,58 @@
+name: "CodeQL"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'python' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v3
+      with:
+        cache: npm
+        node-version: 20
+
+    - name: Cache NPM Dependencies
+      id: cache-npm
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+    # For CodeQL, we don't need to generate tests or doc, hence running only install
+    - name: Install Dependencies
+      run: npm install --ignore-scripts
+      
+    # Build for dev and prod
+    - name: Build 3dmol.js
+      run: |
+        npm run build:dev
+        npm run build:prod
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2

@@ -1,4 +1,4 @@
-import { CC, Color } from "./colors";
+import { CC, Color, ColorSpec } from "./colors";
 
 export abstract class GradientType {
   gradient?: string;
@@ -24,13 +24,34 @@ export function normalizeValue(
   }
 }
 
+/**
+*  Gradient specification.
+* @see builtinGradients
+*/
+export type GradientSpec = {
+  /** Kind of gradient. E.g. RWB, ROYGB, sinebow.  Can also specify linear[_color]* as a
+   * shorthand for CustomLinear and passing a colors array.   */
+  gradient?: string;
+  /** Lower range of gradient */
+  min?: number;
+  /** Upper range of gradient */
+  max?: number;
+  /**  {AtomSpec} property to use for gradient calculation.  E.g., 'b' for temperature factors of a PDB. */
+  prop?: string;
+  /** mid point value for gradient (for rwb) */
+  mid?: number;
+  /** Custom colors for gradient (for {@link CustomLinear}) */
+  colors?: Array<ColorSpec>;
+  /** map of a certain {@link AtomSpec} property to a color of the form `{'prop': 'elem', map:elementColors.greenCarbon}` Allows the user to provide a mapping of elements to colors to the colorscheme.  This can be done with any properties, and not just 'elem'.
+ */
+  map?: Record<string, unknown>
+};
+
 //return a Gradient object, even if what is specified is descriptive
-export function getGradient(grad): GradientType {
+export function getGradient(grad: GradientSpec|GradientType): GradientType {
   if (grad instanceof GradientType) {
     return grad;
-  } else if (
-    grad.gradient !== undefined &&
-    builtinGradients[grad.gradient]
+  } else if (grad.gradient !== undefined && builtinGradients[grad.gradient]
   ) {
     let min = grad.min === undefined ? -1 : grad.min;
     let max = grad.max === undefined ? 1 : grad.max;
@@ -43,8 +64,14 @@ export function getGradient(grad): GradientType {
     } else {
       return new builtinGradients[grad.gradient](min, max, grad.mid);
     }
+  } else if(typeof(grad.gradient) == "string" && grad.gradient.startsWith('linear_')) {
+    let colors = grad.gradient.split('_');
+    colors.shift();
+    let min = grad.min === undefined ? -1 : grad.min;
+    let max = grad.max === undefined ? 1 : grad.max;    
+    return new CustomLinear(min,max,colors);
   }
-  return grad;
+  return grad as GradientType;
 }
 
 /**
@@ -83,8 +110,8 @@ export class RWB extends GradientType {
   }
 
   //map value to hex color, range is provided
-  valueToHex(val, range) {
-    var lo, hi;
+  valueToHex(val: number, range?: number[]) {
+    var lo: number, hi: number;
     val = this.mult * val; //reverse if necessary
     if (range) {
       lo = range[0];
@@ -106,7 +133,7 @@ export class RWB extends GradientType {
     else if (typeof this.mid != "undefined")
       middle = this.mid; //allow user to specify midpoint
     else middle = (lo + hi) / 2;
-    var scale, color;
+    var scale: number, color: number;
 
     //scale bottom from red to white
     if (val < middle) {
@@ -133,9 +160,9 @@ export class RWB extends GradientType {
 export class ROYGB extends GradientType {
   gradient = "ROYGB";
   mult: number;
-  max: number;
-  min: number;
-  constructor(min, max) {
+  max?: number;
+  min?: number;
+  constructor(min?: number, max?: number) {
     super();
     this.mult = 1.0;
     this.min = min;
@@ -150,15 +177,15 @@ export class ROYGB extends GradientType {
     }
   };
   //map value to hex color, range is provided
-  valueToHex(val, range) {
-    var lo, hi;
+  valueToHex(val: number, range?: any[]) {
+    var lo: number, hi: number;
     val = this.mult * val;
     if (range) {
       lo = range[0];
       hi = range[1];
     } else {
-      lo = this.min;
-      hi = this.max;
+      lo = this.min!;
+      hi = this.max!;
     }
 
     if (typeof val == "undefined") return 0xffffff;
@@ -172,7 +199,7 @@ export class ROYGB extends GradientType {
     var q1 = (lo + mid) / 2;
     var q3 = (mid + hi) / 2;
 
-    var scale, color;
+    var scale: number, color: number;
     if (val < q1) {
       //scale green up, red up, blue down
       scale = Math.floor(255 * Math.sqrt((val - lo) / (q1 - lo)));
@@ -228,7 +255,7 @@ export class Sinebow extends GradientType {
   mult: number;
   max: number;
   min: number;
-  constructor(min, max) {
+  constructor(min: number, max: number) {
     super();
     this.mult = 1.0;
     this.min = min;
@@ -247,8 +274,8 @@ export class Sinebow extends GradientType {
   };
 
   //map value to hex color, range is provided
-  valueToHex(val, range) {
-    var lo, hi;
+  valueToHex(val: number, range?: any[]) {
+    var lo: number, hi: number;
     val = this.mult * val;
     if (range) {
       lo = range[0];
@@ -347,8 +374,8 @@ export class CustomLinear extends GradientType {
   }
 
   //map value to hex color, range is provided
-  valueToHex(val, range) {
-    var lo, hi;
+  valueToHex(val: number, range?: any[]) {
+    var lo: number, hi: number;
     if (range) {
       lo = range[0];
       hi = range[1];
@@ -381,15 +408,22 @@ export class CustomLinear extends GradientType {
   }
 }
 
-
-//map from names to gradient constructors
-export const builtinGradients = {
-  rwb: RWB,
-  RWB: RWB,
-  roygb: ROYGB,
-  ROYGB: ROYGB,
-  sinebow: Sinebow,
-  linear: CustomLinear
+/**
+ * built in gradient schemes
+ * The user can pass these strings directly as the gradient
+ * @prop rwb - red/white/blue, supports setting a mid point for white
+ * @prop roygb - rainbow
+ * @prop sinebow - rainbow with better saturation properties
+ * @prop linear  - linearly maps between provided colors
+ *
+  */
+ export const builtinGradients  = {
+  "rwb": RWB,
+  "RWB": RWB,
+  "roygb": ROYGB,
+  "ROYGB": ROYGB,
+  "sinebow": Sinebow,
+  "linear": CustomLinear
 };
 
 export class Gradient extends GradientType {

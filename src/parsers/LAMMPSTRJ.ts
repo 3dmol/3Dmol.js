@@ -1,13 +1,15 @@
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { assignBonds } from "./utils/assignBonds";
 
 /**
  * Parse a lammps trajectory file from str and create atoms
+ * 
  * @category Parsers
+*/
 
- */
-export function LAMMPSTRJ(str, options) {
+export function LAMMPSTRJ(str: string, options: ParserOptionsSpec) {
   var atoms: any[] = [];
-  var dic = {
+  var dic:any = {
     id: "serial",
     type: "atom",
     element: "elem",
@@ -43,7 +45,7 @@ export function LAMMPSTRJ(str, options) {
     atoms.push([]);
     for (let j = offset; j < offset + atomCount; j++) {
       var atom: Record<string, any> = {};
-      var properties = {};
+      var properties: any = {};
       var tokens = lines[j].split(" ");
       for (var k = 0; k < tokens.length; k++) {
         var prop = dic[types[k]];
@@ -64,7 +66,7 @@ export function LAMMPSTRJ(str, options) {
     start = offset + atomCount - 1;
   }
   if (options.assignBonds) {
-    for (var i = 0; i < atoms.length; i++) assignBonds(atoms[i]);
+    for (var i = 0; i < atoms.length; i++) assignBonds(atoms[i], options);
   }
   return atoms;
 }

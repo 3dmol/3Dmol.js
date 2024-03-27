@@ -1,151 +1,146 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>$3Dmol Example</title>
-<script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
-<script src="../build/3Dmol.js"></script>
+	<title>$3Dmol Example</title>
+	<script src="https://code.jquery.com/jquery-3.6.3.min.js"
+		integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+	<script src="../build/3Dmol.js"></script>
+	<style>
+		head,
+		body {
+			margin: 0;
+			border: 0;
+			padding: 0;
+			max-height: 100vh
+		}
+	</style>
+	<script>
+		var glviewer = null;
+		var labels = [];
 
-<style>
-head, body {
-	margin: 0;
-	border: 0;
-	padding: 0;
-	max-height: 100vh
-}
-</style>
-<script>
-	var glviewer = null;
-	var labels = [];
-
-	var addLabels = function() {
-		var atoms = glviewer.getModel().selectedAtoms({
-			atom : "CA"
-		});
-		for ( var a in atoms) {
-			var atom = atoms[a];
-
-			var l = glviewer.addLabel(atom.resn + " " + atom.resi, {
-				inFront : true,
-				fontSize : 12,
-				position : {
-					x : atom.x,
-					y : atom.y,
-					z : atom.z
-				}
+		var addLabels = function () {
+			var atoms = glviewer.getModel().selectedAtoms({
+				atom: "CA"
 			});
-			atom.label = l;
-			labels.push(atom);
-		}
-	};
-	
-	var colorSS = function(viewer) {
-		//color by secondary structure
-		var m = viewer.getModel();
-		m.setColorByFunction({}, function(atom) {
-			if(atom.ss == 'h') return "magenta";
-			else if(atom.ss == 's') return "orange";
-			else return "white";
-		});
-		viewer.render();
-	}
+			for (var a in atoms) {
+				var atom = atoms[a];
 
-	var atomcallback = function(atom, viewer) {
-		if (atom.clickLabel === undefined
-				|| !atom.clickLabel instanceof $3Dmol.Label) {
-			atom.clickLabel = viewer.addLabel(atom.elem + atom.serial, {
-				fontSize : 14,
-				position : {
-					x : atom.x,
-					y : atom.y,
-					z : atom.z
-				},
-				backgroundColor: "black"
-			});
-			atom.clicked = true;
-		}
-
-		//toggle label style
-		else {
-
-			if (atom.clicked) {
-				var newstyle = atom.clickLabel.getStyle();
-				newstyle.backgroundColor = 0x66ccff;
-
-				viewer.setLabelStyle(atom.clickLabel, newstyle);
-				atom.clicked = !atom.clicked;
-			}
-			else {
-				viewer.removeLabel(atom.clickLabel);
-				delete atom.clickLabel;
-				atom.clicked = false;
-			}
-
-		}
-	};
-var readText = function(input,func) {
-			if(input.files.length > 0) {
-				var file = input.files[0];
-				var reader = new FileReader();
-			    reader.onload = function(evt) {
-			    	func(evt.target.result,file.name);
-			    };
-			    reader.readAsText(file);
-			    $(input).val('');
+				var l = glviewer.addLabel(atom.resn + " " + atom.resi, {
+					inFront: true,
+					fontSize: 12,
+					position: {
+						x: atom.x,
+						y: atom.y,
+						z: atom.z
+					}
+				});
+				atom.label = l;
+				labels.push(atom);
 			}
 		};
-	$(document).ready(function() {
 
-		moldata = data = $("#moldata_pdb_large").val();
-		glviewer = $3Dmol.createViewer("gldiv", {
-			defaultcolors : $3Dmol.rasmolElementColors
-		});
-		glviewer.setBackgroundColor(0xffffff);
-
-		receptorModel = m = glviewer.addModel(data, "pqr");
-
-		atoms = m.selectedAtoms({});
-
-		for ( var i in atoms) {
-			var atom = atoms[i];
-			atom.clickable = true;
-			atom.callback = atomcallback;
+		var colorSS = function (viewer) {
+			//color by secondary structure
+			var m = viewer.getModel();
+			m.setColorByFunction({}, function (atom) {
+				if (atom.ss == 'h') return "magenta";
+				else if (atom.ss == 's') return "orange";
+				else return "white";
+			});
+			viewer.render();
 		}
 
-		glviewer.mapAtomProperties($3Dmol.applyPartialCharges);
-		glviewer.zoomTo();
-		glviewer.render();
+		var atomcallback = function (atom, viewer) {
+			if (atom.clickLabel === undefined
+				|| !atom.clickLabel instanceof $3Dmol.Label) {
+				atom.clickLabel = viewer.addLabel(atom.elem + atom.serial, {
+					fontSize: 14,
+					position: {
+						x: atom.x,
+						y: atom.y,
+						z: atom.z
+					},
+					backgroundColor: "black"
+				});
+				atom.clicked = true;
+			}
+
+			//toggle label style
+			else {
+
+				if (atom.clicked) {
+					var newstyle = atom.clickLabel.getStyle();
+					newstyle.backgroundColor = 0x66ccff;
+
+					viewer.setLabelStyle(atom.clickLabel, newstyle);
+					atom.clicked = !atom.clicked;
+				}
+				else {
+					viewer.removeLabel(atom.clickLabel);
+					delete atom.clickLabel;
+					atom.clicked = false;
+				}
+
+			}
+		};
+		var readText = function (input, func) {
+			if (input.files.length > 0) {
+				var file = input.files[0];
+				var reader = new FileReader();
+				reader.onload = function (evt) {
+					func(evt.target.result, file.name);
+				};
+				reader.readAsText(file);
+				$(input).val('');
+			}
+		};
+		$(document).ready(function () {
+
+			moldata = data = $("#moldata_pdb_large").val();
+			glviewer = $3Dmol.createViewer("gldiv", {
+				defaultcolors: $3Dmol.rasmolElementColors
+			});
+			glviewer.setBackgroundColor(0xffffff);
+
+			receptorModel = m = glviewer.addModel(data, "pqr");
+
+			atoms = m.selectedAtoms({});
+
+			for (var i in atoms) {
+				var atom = atoms[i];
+				atom.clickable = true;
+				atom.callback = atomcallback;
+			}
+
+			glviewer.mapAtomProperties($3Dmol.applyPartialCharges);
+			glviewer.zoomTo();
+			glviewer.render();
 
 
-	});
-</script>
+		});
+	</script>
 </head>
+
 <body>
 	<div id="gldiv" style="width: 100%; height: 80vh; margin: 0; padding: 0; border: 0;"></div>
-
 	<hr style="margin: 0;">
-
 	<br>
-	<input type="button" value="Stick"
-		onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
-	<input type="button" value="Line"
-		onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
+	<input type="button" value="Stick" onclick="glviewer.setStyle({},{stick:{}}); glviewer.render();"></input>
+	<input type="button" value="Line" onclick="glviewer.setStyle({},{line:{}}); glviewer.render();"></input>
 	<input type="button" value="Cross"
 		onclick="glviewer.setStyle({},{cross:{linewidth:2}}); glviewer.render();"></input>
-	<input type="button" value="Sphere"
-		onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
+	<input type="button" value="Sphere" onclick="glviewer.setStyle({},{sphere:{}}); glviewer.render();"></input>
 	<input type="button" value="Cartoon"
 		onclick="glviewer.setStyle({hetflag:false},{cartoon:{}}); glviewer.render();"></input>
-	<input type="button" value="Label alpha C's"
-		onclick="addLabels(glviewer); glviewer.render();"></input>
-	<input type="button" value="Color SS"
-		onclick="colorSS(glviewer);"></input>
+	<input type="button" value="Label alpha C's" onclick="addLabels(glviewer); glviewer.render();"></input>
+	<input type="button" value="Color SS" onclick="colorSS(glviewer);"></input>
 	<br>
 	<input type="button" value="Surface1"
 		onclick="surf1 = glviewer.addSurface($3Dmol.SurfaceType.VDW, {}, {hetflag:false,chain:'A'},{hetflag:false,chain:'A'});"></input>
 	<input type="button" value="Surface2"
 		onclick="surf2 = glviewer.addSurface($3Dmol.SurfaceType.MS, {map:{prop:'partialCharge',scheme:new $3Dmol.Gradient.RWB(-.6,.6)}, opacity:0.85}, {chain:'B'},{chain:'B'});"></input>
-	<input type="button" value="RM Surfaces"
-		onclick="glviewer.removeAllSurfaces();"></input>
+	<input type="button" value="RM Surfaces" onclick="glviewer.removeAllSurfaces();"></input>
 	<br>
 	<input type="button" value="Recenter" onclick="glviewer.zoomTo();"></input>
 	<br>
@@ -153,9 +148,9 @@ var readText = function(input,func) {
 	<button
 		onclick="glviewer.clear(); m = $3Dmol.download('pdb:' + $('#pdbid').val(), glviewer, {doAssembly:true, noSecondaryStructure: false});">Download</button>
 	<br>
-	<input type="file" onchange="readText(this, function(data, name) {glviewer.clear(); m= glviewer.addModel(data,name); glviewer.zoomTo(); glviewer.render();} );">
-
-	<textarea style="display: none;" id="moldata_pdb_large">           
+	<input type="file"
+		onchange="readText(this, function(data, name) {glviewer.clear(); m= glviewer.addModel(data,name); glviewer.zoomTo(); glviewer.render();} );">
+	<textarea style="display: none;" id="moldata_pdb_large">
 HEADER    COMPLEX (ONCOGENE PROTEIN/PEPTIDE)      30-SEP-96   1YCR              
 TITLE     MDM2 BOUND TO THE TRANSACTIVATION DOMAIN OF P53                       
 COMPND    MOL_ID: 1;                                                            
@@ -1289,6 +1284,6 @@ TER     820      ASN B  29
 MASTER      247    0    0    5    2    0    0    6  818    2    0   11          
 END                                                                                                                                                                                                               
 </textarea>
-
 </body>
+
 </html>

@@ -2,44 +2,71 @@
     "tags": {
         "allowUnknownTags": true
     },
-    "plugins": ["plugins/markdown",
-            "../../node_modules/better-docs/typescript",
-            "../../node_modules/better-docs/category"],
+    "plugins": [
+        "plugins/markdown",
+        "../../node_modules/better-docs/typescript",
+        "../../node_modules/better-docs/category"
+    ],
+    "recurseDepth": 10,
     "source": {
         "includePattern": "\\.(jsx|js|ts|tsx)$"
-    },    
+    },
     "templates": {
+        "search": true,
         "cleverLinks": true,
         "monospaceLinks": false,
         "footer": "",
-        "copyright":"3Dmol.js © 2019-2022",
+        "copyright":"3Dmol.js © 2019-2023",
         "linenums"              : true,
         "collapseSymbols"       : false,
         "inverseNav"            : true,
-        "highlightTutorialCode" : true,
-         "better-docs": {
-             "name": "<a href=\"http://3dmol.org\"><b>3Dmol</b>.js</a>",
-             "title": "3Dmol.js Documentation",
-             "css": "../tutorials/style.css",
-            "navLinks": [
-                {
-                    "label": "Github",
-                    "href": "https://github.com/3dmol/3Dmol.js"
-                }
-            ]         
-        }        
+        "highlightTutorialCode" : true
     },
     "markdown"  : {
-        "parser"   : "gfm",
-        "hardwrap" : true
+        "hardwrap": true,
+        "idInHeadings": true
     },
     "opts":{
-        "recurse": true,
         "encoding": "utf8",
-        "template": "./node_modules/better-docs",
-        "destination": "doc",
-        "tutorials": "tutorials",
-        "search": true
-     },
-     "tutorials": "tutorials/"
+        "destination": "doc/",
+        "recurse": true,
+        "verbose": true,
+        "template": "./node_modules/clean-jsdoc-theme",
+        "copyright": "3Dmol.js © 2019-2023",
+        "theme_opts": {
+            "default_theme": "light",
+            "includeFilesListInHomepage": true,
+            "homepageTitle": "3Dmol.js",
+            "displayModuleHeader": true,
+            "footer":"3Dmol.js © 2019-2023 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburgh</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
+            "title": "3Dmol.js",
+            "create_style": "article ul li { list-style: disc}",
+            "menu": [
+                {
+                    "title": " Documentation",
+                    "link": "https://3dmol.org/doc/index.html"
+                },
+                {
+                    "title": "Tutorials",
+                    "link": "tutorial-home.html"
+                },
+                {
+                  "title": "GitHub",
+                  "link": "https://github.com/3dmol/3Dmol.js",
+                  "target": "_blank"
+                }
+            ],
+            "meta": [
+                {
+                    "name": "Author",
+                    "content": "David Koes & 3Dmoljs Contributors"
+                },
+                {
+                    "name": "Description",
+                    "content": "A modern, object-oriented JavaScript library for visualizing molecular data"
+                }
+            ]
+        },
+        "tutorials": "tutorials/"
+    }
 }

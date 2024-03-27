@@ -1,0 +1,30 @@
+data_abc
+_audit_creation_date              20XX-XX-XX
+_audit_creation_method            'openmx_seekpath'
+_symmetry_space_group_name_H-M    'P1'
+_symmetry_Int_Tables_number       1
+_symmetry_cell_setting            triclinic
+loop_
+_symmetry_equiv_pos_as_xyz
+  x,y,z
+_cell_length_a       2.898625
+_cell_length_b       7.404968
+_cell_length_c       15.165337
+_cell_angle_alpha    90.000000
+_cell_angle_beta     90.000000
+_cell_angle_gamma    76.847450
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_Uiso_or_equiv
+_atom_site_adp_type
+_atom_site_occupancy
+A1  Al  1.000000  0.750000  0.435210  0.00000  Uiso  1.00
+A2  Cd  0.655399  0.430142  0.386974  0.00000  Uiso  1.00
+A3  Cd  0.344601  0.569858  0.613026  0.00000  Uiso  1.00
+A4  Al  0.000000  0.250000  0.564790  0.00000  Uiso  1.00
+A5  Cd  0.344601  0.069858  0.386974  0.00000  Uiso  1.00
+A6  Cd  0.655399  0.930142  0.613026  0.00000  Uiso  1.00

@@ -1,5 +1,6 @@
 import { base64ToArray } from "../utilities";
 import { Matrix4 } from "../WebGL";
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 import { processSymmetries } from "./utils/processSymmetries";
 
@@ -8,12 +9,12 @@ interface MMTFobj {
 }
 declare var MMTF: MMTFobj;
 
-var fromCharCode = function (charCodeArray) {
+var fromCharCode = function (charCodeArray: any) {
     return String.fromCharCode.apply(null, charCodeArray).replace(/\0/g, '');
 };
 
-var convertSS = function (val) {
-    //convert mmtf code to 3dmol code
+var convertSS = function (val: number | boolean) {
+    // Convert mmtf code to 3dmol code
     /*    
       0:  pi helix
       1:  bend
@@ -41,11 +42,12 @@ let mmtfHETATMtypes = new Set([
     "PEPTIDE-LIKE",
     "SACCHARIDE"]);
 
-/** @param bindata - binary UInt8Array buffer or a base64 encoded string
- *  @param ParserOptionsSpec
- *  @category Parsers
+/** 
+ * @param bindata - binary UInt8Array buffer or a base64 encoded string
+ * @param ParserOptionsSpec
+ * @category Parsers
 */
-export function MMTFparser(bindata, options) {
+export function MMTFparser(bindata: any, options: ParserOptionsSpec) {
 
     var noH = !options.keepH; // suppress hydrogens by default
     var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
@@ -68,15 +70,12 @@ export function MMTFparser(bindata, options) {
     var modelData: any[] = atoms.modelData = [];
 
     // setup index counters
-    var modelIndex = 0;
     var chainIndex = 0;
     var groupIndex = 0;
     var atomIndex = 0;
 
     // setup optional fields
     var secStructList = mmtfData.secStructList;
-    var insCodeList = mmtfData.insCodeList;
-    var sequenceIndexList = mmtfData.sequenceIndexList;
     var bFactorList = mmtfData.bFactorList;
     var altLocList = mmtfData.altLocList;
     var occupancyList = mmtfData.occupancyList;
@@ -87,7 +86,7 @@ export function MMTFparser(bindata, options) {
     if (numModels == 0) return atoms;
     if (!options.multimodel) numModels = 1; //first only
     // hoisted loop variables
-    var i, j, k, kl, m, n;
+    var i: number, j: number, k: number, kl: number, m: number, n: number;
 
 
 
@@ -108,7 +107,7 @@ export function MMTFparser(bindata, options) {
     }
 
     let chainIsPolymer: boolean[] = [];
-    mmtfData.entityList.forEach(entity => {
+    mmtfData.entityList.forEach((entity: { chainIndexList: any[]; type: string; }) => {
         entity.chainIndexList.forEach(ch => {
             chainIsPolymer[ch] = entity.type == "polymer";
         });
@@ -155,21 +154,12 @@ export function MMTFparser(bindata, options) {
                         secStructEnd = true;
                     }
                 }
-                var insCode = null as string | null;
-                if (mmtfData.insCodeList) {
-                    insCode = String.fromCharCode(insCodeList[groupIndex]);
-                }
-                var sequenceIndex = null;
-                if (sequenceIndexList) {
-                    sequenceIndex = sequenceIndexList[groupIndex];
-                }
-
                 var groupId = mmtfData.groupIdList[groupIndex];
                 var groupName = groupData.groupName;
                 let groupType = groupData.chemCompType;
                 var startAtom = atomIndex;
-                //note the following is not identical to respecting HETATM records
-                //this information isn't available in MMTF.  
+                // Note the following is not identical to respecting HETATM records
+                // this information isn't available in MMTF.  
                 let isHETATM = mmtfHETATMtypes.has(groupType) || !chainIsPolymer[chainIndex];
 
                 for (k = 0; k < groupAtomCount; ++k) {
@@ -300,8 +290,6 @@ export function MMTFparser(bindata, options) {
         if (options.multimodel) {
             if (!options.onemol) atoms.push([]);
         }
-
-        modelIndex += 1;
     }
 
     if (!noAssembly) {
@@ -311,7 +299,7 @@ export function MMTFparser(bindata, options) {
     }
 
     if (computeStruct && !ignoreStruct) {
-        computeSecondaryStructure(atoms, options.hbondCutoff);
+        computeSecondaryStructure(atoms as any, options.hbondCutoff);
     }
 
     return atoms;

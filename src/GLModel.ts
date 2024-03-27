@@ -7,20 +7,37 @@ import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3, XYZ } from "./WebGL/math";
 import { Color, CC, ColorschemeSpec, ColorSpec } from "./colors";
 import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
-import { GLDraw } from "./GLDraw"
+import { CAP, GLDraw } from "./GLDraw"
 import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
 import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
 import { Gradient } from "./Gradient";
 import { Parsers } from "./parsers";
 import { NetCDFReader } from "netcdfjs"
-import { inflate } from "pako"
+import { inflate, InflateFunctionOptions, Data } from "pako"
 import { AtomSelectionSpec, AtomSpec } from "./specs";
 import { GLViewer } from "GLViewer";
 import { ArrowSpec } from "GLShape";
 import { ParserOptionsSpec } from "./parsers/ParserOptionsSpec";
 import { LabelSpec } from "Label";
 import { assignBonds } from "./parsers/utils/assignBonds";
+
+function inflateString(str: string | ArrayBuffer): (string | ArrayBuffer) {
+    let data: Data;
+  
+    if (typeof str === 'string') {
+      const encoder = new TextEncoder();
+      data = encoder.encode(str);
+    } else {
+      data = new Uint8Array(str);
+    }
+  
+    const inflatedData = inflate(data, {
+      to: 'string'
+    } as InflateFunctionOptions & { to: 'string' });
+  
+    return inflatedData;
+  }
 
 /**
  * GLModel represents a group of related atoms
@@ -251,6 +268,7 @@ export class GLModel {
         }
         return bestv;
     };
+    
 
     //from atom, return a normalized vector v that is orthogonal and along which
     //it is appropraite to draw multiple bonds
@@ -263,6 +281,7 @@ export class GLModel {
         var v = null;
         dir.sub(p1);
 
+
         if (atom.bonds.length === 1) {
             if (atom2.bonds.length === 1) {
                 v = dir.clone();
@@ -274,6 +293,11 @@ export class GLModel {
                 i2 = (i + 1) % atom2.bonds.length;
                 j2 = atom2.bonds[i2];
                 atom3 = this.atoms[j2];
+                if(atom3.index == atom.index) { // get distinct atom
+                    i2 = (i2 + 1) % atom2.bonds.length;
+                    j2 = atom2.bonds[i2];
+                    atom3 = this.atoms[j2];
+                }
                 p3 = new Vector3(atom3.x, atom3.y, atom3.z);
 
                 dir2 = p3.clone();
@@ -305,9 +329,6 @@ export class GLModel {
         v.normalize();
 
         return v;
-
-        //v.multiplyScalar(r * 1.5);
-
     };
 
     private addLine(vertexArray, colorArray, offset, p1: Vector3, p2: Vector3, c1: Color) {
@@ -641,8 +662,54 @@ export class GLModel {
         this.drawSphereImposter(geo, atom as XYZ, radius, C);
     };
 
+    private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number) {
+        // Calculate the length of a cylinder defined by two points 'from' and 'to'.
+        var cylinderLength = Math.sqrt(
+            Math.pow((from.x - to.x), 2) + 
+            Math.pow((from.y - to.y), 2) + 
+            Math.pow((from.z - to.z), 2)
+        );
+        
+        // Ensure non-negative values for radius, dashLength, and gapLength.
+        // Adjust gapLength to include the radius of the cylinder.
+        radius = Math.max(radius, 0);
+        gapLength = Math.max(gapLength, 0) + 2 * radius;
+        dashLength = Math.max(dashLength, 0.001);
+        
+        // Handle cases where the combined length of dash and gap exceeds the cylinder's length.
+        // In such cases, use a single dash to represent the entire cylinder with no gaps.
+        if (dashLength + gapLength > cylinderLength) {
+            dashLength = cylinderLength;
+            gapLength = 0; // No gap as the dash fills the entire cylinder.
+        }
+        
+        // Calculate the total number of dash-gap segments that can fit within the cylinder.
+        var totalSegments = Math.floor((cylinderLength - dashLength) / (dashLength + gapLength)) + 1;
+        
+        // Compute the total length covered by dashes.
+        var totalDashLength = totalSegments * dashLength;
+        
+        // Recalculate gap length to evenly distribute remaining space among gaps.
+        // This ensures dashes and gaps are evenly spaced within the cylinder.
+        gapLength = (cylinderLength - totalDashLength) / totalSegments;
 
-    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color) {
+        var new_to;
+        var new_from = new Vector3(from.x, from.y, from.z);
+
+        var gapVector = new Vector3((to.x - from.x) / (cylinderLength / gapLength), (to.y - from.y) / (cylinderLength / gapLength), (to.z - from.z) / (cylinderLength / gapLength));
+        var dashVector = new Vector3((to.x - from.x) / (cylinderLength / dashLength), (to.y - from.y) / (cylinderLength / dashLength), (to.z - from.z) / (cylinderLength / dashLength));
+
+        var segments = [];
+        for (var place = 0; place < totalSegments; place++) {
+            new_to = new Vector3(new_from.x + dashVector.x, new_from.y + dashVector.y, new_from.z + dashVector.z);
+            segments.push({ from: new_from, to: new_to });
+            new_from = new Vector3(new_to.x + gapVector.x, new_to.y + gapVector.y, new_to.z + gapVector.z);
+        }
+
+        return segments;
+    }
+
+    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap:CAP = 0, toCap:CAP = 0) {
         //we need the four corners - two have from coord, two have to coord, the normal
         //is the opposing point, from which we can get the normal and length
         //also need the radius
@@ -715,8 +782,15 @@ export class GLModel {
             return;
 
         var atomBondR = style.radius || this.defaultStickRadius;
+        var doubleBondScale = style.doubleBondScaling || 0.4;
+        var tripleBondScale = style.tripleBondScaling || 0.25;
+
+        var bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
+        var bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
+
         var bondR = atomBondR;
         var atomSingleBond = style.singleBonds || false;
+        var atomDashedBonds = style.dashedBonds || false;
         var fromCap = 0, toCap = 0;
         var atomneedsi, atom2needsi, i, singleBond, bstyle;
         var cylinder1a, cylinder1b, cylinder1c, cylinder2a, cylinder2b, cylinder2c;
@@ -728,12 +802,24 @@ export class GLModel {
         if (!atom.capDrawn && atom.bonds.length < 4)
             fromCap = 2;
 
-        var drawCyl = GLDraw.drawCylinder; //mesh cylinder
-        if (geo.imposter)
-            drawCyl = GLModel.drawStickImposter;
+        var selectCylDrawMethod = (bondOrder) => {
+            var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
 
+            if (!atomDashedBonds && bondOrder >= 1) {
+                return drawMethod;
+            }
+
+            // draw dashes
+            return (geo, from, to, radius, color, fromCap = 0, toCap = 0, dashLength = 0.1, gapLength = 0.25) => {
+                var segments = this.calculateDashes(from, to, radius, dashLength, gapLength);
+                segments.forEach(segment => {
+                    drawMethod(geo, segment.from, segment.to, radius, color, fromCap, toCap);
+                });
+            };
+        };
 
         for (i = 0; i < atom.bonds.length; i++) {
+            var drawCyl = selectCylDrawMethod(atom.bondOrder[i]);
             var j = atom.bonds[i]; // our neighbor
             var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
             mp = mp2 = mp3 = null;
@@ -777,10 +863,10 @@ export class GLModel {
                     if (C1 != C2) {
                         mp = new Vector3().addVectors(p1, p2)
                             .multiplyScalar(0.5);
-                        drawCyl(geo, p1, mp, bondR, C1, fromCap, 0);
-                        drawCyl(geo, mp, p2, bondR, C2, 0, toCap);
+                        drawCyl(geo, p1, mp, bondR, C1, fromCap, 0, bondDashLength, bondGapLength);
+                        drawCyl(geo, mp, p2, bondR, C2, 0, toCap, bondDashLength, bondGapLength);
                     } else {
-                        drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap);
+                        drawCyl(geo, p1, p2, bondR, C1, fromCap, toCap, bondDashLength, bondGapLength);
                     }
 
 
@@ -822,7 +908,7 @@ export class GLModel {
                     v = this.getSideBondV(atom, atom2, i);
 
                     if (atom.bondOrder[i] == 2) {
-                        r = bondR / 2.5;
+                        r = bondR * doubleBondScale;
 
                         v.multiplyScalar(r * 1.5);
                         p1a = p1.clone();
@@ -872,7 +958,7 @@ export class GLModel {
                         }
                     }
                     else if (atom.bondOrder[i] == 3) {
-                        r = bondR / 4;
+                        r = bondR * tripleBondScale;
                         v.cross(dir);
                         v.normalize();
                         v.multiplyScalar(r * 3);
@@ -1726,6 +1812,8 @@ export class GLModel {
         return copy;
     };
 
+    private static readonly ignoredKeys = new Set<string>(["props", "invert", "model", "frame", "byres", "expand", "within", "and", "or", "not"]);
+
     /** given a selection specification, return true if atom is selected.
      * Does not support context-aware selectors like expand/within/byres.
      *
@@ -1778,10 +1866,7 @@ export class GLModel {
                     }
                 }
             }
-            else if (sel.hasOwnProperty(key) && key != "props" &&
-                key != "invert" && key != "model" && key != "byres" &&
-                key != "expand" && key != "within" && key != "and" &&
-                key != "or" && key != "not" && !key.startsWith('__cache')) {
+            else if (sel.hasOwnProperty(key) && !GLModel.ignoredKeys.has(key) && !key.startsWith('__cache')) {
 
                 // if something is in sel, atom must have it
                 if (typeof (atom[key]) === "undefined") {
@@ -2061,7 +2146,7 @@ export class GLModel {
      * consider valence constraints and will only create single bonds.
      */
     public assignBonds() {
-        assignBonds(this.atoms);
+        assignBonds(this.atoms, {assignBonds: true});
     }
 
     /** Remove specified atoms from model
@@ -2119,7 +2204,7 @@ export class GLModel {
             style = sel as AtomStyleSpec|string;
             sel = {};
         }
-
+        sel = sel as AtomSelectionSpec;
         //if type is just a string, promote it to an object
         if (typeof (style) === 'string') {
             style = specStringToObject(style);
@@ -2152,11 +2237,16 @@ export class GLModel {
             }
         };
 
-        setStyleHelper(this.atoms);
-        for (var i = 0; i < this.frames.length; i++) {
-            if (this.frames[i] !== this.atoms) setStyleHelper(this.frames[i]);
+        if(sel.frame !== undefined && sel.frame < this.frames.length) { //set specific frame only
+            let frame = sel.frame;
+            if(frame < 0) frame = this.frames.length+frame;
+            setStyleHelper(this.frames[frame]);
+        } else {
+            setStyleHelper(this.atoms);
+            for (var i = 0; i < this.frames.length; i++) {
+                if (this.frames[i] !== this.atoms) setStyleHelper(this.frames[i]);
+            }
         }
-
         if (changedAtoms)
             this.molObj = null; //force rebuild
 
@@ -2642,7 +2732,7 @@ export class GLModel {
          viewer.render();
     */
 
-    public setCoordinates(str:string|ArrayBuffer, format:string) {
+    public setCoordinates(str: string | ArrayBuffer, format:string) {
         format = format || "";
         if (!str)
             return []; // leave an empty model
@@ -2651,9 +2741,7 @@ export class GLModel {
             // unzip gzipped files
             format = format.replace(/\.gz$/, '');
             try {
-                str = inflate(str, {
-                    to: 'string'
-                });
+                str = inflateString(str)
             } catch (err) {
                 console.log(err);
             }
@@ -2741,7 +2829,7 @@ export class GLModel {
         return values;
     };
 
-    static parseMolData(data?, format: string="", options?) {
+    static parseMolData(data?: string | ArrayBuffer, format: string = "", options?: ParserOptionsSpec) {
         if (!data)
             return []; //leave an empty model
 
@@ -2749,7 +2837,7 @@ export class GLModel {
             //unzip gzipped files
             format = format.replace(/\.gz$/, '');
             try {
-                data = inflate(data, { to: 'string' });
+                data = inflateString(data);
             } catch (err) {
                 console.log(err);
             }
@@ -2763,17 +2851,17 @@ export class GLModel {
                 // try to guess correct format from data contents
                 if (data instanceof Uint8Array) {
                     format = "mmtf"; //currently only supported binary format?
-                } else if (data.match(/^@<TRIPOS>MOLECULE/gm)) {
+                } else if ((data as string).match(/^@<TRIPOS>MOLECULE/gm)) {
                     format = "mol2";
-                } else if (data.match(/^data_/gm) && data.match(/^loop_/gm)) {
+                } else if ((data as string).match(/^data_/gm) && (data as string).match(/^loop_/gm)) {
                     format = "cif";
-                } else if (data.match(/^HETATM/gm) || data.match(/^ATOM/gm)) {
+                } else if ((data as string).match(/^HETATM/gm) || (data as string).match(/^ATOM/gm)) {
                     format = "pdb";
-                } else if (data.match(/ITEM: TIMESTEP/gm)) {
+                } else if ((data as string).match(/ITEM: TIMESTEP/gm)) {
                     format = "lammpstrj";
-                } else if (data.match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
+                } else if ((data as string).match(/^.*\n.*\n.\s*(\d+)\s+(\d+)/gm)) {
                     format = "sdf"; // could look at line 3
-                } else if (data.match(/^%VERSION\s+VERSION_STAMP/gm)) {
+                } else if ((data as string).match(/^%VERSION\s+VERSION_STAMP/gm)) {
                     format = "prmtop";
                 } else {
                     format = "xyz";
@@ -2782,7 +2870,7 @@ export class GLModel {
             }
         }
         var parse = Parsers[format];
-        var parsedAtoms = parse(data, options);
+        var parsedAtoms = parse((data as string), options);
 
         return parsedAtoms;
     };
@@ -2812,10 +2900,12 @@ export interface LineStyleSpec {
     hidden?: boolean;
     /** *deprecated due to vanishing browser support*  */
     linewidth?: number;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;    
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
     /** wireframe style */
@@ -2834,12 +2924,23 @@ export interface CrossStyleSpec {
     radius?: number;
     /** scale VDW radius by specified amount */
     scale?: number;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;        
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
+}
+
+/** Dashed Bond style specification
+ */
+export interface DashedBondSpec {
+    /** length of dash (default 0.1) */
+    dashLength?: number;
+    /** length of gap (default 0.25) */
+    gapLength?: number;
 }
 
 /** Stick (cylinder) style specification
@@ -2849,12 +2950,22 @@ export interface StickStyleSpec {
     hidden?: boolean;
     /** radius of stick */
     radius?: number;
+    /** radius scaling factor for drawing double bonds (default 0.4) */
+    doubleBondScaling?: number;
+    /** radius scaling factor for drawing triple bonds (default 0.25) */
+    tripleBondScaling?: number;    
+    /** dashed bond properties */
+    dashedBondConfig?: DashedBondSpec;
+    /** draw all bonds as dashed bonds */
+    dashedBonds?: boolean;
     /** draw all bonds as single bonds */
     singleBonds?: boolean;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;        
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
     /** display nonbonded atoms as spheres */
@@ -2871,10 +2982,12 @@ export interface SphereStyleSpec {
     radius?: number;
     /** scale VDW radius by specified amount */
     scale?: number;
-    /** colorscheme to use on atoms */
+    /** colorscheme to use on atoms; overrides color */
     colorscheme?: ColorschemeSpec;
-    /** fixed coloring, overrides colorscheme */
+    /** fixed coloring */
     color?: ColorSpec;
+    /**  Allows the user to provide a function for setting the colorschemes. */
+    colorfunc?: Function;        
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
 }

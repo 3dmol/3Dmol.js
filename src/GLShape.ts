@@ -3,16 +3,16 @@ import { Sphere, Cylinder, Triangle } from "./WebGL/shapes";
 import { Vector3, XYZ } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
 import { DoubleSide } from "./WebGL";
-import { Color, CC, ColorSpec } from "./colors";
+import { Color, CC, ColorSpec, Colored } from "./colors";
 import { MarchingCube } from "./ProteinSurface4";
 import { VolumeData } from "./VolumeData";
 import { MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Coloring, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { CAP, GLDraw } from "./GLDraw"
 import { subdivide_spline } from "./glcartoon";
 import { adjustVolumeStyle, extend, Func, makeFunction } from "./utilities";
-import { Gradient, GradientType } from "./Gradient";
-import { LineStyleSpec } from "GLModel";
-import { VolumetricRendererSpec } from "VolumetricRender";
+import { GradientType } from "./Gradient";
+import { AtomSelectionSpec } from "specs";
+import { GLViewer } from "GLViewer";
 
 
 /**
@@ -636,7 +636,7 @@ export class GLShape {
 
     boundingSphere: Sphere;
     intersectionShape: any;
-    color: any;
+    color: any = 0xffffff;
     hidden = false;
     wireframe = false;
     opacity = 1;
@@ -752,9 +752,9 @@ export class GLShape {
         sphereSpec.color = CC.color(sphereSpec.color);
 
         this.intersectionShape.sphere.push(new Sphere(sphereSpec.center, sphereSpec.radius));
-
-        GLDraw.drawSphere(this.geo, sphereSpec.center,
-            sphereSpec.radius, sphereSpec.color, sphereSpec.quality);
+ 
+         GLDraw.drawSphere(this.geo, sphereSpec.center,
+           sphereSpec.radius, sphereSpec.color as Colored, sphereSpec.quality);
 
         this.components.push({
             centroid: new Vector3(sphereSpec.center.x,
@@ -1219,7 +1219,7 @@ export class GLShape {
     };
 
     /**
-     * Create isosurface from voluemetric data.
+     * Create isosurface from volumetric data.
      * @param {VolumeData} data - volumetric input data
      * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
      * @example //the user can specify a selected region for the isosurface 
@@ -1245,7 +1245,7 @@ export class GLShape {
               viewer.render();
             });
      */
-    addIsosurface(data, volSpec:IsoSurfaceSpec, callback?) {//may want to cache the arrays geneerated when selectedRegion ==true
+    addIsosurface(data, volSpec:IsoSurfaceSpec, callback?, viewer?: GLViewer) {//may want to cache the arrays generated when selectedRegion ==true
 
         var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
             : 0.0;
@@ -1293,6 +1293,13 @@ export class GLShape {
 
         if (volSpec.selectedRegion && volSpec.coords === undefined) {
             volSpec.coords = volSpec.selectedRegion; //backwards compat for incorrectly documented feature
+        }
+        if (volSpec.coords === undefined && volSpec.selection !== undefined) {
+            if(!viewer) {
+                console.log("addIsosurface needs viewer is selection provided.");
+            } else {
+                volSpec.coords = viewer.selectedAtoms(volSpec.selection) as XYZ[];
+            }
         }
         if (volSpec.coords !== undefined) {
 
@@ -1599,6 +1606,8 @@ export interface IsoSurfaceSpec extends ShapeSpec {
     smoothness?: number;
     /** coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
     coords?: XYZ[];
+    /** selection around which to include data (alternative to coords) */
+    selection?: AtomSelectionSpec;
     /** distance around coords to include data [default = 2.0] */
     seldist?: number;
     /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
@@ -1655,9 +1664,9 @@ export interface CylinderSpec extends ShapeSpec {
     /** radius */
     radius?: number;
     /** Place a cap at the start (none, flat or round) */
-    fromCap?: CAP;
+    fromCap?: CAP | string;
     /** Place a cap at the end (none, flat or round) */
-    toCap?: CAP;
+    toCap?: CAP | string;
     /** Make the cylinder dashed. */
     dashed?: boolean;
     /** Length of dashes (default 0.25) */

@@ -1015,7 +1015,7 @@ var glviewer = null;
 // http://localhost/$3Dmol/viewer.html?pdb=1ycr&style=cartoon&addstyle=line&select=chain~A&colorbyelement=whiteCarbon&style=surface,opacity~.8&select=chain~B&addstyle=stick&select=chain~B,resn~TRP&style=sphere
 // Process commands, in order, and run on viewer (array of strings split on '&')
 var runcmds = function (cmds, viewer, renderSurface) {
-    console.log("rendering")
+    //console.log("rendering")
     renderSurface = renderSurface == undefined ? true : renderSurface;
     if (renderSurface)
         viewer.removeAllSurfaces();
@@ -1051,7 +1051,78 @@ var runcmds = function (cmds, viewer, renderSurface) {
         }
 
     }
-
+    
+    let getlabel = function(atom) {
+      let label = atom.elem;
+      if(atom.resn && atom.resi) {
+        label = atom.resn+atom.resi+":"+atom.atom
+      } 
+      return label;
+    }
+    
+    //hover labels
+    var hover_label = null;
+    viewer.setHoverable({},true, 
+        function(atom){  //hover
+          if(atom._clicklabel == undefined) {
+            label = getlabel(atom);
+            hover_label = viewer.addLabel(label,
+                    {position: atom, fontSize: 12, backgroundColor: "black", backgroundOpacity: 0.5, alignment: "bottomCenter"});
+            viewer.render();          
+          }
+        },
+        function(){ 
+          if(hover_label) {
+           viewer.removeLabel(hover_label);
+           viewer.render();
+          }
+        } //unhover
+    );
+    
+    var lastclicked = null;
+    viewer.setClickable({}, true, function(atom) {      
+        if(hover_label) {
+         viewer.removeLabel(hover_label);
+        }
+        if(lastclicked == null) {
+        let label = getlabel(atom);
+        atom._clicklabel =
+          viewer.addLabel(label,
+                    {position: atom, fontSize: 12, backgroundColor: "blue", backgroundOpacity: 0.75, alignment: "bottomCenter"});
+        lastclicked = atom;
+      } else {
+        viewer.removeLabel(lastclicked._clicklabel);
+        lastclicked._clicklabel = null;
+        if(lastclicked != atom) {
+          let start = new $3Dmol.Vector3(lastclicked.x, lastclicked.y, lastclicked.z);
+          let end = new $3Dmol.Vector3(atom.x, atom.y, atom.z);
+          let dlabel = null;
+          viewer.addCylinder({
+              dashed:true,
+              radius:.05,
+              dashLength:0.25,
+              gapLength:.15,
+              start:start,
+              end:end,
+              fromCap:2,
+              toCap:2,
+              color:"blue",
+              clickable: true,
+              callback: function(shape) {
+                viewer.removeShape(shape);
+                viewer.removeLabel(dlabel);
+              }
+          });
+          
+          let dist = $3Dmol.GLShape.distance_from(start,end);
+          let mid = start.add(end).multiplyScalar(.5);
+          dlabel = viewer.addLabel(dist.toFixed(3),{position: mid, fontSize: 12, backgroundColor: "blue", 
+            backgroundOpacity: 0.75, alignment: "bottomCenter"});          
+        }
+        lastclicked = null;
+      }
+      viewer.render();
+    });
 };
 function run() {
     try {
@@ -1083,7 +1154,7 @@ function run() {
             if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                 return;
             }
-            data = "http://files.rcsb.org/view/" + data
+            data = "https://files.rcsb.org/view/" + data
                 + ".pdb";
             type = "pdb";
         } if (src == 'cif') {
@@ -1091,7 +1162,7 @@ function run() {
             if (!data.match(/^[1-9][A-Za-z0-9]{3}$/)) {
                 return;
             }
-            data = "http://files.rcsb.org/view/" + data
+            data = "https://files.rcsb.org/view/" + data
                 + ".cif";
             type = "cif";
         } else if (src == 'cid') {
@@ -1100,14 +1171,14 @@ function run() {
                 + data + "/SDF?record_type=3d";
         } else if (src == 'mmtf') {
             data = data.toUpperCase();
-            data = 'http://mmtf.rcsb.org/full/' + data + '.mmtf';
+            data = 'https://mmtf.rcsb.org/full/' + data ;
             type = 'mmtf';
         } else { // url
             // try to extract extension
-            type = data.substr(data.lastIndexOf('.') + 1);
+            type = data.substring(data.lastIndexOf('.') + 1);
             if (type == 'gz') {
-                var base = data.substr(0, data.lastIndexOf('.'));
-                type = base.substr(base.lastIndexOf('.')) + '.gz';
+                var base = data.substring(0, data.lastIndexOf('.'));
+                type = base.substring(base.lastIndexOf('.')) + '.gz';
             }
         }
         if (cmds[0] && cmds[0].indexOf('type=') == 0) {

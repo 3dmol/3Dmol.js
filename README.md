@@ -3,12 +3,12 @@
 [![codecov](https://codecov.io/gh/3dmol/3Dmol.js/branch/master/graph/badge.svg)](https://codecov.io/gh/3dmol/3Dmol.js)
 [![Github CI](https://github.com/3dmol/3Dmol.js/actions/workflows/CI.yml/badge.svg)](https://github.com/3dmol/3Dmol.js/actions)
 
-3Dmol.js is an object-oriented, webGL based JavaScript library for online molecular visualization - No Java required!
+3Dmol.js is an object-oriented, WebGL accelerated JavaScript library for online molecular visualization.
 
 Since 3Dmol.js is licensed under the permissive BSD open-source license, you are free to use it in any project, as long the code is properly acknowledged and [cited](http://dx.doi.org/10.1093/bioinformatics/btu829).
 
 With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. Features include:
-* support for pdb, sdf, mol2, xyz, and cube formats
+* support for pdb, sdf, mol2, xyz, cif, cdjson, mmtf, prmtop, gro, pqr, cube, and vasp formats
 * parallelized molecular surface computation
 * sphere, stick, line, cross, cartoon, and surface styles
 * atom property based selection and styling
@@ -16,11 +16,23 @@ With 3Dmol.js, you can add beautifully rendered molecular visualizations to your
 * clickable interactivity with molecular data
 * geometric shapes including spheres and arrows
 
-See the [documentation](https://3dmol.org/doc/index.html) to learn how to use 3Dmol.js as a hosted viewer, embeddable viewer, or as a component of a larger application.
+See the [documentation](https://3dmol.org/doc/index.html) to learn how to use 3Dmol.js as a [hosted viewer](https://3dmol.org/doc/tutorial-url.html), [embeddable viewer](https://3dmol.org/doc/tutorial-embeddable.html), or as a component of a larger application.
 
 ## Examples
 
-#### PDB
+### [HTML](https://3dmol.org/doc/tutorial-embeddable.html)
+
+<img src="examples/embed.png" width=400>
+
+```html
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>     
+ 
+ <div style="width: 400px; height: 400px;" 
+        class='viewer_3Dmoljs' data-pdb='4N8T' data-style='cartoon:color=spectrum'
+        data-surface='opacity:.7;color:white'></div>
+```
+
+#### JavaScript
 We support the use of both PDB queries as well as PDB files.
 
 ![Alt Text](examples/example1.png)

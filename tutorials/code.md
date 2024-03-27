@@ -30,7 +30,7 @@ Here we will use the API to create, load and style the 3Dmol instance. Note, thi
 First, make sure your HTML document links to the 3Dmol code.
 
 ```
-<script src="https://3Dmol.org/build/3Dmol-min.js""></script>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 ```
 
 Now create a container tag in the HTML document that will hold the vizualisation.
@@ -57,19 +57,17 @@ To make sure everything works, we are going to add a sphere, set the camera, ren
 
 ```
 <script>
-$(function() {
-  let element = $('#container-01');
+  let element = document.querySelector('#container-01');
   let config = { backgroundColor: 'orange' };
   let viewer = $3Dmol.createViewer( element, config );
   viewer.addSphere({ center: {x:0, y:0, z:0}, radius: 10.0, color: 'green' });
   viewer.zoomTo();
   viewer.render();
   viewer.zoom(0.8, 2000);
-});
 </script>
 ```
 
-Documentation: [$3Dmol.createViewer()]($3Dmol.html#createViewer)
+Documentation: [$3Dmol.createViewer()](global.html#createViewer)
 
 <div class="align-center">
   <button id="btn-01" class="btn btn-primary">Try it</button>
@@ -98,7 +96,7 @@ jQuery(function() {
 
 If this has worked, you should see a rather fetching green ball in front of an orange background. If not, then now's a good time to get familiar with the developer console on your favourite browser and check for typos ([Firefox](https://developer.mozilla.org/en/docs/Tools/Web_Console), [Chrome](https://developers.google.com/web/tools/chrome-devtools/), ...)
 
-Note, the ```viewer``` variable now contains an instance of GLViewer and we use the [$3Dmol.GLViewer API]($3Dmol.GLViewer) to change the orange background white.
+Note, the ```viewer``` variable now contains an instance of GLViewer and we use the [$3Dmol.GLViewer API](GLViewer.html) to change the orange background white.
 
 ```
   viewer.setBackgroundColor('white');
@@ -108,7 +106,7 @@ Note, the ```viewer``` variable now contains an instance of GLViewer and we use 
   <button id="btn-01-alt" class="btn btn-primary">Try it</button>
 </div>
 
-Documentation: [$3Dmol.GLViewer API]($3Dmol.GLViewer)
+Documentation: [$3Dmol.GLViewer API](GLViewer.html)
 
 ### Loading data dynamically
 

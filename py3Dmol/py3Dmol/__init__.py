@@ -1,6 +1,7 @@
 import time
 import json
 import sys
+import re
 
 try:
     import IPython.display
@@ -53,13 +54,14 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/GLViewer.html
     '''
-    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol-min.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),format=None,js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container
             query -- optional argument to provide to $3Dmol.download
             viewergrid -- optional tuple (rows,columns) to define grid
-            data -- molecular data to provide to addModel, wit viewer grid can be indexed (r,c)
+            data -- molecular data to provide to addModel, with viewer grid can be indexed (r,c)
+            format -- format of provided data
             style -- style to apply, with viewer grid can be indexed (r,c)
             options -- optional options to provide to $3Dmol.download
             js -- url for 3Dmol.js'''
@@ -71,9 +73,8 @@ class view(object):
             width = '%dpx'%width
         if type(height) == int:
             height = '%dpx'%height
-        self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s">
-        <p id="%s" style="background-color:#ffcccc;color:black">You appear to be running in JupyterLab (or JavaScript failed to load for some other reason).  You need to install the 3dmol extension: <br>
-        <tt>jupyter labextension install jupyterlab_3dmol</tt></p>
+        self.startjs = '''<div id="%s"  style="position: relative; width: %s; height: %s;">
+        <p id="%s" style="background-color:#ffcccc;color:black">3Dmol.js failed to load for some reason.  Please check your browser console for error messages.<br></p>
         </div>\n''' % (divid,width,height,warnid)
         self.startjs += '<script>\n'
         self.endjs = '</script>'
@@ -145,10 +146,20 @@ if(warn) {
                     cmds = ''
                     if data:
                         try:
-                            d = data[r][c]
+                            if type(data) == str:
+                              d = data
+                            else:
+                              d = data[r][c]
                         except:
                             d = data
-                        self.startjs += "viewergrid_UNIQUEID[%d][%d].addModel(%s);\n"%(r,c,json.dumps(d))
+                        try:
+                            if type(format) == str:
+                              f = format
+                            else:
+                              f = format[r][c]
+                        except:
+                            f = format
+                        self.startjs += f"viewergrid_UNIQUEID[{r}][{c}].addModel({json.dumps(d)}{','+json.dumps(f) if f else ''});\n"
                     if style:
                         try:
                             s = style[r][c]
@@ -160,7 +171,7 @@ if(warn) {
         else:
             cmds = ''
             if data:
-                cmds = "viewer_UNIQUEID.addModel(%s);\n"%json.dumps(data)
+                cmds = f"viewer_UNIQUEID.addModel({json.dumps(data)}{','+json.dumps(format) if format else ''});\n"                
             if style:
                 cmds += "viewer_UNIQUEID.setStyle(%s);\n"%json.dumps(style)
             self.startjs += cmds + "viewer_UNIQUEID.zoomTo();\n"
@@ -208,6 +219,31 @@ if(warn) {
         self.updatejs = ''
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
 
+
+    def write_html(self, f=None, fullpage=False):
+      '''Write html to reproduce viewer in a web page to a file.
+      f -- file name (str) or writeable file object; if unspecified html string is returned
+      fullpage -- instead of specified width/height make viewer fill the web page
+      '''
+      
+      if f == None:
+        return self._make_html()
+        
+      if type(f) == str:
+        f = open(f,'wt')
+      html = self._make_html()
+      html = f'''<html>
+<body style="margin: 0; padding: 0; display: block;">
+{html}
+</body>
+</html>'''
+      if fullpage:
+        html = re.sub(r'width: (\S+);', 'width: 100%;', html)
+        html = re.sub(r'height: (\S+);', 'height: 100vh;', html)
+        
+      f.write(html)
+      
+      
     @using_ipython
     def png(self):
         '''output png image of viewer, which must already be instantiated'''
