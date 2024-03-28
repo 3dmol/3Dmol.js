@@ -42,7 +42,7 @@ export class GLViewer {
     private labels: Label[] = [];
     private clickables = []; //things you can click on
     private hoverables = []; //things you can hover over
-    private contextMenuEnabledAtoms = []; // atoms with context menu
+    private contextMenuEnabledObjects = []; // atoms and shapes with context menu
     private current_hover: any = null;
     private hoverDuration = 500;
     private longTouchDuration = 1000;
@@ -298,7 +298,7 @@ export class GLViewer {
     private updateClickables() {
         this.clickables.splice(0, this.clickables.length);
         this.hoverables.splice(0, this.hoverables.length);
-        this.contextMenuEnabledAtoms.splice(0, this.contextMenuEnabledAtoms.length);
+        this.contextMenuEnabledObjects.splice(0, this.contextMenuEnabledObjects.length);
 
         for (let i = 0, il = this.models.length; i < il; i++) {
             let model = this.models[i];
@@ -322,9 +322,9 @@ export class GLViewer {
                     this.clickables.push(atoms[m]);
                 }
 
-                // add atoms into contextMenuEnabledAtoms
+                // add atoms into contextMenuEnabledObjects
                 for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
-                    this.contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
+                    this.contextMenuEnabledObjects.push(contextMenuEnabled_atom[m]);
                 }
 
             }
@@ -339,7 +339,7 @@ export class GLViewer {
                 this.hoverables.push(shape);
             }
             if (shape && shape.contextMenuEnabled) {
-                this.contextMenuEnabledAtoms.push(shape);
+                this.contextMenuEnabledObjects.push(shape);
             }
         }
     };
@@ -360,7 +360,7 @@ export class GLViewer {
                     // Clicks from "touchend" after longtouch contextmenu are suppressed
                     // in _handleContextMenu.
                     const isContextMenu = this.mouseButton === 3
-                        && this.contextMenuEnabledAtoms.includes(selected)
+                        && this.contextMenuEnabledObjects.includes(selected)
                         && this.userContextMenuHandler;
                     if (!isContextMenu) {
                         selected.callback(selected, this._viewer, event, this.container, intersects);
@@ -1192,7 +1192,7 @@ export class GLViewer {
             let mouseX = mouse.x;
             let mouseY = mouse.y;
 
-            let intersects = this.targetedObjects(mouseX, mouseY, this.contextMenuEnabledAtoms);
+            let intersects = this.targetedObjects(mouseX, mouseY, this.contextMenuEnabledObjects);
             var selected = null;
             if (intersects.length) {
                 selected = intersects[0].clickable;
