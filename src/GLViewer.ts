@@ -1200,7 +1200,7 @@ export class GLViewer {
             var x = this.mouseStartX - offset.left;
             var y = this.mouseStartY - offset.top;
             if (this.userContextMenuHandler) {
-                this.userContextMenuHandler(selected, x, y, intersects);
+                this.userContextMenuHandler(selected, x, y, intersects, ev);
                 // We've processed this as a context menu evt; ignore further mouseup / touchend.
                 // This is really for touchend after longtouch, since the mouseup for right-click
                 // occurs before the contextmenu event.
