@@ -1182,9 +1182,7 @@ export class GLViewer {
 
     public _handleContextMenu(ev) {
         ev.preventDefault();
-        // contextmenu event is synthetic (not trusted) if it is in response to a longtouch,
-        // so we should allow wiggle room when checking the position.
-        if (this.closeEnoughForClick(ev, { allowTolerance: !ev.isTrusted })) {
+        if (this.closeEnoughForClick(ev)) {
             var x = this.mouseStartX;
             var y = this.mouseStartY;
             var offset = this.canvasOffset();
