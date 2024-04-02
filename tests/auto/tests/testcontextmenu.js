@@ -38,7 +38,7 @@
   <div id="workingDiv" style="width: 400px; height: 400px;">
     <!-- View1 has canvas and menu inside the same offsetParent element -->
     <div id="View1" style="position: absolute; left: 20px; top: 20px; border: black solid 1px;">
-      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='testView1' data-config="id:View1Canvas"></div>
+      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='$3Dmol.tstctx_testView1' data-config="id:View1Canvas"></div>
       <div id="atom-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid blue 2px; z-index: 100;">
         <div>View1 Mouse Atom Menu</span></div>
       </div>
@@ -50,7 +50,7 @@
     to position the menu, since they are relative to the canvas's offsetParent.
     -->
     <div id="View2" style="position: absolute; left: 220px; top: 220px; border: black solid 1px;">
-      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='testView2' data-config="id:View2Canvas"></div>
+      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='$3Dmol.tstctx_testView2' data-config="id:View2Canvas"></div>
     </div>
     <div id="shape-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid limegreen 2px; z-index: 100;">
       <div>View2 Shape Menu</div>
@@ -62,23 +62,44 @@
 </div>
 */
 
-function testView1(viewer) {
+/* @script
+$3Dmol.tstctx_testView1 = function(viewer) {
+    if (typeof(PointerEvent) === 'undefined') {
+        // These tests can be executed by the browser, glcheck, or jest (which uses JSDOM).
+        // In the jest/jsdom case, PointerEvents are not defined, so mock them here.
+        $3Dmol.tstctx_isJest = true;
+        window.PointerEvent = class PointerEvent extends CustomEvent {
+            constructor(type, eventInitDict) {
+                super(type, eventInitDict);
+                for (const field of [
+                    'pageX', 'pageY',
+                    'screenX', 'screenY',
+                    'clientX', 'clientY',
+                    'targetTouches'
+                ]) {
+                    if (eventInitDict[field]) this[field] = eventInitDict[field];
+                }
+            }
+        };
+    }
+
     viewer.userContextMenuHandler = (selected, x, y, intersects, ev) => {
         // Since the menu has the same offsetParent as the viewer,
         // we can use the same x,y coordinates.
-        openMenu(viewer, selected, x, y);
+        $3Dmol.tstctx_openMenu(viewer, selected, x, y);
     }
-    setupViewer(viewer);
+    $3Dmol.tstctx_setupViewer(viewer);
     console.log('Testing right-click on atom in View1');
     // Target 8-oclock H in View1
-    rightClickAt(viewer, { x: 68, y: 120 });
+    const { x, y } = $3Dmol.tstctx_getCoords(68, 120, 'View1');
+    $3Dmol.tstctx_rightClickAt(viewer, { x, y });
 }
 
-function testView2(viewer) {
+$3Dmol.tstctx_testView2 = function(viewer) {
     viewer.userContextMenuHandler = (selected, x, y, intersects, ev) => {
         // Since the menu has a different offsetParent from the canvas,
         // we need to look at the mouseEvent to get preferred menu coordinates.
-        openMenu(viewer, selected, ev?.pageX || x, ev?.pageY || y);
+        $3Dmol.tstctx_openMenu(viewer, selected, ev?.pageX || x, ev?.pageY || y);
         if (!ev) {
             console.warn(
                 'event not passed into handler; View2 has offset position'
@@ -94,19 +115,22 @@ function testView2(viewer) {
         callback: (shape) => viewer.addLabel("Click", { position: shape }),
     });
 
-    setupViewer(viewer);
+    $3Dmol.tstctx_setupViewer(viewer);
     console.log('Testing right-click on background in View2');
-    rightClickAt(viewer, { x: 229, y: 369 });
+    let { x, y } = $3Dmol.tstctx_getCoords(229, 369, 'View2');;
+    $3Dmol.tstctx_rightClickAt(viewer, { x, y });
     console.log('Testing longtouch on sphere in View2');
+    ({ x, y } = $3Dmol.tstctx_getCoords(270, 270, 'View2'));
     // Add a slight change of position to long touch, because physically, it is
     // hard to have completely zero movement when doing a long touch.
-    longTouchAt(viewer, { x: 270, y: 270, endX: 275, endY: 265 });
+    const { x: endX, y: endY } = $3Dmol.tstctx_getCoords(275, 265, 'View2');
+    $3Dmol.tstctx_longTouchAt(viewer, { x, y, endX, endY });
 
     // Tell glcheck to complete the test
-    setTimeout(finish, 1500);
+    setTimeout($3Dmol.tstctx_finish, 1500);
 }
 
-function rightClickAt(viewer, { x, y, endX=0, endY=0 }) {
+$3Dmol.tstctx_rightClickAt = function(viewer, { x, y, endX=0, endY=0 }) {
     // Emulate the sequence of events when a user clicks to open context menu:
     // 1. mousedown
     // 2. mousemove (if there is movement)
@@ -125,7 +149,7 @@ function rightClickAt(viewer, { x, y, endX=0, endY=0 }) {
     viewer._handleContextMenu(endEvt);
 }
 
-function longTouchAt(viewer, { x, y, endX=0, endY=0 }) {
+$3Dmol.tstctx_longTouchAt = function(viewer, { x, y, endX=0, endY=0 }) {
     // Emulate the sequence of events when user does longtouch to open menu:
     // 1. touchstart (starts the longtouch timer)
     // 2. touchmove (allow a small amount of movement for longtouch contextmenu)
@@ -153,8 +177,19 @@ function longTouchAt(viewer, { x, y, endX=0, endY=0 }) {
 }
 
 // HELPER FUNCTIONS
+$3Dmol.tstctx_getCoords = function(x, y, viewerId) {
+    if (!$3Dmol.tstctx_isJest) return { x, y };
+    // In jest/jsdom tests, the offsets are not the same as glcheck / browser
+    // Subtract the left,top numbers for View1/2 divs in the html, plus border
+    const offsetX = viewerId === 'View1' ? (20 + 1) : (220 + 1);
+    const offsetY = viewerId === 'View1' ? (20 + 1) : (220 + 1);
+    return {
+        x: x - offsetX,
+        y: y - offsetY,
+    };
+}
 
-function setupViewer(viewer) {
+$3Dmol.tstctx_setupViewer = function(viewer) {
     viewer.setHeight(180);
     viewer.setWidth(180);
     viewer.zoomTo();
@@ -163,21 +198,20 @@ function setupViewer(viewer) {
     // This is because they only get an insersectObject if they are clickable.
     viewer.setClickable({}, true, (atom) => {
         viewer.addLabel("Click", { position: atom });
+        console.log(`Clicked on atom ${atom.atom} at ${atom.x},${atom.y},${atom.z}`);
     });
     viewer.enableContextMenu({},true);
     viewer.render( ); // This space is necessary to prevent "callback" insertion
 }
 
-async function finish() {
-    await exportAllToCanvas();
-    callback(); // provided and needed by glcheck machinery
+$3Dmol.tstctx_finish = async function() {
+    await $3Dmol.tstctx_exportAllToCanvas();
+    callback(); // provided and needed by test machinery
 }
 
-/**
- * glcheck checks the first canvas it sees, so need to gather the two views and
- * the HTML elements for the "context menus" into a single canvas for glcheck.
- */
-async function exportAllToCanvas() {
+// glcheck checks the first canvas it sees, so need to gather the two views and
+// the HTML elements for the "context menus" into a single canvas for glcheck.
+$3Dmol.tstctx_exportAllToCanvas = async function() {
     const canvas = resultCanvas;
     const ctx = canvas.getContext('2d');
     const menusImg = await nodeToImg(workingDiv, canvas.width, canvas.height);
@@ -202,24 +236,33 @@ async function exportAllToCanvas() {
 
     function svgToImg(svg) {
         return new Promise((resolve, reject) => {
+            const loadTimer = setTimeout(() => {
+                console.warn(
+                    'Image never loaded, probably because JSDOM (used by jest) doesn\'t load images by default. ' +
+                    'Add `@jest-environment-options {"resources": "usable"}` in generate_jest_render_tests.py to fix this. ' +
+                    'In the meantime, this won\'t fail the test, since glcheck is verifying the image.'
+                );
+                resolve(img);
+            }, 2000);
+
             const img = new Image();
-            img.onload = () => resolve(img);
+            img.onload = () => {
+                clearTimeout(loadTimer);
+                resolve(img);
+            };
             img.onerror = reject;
             img.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
         });
     }
 }
 
-function openMenu(viewer, selected, x, y) {
-    const type = targetType(selected);
+$3Dmol.tstctx_openMenu = function(viewer, selected, x, y) {
+    const type = selected ? (selected.atom ? 'atom' : 'shape') : 'background';
     const menuElt = document.getElementById(`${type}-menu`);
-    console.log(`${type} Menu ${x}, ${y}, ${selected?.x}, ${selected?.y}`);
+    console.log(`Context menu invoked for ${type} at ${x}, ${y}, target at ${selected?.x}, ${selected?.y}`);
     menuElt.style.left = x;
     menuElt.style.top = y;
     menuElt.style.display = 'block';
 }
 
-function targetType(selected) {
-    if (!selected) return 'background';
-    return selected.atom ? 'atom' : 'shape';
-}
+*/
