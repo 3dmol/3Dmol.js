@@ -126,8 +126,16 @@ $3Dmol.tstctx_testView2 = function(viewer) {
     const { x: endX, y: endY } = $3Dmol.tstctx_getCoords(275, 265, 'View2');
     $3Dmol.tstctx_longTouchAt(viewer, { x, y, endX, endY });
 
-    // Tell glcheck to complete the test
-    setTimeout($3Dmol.tstctx_finish, 1500);
+    // Test that touch-dragging too far away (> 5) cancels the contextmenu event
+    // Note: this introduces a slight rotation to the benzene. The reference image
+    // doesn't have this, but it is subtle enough to pass the pixelmatch threshold.
+    setTimeout(() => {
+        const [newX, newY] = [x+10, y+10];
+        $3Dmol.tstctx_longTouchAt(viewer, { x: newX, y: newY, endX: newX - 0.5, endY: newY + 5.1 });
+    }, 1500);
+
+    // Tell glcheck to complete the test after other touch timers have completed
+    setTimeout($3Dmol.tstctx_finish, 3000);
 }
 
 $3Dmol.tstctx_rightClickAt = function(viewer, { x, y, endX=0, endY=0 }) {
@@ -237,13 +245,14 @@ $3Dmol.tstctx_exportAllToCanvas = async function() {
     function svgToImg(svg) {
         return new Promise((resolve, reject) => {
             const loadTimer = setTimeout(() => {
-                console.warn(
-                    'Image never loaded, probably because JSDOM (used by jest) doesn\'t load images by default. ' +
-                    'Add `@jest-environment-options {"resources": "usable"}` in generate_jest_render_tests.py to fix this. ' +
-                    'In the meantime, this won\'t fail the test, since glcheck is verifying the image.'
-                );
+                // jest tests use jsdom which doesn't load images by default.
+                // In that case, the onload will never fire to resolve the Promise.
+                // This setTimeout ensures that the promise will complete.
+                // Since jest only executes render tests for code coverage, not for
+                // correctness, and this image is only used by glcheck,
+                // we can resolve the promise as success without actually loading the image.
                 resolve(img);
-            }, 2000);
+            }, 5000);
 
             const img = new Image();
             img.onload = () => {
