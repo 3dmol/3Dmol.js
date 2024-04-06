@@ -42,9 +42,10 @@ export class GLViewer {
     private labels: Label[] = [];
     private clickables = []; //things you can click on
     private hoverables = []; //things you can hover over
-    private contextMenuEnabledAtoms = []; // atoms with context menu
+    private contextMenuEnabledObjects = []; // atoms and shapes with context menu
     private current_hover: any = null;
     private hoverDuration = 500;
+    private longTouchDuration = 1000;
     private viewer_frame = 0;
     private WIDTH: number;
     private HEIGHT: number;
@@ -106,6 +107,7 @@ export class GLViewer {
 
     private mouseButton: any;
     private hoverTimeout: any;
+    private longTouchTimeout: any;
 
     private divwatcher: any;
     private spinInterval: any;
@@ -296,7 +298,7 @@ export class GLViewer {
     private updateClickables() {
         this.clickables.splice(0, this.clickables.length);
         this.hoverables.splice(0, this.hoverables.length);
-        this.contextMenuEnabledAtoms.splice(0, this.contextMenuEnabledAtoms.length);
+        this.contextMenuEnabledObjects.splice(0, this.contextMenuEnabledObjects.length);
 
         for (let i = 0, il = this.models.length; i < il; i++) {
             let model = this.models[i];
@@ -320,9 +322,9 @@ export class GLViewer {
                     this.clickables.push(atoms[m]);
                 }
 
-                // add atoms into contextMenuEnabledAtoms
+                // add atoms into contextMenuEnabledObjects
                 for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
-                    this.contextMenuEnabledAtoms.push(contextMenuEnabled_atom[m]);
+                    this.contextMenuEnabledObjects.push(contextMenuEnabled_atom[m]);
                 }
 
             }
@@ -335,6 +337,9 @@ export class GLViewer {
             }
             if (shape && shape.hoverable) {
                 this.hoverables.push(shape);
+            }
+            if (shape && shape.contextMenuEnabled) {
+                this.contextMenuEnabledObjects.push(shape);
             }
         }
     };
@@ -350,7 +355,16 @@ export class GLViewer {
                     selected.callback = makeFunction(selected.callback);
                 }
                 if (typeof (selected.callback) === "function") {
-                    selected.callback(selected, this._viewer, event, this.container, intersects);
+                    // Suppress click callbacks when context menu will be invoked.
+                    // This only applies to clicks from "mouseup" events after right-click.
+                    // Clicks from "touchend" after longtouch contextmenu are suppressed
+                    // in _handleContextMenu.
+                    const isContextMenu = this.mouseButton === 3
+                        && this.contextMenuEnabledObjects.includes(selected)
+                        && this.userContextMenuHandler;
+                    if (!isContextMenu) {
+                        selected.callback(selected, this._viewer, event, this.container, intersects);
+                    }
                 }
             }
         }
@@ -896,19 +910,26 @@ export class GLViewer {
         this.cslabFar = this.slabFar;
 
         let self = this;
-        setTimeout(function () {
-            if (ev.targetTouches) {
+        if (ev.targetTouches && ev.targetTouches.length === 1) {
+            this.longTouchTimeout = setTimeout(function () {
                 if (self.touchHold == true) {
                     // console.log('Touch hold', x,y);
                     self.glDOM = self.renderer.domElement;
-                    self.glDOM.dispatchEvent(new Event('contextmenu'));
+                    const touch = ev.targetTouches[0];
+                    const newEvent = new PointerEvent('contextmenu', {
+                        ...ev,
+                        pageX: touch.pageX, pageY: touch.pageY,
+                        screenX: touch.screenX, screenY: touch.screenY,
+                        clientX: touch.clientX, clientY: touch.clientY,
+                    });
+                    self.glDOM.dispatchEvent(newEvent);
                 }
                 else {
                     // console.log('Touch hold ended earlier');
 
                 }
-            }
-        }, 1000);
+            }, this.longTouchDuration);
+        }
 
     };
 
@@ -1100,6 +1121,13 @@ export class GLViewer {
 
         if (!this.isDragging)
             return;
+
+        // Cancel longtouch timer to avoid invoking context menu if dragged away from start
+        if (ev.targetTouches && (ev.targetTouches.length > 1 ||
+            (ev.targetTouches.length === 1 && !this.closeEnoughForClick(ev)))) {
+            clearTimeout(this.longTouchTimeout);
+        }
+
         var dx = (x - this.mouseStartX) / this.WIDTH;
         var dy = (y - this.mouseStartY) / this.HEIGHT;
         // check for pinch
@@ -1154,12 +1182,7 @@ export class GLViewer {
 
     public _handleContextMenu(ev) {
         ev.preventDefault();
-        var newX = this.getX(ev);
-        var newY = this.getY(ev);
-
-        if (newX != this.mouseStartX || newY != this.mouseStartY) {
-            return;
-        } else {
+        if (this.closeEnoughForClick(ev)) {
             var x = this.mouseStartX;
             var y = this.mouseStartY;
             var offset = this.canvasOffset();
@@ -1167,7 +1190,7 @@ export class GLViewer {
             let mouseX = mouse.x;
             let mouseY = mouse.y;
 
-            let intersects = this.targetedObjects(mouseX, mouseY, this.contextMenuEnabledAtoms);
+            let intersects = this.targetedObjects(mouseX, mouseY, this.contextMenuEnabledObjects);
             var selected = null;
             if (intersects.length) {
                 selected = intersects[0].clickable;
@@ -1177,7 +1200,11 @@ export class GLViewer {
             var x = this.mouseStartX - offset.left;
             var y = this.mouseStartY - offset.top;
             if (this.userContextMenuHandler) {
-                this.userContextMenuHandler(selected, x, y, intersects);
+                this.userContextMenuHandler(selected, x, y, intersects, ev);
+                // We've processed this as a context menu evt; ignore further mouseup / touchend.
+                // This is really for touchend after longtouch, since the mouseup for right-click
+                // occurs before the contextmenu event.
+                this.isDragging = false;
             }
         }
     };
