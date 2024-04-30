@@ -1,5 +1,7 @@
 import { Matrix3 } from "../WebGL";
 
+import { assignBonds } from "./utils/assignBonds";
+
 /**
  * @param {string}
  *            str
@@ -8,7 +10,7 @@ import { Matrix3 } from "../WebGL";
  * @category Parsers
 */
 
-export function VASP(str: string /*,options*/) {
+export function VASP(str: string, options?) {
   var atoms: any[][] & Record<string, any> = [[]];
   var lattice: Record<string, number | Float32Array> = {};
 
@@ -126,10 +128,15 @@ export function VASP(str: string /*,options*/) {
       }
 
       atom.bonds = [];
+      atom.bondOrder = [];
 
       atoms[0].push(atom);
     }
     atomCounter += atomSpeciesNumber[i];
+  }
+
+  for (let i = 0; i < atoms.length; i++) {
+    assignBonds(atoms[i], options);
   }
 
   return atoms;
