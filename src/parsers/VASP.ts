@@ -60,6 +60,12 @@ export function VASP(str: string /*,options*/) {
     (lines[6] as any).replace(/^\s+/, "").split(/\s+/)
   );
   var vaspMode = lines[7].replace(/\s+/, "");
+  
+  var selective = false
+  if (vaspMode.match(/S/)){
+    selective = true
+    vaspMode = lines[8].replace(/\s+/, "");
+  }
 
   if (vaspMode.match(/C/)) {
     vaspMode = "cartesian";
@@ -79,8 +85,13 @@ export function VASP(str: string /*,options*/) {
     return atoms;
   }
 
-  lines.splice(0, 8);
-
+  if (selective){
+    lines.splice(0, 9);
+  }
+  else{
+    lines.splice(0, 8);
+  }
+  
   var atomCounter = 0;
 
   for (var i = 0, len = atomSymbols.length; i < len; i++) {
