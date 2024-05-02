@@ -1,33 +1,36 @@
+import { AtomSpec } from "specs";
 import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { assignPDBBonds } from "./utils/assignPDBBonds";
 import { atomNameToElem } from "./utils/atomNameToElem";
 
 /**
  * Parse a gro file from str and create atoms
- * 
- * @param {string}
- *            str
- * @param {ParserOptionsSpec}
- *            options* 
+ *
+ * @param {string} str
+ * @param {ParserOptionsSpec} options
  * @category Parsers
-*/
+ * @returns {Array<AtomSpec[]>} - Returns a 2D array of type AtomSpec
+ */
 
-export function GRO(str: string,  options: ParserOptionsSpec) {
-  var allatoms: any[][] & Record<string, any> = [];
-  var lines = str.split(/\r?\n|\r/);
+export function GRO(str: string, options: ParserOptionsSpec) {
+  const allatoms: AtomSpec[][] & { box?: string[] } = [];
+  const lines = str.split(/\r?\n|\r/);
   while (lines.length > 0) {
-    if (lines.length < 3) break;
-    var atomCount = parseInt(lines[1]);
-    if (isNaN(atomCount) || atomCount <= 0) break;
-    if (lines.length < atomCount + 3) break;
-    var atoms: any[] = [];
+    const atomCount = parseInt(lines[1]);
+    const breakCondition =
+      lines.length < 3 ||
+      isNaN(atomCount) ||
+      atomCount <= 0 ||
+      lines.length < atomCount + 3;
+    if (breakCondition) break;
+    const atoms: AtomSpec[] = [];
     allatoms.push(atoms);
-    var offset = 2;
-    var start = atoms.length;
-    var end = start + atomCount;
-    for (var i = start; i < end; i++) {
-      var line = lines[offset++];
-      var atom: Record<string, any> = {};
+    let offset = 2;
+    const start = atoms.length;
+    const end = start + atomCount;
+    for (let i = start; i < end; i++) {
+      const line = lines[offset++];
+      const atom: AtomSpec = {};
       atom.serial = i;
       atom.atom = line.slice(10, 15).trim();
       atom.elem = atomNameToElem(atom.atom, true);
@@ -50,11 +53,11 @@ export function GRO(str: string,  options: ParserOptionsSpec) {
 
     if (lines.length <= offset + 3) {
       //single line left, assume it is the box
-      var last = lines[offset++];
-      var box = last.trim().split(/\s+/);
-      if (box.length == 3) {
-        for (var b = 0; b < 3; b++) {
-          (box[b] as any) = parseFloat(box[b]) * 10.0;
+      const last = lines[offset++];
+      const box = last.trim().split(/\s+/);
+      if (box.length === 3) {
+        for (let b = 0; b < 3; b++) {
+          box[b] = (parseFloat(box[b]) * 10.0).toString();
         }
         allatoms.box = box;
       }
