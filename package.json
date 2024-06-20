@@ -31,8 +31,8 @@
   "types": "build/types/index.d.ts",
   "scripts": {
     "build": "npm run build:dev  && npm run build:prod && npm run generate:tests && npm run doc",
-    "build:dev": "webpack --config webpack.dev.js --mode development",
-    "build:prod": "webpack --config webpack.prod.js --mode production",
+    "build:dev": "webpack --config webpack.dev.js",
+    "build:prod": "webpack --config webpack.prod.js",
     "prepare": "npm run build:dev  && npm run build:prod",
     "jest": "npx jest --testPathIgnorePatterns=render.test.js",
     "test": "npm run generate:jest && npm run jest && npm run glcheck",
