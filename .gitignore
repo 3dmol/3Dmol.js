@@ -12,6 +12,7 @@ __pycache__
 .nyc_output
 .vscode
 .st
+.idea
 tmp/
 .parcel-cache/
 nbproject
