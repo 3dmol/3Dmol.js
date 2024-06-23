@@ -81,6 +81,9 @@ export interface AtomSpec {
   uMat?: Record<string, number>;
   symmetries?: Vector3[];
   sym?: any;
+  dx?: number;
+  dy?: number;
+  dz?: number;
 }
 
 /**
