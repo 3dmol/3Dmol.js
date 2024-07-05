@@ -28,8 +28,12 @@ export interface AtomSpec {
   hetflag?: boolean;
   /**  Chain this atom belongs to, if specified in input file (e.g 'A' for chain A) */
   chain?: string;
+  /** Label chain (not author) */
+  lchain?: string;
   /**  Residue number */
   resi?: number;
+  /** Label residues number (not author) */
+  lresi?: number; 
   icode?: string;
   rescode?: string;
   /** Atom's serial id number */

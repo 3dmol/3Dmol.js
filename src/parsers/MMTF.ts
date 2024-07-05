@@ -4,8 +4,9 @@ import { ParserOptionsSpec } from "./ParserOptionsSpec";
 import { computeSecondaryStructure } from "./utils/computeSecondaryStructure";
 import { processSymmetries } from "./utils/processSymmetries";
 
-interface MMTFobj {
+export interface MMTFobj {
     decode(data: Uint8Array | ArrayBuffer): any;
+    decodeMsgpack(data: Uint8Array | ArrayBuffer): any;
 }
 declare var MMTF: MMTFobj;
 

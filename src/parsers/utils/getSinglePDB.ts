@@ -14,13 +14,13 @@ export function getSinglePDB(
   options: ParserOptionsSpec,
   sslookup: { [x: string]: { [x: string]: string }; hasOwnProperty?: any }
 ): [
-  AtomSpec[],
-  {
-    symmetries: Matrix4[];
-    cryst: Omit<Cryst, "origin" | "size" | "unit" | "matrix4" | "matrix">;
-  },
-  string[]
-] {
+    AtomSpec[],
+    {
+      symmetries: Matrix4[];
+      cryst: Omit<Cryst, "origin" | "size" | "unit" | "matrix4" | "matrix">;
+    },
+    string[]
+  ] {
   const atoms: AtomSpec[] = [];
   const assignbonds =
     options.assignBonds === undefined ? true : options.assignBonds;

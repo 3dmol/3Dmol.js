@@ -10,34 +10,16 @@ import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3
 import { CAP, GLDraw } from "./GLDraw"
 import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
-import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle } from "./utilities";
+import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle, inflateString } from "./utilities";
 import { Gradient } from "./Gradient";
 import { Parsers } from "./parsers";
 import { NetCDFReader } from "netcdfjs"
-import { inflate, InflateFunctionOptions, Data } from "pako"
 import { AtomSelectionSpec, AtomSpec } from "./specs";
 import { GLViewer } from "GLViewer";
 import { ArrowSpec } from "GLShape";
 import { ParserOptionsSpec } from "./parsers/ParserOptionsSpec";
 import { LabelSpec } from "Label";
 import { assignBonds } from "./parsers/utils/assignBonds";
-
-function inflateString(str: string | ArrayBuffer): (string | ArrayBuffer) {
-    let data: Data;
-  
-    if (typeof str === 'string') {
-      const encoder = new TextEncoder();
-      data = encoder.encode(str);
-    } else {
-      data = new Uint8Array(str);
-    }
-  
-    const inflatedData = inflate(data, {
-      to: 'string'
-    } as InflateFunctionOptions & { to: 'string' });
-  
-    return inflatedData;
-  }
 
 /**
  * GLModel represents a group of related atoms
@@ -164,7 +146,7 @@ export class GLModel {
      * @return {number}
      *
      */
-    private getRadiusFromStyle(atom:AtomSpec, style:SphereStyleSpec|ClickSphereStyleSpec|CrossStyleSpec) {
+    private getRadiusFromStyle(atom: AtomSpec, style: SphereStyleSpec | ClickSphereStyleSpec | CrossStyleSpec) {
         var r = this.defaultSphereRadius;
         if (typeof (style.radius) != "undefined")
             r = style.radius;
@@ -189,7 +171,7 @@ export class GLModel {
      * @param {AtomSpec} atom
      * @param {Record<number, Geometry>} geos
      */
-    private drawAtomCross(atom:AtomSpec, geos: Record<number, Geometry>) {
+    private drawAtomCross(atom: AtomSpec, geos: Record<number, Geometry>) {
         if (!atom.style.cross)
             return;
         var style = atom.style.cross;
@@ -240,7 +222,7 @@ export class GLModel {
 
     };
 
-    private getGoodCross(atom:AtomSpec, atom2:AtomSpec, p1, dir) {
+    private getGoodCross(atom: AtomSpec, atom2: AtomSpec, p1, dir) {
         // get vector 2 different neighboring atom
         //find most divergent neighbor
         var bestv = null;
@@ -268,11 +250,11 @@ export class GLModel {
         }
         return bestv;
     };
-    
+
 
     //from atom, return a normalized vector v that is orthogonal and along which
     //it is appropraite to draw multiple bonds
-    private getSideBondV(atom:AtomSpec, atom2:AtomSpec, i:number) {
+    private getSideBondV(atom: AtomSpec, atom2: AtomSpec, i: number) {
 
         var i2, j2, atom3, p3, dir2;
         var p1 = new Vector3(atom.x, atom.y, atom.z);
@@ -293,7 +275,7 @@ export class GLModel {
                 i2 = (i + 1) % atom2.bonds.length;
                 j2 = atom2.bonds[i2];
                 atom3 = this.atoms[j2];
-                if(atom3.index == atom.index) { // get distinct atom
+                if (atom3.index == atom.index) { // get distinct atom
                     i2 = (i2 + 1) % atom2.bonds.length;
                     j2 = atom2.bonds[i2];
                     atom3 = this.atoms[j2];
@@ -349,7 +331,7 @@ export class GLModel {
      * @param {AtomSpec[]} atoms
      * @param {Record<number,Geometry>} geos
      */
-    private drawBondLines(atom:AtomSpec, atoms:AtomSpec[], geos: Record<number,Geometry>) {
+    private drawBondLines(atom: AtomSpec, atoms: AtomSpec[], geos: Record<number, Geometry>) {
         if (!atom.style.line)
             return;
         var style = atom.style.line;
@@ -665,30 +647,30 @@ export class GLModel {
     private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number) {
         // Calculate the length of a cylinder defined by two points 'from' and 'to'.
         var cylinderLength = Math.sqrt(
-            Math.pow((from.x - to.x), 2) + 
-            Math.pow((from.y - to.y), 2) + 
+            Math.pow((from.x - to.x), 2) +
+            Math.pow((from.y - to.y), 2) +
             Math.pow((from.z - to.z), 2)
         );
-        
+
         // Ensure non-negative values for radius, dashLength, and gapLength.
         // Adjust gapLength to include the radius of the cylinder.
         radius = Math.max(radius, 0);
         gapLength = Math.max(gapLength, 0) + 2 * radius;
         dashLength = Math.max(dashLength, 0.001);
-        
+
         // Handle cases where the combined length of dash and gap exceeds the cylinder's length.
         // In such cases, use a single dash to represent the entire cylinder with no gaps.
         if (dashLength + gapLength > cylinderLength) {
             dashLength = cylinderLength;
             gapLength = 0; // No gap as the dash fills the entire cylinder.
         }
-        
+
         // Calculate the total number of dash-gap segments that can fit within the cylinder.
         var totalSegments = Math.floor((cylinderLength - dashLength) / (dashLength + gapLength)) + 1;
-        
+
         // Compute the total length covered by dashes.
         var totalDashLength = totalSegments * dashLength;
-        
+
         // Recalculate gap length to evenly distribute remaining space among gaps.
         // This ensures dashes and gaps are evenly spaced within the cylinder.
         gapLength = (cylinderLength - totalDashLength) / totalSegments;
@@ -709,7 +691,7 @@ export class GLModel {
         return segments;
     }
 
-    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap:CAP = 0, toCap:CAP = 0) {
+    static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap: CAP = 0, toCap: CAP = 0) {
         //we need the four corners - two have from coord, two have to coord, the normal
         //is the opposing point, from which we can get the normal and length
         //also need the radius
@@ -856,7 +838,7 @@ export class GLModel {
                 // draw cylinders
                 if (atom.bondOrder[i] <= 1 || singleBond || atom.bondOrder[i] > 3) { //TODO: aromatics at 4
 
-                    if(atom.bondOrder[i] < 1) bondR *= atom.bondOrder[i];
+                    if (atom.bondOrder[i] < 1) bondR *= atom.bondOrder[i];
                     if (!atom2.capDrawn && atom2.bonds.length < 4)
                         toCap = 2;
 
@@ -1075,14 +1057,14 @@ export class GLModel {
     // at some point we should optimize this to avoid unnecessary
     // recalculation
     /** param {AtomSpec[]} atoms */
-    private createMolObj(atoms:AtomSpec[], options?) {
+    private createMolObj(atoms: AtomSpec[], options?) {
 
         options = options || {};
 
         var ret = new Object3D();
         var cartoonAtoms = [];
         var lineGeometries: Record<number, Geometry> = {};
-        var crossGeometries:Record<number, Geometry> = {};
+        var crossGeometries: Record<number, Geometry> = {};
 
         var drawSphereFunc = this.drawAtomSphere;
         var sphereGeometry: Geometry = null;
@@ -1368,7 +1350,7 @@ export class GLModel {
      * @param {number} gamma - unit cell angle in degrees (default 90)
 
      */
-    public setCrystData(a?: number, b?:number, c?:number, alpha?:number, beta?:number, gamma?:number) {
+    public setCrystData(a?: number, b?: number, c?: number, alpha?: number, beta?: number, gamma?: number) {
         //I am assuming these
         a = a || 1.0;
         b = b || 1.0;
@@ -1453,7 +1435,7 @@ export class GLModel {
         return (this.frames.numFrames != undefined) ? this.frames.numFrames : this.frames.length;
     };
 
-    private adjustCoord(x1:number, x2:number, margin:number, adjust:number) {
+    private adjustCoord(x1: number, x2: number, margin: number, adjust: number) {
         //return new value of x2 that isn't more than margin away
         var dist = x2 - x1;
         if (dist < -margin) {
@@ -1569,7 +1551,7 @@ export class GLModel {
               viewer.render();
           });
      */
-    public vibrate(numFrames:number=10, amplitude:number=1, bothWays:boolean=false, viewer?:GLViewer, arrowSpec?:ArrowSpec) {
+    public vibrate(numFrames: number = 10, amplitude: number = 1, bothWays: boolean = false, viewer?: GLViewer, arrowSpec?: ArrowSpec) {
         var start = 0;
         var end = numFrames;
         if (bothWays) {
@@ -1653,7 +1635,7 @@ export class GLModel {
      * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
      * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input format
      */
-    public addMolData(data: string|ArrayBuffer, format:string, options: ParserOptionsSpec={}) {
+    public addMolData(data: string | ArrayBuffer, format: string, options: ParserOptionsSpec = {}) {
         var parsedAtoms = GLModel.parseMolData(data, format, options);
         this.dontDuplicateAtoms = !options.duplicateAssemblyAtoms;
         var mData = parsedAtoms.modelData;
@@ -1710,7 +1692,7 @@ export class GLModel {
         }
     };
 
-    public setDontDuplicateAtoms(dup:boolean) {
+    public setDontDuplicateAtoms(dup: boolean) {
         this.dontDuplicateAtoms = dup;
     };
 
@@ -1821,7 +1803,7 @@ export class GLModel {
      * @param {AtomSelectionSpec} sel
      * @return {boolean}
      */
-    public atomIsSelected(atom:AtomSpec, sel?:AtomSelectionSpec) {
+    public atomIsSelected(atom: AtomSpec, sel?: AtomSelectionSpec) {
         if (typeof (sel) === "undefined")
             return true; // undef gets all
         var invert = !!sel.invert;
@@ -1910,7 +1892,7 @@ export class GLModel {
     };
 
 
-    private static squaredDistance(atom1:XYZ|AtomSpec, atom2:XYZ|AtomSpec) {
+    private static squaredDistance(atom1: XYZ | AtomSpec, atom2: XYZ | AtomSpec) {
         var xd = atom2.x - atom1.x;
         var yd = atom2.y - atom1.y;
         var zd = atom2.z - atom1.z;
@@ -1926,7 +1908,7 @@ export class GLModel {
      *      [ xctr, yctr, zctr ] ]
      *
      **/
-    private expandAtomList(atomList: AtomSpec[], amt:number) {
+    private expandAtomList(atomList: AtomSpec[], amt: number) {
 
         if (amt <= 0) return atomList;
 
@@ -1958,8 +1940,8 @@ export class GLModel {
 
 
 
-    private static getFloat(val: string|number): number {
-        if(typeof(val) === 'number')
+    private static getFloat(val: string | number): number {
+        if (typeof (val) === 'number')
             return val;
         else
             return parseFloat(val);
@@ -1999,7 +1981,7 @@ export class GLModel {
         // expand selection by some distance
         if (sel.hasOwnProperty("expand")) {
             // get atoms in expanded bounding box
-            const exdist:number = GLModel.getFloat(sel.expand);
+            const exdist: number = GLModel.getFloat(sel.expand);
             let expand = this.expandAtomList(ret, exdist);
             let retlen = ret.length;
             const thresh = exdist * exdist;
@@ -2146,7 +2128,7 @@ export class GLModel {
      * consider valence constraints and will only create single bonds.
      */
     public assignBonds() {
-        assignBonds(this.atoms, {assignBonds: true});
+        assignBonds(this.atoms, { assignBonds: true });
     }
 
     /** Remove specified atoms from model
@@ -2197,11 +2179,11 @@ export class GLModel {
               viewer.render();
           });
      */
-    public setStyle(sel:AtomSelectionSpec|AtomStyleSpec|string, style?:AtomStyleSpec|string, add?) {
+    public setStyle(sel: AtomSelectionSpec | AtomStyleSpec | string, style?: AtomStyleSpec | string, add?) {
 
         if (typeof (style) === 'undefined' && typeof (add) == 'undefined') {
             //if a single argument is provided, assume it is a style and select all
-            style = sel as AtomStyleSpec|string;
+            style = sel as AtomStyleSpec | string;
             sel = {};
         }
         sel = sel as AtomSelectionSpec;
@@ -2237,9 +2219,9 @@ export class GLModel {
             }
         };
 
-        if(sel.frame !== undefined && sel.frame < this.frames.length) { //set specific frame only
+        if (sel.frame !== undefined && sel.frame < this.frames.length) { //set specific frame only
             let frame = sel.frame;
-            if(frame < 0) frame = this.frames.length+frame;
+            if (frame < 0) frame = this.frames.length + frame;
             setStyleHelper(this.frames[frame]);
         } else {
             setStyleHelper(this.atoms);
@@ -2259,7 +2241,7 @@ export class GLModel {
      * @param {function} callback - function called when an atom in the selection is clicked
 
      */
-    public setClickable(sel:AtomSelectionSpec, clickable:boolean, callback) {
+    public setClickable(sel: AtomSelectionSpec, clickable: boolean, callback) {
 
         // make sure clickable is a boolean
         clickable = !!clickable;
@@ -2289,7 +2271,7 @@ export class GLModel {
     * @param {function} hover_callback - function called when an atom in the selection is hovered over
     * @param {function} unhover_callback - function called when the mouse moves out of the hover area
     */
-    public setHoverable(sel:AtomSelectionSpec, hoverable:boolean, hover_callback, unhover_callback) {
+    public setHoverable(sel: AtomSelectionSpec, hoverable: boolean, hover_callback, unhover_callback) {
 
         // make sure hoverable is a boolean
         hoverable = !!hoverable;
@@ -2326,7 +2308,7 @@ export class GLModel {
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
      */
-    public enableContextMenu(sel:AtomSelectionSpec, contextMenuEnabled) {
+    public enableContextMenu(sel: AtomSelectionSpec, contextMenuEnabled) {
         // make sure contextMenuEnabled is a boolean
         contextMenuEnabled = !!contextMenuEnabled;
 
@@ -2368,7 +2350,7 @@ export class GLModel {
      * @param {string} prop
      * @param {Gradient|string} scheme
      */
-    public setColorByProperty(sel: AtomSelectionSpec, prop: string, scheme: Gradient|string, range?) {
+    public setColorByProperty(sel: AtomSelectionSpec, prop: string, scheme: Gradient | string, range?) {
         var i, a;
         var atoms = this.selectedAtoms(sel, atoms);
         this.lastColors = null; // don't bother memoizing
@@ -2602,7 +2584,7 @@ export class GLModel {
      * @param {LabelSpec} options
      * @param {boolean} byframe - if true, create labels for every individual frame, not just current; frames must be loaded already
      */
-    public addResLabels(sel: AtomSelectionSpec, viewer: GLViewer, style: LabelSpec, byframe:boolean=false) {
+    public addResLabels(sel: AtomSelectionSpec, viewer: GLViewer, style: LabelSpec, byframe: boolean = false) {
 
         var created_labels = [];
         var helper = function (model, framenum?) {
@@ -2699,7 +2681,7 @@ export class GLModel {
     * @param {string} path - contains the path of the file (<root>/filename)
     * @return {Promise}
     */
-    public setCoordinatesFromURL(url:string, path:string) {
+    public setCoordinatesFromURL(url: string, path: string) {
         this.frames = [];
         var self = this;
         if (this.box) this.setupDFS();
@@ -2732,7 +2714,7 @@ export class GLModel {
          viewer.render();
     */
 
-    public setCoordinates(str: string | ArrayBuffer, format:string) {
+    public setCoordinates(str: string | ArrayBuffer, format: string) {
         format = format || "";
         if (!str)
             return []; // leave an empty model
@@ -2789,7 +2771,7 @@ export class GLModel {
 
     };
 
-    static parseCrd(data, format:string) {
+    static parseCrd(data, format: string) {
         var values = []; // this will contain the all the float values in the
         // file.
         var counter = 0;
@@ -2837,7 +2819,11 @@ export class GLModel {
             //unzip gzipped files
             format = format.replace(/\.gz$/, '');
             try {
-                data = inflateString(data);
+                if (format.match(/bcif/i)) {
+                    data = inflateString(data, false);
+                } else {
+                    data = inflateString(data);
+                }
             } catch (err) {
                 console.log(err);
             }
@@ -2905,7 +2891,7 @@ export interface LineStyleSpec {
     /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
-    colorfunc?: Function;    
+    colorfunc?: Function;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
     /** wireframe style */
@@ -2929,7 +2915,7 @@ export interface CrossStyleSpec {
     /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
-    colorfunc?: Function;        
+    colorfunc?: Function;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
 }
@@ -2953,7 +2939,7 @@ export interface StickStyleSpec {
     /** radius scaling factor for drawing double bonds (default 0.4) */
     doubleBondScaling?: number;
     /** radius scaling factor for drawing triple bonds (default 0.25) */
-    tripleBondScaling?: number;    
+    tripleBondScaling?: number;
     /** dashed bond properties */
     dashedBondConfig?: DashedBondSpec;
     /** draw all bonds as dashed bonds */
@@ -2965,7 +2951,7 @@ export interface StickStyleSpec {
     /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
-    colorfunc?: Function;        
+    colorfunc?: Function;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
     /** display nonbonded atoms as spheres */
@@ -2987,7 +2973,7 @@ export interface SphereStyleSpec {
     /** fixed coloring */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
-    colorfunc?: Function;        
+    colorfunc?: Function;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
 }

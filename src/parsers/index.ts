@@ -12,6 +12,7 @@ import { MMTFparser } from "./MMTF";
 import { PRMTOP } from "./PRMTOP";
 import { GRO } from "./GRO";
 import { LAMMPSTRJ } from "./LAMMPSTRJ";
+import {BCIF} from "./BCIF";
 
 export { bondLength, setBondLength } from './utils/bondLength';
 
@@ -47,4 +48,6 @@ export const Parsers = {
   GRO,
   lammpstrj: LAMMPSTRJ,
   LAMMPSTRJ,
+  bcif: BCIF,
+  BCIF
 } as Record<string, (str: string, options: ParserOptionsSpec) => any>;

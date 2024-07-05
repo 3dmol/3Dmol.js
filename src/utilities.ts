@@ -4,6 +4,7 @@ import { getGradient, Gradient, GradientType } from "./Gradient";
 import { VolumeData } from "./VolumeData";
 import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
 import { IsoSurfaceSpec } from "GLShape";
+import { inflate, InflateFunctionOptions, Data } from "pako"
 
 //simplified version of jquery extend
 export function extend(obj1, src1) {
@@ -609,4 +610,21 @@ export function getElement(element): HTMLElement | null {
         ret = element.get(0);
     }
     return ret;
+}
+
+export function inflateString(str: string | ArrayBuffer, tostring: Boolean = true): (string | ArrayBuffer) {
+    let data: Data;
+
+    if (typeof str === 'string') {
+        const encoder = new TextEncoder();
+        data = encoder.encode(str);
+    } else {
+        data = new Uint8Array(str);
+    }
+
+    const inflatedData = inflate(data, {
+        to: tostring ? 'string' : null
+    } as InflateFunctionOptions & { to: 'string' });
+
+    return inflatedData;
 }
