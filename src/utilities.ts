@@ -405,7 +405,6 @@ export function getbin(uri, callback?, request?, postdata?) {
 export function download(query, viewer, options, callback?) {
     var type = "";
     var pdbUri = "";
-    var mmtfUri = "";
     var uri = "";
     var promise = null;
     var m = viewer.addModel();
@@ -420,10 +419,13 @@ export function download(query, viewer, options, callback?) {
             query = 'url:' + query;
         }
     }
-    if (query.substring(0, 5) === 'mmtf:') {
-        pdbUri = options && options.pdbUri ? options.pdbUri : "https://mmtf.rcsb.org/v1.0/full/";
+    if (query.substring(0,5) == 'mmtf:') {
+        console.log('WARNING: MMTF now deprecated.  Reverting to bcif.');
+        query = 'bcif:' + query.slice(5);
+    }
+    if (query.substring(0, 5) === 'bcif:') {
         query = query.substring(5).toUpperCase();
-        uri = pdbUri + query;
+        uri = "https://models.rcsb.org/" + query + '.bcif.gz';
         if (options && typeof options.noComputeSecondaryStructure === 'undefined') {
             //when fetch directly from pdb, trust structure annotations
             options.noComputeSecondaryStructure = true;
@@ -431,7 +433,7 @@ export function download(query, viewer, options, callback?) {
         promise = new Promise(function (resolve) {
             getbin(uri)
                 .then(function (ret) {
-                    m.addMolData(ret, 'mmtf', options);
+                    m.addMolData(ret, 'bcif.gz', options);
                     viewer.zoomTo();
                     viewer.render();
                     resolve(m);
@@ -440,7 +442,7 @@ export function download(query, viewer, options, callback?) {
     }
     else {
         if (query.substring(0, 4) === 'pdb:') {
-            type = 'mmtf';
+            type = 'pdb';
             if (options && options.format) {
                 type = options.format; //can override and require pdb
             }
@@ -454,9 +456,8 @@ export function download(query, viewer, options, callback?) {
                 alert("Wrong PDB ID");
                 return;
             }
-            if (type == 'mmtf') {
-                mmtfUri = options && options.mmtfUri ? options.mmtfUri : 'https://mmtf.rcsb.org/v1.0/full/';
-                uri = mmtfUri + query.toUpperCase();
+            if (type == 'bcif') {
+                uri = 'https://models.rcsb.org/' + query.toUpperCase() + '.bcif.gz';
             }
             else {
                 pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
@@ -482,7 +483,7 @@ export function download(query, viewer, options, callback?) {
             viewer.render();
         };
         promise = new Promise(function (resolve) {
-            if (type == 'mmtf') { //binary data
+            if (type == 'bcif') { //binary data
                 getbin(uri)
                     .then(function (ret) {
                         handler(ret);

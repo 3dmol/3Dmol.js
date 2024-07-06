@@ -21,7 +21,7 @@ declare var MMTF: MMTFobj;
 */
 export function BCIF(bindata: any, options: ParserOptionsSpec) {
 
-  //var noH = !options.keepH; // suppress hydrogens by default
+  var noH = !options.keepH; // suppress hydrogens by default
   //var selAltLoc = options.altLoc ? options.altLoc : 'A'; //default alternate location to select if present
   var computeStruct = !options.noComputeSecondaryStructure;
   //var assemblyIndex = options.assemblyIndex ? options.assemblyIndex : 0;
@@ -77,132 +77,51 @@ export function BCIF(bindata: any, options: ParserOptionsSpec) {
     //helices
     let sslookup = {}; //chain to residue range
     let sshelix = cats.struct_conf;
-    let htypes = sshelix.getField('conf_type_id');
-    let hchain = sshelix.getField('beg_label_asym_id');
-    let hstart = sshelix.getField('beg_label_seq_id');
-    let hend = sshelix.getField('end_label_seq_id');
+    if (sshelix) {
+      let htypes = sshelix.getField('conf_type_id');
+      let hchain = sshelix.getField('beg_label_asym_id');
+      let hstart = sshelix.getField('beg_label_seq_id');
+      let hend = sshelix.getField('end_label_seq_id');
 
-    for (let i = 0; i < htypes.length; i++) {
-      if (htypes[i].startsWith('H')) {
-        let ch = hchain[i];
-        let startResi = hstart[i];
-        let endResi = hend[i];
+      for (let i = 0; i < htypes.length; i++) {
+        if (htypes[i].startsWith('H')) {
+          let ch = hchain[i];
+          let startResi = hstart[i];
+          let endResi = hend[i];
+          if (!(ch in sslookup)) {
+            sslookup[ch] = {};
+          }
+          sslookup[ch][startResi] = "h1";
+          for (let res = startResi + 1; res < endResi; res++) {
+            sslookup[ch][res] = "h";
+          }
+          sslookup[ch][endResi] = "h2";
+        }
+      }
+    }
+    //sheets
+    let sssheet = cats.struct_sheet_range;
+    if (sssheet) {
+      let sids = sssheet.getField('id');
+      let schain = sssheet.getField('beg_label_asym_id');
+      let sstart = sssheet.getField('beg_label_seq_id');
+      let send = sssheet.getField('end_label_seq_id');
+
+      for (let i = 0; i < sids.length; i++) {
+        let ch = schain[i];
+        let startResi = sstart[i];
+        let endResi = send[i];
         if (!(ch in sslookup)) {
           sslookup[ch] = {};
         }
-        sslookup[ch][startResi] = "h1";
+        sslookup[ch][startResi] = "s1";
         for (let res = startResi + 1; res < endResi; res++) {
-          sslookup[ch][res] = "h";
+          sslookup[ch][res] = "s";
         }
-        sslookup[ch][endResi] = "h2";
+        sslookup[ch][endResi] = "s2";
+
       }
     }
-
-    //sheets
-    let sssheet = cats.struct_sheet_range;
-    let sids = sssheet.getField('id');
-    let schain = sssheet.getField('beg_label_asym_id');
-    let sstart = sssheet.getField('beg_label_seq_id');
-    let send = sssheet.getField('end_label_seq_id');
-
-    for (let i = 0; i < sids.length; i++) {
-      let ch = schain[i];
-      let startResi = sstart[i];
-      let endResi = send[i];
-      if (!(ch in sslookup)) {
-        sslookup[ch] = {};
-      }
-      sslookup[ch][startResi] = "s1";
-      for (let res = startResi + 1; res < endResi; res++) {
-        sslookup[ch][res] = "s";
-      }
-      sslookup[ch][endResi] = "s2";
-
-    }
-
-
-    //atom info
-
-    let asites = cats.atom_site;
-    let atomCount = asites.rowCount;
-    let group_pdb = asites.getField('group_PDB')
-    let cartn_x = asites.getField('Cartn_x');
-    let cartn_y = asites.getField('Cartn_y');
-    let cartn_z = asites.getField('Cartn_z');
-    let auth_asym_id = asites.getField('auth_asym_id');
-    let label_asym_id = asites.getField('label_asym_id');
-    let auth_seq_id = asites.getField('auth_seq_id');
-    let label_seq_id = asites.getField('label_seq_id');
-    let auth_comp_id = asites.getField('auth_comp_id');
-    let label_comp_id = asites.getField('label_comp_id');
-    let auth_atom_id = asites.getField('auth_atom_id');
-    let label_atom_id = asites.getField('label_atom_id');
-    let type_symbol = asites.getField('type_symbol');
-    let bfactors = asites.getField("B_iso_or_equiv");
-    let serials = asites.getField('id');
-    let icodes = asites.getField('label_alt_id');
-
-    for (let i = 0; i < atomCount; i++) {
-      if (
-        group_pdb !== undefined &&
-        group_pdb[i] === "TER"
-      )
-        continue;
-      const atom: AtomSpec = {};
-      atom.x = cartn_x[i];
-      atom.y = cartn_y[i];
-      atom.z = cartn_z[i];
-
-      atom.chain = auth_asym_id
-        ? auth_asym_id[i]
-        : label_asym_id
-          ? label_asym_id[i]
-          : undefined;
-      atom.lchain = label_asym_id
-      ? label_asym_id[i]
-      : undefined;
-      atom.resi = auth_seq_id
-        ? auth_seq_id[i]
-        : label_seq_id
-          ? label_seq_id[i]
-          : undefined;
-      atom.lresi = label_seq_id
-      ? label_seq_id[i]
-      : undefined;
-      atom.resn = auth_comp_id
-        ? auth_comp_id[i].trim()
-        : label_comp_id
-          ? label_comp_id[i].trim()
-          : undefined;
-      atom.atom = auth_atom_id
-        ? auth_atom_id[i].replace(/"/gm, "")
-        : label_atom_id
-          ? label_atom_id[i].replace(/"/gm, "")
-          : undefined; //"primed" names are in quotes
-
-      atom.icode = icodes ? icodes[i] : undefined;
-      atom.hetflag =
-        !group_pdb ||
-        group_pdb[i] === "HETA" ||
-        group_pdb[i] === "HETATM";
-      let elem = "X";
-      if (type_symbol) {
-        elem = type_symbol[i].replace(/\(?\+?\d+.*/, "");
-      }
-
-      atom.elem = elem[0].toUpperCase() + elem.substring(1, 2).toLowerCase();
-      if (bfactors) atom.b = bfactors[i];
-
-      atom.bonds = [];
-      atom.ss = "c";
-      atom.serial = serials[i];
-      serialToIndex[atom.serial] = i;
-      atom.bondOrder = [];
-      atom.properties = {};
-      atoms[atoms.length - 1].push(atom);
-    }
-
-
 
     //symmetry operations
     let structops = cats.pdbx_struct_oper_list;
@@ -239,6 +158,105 @@ export function BCIF(bindata: any, options: ParserOptionsSpec) {
         modelData[modelData.length - 1].symmetries.push(matrix);
       }
     }
+    //atom info
+
+    let asites = cats.atom_site;
+    let atomCount = asites.rowCount;
+    let group_pdb = asites.getField('group_PDB')
+    let cartn_x = asites.getField('Cartn_x');
+    let cartn_y = asites.getField('Cartn_y');
+    let cartn_z = asites.getField('Cartn_z');
+    let auth_asym_id = asites.getField('auth_asym_id');
+    let label_asym_id = asites.getField('label_asym_id');
+    let auth_seq_id = asites.getField('auth_seq_id');
+    let label_seq_id = asites.getField('label_seq_id');
+    let auth_comp_id = asites.getField('auth_comp_id');
+    let label_comp_id = asites.getField('label_comp_id');
+    let auth_atom_id = asites.getField('auth_atom_id');
+    let label_atom_id = asites.getField('label_atom_id');
+    let type_symbol = asites.getField('type_symbol');
+    let bfactors = asites.getField("B_iso_or_equiv");
+    let serials = asites.getField('id');
+    let icodes = asites.getField('label_alt_id');
+    let modelnums = asites.getField('pdbx_PDB_model_num');
+    let curmodel = modelnums ? modelnums[0] : 0;
+
+    for (let i = 0; i < atomCount; i++) {
+      if (group_pdb !== undefined &&
+        group_pdb[i] === "TER"
+      )
+        continue;
+
+      if (modelnums && modelnums[i] != curmodel) {
+        curmodel = modelnums[i];
+        if (options.multimodel) {
+          if (!options.onemol) {
+            atoms.push([]);
+            modelData.push(modelData[modelData.length-1]);
+          }
+        } else {
+          break; //first model only
+        }
+      }
+
+      const atom: AtomSpec = {};
+      atom.x = cartn_x[i];
+      atom.y = cartn_y[i];
+      atom.z = cartn_z[i];
+
+      atom.chain = auth_asym_id
+        ? auth_asym_id[i]
+        : label_asym_id
+          ? label_asym_id[i]
+          : undefined;
+      atom.lchain = label_asym_id
+        ? label_asym_id[i]
+        : undefined;
+      atom.resi = auth_seq_id
+        ? auth_seq_id[i]
+        : label_seq_id
+          ? label_seq_id[i]
+          : undefined;
+      atom.lresi = label_seq_id
+        ? label_seq_id[i]
+        : undefined;
+      atom.resn = auth_comp_id
+        ? auth_comp_id[i].trim()
+        : label_comp_id
+          ? label_comp_id[i].trim()
+          : undefined;
+      atom.atom = auth_atom_id
+        ? auth_atom_id[i].replace(/"/gm, "")
+        : label_atom_id
+          ? label_atom_id[i].replace(/"/gm, "")
+          : undefined; //"primed" names are in quotes
+
+      atom.icode = icodes ? icodes[i] : undefined;
+      atom.hetflag =
+        !group_pdb ||
+        group_pdb[i] === "HETA" ||
+        group_pdb[i] === "HETATM";
+      let elem = "X";
+      if (type_symbol) {
+        elem = type_symbol[i].replace(/\(?\+?\d+.*/, "");
+      }
+
+      atom.elem = elem[0].toUpperCase() + elem.substring(1, 2).toLowerCase();
+      if (bfactors) atom.b = bfactors[i];
+
+      if(noH && atom.elem == 'H') {
+        continue;
+      }
+
+      atom.bonds = [];
+      atom.ss = "c";
+      atom.serial = serials[i];
+      serialToIndex[atom.serial] = i;
+      atom.bondOrder = [];
+      atom.properties = {};
+      atoms[atoms.length - 1].push(atom);
+    }
+
 
     // Assign secondary structures from pdb file
     if (!isEmpty(sslookup)) {
@@ -257,8 +275,11 @@ export function BCIF(bindata: any, options: ParserOptionsSpec) {
       }
     }
 
-    if (options.multimodel) {
-      if (!options.onemol) atoms.push([]);
+    if (options.multimodel && m < numModels - 1) {
+      if (!options.onemol) {
+        atoms.push([]);
+        modelData.push({ symmetries: [] });
+      }
     }
   }
 

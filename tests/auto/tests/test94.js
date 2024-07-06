@@ -1,5 +1,5 @@
              
-              $3Dmol.download("pdb:2V0E",viewer,{multimodel:true, frames:true})
+              $3Dmol.download("bcif:2V0E",viewer,{multimodel:true, frames:true})
               .then(function(m1){
                   $3Dmol.download("mmtf:4HHB",viewer,{multimodel:true, frames:true})
                   .then(function(m2){
