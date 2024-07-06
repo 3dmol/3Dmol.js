@@ -1,6 +1,8 @@
+
 import { Matrix3 } from "../WebGL";
 
 import { assignBonds } from "./utils/assignBonds";
+import { ParserOptionsSpec } from "./ParserOptionsSpec";
 
 /**
  * @param {string}
@@ -10,9 +12,11 @@ import { assignBonds } from "./utils/assignBonds";
  * @category Parsers
 */
 
-export function VASP(str: string, options?) {
+export function VASP(str: string, options: ParserOptionsSpec = {}) {
   var atoms: any[][] & Record<string, any> = [[]];
   var lattice: Record<string, number | Float32Array> = {};
+  const assignbonds =
+    options.assignBonds === undefined ? true : options.assignBonds;
 
   var lines = str.replace(/^\s+/, "").split(/\r?\n/);
 
@@ -62,9 +66,9 @@ export function VASP(str: string, options?) {
     (lines[6] as any).replace(/^\s+/, "").split(/\s+/)
   );
   var vaspMode = lines[7].replace(/\s+/, "");
-  
+
   var selective = false
-  if (vaspMode.match(/S/)){
+  if (vaspMode.match(/S/)) {
     selective = true
     vaspMode = lines[8].replace(/\s+/, "");
   }
@@ -87,13 +91,13 @@ export function VASP(str: string, options?) {
     return atoms;
   }
 
-  if (selective){
+  if (selective) {
     lines.splice(0, 9);
   }
-  else{
+  else {
     lines.splice(0, 8);
   }
-  
+
   var atomCounter = 0;
 
   for (var i = 0, len = atomSymbols.length; i < len; i++) {
@@ -135,9 +139,10 @@ export function VASP(str: string, options?) {
     atomCounter += atomSpeciesNumber[i];
   }
 
-  for (let i = 0; i < atoms.length; i++) {
-    assignBonds(atoms[i], options);
+  if (assignbonds) {
+    for (let i = 0; i < atoms.length; i++) {
+      assignBonds(atoms[i], options);
+    }
   }
-
   return atoms;
 }

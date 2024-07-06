@@ -442,7 +442,7 @@ export function download(query, viewer, options, callback?) {
     }
     else {
         if (query.substring(0, 4) === 'pdb:') {
-            type = 'pdb';
+            type = 'bcif';
             if (options && options.format) {
                 type = options.format; //can override and require pdb
             }

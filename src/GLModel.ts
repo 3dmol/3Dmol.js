@@ -2836,7 +2836,7 @@ export class GLModel {
                 console.log("Unknown format: " + format);
                 // try to guess correct format from data contents
                 if (data instanceof Uint8Array) {
-                    format = "mmtf"; //currently only supported binary format?
+                    format = "bcif"; //mmtf deprecated so go with bcif
                 } else if ((data as string).match(/^@<TRIPOS>MOLECULE/gm)) {
                     format = "mol2";
                 } else if ((data as string).match(/^data_/gm) && (data as string).match(/^loop_/gm)) {

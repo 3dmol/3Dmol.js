@@ -279,6 +279,9 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         !mmCIF._atom_site_group_pdb ||
         mmCIF._atom_site_group_pdb[i] === "HETA" ||
         mmCIF._atom_site_group_pdb[i] === "HETATM";
+      if(mmCIF._atom_site_b_iso_or_equiv ) {
+        atom.b = parseFloat(mmCIF._atom_site_b_iso_or_equiv[i]);
+      }
       let elem = "X";
       if (mmCIF._atom_site_type_symbol) {
         elem = mmCIF._atom_site_type_symbol[i].replace(/\(?\+?\d+.*/, "");
