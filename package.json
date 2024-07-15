@@ -48,8 +48,6 @@
   "dependencies": {
     "iobuffer": "^5.3.1",
     "netcdfjs": "^3.0.0",
-    "npm": "^10.8.1",
-    "nvm": "^0.0.4",
     "pako": "^2.1.0",
     "upng-js": "^2.1.0"
   },
