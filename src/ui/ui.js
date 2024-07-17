@@ -1170,8 +1170,6 @@ $3Dmol.UI = (function () {
         } else {
           valueHolder.text(value.replace(/\^/g, ''));
         }
-
-        console.log('Type of value', typeof (value), value);
       }
 
       /*
@@ -1819,7 +1817,6 @@ $3Dmol.UI = (function () {
             else {
               formSurfaceStyle.getValue();
               control.id = surfaceBox.data('surf-id');
-              console.log('Edit surface called')
               stateManager.editSurface(control); // -> add updateSurface funciton to surfaceMenu
               surfacePropertyBox.hide();
             }

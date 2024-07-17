@@ -1359,8 +1359,6 @@ export class GLViewer {
         this.WIDTH = this.getWidth();
         this.HEIGHT = this.getHeight();
         let regen = false;
-        console.log("resize "+this.container.id);
-        console.log("lost "+this.renderer.isLost() + " w"+this.WIDTH+ " h"+this.HEIGHT);
         if (this.renderer.isLost() && this.WIDTH > 0 && this.HEIGHT > 0) {
             //create new context
             let resetcanvas = false;
@@ -1383,8 +1381,6 @@ export class GLViewer {
             if(resetcanvas) {
                 this.config.canvas = this.renderer.getCanvas();
             }
-            console.log("regen "+regen+"  resetcanvas "+resetcanvas);
-
         }
         if (this.WIDTH == 0 || this.HEIGHT == 0) {
             if (this.animated) this._viewer.pauseAnimate();
