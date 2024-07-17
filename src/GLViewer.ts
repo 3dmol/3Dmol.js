@@ -110,6 +110,7 @@ export class GLViewer {
     private longTouchTimeout: any;
 
     private divwatcher: any;
+    private intwatcher: any;
     private spinInterval: any;
 
 
@@ -651,6 +652,19 @@ export class GLViewer {
             this.divwatcher.observe(this.container);
         }
 
+        if (typeof (window.IntersectionObserver) !== "undefined") {
+            //make sure a viewer that is becoming visible is alive
+            let intcallback = (entries, observer) => {
+                entries.forEach((entry) => {
+                    if(entry.isIntersecting) {
+                        this.resize();
+                    }
+                });
+            };
+            this.intwatcher = new window.IntersectionObserver(intcallback);
+            this.intwatcher.observe(this.container);
+        }
+          
         try {
             if (typeof (this.callback) === "function")
                 this.callback(this);
@@ -1345,6 +1359,8 @@ export class GLViewer {
         this.WIDTH = this.getWidth();
         this.HEIGHT = this.getHeight();
         let regen = false;
+        console.log("resize "+this.container.id);
+        console.log("lost "+this.renderer.isLost() + " w"+this.WIDTH+ " h"+this.HEIGHT);
         if (this.renderer.isLost() && this.WIDTH > 0 && this.HEIGHT > 0) {
             //create new context
             let resetcanvas = false;
@@ -1367,13 +1383,14 @@ export class GLViewer {
             if(resetcanvas) {
                 this.config.canvas = this.renderer.getCanvas();
             }
+            console.log("regen "+regen+"  resetcanvas "+resetcanvas);
+
         }
         if (this.WIDTH == 0 || this.HEIGHT == 0) {
             if (this.animated) this._viewer.pauseAnimate();
         } else if (this.animated) {
             this._viewer.resumeAnimate();
         }
-
         this.updateSize();
 
         if (regen) { //restored rendere, need to regenerate scene
