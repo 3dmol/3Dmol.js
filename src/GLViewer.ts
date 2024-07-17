@@ -664,7 +664,7 @@ export class GLViewer {
             this.intwatcher = new window.IntersectionObserver(intcallback);
             this.intwatcher.observe(this.container);
         }
-          
+
         try {
             if (typeof (this.callback) === "function")
                 this.callback(this);
@@ -1359,8 +1359,8 @@ export class GLViewer {
         this.WIDTH = this.getWidth();
         this.HEIGHT = this.getHeight();
         let regen = false;
-        console.log("resize "+this.container.id);
-        console.log("lost "+this.renderer.isLost() + " w"+this.WIDTH+ " h"+this.HEIGHT);
+        // console.log("resize "+this.container.id);
+        // console.log("lost "+this.renderer.isLost() + " w"+this.WIDTH+ " h"+this.HEIGHT);
         if (this.renderer.isLost() && this.WIDTH > 0 && this.HEIGHT > 0) {
             //create new context
             let resetcanvas = false;
@@ -1380,10 +1380,10 @@ export class GLViewer {
             this.renderer.setClearColorHex(this.bgColor, this.config.backgroundAlpha);
 
             regen = true;
-            if(resetcanvas) {
+            if (resetcanvas) {
                 this.config.canvas = this.renderer.getCanvas();
             }
-            console.log("regen "+regen+"  resetcanvas "+resetcanvas);
+            // console.log("regen "+regen+"  resetcanvas "+resetcanvas);
 
         }
         if (this.WIDTH == 0 || this.HEIGHT == 0) {
@@ -4452,7 +4452,7 @@ export class GLViewer {
 
                     var efunction = function (event) {
                         releaseMemory();
-                        console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
+                        // console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
                         reject(event);
                     };
 
