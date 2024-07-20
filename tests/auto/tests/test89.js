@@ -31,7 +31,7 @@ $scope.renderModel = function (model) {
   var modelPath=model.name;
   var format=model.format;
   $.get(modelPath,function(data){
-    var model = $scope.MAIN_VIEWER.addModel(data, format);
+    var model = $scope.MAIN_VIEWER.addModel(data, format,{assignBonds: false});
   $scope.MAIN_VIEWER.addUnitCell(model);
     model.setStyle({}, {sphere:{scale: 0.2}, stick:{radius:0.1}});	  
     $scope.MAIN_VIEWER.zoomTo();

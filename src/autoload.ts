@@ -64,7 +64,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 viewerdiv.dataset[datatypes[datatypes.length - 1]] = molName;
             }
 
-            var divdata = viewerdiv.dataset;
+            let divdata = viewerdiv.dataset;
             for (i in divdata) {
                 if ((i.substring(0, 3) === "pdb" && (i !== "pdb"))) {
                     datauri.push("https://files.rcsb.org/view/" + divdata[i] + ".pdb");
@@ -187,7 +187,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 }
             };
 
-            var glviewer = viewer;
+            let glviewer = viewer;
             try {
                 var config: any = specStringToObject(viewerdiv.dataset.config) || {};
                 if (config.backgroundColor === undefined) config.backgroundColor = bgcolor;
@@ -213,7 +213,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
             if (datauri.length != 0) {
                 //load multiple data elements in serial
                 let i = 0;
-                var process = function (moldata: any) {
+                let process = ((viewerdiv, glviewer) => function (moldata: any) {
                     //add moldata to viewer and load next model
                     uri = datauri[i]; //this is where the moldata came from
                     var type = viewerdiv.dataset.type || viewerdiv.dataset.datatype || datatypes[i];
@@ -240,7 +240,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                         processing_autoinit = false;
                         if (callback) callback(glviewer);
                     }
-                };
+                })(viewerdiv,glviewer);
                 get(datauri[0]).then(process);
 
             }

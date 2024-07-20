@@ -54,7 +54,7 @@ class view(object):
        the exception that the functions all return None.
        http://3dmol.org/doc/GLViewer.html
     '''
-    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),format=None,js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),format=None,js='https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.2.1-post1/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
             width -- width in pixels of container
             height -- height in pixels of container

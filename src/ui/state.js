@@ -221,7 +221,6 @@ $3Dmol.StateManager = (function(){
 
       glviewer.removeSurface(surfaces[surfaceProperty.id]);
 
-      console.log(surfaceProperty);
       glviewer.addSurface(
         $3Dmol.SurfaceType[surfaceProperty.surfaceType.value],
         style,

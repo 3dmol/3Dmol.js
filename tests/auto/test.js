@@ -204,6 +204,7 @@ $(document).ready(function(){
             waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 1000 , 0 , "" , function(){
                 var after=Date.now();
                 //gets the canvas
+                viewer.render();
                 var canvas=viewer.getCanvas(); //$("canvas#"+key).get(0);
                 //creates an image for the canvas
                 var canvasImageData = imageFromWebGlCanvas(canvas);

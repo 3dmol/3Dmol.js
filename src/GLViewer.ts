@@ -110,6 +110,7 @@ export class GLViewer {
     private longTouchTimeout: any;
 
     private divwatcher: any;
+    private intwatcher: any;
     private spinInterval: any;
 
 
@@ -651,6 +652,19 @@ export class GLViewer {
             this.divwatcher.observe(this.container);
         }
 
+        if (typeof (window.IntersectionObserver) !== "undefined") {
+            //make sure a viewer that is becoming visible is alive
+            let intcallback = (entries, observer) => {
+                entries.forEach((entry) => {
+                    if(entry.isIntersecting) {
+                        this.resize();
+                    }
+                });
+            };
+            this.intwatcher = new window.IntersectionObserver(intcallback);
+            this.intwatcher.observe(this.container);
+        }
+          
         try {
             if (typeof (this.callback) === "function")
                 this.callback(this);
@@ -1373,7 +1387,6 @@ export class GLViewer {
         } else if (this.animated) {
             this._viewer.resumeAnimate();
         }
-
         this.updateSize();
 
         if (regen) { //restored rendere, need to regenerate scene

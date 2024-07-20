@@ -144,11 +144,14 @@ class TestSystem():
         #these are the files with examples in them
         for filename in glob.glob(examples_path+'/*.js'):
             with open(filename,'r', encoding="utf-8") as text:
-                files.append(File(filename,"generated",text.read()))
+                contents = text.read()
+                files.append(File(filename,"generated",contents))
         #these are the built in tests
         for filename in glob.glob(manual_tests_path+'/*.js'):
-            with open(filename,"r", encoding="utf-8") as file:
-                files.append(File(filename,"builtin",file.read()))
+            with open(filename,"r", encoding="utf-8") as text:
+                contents = text.read()
+                if '/* skip */' not in contents:
+                    files.append(File(filename,"builtin",contents))
         
         #print("Found %d files"%len(files))
         

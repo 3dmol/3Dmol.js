@@ -12,6 +12,8 @@ import { ColorSpec } from "./colors";
 export interface AtomSpec {
   /** Parent residue name */
   resn?: string;
+  /** Residue label name */
+  lresn?: string;
   /**  Atom's x coordinate  */
   x?: number;
   /**  Atom's y coordinate  */

@@ -31,7 +31,7 @@ export function areConnected(atom1: AtomSpec, atom2: AtomSpec, options: ParserOp
     isNaN(distSquared) ||
     distSquared < 0.5 ||
     distSquared > maxsq ||
-    (atom1.altLoc !== atom2.altLoc && atom1.altLoc !== " " && atom2.altLoc !== " ")
+    (atom1.altLoc !== atom2.altLoc && atom1.altLoc.trim() !== "" && atom2.altLoc.trim() !== "")
   )
     return false;
 

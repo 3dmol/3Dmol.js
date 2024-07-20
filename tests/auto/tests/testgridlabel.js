@@ -83,6 +83,8 @@ view0.zoomTo();
 view1.zoomTo();
 view0.render( );
 view1.render( );
+viewers[1][0].render( );
+viewers[0][1].render( );
 
 let xy = view0.modelToScreen(view0.models[0].atoms[1]);
 

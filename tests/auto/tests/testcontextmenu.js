@@ -27,41 +27,8 @@
  * into resultCanvas, which is the one found by glcheck.
  */
 
-  /* @div
-<div>
-  <!-- This div holds the resultsCanvas, to combine the two 3Dmol canvases and the HTML decorations -->
-  <div id="resultDiv" style="position: absolute; left: 402px; width: 800px; height: 800px;">
-    <canvas id="resultCanvas" height=800 width=800>
-  </div>
-
-  <!-- This div hold the 3Dmol test canvases -->
-  <div id="workingDiv" style="width: 400px; height: 400px;">
-    <!-- View1 has canvas and menu inside the same offsetParent element -->
-    <div id="View1" style="position: absolute; left: 20px; top: 20px; border: black solid 1px;">
-      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='$3Dmol.tstctx_testView1' data-config="id:View1Canvas"></div>
-      <div id="atom-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid blue 2px; z-index: 100;">
-        <div>View1 Mouse Atom Menu</span></div>
-      </div>
-    </div>
-
-    <!--
-    View2 has the menu outside the canvas' offsetParent.
-    This means that the default x,y coming from GLViewer can't be used
-    to position the menu, since they are relative to the canvas's offsetParent.
-    -->
-    <div id="View2" style="position: absolute; left: 220px; top: 220px; border: black solid 1px;">
-      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='$3Dmol.tstctx_testView2' data-config="id:View2Canvas"></div>
-    </div>
-    <div id="shape-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid limegreen 2px; z-index: 100;">
-      <div>View2 Shape Menu</div>
-    </div>
-    <div id="background-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid magenta 2px; z-index: 100;">
-      <div>View2 Background Menu</div>
-    </div>
-  </div>
-</div>
-*/
-
+/* skip */ //does not fit into evaluation framework, but apparently works for glcheck?
+  
 /* @script
 $3Dmol.tstctx_testView1 = function(viewer) {
     if (typeof(PointerEvent) === 'undefined') {
@@ -274,4 +241,39 @@ $3Dmol.tstctx_openMenu = function(viewer, selected, x, y) {
     menuElt.style.display = 'block';
 }
 
+*/
+
+/* @div
+<div>
+  <!-- This div holds the resultsCanvas, to combine the two 3Dmol canvases and the HTML decorations -->
+  <div id="resultDiv" style="position: absolute; left: 402px; width: 800px; height: 800px;">
+    <canvas id="resultCanvas" height=800 width=800>
+  </div>
+
+  <!-- This div hold the 3Dmol test canvases -->
+  <div id="workingDiv" style="width: 400px; height: 400px;">
+    <!-- View1 has canvas and menu inside the same offsetParent element -->
+    <div id="View1" style="position: absolute; left: 20px; top: 20px; border: black solid 1px;">
+      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='$3Dmol.tstctx_testView1' data-config="id:View1Canvas"></div>
+      <div id="atom-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid blue 2px; z-index: 100;">
+        <div>View1 Mouse Atom Menu</span></div>
+      </div>
+    </div>
+
+    <!--
+    View2 has the menu outside the canvas' offsetParent.
+    This means that the default x,y coming from GLViewer can't be used
+    to position the menu, since they are relative to the canvas's offsetParent.
+    -->
+    <div id="View2" style="position: absolute; left: 220px; top: 220px; border: black solid 1px;">
+      <div class='viewer_3Dmoljs'  style="width: 180px; height: 180px;" data-backgroundColor="white" data-href="../test_structs/benzene.sdf" data-style="stick" data-callback='$3Dmol.tstctx_testView2' data-config="id:View2Canvas"></div>
+    </div>
+    <div id="shape-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid limegreen 2px; z-index: 100;">
+      <div>View2 Shape Menu</div>
+    </div>
+    <div id="background-menu" style="display: none; position: absolute; background-color: rgba(255, 255, 255, .50); color: blue; border: solid magenta 2px; z-index: 100;">
+      <div>View2 Background Menu</div>
+    </div>
+  </div>
+</div>
 */
