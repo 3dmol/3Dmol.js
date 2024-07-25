@@ -15,6 +15,7 @@ import { GLVolumetricRender, VolumetricRendererSpec } from "./VolumetricRender";
 import { AtomSelectionSpec, AtomSpec } from "./specs";
 import { decode, toRGBA8, encode } from 'upng-js'
 
+export const CONTEXTS_PER_VIEWPORT = 16;
 
 /**
  * WebGL-based 3Dmol.js viewer
@@ -117,8 +118,8 @@ export class GLViewer {
     private getWidth() {
         let div = this.container;
         //offsetwidth accounts for scaling
-        let w = div.offsetWidth; 
-        if(w == 0 && div.style.display === 'none') {
+        let w = div.offsetWidth;
+        if (w == 0 && div.style.display === 'none') {
             let oldpos = div.style.position;
             let oldvis = div.style.visibility;
             div.style.display = 'block';
@@ -127,15 +128,15 @@ export class GLViewer {
             w = div.offsetWidth;
             div.style.display = 'none';
             div.style.visibility = oldvis;
-            div.style.position = oldpos;            
+            div.style.position = oldpos;
         }
         return w;
     };
 
     private getHeight() {
         let div = this.container;
-        let h = div.offsetHeight; 
-        if(h == 0 && div.style.display === 'none') {
+        let h = div.offsetHeight;
+        if (h == 0 && div.style.display === 'none') {
             let oldpos = div.style.position;
             let oldvis = div.style.visibility;
             div.style.display = 'block';
@@ -144,7 +145,7 @@ export class GLViewer {
             h = div.offsetHeight;
             div.style.display = 'none';
             div.style.visibility = oldvis;
-            div.style.position = oldpos;            
+            div.style.position = oldpos;
         }
         return h;
     };
@@ -195,6 +196,34 @@ export class GLViewer {
         this.scene.add(directionalLight);
     };
 
+    private _handleLostContext(event) {
+
+        //when contexts go missing, try to regenerate any that are visible on screen
+        //but no more than CONTEXTS_PER_VIEWPORT (if this is set higher than the
+        //browser limit there will be an infinity loop of refreshing contexts of
+        //too many are on screen)
+        const isVisible = function (cont) {
+            const rect = cont.getBoundingClientRect();
+            return !(
+                rect.right < 0 ||
+                rect.bottom < 0 ||
+                rect.top > (window.innerHeight || document.documentElement.clientHeight) ||
+                rect.left > (window.innerWidth || document.documentElement.clientWidth)
+            );
+        };
+
+        if (isVisible(this.container)) {
+            let restored = 0;
+            for(let c of document.getElementsByTagName('canvas')) {
+                if( isVisible(c) && (c as any)._3dmol_viewer != undefined) {
+                    (c as any)._3dmol_viewer.resize();
+                    restored += 1;
+                    if(restored >= CONTEXTS_PER_VIEWPORT) break;
+                }
+            }
+        }
+    }
+
     private initContainer(element) {
         this.container = element;
         this.WIDTH = this.getWidth();
@@ -203,6 +232,9 @@ export class GLViewer {
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         this.container.append(this.renderer.domElement);
         this.glDOM = this.renderer.domElement;
+
+        (this.glDOM as any)._3dmol_viewer = this;
+        this.glDOM.addEventListener("webglcontextlost", this._handleLostContext.bind(this));
 
         if (!this.nomouse) {
             // user can request that the mouse handlers not be installed
@@ -656,7 +688,7 @@ export class GLViewer {
             //make sure a viewer that is becoming visible is alive
             let intcallback = (entries, observer) => {
                 entries.forEach((entry) => {
-                    if(entry.isIntersecting) {
+                    if (entry.isIntersecting) {
                         this.resize();
                     }
                 });
@@ -664,7 +696,7 @@ export class GLViewer {
             this.intwatcher = new window.IntersectionObserver(intcallback);
             this.intwatcher.observe(this.container);
         }
-          
+
         try {
             if (typeof (this.callback) === "function")
                 this.callback(this);
@@ -1363,12 +1395,12 @@ export class GLViewer {
             //create new context
             let resetcanvas = false;
             let currentcanvas = this.container.querySelector('canvas');
-            if(currentcanvas && currentcanvas != this.renderer.getCanvas()) {
+            if (currentcanvas && currentcanvas != this.renderer.getCanvas()) {
                 //canvas has been replaced, use new one
                 this.config.canvas = currentcanvas;
             } else {
                 currentcanvas.remove(); //remove existing
-                if(this.config && this.config.canvas != undefined) {
+                if (this.config && this.config.canvas != undefined) {
                     delete this.config.canvas;
                     resetcanvas = true;
                 }
@@ -1378,7 +1410,7 @@ export class GLViewer {
             this.renderer.setClearColorHex(this.bgColor, this.config.backgroundAlpha);
 
             regen = true;
-            if(resetcanvas) {
+            if (resetcanvas) {
                 this.config.canvas = this.renderer.getCanvas();
             }
         }
@@ -1392,10 +1424,10 @@ export class GLViewer {
         if (regen) { //restored rendere, need to regenerate scene
             let options = this.renderer.supportedExtensions();
             options.regen = true;
-            if(this.viewers) {
-                for(let i = 0, n = this.viewers.length; i < n; i++) {
-                    for(let j = 0, m = this.viewers[i].length; j < m; j++) {
-                       this.viewers[i][j].render(null, options);
+            if (this.viewers) {
+                for (let i = 0, n = this.viewers.length; i < n; i++) {
+                    for (let j = 0, m = this.viewers[i].length; j < m; j++) {
+                        this.viewers[i][j].render(null, options);
                     }
                 }
             }
@@ -1748,7 +1780,7 @@ export class GLViewer {
         }
 
         for (i = 0; i < this.labels.length; i++) {
-            if(exts.regen) {
+            if (exts.regen) {
                 this.labels[i].dispose();
                 this.modelGroup.remove(this.labels[i].sprite);
                 this.labels[i].setContext();
@@ -2230,7 +2262,7 @@ export class GLViewer {
 
           $3Dmol.get('data/1fas.pqr', function(data){
               viewer.addModel(data, "pqr");
-	      viewer.zoomTo();
+          viewer.zoomTo();
               $3Dmol.get("data/1fas.cube",function(volumedata){
                   viewer.addSurface($3Dmol.SurfaceType.VDW, {
                       opacity:0.85,
@@ -3077,9 +3109,9 @@ export class GLViewer {
 
                         let newatoms = [];
                         for (let a = 0; a < atoms.length; a++) {
-                            let newx = atoms[a].x+offset.x, 
-                                newy = atoms[a].y+offset.y, 
-                                newz = atoms[a].z+offset.z;
+                            let newx = atoms[a].x + offset.x,
+                                newy = atoms[a].y + offset.y,
+                                newz = atoms[a].z + offset.z;
                             if (omitPosition(newx, newy, newz)) {
                                 continue;
                             }
@@ -3368,7 +3400,7 @@ export class GLViewer {
         if (options.interval) {
             interval = options.interval;
         }
-        if (options.loop) {``
+        if (options.loop) {
             loop = options.loop;
         }
         if (options.reps) {
@@ -4166,7 +4198,7 @@ export class GLViewer {
      */
     private static getMatWithStyle(style: SurfaceStyleSpec) {
         let mat = null;
-        if(style.onesided) {
+        if (style.onesided) {
             mat = new MeshLambertMaterial();
         } else {
             mat = new MeshDoubleLambertMaterial();
