@@ -420,7 +420,7 @@ export function download(query, viewer, options, callback?) {
         }
     }
     if (query.substring(0,5) == 'mmtf:') {
-        console.log('WARNING: MMTF now deprecated.  Reverting to bcif.');
+        console.warn('WARNING: MMTF now deprecated.  Reverting to bcif.');
         query = 'bcif:' + query.slice(5);
     }
     if (query.substring(0, 5) === 'bcif:') {
@@ -437,7 +437,7 @@ export function download(query, viewer, options, callback?) {
                     viewer.zoomTo();
                     viewer.render();
                     resolve(m);
-                }, function () { console.log("fetch of " + uri + " failed."); });
+                }, function () { console.error("fetch of " + uri + " failed."); });
         });
     }
     else {
@@ -493,14 +493,14 @@ export function download(query, viewer, options, callback?) {
                         pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
                         uri = pdbUri + query + ".pdb";
                         type = "pdb";
-                        console.log("falling back to pdb format");
+                        console.warn("falling back to pdb format");
                         get(uri).then(function (data) {
                             handler(data);
                             resolve(m);
                         }).catch(function (e) {
                             handler("");
                             resolve(m);
-                            console.log("fetch of " + uri + " failed: " + e.statusText);
+                            console.error("fetch of " + uri + " failed: " + e.statusText);
                         });
                     }); //an error msg has already been printed
             }
@@ -511,7 +511,7 @@ export function download(query, viewer, options, callback?) {
                 }).catch(function (e) {
                     handler("");
                     resolve(m);
-                    console.log("fetch of " + uri + " failed: " + e.statusText);
+                    console.error("fetch of " + uri + " failed: " + e.statusText);
                 });
             }
         });
@@ -591,7 +591,7 @@ export function getColorFromStyle(atom, style): Color {
             //actual color scheme provided
             color = style.colorscheme[atom.elem];
         } else {
-            console.log("Could not interpret colorscheme " + scheme);
+            console.warn("Could not interpret colorscheme " + scheme);
         }
     } else if (typeof style.colorfunc != "undefined") {
         //this is a user provided function for turning an atom into a color

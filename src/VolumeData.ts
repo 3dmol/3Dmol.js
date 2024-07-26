@@ -63,7 +63,7 @@ export class VolumeData {
                     str = new TextDecoder("utf-8").decode(inflate(str));
                 }
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
         }
 
@@ -92,7 +92,6 @@ export class VolumeData {
                     total += diff * diff; //variance is ave of squared difference with mean
                 }
                 var variance = total / this.data.length;
-                //console.log("Computed variance: "+variance);
                 //now normalize
                 for (let i = 0, n = this.data.length; i < n; i++) {
                     this.data[i] = (this.data[i] - mean) / variance;
@@ -180,7 +179,7 @@ export class VolumeData {
         var natoms = atomicData.length;
 
         if (natoms == 0) {
-            console.log("No good formating of CHG or CHGCAR file, not atomic information provided in the file.");
+            console.warn("No good formating of CHG or CHGCAR file, not atomic information provided in the file.");
             this.data = [];
             return;
         }
@@ -259,15 +258,6 @@ export class VolumeData {
         }
 
         this.data = preConvertedData;
-
-        //console.log(xVec);
-        //console.log(yVec);
-        //console.log(zVec);
-        //console.log(this.unit);
-        //console.log(this.origin);
-        //console.log(this.matrix);
-        //console.log(this.data);
-
     };
 
     // parse dx data - does not support all features of the file format
@@ -291,32 +281,32 @@ export class VolumeData {
             else if ((m = redelta.exec(line))) {
                 var xunit = parseFloat(m[1]);
                 if (parseFloat(m[2]) != 0 || parseFloat(m[3]) != 0) {
-                    console.log("Non-orthogonal delta matrix not currently supported in dx format");
+                    console.warn("Non-orthogonal delta matrix not currently supported in dx format");
                 }
                 i += 1;
                 line = lines[i];
                 m = redelta.exec(line);
                 if (m == null) {
-                    console.log("Parse error in dx delta matrix");
+                    console.error("Parse error in dx delta matrix");
                     return;
                 }
 
                 var yunit = parseFloat(m[2]);
                 if (parseFloat(m[1]) != 0 || parseFloat(m[3]) != 0) {
-                    console.log("Non-orthogonal delta matrix not currently supported in dx format");
+                    console.warn("Non-orthogonal delta matrix not currently supported in dx format");
                 }
 
                 i += 1;
                 line = lines[i];
                 m = redelta.exec(line);
                 if (m == null) {
-                    console.log("Parse error in dx delta matrix");
+                    console.error("Parse error in dx delta matrix");
                     return;
                 }
 
                 var zunit = parseFloat(m[3]);
                 if (parseFloat(m[1]) != 0 || parseFloat(m[2]) != 0) {
-                    console.log("Non-orthogonal delta matrix not currently supported in dx format");
+                    console.warn("Non-orthogonal delta matrix not currently supported in dx format");
                 }
                 this.unit = new Vector3(xunit, yunit, zunit);
             }
@@ -331,7 +321,7 @@ export class VolumeData {
         }
         i += 1;
         if (!this.size || !this.origin || !this.unit || !this.size) {
-            console.log("Error parsing dx format");
+            console.error("Error parsing dx format");
             return;
         }
         var raw = lines.splice(i).join(" ");
@@ -484,7 +474,6 @@ export class VolumeData {
 
         // 56      NLABL           Number of labels being used
         // 57-256  LABEL(20,10)    10  80 character text labels (ie. A4 format)
-        //console.log("Map has min,mean,average,rmsddv: "+header.DMIN+","+header.DMAX+","+header.DMEAN+","+header.ARMS);
 
         //create transformation matrix, code mostly copied from ngl
         var h = header;

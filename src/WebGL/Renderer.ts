@@ -189,14 +189,14 @@ export class Renderer {
 
     this._canvas.id = parameters.id;
 
-    if(parameters.containerWidth == 0 || parameters.containerHeight == 0) {
+    if (parameters.containerWidth == 0 || parameters.containerHeight == 0) {
       return; //start lost
     }
     this.initGL();
     this.setDefaultGLState();
 
     this.context = this._gl;
-    if(this.isWebGL1()) {
+    if (this.isWebGL1()) {
       this._extInstanced = this._gl.getExtension("ANGLE_instanced_arrays");
     } else { //no longer an extension, wrap
       this._extInstanced = {
@@ -228,7 +228,7 @@ export class Renderer {
   getCanvas() {
     return this._canvas;
   }
-  
+
   isLost() {
     return this._gl == null || this._gl.isContextLost();
   }
@@ -240,7 +240,7 @@ export class Renderer {
   setClearColorHex(hex, alpha) {
     this._clearColor.setHex(hex);
     this._clearAlpha = alpha;
-    if(!this.isLost()) {
+    if (!this.isLost()) {
       this._gl.clearColor(this._clearColor.r, this._clearColor.g, this._clearColor.b, this._clearAlpha);
     }
   }
@@ -273,7 +273,7 @@ export class Renderer {
       this._viewportWidth = wid;
       this._viewportHeight = hei;
 
-      if(!this.isLost()) {
+      if (!this.isLost()) {
         this._gl.enable(this._gl.SCISSOR_TEST);
         this._gl.scissor(wid * this.col, hei * this.row, wid, hei);
         this._gl.viewport(wid * this.col, hei * this.row, wid, hei);
@@ -314,7 +314,7 @@ export class Renderer {
       this._canvas.style.width = width + "px";
       this._canvas.style.height = height + "px";
 
-      if(!this.isLost()) {
+      if (!this.isLost()) {
         this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
       }
     }
@@ -440,7 +440,7 @@ export class Renderer {
     // program
     // Also sets appropriate uniform variables
     program = this.setProgram(camera, lights, fog, material, object, this);
-    if(!program) return;
+    if (!program) return;
 
     attributes = program.attributes;
 
@@ -616,7 +616,7 @@ export class Renderer {
       camera.matrixWorldInverse
     );
 
-    if(this.isLost()) {
+    if (this.isLost()) {
       return;
     }
     // update WebGL objects
@@ -1264,7 +1264,7 @@ export class Renderer {
     // Set up new program and compile shaders
 
     program = this._gl.createProgram();
-    if(program == null) return null;
+    if (program == null) return null;
 
     // set up precision
     var precision = this._precision;
@@ -1290,8 +1290,8 @@ export class Renderer {
     );
     var glVertexShader = this.getShader("vertex", prefix_vertex + vertexShader);
 
-    if(glVertexShader != null)  this._gl.attachShader(program, glVertexShader);
-    if(glFragmentShader != null) this._gl.attachShader(program, glFragmentShader);
+    if (glVertexShader != null) this._gl.attachShader(program, glVertexShader);
+    if (glFragmentShader != null) this._gl.attachShader(program, glFragmentShader);
 
     this._gl.linkProgram(program);
 
@@ -1364,7 +1364,7 @@ export class Renderer {
       this.initMaterial(material, lights, fog, object);
       material.needsUpdate = false;
     }
-    if( material.program == null) return null;
+    if (material.program == null) return null;
 
     var refreshMaterial = false;
 
@@ -1967,69 +1967,56 @@ export class Renderer {
         this.setMaterialFaces(material, reflected);
 
         this.renderBuffer(camera, lights, fog, material, buffer, object);
-        if (this._outlineEnabled || material.outline) {
+
+        if ((this._outlineEnabled || material.outline) &&
+          !material.wireframe &&
+          material.shaderID !== "basic" &&
+          material.opacity !== 0.0) {
+          let outmat: any = this._outlineMaterial;
           if (material.shaderID == "sphereimposter") {
-            this.renderBuffer(
-              camera,
-              lights,
-              fog,
-              this._outlineSphereImposterMaterial,
-              buffer,
-              object
-            );
+            outmat = this._outlineSphereImposterMaterial;
           } else if (material.shaderID == "stickimposter") {
-            this.renderBuffer(
-              camera,
-              lights,
-              fog,
-              this._outlineStickImposterMaterial,
-              buffer,
-              object
-            );
-          } else if (
-            !material.wireframe &&
-            material.shaderID !== "basic" &&
-            material.opacity !== 0.0
-          ) {
-            this.renderBuffer(
-              camera,
-              lights,
-              fog,
-              this._outlineMaterial,
-              buffer,
-              object
-            );
+            outmat = this._outlineStickImposterMaterial;
           }
+
+          this.renderBuffer(
+            camera,
+            lights,
+            fog,
+            outmat,
+            buffer,
+            object
+          );
         }
       }
     }
   }
 
   private renderSprites(scene, camera, inFront) {
-    // Reset state once regardless
-    // This should also fix cartoon render bug (after transparent surface
-    // render)
+  // Reset state once regardless
+  // This should also fix cartoon render bug (after transparent surface
+  // render)
 
-    this._currentGeometryGroupHash = -1;
-    this._currentProgram = null;
-    this._currentCamera = null;
-    this._oldDepthWrite = -1;
-    this._oldDepthTest = -1;
-    this._oldDoubleSided = -1;
-    this._currentMaterialId = -1;
-    this._oldFlipSided = -1;
-    this._lightsNeedUpdate = true;
+  this._currentGeometryGroupHash = -1;
+  this._currentProgram = null;
+  this._currentCamera = null;
+  this._oldDepthWrite = -1;
+  this._oldDepthTest = -1;
+  this._oldDoubleSided = -1;
+  this._currentMaterialId = -1;
+  this._oldFlipSided = -1;
+  this._lightsNeedUpdate = true;
 
-    this.sprites.render(scene, camera, this._currentWidth, this._currentHeight, inFront);
+  this.sprites.render(scene, camera, this._currentWidth, this._currentHeight, inFront);
 
-    // Reset state a
-    this._currentGeometryGroupHash = -1;
-    this._currentProgram = null;
-    this._currentCamera = null;
-    this._oldDepthWrite = -1;
-    this._oldDepthTest = -1;
-    this._oldDoubleSided = -1;
-    this._currentMaterialId = -1;
-    this._oldFlipSided = -1;
-  }
+  // Reset state a
+  this._currentGeometryGroupHash = -1;
+  this._currentProgram = null;
+  this._currentCamera = null;
+  this._oldDepthWrite = -1;
+  this._oldDepthTest = -1;
+  this._oldDoubleSided = -1;
+  this._currentMaterialId = -1;
+  this._oldFlipSided = -1;
+}
 }
