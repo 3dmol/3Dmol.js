@@ -30,7 +30,7 @@ export class GLViewer {
 
     private callback: any;
     private defaultcolors: any;
-    private config: any;
+    private config: ViewerSpec;
     private nomouse = false;
     private bgColor: any;
     private camerax: number;
@@ -164,7 +164,9 @@ export class GLViewer {
             canvas: this.config.canvas,
             //cannot initialize with zero size - render will start out lost
             containerWidth: this.WIDTH,
-            containerHeight: this.HEIGHT
+            containerHeight: this.HEIGHT,
+            ambientOcclusion: this.config.ambientOcclusion,
+            outline: this.config.outline
         });
         this.renderer.domElement.style.width = "100%";
         this.renderer.domElement.style.height = "100%";
@@ -620,7 +622,7 @@ export class GLViewer {
         this.defaultcolors = this.config.defaultcolors;
         if (!this.defaultcolors)
             this.defaultcolors = elementColors.defaultColors;
-        this.nomouse = this.config.nomouse;
+        this.nomouse = Boolean(this.config.nomouse);
         this.bgColor = 0;
         this.config.backgroundColor = this.config.backgroundColor || "#ffffff";
         if (typeof (this.config.backgroundColor) != 'undefined') {
@@ -630,7 +632,7 @@ export class GLViewer {
 
         this.camerax = 0;
         if (typeof (this.config.camerax) != 'undefined') {
-            this.camerax = parseFloat(this.config.camerax);
+            this.camerax = typeof(this.config.camerax) === 'string' ? parseFloat(this.config.camerax) : this.config.camerax;
         }
         this._viewer = this;
         this.container = element; //we expect container to be HTMLElement
@@ -674,7 +676,7 @@ export class GLViewer {
 
         this.initContainer(this.container);
         if (this.config.style) { //enable setting style in constructor
-            this.setViewStyle(this.config);
+            this.setViewStyle(this.config as ViewStyle);
         }
 
         window.addEventListener("resize", this.resize.bind(this));
@@ -830,10 +832,10 @@ export class GLViewer {
     };
 
     /**
-     * Set the configuration object.  Note that some setting may only
+     * Set the configuration object.  Note that some settings may only
      * have an effect at viewer creation time.
      */
-    public setConfig(c) {
+    public setConfig(c: ViewerSpec) {
         this.config = c;
     };
 
@@ -1341,8 +1343,11 @@ export class GLViewer {
           });
      *
      */
-    public setViewStyle(parameters) {
-        if (parameters.style === "outline") {
+    public setViewStyle(parameters: ViewStyle) {
+        parameters = parameters || {};
+        parameters.style = parameters.style || "";
+
+        if (parameters.style.includes("outline")) {
             var params: any = {};
             if (parameters.color) params.color = CC.color(parameters.color);
             if (parameters.width) params.width = parameters.width;
@@ -1350,6 +1355,14 @@ export class GLViewer {
         } else {
             this.renderer.disableOutline();
         }
+        if (parameters.style.includes("ambientOcclusion")) {
+            var params: any = {};
+            if (parameters.strength) params.strength = parameters.strength;
+            if (parameters.radius) params.radius = parameters.radius;
+            this.renderer.enableAmbientOcclusion(params);
+        } else {
+            this.renderer.disableAmbientOcclusion();
+        }        
         return this;
     };
 
@@ -4971,6 +4984,34 @@ export function createStereoViewer(element) {
 
 };
 
+
+/**
+ * Outline style configuration parameters
+ */
+export interface OutlineStyle {
+    /** Width of the outline */
+    width?: number;
+    /** Color of the outline */
+    color?: ColorSpec;
+}
+
+/**
+ * AmbientOcclusion style configuration parameters
+ */
+export interface AmbientOcclusionStyle {
+    /** Strength (darkness) of shading (default 1.0) */
+    strength?: number;
+    /** Radius (in Angstroms) used to detect occlusions (default 5.0). */
+    radius?: number;
+}
+
+/**
+ * View style configuration
+ */
+export interface ViewStyle extends OutlineStyle, AmbientOcclusionStyle {
+    /** How to style viewer: outline|ambientOcclusion|none */
+    style?: string;
+}
 /**
  * GLViewer input specification
  */
@@ -4993,7 +5034,7 @@ export interface ViewerSpec {
     /** Alpha transparency of canvas background */
     backgroundAlpha?: number;
     /** */
-    camerax?: number;
+    camerax?: number|string;
     /** */
     hoverDuration?: number;
     /** id of the canvas */
@@ -5025,6 +5066,12 @@ export interface ViewerSpec {
     orthographic?: boolean;
     /** Disable fog, default to false */
     disableFog?: boolean;
+    /** outline or ambientOcclusion **deprecated** */
+    style?: string;
+    /** Outline parameters */
+    outline?: OutlineStyle;
+    /** Ambient occlusion settings */
+    ambientOcclusion?: AmbientOcclusionStyle;
 
 };
 

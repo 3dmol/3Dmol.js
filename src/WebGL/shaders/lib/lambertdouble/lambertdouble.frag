@@ -1,4 +1,7 @@
 
+#ifdef SHADED
+uniform highp sampler2D shading;
+#endif
 
 uniform mat4 viewMatrix;
 uniform float opacity;
@@ -11,6 +14,8 @@ varying vec3 vLightFront;
 varying vec3 vLightBack;
 
 varying vec3 vColor;
+
+
 //DEFINEFRAGCOLOR
 
 void main() {
@@ -24,7 +29,13 @@ void main() {
        gl_FragColor.xyz *= vLightBack;
     #endif
 
-    gl_FragColor = gl_FragColor * vec4( vColor, opacity );
+    vec3 color = vColor;
+#ifdef SHADED
+    ivec2 dim = textureSize(shading,0);
+    float shadowFactor = texture2D(shading,vec2(gl_FragCoord.x/float(dim.x),gl_FragCoord.y/float(dim.y))).r;
+    color *= shadowFactor;
+#endif
+    gl_FragColor = gl_FragColor * vec4( color, opacity );
     float depth = gl_FragCoord.z / gl_FragCoord.w;
 
     float fogFactor = smoothstep( fogNear, fogFar, depth );

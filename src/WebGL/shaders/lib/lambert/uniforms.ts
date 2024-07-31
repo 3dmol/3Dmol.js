@@ -6,5 +6,5 @@ export const  uniforms = {
     fogNear: { type: 'f', value: 1.0 },
     fogFar: { type: 'f', value: 2000},
     directionalLightColor: { type: 'fv', value: [] },
-    directionalLightDirection: { type: 'fv', value: [] }
+    directionalLightDirection: { type: 'fv', value: [] },
 }

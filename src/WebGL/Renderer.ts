@@ -29,10 +29,6 @@ export class Renderer {
   context = null;
   devicePixelRatio = 1.0; //set in setSize
   domElement: HTMLCanvasElement;
-  autoClear = true;
-  autoClearColor = true;
-  autoClearDepth = true;
-  autoClearStencil = true;
 
   // scene graph
   sortObjects = true;
@@ -79,11 +75,12 @@ export class Renderer {
   private _currentHeight = 0;
   private _enabledAttributes = {};
   // camera matrices cache
-  private _projScreenMatrix = new Matrix4();
   private _vector3 = new Vector3();
   private _worldInverse = new Matrix4();
   private _projInverse = new Matrix4();
   private _textureMatrix = new Matrix4();
+  private _fullProjModelMatrix = new Matrix4();
+  private _fullProjModelMatrixInv = new Matrix4();
   // light arrays cach
   private _direction = new Vector3();
   private _lightsNeedUpdate = true;
@@ -121,13 +118,19 @@ export class Renderer {
 
   //screensshader related variables
   private _screenshader = null;
+  private _AOshader = null;
+  private _blurshader = null;
   private _vertexattribpos = null;
+  private _aovertexattribpos = null;
+  private _blurvertexattribpos = null;
   private _screenQuadVBO = null;
 
   //framebuffer variables
   private _fb = null;
   private _targetTexture = null;
   private _depthTexture = null;
+  private _shadingTexture = null;
+  private _scratchTexture = null;
   private _canvas: any;
   private _precision: any;
   private _alpha: any;
@@ -141,10 +144,15 @@ export class Renderer {
   private _outlineSphereImposterMaterial: SphereImposterOutlineMaterial;
   private _outlineStickImposterMaterial: StickImposterOutlineMaterial;
   private _outlineEnabled: boolean;
+  private _AOEnabled: boolean;
+  private _AOstrength: number = 1.0;
+  private _AOradius: number = 5.0;
   private _extInstanced: any;
   private _extFragDepth: ReturnType<WebGL2RenderingContext["getExtension"]>;
   private _extFloatLinear: ReturnType<WebGL2RenderingContext["getExtension"]>;
   private _extColorBufferFloat: ReturnType<WebGL2RenderingContext["getExtension"]>;
+
+  private SHADE_TEXTURE: number = 3;
 
   constructor(parameters) {
     parameters = parameters || {};
@@ -185,8 +193,18 @@ export class Renderer {
       parameters.outline
     );
     this._outlineEnabled = !!parameters.outline;
+    this._AOEnabled = !!parameters.ambientOcclusion;
+    if(parameters.ambientOcclusion && typeof(parameters.ambientOcclusion.strength) !== 'undefined') {
+      this._AOstrength = parseFloat(parameters.ambientOcclusion.strength);
+    }
+    if(this._AOstrength == 0) {
+      this._AOEnabled = false;
+    }
+    if(parameters.ambientOcclusion && typeof(parameters.ambientOcclusion.radius) !== 'undefined') {
+      this._AOradius = parseFloat(parameters.ambientOcclusion.radius);
+    }    
+    
     this.domElement = this._canvas;
-
     this._canvas.id = parameters.id;
 
     if (parameters.containerWidth == 0 || parameters.containerHeight == 0) {
@@ -260,6 +278,18 @@ export class Renderer {
     this._outlineEnabled = false;
   }
 
+  enableAmbientOcclusion(parameters) {
+    if(parameters) {
+      if(parameters.strength) this._AOstrength = parameters.strength;
+      if(parameters.scale) this._AOradius = parameters.scale;
+    }
+    this._AOEnabled = this._AOstrength > 0;
+  }
+
+  disableAmbientOcclusion() {
+    this._AOEnabled = false;
+  }
+
   setViewport() {
     if (
       this.rows != undefined &&
@@ -327,10 +357,6 @@ export class Renderer {
     if (depth === undefined || depth) bits |= this._gl.DEPTH_BUFFER_BIT;
     if (stencil === undefined || stencil) bits |= this._gl.STENCIL_BUFFER_BIT;
     this._gl.clear(bits);
-  }
-
-  clearTarget(color, depth, stencil) {
-    this.clear(color, depth, stencil);
   }
 
   setMaterialFaces(material, reflected) {
@@ -415,12 +441,17 @@ export class Renderer {
       material.fragmentShader = shader.fragmentShader;
       material.uniforms = ShaderUtils.clone(shader.uniforms);
       // TODO: set material uniforms to shader uniform variables
+
+      if (material.shaded) {
+        material.makeShaded(this.SHADE_TEXTURE);
+      }
     }
 
     parameters = {
       wireframe: material.wireframe,
       fragdepth: material.imposter,
       volumetric: material.volumetric,
+      shaded: material.shaded
     };
 
     material.program = this.buildProgram(
@@ -581,7 +612,161 @@ export class Renderer {
     }
   }
 
-  render(scene, camera, forceClear?) {
+  /* clear out the shading textures */
+  clearShading() {
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.DEPTH_ATTACHMENT,
+      this._gl.TEXTURE_2D,
+      this._shadingTexture,
+      0
+    );
+    this.clear(false,true,false);
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.DEPTH_ATTACHMENT,
+      this._gl.TEXTURE_2D,
+      this._depthTexture,
+      0
+    );
+  }
+
+  /* Setup the shading buffer to reflect desired shading (ambient occlusion) values.
+    Only the matching object with materialType are considered. */
+  setShading(scene, camera, materialType) {
+    //identify all matching objects
+    let lights = scene.__lights;
+    let fog = scene.fog;
+    let renderList = [];
+
+    for (let i = 0, il = scene.__webglObjects.length; i < il; i++) {
+      let webglObject = scene.__webglObjects[i];
+
+      if (webglObject.render && webglObject[materialType]) {
+        renderList.push(webglObject);
+      }
+    }
+
+    if (renderList.length == 0) return;
+
+    //setup shading texture as depth buffer
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.DEPTH_ATTACHMENT,
+      this._gl.TEXTURE_2D,
+      this._shadingTexture,
+      0
+    );
+
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.COLOR_ATTACHMENT0,
+      this._gl.TEXTURE_2D,
+      null, //don't write colors (can we do this?)
+      0
+    );
+
+    //calculate depth map
+    this.renderObjects(scene.__webglObjects, true, materialType + "Depth",
+      camera, lights, fog, false);
+    
+    //detach so we can read and attach scratch
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.DEPTH_ATTACHMENT,
+      this._gl.TEXTURE_2D,
+      this._scratchTexture,
+      0
+    );
+    this.clear(false,true,false);
+
+    //perform AO calculation from depth map to scratch buffer
+
+    // set screen shader and use it
+    this._gl.useProgram(this._AOshader);
+    this._currentProgram = this._AOshader;
+    // disable depth test
+    this.setDepthTest(-1);
+    this.setDepthWrite(-1);
+
+    let p_uniforms = this._AOshader.uniforms;
+    this._gl.uniform1f(p_uniforms.total_strength, this._AOstrength);
+    this._gl.uniform1f(p_uniforms.radius, this._AOradius);
+
+    //setup full projection matrix from model to screen and inverted
+    //use first object
+    this._fullProjModelMatrix = new Matrix4();
+    this._fullProjModelMatrixInv = new Matrix4();
+    let object = renderList[0].object;
+    this._fullProjModelMatrix.multiplyMatrices(camera.projectionMatrix,object._modelViewMatrix);
+    this._fullProjModelMatrixInv.getInverse(this._fullProjModelMatrix);
+      this._gl.uniformMatrix4fv(
+        p_uniforms.projectionMatrix,
+        false,
+        this._fullProjModelMatrix.elements
+      );
+    
+    this._gl.uniformMatrix4fv(p_uniforms.projinv, false, this._fullProjModelMatrixInv.elements);    
+
+
+    // bind vertexarray buffer and texture
+    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._screenQuadVBO);
+    this._gl.enableVertexAttribArray(this._aovertexattribpos);
+    this._gl.vertexAttribPointer(this._aovertexattribpos, 2, this._gl.FLOAT, false, 0, 0);
+
+    this._gl.activeTexture(this._gl.TEXTURE0);
+    this._gl.bindTexture(this._gl.TEXTURE_2D, this._shadingTexture);
+
+    // Draw 6 vertexes => 2 triangles:
+    this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
+
+
+    //perform blur from scratch to shading
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.DEPTH_ATTACHMENT,
+      this._gl.TEXTURE_2D,
+      this._shadingTexture,
+      0
+    );
+    this.clear(false,true,false);
+        
+    this._gl.useProgram(this._blurshader);
+    this._currentProgram = this._blurshader;
+    this.setDepthTest(-1);
+    this.setDepthWrite(-1);    
+
+
+    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._screenQuadVBO);
+    this._gl.enableVertexAttribArray(this._blurvertexattribpos);
+    this._gl.vertexAttribPointer(this._blurvertexattribpos, 2, this._gl.FLOAT, false, 0, 0);
+
+    this._gl.activeTexture(this._gl.TEXTURE0);
+    this._gl.bindTexture(this._gl.TEXTURE_2D, this._scratchTexture);
+
+    // Draw 6 vertexes => 2 triangles:
+    this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
+
+    //restore original depth, color
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.COLOR_ATTACHMENT0,
+      this._gl.TEXTURE_2D,
+      this._targetTexture,
+      0
+    );
+
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.DEPTH_ATTACHMENT,
+      this._gl.TEXTURE_2D,
+      this._depthTexture,
+      0
+    );
+
+  }
+
+  render(scene, camera) {
     if (camera instanceof Camera === false) {
       console.error("Renderer.render: camera is not an instance of Camera.");
       return;
@@ -611,11 +796,6 @@ export class Renderer {
 
     camera.matrixWorldInverse.getInverse(camera.matrixWorld);
 
-    this._projScreenMatrix.multiplyMatrices(
-      camera.projectionMatrix,
-      camera.matrixWorldInverse
-    );
-
     if (this.isLost()) {
       return;
     }
@@ -633,19 +813,14 @@ export class Renderer {
     this.setViewport();
     this.setFrameBuffer();
 
-    if (this.autoClear || forceClear) {
-      this._gl.clearColor(this._clearColor.r, this._clearColor.g, this._clearColor.b, this._clearAlpha);
-      this.clear(
-        this.autoClearColor,
-        this.autoClearDepth,
-        this.autoClearStencil
-      );
-    }
+    this._gl.clearColor(this._clearColor.r, this._clearColor.g, this._clearColor.b, this._clearAlpha);
+    this.clear(true, true, true);
 
     // set matrices for regular objects (frustum culled)
 
     renderList = scene.__webglObjects;
-    var hasvolumetric = false;
+    let hasvolumetric = false;
+    let hasAO = this._AOEnabled;
     for (i = 0, il = renderList.length; i < il; i++) {
       webglObject = renderList[i];
       object = webglObject.object;
@@ -657,70 +832,52 @@ export class Renderer {
         this.unrollBufferMaterial(webglObject);
         webglObject.render = true;
         if (webglObject.volumetric) hasvolumetric = true;
+        if (webglObject.hasAO) hasAO = true;
       }
     }
 
     // set matrices for immediate objects
 
-    var material = null;
-
     // opaque pass (front-to-back order)
 
     this.setBlending(false);
 
-    this.renderObjects(
-      scene.__webglObjects,
-      true,
-      "opaque",
-      camera,
-      lights,
-      fog,
-      false,
-      material
-    );
+    if (hasAO) {
+      this.setShading(scene, camera, "opaque");
+    }
+
+    this.renderObjects(scene.__webglObjects, true, "opaque",
+      camera, lights, fog, false);
+
+      if (hasAO) {
+        this.clearShading();
+      }
 
     // Render embedded labels (sprites)
     this.renderSprites(scene, camera, false);
 
-    // prime depth buffer
-    this.renderObjects(
-      scene.__webglObjects,
-      true,
-      "blank",
-      camera,
-      lights,
-      fog,
-      true,
-      material
-    );
+    // prime depth buffer with transparent objects
+    this.renderObjects(scene.__webglObjects, true, "transparentDepth",
+      camera, lights, fog, true);
 
     // transparent pass (back-to-front order)
 
-    this.renderObjects(
-      scene.__webglObjects,
-      false,
-      "transparent",
-      camera,
-      lights,
-      fog,
-      true,
-      material
-    );
+    this.renderObjects(scene.__webglObjects, false, "transparent",
+      camera, lights, fog, true);
 
     //volumetric is separate
     if (hasvolumetric && this._fb) {
-      //disconnect framebuffer to get depth texture
-      this.reinitFrameBuffer();
-      this.renderObjects(
-        scene.__webglObjects,
-        false,
-        "volumetric",
-        camera,
-        lights,
-        fog,
-        true,
-        material
+      //disconnect depth texture from framebuffer so we can read it
+      this._gl.framebufferTexture2D(
+        this._gl.FRAMEBUFFER,
+        this._gl.DEPTH_ATTACHMENT,
+        this._gl.TEXTURE_2D,
+        null,
+        0
       );
+
+      this.renderObjects(scene.__webglObjects, false, "volumetric",
+        camera, lights, fog, true);
     }
 
     this.renderFrameBuffertoScreen();
@@ -731,23 +888,6 @@ export class Renderer {
     this.renderSprites(scene, camera, true);
   }
 
-  //reinitialize framebuffer without the depth texture attached so we can read to it
-  //do not allocate new textures
-  reinitFrameBuffer() {
-    // only needed/works with webgl2
-    if (this.isWebGL1()) return;
-
-    // Create and bind the framebuffer
-    this._fb = this._gl.createFramebuffer();
-    this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, this._fb);
-    this._gl.framebufferTexture2D(
-      this._gl.FRAMEBUFFER,
-      this._gl.COLOR_ATTACHMENT0,
-      this._gl.TEXTURE_2D,
-      this._targetTexture,
-      0
-    );
-  }
 
   //setup framebuffer for drawing into, assumes buffers already allocated
   setFrameBuffer() {
@@ -796,6 +936,43 @@ export class Renderer {
     this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
     this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
 
+    //shading texture - for AO and maybe eventually shadows? I don't like shadows
+
+    this._gl.bindTexture(this._gl.TEXTURE_2D, this._shadingTexture);
+    this._gl.texImage2D(
+      this._gl.TEXTURE_2D,
+      0,
+      (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
+      width,
+      height,
+      0,
+      this._gl.DEPTH_COMPONENT,
+      this._gl.FLOAT,
+      null
+    );
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
+
+    //scratch texture, needed by AO to do blur
+    this._gl.bindTexture(this._gl.TEXTURE_2D, this._scratchTexture);
+    this._gl.texImage2D(
+      this._gl.TEXTURE_2D,
+      0,
+      (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
+      width,
+      height,
+      0,
+      this._gl.DEPTH_COMPONENT,
+      this._gl.FLOAT,
+      null
+    );
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
+
     //bind fb
     this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, this._fb);
     this._gl.framebufferTexture2D(
@@ -805,6 +982,16 @@ export class Renderer {
       this._targetTexture,
       0
     );
+    this._gl.framebufferTexture2D(
+      this._gl.FRAMEBUFFER,
+      this._gl.DEPTH_ATTACHMENT,
+      this._gl.TEXTURE_2D,
+      this._shadingTexture,
+      0
+    );
+    this._gl.clearDepth(1);
+    this._gl.clear(this._gl.DEPTH_BUFFER_BIT);  //shading all ones
+
     this._gl.framebufferTexture2D(
       this._gl.FRAMEBUFFER,
       this._gl.DEPTH_ATTACHMENT,
@@ -830,6 +1017,8 @@ export class Renderer {
     //create textures and frame buffer, will be initialized in setFrameBuffer
     this._targetTexture = this._gl.createTexture();
     this._depthTexture = this._gl.createTexture();
+    this._shadingTexture = this._gl.createTexture();
+    this._scratchTexture = this._gl.createTexture();
     this._fb = this._gl.createFramebuffer();
 
     // build screenshader
@@ -852,6 +1041,30 @@ export class Renderer {
     this._screenQuadVBO = this._gl.createBuffer();
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._screenQuadVBO);
     this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(verts), this._gl.STATIC_DRAW);
+
+    // build aoshader
+    let aoshader = ShaderLib.ssao;
+
+    this._AOshader = this.buildProgram(
+      aoshader.fragmentShader,
+      aoshader.vertexShader,
+      aoshader.uniforms,
+      {}
+    );
+    this._aovertexattribpos = this._gl.getAttribLocation(this._AOshader, "vertexPosition");
+    // create the vertex array and attrib array for the full screenquad
+
+    //blur shader
+    let bshader = ShaderLib.blur;
+
+    this._blurshader = this.buildProgram(
+      bshader.fragmentShader,
+      bshader.vertexShader,
+      bshader.uniforms,
+      {}
+    );
+    this._blurvertexattribpos = this._gl.getAttribLocation(this._blurshader, "vertexPosition");
+
   }
 
   renderFrameBuffertoScreen() {
@@ -1262,7 +1475,6 @@ export class Renderer {
     }
 
     // Set up new program and compile shaders
-
     program = this._gl.createProgram();
     if (program == null) return null;
 
@@ -1280,6 +1492,7 @@ export class Renderer {
       parameters.fragdepth && this.isWebGL1()
         ? "#extension GL_EXT_frag_depth: enable"
         : "",
+      parameters.shaded ? "#define SHADED 1" : "",
       parameters.wireframe ? "#define WIREFRAME 1" : "",
       prefix,
     ].join("\n");
@@ -1391,22 +1604,42 @@ export class Renderer {
       refreshMaterial = true;
     }
 
-    this._gl.uniformMatrix4fv(
-      p_uniforms.projectionMatrix,
-      false,
-      camera.projectionMatrix.elements
-    );
-    this._gl.uniformMatrix4fv(
-      p_uniforms.modelViewMatrix,
-      false,
-      object._modelViewMatrix.elements
-    );
-    this._gl.uniformMatrix3fv(
-      p_uniforms.normalMatrix,
-      false,
-      object._normalMatrix.elements
-    );
+    if (p_uniforms.projectionMatrix) {
+      this._gl.uniformMatrix4fv(
+        p_uniforms.projectionMatrix,
+        false,
+        camera.projectionMatrix.elements
+      );
+    }
 
+    if (p_uniforms.modelViewMatrix) {
+      this._gl.uniformMatrix4fv(
+        p_uniforms.modelViewMatrix,
+        false,
+        object._modelViewMatrix.elements
+      );
+    }
+
+    if (p_uniforms.normalMatrix) {
+      this._gl.uniformMatrix3fv(
+        p_uniforms.normalMatrix,
+        false,
+        object._normalMatrix.elements
+      );
+    }
+
+    if (p_uniforms.projinv) {
+      this._projInverse.getInverse(camera.projectionMatrix);
+      this._gl.uniformMatrix4fv(p_uniforms.projinv, false, this._projInverse.elements);
+    }
+
+    if (p_uniforms.viewMatrix) {
+      this._gl.uniformMatrix4fv(
+        p_uniforms.viewMatrix,
+        false,
+        camera.matrixWorldInverse.elements
+      );
+    }
     // Send projection matrix to uniform variable in shader
     if (refreshMaterial) {
       // Load projection, model-view matrices for perspective
@@ -1424,11 +1657,6 @@ export class Renderer {
       ) {
         // load view and normal matrices for directional and object
         // lighting
-        this._gl.uniformMatrix4fv(
-          p_uniforms.viewMatrix,
-          false,
-          camera.matrixWorldInverse.elements
-        );
 
         if (this._lightsNeedUpdate) {
           this.setupLights(program, lights);
@@ -1483,6 +1711,15 @@ export class Renderer {
 
       // Load any other material specific uniform variables to gl shaders
       this.loadMaterialUniforms(p_uniforms, m_uniforms);
+    }
+
+    if (m_uniforms.shading) {
+      if (m_uniforms.shading.value == 3) {
+        this._gl.activeTexture(this._gl.TEXTURE0 + this.SHADE_TEXTURE);
+        this._gl.bindTexture(this._gl.TEXTURE_2D, this._shadingTexture);
+      } else {
+        console.error("Invalid shading textures.");
+      }
     }
 
     return program;
@@ -1640,14 +1877,27 @@ export class Renderer {
       globject.volumetric = null;
       globject.transparent = material;
       if (!material.wireframe) {
-        var blankMaterial = material.clone();
+        let blankMaterial = material.clone();
         blankMaterial.opacity = 0.0;
-        globject.blank = blankMaterial;
+        globject.transparentDepth = blankMaterial;
       }
     } else {
       globject.opaque = material;
       globject.transparent = null;
       globject.volumetric = null;
+      if (!material.wireframe) {
+        let blankMaterial = material.clone();
+        blankMaterial.opacity = 0.0;
+        globject.opaqueDepth = blankMaterial;
+      }
+      if(material.hasAO) {
+        globject.hasAO = true;
+      }
+      if (this._AOEnabled || globject.hasAO) {
+        globject.opaqueShaded = material.clone();
+        globject.opaqueShaded.shaded = true;
+      }
+
     }
   }
 
@@ -1925,12 +2175,12 @@ export class Renderer {
     camera,
     lights,
     fog,
-    useBlending,
-    material
+    useBlending
   ) {
     var webglObject, object, buffer, material, start, end, delta;
 
     // Forward or backward render
+
 
     if (reverse) {
       start = renderList.length - 1;
@@ -1950,6 +2200,11 @@ export class Renderer {
         buffer = webglObject.buffer;
         material = webglObject[materialType];
 
+        //convert to AO if needed
+        if ((webglObject.hasAO || this._AOEnabled) &&
+          webglObject[materialType + "Shaded"]) {
+          material = webglObject[materialType + "Shaded"];
+        }
         if (!material) continue;
 
         if (useBlending) this.setBlending(true);
@@ -1993,30 +2248,30 @@ export class Renderer {
   }
 
   private renderSprites(scene, camera, inFront) {
-  // Reset state once regardless
-  // This should also fix cartoon render bug (after transparent surface
-  // render)
+    // Reset state once regardless
+    // This should also fix cartoon render bug (after transparent surface
+    // render)
 
-  this._currentGeometryGroupHash = -1;
-  this._currentProgram = null;
-  this._currentCamera = null;
-  this._oldDepthWrite = -1;
-  this._oldDepthTest = -1;
-  this._oldDoubleSided = -1;
-  this._currentMaterialId = -1;
-  this._oldFlipSided = -1;
-  this._lightsNeedUpdate = true;
+    this._currentGeometryGroupHash = -1;
+    this._currentProgram = null;
+    this._currentCamera = null;
+    this._oldDepthWrite = -1;
+    this._oldDepthTest = -1;
+    this._oldDoubleSided = -1;
+    this._currentMaterialId = -1;
+    this._oldFlipSided = -1;
+    this._lightsNeedUpdate = true;
 
-  this.sprites.render(scene, camera, this._currentWidth, this._currentHeight, inFront);
+    this.sprites.render(scene, camera, this._currentWidth, this._currentHeight, inFront);
 
-  // Reset state a
-  this._currentGeometryGroupHash = -1;
-  this._currentProgram = null;
-  this._currentCamera = null;
-  this._oldDepthWrite = -1;
-  this._oldDepthTest = -1;
-  this._oldDoubleSided = -1;
-  this._currentMaterialId = -1;
-  this._oldFlipSided = -1;
-}
+    // Reset state a
+    this._currentGeometryGroupHash = -1;
+    this._currentProgram = null;
+    this._currentCamera = null;
+    this._oldDepthWrite = -1;
+    this._oldDepthTest = -1;
+    this._oldDoubleSided = -1;
+    this._currentMaterialId = -1;
+    this._oldFlipSided = -1;
+  }
 }

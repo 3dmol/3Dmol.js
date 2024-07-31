@@ -20,13 +20,13 @@ export class Material extends EventDispatcher {
   uvOffset?: Vector2;
   scaleByViewport?: boolean;
   fog?: unknown;
+  uniforms?: any;
 
   side = FrontSide;
   opacity = 1;
   transparent = false;
   depthTest = true;
   depthWrite = true;
-  stencilTest = true;
   polygonOffset = false;
   polygonOffsetFactor = 0;
   polygonOffsetUnits = 0;
@@ -35,6 +35,7 @@ export class Material extends EventDispatcher {
   needsUpdate = true;
   outline = false;
   wireframe = false;
+  shaded = false;
 
   setValues(
     values: Partial<Record<keyof Material, any>> = {} as any
@@ -79,7 +80,6 @@ export class Material extends EventDispatcher {
 
     material.depthTest = this.depthTest;
     material.depthWrite = this.depthWrite;
-    material.stencilTest = this.stencilTest;
 
     material.polygonOffset = this.polygonOffset;
     material.polygonOffsetFactor = this.polygonOffsetFactor;
@@ -94,6 +94,14 @@ export class Material extends EventDispatcher {
     return material;
   }
 
+  makeShaded(sTex: number) {
+    this.shaded = true;
+    if(this.uniforms) {
+      this.uniforms.shading = { type: 'i', value: sTex };
+      this.uniforms.vWidth = { type: 'f', value: 1.0 };
+      this.uniforms.vHeight = { type: 'f', value: 1.0 };
+    }
+  }
   dispose() {
     this.dispatchEvent({ type: "dispose" });
   }

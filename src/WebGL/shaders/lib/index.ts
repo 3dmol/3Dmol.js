@@ -20,22 +20,25 @@ import { lambertdouble } from "./lambertdouble"
 import { outline } from "./outline"
 import { screen } from "./screen"
 import { screenaa } from "./screenaa"
+import { ssao } from "./ssao"
 import { sphereimposter } from "./sphereimposter"
 import { sphereimposteroutline } from "./sphereimposteroutline"
 import { sprite } from "./sprite"
 import { stickimposter } from "./stickimposter"
 import { stickimposteroutline } from "./stickimposteroutline"
 import { volumetric } from "./volumetric"
-
+import {blur } from "./blur"
 
 export const ShaderLib: Record<string, Shader> = {
     basic,
+    blur,
     instanced,
     lambert,
     lambertdouble,
     outline,
     screen,
     screenaa,
+    ssao,
     sphereimposter,
     sphereimposteroutline,
     sprite,

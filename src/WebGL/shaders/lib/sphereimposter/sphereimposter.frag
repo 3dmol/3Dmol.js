@@ -15,6 +15,10 @@ varying float rval;
 varying vec3 vLight;
 varying vec3 center;
 
+#ifdef SHADED
+uniform highp sampler2D shading;
+#endif
+
 //DEFINEFRAGCOLOR
 
 void main() {
@@ -31,7 +35,13 @@ void main() {
     float dotProduct = dot( norm, vLight );
     vec3 directionalLightWeighting = vec3( max( dotProduct, 0.0 ) );
     vec3 vLight = directionalLightColor[ 0 ] * directionalLightWeighting;
-    gl_FragColor = vec4(vLight*vColor, opacity*opacity );
+    vec3 color = vLight*vColor;
+#ifdef SHADED
+    ivec2 dim = textureSize(shading,0);
+    float shadowFactor = texture2D(shading,vec2(gl_FragCoord.x/float(dim.x),gl_FragCoord.y/float(dim.y))).r;
+    color *= shadowFactor;
+#endif    
+    gl_FragColor = vec4(color, opacity*opacity );
     float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );
     gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
 

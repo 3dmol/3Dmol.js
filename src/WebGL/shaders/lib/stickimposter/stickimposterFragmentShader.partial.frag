@@ -12,6 +12,10 @@ varying vec3 p1;
 varying vec3 p2;
 varying float r;
 
+#ifdef SHADED
+uniform highp sampler2D shading;
+#endif
+
 //DEFINEFRAGCOLOR
 
 //cylinder-ray intersection testing taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf
