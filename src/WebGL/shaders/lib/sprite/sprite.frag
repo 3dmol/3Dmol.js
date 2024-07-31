@@ -18,7 +18,7 @@ void main() {
 
     vec4 texture = texture2D(map, vUV);
 
-    if (texture.a < alphaTest) discard;
+    if (texture.a <= alphaTest) discard;
 
     gl_FragColor = vec4(color * texture.xyz, texture.a * opacity);
 

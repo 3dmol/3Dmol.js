@@ -837,6 +837,9 @@ export class GLViewer {
      */
     public setConfig(c: ViewerSpec) {
         this.config = c;
+        if(c.ambientOcclusion) {
+            this.renderer.enableAmbientOcclusion(c.ambientOcclusion);
+        }
     };
 
     /**

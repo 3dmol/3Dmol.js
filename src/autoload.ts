@@ -246,7 +246,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     }
                 })(viewerdiv,glviewer);
 
-                if(type.endsWith('gz')) {
+                if(type && type.endsWith('gz')) {
                     getbin(datauri[0]).then(process);
                 } else {
                     get(datauri[0]).then(process);
