@@ -16,7 +16,7 @@
         "cleverLinks": true,
         "monospaceLinks": false,
         "footer": "",
-        "copyright":"3Dmol.js © 2019-2023",
+        "copyright":"3Dmol.js © 2019-2024",
         "linenums"              : true,
         "collapseSymbols"       : false,
         "inverseNav"            : true,
@@ -38,7 +38,7 @@
             "includeFilesListInHomepage": true,
             "homepageTitle": "3Dmol.js",
             "displayModuleHeader": true,
-            "footer":"3Dmol.js © 2019-2023 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburgh</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
+            "footer":"3Dmol.js © 2019-2024 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburgh</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
             "title": "3Dmol.js",
             "create_style": "article ul li { list-style: disc}",
             "menu": [

@@ -5011,9 +5011,17 @@ export interface AmbientOcclusionStyle {
 /**
  * View style configuration
  */
-export interface ViewStyle extends OutlineStyle, AmbientOcclusionStyle {
+export interface ViewStyle  {
     /** How to style viewer: outline|ambientOcclusion|none */
     style?: string;
+    /** Ambient occlusion strength (darkness) of shading (default 1.0) */
+    strength?: number;
+    /** Ambient occlusion radius (in Angstroms) used to detect occlusions (default 5.0). */
+    radius?: number;
+    /** Width of the outline */
+    width?: number;
+    /** Color of the outline */
+    color?: ColorSpec;    
 }
 /**
  * GLViewer input specification

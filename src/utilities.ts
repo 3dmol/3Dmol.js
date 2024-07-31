@@ -526,7 +526,7 @@ export function download(query, viewer, options, callback?) {
 };
 
 
-/* Return proper color for atom given style
+/**  Return proper color for atom given style
  * @param {AtomSpec} atom
  * @param {AtomStyle} style
  * @return {Color}
