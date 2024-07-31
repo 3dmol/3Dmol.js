@@ -2,7 +2,7 @@
 
 import { GLViewer, createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
-import { get, specStringToObject } from "./utilities";
+import { get, getbin, specStringToObject } from "./utilities";
 import { CC } from "./colors";
 
 export var autoinit = false;
@@ -55,6 +55,10 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     uri = viewerdiv.dataset.url;
                 datauri.push(uri);
                 type = uri.substring(uri.lastIndexOf('.') + 1);
+                if(type == 'gz') {
+                    let pos = uri.substring(0,uri.lastIndexOf('.')).lastIndexOf('.');
+                    type = uri.substring(pos+1);
+                }
                 datatypes.push(type);
 
                 var molName = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
@@ -241,8 +245,12 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                         if (callback) callback(glviewer);
                     }
                 })(viewerdiv,glviewer);
-                get(datauri[0]).then(process);
 
+                if(type.endsWith('gz')) {
+                    getbin(datauri[0]).then(process);
+                } else {
+                    get(datauri[0]).then(process);
+                }
             }
             else {
 

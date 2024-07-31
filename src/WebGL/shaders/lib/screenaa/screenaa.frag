@@ -1,15 +1,18 @@
-uniform sampler2D colormap;
+uniform highp sampler2D colormap;
 varying highp vec2 vTexCoords;
-uniform vec2 dimensions;
+
 
 // Basic FXAA implementation based on the code on geeks3d.com 
 #define FXAA_REDUCE_MIN (1.0/ 128.0)
 #define FXAA_REDUCE_MUL (1.0 / 8.0)
 #define FXAA_SPAN_MAX 8.0
 
-vec4 applyFXAA(vec2 fragCoord, sampler2D tex)
+
+vec4 applyFXAA(vec2 fragCoord, highp sampler2D tex)
 {
     vec4 color;
+    ivec2 dim = textureSize(tex,0);
+    vec2 dimensions = vec2(float(dim.x),float(dim.y));
     vec2 inverseVP = vec2(1.0 / dimensions.x, 1.0 / dimensions.y);
     vec3 rgbNW = texture2D(tex, fragCoord + vec2(-1.0, -1.0) * inverseVP).xyz;
     vec3 rgbNE = texture2D(tex, fragCoord + vec2(1.0, -1.0) * inverseVP).xyz;
@@ -51,8 +54,12 @@ vec4 applyFXAA(vec2 fragCoord, sampler2D tex)
         color = vec4(rgbB, 1.0);
     return color;
 }
+
+
 //DEFINEFRAGCOLOR
 void main (void) {
-   gl_FragColor = applyFXAA(vTexCoords, colormap);
+    ivec2 dim = textureSize(colormap,0);
+
+  gl_FragColor = applyFXAA(vTexCoords, colormap);
 }
         

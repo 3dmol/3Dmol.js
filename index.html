@@ -175,8 +175,10 @@
       <div class="tablerow">
         <div id='viewer1' class='viewer_3Dmoljs' data-href='tests/test_structs/2por.pdb' data-backgroundcolor='0xffffff'
           data-select='{"hetflag":false}' data-style='{"cartoon":{"color":"spectrum"}}'></div>
-        <div id='viewer2' class='viewer_3Dmoljs' data-element='moldata_sdf' data-datatype='sdf'
-          data-style='{"stick":{}}' data-callback='initSDF' data-backgroundcolor='0xf6f6f6'></div>
+        <div id='viewer2' class='viewer_3Dmoljs' data-href='tests/test_structs/3m8l.cif.gz' data-config='ambientOcclusion:strength~1,radius=10'
+          data-select1='chain:A' data-style1='stick:radius=1,color=yellow' 
+          data-select2='chain:B' data-style2='sphere:color=white'
+          data-select3='chain:C' data-surface3='color:#5085e4;opacity:1' data-backgroundcolor='0xf6f6f6'></div>
       </div>
       <div class="tablerow">
         <div id='viewer4' class='viewer_3Dmoljs' data-href="tests/test_structs/benzene.sdf" data-datatype="sdf"

@@ -136,7 +136,6 @@ export class Renderer {
   private _alpha: any;
   private _premultipliedAlpha: any;
   private _antialias: any;
-  private _stencil: any;
   private _preserveDrawingBuffer: any;
   private _clearColor: Color;
   private _clearAlpha: any;
@@ -171,10 +170,8 @@ export class Renderer {
       parameters.premultipliedAlpha !== undefined
         ? parameters.premultipliedAlpha
         : true;
-    this._antialias =
-      parameters.antialias !== undefined ? parameters.antialias : false;
-    this._stencil =
-      parameters.stencil !== undefined ? parameters.stencil : true;
+    this._antialias = parameters.antialias !== undefined ? parameters.antialias : false;
+
     this._preserveDrawingBuffer =
       parameters.preserveDrawingBuffer !== undefined
         ? parameters.preserveDrawingBuffer
@@ -1022,7 +1019,7 @@ export class Renderer {
     this._fb = this._gl.createFramebuffer();
 
     // build screenshader
-    var screenshader = ShaderLib.screen;
+    var screenshader = this._antialias ? ShaderLib.screenaa : ShaderLib.screen;
 
     this._screenshader = this.buildProgram(
       screenshader.fragmentShader,
@@ -2111,7 +2108,6 @@ export class Renderer {
           alpha: this._alpha,
           premultipliedAlpha: this._premultipliedAlpha,
           antialias: this._antialias,
-          stencil: this._stencil,
           preserveDrawingBuffer: this._preserveDrawingBuffer,
         }))
       ) {
@@ -2120,7 +2116,6 @@ export class Renderer {
             alpha: this._alpha,
             premultipliedAlpha: this._premultipliedAlpha,
             antialias: this._antialias,
-            stencil: this._stencil,
             preserveDrawingBuffer: this._preserveDrawingBuffer,
           }))
         ) {
@@ -2129,7 +2124,6 @@ export class Renderer {
               alpha: this._alpha,
               premultipliedAlpha: this._premultipliedAlpha,
               antialias: this._antialias,
-              stencil: this._stencil,
               preserveDrawingBuffer: this._preserveDrawingBuffer,
             }))
           ) {
