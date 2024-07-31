@@ -2490,7 +2490,7 @@ export class GLViewer {
               viewer.render();
             });
      */
-    public addResLabels(sel: AtomSelectionSpec, style: AtomStyleSpec, byframe: boolean = false) {
+    public addResLabels(sel: AtomSelectionSpec, style: LabelSpec, byframe: boolean = false) {
         let start = this.labels.length;
         this.applyToModels("addResLabels", sel, this, style, byframe);
         this.show();
