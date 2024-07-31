@@ -1475,12 +1475,14 @@ export class GLShape {
 
         this.shapeObj.add(mesh);
 
-        var lineMaterial = new LineBasicMaterial({
-            linewidth: this.linewidth,
-            color: this.color
-        });
-        var line = new Line(this.linegeo, lineMaterial as Material, LineStyle.LinePieces);
-        this.shapeObj.add(line);
+        if(this.linegeo && this.linegeo.vertices > 0) {
+            var lineMaterial = new LineBasicMaterial({
+                linewidth: this.linewidth,
+                color: this.color
+            });
+            var line = new Line(this.linegeo, lineMaterial as Material, LineStyle.LinePieces);
+            this.shapeObj.add(line);
+        }
 
         this.renderedShapeObj = this.shapeObj.clone();
         group.add(this.renderedShapeObj);

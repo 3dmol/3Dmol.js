@@ -934,42 +934,49 @@ export class Renderer {
     this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
 
     //shading texture - for AO and maybe eventually shadows? I don't like shadows
+    if(this._shadingTexture) {
+      //for whatever reason, chrome seems to require this manual memory management
+      //for these textures, at least in the auto tests webpage where many viewers are being created/destroyed
+      this._gl.deleteTexture(this._shadingTexture);
+      this._shadingTexture = this._gl.createTexture();
+      this._gl.bindTexture(this._gl.TEXTURE_2D, this._shadingTexture);
+      this._gl.texImage2D(
+        this._gl.TEXTURE_2D,
+        0,
+        (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
+        width,
+        height,
+        0,
+        this._gl.DEPTH_COMPONENT,
+        this._gl.FLOAT,
+        null
+      );
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
 
-    this._gl.bindTexture(this._gl.TEXTURE_2D, this._shadingTexture);
-    this._gl.texImage2D(
-      this._gl.TEXTURE_2D,
-      0,
-      (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
-      width,
-      height,
-      0,
-      this._gl.DEPTH_COMPONENT,
-      this._gl.FLOAT,
-      null
-    );
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
-
-    //scratch texture, needed by AO to do blur
-    this._gl.bindTexture(this._gl.TEXTURE_2D, this._scratchTexture);
-    this._gl.texImage2D(
-      this._gl.TEXTURE_2D,
-      0,
-      (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
-      width,
-      height,
-      0,
-      this._gl.DEPTH_COMPONENT,
-      this._gl.FLOAT,
-      null
-    );
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
-
+      //scratch texture, needed by AO to do blur
+      this._gl.deleteTexture(this._scratchTexture);
+      this._scratchTexture = this._gl.createTexture();
+      this._gl.bindTexture(this._gl.TEXTURE_2D, this._scratchTexture);
+      this._gl.texImage2D(
+        this._gl.TEXTURE_2D,
+        0,
+        (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
+        width,
+        height,
+        0,
+        this._gl.DEPTH_COMPONENT,
+        this._gl.FLOAT,
+        null
+      );
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
+      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
+      
+    }
     //bind fb
     this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, this._fb);
     this._gl.framebufferTexture2D(
