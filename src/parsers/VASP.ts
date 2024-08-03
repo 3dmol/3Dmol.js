@@ -59,7 +59,7 @@ export function VASP(str: string, options: ParserOptionsSpec = {}) {
   matrix.multiplyScalar(lattice.length);
   atoms.modelData = [{ symmetries: [], cryst: { matrix: matrix } }];
   var atomSymbols = lines[5]
-    .replace(/\s+/, "")
+    .replace(/\s*/, "")
     .replace(/\s+$/, "")
     .split(/\s+/);
   var atomSpeciesNumber = new Int16Array(
