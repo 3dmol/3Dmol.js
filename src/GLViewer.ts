@@ -1285,7 +1285,7 @@ export class GLViewer {
      *
      * @example
      *
-     * viewer.setBackgroundColor(0x000000);
+     * viewer.setBackgroundColor("green",0.5);
 
 
      *
