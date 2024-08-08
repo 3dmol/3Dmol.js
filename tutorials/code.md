@@ -130,7 +130,7 @@ Since jQuery is already loaded, we'll use ```jQuery.ajax()``` to load PDB data f
   });
 ```
 
-All these methods (and more) are covered in detail in the [API documentation for GLViewer]($3Dmol.GLViewer).
+All these methods (and more) are covered in detail in the [API documentation for GLViewer](GLViewer.html).
 
 <div class="align-center">
   <button class="btn btn-primary" id="btn-02">Try it</button>

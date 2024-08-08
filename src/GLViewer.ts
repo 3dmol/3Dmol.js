@@ -4762,7 +4762,7 @@ export class GLViewer {
      * Synchronize this view matrix of this viewer to the passed viewer.
      * When the viewpoint of this viewer changes, the other viewer will
      * be set to this viewer's view.
-     * @param {$3Dmol.GLViewer} otherview
+     * @param {GLViewer} otherview
      */
     public linkViewer(otherviewer: GLViewer) {
         this.linkedViewers.push(otherviewer);
