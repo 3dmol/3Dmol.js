@@ -2,7 +2,7 @@
 
 import { GLViewer, createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
-import { get, getbin, specStringToObject } from "./utilities";
+import { get, getbin, makeFunction, specStringToObject } from "./utilities";
 import { CC } from "./colors";
 
 export var autoinit = false;
@@ -236,10 +236,8 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                         if (viewerdiv.dataset.callback) {
                             //evaluate javascript in the string, if it resolves to a function,
                             //call it with the viewer
-                            /*jshint -W061 */ var runres = eval(viewerdiv.dataset.callback);
-                            if (typeof (runres) == 'function') {
-                                runres(glviewer);
-                            }
+                            let runres = makeFunction(viewerdiv.dataset.callback);
+                            runres(glviewer);                            
                         }
                         processing_autoinit = false;
                         if (callback) callback(glviewer);
@@ -266,10 +264,8 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 if (viewerdiv.dataset.callback) {
                     //evaluate javascript in the string, if it resolves to a function,
                     //call it with the viewer
-                    /*jshint -W061 */ var runres = eval(viewerdiv.dataset.callback);
-                    if (typeof (runres) == 'function') {
-                        runres(glviewer);
-                    }
+                    let runres = makeFunction(viewerdiv.dataset.callback);
+                    runres(glviewer);                    
                 }
                 processing_autoinit = false;
                 if (callback)

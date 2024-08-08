@@ -57,7 +57,7 @@ export function isEmptyObject(obj) {
 
 export type Func = Function|string|undefined|null;
 
-export function makeFunction(callback:Func) {
+export function makeFunction(callback:Func): Function {
     //for py3dmol let users provide callback as string
     if (callback && typeof callback === "string") {
         /* jshint ignore:start */
@@ -66,9 +66,10 @@ export function makeFunction(callback:Func) {
     }
     // report to console if callback is not a valid function
     if (callback && typeof callback != "function") {
-        return null;
+        console.warn("Invalid callback provided.");
+        return ()=>{}; //return noop function
     }
-    return callback;
+    return callback as Function;
 };
 
 //standardize voldata/volscheme in style
