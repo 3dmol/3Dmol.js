@@ -820,6 +820,7 @@ export class Renderer {
 
     this._currentWidth = this._viewportWidth;
     this._currentHeight = this._viewportHeight;
+
     this.setViewport();
     this.setFrameBuffer();
 
@@ -2127,11 +2128,15 @@ export class Renderer {
   private initGL() {
 
     try {
-      if (OffscreenCanvas) {
+      //safari and firefox do not seem to respect alpha in transferFromImageBitmap
+      //and so can't use offscreen canvas with grids
+      if (OffscreenCanvas && this.rows == undefined &&
+        this.cols != undefined && this.row != undefined &&
+        this.col != undefined) {
         if(_gl_singleton == null || _gl_singleton.isContextLost()) {
           _offscreen_singleton = new OffscreenCanvas(this._canvas.width, this._canvas.height);
           _gl_singleton = _offscreen_singleton.getContext("webgl2", {
-            alpha: this._alpha,
+            alpha: true,
             premultipliedAlpha: this._premultipliedAlpha,
             antialias: this._antialias,
             preserveDrawingBuffer: this._preserveDrawingBuffer,
@@ -2139,7 +2144,9 @@ export class Renderer {
         }
         this._offscreen = _offscreen_singleton;
         this._gl = _gl_singleton;        
-        this._bitmap = this._canvas.getContext("bitmaprenderer");
+        this._bitmap = this._canvas.getContext("bitmaprenderer",{
+          alpha: true
+        });
       } else {
         if (
           !(this._gl = this._canvas.getContext("webgl2", {
