@@ -310,10 +310,10 @@ export class GLViewer {
         this.renderer.setViewport();
         if (!this.scene)
             return;
-        // var time = new Date();
+        //let time = new Date();
         this.setSlabAndFog();
         this.renderer.render(this.scene, this.camera);
-        // console.log("rendered in " + (+new Date() - time) + "ms");
+        //console.log("rendered in " + (+new Date() - (time as any)) + "ms");
 
         //have any scene change trigger a callback
         if (this.viewChangeCallback) this.viewChangeCallback(this._viewer.getView());

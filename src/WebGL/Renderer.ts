@@ -21,6 +21,11 @@ import { Mesh, Line, Sprite } from "./objects";
 import { ShaderLib, ShaderUtils } from "./shaders";
 import { SpritePlugin } from "./SpritePlugin";
 
+// share a single offscreen renderer across all Renderers 
+var _offscreen_singleton =  null;
+var _gl_singleton = null;
+
+
 export class Renderer {
   row: any;
   col: any;
@@ -51,7 +56,9 @@ export class Renderer {
   };
 
   // webgl rednering context
-  private _gl: WebGLRenderingContext | WebGL2RenderingContext;
+  private _gl: WebGLRenderingContext | WebGL2RenderingContext; 
+  private _offscreen: OffscreenCanvas = null;
+  private _bitmap: ImageBitmapRenderingContext = null;
   // internal properties
   private _programs = [];
   private _programs_counter = 0;
@@ -191,16 +198,16 @@ export class Renderer {
     );
     this._outlineEnabled = !!parameters.outline;
     this._AOEnabled = !!parameters.ambientOcclusion;
-    if(parameters.ambientOcclusion && typeof(parameters.ambientOcclusion.strength) !== 'undefined') {
+    if (parameters.ambientOcclusion && typeof (parameters.ambientOcclusion.strength) !== 'undefined') {
       this._AOstrength = parseFloat(parameters.ambientOcclusion.strength);
     }
-    if(this._AOstrength == 0) {
+    if (this._AOstrength == 0) {
       this._AOEnabled = false;
     }
-    if(parameters.ambientOcclusion && typeof(parameters.ambientOcclusion.radius) !== 'undefined') {
+    if (parameters.ambientOcclusion && typeof (parameters.ambientOcclusion.radius) !== 'undefined') {
       this._AOradius = parseFloat(parameters.ambientOcclusion.radius);
-    }    
-    
+    }
+
     this.domElement = this._canvas;
     this._canvas.id = parameters.id;
 
@@ -276,9 +283,9 @@ export class Renderer {
   }
 
   enableAmbientOcclusion(parameters) {
-    if(parameters) {
-      if(parameters.strength) this._AOstrength = parameters.strength;
-      if(parameters.scale) this._AOradius = parameters.scale;
+    if (parameters) {
+      if (parameters.strength) this._AOstrength = parameters.strength;
+      if (parameters.scale) this._AOradius = parameters.scale;
     }
     this._AOEnabled = this._AOstrength > 0;
   }
@@ -288,6 +295,11 @@ export class Renderer {
   }
 
   setViewport() {
+    if(this._offscreen) {
+      //set viewport is called before every render, so setup offscreen size here
+      this._offscreen.width = this._canvas.width;
+      this._offscreen.height = this._canvas.height;
+    }       
     if (
       this.rows != undefined &&
       this.cols != undefined &&
@@ -305,7 +317,7 @@ export class Renderer {
         this._gl.scissor(wid * this.col, hei * this.row, wid, hei);
         this._gl.viewport(wid * this.col, hei * this.row, wid, hei);
       }
-    }
+    } 
   }
 
   setSize(width, height) {
@@ -345,6 +357,7 @@ export class Renderer {
         this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
       }
     }
+
     this.initFrameBuffer();
   }
 
@@ -618,7 +631,7 @@ export class Renderer {
       this._shadingTexture,
       0
     );
-    this.clear(false,true,false);
+    this.clear(false, true, false);
     this._gl.framebufferTexture2D(
       this._gl.FRAMEBUFFER,
       this._gl.DEPTH_ATTACHMENT,
@@ -666,7 +679,7 @@ export class Renderer {
     //calculate depth map
     this.renderObjects(scene.__webglObjects, true, materialType + "Depth",
       camera, lights, fog, false);
-    
+
     //detach so we can read and attach scratch
     this._gl.framebufferTexture2D(
       this._gl.FRAMEBUFFER,
@@ -675,7 +688,7 @@ export class Renderer {
       this._scratchTexture,
       0
     );
-    this.clear(false,true,false);
+    this.clear(false, true, false);
 
     //perform AO calculation from depth map to scratch buffer
 
@@ -695,15 +708,15 @@ export class Renderer {
     this._fullProjModelMatrix = new Matrix4();
     this._fullProjModelMatrixInv = new Matrix4();
     let object = renderList[0].object;
-    this._fullProjModelMatrix.multiplyMatrices(camera.projectionMatrix,object._modelViewMatrix);
+    this._fullProjModelMatrix.multiplyMatrices(camera.projectionMatrix, object._modelViewMatrix);
     this._fullProjModelMatrixInv.getInverse(this._fullProjModelMatrix);
-      this._gl.uniformMatrix4fv(
-        p_uniforms.projectionMatrix,
-        false,
-        this._fullProjModelMatrix.elements
-      );
-    
-    this._gl.uniformMatrix4fv(p_uniforms.projinv, false, this._fullProjModelMatrixInv.elements);    
+    this._gl.uniformMatrix4fv(
+      p_uniforms.projectionMatrix,
+      false,
+      this._fullProjModelMatrix.elements
+    );
+
+    this._gl.uniformMatrix4fv(p_uniforms.projinv, false, this._fullProjModelMatrixInv.elements);
 
 
     // bind vertexarray buffer and texture
@@ -726,12 +739,12 @@ export class Renderer {
       this._shadingTexture,
       0
     );
-    this.clear(false,true,false);
-        
+    this.clear(false, true, false);
+
     this._gl.useProgram(this._blurshader);
     this._currentProgram = this._blurshader;
     this.setDepthTest(-1);
-    this.setDepthWrite(-1);    
+    this.setDepthWrite(-1);
 
 
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._screenQuadVBO);
@@ -846,9 +859,9 @@ export class Renderer {
     this.renderObjects(scene.__webglObjects, true, "opaque",
       camera, lights, fog, false);
 
-      if (hasAO) {
-        this.clearShading();
-      }
+    if (hasAO) {
+      this.clearShading();
+    }
 
     // Render embedded labels (sprites)
     this.renderSprites(scene, camera, false);
@@ -883,6 +896,12 @@ export class Renderer {
 
     // Render floating labels (sprites)
     this.renderSprites(scene, camera, true);
+
+    //if using offscreen render, copy final image
+    if(this._bitmap) {
+      const bitmap = this._offscreen.transferToImageBitmap();
+      this._bitmap.transferFromImageBitmap(bitmap);
+    }    
   }
 
 
@@ -934,7 +953,7 @@ export class Renderer {
     this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
 
     //shading texture - for AO and maybe eventually shadows? I don't like shadows
-    if(this._shadingTexture) {
+    if (this._shadingTexture) {
       //for whatever reason, chrome seems to require this manual memory management
       //for these textures, at least in the auto tests webpage where many viewers are being created/destroyed
       this._gl.deleteTexture(this._shadingTexture);
@@ -975,7 +994,7 @@ export class Renderer {
       this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
       this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
       this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
-      
+
     }
     //bind fb
     this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, this._fb);
@@ -1894,7 +1913,7 @@ export class Renderer {
         blankMaterial.opacity = 0.0;
         globject.opaqueDepth = blankMaterial;
       }
-      if(material.hasAO) {
+      if (material.hasAO) {
         globject.hasAO = true;
       }
       if (this._AOEnabled || globject.hasAO) {
@@ -2106,20 +2125,24 @@ export class Renderer {
   }
 
   private initGL() {
-    //note setting antialis to true doesn't seem to do much and
-    //causes problems on iOS Safari
 
     try {
-      if (
-        !(this._gl = this._canvas.getContext("webgl2", {
-          alpha: this._alpha,
-          premultipliedAlpha: this._premultipliedAlpha,
-          antialias: this._antialias,
-          preserveDrawingBuffer: this._preserveDrawingBuffer,
-        }))
-      ) {
+      if (OffscreenCanvas) {
+        if(_gl_singleton == null || _gl_singleton.isContextLost()) {
+          _offscreen_singleton = new OffscreenCanvas(this._canvas.width, this._canvas.height);
+          _gl_singleton = _offscreen_singleton.getContext("webgl2", {
+            alpha: this._alpha,
+            premultipliedAlpha: this._premultipliedAlpha,
+            antialias: this._antialias,
+            preserveDrawingBuffer: this._preserveDrawingBuffer,
+          }) as WebGL2RenderingContext;
+        }
+        this._offscreen = _offscreen_singleton;
+        this._gl = _gl_singleton;        
+        this._bitmap = this._canvas.getContext("bitmaprenderer");
+      } else {
         if (
-          !(this._gl = this._canvas.getContext("experimental-webgl", {
+          !(this._gl = this._canvas.getContext("webgl2", {
             alpha: this._alpha,
             premultipliedAlpha: this._premultipliedAlpha,
             antialias: this._antialias,
@@ -2127,14 +2150,23 @@ export class Renderer {
           }))
         ) {
           if (
-            !(this._gl = this._canvas.getContext("webgl", {
+            !(this._gl = this._canvas.getContext("experimental-webgl", {
               alpha: this._alpha,
               premultipliedAlpha: this._premultipliedAlpha,
               antialias: this._antialias,
               preserveDrawingBuffer: this._preserveDrawingBuffer,
             }))
           ) {
-            throw "Error creating WebGL context.";
+            if (
+              !(this._gl = this._canvas.getContext("webgl", {
+                alpha: this._alpha,
+                premultipliedAlpha: this._premultipliedAlpha,
+                antialias: this._antialias,
+                preserveDrawingBuffer: this._preserveDrawingBuffer,
+              }))
+            ) {
+              throw "Error creating WebGL context.";
+            }
           }
         }
       }
