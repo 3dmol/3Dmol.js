@@ -22,7 +22,7 @@ import { ShaderLib, ShaderUtils } from "./shaders";
 import { SpritePlugin } from "./SpritePlugin";
 
 // share a single offscreen renderer across all Renderers 
-var _offscreen_singleton =  null;
+var _offscreen_singleton = null;
 var _gl_singleton = null;
 
 
@@ -56,7 +56,7 @@ export class Renderer {
   };
 
   // webgl rednering context
-  private _gl: WebGLRenderingContext | WebGL2RenderingContext; 
+  private _gl: WebGLRenderingContext | WebGL2RenderingContext;
   private _offscreen: OffscreenCanvas = null;
   private _bitmap: ImageBitmapRenderingContext = null;
   // internal properties
@@ -295,11 +295,11 @@ export class Renderer {
   }
 
   setViewport() {
-    if(this._offscreen) {
+    if (this._offscreen) {
       //set viewport is called before every render, so setup offscreen size here
       this._offscreen.width = this._canvas.width;
       this._offscreen.height = this._canvas.height;
-    }       
+    }
     if (
       this.rows != undefined &&
       this.cols != undefined &&
@@ -317,7 +317,7 @@ export class Renderer {
         this._gl.scissor(wid * this.col, hei * this.row, wid, hei);
         this._gl.viewport(wid * this.col, hei * this.row, wid, hei);
       }
-    } 
+    }
   }
 
   setSize(width, height) {
@@ -899,10 +899,10 @@ export class Renderer {
     this.renderSprites(scene, camera, true);
 
     //if using offscreen render, copy final image
-    if(this._bitmap) {
+    if (this._bitmap) {
       const bitmap = this._offscreen.transferToImageBitmap();
       this._bitmap.transferFromImageBitmap(bitmap);
-    }    
+    }
   }
 
 
@@ -2130,10 +2130,11 @@ export class Renderer {
     try {
       //safari and firefox do not seem to respect alpha in transferFromImageBitmap
       //and so can't use offscreen canvas with grids
-      if (OffscreenCanvas && this.rows == undefined &&
+      //I tried using drawImage with a 2d canvas and it worked but was noticeably laggy
+      if (OffscreenCanvas && !(this.rows != undefined &&
         this.cols != undefined && this.row != undefined &&
-        this.col != undefined) {
-        if(_gl_singleton == null || _gl_singleton.isContextLost()) {
+        this.col != undefined)) {
+        if (_gl_singleton == null || _gl_singleton.isContextLost()) {
           _offscreen_singleton = new OffscreenCanvas(this._canvas.width, this._canvas.height);
           _gl_singleton = _offscreen_singleton.getContext("webgl2", {
             alpha: true,
@@ -2143,10 +2144,11 @@ export class Renderer {
           }) as WebGL2RenderingContext;
         }
         this._offscreen = _offscreen_singleton;
-        this._gl = _gl_singleton;        
-        this._bitmap = this._canvas.getContext("bitmaprenderer",{
+        this._gl = _gl_singleton;
+        this._bitmap = this._canvas.getContext("bitmaprenderer", {
           alpha: true
         });
+
       } else {
         if (
           !(this._gl = this._canvas.getContext("webgl2", {
@@ -2189,7 +2191,6 @@ export class Renderer {
   }
 
   private setDefaultGLState() {
-    this._gl.clearColor(0, 0, 0, 1);
     this._gl.clearDepth(1);
     this._gl.clearStencil(0);
 
