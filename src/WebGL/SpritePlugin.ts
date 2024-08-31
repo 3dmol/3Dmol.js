@@ -207,13 +207,11 @@ export class SpritePlugin {
     let sprites: unknown[] = [];
     scene?.__webglSprites?.forEach((sprite) => {
       //depthTest is false for inFront labels
-      if (!sprite.hidden) {
-        if (inFront && sprite.material.depthTest == false) {
-          sprites.push(sprite);
-        } else if (!inFront && sprite.material.depthTest) {
-          sprites.push(sprite);
-        }
-      }
+      if (inFront && sprite.material.depthTest == false) {
+        sprites.push(sprite);
+      } else if (!inFront && sprite.material.depthTest) {
+        sprites.push(sprite);
+      }      
     });
 
     let nSprites = sprites.length;

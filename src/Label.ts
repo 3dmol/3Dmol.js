@@ -73,7 +73,7 @@ export interface LabelSpec {
   backgroundOpacity?: number;
   /** coordinates for label */
   position?: XYZ;
-  /** x,y pixel offset of label from position */
+  /** x,y,z pixel offset of label from position; for screen labels z is a z-index */
   screenOffset?: Vector2;
   /** always put labels in front of model */
   inFront?: boolean;
