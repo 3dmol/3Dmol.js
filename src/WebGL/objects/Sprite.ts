@@ -9,7 +9,6 @@ export class Sprite extends Object3D {
   _modelViewMatrix: any;
   z?: number;
   material?: Material;
-  hidden = false;
 
   constructor(material = new SpriteMaterial() as Material) {
     super();

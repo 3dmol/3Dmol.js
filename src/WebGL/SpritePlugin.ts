@@ -207,10 +207,12 @@ export class SpritePlugin {
     let sprites: unknown[] = [];
     scene?.__webglSprites?.forEach((sprite) => {
       //depthTest is false for inFront labels
-      if (inFront && sprite.material.depthTest == false) {
-        sprites.push(sprite);
-      } else if (!inFront && sprite.material.depthTest) {
-        sprites.push(sprite);
+      if (!sprite.hidden) {
+        if (inFront && sprite.material.depthTest == false) {
+          sprites.push(sprite);
+        } else if (!inFront && sprite.material.depthTest) {
+          sprites.push(sprite);
+        }
       }
     });
 
@@ -340,10 +342,10 @@ export class SpritePlugin {
             uniforms.screenPosition,
             (sprite.position.x * this.renderer.devicePixelRatio -
               halfViewportWidth) /
-              halfViewportWidth,
+            halfViewportWidth,
             (halfViewportHeight -
               sprite.position.y * this.renderer.devicePixelRatio) /
-              halfViewportHeight,
+            halfViewportHeight,
             Math.max(0, Math.min(1, sprite.position.z))
           );
         } else {

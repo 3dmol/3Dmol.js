@@ -123,11 +123,13 @@ export class Label {
     return this.stylespec;
   }
 
-  hide() {
+  /** Hide this label. */
+  public hide() {
     this.sprite.visible = false;
   }
 
-  show() {
+  /** Show a hidden label. */
+  public show() {
 
     this.sprite.visible = true;
   }
