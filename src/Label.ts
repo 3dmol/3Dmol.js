@@ -4,6 +4,7 @@ import {
   SpriteMaterial,
   Sprite,
   Vector2,
+  Material,
 } from "./WebGL";
 import { Gradient } from "./Gradient";
 import { Color, CC, ColorSpec } from "./colors";
@@ -101,7 +102,7 @@ export class Label {
   stylespec: any;
   canvas: HTMLCanvasElement;
   context: any;
-  sprite: any;
+  sprite: Sprite;
   text: any;
   frame: any;
   constructor(text: string, parameters: LabelSpec) {
@@ -120,6 +121,15 @@ export class Label {
 
   getStyle() {
     return this.stylespec;
+  }
+
+  hide() {
+    this.sprite.visible = false;
+  }
+
+  show() {
+
+    this.sprite.visible = true;
   }
 
   setContext() {
@@ -305,7 +315,7 @@ export class Label {
       alignment: spriteAlignment,
       depthTest: !inFront,
       screenOffset: style.screenOffset || null,
-    });
+    }) as Material;
 
     this.sprite.scale.set(1, 1, 1);
 
