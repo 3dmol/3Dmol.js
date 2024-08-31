@@ -17,6 +17,16 @@ import { decode, toRGBA8, encode } from 'upng-js'
 
 export const CONTEXTS_PER_VIEWPORT = 16;
 
+interface SurfObj {
+    geo: Geometry;
+    mat: Material;
+    done: Boolean;
+    finished: Boolean;
+    lastGL?: any;
+    symmetries?: any[];
+    style?: SurfaceStyleSpec;
+}
+
 /**
  * WebGL-based 3Dmol.js viewer
  * Note: The preferred method of instantiating a GLViewer is through {@link createViewer}
@@ -38,7 +48,7 @@ export class GLViewer {
     private glDOM: HTMLCanvasElement | null = null;
 
     private models: GLModel[] = []; // atomistic molecular models
-    private surfaces: any = {};
+    private surfaces: Record<number,SurfObj[]> = {};
     private shapes = []; // Generic shapes
     private labels: Label[] = [];
     private clickables = []; //things you can click on
@@ -1826,7 +1836,6 @@ export class GLViewer {
                         geo.normalsNeedUpdate = true;
                         geo.colorsNeedUpdate = true;
                         geo.buffersNeedUpdate = true;
-                        geo.boundingSphere = null;
                         surfArr[n].mat.needsUpdate = true;
 
                         if (surfArr[n].done)
@@ -2512,7 +2521,7 @@ export class GLViewer {
               viewer.render();
             });
      */
-    public addPropertyLabels(prop: string, sel: AtomSelectionSpec, style: AtomStyleSpec) {
+    public addPropertyLabels(prop: string, sel: AtomSelectionSpec, style: LabelSpec) {
         this.applyToModels("addPropertyLabels", prop, sel, this, style);
         this.show();
         return this;
@@ -4083,6 +4092,7 @@ export class GLViewer {
 
         //set colorArray of there are per-atom colors
         var colorArray = geoGroup.colorArray;
+        let atomArray = geoGroup.atomArray;
 
         if (mat.voldata && mat.volscheme) {
             //convert volumetric data into colors
@@ -4090,12 +4100,14 @@ export class GLViewer {
             var voldata = mat.voldata;
             var range = scheme.range() || [-1, 1];
             for (let i = 0, il = v.length; i < il; i++) {
+                let A = v[i].atomid;
                 let val = voldata.getVal(v[i].x, v[i].y, v[i].z);
                 let col = CC.color(scheme.valueToHex(val, range));
                 let offset = i * 3;
                 colorArray[offset] = col.r;
                 colorArray[offset + 1] = col.g;
                 colorArray[offset + 2] = col.b;
+                atomArray[i] = atoms[A];
             }
         }
         else if (colors.length > 0) { //have atom colors
@@ -4106,6 +4118,7 @@ export class GLViewer {
                 colorArray[offsetA] = colors[A].r;
                 colorArray[offsetA + 1] = colors[A].g;
                 colorArray[offsetA + 2] = colors[A].b;
+                atomArray[i] = atoms[A];
             }
         }
 
@@ -4237,7 +4250,6 @@ export class GLViewer {
         return mat;
     }
 
-
     /**
      * Adds an explicit mesh as a surface object.
      * @param {Mesh}
@@ -4254,7 +4266,7 @@ export class GLViewer {
             finished: false //the rendered finishes surfaces when they are done
         };
         var surfid = this.nextSurfID();
-        this.surfaces[surfid] = surfobj;
+        this.surfaces[surfid] = [surfobj];
         return surfid;
     };
 
@@ -4597,15 +4609,14 @@ export class GLViewer {
         adjustVolumeStyle(style);
         if (this.surfaces[surf]) {
             var surfArr = this.surfaces[surf];
-            surfArr.style = style;
-            for (var i = 0; i < surfArr.length; i++) {
+            for (let i = 0; i < surfArr.length; i++) {
                 var mat = surfArr[i].mat = GLViewer.getMatWithStyle(style);
                 surfArr[i].mat.side = FrontSide;
                 if (style.color) {
-                    surfArr[i].mat.color = style.color;
+                    surfArr[i].mat.color = CC.color(style.color);
                     surfArr[i].geo.colorsNeedUpdate = true;
                     const c = CC.color(style.color);
-                    surfArr[i].geo.setColors(function () { return c; });
+                    surfArr[i].geo.setColor(c);
                 }
                 else if (mat.voldata && mat.volscheme) {
                     //convert volumetric data into colors
@@ -4618,6 +4629,17 @@ export class GLViewer {
                         let col = cc.color(scheme.valueToHex(val, range));
                         return col;
                     });
+                } else {
+                    surfArr[i].geo.colorsNeedUpdate = true;
+                    for(let geo of  surfArr[i].geo.geometryGroups ) {
+                        for(let j = 0; j < geo.vertices; j++) {
+                            let c = getColorFromStyle(geo.atomArray[j],style);
+                            let off = 3*j;
+                            geo.colorArray[off] = c.r;
+                            geo.colorArray[off+1] = c.g;
+                            geo.colorArray[off+2] = c.b;
+                        }
+                    }
                 }
                 surfArr[i].finished = false; // trigger redraw
             }

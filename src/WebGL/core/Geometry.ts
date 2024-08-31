@@ -3,6 +3,7 @@ import { LineBasicMaterial } from '../materials/LineBasicMaterial';
 import { EventDispatcher } from "./EventDispatcher";
 import { Vector3 } from "../math";
 import { CC, Color } from "../../colors";
+import { AtomSpec } from 'specs';
 const BUFFERSIZE = 65535; //limited to 16bit indices
 export class GeometryGroup {
   id: number;
@@ -12,6 +13,7 @@ export class GeometryGroup {
   radiusArray: Float32Array | null = null;
   faceArray: Uint16Array | null = null;
   lineArray: Uint16Array | null = null;
+  atomArray: Array<AtomSpec> = Array<AtomSpec>();
   vertices: number = 0;
   faceidx: number = 0;
   lineidx: number = 0;
@@ -22,7 +24,22 @@ export class GeometryGroup {
     this.id = id;
   }
 
-  setColors(setcolor: (r: number, g: number, b: number) => Color | number): void {
+  public setColor(color: Color | number): void {
+    //apply constant color
+    var v = this.vertexArray;
+    var c = this.colorArray;
+    if (!v) throw new Error("vertex array not initialized");
+    if (!c) throw new Error("color array not initialized");
+
+    let col = CC.color(color);
+    for (var i = 0; i < v.length; i += 3) {
+      c[i] = col.r;
+      c[i + 1] = col.g;
+      c[i + 2] = col.b;
+    }
+  }
+
+  setColors(setcolor: (x: number, y: number, z: number) => Color | number): void {
     //apply a function that takes the vertex coordinate and returns a color
     var v = this.vertexArray;
     var c = this.colorArray;
@@ -448,6 +465,13 @@ export class Geometry extends EventDispatcher {
     }
   }
 
+  setColor(...setcolor: Parameters<GeometryGroup["setColor"]>): void {
+    var len = this.geometryGroups.length;
+    for (var g = 0; g < len; g++) {
+      var geoGroup = this.geometryGroups[g];
+      geoGroup.setColor(...setcolor);
+    }
+  }
 
   setUpWireframe(...lineIndexArgs: Parameters<GeometryGroup["setLineIndices"]>) {
     for (var g = 0; g < this.groups; g++) {
