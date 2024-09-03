@@ -5,6 +5,7 @@ export class SphereImposterOutlineMaterial extends ImposterMaterial {
   outlineColor: Color;
   outlineWidth: number;
   outlinePushback: number;
+  outlineMaxPixels: number;
   
   constructor(parameters?: any) {
     super(parameters);
@@ -14,7 +15,7 @@ export class SphereImposterOutlineMaterial extends ImposterMaterial {
     this.outlineColor = parameters.color || new Color(0.0, 0.0, 0.0);
     this.outlineWidth = parameters.width || 0.1;
     this.outlinePushback = parameters.pushback || 1.0;
-
+    this.outlineMaxPixels = parameters.maxpixels || 0.0;
     this.setValues(parameters);
   }
 
@@ -23,6 +24,7 @@ export class SphereImposterOutlineMaterial extends ImposterMaterial {
     material.outlineColor = this.outlineColor;
     material.outlineWidth = this.outlineWidth;
     material.outlinePushback = this.outlinePushback;
+    material.outlineMaxPixels = this.outlineMaxPixels;
     return material;
   }
 }

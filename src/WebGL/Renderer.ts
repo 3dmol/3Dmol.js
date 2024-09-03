@@ -1548,6 +1548,8 @@ export class Renderer {
       "modelViewMatrix",
       "projectionMatrix",
       "normalMatrix",
+      "vWidth",
+      "vHeight"
     ];
 
     // custom uniform vars
@@ -1664,6 +1666,13 @@ export class Renderer {
         camera.matrixWorldInverse.elements
       );
     }
+
+    if (p_uniforms.vWidth) {
+      this._gl.uniform1f(p_uniforms.vWidth, this._viewportWidth);
+    }
+    if (p_uniforms.vHeight) {
+      this._gl.uniform1f(p_uniforms.vHeight, this._viewportHeight);
+    }    
     // Send projection matrix to uniform variable in shader
     if (refreshMaterial) {
       // Load projection, model-view matrices for perspective
@@ -1695,6 +1704,7 @@ export class Renderer {
         m_uniforms.outlineColor.value = material.outlineColor;
         m_uniforms.outlineWidth.value = material.outlineWidth;
         m_uniforms.outlinePushback.value = material.outlinePushback;
+        m_uniforms.outlineMaxPixels.value = material.outlineMaxPixels*this.devicePixelRatio;
       } else if (material.shaderID === "volumetric") {
         //need a matrix that maps back from model coordinates to texture coordinates
         //  textureMat*modelInv*position

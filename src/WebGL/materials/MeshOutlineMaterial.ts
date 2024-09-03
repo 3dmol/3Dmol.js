@@ -7,8 +7,10 @@ export class MeshOutlineMaterial extends Material {
   shaderID: string;
   wireframe: boolean;
   outlineColor: any;
-  outlineWidth: any;
-  outlinePushback: any;
+  outlineWidth: number;
+  outlinePushback: number;
+  outlineMaxPixels: number;
+
   constructor(parameters?: any) {
     super();
     parameters = parameters || {};
@@ -18,12 +20,17 @@ export class MeshOutlineMaterial extends Material {
     this.outlineColor = parameters.color || new Color(0.0, 0.0, 0.0);
     this.outlineWidth = parameters.width || 0.1;
     this.outlinePushback = parameters.pushback || 1.0;
+    this.outlineMaxPixels = parameters.maxpixels || 0.0;
   }
   clone<T extends this>(material: T = new MeshOutlineMaterial() as T): T {
     super.clone.call(this, material);
     material.fog = this.fog;
     material.shaderID = this.shaderID;
     material.wireframe = this.wireframe;
+    material.outlineColor = this.outlineColor;
+    material.outlineWidth = this.outlineWidth;
+    material.outlinePushback = this.outlinePushback;
+    material.outlineMaxPixels = this.outlineMaxPixels;
     return material;
   }
 }

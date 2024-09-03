@@ -5,10 +5,13 @@ export class StickImposterOutlineMaterial extends ImposterMaterial {
   outlineColor = new Color(0.0, 0.0, 0.0);
   outlineWidth = 0.1;
   outlinePushback = 1.0;
+  outlineMaxPixels = 0.0;
+
   constructor(
     parameters: Record<keyof StickImposterOutlineMaterial, unknown> & {
       width?: number;
       pushback?: number;
+      maxpixels?: number;
     } = {} as any
   ) {
     super(parameters);
@@ -16,6 +19,8 @@ export class StickImposterOutlineMaterial extends ImposterMaterial {
     if (parameters.width) this.outlineWidth = parameters.width as number;
     if (parameters.pushback)
       this.outlinePushback = parameters.pushback as number;
+    if (parameters.maxpixels)
+      this.outlineMaxPixels = parameters.maxpixels;
 
     this.setValues(parameters);
   }
@@ -25,6 +30,7 @@ export class StickImposterOutlineMaterial extends ImposterMaterial {
     material.outlineColor = this.outlineColor;
     material.outlineWidth = this.outlineWidth;
     material.outlinePushback = this.outlinePushback;
+    material.outlineMaxPixels = this.outlineMaxPixels;
     return material;
   }
 }

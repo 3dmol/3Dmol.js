@@ -1361,10 +1361,7 @@ export class GLViewer {
         parameters.style = parameters.style || "";
 
         if (parameters.style.includes("outline")) {
-            var params: any = {};
-            if (parameters.color) params.color = CC.color(parameters.color);
-            if (parameters.width) params.width = parameters.width;
-            this.renderer.enableOutline(params);
+            this.renderer.enableOutline(parameters);
         } else {
             this.renderer.disableOutline();
         }
@@ -5018,6 +5015,8 @@ export interface OutlineStyle {
     width?: number;
     /** Color of the outline */
     color?: ColorSpec;
+    /** Maximum width in screen pixels of outline. */
+    maxpixels?: number;
 }
 
 /**

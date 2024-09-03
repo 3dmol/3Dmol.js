@@ -8,4 +8,5 @@ export const uniforms = {
   fogFar: { type: "f", value: 2000 },
   outlineWidth: { type: "f", value: 0.1 },
   outlinePushback: { type: "f", value: 1.0 },
+  outlineMaxPixels: {type: "f", value: 0.0 }
 };
