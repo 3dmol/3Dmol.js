@@ -1,4 +1,4 @@
-import { Color } from "../../colors";
+import { CC, Color } from "../../colors";
 import { ImposterMaterial } from "./ImposterMaterial";
 
 export class SphereImposterOutlineMaterial extends ImposterMaterial {
@@ -12,7 +12,7 @@ export class SphereImposterOutlineMaterial extends ImposterMaterial {
     parameters = parameters || {};
 
     this.shaderID = "sphereimposteroutline";
-    this.outlineColor = parameters.color || new Color(0.0, 0.0, 0.0);
+    this.outlineColor = CC.color(parameters.color || new Color(0.0, 0.0, 0.0));
     this.outlineWidth = parameters.width || 0.1;
     this.outlinePushback = parameters.pushback || 1.0;
     this.outlineMaxPixels = parameters.maxpixels || 0.0;

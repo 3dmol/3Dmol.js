@@ -1,4 +1,4 @@
-import { Color } from "../../colors";
+import { CC, Color } from "../../colors";
 import { Material } from "./Material";
 //Outlined Mesh Lamert material
 /* @constructor */
@@ -17,7 +17,7 @@ export class MeshOutlineMaterial extends Material {
     this.fog = true;
     this.shaderID = "outline";
     this.wireframe = false;
-    this.outlineColor = parameters.color || new Color(0.0, 0.0, 0.0);
+    this.outlineColor = CC.color(parameters.color || new Color(0.0, 0.0, 0.0));
     this.outlineWidth = parameters.width || 0.1;
     this.outlinePushback = parameters.pushback || 1.0;
     this.outlineMaxPixels = parameters.maxpixels || 0.0;

@@ -1,4 +1,4 @@
-import { Color } from "../../colors";
+import { CC, Color, ColorSpec } from "../../colors";
 import { ImposterMaterial } from "./ImposterMaterial";
 export class StickImposterOutlineMaterial extends ImposterMaterial {
   shaderID = "stickimposteroutline";
@@ -15,7 +15,7 @@ export class StickImposterOutlineMaterial extends ImposterMaterial {
     } = {} as any
   ) {
     super(parameters);
-    if (parameters.color) this.outlineColor = parameters.color as Color;
+    if (parameters.color) this.outlineColor = CC.color(parameters.color as ColorSpec);
     if (parameters.width) this.outlineWidth = parameters.width as number;
     if (parameters.pushback)
       this.outlinePushback = parameters.pushback as number;
