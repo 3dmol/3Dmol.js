@@ -3,6 +3,7 @@ import { Matrix3 } from "../WebGL";
 
 import { assignBonds } from "./utils/assignBonds";
 import { ParserOptionsSpec } from "./ParserOptionsSpec";
+import { AtomSpec } from "specs";
 
 /**
  * @param {string}
@@ -58,26 +59,23 @@ export function VASP(str: string, options: ParserOptionsSpec = {}) {
 
   matrix.multiplyScalar(lattice.length);
   atoms.modelData = [{ symmetries: [], cryst: { matrix: matrix } }];
-  var atomSymbols = lines[5]
-    .replace(/\s+/, "")
-    .replace(/\s+$/, "")
-    .split(/\s+/);
+  var atomSymbols = lines[5].trim().split(/\s+/);
   var atomSpeciesNumber = new Int16Array(
-    (lines[6] as any).replace(/^\s+/, "").split(/\s+/)
+    lines[6].trim().split(/\s+/) as any
   );
-  var vaspMode = lines[7].replace(/\s+/, "");
+  var vaspMode = lines[7].trim();
 
   var selective = false
   if (vaspMode.match(/S/)) {
     selective = true
-    vaspMode = lines[8].replace(/\s+/, "");
+    vaspMode = lines[8].trim();
   }
 
-  if (vaspMode.match(/C/)) {
+  if (vaspMode.toLowerCase()[0] == "c") {
     vaspMode = "cartesian";
-  } else if (vaspMode.match(/D/)) {
+  } else if (vaspMode.toLowerCase()[0] == "d") {
     vaspMode = "direct";
-  } else {
+  } else {    
     console.log(
       "Warning: Unknown vasp mode in POSCAR file: mode must be either C(artesian) or D(irect)"
     );
@@ -104,10 +102,10 @@ export function VASP(str: string, options: ParserOptionsSpec = {}) {
     var atomSymbol = atomSymbols[i];
     for (var j = 0, atomLen = atomSpeciesNumber[i]; j < atomLen; j++) {
       var coords = new Float32Array(
-        (lines[atomCounter + j] as any).replace(/^\s+/, "").split(/\s+/)
+        lines[atomCounter + j].trim().split(/\s+/) as any
       );
 
-      var atom: Record<string, number | []> = {};
+      var atom: AtomSpec = {};
       (atom.elem as any) = atomSymbol;
       if (vaspMode == "cartesian") {
         atom.x = lattice.length * coords[0];
