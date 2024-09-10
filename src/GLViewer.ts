@@ -2581,6 +2581,55 @@ export class GLViewer {
         return this;
     };
 
+    /**
+     * Hide all labels in viewer
+     *
+     *         @example
+    $3Dmol.download("pdb:1ubq",viewer,{},function(){
+
+           viewer.addResLabels();
+           viewer.setStyle({},{stick:{}});
+           viewer.render( ); //show labels
+
+           viewer.hideAllLabels();
+           viewer.render(); //hide labels
+    });
+     */
+    public hideAllLabels() {
+        for (var i = 0; i < this.labels.length; i++) {
+            if (this.labels[i]) {
+                this.labels[i].hide();
+            }
+        }
+        this.show();
+        return this;
+    };    
+
+    /**
+     * Show all labels in viewer
+     *
+     *         @example
+    $3Dmol.download("pdb:1ubq",viewer,{},function(){
+
+           viewer.addResLabels();
+           viewer.setStyle({},{stick:{}});
+           viewer.render( ); //show labels
+
+           viewer.hideAllLabels();
+           viewer.showAllLabels();
+           viewer.render(); //hide labels
+    });
+     */
+    public showAllLabels() {
+        for (var i = 0; i < this.labels.length; i++) {
+            if (this.labels[i]) {
+                this.labels[i].show();
+            }
+        }
+        this.show();
+        return this;
+    };        
+
     // Modify label style
     /**
      * Modify existing label's style

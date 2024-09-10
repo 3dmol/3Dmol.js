@@ -1675,6 +1675,8 @@ export interface CylinderSpec extends ShapeSpec {
     dashLength?: number;
     /** Length of gaps (default 0.25) */
     gapLength?: number;
+    /** hidden */
+    hidden?: boolean;    
 };
 
 /**

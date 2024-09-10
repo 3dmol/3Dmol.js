@@ -125,13 +125,16 @@ export class Label {
 
   /** Hide this label. */
   public hide() {
-    this.sprite.visible = false;
+    if(this.sprite) {
+      this.sprite.visible = false;
+    }
   }
 
   /** Show a hidden label. */
   public show() {
-
-    this.sprite.visible = true;
+    if(this.sprite) {
+      this.sprite.visible = true;
+    }
   }
 
   setContext() {
