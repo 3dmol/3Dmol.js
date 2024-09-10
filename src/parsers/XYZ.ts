@@ -16,7 +16,7 @@ export function XYZ(str: string, options: ParserOptionsSpec) {
   var atoms: any[][] & Record<string, any> = [[]];
   var assignbonds =
     options.assignBonds === undefined ? true : options.assignBonds;
-  var lines = str.split(/\r?\n|\r/);
+  var lines = str.trimStart().split(/\r?\n|\r/);
   while (lines.length > 0) {
     if (lines.length < 3) break;
     var atomCount = parseInt(lines[0]);
@@ -46,7 +46,7 @@ export function XYZ(str: string, options: ParserOptionsSpec) {
     var end = start + atomCount;
     for (var i = start; i < end; i++) {
       var line = lines[offset++];
-      var tokens = line.replace(/^\s+/, "").replace(/\s+/g, " ").split(" ");
+      var tokens = line.trim().split(/\s+/);
       var atom: Record<string, any> = {};
       atom.serial = i;
       var elem = tokens[0];
