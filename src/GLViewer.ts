@@ -2611,7 +2611,7 @@ export class GLViewer {
      *         @example
     $3Dmol.download("pdb:1ubq",viewer,{},function(){
 
-           viewer.addResLabels();
+           viewer.addLabel("Hello World",{position:{x:10,y:0,z:0},backgroundColor: "blue",useScreen: true, fontSize: 64})
            viewer.setStyle({},{stick:{}});
            viewer.render( ); //show labels
 
