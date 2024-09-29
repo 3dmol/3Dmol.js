@@ -8,7 +8,7 @@ The instructor can pose questions that the students then answer by clicking on a
 
 ## Self-Hosting
 
-The easiest way to use the 3Dmol.js active learning environment is through the hosted viewer at [https://3dmol.csb.pitt.edu].  However, it may be desirable to host your own instance for your class.  A light-weight Flask webserver can quickly be brought up on a Ubuntu Linux machine with a few commands:
+The easiest way to use the 3Dmol.js active learning environment is through the hosted viewer at [https://3dmol.csb.pitt.edu](https://3dmol.csb.pitt.edu).  However, it may be desirable to host your own instance for your class.  A light-weight Flask webserver can quickly be brought up on a Ubuntu Linux machine with a few commands:
 
 
 ```{@lang bash}
@@ -36,16 +36,15 @@ Note that files put in the `3dmol` directory can be referenced as relative paths
 If you already have a webserver running, you can redirect the websocket requests used by 3Dmol.js to the server running on port 5000.  For example, for apache the following is added to the configuration (see [here](https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root)</a>):
 
 
-<pre>
-<font color='black'>RewriteEngine On
+```apache.conf
+RewriteEngine On
 RewriteCond %{REQUEST_URI}  ^/socket.io            [NC]
 RewriteCond %{QUERY_STRING} transport=websocket    [NC]
 RewriteRule /(.*)           ws://localhost:5000/$1 [P,L]
 
 ProxyPass        /socket.io http://localhost:5000/socket.io
 ProxyPassReverse /socket.io http://localhost:5000/socket.io
-<font>
-</pre>
+```
 
 The [flask-SocketIO documentation](https://flask-socketio.readthedocs.io/en/latest/) provides more information for running in other setups such as gunicorn, uwsgi, and nginx.
 
