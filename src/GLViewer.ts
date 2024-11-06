@@ -1510,9 +1510,11 @@ export class GLViewer {
      * @param  {number} speed
      *            [speed] - Speed multiplier for spinning the viewer. 1 is default and a negative
      *             value reverses the direction of the spin.
+     * @param {boolean} only_when_visable
+     *            [only_when_visable] - if true, will only update spin when canvas is visible
      *
      */
-    public spin(axis, speed: number = 1) {
+    public spin(axis, speed: number = 1, only_when_visable: boolean = false) {
         clearInterval(this.spinInterval);
         if (typeof axis == 'undefined')
             axis = 'y';
@@ -1535,7 +1537,9 @@ export class GLViewer {
                 if (!viewer.getCanvas().isConnected && viewer.renderer.isLost()) {
                     clearInterval(viewer.spinInterval);
                 }
-                viewer.rotate(1 * speed, axis);
+                if(!only_when_visable || (viewer.container.checkVisibility && viewer.container.checkVisibility())) {                    
+                    viewer.rotate(1 * speed, axis);
+                }
             }, 25);
 
     };
