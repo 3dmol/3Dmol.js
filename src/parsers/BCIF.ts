@@ -123,6 +123,9 @@ class Residues {
               let a1 = atoms[i];
               let a2 = atoms[j];
               let bo = C.order(resn,a1.atom,a2.atom);
+              if(a1.altLoc != a2.altLoc && a1.altLoc != "" && a2.altLoc != "") {
+                bo = 0; 
+              }
               if(bo > 0) {
                 a1.bonds.push(a2.index);
                 a2.bonds.push(a1.index);
