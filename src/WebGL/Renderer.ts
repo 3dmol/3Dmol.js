@@ -902,6 +902,7 @@ export class Renderer {
     if (this._bitmap) {
       const bitmap = this._offscreen.transferToImageBitmap();
       this._bitmap.transferFromImageBitmap(bitmap);
+      bitmap.close();
     }
   }
 
@@ -2258,7 +2259,7 @@ export class Renderer {
         }
         if (!material) continue;
 
-        if (useBlending) this.setBlending(true);
+        this.setBlending(useBlending);
 
         this.setDepthTest(material.depthTest);
         this.setDepthWrite(material.depthWrite);

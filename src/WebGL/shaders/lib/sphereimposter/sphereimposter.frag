@@ -44,7 +44,5 @@ void main() {
     gl_FragColor = vec4(color, opacity*opacity );
     float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );
     gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
-
-
 }
 

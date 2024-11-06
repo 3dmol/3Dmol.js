@@ -24,7 +24,7 @@ URL: https://github.com/Huddle/Resemble.js
 	};
 
 	function colorsDistance(c1, c2){
-		return (Math.abs(c1.r - c2.r) + Math.abs(c1.g - c2.g) + Math.abs(c1.b - c2.b))/3;
+		return (Math.abs(c1.r - c2.r) + Math.abs(c1.g - c2.g) + Math.abs(c1.b - c2.b) + Math.abs(c1.a - c2.a))/4;
 	}
 
 	var errorPixelTransform = {

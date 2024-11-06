@@ -18,7 +18,7 @@ vec4 applyFXAA(vec2 fragCoord, highp sampler2D tex)
     vec3 rgbNE = texture2D(tex, fragCoord + vec2(1.0, -1.0) * inverseVP).xyz;
     vec3 rgbSW = texture2D(tex, fragCoord + vec2(-1.0, 1.0) * inverseVP).xyz;
     vec3 rgbSE = texture2D(tex, fragCoord + vec2(1.0, 1.0) * inverseVP).xyz;
-    vec4 rgbM  = texture2D(tex, fragCoord  * inverseVP);
+    vec4 rgbM  = texture2D(tex, fragCoord );
     vec3 luma = vec3(0.299, 0.587, 0.114);
     float lumaNW = dot(rgbNW, luma);
     float lumaNE = dot(rgbNE, luma);
@@ -52,6 +52,7 @@ vec4 applyFXAA(vec2 fragCoord, highp sampler2D tex)
         color = vec4(rgbA, rgbM.w);
     else
         color = vec4(rgbB, rgbM.w);
+
     return color;
 }
 
