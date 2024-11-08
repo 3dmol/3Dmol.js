@@ -33,9 +33,10 @@ void main() {
        mvPosition = to;
     }
     vec3 n = normalize(mvPosition.xyz);
+    bool isperspective = (projectionMatrix[3][3] == 0.0);
 //intersect with the plane defined by the camera looking at the billboard point
     if(color.z >= 0.0) { //p1
-       if(projectionMatrix[3][3] == 0.0) { //perspective
+       if(isperspective) { //perspective
          vec3 pnorm = normalize(p1);
          float t = dot(mvPosition.xyz-p1,n)/dot(pnorm,n);
          mvPosition.xyz = p1+t*pnorm; 
@@ -43,7 +44,7 @@ void main() {
          mvPosition.xyz = p1;
        }
     } else {
-      if(projectionMatrix[3][3] == 0.0) { //perspective
+      if(isperspective) { //perspective
          vec3 pnorm = normalize(p2);
          float t = dot(mvPosition.xyz-p2,n)/dot(pnorm,n);
          mvPosition.xyz = p2+t*pnorm;
@@ -52,9 +53,17 @@ void main() {
        } 
        mult *= -1.0;
     }
-    vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;
-    vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius;
-    mvPosition.xyz +=  mult*(cr + doublecr).xyz;
+
+    if(isperspective) { //perspective
+      vec3 cr = normalize(cross(mvPosition.xyz,norm))*radius;
+      vec3 doublecr = normalize(cross(mvPosition.xyz,cr))*radius;
+      mvPosition.xyz +=  mult*(cr + doublecr).xyz;
+    } else {
+      vec3 cr = normalize(cross(vec3(0.0,0.0,-1.0),norm))*radius;
+      vec3 doublecr = normalize(cross(vec3(0.0,0.0,-1.0),cr))*radius;
+      mvPosition.xyz +=  mult*(cr + doublecr).xyz;     
+    }
+
     cposition = mvPosition.xyz;
     gl_Position = projectionMatrix * mvPosition;
     vec4 lDirection = viewMatrix * vec4( directionalLightDirection[ 0 ], 0.0 );

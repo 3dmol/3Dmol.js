@@ -291,7 +291,7 @@ export class GLViewer {
         if (center < 1)
             center = 1;
         this.camera.near = center + this.slabNear;
-        if (this.camera.near < 1)
+        if (!this.camera.ortho && this.camera.near < 1)
             this.camera.near = 1;
         this.camera.far = center + this.slabFar;
         if (this.camera.near + 1 > this.camera.far)
@@ -944,6 +944,7 @@ export class GLViewer {
         if (parameters.orthographic !== undefined) {
             this.camera.ortho = parameters.orthographic;
         }
+        this.setSlabAndFog();
     };
 
     public _handleMouseDown(ev) {
