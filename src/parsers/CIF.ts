@@ -6,14 +6,6 @@ import { conversionMatrix3, Matrix3, Matrix4, Vector3 } from "../WebGL";
 import { assignPDBBonds } from "./utils/assignPDBBonds";
 import { AtomSpec } from "specs";
 
-/**
- * Puts atoms specified in mmCIF fromat in str into atoms
- *
- * @param {string} str
- * @param {ParserOptionsSpec} options
- * @category Parsers
- */
-
 //coordinate conversion
 const fractionalToCartesian = function (
   cmat: Matrix3,
@@ -24,6 +16,13 @@ const fractionalToCartesian = function (
   return new Vector3(x, y, z).applyMatrix3(cmat);
 };
 
+/**
+ * Puts atoms specified in mmCIF fromat in str into atoms
+ *
+ * @param {string} str
+ * @param {ParserOptionsSpec} options
+ * @category Parsers
+ */
 export function CIF(str: string, options: ParserOptionsSpec = {}) {
   const atoms: Array<AtomSpec[]> & { modelData?: unknown } = [];
   const noAssembly = !options.doAssembly; // don't assemble by default
