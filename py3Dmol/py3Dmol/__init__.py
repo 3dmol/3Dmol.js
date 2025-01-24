@@ -63,7 +63,7 @@ class view(object):
             data -- molecular data to provide to addModel, with viewer grid can be indexed (r,c)
             format -- format of provided data
             style -- style to apply, with viewer grid can be indexed (r,c)
-            options -- optional options to provide to $3Dmol.download
+            options -- optional options to provide to $3Dmol.download or addModel
             js -- url for 3Dmol.js'''
         divid = "3dmolviewer_UNIQUEID"
         warnid = "3dmolwarning_UNIQUEID"
@@ -159,7 +159,7 @@ if(warn) {
                               f = format[r][c]
                         except:
                             f = format
-                        self.startjs += f"viewergrid_UNIQUEID[{r}][{c}].addModel({json.dumps(d)}{','+json.dumps(f) if f else ''});\n"
+                        self.startjs += f"viewergrid_UNIQUEID[{r}][{c}].addModel({json.dumps(d)},{json.dumps(f) if f else 'undefined'},{json.dumps(options) if options else 'undefined'});\n"
                     if style:
                         try:
                             s = style[r][c]
@@ -171,7 +171,7 @@ if(warn) {
         else:
             cmds = ''
             if data:
-                cmds = f"viewer_UNIQUEID.addModel({json.dumps(data)}{','+json.dumps(format) if format else ''});\n"                
+                cmds = f"viewer_UNIQUEID.addModel({json.dumps(data)},{json.dumps(format) if format else 'undefined'},{json.dumps(options) if options else 'undefined'});\n"                
             if style:
                 cmds += "viewer_UNIQUEID.setStyle(%s);\n"%json.dumps(style)
             self.startjs += cmds + "viewer_UNIQUEID.zoomTo();\n"
