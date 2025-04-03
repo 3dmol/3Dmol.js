@@ -47,12 +47,8 @@ export function isNumeric(obj) {
         !isNaN(obj - parseFloat(obj));
 };
 
-export function isEmptyObject(obj) {
-    var name;
-    for (name in obj) {
-        return false;
-    }
-    return true;
+export function isEmptyObject(obj: object) {
+    return Object.keys(obj).length === 0;
 };
 
 export type Func = Function|string|undefined|null;

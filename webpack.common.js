@@ -46,7 +46,7 @@ module.exports = {
       $: "jquery"
     }),
     new webpack.BannerPlugin({ banner }),
-    new ESLintPlugin()
+    new ESLintPlugin({exclude: ['node_modules']})
   ],
   stats: {
     errorDetails: true,

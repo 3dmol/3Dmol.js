@@ -614,13 +614,11 @@ $3Dmol.UI = (function () {
           }
           else {
             if (allControl.value) {
-              let id = sid;
-              stateManager.addSelection({}, id);
-              finalizeSelection(id);
+              stateManager.addSelection({}, sid);
+              finalizeSelection(sid);
             }
             else {
-              let id = sid;
-              checkAndAddSelection(id);
+              checkAndAddSelection(sid);
             }
           }
         });

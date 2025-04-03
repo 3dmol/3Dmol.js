@@ -20,7 +20,8 @@
     "coverageReporters": [
       "lcov",
       "text"
-    ]
+    ],
+    "testEnvironment": "jest-fixed-jsdom"
   },
   "engines": {
     "npm": ">=8.11",
@@ -46,7 +47,7 @@
     "doc": "rm -rf doc/ && npx jsdoc -c jsdoc.conf.json src doc.md"
   },
   "dependencies": {
-    "iobuffer": "^5.3.1",
+    "iobuffer": "^5.0.0",
     "netcdfjs": "^3.0.0",
     "pako": "^2.1.0",
     "upng-js": "^2.1.0"
@@ -61,11 +62,12 @@
     "clean-jsdoc-theme": "github:3dmol/clean-jsdoc-theme#master",
     "codecov": "^3.8.3",
     "del": "^7.0.0",
-    "eslint": "^8.30.0",
-    "eslint-webpack-plugin": "^3.2.0",
+    "eslint": "^9.0.0",
+    "eslint-webpack-plugin": "^5.0.0",
     "glcheck": "github:3dmol/glcheck",
-    "jest": "^29.3.1",
+    "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.3.1",
+    "jest-fixed-jsdom": "^0.0.9",
     "jest-webgl-canvas-mock": "^0.2.3",
     "jquery": "^3.6.3",
     "jsdoc": "^4.0.0",

@@ -466,7 +466,7 @@ export class Geometry extends EventDispatcher {
   }
 
   setColor(...setcolor: Parameters<GeometryGroup["setColor"]>): void {
-    var len = this.geometryGroups.length;
+    let len = this.geometryGroups.length;
     for (var g = 0; g < len; g++) {
       var geoGroup = this.geometryGroups[g];
       geoGroup.setColor(...setcolor);
@@ -474,7 +474,8 @@ export class Geometry extends EventDispatcher {
   }
 
   setUpWireframe(...lineIndexArgs: Parameters<GeometryGroup["setLineIndices"]>) {
-    for (var g = 0; g < this.groups; g++) {
+    let len = this.geometryGroups.length;
+    for (var g = 0; g < len; g++) {
       var geoGroup = this.geometryGroups[g];
 
       geoGroup.setLineIndices(...lineIndexArgs);

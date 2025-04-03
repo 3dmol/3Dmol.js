@@ -83,7 +83,7 @@ function view<T>(data: Uint8Array, byteSize: number, c: new (buffer: ArrayBuffer
   if (data.byteOffset != 0 || data.byteLength != data.buffer.byteLength) { //dkoes - extract from larger buffer if needed
     data = new Uint8Array(data);
   }
-  if (IsNativeEndianLittle) return new c(data.buffer);
+  if (IsNativeEndianLittle) return new c(data.buffer as ArrayBuffer);
   return new c(flipByteOrder(data, byteSize));
 }
 

@@ -1,6 +1,3 @@
-/**
-*@jest-environment jsdom
-*/
 
 global.$ = require("jquery");
 global.URL.createObjectURL = function() {};
