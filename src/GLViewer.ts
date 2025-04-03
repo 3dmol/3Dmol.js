@@ -27,6 +27,13 @@ interface SurfObj {
     style?: SurfaceStyleSpec;
 }
 
+interface Surface extends Array<SurfObj> {
+    style?: SurfaceStyleSpec;
+    atomsel?: AtomSelectionSpec;
+    allsel?: AtomSelectionSpec;
+    focus?:  AtomSelectionSpec;
+}
+
 /**
  * WebGL-based 3Dmol.js viewer
  * Note: The preferred method of instantiating a GLViewer is through {@link createViewer}
@@ -48,7 +55,7 @@ export class GLViewer {
     private glDOM: HTMLCanvasElement | null = null;
 
     private models: GLModel[] = []; // atomistic molecular models
-    private surfaces: Record<number,SurfObj[]> = {};
+    private surfaces: Record<number,Surface> = {};
     private shapes = []; // Generic shapes
     private labels: Label[] = [];
     private clickables = []; //things you can click on
@@ -1840,8 +1847,9 @@ export class GLViewer {
                         geo.buffersNeedUpdate = true;
                         surfArr[n].mat.needsUpdate = true;
 
-                        if (surfArr[n].done)
-                            surfArr[n].finished = true;
+                        if (surfArr[n].done) {
+                            surfArr[n].finished = true;                      
+                        }
 
                         // remove partially rendered surface
                         if (surfArr[n].lastGL)
@@ -1855,6 +1863,9 @@ export class GLViewer {
                             smesh = new Line(geo, surfArr[n].mat);
                         }
                         else {
+                            if('wireframe' in surfArr.style  && surfArr.style.wireframe) {
+                                geo.setUpWireframe();
+                            }                                
                             smesh = new Mesh(geo, surfArr[n].mat);
                         }
                         if (surfArr[n].mat.transparent && surfArr[n].mat.opacity == 0) {
@@ -4298,6 +4309,10 @@ export class GLViewer {
                 mat.transparent = true;
         }
 
+        if (style.wireframe !== undefined) {
+            mat.wireframe = style.wireframe;
+        }
+
         return mat;
     }
 
@@ -4310,7 +4325,7 @@ export class GLViewer {
      * @returns {number} surfid
      */
     public addMesh(mesh: Mesh) {
-        var surfobj = {
+        let surfobj: SurfObj = {
             geo: mesh.geometry,
             mat: mesh.material,
             done: true,
@@ -4399,7 +4414,7 @@ export class GLViewer {
             }
         }
 
-        var addSurfaceHelper = function addSurfaceHelper(surfobj, atomlist: AtomSpec[], atomsToShow: AtomSpec[]) {
+        var addSurfaceHelper = function addSurfaceHelper(surfobj: SurfObj, atomlist: AtomSpec[], atomsToShow: AtomSpec[]) {
             //function returns promise with surfid resolved
             if (!focus) {
                 focusSele = atomsToShow;
@@ -4581,12 +4596,12 @@ export class GLViewer {
 
         style = style || {};
         mat = GLViewer.getMatWithStyle(style);
-        var surfobj: any = [];
+        let surf: Surface = [];
         //save configuration of surface
-        surfobj.style = style;
-        surfobj.atomsel = atomsel;
-        surfobj.allsel = allsel;
-        surfobj.focus = focus;
+        surf.style = style;
+        surf.atomsel = atomsel;
+        surf.allsel = allsel;
+        surf.focus = focus;
         var promise = null;
         if (symmetries) { //do preprocessing
             var modelsAtomList = {};
@@ -4604,7 +4619,7 @@ export class GLViewer {
             var promises = [];
             for (n = 0; n < this.models.length; n++) {
                 if (modelsAtomsToShow[n].length > 0) {
-                    surfobj.push({
+                    surf.push({
                         geo: new Geometry(true),
                         mat: mat,
                         done: false,
@@ -4612,22 +4627,22 @@ export class GLViewer {
                         symmetries: this.models[n].getSymmetries()
                         // also webgl initialized
                     });
-                    promises.push(addSurfaceHelper(surfobj[surfobj.length - 1], modelsAtomList[n], modelsAtomsToShow[n]));
+                    promises.push(addSurfaceHelper(surf[surf.length - 1], modelsAtomList[n], modelsAtomsToShow[n]));
                 }
             }
             promise = Promise.all(promises);
         }
         else {
-            surfobj.push({
+            surf.push({
                 geo: new Geometry(true),
                 mat: mat,
                 done: false,
                 finished: false,
                 symmetries: [new Matrix4()]
             });
-            promise = addSurfaceHelper(surfobj[surfobj.length - 1], atomlist, atomsToShow);
+            promise = addSurfaceHelper(surf[surf.length - 1], atomlist, atomsToShow);
         }
-        this.surfaces[surfid] = surfobj;
+        this.surfaces[surfid] = surf;
         promise.surfid = surfid;
 
         if (surfacecallback && typeof (surfacecallback) == "function") {
@@ -4663,6 +4678,9 @@ export class GLViewer {
             for (let i = 0; i < surfArr.length; i++) {
                 var mat = surfArr[i].mat = GLViewer.getMatWithStyle(style);
                 surfArr[i].mat.side = FrontSide;
+                if (style.wireframe) {
+                    surfArr[i].geo.setUpWireframe();
+                }
                 if (style.color) {
                     surfArr[i].mat.color = CC.color(style.color);
                     surfArr[i].geo.colorsNeedUpdate = true;
@@ -5204,6 +5222,8 @@ export interface SurfaceStyleSpec {
     volscheme?: Gradient;
     /** format of voldata if not a {VolumeData} object */
     volformat?: string;
+    /** Display as wireframe */
+    wireframe?: boolean;
     /* specifies a numeric atom property (prop) and color mapping (scheme) such as {@link $3Dmol.Gradient.RWB}.  Deprecated, use colorscheme instead. */
     map?: Record<string, unknown>
 };
