@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ES6 Module Example</title>
+    <style>
+      .mol-container {
+        width: 60%;
+        height: 800px;
+        position: relative;
+      }
+    </style>
+    <script src="../build/3Dmol.js"></script>
+  </head>
+  <body>
+    <div id="container-01" class="mol-container"></div>
+    <script>
+      console.log($3Dmol);
+      let element = document.querySelector("#container-01");
+      let config = {};
+
+      let viewer = $3Dmol.createViewer(element, config);
+      let pdbUri = "https://files.rcsb.org/download/1YCR.pdb";
+
+      $3Dmol.get(pdbUri).then(
+        function (data) {
+          console.log("Loaded PDB " + pdbUri);
+          let v = viewer;
+          v.addModel(data, "pdb"); /* load data */
+          v.setStyle(
+            {},
+            { cartoon: { color: "spectrum" } },
+          ); /* style all atoms */
+          v.zoomTo(); /* set camera */
+          v.render(); /* render scene */
+          v.zoom(1.2, 1000); /* slight zoom */
+          v.setBackgroundColor('white');
+          console.log("displayed", viewer);
+        },
+        function () {
+          console.error("Failed to load PDB " + pdbUri);
+        },
+      );
+    </script>
+  </body>
+</html>
