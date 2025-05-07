@@ -60,6 +60,10 @@
       viewer.addCylinder({start: {chain: "B", resi: 23, atom: "NE1"}, end: {chain: "A", resi: 54, atom: "O"}, dashed: true,color:'#FFFAA0',fromCap:'round',toCap:'round'});
     };
 
+    // bind callbacks to window object so they can be resolved in autoload
+    window.initShapes = initShapes;
+    window.init1YCR = init1YCR;
+
     const addSurf = function (viewer) {
       viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.75 },
         { hetflag: false }, { hetflag: false }, { chain: 'B' });
