@@ -1,19 +1,18 @@
 //a molecular viewer based on GLMol
 
-import { Geometry, Renderer, Camera, Raycaster, Projector, Light, Fog, Scene, Coloring, FrontSide, Material, MeshDoubleLambertMaterial } from "./WebGL";
-import { Vector3, Matrix4, Matrix3, Quaternion, XYZ } from "./WebGL/math";
-import { MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line } from "./WebGL";
-import { elementColors, CC, ColorSpec, ColorschemeSpec } from "./colors";
-import { extend, getExtent, makeFunction, getPropertyRange, isEmptyObject, adjustVolumeStyle, mergeGeos, PausableTimer, getColorFromStyle, getElement } from "./utilities";
-import { getGradient, Gradient } from "./Gradient";
+import { decode, encode, toRGBA8 } from 'upng-js';
 import { AtomStyleSpec, GLModel, LineStyleSpec } from "./GLModel";
-import { Label, LabelSpec } from "./Label";
 import { ArrowSpec, BoxSpec, CurveSpec, CustomShapeSpec, CylinderSpec, GLShape, IsoSurfaceSpec, LineSpec, ShapeSpec, SphereSpec, splitMesh } from "./GLShape";
-import { VolumeData } from "./VolumeData";
+import { getGradient, Gradient } from "./Gradient";
+import { Label, LabelSpec } from "./Label";
 import { ProteinSurface, SurfaceType, syncSurface } from "./ProteinSurface4";
+import { VolumeData } from "./VolumeData";
 import { GLVolumetricRender, VolumetricRendererSpec } from "./VolumetricRender";
+import { Camera, Coloring, Fog, FrontSide, Geometry, Light, Line, LineBasicMaterial, Material, Mesh, MeshDoubleLambertMaterial, MeshLambertMaterial, Object3D, Projector, Raycaster, Renderer, Scene } from "./WebGL";
+import { Matrix3, Matrix4, Quaternion, Vector3, XYZ } from "./WebGL/math";
+import { CC, ColorschemeSpec, ColorSpec, elementColors } from "./colors";
 import { AtomSelectionSpec, AtomSpec } from "./specs";
-import { decode, toRGBA8, encode } from 'upng-js'
+import { adjustVolumeStyle, extend, getColorFromStyle, getElement, getExtent, getPropertyRange, isEmptyObject, makeFunction, mergeGeos, PausableTimer } from "./utilities";
 
 export const CONTEXTS_PER_VIEWPORT = 16;
 
@@ -4487,6 +4486,13 @@ export class GLViewer {
             }
 
             var sync = !!(syncSurface);
+            if (typeof $3Dmol == "undefined" || !!$3Dmol.SurfaceWorker) {
+              console.log(
+                "$3Dmol.SurfaceWorker is not defined, using synchronous surface generation.",
+              );
+              sync = true;
+            }
+
             if (sync) { // don't use worker, still break up for memory purposes
 
                 // to keep the browser from locking up, call through setTimeout
