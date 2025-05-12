@@ -148,7 +148,7 @@ export class CC {
       if (m) {
         if (m[1] != "") {
           console.log(
-            "WARNING: Opacity value in rgba ignored.  Specify separately as opacity attribute."
+            "WARNING: Opacity value in rgba ignored.  Specify separately as opacity attribute.",
           );
         }
         let ret = 0;
@@ -161,7 +161,14 @@ export class CC {
         }
         return ret;
       }
-      return (window as any)?.$3Dmol?.htmlColors[hex.toLowerCase()] || 0x000000;
+      // check if hex.toLowerCase() is in htmlColors and console.error log if not
+      let val = htmlColors[hexs.toLowerCase()];
+      if (val) {
+        return val;
+      } else {
+        console.error("color not found", hex.toLowerCase(), htmlColors);
+        return 0x000000;
+      }
     }
     return hex as number;
   }
