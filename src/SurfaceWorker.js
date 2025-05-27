@@ -1,6 +1,5 @@
 //Hackish way to create webworker (independent of $3Dmol namespace) within minified file
 //We need to convert actual javascript into a string, not typescript, so for the time being
-
 //this will remain a JS file
 $3Dmol.workerString = function(){
 

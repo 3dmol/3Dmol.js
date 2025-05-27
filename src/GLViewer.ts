@@ -167,23 +167,14 @@ export class GLViewer {
     };
 
     private setupRenderer() {
-
-        this.renderer = new Renderer({
-            antialias: this.config.antialias,
+        let rendopt = {...this.config,
             preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha: false,/* more traditional compositing with background */
-            id: this.config.id,
-            row: this.config.row,
-            col: this.config.col,
-            rows: this.config.rows,
-            cols: this.config.cols,
-            canvas: this.config.canvas,
             //cannot initialize with zero size - render will start out lost
             containerWidth: this.WIDTH,
-            containerHeight: this.HEIGHT,
-            ambientOcclusion: this.config.ambientOcclusion,
-            outline: this.config.outline
-        });
+            containerHeight: this.HEIGHT
+        };
+        this.renderer = new Renderer(rendopt);
         this.renderer.domElement.style.width = "100%";
         this.renderer.domElement.style.height = "100%";
         this.renderer.domElement.style.padding = "0";
@@ -4486,7 +4477,7 @@ export class GLViewer {
             }
 
             var sync = !!(syncSurface);
-            if (typeof $3Dmol == "undefined" || !!$3Dmol.SurfaceWorker) {
+            if (typeof $3Dmol == "undefined" || typeof $3Dmol.SurfaceWorker == "undefined") {
               console.log(
                 "$3Dmol.SurfaceWorker is not defined, using synchronous surface generation.",
               );
@@ -4522,6 +4513,7 @@ export class GLViewer {
                 return Promise.all(promises)
                     .then(function () {
                         surfobj.done = true;
+                        self.render(); // for consistency with parallel case, call render when done
                         return Promise.resolve(surfid);
                     });
 
@@ -5149,7 +5141,7 @@ export interface ViewerSpec {
     hoverDuration?: number;
     /** id of the canvas */
     id?: string;
-    /** default 5 */
+    /** default 10 */
     cartoonQuality?: number;
     /** */
     row?: number;
@@ -5168,11 +5160,13 @@ export interface ViewerSpec {
     lowerZoomLimit?: number;
     /** */
     upperZoomLimit?: number;
-    /** */
+    /** Enable antialiasing */
     antialias?: boolean;
+    /** Render upscaled to 2x resolution. Defaults to antialiasing setting. Ignored for Retina displays. */
+    upscale?: boolean;
     /** */
     control_all?: boolean;
-    /** */
+    /** Orthographic instead of perspective rendering. Default false. */
     orthographic?: boolean;
     /** Disable fog, default to false */
     disableFog?: boolean;

@@ -143,6 +143,7 @@ export class Renderer {
   private _alpha: any;
   private _premultipliedAlpha: any;
   private _antialias: any;
+  private _upscale: boolean | null = null;
   private _preserveDrawingBuffer: any;
   private _clearColor: Color;
   private _clearAlpha: any;
@@ -178,6 +179,7 @@ export class Renderer {
         ? parameters.premultipliedAlpha
         : true;
     this._antialias = parameters.antialias !== undefined ? parameters.antialias : false;
+    this._upscale = parameters.upscale !== undefined ? parameters.upscale : this._antialias;
 
     this._preserveDrawingBuffer =
       parameters.preserveDrawingBuffer !== undefined
@@ -324,9 +326,9 @@ export class Renderer {
     //zooming (in the browser) changes the pixel ratio and width/height
     this.devicePixelRatio =
       window.devicePixelRatio !== undefined ? window.devicePixelRatio : 1;
-    //with antialiasing on (which doesn't seem to do much), render at double rsolution to eliminate jaggies
-    //my iphone crashes if we do though, so as a hacky workaround, don't do it with retina displays
-    if (this._antialias && this.devicePixelRatio < 2.0) this.devicePixelRatio *= 2.0;
+    //with antialiasing on, render at double rsolution to eliminate jaggies
+    //don't do it with high resolution displays
+    if (this._upscale && this.devicePixelRatio < 2.0) this.devicePixelRatio = 2.0;
 
     if (
       this.rows != undefined &&

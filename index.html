@@ -27,9 +27,8 @@
     ga('send', 'pageview');
 
   </script>
-  <script type="module">
-    import * as $3Dmol from './build/3Dmol.es6.js';
-
+  <script src="./build/3Dmol.js"></script>
+  <script>
     const initShapes = function (viewer) {
       $.get('tests/test_structs/benzene-homo.cube', function (data) {
         var voldata = new $3Dmol.VolumeData(data, "cube");
