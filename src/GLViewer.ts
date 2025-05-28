@@ -26,11 +26,52 @@ interface SurfObj {
     style?: SurfaceStyleSpec;
 }
 
-interface Surface extends Array<SurfObj> {
+/**
+ * A surface.
+ *
+ * @class
+*/
+class Surface extends Array<SurfObj> {
     style?: SurfaceStyleSpec;
     atomsel?: AtomSelectionSpec;
     allsel?: AtomSelectionSpec;
-    focus?:  AtomSelectionSpec;
+    focus?: AtomSelectionSpec;
+
+    constructor(items: SurfObj[]) {
+        super(...items); // spread the array elements into the Array constructor
+    }
+    /**
+     * Returns list of rotational/translational matrices if there is BIOMT data
+     * Otherwise returns a list of just the ID matrix
+     *
+     * @return {Array<Matrix4>}
+     *
+     */
+    public getSymmetries() {
+        //we assume all sub-objects have same symmetries
+        if (this.length == 0) return [];
+        let obj = this[0];
+        if (typeof (obj.symmetries) == 'undefined') {
+            this.setSymmetries([new Matrix4()]);
+        }
+        return obj.symmetries;
+    };
+
+    /**
+     * Sets symmetries based on specified matrices in list
+     *
+     * @param {Array<Matrix4>} list
+     *
+     */
+    public setSymmetries(syms) {
+        if (typeof (syms) == "undefined") { //delete sym data
+            syms = [new Matrix4()];
+        }
+        for (let obj of this) {
+            obj.symmetries = syms;
+            obj.finished = false; //trigger redraw
+        }
+    };
 }
 
 /**
@@ -54,7 +95,7 @@ export class GLViewer {
     private glDOM: HTMLCanvasElement | null = null;
 
     private models: GLModel[] = []; // atomistic molecular models
-    private surfaces: Record<number,Surface> = {};
+    private surfaces: Record<number, Surface> = {};
     private shapes = []; // Generic shapes
     private labels: Label[] = [];
     private clickables = []; //things you can click on
@@ -167,7 +208,8 @@ export class GLViewer {
     };
 
     private setupRenderer() {
-        let rendopt = {...this.config,
+        let rendopt = {
+            ...this.config,
             preserveDrawingBuffer: true, //so we can export images
             premultipliedAlpha: false,/* more traditional compositing with background */
             //cannot initialize with zero size - render will start out lost
@@ -223,11 +265,11 @@ export class GLViewer {
 
         if (isVisible(this.container)) {
             let restored = 0;
-            for(let c of document.getElementsByTagName('canvas')) {
-                if( isVisible(c) && (c as any)._3dmol_viewer != undefined) {
+            for (let c of document.getElementsByTagName('canvas')) {
+                if (isVisible(c) && (c as any)._3dmol_viewer != undefined) {
                     (c as any)._3dmol_viewer.resize();
                     restored += 1;
-                    if(restored >= CONTEXTS_PER_VIEWPORT) break;
+                    if (restored >= CONTEXTS_PER_VIEWPORT) break;
                 }
             }
         }
@@ -639,7 +681,7 @@ export class GLViewer {
 
         this.camerax = 0;
         if (typeof (this.config.camerax) != 'undefined') {
-            this.camerax = typeof(this.config.camerax) === 'string' ? parseFloat(this.config.camerax) : this.config.camerax;
+            this.camerax = typeof (this.config.camerax) === 'string' ? parseFloat(this.config.camerax) : this.config.camerax;
         }
         this._viewer = this;
         this.container = element; //we expect container to be HTMLElement
@@ -844,7 +886,7 @@ export class GLViewer {
      */
     public setConfig(c: ViewerSpec) {
         this.config = c;
-        if(c.ambientOcclusion) {
+        if (c.ambientOcclusion) {
             this.renderer.enableAmbientOcclusion(c.ambientOcclusion);
         }
     };
@@ -1370,7 +1412,7 @@ export class GLViewer {
             this.renderer.enableAmbientOcclusion(params);
         } else {
             this.renderer.disableAmbientOcclusion();
-        }        
+        }
         return this;
     };
 
@@ -1535,7 +1577,7 @@ export class GLViewer {
                 if (!viewer.getCanvas().isConnected && viewer.renderer.isLost()) {
                     clearInterval(viewer.spinInterval);
                 }
-                if(!only_when_visable || (viewer.container.checkVisibility && viewer.container.checkVisibility())) {                    
+                if (!only_when_visable || (viewer.container.checkVisibility && viewer.container.checkVisibility())) {
                     viewer.rotate(1 * speed, axis);
                 }
             }, 25);
@@ -1838,7 +1880,7 @@ export class GLViewer {
                         surfArr[n].mat.needsUpdate = true;
 
                         if (surfArr[n].done) {
-                            surfArr[n].finished = true;                      
+                            surfArr[n].finished = true;
                         }
 
                         // remove partially rendered surface
@@ -1853,9 +1895,9 @@ export class GLViewer {
                             smesh = new Line(geo, surfArr[n].mat);
                         }
                         else {
-                            if('wireframe' in surfArr.style  && surfArr.style.wireframe) {
+                            if ('wireframe' in surfArr.style && surfArr.style.wireframe) {
                                 geo.setUpWireframe();
-                            }                                
+                            }
                             smesh = new Mesh(geo, surfArr[n].mat);
                         }
                         if (surfArr[n].mat.transparent && surfArr[n].mat.opacity == 0) {
@@ -1866,7 +1908,7 @@ export class GLViewer {
                         }
                         if (surfArr[n].symmetries.length > 1 ||
                             (surfArr[n].symmetries.length == 1 &&
-                                !(surfArr[n].symmetries[n].isIdentity()))) {
+                                !(surfArr[n].symmetries[0].isIdentity()))) {
                             var j;
                             var tmeshes = new Object3D(); //transformed meshes
                             for (j = 0; j < surfArr[n].symmetries.length; j++) {
@@ -2609,7 +2651,7 @@ export class GLViewer {
         }
         this.show();
         return this;
-    };    
+    };
 
     /**
      * Show all labels in viewer
@@ -2634,7 +2676,7 @@ export class GLViewer {
         }
         this.show();
         return this;
-    };        
+    };
 
     // Modify label style
     /**
@@ -4322,7 +4364,7 @@ export class GLViewer {
             finished: false //the rendered finishes surfaces when they are done
         };
         var surfid = this.nextSurfID();
-        this.surfaces[surfid] = [surfobj];
+        this.surfaces[surfid] = new Surface([surfobj]);
         return surfid;
     };
 
@@ -4478,10 +4520,10 @@ export class GLViewer {
 
             var sync = !!(syncSurface);
             if (typeof $3Dmol == "undefined" || typeof $3Dmol.SurfaceWorker == "undefined") {
-              console.log(
-                "$3Dmol.SurfaceWorker is not defined, using synchronous surface generation.",
-              );
-              sync = true;
+                console.log(
+                    "$3Dmol.SurfaceWorker is not defined, using synchronous surface generation.",
+                );
+                sync = true;
             }
 
             if (sync) { // don't use worker, still break up for memory purposes
@@ -4594,7 +4636,7 @@ export class GLViewer {
 
         style = style || {};
         mat = GLViewer.getMatWithStyle(style);
-        let surf: Surface = [];
+        let surf: Surface = new Surface([]);
         //save configuration of surface
         surf.style = style;
         surf.atomsel = atomsel;
@@ -4698,13 +4740,13 @@ export class GLViewer {
                     });
                 } else {
                     surfArr[i].geo.colorsNeedUpdate = true;
-                    for(let geo of  surfArr[i].geo.geometryGroups ) {
-                        for(let j = 0; j < geo.vertices; j++) {
-                            let c = getColorFromStyle(geo.atomArray[j],style);
-                            let off = 3*j;
+                    for (let geo of surfArr[i].geo.geometryGroups) {
+                        for (let j = 0; j < geo.vertices; j++) {
+                            let c = getColorFromStyle(geo.atomArray[j], style);
+                            let off = 3 * j;
                             geo.colorArray[off] = c.r;
-                            geo.colorArray[off+1] = c.g;
-                            geo.colorArray[off+2] = c.b;
+                            geo.colorArray[off + 1] = c.g;
+                            geo.colorArray[off + 2] = c.b;
                         }
                     }
                 }
@@ -5102,7 +5144,7 @@ export interface AmbientOcclusionStyle {
 /**
  * View style configuration
  */
-export interface ViewStyle  {
+export interface ViewStyle {
     /** How to style viewer: outline|ambientOcclusion|none */
     style?: string;
     /** Ambient occlusion strength (darkness) of shading (default 1.0) */
@@ -5112,7 +5154,7 @@ export interface ViewStyle  {
     /** Width of the outline */
     width?: number;
     /** Color of the outline */
-    color?: ColorSpec;    
+    color?: ColorSpec;
 }
 /**
  * GLViewer input specification
@@ -5136,7 +5178,7 @@ export interface ViewerSpec {
     /** Alpha transparency of canvas background */
     backgroundAlpha?: number;
     /** */
-    camerax?: number|string;
+    camerax?: number | string;
     /** */
     hoverDuration?: number;
     /** id of the canvas */

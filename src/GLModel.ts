@@ -1414,6 +1414,7 @@ export class GLModel {
         }
         else {
             this.modelData.symmetries = list;
+            this.molObj = null;
         }
     };
 
