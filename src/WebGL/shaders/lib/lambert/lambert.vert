@@ -12,6 +12,7 @@ attribute vec3 color;
 
 varying vec3 vColor;
 varying vec3 vLightFront;
+varying vec4 mvPosition;
 
 void main() {
 
@@ -19,7 +20,7 @@ void main() {
 
     vec3 objectNormal = normal;
     vec3 transformedNormal = normalMatrix * objectNormal;
-    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+    mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
     vLightFront = vec3( 0.0 );
 

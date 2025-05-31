@@ -12,10 +12,12 @@ attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 color;
 
+varying vec4 mvPosition;
+
 void main() {
 
     vec4 norm = modelViewMatrix*vec4(normalize(normal),0.0);
-    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+    mvPosition = modelViewMatrix * vec4( position, 1.0 );
     mvPosition.xy += norm.xy*outlineWidth;
     vec4 outpos = projectionMatrix * mvPosition;
 

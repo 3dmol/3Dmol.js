@@ -859,8 +859,7 @@ export class Renderer {
       this.setShading(scene, camera, "opaque");
     }
 
-    this.renderObjects(scene.__webglObjects, true, "opaque",
-      camera, lights, fog, false);
+    this.renderObjects(scene.__webglObjects, true, "opaque", camera, lights, fog, false);
 
     if (hasAO) {
       this.clearShading();
@@ -870,13 +869,10 @@ export class Renderer {
     this.renderSprites(scene, camera, false);
 
     // prime depth buffer with transparent objects
-    this.renderObjects(scene.__webglObjects, true, "transparentDepth",
-      camera, lights, fog, true);
+    this.renderObjects(scene.__webglObjects, true, "transparentDepth", camera, lights, fog, true);
 
     // transparent pass (back-to-front order)
-
-    this.renderObjects(scene.__webglObjects, false, "transparent",
-      camera, lights, fog, true);
+    this.renderObjects(scene.__webglObjects, false, "transparent", camera, lights, fog, true);
 
     //volumetric is separate
     if (hasvolumetric && this._fb) {
@@ -1675,7 +1671,7 @@ export class Renderer {
     }
     if (p_uniforms.vHeight) {
       this._gl.uniform1f(p_uniforms.vHeight, this._viewportHeight);
-    }    
+    }
     // Send projection matrix to uniform variable in shader
     if (refreshMaterial) {
       // Load projection, model-view matrices for perspective
@@ -1707,7 +1703,7 @@ export class Renderer {
         m_uniforms.outlineColor.value = material.outlineColor;
         m_uniforms.outlineWidth.value = material.outlineWidth;
         m_uniforms.outlinePushback.value = material.outlinePushback;
-        m_uniforms.outlineMaxPixels.value = material.outlineMaxPixels*this.devicePixelRatio;
+        m_uniforms.outlineMaxPixels.value = material.outlineMaxPixels * this.devicePixelRatio;
       } else if (material.shaderID === "volumetric") {
         //need a matrix that maps back from model coordinates to texture coordinates
         //  textureMat*modelInv*position

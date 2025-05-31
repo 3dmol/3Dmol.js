@@ -25,6 +25,12 @@ void main() {
     float ndcDepth = clipPos.z / clipPos.w;
     gl_FragDepthEXT = ((gl_DepthRange.diff * ndcDepth) + gl_DepthRange.near + gl_DepthRange.far) / 2.0;
     gl_FragColor = vec4(outlineColor, 1 );
+
+    if(fogNear != fogFar) {
+        float depth = -cameraPos.z;
+        float fogFactor = smoothstep( fogNear, fogFar, depth );
+        gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+    }
 }
 
 

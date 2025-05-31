@@ -137,6 +137,7 @@ export class GLViewer {
     private modelGroup: any = null;
 
     private fogStart = 0.4;
+    private fogEnd = 1.0;
     private slabNear = -50; // relative to the center of rotationGroup
     private slabFar = 50;
 
@@ -345,8 +346,7 @@ export class GLViewer {
         this.camera.updateProjectionMatrix();
 
         this.scene.fog.near = this.camera.near + this.fogStart * (this.camera.far - this.camera.near);
-        // if (scene.fog.near > center) scene.fog.near = center;
-        this.scene.fog.far = this.camera.far;
+        this.scene.fog.far = this.camera.near + this.fogEnd * (this.camera.far - this.camera.near);
 
         if (this.config.disableFog) {
             this.scene.fog.near = this.scene.fog.far;
@@ -2186,6 +2186,14 @@ export class GLViewer {
      * @param {AtomSelectionSpec} sel
      *            Selection specification specifying model and atom
      *            properties to select. Default: all atoms in viewer
+     * @example
+            $3Dmol.get('data/1jpy.cif', function(data) {
+              let m = viewer.addModel(data);
+              viewer.setStyle('stick');
+              viewer.zoomTo({resn:'NAG',chain:'B'});
+              viewer.fitSlab({resn:'NAG',chain:'B'});
+              viewer.render();
+    });
      */
     public fitSlab(sel: AtomSelectionSpec) {
         sel = sel || {};
@@ -3439,10 +3447,27 @@ export class GLViewer {
      * Enable/disable fog for content far from the camera
      *
      * @param {boolean} fog whether to enable or disable the fog
+     * 
+     * @example
+            $3Dmol.get('data/1jpy.cif', function(data) {
+              let m = viewer.addModel(data);
+              viewer.setStyle('stick');
+              viewer.zoomTo({resn:'NAG',chain:'B'});
+              viewer.enableFog({fogStart:.2,fogEnd:.6});
+              viewer.render();
+    });
      */
-    public enableFog(fog: boolean) {
+    public enableFog(fog: boolean|FogSpec) {
         if (fog) {
             this.scene.fog = new Fog(this.bgColor, 100, 200);
+            this.config.disableFog = false;
+
+            const f = fog as FogSpec;
+            if(f.fogStart == undefined) this.fogStart = 0.4;
+            else this.fogStart = f.fogStart;
+            if(f.fogEnd == undefined) this.fogEnd = 1.0;
+            else this.fogEnd = f.fogEnd; 
+
         } else {
             this.config.disableFog = true;
             this.show();
@@ -5293,4 +5318,12 @@ export interface UnitCellStyleSpec {
     clabel?: string;
     /** label style for c axis */
     clabelstyle?: LabelSpec;
+}
+
+/** Fog specification. */
+export interface FogSpec {
+    /** Fraction within the slab where fog starts to be linearly added. Default 0.4. */
+    fogStart?: number;
+    /** Fraction with the slab where fog ends (nothing visible after this point). Default 1.0. */
+    fogEnd?: number;
 }

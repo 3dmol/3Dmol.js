@@ -42,7 +42,12 @@ void main() {
     color *= shadowFactor;
 #endif    
     gl_FragColor = vec4(color, opacity*opacity );
-    float fogFactor = smoothstep( fogNear, fogFar, gl_FragDepthEXT/gl_FragCoord.w );
-    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+
+    if(fogNear != fogFar) {
+        float depth = -cameraPos.z;
+        float fogFactor = smoothstep( fogNear, fogFar, depth );
+        gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+    }
+     
 }
 

@@ -9,6 +9,9 @@ uniform highp sampler2D shading;
 #endif
 varying vec3 vLightFront;
 varying vec3 vColor;
+varying vec4 mvPosition;
+
+
 //DEFINEFRAGCOLOR
 
 void main() {
@@ -24,10 +27,11 @@ void main() {
     vColor *= shadowFactor;
 #endif
     gl_FragColor = gl_FragColor * vec4( vColor, opacity );
-    float depth = gl_FragCoord.z / gl_FragCoord.w;
 
-    float fogFactor = smoothstep( fogNear, fogFar, depth );
-
-    gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+    if(fogNear != fogFar) {
+        float depth = -mvPosition.z;
+        float fogFactor = smoothstep( fogNear, fogFar, depth );
+        gl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );
+    }
 
 }

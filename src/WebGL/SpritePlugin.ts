@@ -22,8 +22,6 @@ export type UniformsValueType = {
   screenPosition: NullableWebGLUniformLocation;
   modelViewMatrix: NullableWebGLUniformLocation;
   projectionMatrix: NullableWebGLUniformLocation;
-  fogType: NullableWebGLUniformLocation;
-  fogDensity: NullableWebGLUniformLocation;
   fogNear: NullableWebGLUniformLocation;
   fogFar: NullableWebGLUniformLocation;
   fogColor: NullableWebGLUniformLocation;
@@ -171,14 +169,6 @@ export class SpritePlugin {
       this.sprite.program,
       "projectionMatrix"
     );
-    uniforms.fogType = this.gl.getUniformLocation(
-      this.sprite.program,
-      "fogType"
-    );
-    uniforms.fogDensity = this.gl.getUniformLocation(
-      this.sprite.program,
-      "fogDensity"
-    );
     uniforms.fogNear = this.gl.getUniformLocation(
       this.sprite.program,
       "fogNear"
@@ -265,8 +255,6 @@ export class SpritePlugin {
     this.gl.activeTexture(this.gl.TEXTURE0);
     this.gl.uniform1i(uniforms.map, 0);
 
-    var oldFogType = 0;
-    var sceneFogType = 0;
     var fog = scene.fog as Fog;
 
     if (fog) {
@@ -279,14 +267,9 @@ export class SpritePlugin {
 
       this.gl.uniform1f(uniforms.fogNear, fog.near);
       this.gl.uniform1f(uniforms.fogFar, fog.far);
-
-      this.gl.uniform1i(uniforms.fogType, 1);
-      oldFogType = 1;
-      sceneFogType = 1;
     } else {
-      this.gl.uniform1i(uniforms.fogType, 0);
-      oldFogType = 0;
-      sceneFogType = 0;
+      this.gl.uniform1f(uniforms.fogNear, 0);
+      this.gl.uniform1f(uniforms.fogFar, 0);
     }
 
     // update positions and sort
@@ -295,7 +278,6 @@ export class SpritePlugin {
     let sprite: Sprite;
     let material;
     let size;
-    let fogType;
     let scale: number[] = [];
 
     for (i = 0; i < nSprites; i++) {
@@ -353,17 +335,6 @@ export class SpritePlugin {
             false,
             sprite._modelViewMatrix.elements
           );
-        }
-
-        if (scene.fog && material.fog) {
-          fogType = sceneFogType;
-        } else {
-          fogType = 0;
-        }
-
-        if (oldFogType !== fogType) {
-          this.gl.uniform1i(uniforms.fogType, fogType);
-          oldFogType = fogType;
         }
 
         size = 1 / (material.scaleByViewport ? viewportHeight : 1);
