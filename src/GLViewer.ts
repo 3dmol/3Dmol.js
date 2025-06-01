@@ -923,7 +923,7 @@ export class GLViewer {
         var newm = state.models;
         for (let i = 0; i < newm.length; i++) {
             if (newm[i]) {
-                this.models[i] = new GLModel(i);
+                this.models[i] = new GLModel(i,undefined,this);
                 this.models[i].setInternalState(newm[i]);
             }
         }
@@ -2554,7 +2554,7 @@ export class GLViewer {
      */
     public addResLabels(sel: AtomSelectionSpec, style: LabelSpec, byframe: boolean = false) {
         let start = this.labels.length;
-        this.applyToModels("addResLabels", sel, this, style, byframe);
+        this.applyToModels("addResLabels", sel, style, byframe);
         this.show();
         return this.labels.slice(start);
     };
@@ -2575,7 +2575,7 @@ export class GLViewer {
             });
      */
     public addPropertyLabels(prop: string, sel: AtomSelectionSpec, style: LabelSpec) {
-        this.applyToModels("addPropertyLabels", prop, sel, this, style);
+        this.applyToModels("addPropertyLabels", prop, sel, style);
         this.show();
         return this;
     };
@@ -3487,7 +3487,7 @@ export class GLViewer {
         let viewer = this;
         return new Promise<void>(function (resolve) {
             var modelMap = viewer.models.map(function (model) {
-                return model.setFrame(framenum, viewer);
+                return model.setFrame(framenum);
             });
             Promise.all(modelMap)
                 .then(function () { resolve(); });
@@ -3526,6 +3526,10 @@ export class GLViewer {
         }
         return mostFrames;
     };
+
+    public getNextModelId() {
+        return this.models.length;
+    }
 
 
     /**
@@ -3687,7 +3691,7 @@ export class GLViewer {
     public addModel(data?, format = "", options?) {
         options = this.getModelOpt(options);
 
-        var m = new GLModel(this.models.length, options);
+        var m = new GLModel(this.models.length, options, this);
         m.addMolData(data, format, options);
         this.models.push(m);
 
@@ -3710,7 +3714,7 @@ export class GLViewer {
         var modelatoms = GLModel.parseMolData(data, format, options);
 
         for (var i = 0; i < modelatoms.length; i++) {
-            var newModel = new GLModel(this.models.length, options);
+            var newModel = new GLModel(this.models.length, options, this);
             newModel.setAtomDefaults(modelatoms[i]);
             newModel.addFrame(modelatoms[i]);
             newModel.setFrame(0);
@@ -3745,7 +3749,7 @@ export class GLViewer {
         options = this.getModelOpt(options);
         options.multimodel = true;
         options.frames = true;
-        var m = new GLModel(this.models.length, options);
+        var m = new GLModel(this.models.length, options, this);
         m.addMolData(data, format, options);
         this.models.push(m);
 
@@ -3772,7 +3776,7 @@ export class GLViewer {
         options = this.getModelOpt(options);
         options.multimodel = true;
         options.onemol = true;
-        var m = new GLModel(this.models.length, options);
+        var m = new GLModel(this.models.length, options, this);
         m.addMolData(data, format, options);
         this.models.push(m);
 
@@ -3853,7 +3857,7 @@ export class GLViewer {
      * @return {GLModel}
      */
     public createModelFrom(sel: AtomSelectionSpec, extract: boolean = false) {
-        var m = new GLModel(this.models.length, this.defaultcolors);
+        var m = new GLModel(this.models.length, this.defaultcolors, this);
         for (var i = 0; i < this.models.length; i++) {
             if (this.models[i]) {
                 var atoms = this.models[i].selectedAtoms(sel);
@@ -4012,7 +4016,7 @@ export class GLViewer {
      * @param {ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
      */
     public vibrate(numFrames: number, amplitude: number, bothways: boolean, arrowSpec: ArrowSpec) {
-        this.applyToModels("vibrate", numFrames, amplitude, bothways, this, arrowSpec);
+        this.applyToModels("vibrate", numFrames, amplitude, bothways, arrowSpec);
         return this;
     };
 

@@ -123,15 +123,17 @@ export class GLModel {
     private options: any;
     private ElementColors: any;
 
+    private viewer: GLViewer;
 
     private readonly defaultSphereRadius: number;
     private readonly defaultCartoonQuality: number;
     // bonds as cylinders
     private readonly defaultStickRadius = 0.25;
 
-    constructor(mid, options?) {
+    constructor(mid, options?, viewer?) {
 
         this.options = options || {};
+        this.viewer = viewer;
         this.ElementColors = (this.options.defaultcolors) ? this.options.defaultcolors : elementColors.defaultColors;
 
         this.defaultSphereRadius = (this.options.defaultSphereRadius) ? this.options.defaultSphereRadius : 1.5;
@@ -1479,9 +1481,10 @@ export class GLModel {
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @return {Promise}
      */
-    public setFrame(framenum: number, viewer?: GLViewer) { //viewer only passed internally for unit cell
+    public setFrame(framenum: number) { 
         var numFrames = this.getNumFrames();
         let model = this;
+        let viewer = this.viewer;
         return new Promise<void>(function (resolve, reject) {
             if (numFrames == 0) {
                 //return;
@@ -1539,7 +1542,6 @@ export class GLModel {
      * @param {number} numFrames - number of frames to be created, default to 10
      * @param {number} amplitude - amplitude of distortion, default to 1 (full)
      * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
-     * @param {GLViewer} viewer - required if arrowSpec is provided
      * @param {ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
      *@example
 
@@ -1552,9 +1554,10 @@ export class GLModel {
               viewer.render();
           });
      */
-    public vibrate(numFrames: number = 10, amplitude: number = 1, bothWays: boolean = false, viewer?: GLViewer, arrowSpec?: ArrowSpec) {
+    public vibrate(numFrames: number = 10, amplitude: number = 1, bothWays: boolean = false, arrowSpec?: ArrowSpec) {
         var start = 0;
         var end = numFrames;
+        let viewer = this.viewer;
         if (bothWays) {
             start = -numFrames;
             end = numFrames;
@@ -1847,6 +1850,16 @@ export class GLModel {
                         ret = false;
                         break;
                     }
+                }
+            }
+            else if (key == "model") {
+                let m = sel.model;
+                if(typeof m  === 'number' && m < 0) {
+                    m = this.viewer.getNextModelId()+m;
+                }
+                if(m != this && m != this.id) {
+                    ret = false;
+                    break;
                 }
             }
             else if (sel.hasOwnProperty(key) && !GLModel.ignoredKeys.has(key) && !key.startsWith('__cache')) {
@@ -2553,14 +2566,14 @@ export class GLModel {
      *
      * @param {String} prop - property name
      * @param {AtomSelectionSpec} sel
-     * @param {GLViewer} viewer
      * @param {LabelSpec} options
      */
-    public addPropertyLabels(prop: string, sel: AtomSelectionSpec, viewer: GLViewer, style: LabelSpec) {
-        var atoms = this.selectedAtoms(sel, atoms);
-        var mystyle = deepCopy(style);
-        for (var i = 0; i < atoms.length; i++) {
-            var a = atoms[i];
+    public addPropertyLabels(prop: string, sel: AtomSelectionSpec, style: LabelSpec) {
+        let atoms = this.selectedAtoms(sel);
+        let viewer = this.viewer;
+        let mystyle = deepCopy(style);
+        for (let i = 0; i < atoms.length; i++) {
+            let a = atoms[i];
             var label = null;
             if (typeof (a[prop]) != 'undefined') {
                 label = String(a[prop]);
@@ -2581,12 +2594,11 @@ export class GLModel {
      * with the same chain,resn, and resi.
      *
      * @param {AtomSelectionSpec} sel
-     * @param {GLViewer} viewer
      * @param {LabelSpec} options
      * @param {boolean} byframe - if true, create labels for every individual frame, not just current; frames must be loaded already
      */
-    public addResLabels(sel: AtomSelectionSpec, viewer: GLViewer, style: LabelSpec, byframe: boolean = false) {
-
+    public addResLabels(sel: AtomSelectionSpec, style: LabelSpec, byframe: boolean = false) {
+        let viewer = this.viewer;
         var created_labels = [];
         var helper = function (model, framenum?) {
             var atoms = model.selectedAtoms(sel, atoms);

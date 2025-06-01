@@ -1,5 +1,6 @@
 //a collection of miscellaneous utility functions
 
+import { GLViewer } from "GLViewer";
 import { getGradient, Gradient, GradientType } from "./Gradient";
 import { VolumeData } from "./VolumeData";
 import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./colors";
@@ -399,7 +400,7 @@ export function getbin(uri, callback?, request?, postdata?) {
        viewer.render(callback);
     });
  */
-export function download(query, viewer, options, callback?) {
+export function download(query, viewer: GLViewer, options, callback?) {
     var type = "";
     var pdbUri = "";
     var uri = "";
