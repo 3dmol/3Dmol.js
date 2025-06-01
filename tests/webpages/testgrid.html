@@ -1,0 +1,23 @@
+<html>
+
+<head>
+</head>
+
+<body>
+      <script src="../../build/3Dmol.js"></script>
+      <div c id="V" style="height: 8000px; width: 1200px; z-index: 100;"></div> 
+      <script>
+        var viewers = $3Dmol.createViewerGrid("V", { rows: 20, cols: 2, control_all: false })
+    for (var r = 0; r < viewers.length; r++) {
+      for (var c = 0; c < viewers[0].length; c++) {
+        let viewer = viewers[r][c];
+        $3Dmol.download("pdb:1YCR", viewer).then(() => { viewer.setStyle('cartoon'); viewer.zoomTo(); viewer.render();});
+      }
+    }
+      </script>
+          
+      
+                
+</body>
+
+</html>
