@@ -308,8 +308,10 @@ export class Renderer {
       this.row != undefined &&
       this.col != undefined
     ) {
-      var wid = this._canvas.width / this.cols;
-      var hei = this._canvas.height / this.rows;
+      //note that drawingBuffer may be smaller than the requested width
+      //for large canvases
+      var wid = this._gl.drawingBufferWidth / this.cols;
+      var hei = this._gl.drawingBufferHeight / this.rows;
 
       this._viewportWidth = wid;
       this._viewportHeight = hei;
@@ -329,6 +331,10 @@ export class Renderer {
     //with antialiasing on, render at double rsolution to eliminate jaggies
     //don't do it with high resolution displays
     if (this._upscale && this.devicePixelRatio < 2.0) this.devicePixelRatio = 2.0;
+    this._canvas.width = width * this.devicePixelRatio;
+    this._canvas.height = height * this.devicePixelRatio;
+    this._canvas.style.width = width + "px";
+    this._canvas.style.height = height + "px";
 
     if (
       this.rows != undefined &&
@@ -338,22 +344,16 @@ export class Renderer {
     ) {
       var wid = width / this.cols;
       var hei = height / this.rows;
-      this._canvas.width = width * this.devicePixelRatio;
-      this._canvas.height = height * this.devicePixelRatio;
 
       this._viewportWidth = wid * this.devicePixelRatio;
       this._viewportHeight = hei * this.devicePixelRatio;
-
-      this._canvas.style.width = width + "px";
-      this._canvas.style.height = height + "px";
+      this._viewportWidth = this._gl.drawingBufferWidth /this.cols;
+      this._viewportHeight = this._gl.drawingBufferHeight/this.rows;
 
       this.setViewport();
     } else {
-      this._viewportWidth = this._canvas.width = width * this.devicePixelRatio;
-      this._viewportHeight = this._canvas.height = height * this.devicePixelRatio;
-
-      this._canvas.style.width = width + "px";
-      this._canvas.style.height = height + "px";
+      this._viewportWidth = this._canvas.width;
+      this._viewportHeight = this._canvas.height;
 
       if (!this.isLost()) {
         this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
