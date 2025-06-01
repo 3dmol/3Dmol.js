@@ -259,6 +259,9 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
         : mmCIF._atom_site_label_asym_id
         ? mmCIF._atom_site_label_asym_id[i]
         : undefined;
+      atom.lchain = mmCIF._atom_site_label_asym_id
+        ? mmCIF._atom_site_label_asym_id[i]
+        : undefined;
       atom.resi = mmCIF._atom_site_auth_seq_id
         ? parseInt(mmCIF._atom_site_auth_seq_id[i])
         : mmCIF._atom_site_label_seq_id
