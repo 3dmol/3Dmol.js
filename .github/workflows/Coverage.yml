@@ -23,7 +23,7 @@ jobs:
 
       - name: Coverage
         env:
-          NODE_OPTIONS: "--expose-gc"   
+          NODE_OPTIONS: "--expose-gc --max_old_space_size=25000"   
         # coverage has trouble fetching data for some reason in the CI,
         # I don't actually care about the test results (that's tested above)
         # so ignore any failure here
