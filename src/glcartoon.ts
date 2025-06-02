@@ -7,8 +7,9 @@ import { Triangle, Sphere } from "./WebGL/shapes";
 import { MeshDoubleLambertMaterial, Mesh, Geometry, Material, Coloring } from "./WebGL";
 import { Gradient } from "./Gradient";
 import { CC, ColorSpec, ColorschemeSpec } from "./colors";
-import { GLDraw } from "./GLDraw";
-import { isNumeric, getColorFromStyle } from "./utilities";
+import { CAP, GLDraw } from "./GLDraw";
+import { isNumeric, getColorFromStyle, extend } from "./utilities";
+import { AtomSpec } from "specs";
 
 /**
  * A visualization of protein or nucleic acid secondary structure.  Applying this to other molecules will not show anything.
@@ -29,11 +30,11 @@ export interface CartoonStyleSpec {
     /** do not show  */
     hidden?: boolean;
     /** colorscheme to use on atoms; overrides color */
-    colorscheme?: ColorschemeSpec;    
+    colorscheme?: ColorschemeSpec;
     /** strand color, may specify as 'spectrum' which will apply reversed gradient based on residue number */
     color?: ColorSpec;
     /**  Allows the user to provide a function for setting the colorschemes. */
-    colorfunc?: Function;    
+    colorfunc?: Function;
     /**  style of cartoon rendering (trace, oval, rectangle (default), parabola, edged) */
     style?: string;
     /**  whether to use constant strand width, disregarding
@@ -52,7 +53,11 @@ export interface CartoonStyleSpec {
     width?: number;
     /** set opacity from 0-1; transparency is set per-chain
     *       with a warning outputted in the event of ambiguity */
-    opacity?: number
+    opacity?: number,
+    /** If there is a gap of strictly fewer than gapcutoff missing residues
+     * within a chain, draw a dashed line.
+     */
+    gapcutoff?: number
 };
 
 // helper functions
@@ -121,7 +126,7 @@ const coilWidth = 0.5;
 const helixSheetWidth = 1.3;
 const nucleicAcidWidth = 0.8;
 const defaultThickness = 0.4;
-const baseThickness    = 0.4;
+const baseThickness = 0.4;
 
 function drawThinStrip(geo: Geometry, p1, p2, colors) {
 
@@ -1010,6 +1015,7 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
 
     // then accumulate points
     curr = undefined;
+    let disconnects = []
     for (var a = 0; a < atoms.length; a++) {
         next = atoms[a];
 
@@ -1029,6 +1035,13 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
         if (curr && curr.style.cartoon && (!next.style.cartoon ||
             curr.style.cartoon.opacity != next.style.cartoon.opacity)) {
             flushGeom(curr.chain == next.chain);
+        }
+
+        //check for disconnects in the same chain
+        if (curr && next && !inConnectedResidues(curr, next) && curr.chain &&
+            curr.chain == next.chain && !curr.hetflag && !next.hetflag &&
+            curr.reschain + 1 == next.reschain) {
+            disconnects.push([curr, next]);
         }
 
         if (cartoon.style === "trace") // draw cylinders connecting
@@ -1261,6 +1274,47 @@ export function drawCartoon(group, atomList, gradientrange, quality = 10) {
 
     // for default style, draw the last strand
     flushGeom(false);
+
+    //cartoon gaps
+    var drawGap = function (start: AtomSpec, end: AtomSpec) {
+        if (start.style.cartoon.gapcutoff &&
+            start.style.cartoon.gapcutoff == end.style.cartoon.gapcutoff) {
+            let cut = start.style.cartoon.gapcutoff;
+            let gap = end.resi - start.resi;
+            if (gap > 0 && gap < cut) {
+
+                let radius = 0.25;
+                let xdiff = end.x-start.x;
+                let ydiff = end.y-start.y;
+                let zdiff = end.z-start.z;
+
+                let gapLength = Math.sqrt(xdiff*xdiff+ydiff*ydiff+zdiff*zdiff);
+                let cylinderLength = gapLength/(2*gap); //one dash for each missing residue, evenly spaced
+
+                let new_start = new Vector3(start.x,start.y,start.z);
+                let div = gapLength/cylinderLength;
+                let dashVector = new Vector3((end.x - start.x) / div, (end.y - start.y) / div, (end.z - start.z) / div);
+
+                new_start.add({x:dashVector.x/2,y:dashVector.y/2,z:dashVector.z/2});
+                let new_end = new_start.clone().add(dashVector);
+                dashVector.multiplyScalar(2); //skip over dash and gap
+                let fakeres = extend({},start);
+                for (var place = 0; place < gap; place++) {
+                    fakeres.resi += 1;
+                    let color = cartoonColor(fakeres, fakeres.style.cartoon);
+                    GLDraw.drawCylinder(shapeGeo, new_start, new_end, radius, CC.color(color), CAP.FLAT, CAP.FLAT);
+                    new_start.add(dashVector);
+                    new_end.add(dashVector);
+                }
+                flushGeom(false);
+            }
+
+        }
+    }
+
+    for (let pair of disconnects) {
+        drawGap(pair[0], pair[1]);
+    }
 };
 
 

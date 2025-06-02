@@ -43,7 +43,7 @@
     "generate:tests": "python3 tests/auto/generate_tests.py",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py -min",
     "generate:jest": "python3 tests/jest/generate_jest_render_tests.py",
-    "cover": "npm run generate:jest && npx jest --coverage --verbose --runInBand",
+    "cover": "npm run generate:jest && npx jest --coverage --verbose",
     "doc": "rm -rf doc/ && npx jsdoc -c jsdoc.conf.json src doc.md"
   },
   "dependencies": {
