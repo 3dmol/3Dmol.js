@@ -24,7 +24,7 @@ setup(
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     # Keep version in synce with 3Dmol.js version.  Use "postX" suffix if needed
-    version='2.4.2post1',
+    version='2.5.0',
 
     description='An IPython interface for embedding 3Dmol.js views in Jupyter notebooks',
     long_description=long_description,

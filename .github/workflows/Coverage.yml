@@ -23,7 +23,7 @@ jobs:
 
       - name: Coverage
         env:
-          NODE_OPTIONS: "--expose-gc --no-compilation-cache"   
+          NODE_OPTIONS: "--expose-gc"   
         # coverage has trouble fetching data for some reason in the CI,
         # I don't actually care about the test results (that's tested above)
         # so ignore any failure here
