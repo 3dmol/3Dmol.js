@@ -1857,9 +1857,24 @@ export class GLModel {
                 if(typeof m  === 'number' && m < 0) {
                     m = this.viewer.getNextModelId()+m;
                 }
-                if(m != this && m != this.id) {
-                    ret = false;
-                    break;
+
+                if (Array.isArray(m)) {  // handle list
+                    let isokay = false;
+                    for (let i = 0; i < m.length; i++) {
+                        if(m[i] == this || m[i] == this.id) {
+                            isokay = true;
+                            break;
+                        }
+                    }
+                    if (!isokay) {
+                        ret = false;
+                        break;
+                    }
+                } else {
+                    if(m != this && m != this.id) {
+                        ret = false;
+                        break;
+                    }
                 }
             }
             else if (sel.hasOwnProperty(key) && !GLModel.ignoredKeys.has(key) && !key.startsWith('__cache')) {
@@ -1869,7 +1884,7 @@ export class GLModel {
                     ret = false;
                     break;
                 }
-                var isokay = false;
+                let isokay = false;
                 if (key === "bonds") {
                     //special case counting number of bonds, for selecting nonbonded mostly
                     var val = sel[key];
