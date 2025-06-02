@@ -24,13 +24,16 @@ export function PRMTOP(str: string /*, options*/) {
         line.includes("CHARGE") ||
         line.includes("RADII") ||
         line.includes("BONDS_INC_HYDROGEN") ||
-        line.includes("BONDS_WITHOUT_HYDROGEN")
+        line.includes("BONDS_WITHOUT_HYDROGEN") ||
+        line.includes("RESIDUE_LABEL") ||
+        line.includes("RESIDUE_POINTER")
       );
     });
     var index = getIndex("POINTERS");
     if (index == -1) return [];
     var col = getColEleSize(index);
     var atomCount = parseInt(lines[index + 1].slice(0, col[1]));
+    let resCount = parseInt(lines[index + 2].slice(col[1], col[0] + col[1]));
     if (isNaN(atomCount) || atomCount <= 0) return [];
     index = getIndex("ATOM_NAME");
     if (index == -1) return [];
@@ -50,6 +53,8 @@ export function PRMTOP(str: string /*, options*/) {
         atom.properties = properties;
         atom.bonds = [];
         atom.bondOrder = [];
+        atom.index = atoms.length;
+
         atoms.push(atom);
         count++;
       }
@@ -69,6 +74,49 @@ export function PRMTOP(str: string /*, options*/) {
           count++;
         }
         index++;
+      }
+    }
+
+    index = getIndex("RESIDUE_POINTER");
+    var resstarts = [];
+    if (index != -1) {
+      col = getColEleSize(index);
+      noOfCol = col[0];
+      index += 1;
+      for (let i = 0; i < resCount / col[0]; i++) {
+        if (i == parseInt(resCount / col[0])) noOfCol = resCount % col[0];
+        for (let j = 0; j < noOfCol; j++) {
+          resstarts.push(parseInt(lines[index].slice(col[1] * j, col[1] * (j + 1))));
+        }
+        index++;
+      }
+      index = getIndex("RESIDUE_LABEL");
+      if (index != -1) {
+        let resnames = []
+        col = getColEleSize(index);
+        noOfCol = col[0];
+        index += 1;
+        for (let i = 0; i < resCount / col[0]; i++) {
+          if (i == parseInt(resCount / col[0])) noOfCol = resCount % col[0];
+          for (let j = 0; j < noOfCol; j++) {
+            resnames.push(lines[index].slice(col[1] * j, col[1] * (j + 1)).trim());
+          }
+          index++;
+        }
+
+        let curres = 0;
+        let resi = 0;
+        let resn = '';
+        resstarts.push(atoms.length+1);
+        for(let i = 0; i < atoms.length; i++) {
+          if(i+1 >= resstarts[curres]) {
+            resn = resnames[curres];
+            curres += 1;
+            resi += 1;
+          }
+          atoms[i].resi = resi;
+          atoms[i].resn = resn;
+        }
       }
     }
     index = getIndex("RADII");
@@ -106,6 +154,7 @@ export function PRMTOP(str: string /*, options*/) {
             atoms[atomIndex].bonds.push(
               parseInt(lines[index].slice(col[1] * j, col[1] * (j + 1)) / 3)
             );
+            atoms[atomIndex].bondOrder.push(1);
           }
           count++;
         }
@@ -131,6 +180,7 @@ export function PRMTOP(str: string /*, options*/) {
             atoms[atomIndex].bonds.push(
               parseInt(lines[index].slice(col[1] * j, col[1] * (j + 1)) / 3)
             );
+            atoms[atomIndex].bonds.push(1);
           }
           count++;
         }
@@ -162,7 +212,7 @@ export function PRMTOP(str: string /*, options*/) {
     if (elementSize == null) {
       elementSize = lines[i].match(/[a-zA-Z](\d*)\.\d*\)\s*/); //stores the element size
     }
-    return [numberOfCol[1], elementSize[1]];
+    return [parseInt(numberOfCol[1]), parseInt(elementSize[1])];
   }
   return [atoms];
 }
