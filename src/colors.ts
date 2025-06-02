@@ -163,7 +163,7 @@ export class CC {
       }
       // check if hex.toLowerCase() is in htmlColors and console.error log if not
       let val = htmlColors[hexs.toLowerCase()];
-      if (val) {
+      if (val !== undefined) {
         return val;
       } else {
         console.error("color not found", hex.toLowerCase(), htmlColors);
@@ -176,6 +176,7 @@ export class CC {
 
 
 export const htmlColors: Record<string, ColorSpec> = {
+  //htmlcolors
   aliceblue: 0xf0f8ff,
   antiquewhite: 0xfaebd7,
   aqua: 0x00ffff,
@@ -324,6 +325,15 @@ export const htmlColors: Record<string, ColorSpec> = {
   whitesmoke: 0xf5f5f5,
   yellow: 0xffff00,
   yellowgreen: 0x9acd32,
+  //matplotlib single char colors
+  'b': 0x0000ff,  // blue
+  'g': 0x008000,  // green
+  'r': 0xff0000,  // red
+  'c': 0x00bfbf,  // cyan
+  'm': 0xbf00bf,  // magenta
+  'y': 0xbfbf00,  // yellow
+  'k': 0x000000,  // black
+  'w': 0xffffff   // white  
 };
 
 /**
