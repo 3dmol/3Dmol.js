@@ -1296,7 +1296,13 @@ export class GLModel {
         return ret;
     };
 
-
+    /**
+     * Return viewer associated with this model.
+     * @returns GLViewer
+     */
+    public getViewer() {
+        return this.viewer;
+    }
 
     /**
      * Return object representing internal state of
