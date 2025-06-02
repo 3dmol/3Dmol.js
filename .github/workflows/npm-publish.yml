@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on:  ubuntu-22.04  # latest has broken apparmor
     steps:
       - uses: actions/checkout@v3
 
