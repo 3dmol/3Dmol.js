@@ -15,7 +15,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
+      - name: Create apparmor profile
+        run: |
+          sudo cat > /etc/apparmor.d/chrome-dev-builds  << EOF
+          abi <abi/4.0>,
+          include <tunables/global>
+          profile chrome.dev /@{HOME}/.cache/puppeteer/chrome/**/chrome flags=(unconfined) {
+          userns,
+          include if exists <local/chrome>
+          }          
+          EOF
+      - name: Reload apparmor
+        run: sudo service apparmor reload
       # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
       - name: Install Dependencies & Build 3dmol.js
         run: npm install 
