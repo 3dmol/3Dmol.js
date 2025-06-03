@@ -12,10 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cisagov/action-disable-apparmor@437d94f26a2e4bf8c03acfb500a6afc688b497db # to run on 24.04
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Disable apparmor
+        shell: bash
+        run: sudo aa-complain chrome
 
       # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
       - name: Install Dependencies & Build 3dmol.js
