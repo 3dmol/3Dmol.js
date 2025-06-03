@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows:
-     - CI
+     - "3Dmol.js CI"
     types:
       - completed 
 
@@ -15,10 +15,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
       - name: Install Dependencies & Build 3dmol.js
