@@ -9,15 +9,12 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Disable apparmor
-        shell: bash
-        run: sudo rm /etc/apparmor.d/firefox && sudo apt -y install apparmor-utils && sudo aa-complain chrome
 
       # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
       - name: Install Dependencies & Build 3dmol.js
