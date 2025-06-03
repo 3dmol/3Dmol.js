@@ -11,13 +11,13 @@ on:
 jobs:
   cover:
     if: ${{ github.event.workflow_run.conclusion != 'failure' }}
-    runs-on: ubuntu-22.04
+    runs-on: self-hosted
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
 
       # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
       - name: Install Dependencies & Build 3dmol.js
