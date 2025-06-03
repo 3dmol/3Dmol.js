@@ -2,13 +2,15 @@ name: 3Dmol.js Coverage
 
 on:
   workflow_dispatch:
-  workflows: ["CI"]  # only run if CI succeeds
+  workflow_run:
+    workflows:
+     - CI
     types:
       - completed 
 
 jobs:
   cover:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion != 'failure' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
