@@ -1737,7 +1737,7 @@ export class GLModel {
     // as arrays and nested objects with values of the aformentioned
     // types.
     private static deepCopyAndCache(selobject, model) {
-        if (typeof selobject != 'object' || selobject == null) return selobject;
+        if (typeof selobject != 'object' || selobject == null || selobject instanceof GLModel) return selobject;
         if (selobject.__cache_created) return selobject; //already done
         const copy: any = {};
         for (const key in selobject) {
