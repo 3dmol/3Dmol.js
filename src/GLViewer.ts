@@ -3609,6 +3609,7 @@ export class GLViewer {
             else {
                 var newInterval = interval - (new Date().getTime() - time.getTime());
                 newInterval = (newInterval > 0) ? newInterval : 0;
+                timer.cancel();
                 self.animationTimers.delete(timer);
                 timer = new PausableTimer(display, newInterval, loop);
                 self.animationTimers.add(timer);
