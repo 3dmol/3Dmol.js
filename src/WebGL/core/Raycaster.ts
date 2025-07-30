@@ -78,10 +78,11 @@ var v3 = new Vector3();
 var matrixPosition = new Vector3();
 
 //object is a Sphere or (Bounding) Box
-export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { intersectionShape: any; boundingSphere: Sphere | undefined; }, raycaster: Raycaster, intersects: any[]) {
+export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { hidden?: boolean; intersectionShape: any; boundingSphere: Sphere | undefined; }, raycaster: Raycaster, intersects: any[]) {
   matrixPosition.getPositionFromMatrix(group.matrixWorld);
 
   if (clickable.intersectionShape === undefined) return intersects;
+  if (clickable.hidden) return intersects;
   var intersectionShape = clickable.intersectionShape;
   var precision = raycaster.linePrecision;
   precision *= group.matrixWorld.getMaxScaleOnAxis();
