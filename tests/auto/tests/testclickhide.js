@@ -21,18 +21,22 @@
                                   fromCap:1,
                                   toCap:2,
                                   color:'red',
-                                  hoverable:true,
                                   clickable:true,
-                                  callback:function(){ cyl.color.setHex(0x00FFFF00);viewer.render();}
+                                  callback:function(){ cyl.color.setHex(0xFFFF00);
+                                  viewer.render();}
                                   }
                                  );
 
               viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
-                                  end:{x:15.0,y:0.0,z:10.0},
+                                  end:{x:15.0,y:10.0,z:10.0},
                                   radius:1.0,
                                   color:'black',
                                   fromCap:false,
-                                  toCap:false});
+                                  toCap:false,
+                                  clickable:true,
+                                  callback:function(){ this.color.setHex(0xFFFFFF);
+                                  viewer.render();
+                                  }});
                                   
               viewer.zoomTo();    
     viewer.render( );
@@ -42,6 +46,8 @@
     viewer._handleMouseDown({pageX: 220, pageY: 265, preventDefault: function(){}});
     viewer._handleMouseUp({pageX: 220, pageY: 265, preventDefault: function(){}});
 
+    viewer._handleMouseDown({pageX: 296, pageY: 269, preventDefault: function(){}});
+    viewer._handleMouseUp({pageX: 296, pageY: 269, preventDefault: function(){}});
   };
 */
   /* @div
