@@ -923,7 +923,7 @@ export class GLViewer {
         var newm = state.models;
         for (let i = 0; i < newm.length; i++) {
             if (newm[i]) {
-                this.models[i] = new GLModel(i,undefined,this);
+                this.models[i] = new GLModel(i, undefined, this);
                 this.models[i].setInternalState(newm[i]);
             }
         }
@@ -1495,7 +1495,7 @@ export class GLViewer {
                 }
             }
             this._viewer.render(null, options);
-        } else {
+        } else if (this.WIDTH > 0 && this.HEIGHT > 0) {
             this.show();
         }
 
@@ -3457,16 +3457,16 @@ export class GLViewer {
               viewer.render();
     });
      */
-    public enableFog(fog: boolean|FogSpec) {
+    public enableFog(fog: boolean | FogSpec) {
         if (fog) {
             this.scene.fog = new Fog(this.bgColor, 100, 200);
             this.config.disableFog = false;
 
             const f = fog as FogSpec;
-            if(f.fogStart == undefined) this.fogStart = 0.4;
+            if (f.fogStart == undefined) this.fogStart = 0.4;
             else this.fogStart = f.fogStart;
-            if(f.fogEnd == undefined) this.fogEnd = 1.0;
-            else this.fogEnd = f.fogEnd; 
+            if (f.fogEnd == undefined) this.fogEnd = 1.0;
+            else this.fogEnd = f.fogEnd;
 
         } else {
             this.config.disableFog = true;
