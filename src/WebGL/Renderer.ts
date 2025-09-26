@@ -310,13 +310,11 @@ export class Renderer {
     ) {
       //note that drawingBuffer may be smaller than the requested width
       //for large canvases
-      var wid = this._gl.drawingBufferWidth / this.cols;
-      var hei = this._gl.drawingBufferHeight / this.rows;
-
-      this._viewportWidth = wid;
-      this._viewportHeight = hei;
-
-      if (!this.isLost()) {
+      if(!this.isLost()) {
+        var wid = this._gl.drawingBufferWidth / this.cols;
+        var hei = this._gl.drawingBufferHeight / this.rows;            
+        this._viewportWidth = wid;
+        this._viewportHeight = hei;
         this._gl.enable(this._gl.SCISSOR_TEST);
         this._gl.scissor(wid * this.col, hei * this.row, wid, hei);
         this._gl.viewport(wid * this.col, hei * this.row, wid, hei);
@@ -342,13 +340,10 @@ export class Renderer {
       this.row != undefined &&
       this.col != undefined
     ) {
-      var wid = width / this.cols;
-      var hei = height / this.rows;
-
-      this._viewportWidth = wid * this.devicePixelRatio;
-      this._viewportHeight = hei * this.devicePixelRatio;
-      this._viewportWidth = this._gl.drawingBufferWidth /this.cols;
-      this._viewportHeight = this._gl.drawingBufferHeight/this.rows;
+      if (!this.isLost()) {
+        this._viewportWidth = this._gl.drawingBufferWidth /this.cols;
+        this._viewportHeight = this._gl.drawingBufferHeight/this.rows;
+      }
 
       this.setViewport();
     } else {
