@@ -6,5 +6,6 @@
     "referenceImageDir": "tests/glcheck/reference-images",
     "renderFailureDir": "tests/glcheck/render-failures",
     "coverage": false,
+    "nocors": true,
     "defaultViewport": { "width": 800, "height": 800 }
 }
