@@ -3979,7 +3979,7 @@ export class GLViewer {
                 atom.label = viewer.addLabel(atom.resn+":"+atom.atom,{position: atom, backgroundColor: 'mintcream', fontColor:'black'});
                }
            },
-           function(atom) {
+           function(atom,viewer) {
                if(atom.label) {
                 viewer.removeLabel(atom.label);
                 delete atom.label;
