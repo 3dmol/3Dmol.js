@@ -941,11 +941,14 @@ export class GLModel {
                 var solid2 = solidColor || C2;
                 var dashed1 = dashedColor || C1;
                 var dashed2 = dashedColor || C2;
+                
+                // Treat aromatic bond type (4) as 1.5 for rendering
+                var renderBondOrder = (atom.bondOrder[i] === 4) ? 1.5 : atom.bondOrder[i];
 
                 // draw cylinders
-                if (atom.bondOrder[i] <= 1 || singleBond || atom.bondOrder[i] > 3) { //TODO: aromatics at 4
+                if (renderBondOrder <= 1 || singleBond || renderBondOrder > 3) {
 
-                    if (atom.bondOrder[i] < 1) bondR *= atom.bondOrder[i];
+                    if (renderBondOrder < 1) bondR *= renderBondOrder;
                     if (!atom2.capDrawn && atom2.bonds.length < 4)
                         toCap = 2;
 
@@ -970,7 +973,7 @@ export class GLModel {
                         }
                     }
                 }
-                else if (atom.bondOrder[i] > 1) {
+                else if (renderBondOrder > 1) {
                     //multi bond caps
                     var mfromCap = 0;
                     var mtoCap = 0;
@@ -990,14 +993,14 @@ export class GLModel {
 
                     // Determine dashed bond placement for fractional orders (aromatic)
                     var isDashedBondFlipped = false;
-                    if (atom.bondOrder[i] % 1 !== 0) {
+                    if (renderBondOrder % 1 !== 0) {
                         isDashedBondFlipped = this.chooseDashedPlusV(atom, atom2, p1, p2, v);
                     }
 
-                    if (atom.bondOrder[i] > 1 && atom.bondOrder[i] <= 2) {
+                    if (renderBondOrder > 1 && renderBondOrder <= 2) {
                         // Fractional double bond (aromatic, 1.5, etc)
                         r = bondR * doubleBondScale;
-                        r2 = r * (atom.bondOrder[i] - 1); // dashed bond is thinner
+                        r2 = r * (renderBondOrder - 1); // dashed bond is thinner
 
                         v.multiplyScalar(r * 1.5);
                         p1a = p1.clone();
@@ -1056,8 +1059,8 @@ export class GLModel {
                                 .multiplyScalar(0.5);
 
                             // Account for flip - dashed bond has radius r2
-                            var raRadius = (atom.bondOrder[i] == 2) ? r : (isDashedBondFlipped ? r2 : r);
-                            var rbRadius = (atom.bondOrder[i] == 2) ? r : (isDashedBondFlipped ? r : r2);
+                            var raRadius = (renderBondOrder == 2) ? r : (isDashedBondFlipped ? r2 : r);
+                            var rbRadius = (renderBondOrder == 2) ? r : (isDashedBondFlipped ? r : r2);
 
                             if (atomneedsi) {
                                 cylinder1a = new Cylinder(p1a, mp, raRadius);
@@ -1073,9 +1076,9 @@ export class GLModel {
                             }
                         }
                     }
-                    else if (atom.bondOrder[i] > 2 && atom.bondOrder[i] <= 3) {
+                    else if (renderBondOrder > 2 && renderBondOrder <= 3) {
                         r = bondR * tripleBondScale;
-                        var r3 = r * (atom.bondOrder[i] - 2); // dashed bond thinner for fractional
+                        var r3 = r * (renderBondOrder - 2); // dashed bond thinner for fractional
                         v.cross(dir);
                         v.normalize();
                         v.multiplyScalar(r * 3);
@@ -1112,7 +1115,7 @@ export class GLModel {
                             });
                         };
 
-                        if (atom.bondOrder[i] == 3) {
+                        if (renderBondOrder == 3) {
                             // Integer triple bond - all solid
                             drawSolidTriple(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
                             drawSolidTriple(p1, p2, r, solid1, solid2, fromCap, toCap);
@@ -1142,8 +1145,8 @@ export class GLModel {
                                 .multiplyScalar(0.5);
 
                             // Account for flip - dashed bond has radius r3
-                            var raRadius = (atom.bondOrder[i] == 3) ? r : (isDashedBondFlipped ? r3 : r);
-                            var rbRadius = (atom.bondOrder[i] == 3) ? r : (isDashedBondFlipped ? r : r3);
+                            var raRadius = (renderBondOrder == 3) ? r : (isDashedBondFlipped ? r3 : r);
+                            var rbRadius = (renderBondOrder == 3) ? r : (isDashedBondFlipped ? r : r3);
 
                             if (atomneedsi) {
                                 cylinder1a = new Cylinder(p1a.clone(), mp.clone(), raRadius);
