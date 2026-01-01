@@ -1041,12 +1041,19 @@ export class GLModel {
                             });
                         };
 
-                        if (!isDashedBondFlipped) {
+                        if (renderBondOrder == 2) {
+                            // Integer double bond - both solid
                             drawSolid(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
-                            drawDashed(p1b, p2b, r2, dashed1, dashed2, mfromCap, mtoCap);
-                        } else {
-                            drawDashed(p1a, p2a, r2, dashed1, dashed2, mfromCap, mtoCap);
                             drawSolid(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                        } else {
+                            // Fractional double bond (1.x) - one solid, one dashed
+                            if (!isDashedBondFlipped) {
+                                drawSolid(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
+                                drawDashed(p1b, p2b, r2, dashed1, dashed2, mfromCap, mtoCap);
+                            } else {
+                                drawDashed(p1a, p2a, r2, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolid(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                            }
                         }
 
                         atomneedsi = atom.clickable || atom.hoverable;
