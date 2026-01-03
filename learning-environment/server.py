@@ -4,7 +4,7 @@ import json, random, datetime, argparse
 
 # for socketio
 import eventlet
-eventlet.monkey_patch()
+#eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -34,7 +34,7 @@ def handleCreateSession(json):
         print("Invalid name",name)
         emit('create session response', 0)
     else: 
-        secret = random.randint(1,4e9)
+        secret = random.randint(1,int(4e9))
         emit('create session response', secret)
         print("Session Created",name,request.sid)
         sessions[name] = {'cnt': 0,
