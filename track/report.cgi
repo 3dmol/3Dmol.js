@@ -3,7 +3,7 @@
 #this script gets pinged everytime 3dmol.js is loaded,
 #this allows us to report usage to our funding agencies
 import os,MySQLdb,sys
-
+sys.exit()
 host = os.environ["REMOTE_ADDR"]
 domain = host
 if "HTTP_REFERER" in os.environ:
