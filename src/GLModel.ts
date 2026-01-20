@@ -902,7 +902,10 @@ export class GLModel {
         };
 
         for (i = 0; i < atom.bonds.length; i++) {
-            var drawCyl = selectCylDrawMethod(atom.bondOrder[i]);
+            // Treat aromatic bond type (4) as 1.5 for rendering
+            var renderBondOrder = (atom.bondOrder[i] === 4) ? 1.5 : atom.bondOrder[i];
+
+            var drawCyl = selectCylDrawMethod(renderBondOrder);
             var j = atom.bonds[i]; // our neighbor
             var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
             mp = mp2 = mp3 = null;
@@ -942,9 +945,6 @@ export class GLModel {
                 var dashed1 = dashedColor || C1;
                 var dashed2 = dashedColor || C2;
                 
-                // Treat aromatic bond type (4) as 1.5 for rendering
-                var renderBondOrder = (atom.bondOrder[i] === 4) ? 1.5 : atom.bondOrder[i];
-
                 // draw cylinders
                 if (renderBondOrder <= 1 || singleBond || renderBondOrder > 3) {
 
