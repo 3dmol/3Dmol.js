@@ -714,7 +714,6 @@ export class GLModel {
         return segments;
     }
 
-
     // Calculate segments for solid two-color bonds (split at midpoint)
     private calculateTwoColorSegments(from: XYZ, to: XYZ, colors: Color[]) {
         var segments = [];
