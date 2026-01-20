@@ -903,7 +903,8 @@ export class GLModel {
 
         for (i = 0; i < atom.bonds.length; i++) {
             // Treat aromatic bond type (4) as 1.5 for rendering
-            var renderBondOrder = (atom.bondOrder[i] === 4) ? 1.5 : atom.bondOrder[i];
+            var rawBondOrder = atom.bondOrder[i];
+            var renderBondOrder = (rawBondOrder === 4) ? 1.5 : rawBondOrder;
 
             var drawCyl = selectCylDrawMethod(renderBondOrder);
             var j = atom.bonds[i]; // our neighbor
@@ -913,6 +914,7 @@ export class GLModel {
                 // lets us combine
                 // cylinders of the same
                 // color
+                toCap = 0;
                 var style2 = atom2.style;
                 if (!style2.stick || style2.stick.hidden)
                     continue; // don't sweat the details
@@ -952,7 +954,11 @@ export class GLModel {
                     if (!atom2.capDrawn && atom2.bonds.length < 4)
                         toCap = 2;
 
-                    drawCyl(geo, p1, p2, bondR, dashed1, dashed2, fromCap, toCap);
+                    const isDashed = atomDashedBonds || (renderBondOrder % 1 !== 0);
+                    const colA = isDashed ? dashed1 : solid1;
+                    const colB = isDashed ? dashed2 : solid2;
+                    
+                    drawCyl(geo, p1, p2, bondR, colA, colB, fromCap, toCap);
 
                     atomneedsi = atom.clickable || atom.hoverable;
                     atom2needsi = atom2.clickable || atom2.hoverable;
