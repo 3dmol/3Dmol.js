@@ -669,8 +669,13 @@ export class GLModel {
         // Handle cases where the combined length of dash and gap exceeds the cylinder's length.
         // In such cases, use a single dash to represent the entire cylinder with no gaps.
         if (dashLength + gapLength > cylinderLength) {
-            dashLength = cylinderLength;
-            gapLength = 0; // No gap as the dash fills the entire cylinder.
+            // avoid gapLength=0 causing divide-by-zero in gapVector
+            var segmentColor = (colors && colors.length > 0) ? colors[0] : null;
+            return [{
+                from: new Vector3(from.x, from.y, from.z),
+                to: new Vector3(to.x, to.y, to.z),
+                color: segmentColor
+            }];
         }
 
         // Calculate the total number of dash-gap segments that can fit within the cylinder.
@@ -686,8 +691,16 @@ export class GLModel {
         var new_to;
         var new_from = new Vector3(from.x, from.y, from.z);
 
-        var gapVector = new Vector3((to.x - from.x) / (cylinderLength / gapLength), (to.y - from.y) / (cylinderLength / gapLength), (to.z - from.z) / (cylinderLength / gapLength));
-        var dashVector = new Vector3((to.x - from.x) / (cylinderLength / dashLength), (to.y - from.y) / (cylinderLength / dashLength), (to.z - from.z) / (cylinderLength / dashLength));
+        var gapVector = new Vector3(
+            (to.x - from.x) / (cylinderLength / gapLength),
+            (to.y - from.y) / (cylinderLength / gapLength),
+            (to.z - from.z) / (cylinderLength / gapLength)
+        );
+        var dashVector = new Vector3(
+            (to.x - from.x) / (cylinderLength / dashLength),
+            (to.y - from.y) / (cylinderLength / dashLength),
+            (to.z - from.z) / (cylinderLength / dashLength)
+        );
 
         var segments = [];
         for (var place = 0; place < totalSegments; place++) {
@@ -700,6 +713,7 @@ export class GLModel {
 
         return segments;
     }
+
 
     // Calculate segments for solid two-color bonds (split at midpoint)
     private calculateTwoColorSegments(from: XYZ, to: XYZ, colors: Color[]) {
@@ -946,7 +960,7 @@ export class GLModel {
                 var solid2 = solidColor || C2;
                 var dashed1 = dashedColor || C1;
                 var dashed2 = dashedColor || C2;
-                
+
                 // draw cylinders
                 if (renderBondOrder <= 1 || singleBond || renderBondOrder > 3) {
 
@@ -1661,7 +1675,7 @@ export class GLModel {
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @return {Promise}
      */
-    public setFrame(framenum: number) { 
+    public setFrame(framenum: number) {
         var numFrames = this.getNumFrames();
         let model = this;
         let viewer = this.viewer;
