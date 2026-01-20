@@ -971,7 +971,7 @@ export class GLModel {
                     const isDashed = atomDashedBonds || (renderBondOrder % 1 !== 0);
                     const colA = isDashed ? dashed1 : solid1;
                     const colB = isDashed ? dashed2 : solid2;
-                    
+
                     drawCyl(geo, p1, p2, bondR, colA, colB, fromCap, toCap);
 
                     atomneedsi = atom.clickable || atom.hoverable;
