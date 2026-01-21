@@ -68,7 +68,7 @@
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.3.1",
     "jest-fixed-jsdom": "^0.0.9",
-    "jest-webgl-canvas-mock": "^0.2.3",
+    "jest-webgl-canvas-mock": "^0.2",
     "jquery": "^3.6.3",
     "jsdoc": "^4.0.0",
     "jsdom": "^20.0.3",
