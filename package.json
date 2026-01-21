@@ -36,7 +36,7 @@
     "build:prod": "webpack --mode production",
     "prepare": "npm run build:dev  && npm run build:prod",
     "jest": "npx jest --testPathIgnorePatterns=render.test.js",
-    "test": "npm run generate:jest && npm run jest && npm run glcheck",
+    "test": "npm run generate:tests && npm run generate:jest && npm run jest && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
     "clean:glcheck": "rm -rf ./tests/glcheck/render-failures",

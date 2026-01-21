@@ -116,7 +116,7 @@ class File():
             code = code.replace('*','')
             name = makename(name)
             #look for @directives and stop the code there
-            m = re.search('(^.*?)@(\S+).*',code,re.DOTALL)
+            m = re.search(r'(^.*?)@(\S+).*',code,re.DOTALL)
             if m:
                 code = m.group(1)
                 if m.group(2) == 'example':
