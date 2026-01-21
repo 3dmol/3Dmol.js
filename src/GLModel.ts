@@ -669,8 +669,13 @@ export class GLModel {
         // Handle cases where the combined length of dash and gap exceeds the cylinder's length.
         // In such cases, use a single dash to represent the entire cylinder with no gaps.
         if (dashLength + gapLength > cylinderLength) {
-            dashLength = cylinderLength;
-            gapLength = 0; // No gap as the dash fills the entire cylinder.
+            // avoid gapLength=0 causing divide-by-zero in gapVector
+            var segmentColor = (colors && colors.length > 0) ? colors[0] : null;
+            return [{
+                from: new Vector3(from.x, from.y, from.z),
+                to: new Vector3(to.x, to.y, to.z),
+                color: segmentColor
+            }];
         }
 
         // Calculate the total number of dash-gap segments that can fit within the cylinder.
@@ -686,8 +691,16 @@ export class GLModel {
         var new_to;
         var new_from = new Vector3(from.x, from.y, from.z);
 
-        var gapVector = new Vector3((to.x - from.x) / (cylinderLength / gapLength), (to.y - from.y) / (cylinderLength / gapLength), (to.z - from.z) / (cylinderLength / gapLength));
-        var dashVector = new Vector3((to.x - from.x) / (cylinderLength / dashLength), (to.y - from.y) / (cylinderLength / dashLength), (to.z - from.z) / (cylinderLength / dashLength));
+        var gapVector = new Vector3(
+            (to.x - from.x) / (cylinderLength / gapLength),
+            (to.y - from.y) / (cylinderLength / gapLength),
+            (to.z - from.z) / (cylinderLength / gapLength)
+        );
+        var dashVector = new Vector3(
+            (to.x - from.x) / (cylinderLength / dashLength),
+            (to.y - from.y) / (cylinderLength / dashLength),
+            (to.z - from.z) / (cylinderLength / dashLength)
+        );
 
         var segments = [];
         for (var place = 0; place < totalSegments; place++) {
@@ -902,7 +915,11 @@ export class GLModel {
         };
 
         for (i = 0; i < atom.bonds.length; i++) {
-            var drawCyl = selectCylDrawMethod(atom.bondOrder[i]);
+            // Treat aromatic bond type (4) as 1.5 for rendering
+            var rawBondOrder = atom.bondOrder[i];
+            var renderBondOrder = (rawBondOrder === 4) ? 1.5 : rawBondOrder;
+
+            var drawCyl = selectCylDrawMethod(renderBondOrder);
             var j = atom.bonds[i]; // our neighbor
             var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
             mp = mp2 = mp3 = null;
@@ -910,6 +927,7 @@ export class GLModel {
                 // lets us combine
                 // cylinders of the same
                 // color
+                toCap = 0;
                 var style2 = atom2.style;
                 if (!style2.stick || style2.stick.hidden)
                     continue; // don't sweat the details
@@ -941,9 +959,6 @@ export class GLModel {
                 var solid2 = solidColor || C2;
                 var dashed1 = dashedColor || C1;
                 var dashed2 = dashedColor || C2;
-                
-                // Treat aromatic bond type (4) as 1.5 for rendering
-                var renderBondOrder = (atom.bondOrder[i] === 4) ? 1.5 : atom.bondOrder[i];
 
                 // draw cylinders
                 if (renderBondOrder <= 1 || singleBond || renderBondOrder > 3) {
@@ -952,7 +967,11 @@ export class GLModel {
                     if (!atom2.capDrawn && atom2.bonds.length < 4)
                         toCap = 2;
 
-                    drawCyl(geo, p1, p2, bondR, dashed1, dashed2, fromCap, toCap);
+                    const isDashed = atomDashedBonds || (renderBondOrder % 1 !== 0);
+                    const colA = isDashed ? dashed1 : solid1;
+                    const colB = isDashed ? dashed2 : solid2;
+
+                    drawCyl(geo, p1, p2, bondR, colA, colB, fromCap, toCap);
 
                     atomneedsi = atom.clickable || atom.hoverable;
                     atom2needsi = atom2.clickable || atom2.hoverable;
@@ -1655,7 +1674,7 @@ export class GLModel {
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @return {Promise}
      */
-    public setFrame(framenum: number) { 
+    public setFrame(framenum: number) {
         var numFrames = this.getNumFrames();
         let model = this;
         let viewer = this.viewer;
