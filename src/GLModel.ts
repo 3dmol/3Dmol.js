@@ -968,8 +968,8 @@ export class GLModel {
                         toCap = 2;
 
                     const isDashed = atomDashedBonds || (renderBondOrder % 1 !== 0);
-                    const colA = isDashed ? dashed1 : solid1;
-                    const colB = isDashed ? dashed2 : solid2;
+                    const colA = isDashed ? dashed1 : C1;
+                    const colB = isDashed ? dashed2 : C2;
 
                     drawCyl(geo, p1, p2, bondR, colA, colB, fromCap, toCap);
 
