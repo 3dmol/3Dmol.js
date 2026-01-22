@@ -421,6 +421,13 @@ export function download(query, viewer: GLViewer, options, callback?) {
         console.warn('WARNING: MMTF now deprecated.  Reverting to bcif.');
         query = 'bcif:' + query.slice(5);
     }
+
+    var handler = function (ret) {
+        m.addMolData(ret, type, options);
+        viewer.zoomTo();
+        viewer.render();
+    };
+
     if (query.substring(0, 5) === 'bcif:') {
         query = query.substring(5).toUpperCase();
         uri = "https://models.rcsb.org/" + query + '.bcif.gz';
@@ -431,11 +438,23 @@ export function download(query, viewer: GLViewer, options, callback?) {
         promise = new Promise(function (resolve) {
             getbin(uri)
                 .then(function (ret) {
-                    m.addMolData(ret, 'bcif.gz', options);
-                    viewer.zoomTo();
-                    viewer.render();
+                    handler(ret);
                     resolve(m);
-                }, function () { console.error("fetch of " + uri + " failed."); });
+                }).catch(function () {
+                    //models.rcsb.org has rate limits and can fail, fallback to text
+                    pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+                    uri = pdbUri + query + ".pdb";
+                    type = "pdb";
+                    console.warn("falling back to pdb format");
+                    get(uri).then(function (data) {
+                        handler(data);
+                        resolve(m);
+                    }).catch(function (e) {
+                        handler("");
+                        resolve(m);
+                        console.error("fetch of " + uri + " failed: " + e.statusText);
+                    });
+                }); 
         });
     }
     else {
@@ -475,11 +494,6 @@ export function download(query, viewer: GLViewer, options, callback?) {
             type = uri;
         }
 
-        var handler = function (ret) {
-            m.addMolData(ret, type, options);
-            viewer.zoomTo();
-            viewer.render();
-        };
         promise = new Promise(function (resolve) {
             if (type == 'bcif') { //binary data
                 getbin(uri)
