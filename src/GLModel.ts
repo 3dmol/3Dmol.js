@@ -651,64 +651,92 @@ export class GLModel {
         this.drawSphereImposter(geo, atom as XYZ, radius, C);
     };
 
-    // Calculate dashes with color support for two-color bonds
+    /**
+     * Calculate dashed line segments along a bond, with proper centering and two-color support.
+     *
+     * The dashes are centered along the bond using the pattern:
+     *   [halfGap]-[dash]-[gap]-[dash]-[gap]-...-[dash]-[halfGap]
+     *
+     * For two-color bonds, the first half of dashes use colors[0], second half use colors[1].
+     */
     private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number, colors?: Color[]) {
-        // Calculate the length of a cylinder defined by two points 'from' and 'to'.
-        var cylinderLength = Math.sqrt(
-            Math.pow((from.x - to.x), 2) +
-            Math.pow((from.y - to.y), 2) +
-            Math.pow((from.z - to.z), 2)
-        );
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const dz = to.z - from.z;
+        const bondLength = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-        // Ensure non-negative values for radius, dashLength, and gapLength.
-        // Adjust gapLength to include the radius of the cylinder.
-        radius = Math.max(radius, 0);
-        gapLength = Math.max(gapLength, 0) + 2 * radius;
-        dashLength = Math.max(dashLength, 0.001);
-
-        // Handle cases where the combined length of dash and gap exceeds the cylinder's length.
-        // In such cases, use a single dash to represent the entire cylinder with no gaps.
-        if (dashLength + gapLength > cylinderLength) {
-            // avoid gapLength=0 causing divide-by-zero in gapVector
-            var segmentColor = (colors && colors.length > 0) ? colors[0] : null;
+        // Handle degenerate case: zero or near-zero length bond
+        if (bondLength < 0.001) {
             return [{
                 from: new Vector3(from.x, from.y, from.z),
                 to: new Vector3(to.x, to.y, to.z),
-                color: segmentColor
+                color: colors?.[0] ?? null
             }];
         }
 
-        // Calculate the total number of dash-gap segments that can fit within the cylinder.
-        var totalSegments = Math.floor((cylinderLength - dashLength) / (dashLength + gapLength)) + 1;
+        // Clamp inputs to valid ranges
+        radius = Math.max(radius, 0);
+        dashLength = Math.max(dashLength, 0.001);
 
-        // Compute the total length covered by dashes.
-        var totalDashLength = totalSegments * dashLength;
+        // Effective gap includes cylinder radius on each side to prevent visual overlap
+        const effectiveGap = Math.max(gapLength, 0) + 2 * radius;
 
-        // Recalculate gap length to evenly distribute remaining space among gaps.
-        // This ensures dashes and gaps are evenly spaced within the cylinder.
-        gapLength = (cylinderLength - totalDashLength) / totalSegments;
+        // Minimum padding at each end to prevent dashes from touching bond endpoints
+        const endPadding = effectiveGap / 2;
+        const drawableLength = bondLength - 2 * endPadding;
 
-        var new_to;
-        var new_from = new Vector3(from.x, from.y, from.z);
+        // If drawable region is too small, just draw a single segment
+        if (drawableLength < dashLength) {
+            return [{
+                from: new Vector3(from.x, from.y, from.z),
+                to: new Vector3(to.x, to.y, to.z),
+                color: colors?.[0] ?? null
+            }];
+        }
 
-        var gapVector = new Vector3(
-            (to.x - from.x) / (cylinderLength / gapLength),
-            (to.y - from.y) / (cylinderLength / gapLength),
-            (to.z - from.z) / (cylinderLength / gapLength)
-        );
-        var dashVector = new Vector3(
-            (to.x - from.x) / (cylinderLength / dashLength),
-            (to.y - from.y) / (cylinderLength / dashLength),
-            (to.z - from.z) / (cylinderLength / dashLength)
-        );
+        // Calculate how many dashes fit in the drawable region
+        const numDashes = Math.floor((drawableLength - dashLength) / (dashLength + effectiveGap)) + 1;
+        const totalDashLength = numDashes * dashLength;
 
-        var segments = [];
-        for (var place = 0; place < totalSegments; place++) {
-            new_to = new Vector3(new_from.x + dashVector.x, new_from.y + dashVector.y, new_from.z + dashVector.z);
-            // Color interpolation: first half uses colors[0], second half uses colors[1]
-            var segmentColor = (colors && colors.length > 1 && place >= totalSegments / 2) ? colors[1] : (colors ? colors[0] : null);
-            segments.push({ from: new_from, to: new_to, color: segmentColor });
-            new_from = new Vector3(new_to.x + gapVector.x, new_to.y + gapVector.y, new_to.z + gapVector.z);
+        // Redistribute remaining space evenly as gaps within drawable region
+        // Pattern: [dash][gap][dash][gap]...[dash]
+        // Number of gaps between dashes = numDashes - 1
+        // We want to center this pattern within drawableLength
+        const totalInternalGaps = numDashes > 1 ? numDashes - 1 : 0;
+        const remainingSpace = drawableLength - totalDashLength;
+        const internalGap = totalInternalGaps > 0 ? remainingSpace / (totalInternalGaps + 1) : remainingSpace;
+        const halfGap = internalGap / 2;
+
+        // Normalized direction vector
+        const dirX = dx / bondLength;
+        const dirY = dy / bondLength;
+        const dirZ = dz / bondLength;
+
+        const segments: Array<{ from: Vector3; to: Vector3; color: Color | null }> = [];
+
+        // Start after endPadding + halfGap to center dashes in drawable region
+        const startPosition = endPadding + halfGap;
+
+        for (let i = 0; i < numDashes; i++) {
+            const startOffset = startPosition + i * (dashLength + internalGap);
+            const endOffset = startOffset + dashLength;
+
+            const dashStart = new Vector3(
+                from.x + dirX * startOffset,
+                from.y + dirY * startOffset,
+                from.z + dirZ * startOffset
+            );
+            const dashEnd = new Vector3(
+                from.x + dirX * endOffset,
+                from.y + dirY * endOffset,
+                from.z + dirZ * endOffset
+            );
+
+            // Two-color support: first half uses colors[0], second half uses colors[1]
+            const useSecondColor = colors && colors.length > 1 && i >= numDashes / 2;
+            const color = useSecondColor ? colors[1] : (colors?.[0] ?? null);
+
+            segments.push({ from: dashStart, to: dashEnd, color });
         }
 
         return segments;
