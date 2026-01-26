@@ -58,7 +58,7 @@
     "@babel/plugin-transform-typescript": "^7.20.7",
     "@types/pako": "^2.0.0",
     "better-docs": "github:3dmol/better-docs#master",
-    "canvas": "^2.11.0",
+    "canvas": "^3.2.1",
     "clean-jsdoc-theme": "github:3dmol/clean-jsdoc-theme#master",
     "codecov": "^3.8.3",
     "del": "^7.0.0",
