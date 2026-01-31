@@ -317,6 +317,17 @@ export class GLModel {
         v.cross(dir);
         v.normalize();
 
+        // Canonicalize v direction: always point toward positive x (or y, or z)
+        // This ensures consistent results regardless of which neighbor was used
+        var threshold = 0.001;
+        if (Math.abs(v.x) > threshold) {
+            if (v.x < 0) v.negate();
+        } else if (Math.abs(v.y) > threshold) {
+            if (v.y < 0) v.negate();
+        } else if (v.z < 0) {
+            v.negate();
+        }
+
         return v;
     };
 
@@ -756,62 +767,57 @@ export class GLModel {
     }
 
     // Determine which side of a multi-bond should have the dashed line.
-    // Returns true if dashed should be on the +v side (toward ring interior).
+    // Returns true if dashed should be on the +v side (toward neighbors).
+    // Uses immediate neighbor positions for stability across conformations.
     private chooseDashedPlusV(atom: AtomSpec, atom2: AtomSpec, p1: Vector3, p2: Vector3, v: Vector3) {
-        var center = new Vector3(0, 0, 0);
-        var totalWeight = 0;
+        var neighborCenter = new Vector3(0, 0, 0);
+        var count = 0;
 
-        // Check if any non-terminal neighbors exist (ring atoms vs hydrogens)
-        var hasNonTerminal = false;
-        for (var idx = 0; idx < atom.bonds.length; idx++) {
-            if (atom.bonds[idx] === atom2.index) continue;
-            var a3 = this.atoms[atom.bonds[idx]];
-            if (a3 && a3.bonds && a3.bonds.length > 1) {
-                hasNonTerminal = true;
-                break;
-            }
-        }
-        if (!hasNonTerminal) {
-            for (var idx = 0; idx < atom2.bonds.length; idx++) {
-                if (atom2.bonds[idx] === atom.index) continue;
-                var a3 = this.atoms[atom2.bonds[idx]];
-                if (a3 && a3.bonds && a3.bonds.length > 1) {
-                    hasNonTerminal = true;
-                    break;
-                }
+        // Add atom's neighbors (except atom2)
+        for (var i = 0; i < atom.bonds.length; i++) {
+            if (atom.bonds[i] === atom2.index) continue;
+            var neighbor = this.atoms[atom.bonds[i]];
+            if (neighbor) {
+                neighborCenter.x += neighbor.x;
+                neighborCenter.y += neighbor.y;
+                neighborCenter.z += neighbor.z;
+                count++;
             }
         }
 
-        // Accumulate weighted centroid of neighbors
-        var addNeighbors = (sourceAtom: AtomSpec, excludeIdx: number) => {
-            for (var idx = 0; idx < sourceAtom.bonds.length; idx++) {
-                if (sourceAtom.bonds[idx] === excludeIdx) continue;
-                var a3 = this.atoms[sourceAtom.bonds[idx]];
-                if (!a3) continue;
-
-                // Terminal atoms (like H) get lower weight when non-terminals exist
-                var isTerminal = !a3.bonds || a3.bonds.length <= 1;
-                var weight = (hasNonTerminal && isTerminal) ? 0.25 : 1.0;
-
-                center.x += a3.x * weight;
-                center.y += a3.y * weight;
-                center.z += a3.z * weight;
-                totalWeight += weight;
+        // Add atom2's neighbors (except atom)
+        for (var i = 0; i < atom2.bonds.length; i++) {
+            if (atom2.bonds[i] === atom.index) continue;
+            var neighbor = this.atoms[atom2.bonds[i]];
+            if (neighbor) {
+                neighborCenter.x += neighbor.x;
+                neighborCenter.y += neighbor.y;
+                neighborCenter.z += neighbor.z;
+                count++;
             }
-        };
+        }
 
-        addNeighbors(atom, atom2.index);
-        addNeighbors(atom2, atom.index);
-
-        if (totalWeight < 1e-8) return false;
-        center.multiplyScalar(1.0 / totalWeight);
+        if (count === 0) return false;
+        neighborCenter.multiplyScalar(1.0 / count);
 
         var mid = new Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-        var plus = mid.clone().add(v);
-        var minus = mid.clone().sub(v);
+        var toNeighbors = new Vector3(
+            neighborCenter.x - mid.x,
+            neighborCenter.y - mid.y,
+            neighborCenter.z - mid.z
+        );
 
-        // Dashed line goes toward the centroid (ring interior)
-        return plus.distanceToSquared(center) < minus.distanceToSquared(center);
+        var dot = v.x * toNeighbors.x + v.y * toNeighbors.y + v.z * toNeighbors.z;
+
+        // If nearly perpendicular, use canonical v direction
+        var vLen = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+        var toLen = Math.sqrt(toNeighbors.x * toNeighbors.x + toNeighbors.y * toNeighbors.y + toNeighbors.z * toNeighbors.z);
+
+        if (toLen < 0.001 || Math.abs(dot) < 0.1 * vLen * toLen) {
+            return false; // Use canonical v direction
+        }
+
+        return dot > 0;
     }
 
     static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap: CAP = 0, toCap: CAP = 0) {
