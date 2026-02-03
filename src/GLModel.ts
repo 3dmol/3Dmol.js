@@ -1001,7 +1001,7 @@ export class GLModel {
                     if (!atom2.capDrawn && atom2.bonds.length < 4)
                         toCap = 2;
 
-                    const isDashed = atomDashedBonds || (renderBondOrder % 1 !== 0);
+                    const isDashed = renderBondOrder % 1 !== 0;
                     const colA = isDashed ? dashed1 : C1;
                     const colB = isDashed ? dashed2 : C2;
 
@@ -1096,8 +1096,8 @@ export class GLModel {
 
                         if (renderBondOrder == 2) {
                             // Integer double bond - both solid
-                            drawSolid(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
-                            drawSolid(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                            drawSolid(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
+                            drawSolid(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
                         } else {
                             // Fractional double bond (1.x) - one solid, one dashed
                             if (!isDashedBondFlipped) {
@@ -1177,9 +1177,9 @@ export class GLModel {
 
                         if (renderBondOrder == 3) {
                             // Integer triple bond - all solid
-                            drawSolidTriple(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
-                            drawSolidTriple(p1, p2, r, solid1, solid2, fromCap, toCap);
-                            drawSolidTriple(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                            drawSolidTriple(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidTriple(p1, p2, r, C1, C2, fromCap, toCap);
+                            drawSolidTriple(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
                         } else {
                             // Fractional triple bond (2.x) - one dashed
                             if (!isDashedBondFlipped) {
