@@ -470,7 +470,12 @@ export class GLViewer {
 
     //set current_hover to sel (which can be null), calling appropraite callbacks
     private setHover(selected, event?, intersects?) {
+        
+        if (selected && selected.hidden) {
+            selected = null;
+        }
         if (this.current_hover == selected) return;
+    
         if (this.current_hover) {
             if (typeof (this.current_hover.unhover_callback) != "function") {
                 this.current_hover.unhover_callback = makeFunction(this.current_hover.unhover_callback);
@@ -496,6 +501,7 @@ export class GLViewer {
         let intersects = this.targetedObjects(mouseX, mouseY, this.hoverables);
         if (intersects.length) {
             var selected = intersects[0].clickable;
+            
             this.setHover(selected, event, intersects);
             this.current_hover = selected;
         }
