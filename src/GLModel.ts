@@ -766,6 +766,92 @@ export class GLModel {
         return segments;
     }
 
+    /**
+     * Find the smallest ring containing the bond between two atoms.
+     * Uses BFS to find shortest alternative path (excluding the direct bond).
+     * Returns array of atom indices forming the ring, or null if no ring found.
+     */
+    private findSmallestRing(atomIdx1: number, atomIdx2: number, maxRingSize: number = 8): number[] | null {
+        const queue: number[][] = [[atomIdx1]];
+        const visited = new Set<number>([atomIdx1]);
+
+        while (queue.length > 0) {
+            const path = queue.shift();
+            const current = path[path.length - 1];
+
+            // Ring would be path.length atoms + the direct bond back
+            if (path.length >= maxRingSize) continue;
+
+            const atom = this.atoms[current];
+            if (!atom || !atom.bonds) continue;
+
+            for (let i = 0; i < atom.bonds.length; i++) {
+                const neighbor = atom.bonds[i];
+
+                // Skip the direct bond between the two endpoints
+                if (current === atomIdx1 && neighbor === atomIdx2) continue;
+                if (current === atomIdx2 && neighbor === atomIdx1) continue;
+
+                if (neighbor === atomIdx2 && path.length >= 2) {
+                    // Found alternative path back - this is a ring
+                    return [...path, atomIdx2];
+                }
+
+                if (!visited.has(neighbor)) {
+                    visited.add(neighbor);
+                    queue.push([...path, neighbor]);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine dashed bond placement using ring detection.
+     * For bonds in rings, places dashed side toward ring interior (chemically correct).
+     * For non-ring bonds, falls back to neighbor centroid heuristic.
+     * Computed fresh each frame - stable without caching because:
+     *   - v is canonicalized (always positive x/y/z) by getSideBondV
+     *   - Ring centroid moves smoothly with atoms
+     *   - If v flips at a canonicalization boundary, the dot product also flips,
+     *     so the visual result stays on the same physical side
+     */
+    private chooseDashedSide(atom: AtomSpec, atom2: AtomSpec, p1: Vector3, p2: Vector3, v: Vector3): boolean {
+        const ring = this.findSmallestRing(atom.index, atom2.index);
+
+        if (ring && ring.length >= 3) {
+            // Bond is in a ring - use ring centroid for dash side
+            const centroid = new Vector3(0, 0, 0);
+            for (let ri = 0; ri < ring.length; ri++) {
+                const ra = this.atoms[ring[ri]];
+                centroid.x += ra.x;
+                centroid.y += ra.y;
+                centroid.z += ra.z;
+            }
+            centroid.multiplyScalar(1.0 / ring.length);
+
+            const mid = new Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+            const toRing = new Vector3(
+                centroid.x - mid.x,
+                centroid.y - mid.y,
+                centroid.z - mid.z
+            );
+
+            const dot = v.x * toRing.x + v.y * toRing.y + v.z * toRing.z;
+            const vLen = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+            const toLen = Math.sqrt(toRing.x * toRing.x + toRing.y * toRing.y + toRing.z * toRing.z);
+
+            if (toLen >= 0.001 && Math.abs(dot) >= 0.05 * vLen * toLen) {
+                return dot > 0;
+            }
+            // Ring centroid is nearly on the bond axis - fall back to neighbor heuristic
+        }
+
+        // No ring or degenerate ring geometry - use neighbor heuristic
+        return this.chooseDashedPlusV(atom, atom2, p1, p2, v);
+    }
+
     // Determine which side of a multi-bond should have the dashed line.
     // Returns true if dashed should be on the +v side (toward neighbors).
     // Uses immediate neighbor positions for stability across conformations.
@@ -1047,7 +1133,7 @@ export class GLModel {
                     // Determine dashed bond placement for fractional orders (aromatic)
                     var isDashedBondFlipped = false;
                     if (renderBondOrder % 1 !== 0) {
-                        isDashedBondFlipped = this.chooseDashedPlusV(atom, atom2, p1, p2, v);
+                        isDashedBondFlipped = this.chooseDashedSide(atom, atom2, p1, p2, v);
                     }
 
                     if (renderBondOrder > 1 && renderBondOrder <= 2) {
