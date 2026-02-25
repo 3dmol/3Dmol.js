@@ -1,0 +1,50 @@
+/*@div
+<div style="width: 400px; height: 400px; position: relative;"
+     class='viewer_3Dmoljs'
+     data-element='moldata'
+     data-backgroundcolor='0xffffff'
+     data-type="sdf"></div>
+*/
+/*
+@data
+<textarea style="display: none;" id="moldata">
+pyridine_v3000
+
+
+  0  0  0  0  0  0            999 V3000
+M  V30 BEGIN CTAB
+M  V30 COUNTS 11 11 0 0 0
+M  V30 BEGIN ATOM
+M  V30 1 N 0.0000 1.4000 0.0000 0
+M  V30 2 C 1.2124 0.7000 0.0000 0
+M  V30 3 C 1.2124 -0.7000 0.0000 0
+M  V30 4 C 0.0000 -1.4000 0.0000 0
+M  V30 5 C -1.2124 -0.7000 0.0000 0
+M  V30 6 C -1.2124 0.7000 0.0000 0
+M  V30 7 H 2.1560 1.2440 0.0000 0
+M  V30 8 H 2.1560 -1.2440 0.0000 0
+M  V30 9 H 0.0000 -2.4880 0.0000 0
+M  V30 10 H -2.1560 -1.2440 0.0000 0
+M  V30 11 H -2.1560 1.2440 0.0000 0
+M  V30 END ATOM
+M  V30 BEGIN BOND
+M  V30 1 1.5 1 2
+M  V30 2 1.5 2 3
+M  V30 3 1.5 3 4
+M  V30 4 1.5 4 5
+M  V30 5 1.5 5 6
+M  V30 6 1.5 6 1
+M  V30 7 1 2 7
+M  V30 8 1 3 8
+M  V30 9 1 4 9
+M  V30 10 1 5 10
+M  V30 11 1 6 11
+M  V30 END BOND
+M  V30 END CTAB
+M  END
+> <3DMOL_STYLE>
+{"stick":{"radius":0.12,"dashedBondConfig":{"solidColor":"#333333","dashedColor":"#FF6600"}},"bonds":{"2-3":{"color1":"red","color2":"blue"}}}
+
+$$$$
+</textarea>
+*/
