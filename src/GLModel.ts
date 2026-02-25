@@ -755,11 +755,11 @@ export class GLModel {
 
     // Calculate segments for solid two-color bonds (split at midpoint)
     private calculateTwoColorSegments(from: XYZ, to: XYZ, colors: Color[]) {
-        var segments = [];
+        const segments = [];
         if (colors.length <= 1) {
             segments.push({ from: new Vector3(from.x, from.y, from.z), to: new Vector3(to.x, to.y, to.z), color: colors[0] });
         } else {
-            var mp = new Vector3((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2);
+            const mp = new Vector3((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2);
             segments.push({ from: new Vector3(from.x, from.y, from.z), to: mp, color: colors[0] });
             segments.push({ from: mp, to: new Vector3(to.x, to.y, to.z), color: colors[1] });
         }
@@ -856,13 +856,13 @@ export class GLModel {
     // Returns true if dashed should be on the +v side (toward neighbors).
     // Uses immediate neighbor positions for stability across conformations.
     private chooseDashedPlusV(atom: AtomSpec, atom2: AtomSpec, p1: Vector3, p2: Vector3, v: Vector3) {
-        var neighborCenter = new Vector3(0, 0, 0);
-        var count = 0;
+        const neighborCenter = new Vector3(0, 0, 0);
+        let count = 0;
 
         // Add atom's neighbors (except atom2)
-        for (var i = 0; i < atom.bonds.length; i++) {
+        for (let i = 0; i < atom.bonds.length; i++) {
             if (atom.bonds[i] === atom2.index) continue;
-            var neighbor = this.atoms[atom.bonds[i]];
+            const neighbor = this.atoms[atom.bonds[i]];
             if (neighbor) {
                 neighborCenter.x += neighbor.x;
                 neighborCenter.y += neighbor.y;
@@ -872,9 +872,9 @@ export class GLModel {
         }
 
         // Add atom2's neighbors (except atom)
-        for (var i = 0; i < atom2.bonds.length; i++) {
+        for (let i = 0; i < atom2.bonds.length; i++) {
             if (atom2.bonds[i] === atom.index) continue;
-            var neighbor = this.atoms[atom2.bonds[i]];
+            const neighbor = this.atoms[atom2.bonds[i]];
             if (neighbor) {
                 neighborCenter.x += neighbor.x;
                 neighborCenter.y += neighbor.y;
@@ -886,18 +886,18 @@ export class GLModel {
         if (count === 0) return false;
         neighborCenter.multiplyScalar(1.0 / count);
 
-        var mid = new Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-        var toNeighbors = new Vector3(
+        const mid = new Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+        const toNeighbors = new Vector3(
             neighborCenter.x - mid.x,
             neighborCenter.y - mid.y,
             neighborCenter.z - mid.z
         );
 
-        var dot = v.x * toNeighbors.x + v.y * toNeighbors.y + v.z * toNeighbors.z;
+        const dot = v.x * toNeighbors.x + v.y * toNeighbors.y + v.z * toNeighbors.z;
 
         // If nearly perpendicular, use canonical v direction
-        var vLen = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-        var toLen = Math.sqrt(toNeighbors.x * toNeighbors.x + toNeighbors.y * toNeighbors.y + toNeighbors.z * toNeighbors.z);
+        const vLen = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+        const toLen = Math.sqrt(toNeighbors.x * toNeighbors.x + toNeighbors.y * toNeighbors.y + toNeighbors.z * toNeighbors.z);
 
         if (toLen < 0.001 || Math.abs(dot) < 0.1 * vLen * toLen) {
             return false; // Use canonical v direction
@@ -982,30 +982,28 @@ export class GLModel {
         var doubleBondScale = style.doubleBondScaling || 0.4;
         var tripleBondScale = style.tripleBondScaling || 0.25;
 
-        var bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
-        var bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
+        const bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
+        const bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
 
         var bondR = atomBondR;
         var atomSingleBond = style.singleBonds || false;
         var atomDashedBonds = style.dashedBonds || false;
         var fromCap = 0, toCap = 0;
-        var atomneedsi, atom2needsi, i, singleBond, bstyle;
+        var atomneedsi, atom2needsi, i, singleBond;
         var cylinder1a, cylinder1b, cylinder1c, cylinder2a, cylinder2b, cylinder2c;
 
-        var C1 = getColorFromStyle(atom, style);
-
+        var atomColor = getColorFromStyle(atom, style);
         var mp, mp2, mp3;
 
         if (!atom.capDrawn && atom.bonds.length < 4)
             fromCap = 2;
 
         // Get custom colors from dashedBondConfig if specified
-        var solidColor = style.dashedBondConfig?.solidColor ? CC.color(style.dashedBondConfig.solidColor) as Color : null;
-        var dashedColor = style.dashedBondConfig?.dashedColor ? CC.color(style.dashedBondConfig.dashedColor) as Color : null;
+        const solidColor = style.dashedBondConfig?.solidColor ? CC.color(style.dashedBondConfig.solidColor) as Color : null;
+        const dashedColor = style.dashedBondConfig?.dashedColor ? CC.color(style.dashedBondConfig.dashedColor) as Color : null;
 
-        var self = this;
-        var selectCylDrawMethod = (bondOrder) => {
-            var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
+        const selectCylDrawMethod = (bondOrder) => {
+            const drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
 
             if (!atomDashedBonds && bondOrder % 1 === 0) {
                 // Integer bond order - solid
@@ -1013,11 +1011,11 @@ export class GLModel {
                     if (!color2 || color1 === color2) {
                         drawMethod(geo, from, to, radius, color1, fromCap, toCap);
                     } else {
-                        var segments = self.calculateTwoColorSegments(from, to, [color1, color2]);
-                        for (var si = 0; si < segments.length; si++) {
-                            var seg = segments[si];
-                            var fc = (si === 0) ? fromCap : 0;
-                            var tc = (si === segments.length - 1) ? toCap : 0;
+                        const segments = this.calculateTwoColorSegments(from, to, [color1, color2]);
+                        for (let si = 0; si < segments.length; si++) {
+                            const seg = segments[si];
+                            const fc = (si === 0) ? fromCap : 0;
+                            const tc = (si === segments.length - 1) ? toCap : 0;
                             drawMethod(geo, seg.from, seg.to, radius, seg.color, fc, tc);
                         }
                     }
@@ -1026,8 +1024,8 @@ export class GLModel {
 
             // Fractional bond order - dashed
             return (geo, from, to, radius, color1, color2, fromCap = 0, toCap = 0) => {
-                var colors = color2 ? [color1, color2] : [color1];
-                var segments = self.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
+                const colors = color2 ? [color1, color2] : [color1];
+                const segments = this.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
                 segments.forEach(segment => {
                     drawMethod(geo, segment.from, segment.to, radius, segment.color, fromCap, toCap);
                 });
@@ -1036,29 +1034,30 @@ export class GLModel {
 
         for (i = 0; i < atom.bonds.length; i++) {
             // Treat aromatic bond type (4) as 1.5 for rendering
-            var rawBondOrder = atom.bondOrder[i];
-            var renderBondOrder = (rawBondOrder === 4) ? 1.5 : rawBondOrder;
+            const rawBondOrder = atom.bondOrder[i];
+            const renderBondOrder = (rawBondOrder === 4) ? 1.5 : rawBondOrder;
 
-            var drawCyl = selectCylDrawMethod(renderBondOrder);
-            var j = atom.bonds[i]; // our neighbor
-            var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
+            const drawCyl = selectCylDrawMethod(renderBondOrder);
+            const j = atom.bonds[i]; // our neighbor
+            const atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
             mp = mp2 = mp3 = null;
             if (atom.index < atom2.index) {// only draw if less, this
                 // lets us combine
                 // cylinders of the same
                 // color
                 toCap = 0;
-                var style2 = atom2.style;
+                const style2 = atom2.style;
                 if (!style2.stick || style2.stick.hidden)
                     continue; // don't sweat the details
 
-                var C2 = getColorFromStyle(atom2, style2.stick);
+                let C1 = atomColor;
+                let C2 = getColorFromStyle(atom2, style2.stick);
 
                 //support bond specific styles
                 bondR = atomBondR;
                 singleBond = atomSingleBond;
-                if (atom.bondStyles && atom.bondStyles[i]) {
-                    bstyle = atom.bondStyles[i];
+                const bstyle = atom.bondStyles?.[i];
+                if (bstyle) {
                     if (bstyle.iswire) {
                         continue;
                     }
@@ -1071,14 +1070,20 @@ export class GLModel {
                         C2 = CC.color(bstyle.color2) as Color;
                     }
                 }
-                var p1 = new Vector3(atom.x, atom.y, atom.z);
-                var p2 = new Vector3(atom2.x, atom2.y, atom2.z);
+                const p1 = new Vector3(atom.x, atom.y, atom.z);
+                const p2 = new Vector3(atom2.x, atom2.y, atom2.z);
 
-                // Determine colors for solid and dashed portions
-                var solid1 = solidColor || C1;
-                var solid2 = solidColor || C2;
-                var dashed1 = dashedColor || C1;
-                var dashed2 = dashedColor || C2;
+                // Determine colors and dash geometry for solid/dashed portions
+                // Priority: per-bond dashedBondConfig > per-bond color1/color2 > global dashedBondConfig > atom color
+                const perBondSolid = bstyle?.dashedBondConfig?.solidColor ? CC.color(bstyle.dashedBondConfig.solidColor) as Color : null;
+                const perBondDashed = bstyle?.dashedBondConfig?.dashedColor ? CC.color(bstyle.dashedBondConfig.dashedColor) as Color : null;
+                const hasPerBondColor = bstyle && (typeof bstyle.color1 !== "undefined" || typeof bstyle.color2 !== "undefined");
+                const solid1 = perBondSolid || (hasPerBondColor ? C1 : (solidColor || C1));
+                const solid2 = perBondSolid || (hasPerBondColor ? C2 : (solidColor || C2));
+                const dashed1 = perBondDashed || (hasPerBondColor ? C1 : (dashedColor || C1));
+                const dashed2 = perBondDashed || (hasPerBondColor ? C2 : (dashedColor || C2));
+                const perBondDashLength = bstyle?.dashedBondConfig?.dashLength || bondDashLength;
+                const perBondGapLength = bstyle?.dashedBondConfig?.gapLength || bondGapLength;
 
                 // draw cylinders
                 if (renderBondOrder <= 1 || singleBond || renderBondOrder > 3) {
@@ -1123,18 +1128,41 @@ export class GLModel {
                         mtoCap = 2;
                     }
 
-                    var dir = p2.clone();
-                    var v = null;
+                    const dir = p2.clone();
                     dir.sub(p1);
 
-                    var r, r2, p1a, p1b, p2a, p2b;
-                    v = this.getSideBondV(atom, atom2, i);
+                    let r, r2, p1a, p1b, p2a, p2b;
+                    const v = this.getSideBondV(atom, atom2, i);
 
                     // Determine dashed bond placement for fractional orders (aromatic)
-                    var isDashedBondFlipped = false;
+                    let isDashedBondFlipped = false;
                     if (renderBondOrder % 1 !== 0) {
-                        isDashedBondFlipped = this.chooseDashedSide(atom, atom2, p1, p2, v);
+                        if (bstyle?.dashedBondFlip != null) {
+                            isDashedBondFlipped = bstyle.dashedBondFlip;
+                        } else {
+                            isDashedBondFlipped = this.chooseDashedSide(atom, atom2, p1, p2, v);
+                        }
                     }
+
+                    const multiBondDrawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
+
+                    const drawSolidHalf = (from, to, radius, c1, c2, fc, tc) => {
+                        if (c1 != c2) {
+                            const m = new Vector3().addVectors(from, to).multiplyScalar(0.5);
+                            multiBondDrawMethod(geo, from, m, radius, c1, fc, 0);
+                            multiBondDrawMethod(geo, m, to, radius, c2, 0, tc);
+                        } else {
+                            multiBondDrawMethod(geo, from, to, radius, c1, fc, tc);
+                        }
+                    };
+
+                    const drawDashedHalf = (from, to, radius, c1, c2, fc, tc) => {
+                        const colors = (c1 != c2) ? [c1, c2] : [c1];
+                        const segments = this.calculateDashes(from, to, radius, perBondDashLength, perBondGapLength, colors);
+                        segments.forEach(segment => {
+                            multiBondDrawMethod(geo, segment.from, segment.to, radius, segment.color || c1, fc, tc);
+                        });
+                    };
 
                     if (renderBondOrder > 1 && renderBondOrder <= 2) {
                         // Fractional double bond (aromatic, 1.5, etc)
@@ -1152,46 +1180,18 @@ export class GLModel {
                         p2b = p1b.clone();
                         p2b.add(dir);
 
-                        // Determine colors for solid and dashed portions
-                        var solid1 = solidColor || C1;
-                        var solid2 = solidColor || C2;
-                        var dashed1 = dashedColor || C1;
-                        var dashed2 = dashedColor || C2;
-
-                        var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
-
-                        // Draw solid bond
-                        var drawSolid = (from, to, radius, c1, c2, fc, tc) => {
-                            if (c1 != c2) {
-                                var m = new Vector3().addVectors(from, to).multiplyScalar(0.5);
-                                drawMethod(geo, from, m, radius, c1, fc, 0);
-                                drawMethod(geo, m, to, radius, c2, 0, tc);
-                            } else {
-                                drawMethod(geo, from, to, radius, c1, fc, tc);
-                            }
-                        };
-
-                        // Draw dashed bond
-                        var drawDashed = (from, to, radius, c1, c2, fc, tc) => {
-                            var colors = (c1 != c2) ? [c1, c2] : [c1];
-                            var segments = self.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
-                            segments.forEach(segment => {
-                                drawMethod(geo, segment.from, segment.to, radius, segment.color || c1, fc, tc);
-                            });
-                        };
-
-                        if (renderBondOrder == 2) {
+                        if (renderBondOrder === 2) {
                             // Integer double bond - both solid
-                            drawSolid(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
-                            drawSolid(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
                         } else {
                             // Fractional double bond (1.x) - one solid, one dashed
                             if (!isDashedBondFlipped) {
-                                drawSolid(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
-                                drawDashed(p1b, p2b, r2, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
+                                drawDashedHalf(p1b, p2b, r2, dashed1, dashed2, mfromCap, mtoCap);
                             } else {
-                                drawDashed(p1a, p2a, r2, dashed1, dashed2, mfromCap, mtoCap);
-                                drawSolid(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                                drawDashedHalf(p1a, p2a, r2, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
                             }
                         }
 
@@ -1205,8 +1205,8 @@ export class GLModel {
                                 .multiplyScalar(0.5);
 
                             // Account for flip - dashed bond has radius r2
-                            var raRadius = (renderBondOrder == 2) ? r : (isDashedBondFlipped ? r2 : r);
-                            var rbRadius = (renderBondOrder == 2) ? r : (isDashedBondFlipped ? r : r2);
+                            const raRadius = (renderBondOrder === 2) ? r : (isDashedBondFlipped ? r2 : r);
+                            const rbRadius = (renderBondOrder === 2) ? r : (isDashedBondFlipped ? r : r2);
 
                             if (atomneedsi) {
                                 cylinder1a = new Cylinder(p1a, mp, raRadius);
@@ -1224,7 +1224,7 @@ export class GLModel {
                     }
                     else if (renderBondOrder > 2 && renderBondOrder <= 3) {
                         r = bondR * tripleBondScale;
-                        var r3 = r * (renderBondOrder - 2); // dashed bond thinner for fractional
+                        const r3 = r * (renderBondOrder - 2); // dashed bond thinner for fractional
                         v.cross(dir);
                         v.normalize();
                         v.multiplyScalar(r * 3);
@@ -1239,43 +1239,21 @@ export class GLModel {
                         p2b = p1b.clone();
                         p2b.add(dir);
 
-                        var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
-
-                        // Draw solid bond helper
-                        var drawSolidTriple = (from, to, radius, c1, c2, fc, tc) => {
-                            if (c1 != c2) {
-                                var m = new Vector3().addVectors(from, to).multiplyScalar(0.5);
-                                drawMethod(geo, from, m, radius, c1, fc, 0);
-                                drawMethod(geo, m, to, radius, c2, 0, tc);
-                            } else {
-                                drawMethod(geo, from, to, radius, c1, fc, tc);
-                            }
-                        };
-
-                        // Draw dashed bond helper
-                        var drawDashedTriple = (from, to, radius, c1, c2, fc, tc) => {
-                            var colors = (c1 != c2) ? [c1, c2] : [c1];
-                            var segments = self.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
-                            segments.forEach(segment => {
-                                drawMethod(geo, segment.from, segment.to, radius, segment.color || c1, fc, tc);
-                            });
-                        };
-
-                        if (renderBondOrder == 3) {
+                        if (renderBondOrder === 3) {
                             // Integer triple bond - all solid
-                            drawSolidTriple(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
-                            drawSolidTriple(p1, p2, r, C1, C2, fromCap, toCap);
-                            drawSolidTriple(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1, p2, r, C1, C2, fromCap, toCap);
+                            drawSolidHalf(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
                         } else {
                             // Fractional triple bond (2.x) - one dashed
                             if (!isDashedBondFlipped) {
-                                drawSolidTriple(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
-                                drawSolidTriple(p1, p2, r, solid1, solid2, fromCap, toCap);
-                                drawDashedTriple(p1b, p2b, r3, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
+                                drawSolidHalf(p1, p2, r, solid1, solid2, fromCap, toCap);
+                                drawDashedHalf(p1b, p2b, r3, dashed1, dashed2, mfromCap, mtoCap);
                             } else {
-                                drawDashedTriple(p1a, p2a, r3, dashed1, dashed2, mfromCap, mtoCap);
-                                drawSolidTriple(p1, p2, r, solid1, solid2, fromCap, toCap);
-                                drawSolidTriple(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                                drawDashedHalf(p1a, p2a, r3, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1, p2, r, solid1, solid2, fromCap, toCap);
+                                drawSolidHalf(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
                             }
                         }
 
@@ -1291,8 +1269,8 @@ export class GLModel {
                                 .multiplyScalar(0.5);
 
                             // Account for flip - dashed bond has radius r3
-                            var raRadius = (renderBondOrder == 3) ? r : (isDashedBondFlipped ? r3 : r);
-                            var rbRadius = (renderBondOrder == 3) ? r : (isDashedBondFlipped ? r : r3);
+                            const raRadius = (renderBondOrder === 3) ? r : (isDashedBondFlipped ? r3 : r);
+                            const rbRadius = (renderBondOrder === 3) ? r : (isDashedBondFlipped ? r : r3);
 
                             if (atomneedsi) {
                                 cylinder1a = new Cylinder(p1a.clone(), mp.clone(), raRadius);
@@ -1325,8 +1303,8 @@ export class GLModel {
         //also, if any bonds were drawn as multiples, need sphere
         for (i = 0; i < atom.bonds.length; i++) {
             singleBond = atomSingleBond;
-            if (atom.bondStyles && atom.bondStyles[i]) {
-                bstyle = atom.bondStyles[i];
+            var bstyle = atom.bondStyles?.[i];
+            if (bstyle) {
                 if (bstyle.singleBond) singleBond = true;
                 if (bstyle.radius && bstyle.radius != atomBondR) {
                     differentradii = true;
@@ -1349,10 +1327,10 @@ export class GLModel {
             //do not use bond style as this can be variable, particularly
             //with jmol export of double/triple bonds
             if (geo.imposter) {
-                this.drawSphereImposter(geo.sphereGeometry, atom as XYZ, bondR, C1);
+                this.drawSphereImposter(geo.sphereGeometry, atom as XYZ, bondR, atomColor);
             }
             else {
-                GLDraw.drawSphere(geo, atom, bondR, C1);
+                GLDraw.drawSphere(geo, atom, bondR, atomColor);
             }
         }
 
@@ -3288,9 +3266,9 @@ export interface DashedBondSpec {
     dashLength?: number;
     /** length of gap (default 0.25) */
     gapLength?: number;
-    // Color for the solid portion of aromatic bonds (default: atom color)
+    /** Color for the solid portion of aromatic bonds (default: atom color) */
     solidColor?: ColorSpec;
-    // Color for the dashed portion of aromatic bonds (default: atom color)
+    /** Color for the dashed portion of aromatic bonds (default: atom color) */
     dashedColor?: ColorSpec;
 }
 
@@ -3367,4 +3345,10 @@ export interface BondStyle {
     color1?: ColorSpec;
     /**  */
     color2?: ColorSpec;
+    /** Override which side of a fractional bond (e.g. aromatic 1.5) gets the dashed line.
+     *  true = dashed on +v side, false = dashed on -v side.
+     *  When absent, automatically determined via ring detection. */
+    dashedBondFlip?: boolean;
+    /** Override dashed bond colors for this specific bond */
+    dashedBondConfig?: DashedBondSpec;
 }
