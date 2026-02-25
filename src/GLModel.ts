@@ -1873,9 +1873,7 @@ export class GLModel {
         if (mData) {
             if (Array.isArray(mData)) {
                 this.modelData = mData[0];
-                if (options.frames) {
-                    this.modelDatas = mData;
-                }
+                this.modelDatas = mData;
             } else {
                 this.modelData = mData;
             }
@@ -1888,9 +1886,19 @@ export class GLModel {
         }
 
         if (this.frames.length == 0) { //first call
+            // Build frames and modelDatas in one pass, skipping empty frames.
+            // modelDatas (from SDF parsing) uses raw parsed indices, so we
+            // compact it here to stay aligned with this.frames.
+            const remapped = this.modelDatas ? [] as any[] : null;
             for (let i = 0; i < parsedAtoms.length; i++) {
-                if (parsedAtoms[i].length != 0)
+                if (parsedAtoms[i].length != 0) {
                     this.frames.push(parsedAtoms[i]);
+                    if (remapped) remapped.push(this.modelDatas[i] || null);
+                }
+            }
+            if (remapped) {
+                this.modelDatas = remapped;
+                if (remapped[0]) this.modelData = remapped[0];
             }
             if (this.frames[0])
                 this.atoms = this.frames[0];
@@ -1916,6 +1924,18 @@ export class GLModel {
         if (options.vibrate && options.vibrate.frames && options.vibrate.amplitude) {
             //fill in vibrational modes
             this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
+        }
+
+        // Apply embedded 3DMOL_STYLE model-level styles from SDF parsing.
+        // modelDatas was already remapped to match this.frames indices above.
+        if (this.modelDatas) {
+            for (let i = 0; i < this.modelDatas.length; i++) {
+                if (this.modelDatas[i]?.style) {
+                    this.setStyle({frame: i}, this.modelDatas[i].style, true);
+                }
+            }
+        } else if (mData && mData.style) {
+            this.setStyle({}, mData.style, true);
         }
 
         if (options.style) {
