@@ -1,0 +1,42 @@
+/*
+@data
+<textarea style="display: none;" id="moldata">
+benzene
+
+
+ 12 12  0  0  0  0  0  0  0  0999 V2000
+    1.2124    0.7000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    1.2124   -0.7000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000   -1.4000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.2124   -0.7000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   -1.2124    0.7000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    1.4000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.1560    1.2440    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    2.1560   -1.2440    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000   -2.4880    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.1560   -1.2440    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+   -2.1560    1.2440    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    2.4880    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  4  0
+  2  3  4  0
+  3  4  4  0
+  4  5  4  0
+  5  6  4  0
+  6  1  4  0
+  1  7  1  0
+  2  8  1  0
+  3  9  1  0
+  4 10  1  0
+  5 11  1  0
+  6 12  1  0
+M  END
+$$$$
+</textarea>
+*/
+var moldata = $('#moldata').val();
+viewer.addModel(moldata, 'sdf');
+viewer.setStyle({stick:{radius:0.15, aromaticStyle:'circle'}});
+viewer.setBackgroundColor(0xffffff);
+viewer.zoomTo();
+// Force polygon mesh rendering (no imposters) for comparison
+viewer.render(callback, {supportsImposters: false, supportsAIA: false});

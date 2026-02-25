@@ -6,7 +6,7 @@ import { Geometry, Material, StickImposterMaterial } from "./WebGL";
 import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3, XYZ } from "./WebGL/math";
 import { Color, CC, ColorschemeSpec, ColorSpec } from "./colors";
-import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
+import { InstancedMaterial, SphereImposterMaterial, RingImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { CAP, GLDraw } from "./GLDraw"
 import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
@@ -129,6 +129,8 @@ export class GLModel {
     private readonly defaultCartoonQuality: number;
     // bonds as cylinders
     private readonly defaultStickRadius = 0.25;
+    private _drawnAromaticRings: Set<string> = new Set();
+    private _ringCache: Map<string, number[] | null> = new Map();
 
     constructor(mid, options?, viewer?) {
 
@@ -662,6 +664,86 @@ export class GLModel {
         this.drawSphereImposter(geo, atom as XYZ, radius, C);
     };
 
+    // 3D-aware ring imposter using analytical annulus test.
+    // Encodes the ring plane normal so the fragment shader can project
+    // correctly when the ring is tilted relative to the camera.
+    //
+    // Encoding (4 vertices per ring):
+    //   position  = ring center (same for all 4)
+    //   normal    = ringNormal * minorR  (direction = ring normal, length = minorR)
+    //   color     = (r, g, ±b)  sign(b) = Y billboard corner
+    //   radius    = ±outerR     sign    = X billboard corner
+    private drawRingImposter(geo: Geometry, center: XYZ, ringNormal: XYZ,
+                             majorRadius: number, minorRadius: number, C: Color) {
+        var geoGroup = geo.updateGeoGroup(4);
+        var startv = geoGroup.vertices;
+        var start = startv * 3;
+        var vertexArray = geoGroup.vertexArray;
+        var colorArray = geoGroup.colorArray;
+        var normalArray = geoGroup.normalArray;
+        var radiusArray = geoGroup.radiusArray;
+        var outerR = majorRadius + minorRadius;
+
+        // All 4 vertices share the same center position
+        for (var i = 0; i < 4; i++) {
+            vertexArray[start + 3 * i] = center.x;
+            vertexArray[start + 3 * i + 1] = center.y;
+            vertexArray[start + 3 * i + 2] = center.z;
+        }
+
+        // Normal = ringNormal scaled by minorR (direction + magnitude encoding)
+        var scaledNx = ringNormal.x * minorRadius;
+        var scaledNy = ringNormal.y * minorRadius;
+        var scaledNz = ringNormal.z * minorRadius;
+        for (var i = 0; i < 4; i++) {
+            normalArray[start + 3 * i] = scaledNx;
+            normalArray[start + 3 * i + 1] = scaledNy;
+            normalArray[start + 3 * i + 2] = scaledNz;
+        }
+
+        // Color: RGB with sign of blue encoding Y billboard corner
+        //   vertices 0,3: +b (Y = +outerR)
+        //   vertices 1,2: -b (Y = -outerR)
+        var b = Math.abs(C.b);
+        if (b < 0.0001) b = 0.0001; // ensure nonzero so sign is meaningful
+        colorArray[start + 0] = C.r;
+        colorArray[start + 1] = C.g;
+        colorArray[start + 2] = b;       // vertex 0: Y+
+
+        colorArray[start + 3] = C.r;
+        colorArray[start + 4] = C.g;
+        colorArray[start + 5] = -b;      // vertex 1: Y-
+
+        colorArray[start + 6] = C.r;
+        colorArray[start + 7] = C.g;
+        colorArray[start + 8] = -b;      // vertex 2: Y-
+
+        colorArray[start + 9] = C.r;
+        colorArray[start + 10] = C.g;
+        colorArray[start + 11] = b;      // vertex 3: Y+
+
+        // Radius: ±outerR, sign encodes X billboard corner
+        //   vertices 0,1: -outerR (X = -outerR)
+        //   vertices 2,3: +outerR (X = +outerR)
+        radiusArray[startv + 0] = -outerR;  // vertex 0: X-
+        radiusArray[startv + 1] = -outerR;  // vertex 1: X-
+        radiusArray[startv + 2] = outerR;   // vertex 2: X+
+        radiusArray[startv + 3] = outerR;   // vertex 3: X+
+
+        geoGroup.vertices += 4;
+
+        // Two faces
+        var faceArray = geoGroup.faceArray;
+        var faceoffset = geoGroup.faceidx;
+        faceArray[faceoffset + 0] = startv;
+        faceArray[faceoffset + 1] = startv + 1;
+        faceArray[faceoffset + 2] = startv + 2;
+        faceArray[faceoffset + 3] = startv + 2;
+        faceArray[faceoffset + 4] = startv + 3;
+        faceArray[faceoffset + 5] = startv;
+        geoGroup.faceidx += 6;
+    };
+
     /**
      * Calculate dashed line segments along a bond, with proper centering and two-color support.
      *
@@ -766,12 +848,14 @@ export class GLModel {
         return segments;
     }
 
-    /**
-     * Find the smallest ring containing the bond between two atoms.
-     * Uses BFS to find shortest alternative path (excluding the direct bond).
-     * Returns array of atom indices forming the ring, or null if no ring found.
-     */
+    // BFS for the smallest ring containing the bond (atomIdx1–atomIdx2).
+    // Results are cached per render pass in _ringCache.
     private findSmallestRing(atomIdx1: number, atomIdx2: number, maxRingSize: number = 8): number[] | null {
+        const lo = atomIdx1 < atomIdx2 ? atomIdx1 : atomIdx2;
+        const hi = atomIdx1 < atomIdx2 ? atomIdx2 : atomIdx1;
+        const cacheKey = lo + "," + hi;
+        if (this._ringCache.has(cacheKey)) return this._ringCache.get(cacheKey);
+
         const queue: number[][] = [[atomIdx1]];
         const visited = new Set<number>([atomIdx1]);
 
@@ -793,8 +877,9 @@ export class GLModel {
                 if (current === atomIdx2 && neighbor === atomIdx1) continue;
 
                 if (neighbor === atomIdx2 && path.length >= 2) {
-                    // Found alternative path back - this is a ring
-                    return [...path, atomIdx2];
+                    const ring = [...path, atomIdx2];
+                    this._ringCache.set(cacheKey, ring);
+                    return ring;
                 }
 
                 if (!visited.has(neighbor)) {
@@ -804,19 +889,13 @@ export class GLModel {
             }
         }
 
+        this._ringCache.set(cacheKey, null);
         return null;
     }
 
-    /**
-     * Determine dashed bond placement using ring detection.
-     * For bonds in rings, places dashed side toward ring interior (chemically correct).
-     * For non-ring bonds, falls back to neighbor centroid heuristic.
-     * Computed fresh each frame - stable without caching because:
-     *   - v is canonicalized (always positive x/y/z) by getSideBondV
-     *   - Ring centroid moves smoothly with atoms
-     *   - If v flips at a canonicalization boundary, the dot product also flips,
-     *     so the visual result stays on the same physical side
-     */
+    // Choose which side of a multi-bond gets the dashed line.
+    // For ring bonds, places dashes toward the ring interior; otherwise falls back
+    // to the neighbor-centroid heuristic.
     private chooseDashedSide(atom: AtomSpec, atom2: AtomSpec, p1: Vector3, p2: Vector3, v: Vector3): boolean {
         const ring = this.findSmallestRing(atom.index, atom2.index);
 
@@ -906,6 +985,73 @@ export class GLModel {
         return dot > 0;
     }
 
+    // Draw a torus inside the aromatic ring that contains this bond.
+    // Each ring is drawn once per render pass (deduplicated by sorted atom indices).
+    private drawAromaticRingTorus(atom: AtomSpec, atom2: AtomSpec, geo: Geometry, bondR: number, color: Color) {
+        const ring = this.findSmallestRing(atom.index, atom2.index);
+        if (!ring || ring.length < 3) return;
+
+        const ringKey = ring.slice().sort((a, b) => a - b).join(",");
+        if (this._drawnAromaticRings.has(ringKey)) return;
+        this._drawnAromaticRings.add(ringKey);
+
+        // centroid
+        const centroid = new Vector3(0, 0, 0);
+        for (let ri = 0; ri < ring.length; ri++) {
+            const ra = this.atoms[ring[ri]];
+            centroid.x += ra.x;
+            centroid.y += ra.y;
+            centroid.z += ra.z;
+        }
+        centroid.multiplyScalar(1.0 / ring.length);
+
+        // ring-plane normal (Newell's method)
+        const normal = new Vector3(0, 0, 0);
+        for (let ri = 0; ri < ring.length; ri++) {
+            const cur = this.atoms[ring[ri]];
+            const next = this.atoms[ring[(ri + 1) % ring.length]];
+            normal.x += (cur.y - next.y) * (cur.z + next.z);
+            normal.y += (cur.z - next.z) * (cur.x + next.x);
+            normal.z += (cur.x - next.x) * (cur.y + next.y);
+        }
+        const nLen = Math.sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+        if (nLen < 1e-4) return; // degenerate (collinear) ring
+        normal.multiplyScalar(1.0 / nLen);
+
+        // average distance from centroid to ring atoms
+        let avgDist = 0;
+        let maxSphereR = 0;
+        for (let ri = 0; ri < ring.length; ri++) {
+            const ra = this.atoms[ring[ri]];
+            const dx = ra.x - centroid.x;
+            const dy = ra.y - centroid.y;
+            const dz = ra.z - centroid.z;
+            avgDist += Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (ra.style?.sphere && !ra.style.sphere.hidden && ra.style.sphere.radius) {
+                const sr = this.getRadiusFromStyle(ra, ra.style.sphere);
+                if (sr > maxSphereR) maxSphereR = sr;
+            }
+        }
+        avgDist /= ring.length;
+
+        const minorRadius = bondR * 0.5;
+        // Two clearance constraints:
+        // 1) Bond sticks: torus outer edge + bondR gap < apothem
+        //    majorRadius + minorRadius + bondR < apothem
+        // 2) Atom spheres: torus outer edge + bondR gap < avgDist - sphereR
+        //    majorRadius + minorRadius + bondR < avgDist - sphereR
+        const apothem = avgDist * Math.cos(Math.PI / ring.length);
+        const bondLimit = apothem - minorRadius - 2 * bondR;
+        const sphereLimit = avgDist - minorRadius - maxSphereR - bondR;
+        const majorRadius = Math.max(minorRadius, Math.min(bondLimit, sphereLimit));
+
+        if (geo.imposter) {
+            this.drawRingImposter(geo, centroid, normal, majorRadius, minorRadius, color);
+        } else {
+            GLDraw.drawTorus(geo, centroid, normal, majorRadius, minorRadius, color);
+        }
+    }
+
     static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap: CAP = 0, toCap: CAP = 0) {
         //we need the four corners - two have from coord, two have to coord, the normal
         //is the opposing point, from which we can get the normal and length
@@ -971,7 +1117,7 @@ export class GLModel {
     };
 
     // draws cylinders and small spheres (at bond radius)
-    private drawBondSticks(atom: AtomSpec, atoms: AtomSpec[], geo: Geometry) {
+    private drawBondSticks(atom: AtomSpec, atoms: AtomSpec[], geo: Geometry, torusGeo?: Geometry) {
         if (!atom.style.stick)
             return;
         var style = atom.style.stick;
@@ -984,6 +1130,7 @@ export class GLModel {
 
         const bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
         const bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
+        const aromaticStyle = style.aromaticStyle || "dashed";
 
         var bondR = atomBondR;
         var atomSingleBond = style.singleBonds || false;
@@ -1033,9 +1180,16 @@ export class GLModel {
         };
 
         for (i = 0; i < atom.bonds.length; i++) {
-            // Treat aromatic bond type (4) as 1.5 for rendering
             const rawBondOrder = atom.bondOrder[i];
-            const renderBondOrder = (rawBondOrder === 4) ? 1.5 : rawBondOrder;
+            const isAromatic = rawBondOrder === 4;
+            let renderBondOrder: number;
+            if (isAromatic) {
+                // "circle" draws a single bond + torus per ring
+                // "dashed" draws one solid + one dashed bond (1.5 order)
+                renderBondOrder = (aromaticStyle === "circle") ? 1 : 1.5;
+            } else {
+                renderBondOrder = rawBondOrder;
+            }
 
             const drawCyl = selectCylDrawMethod(renderBondOrder);
             const j = atom.bonds[i]; // our neighbor
@@ -1115,6 +1269,11 @@ export class GLModel {
                             atom2.intersectionShape.cylinder.push(cylinder2);
                             atom2.intersectionShape.sphere.push(sphere2);
                         }
+                    }
+
+                    if (isAromatic && aromaticStyle === "circle") {
+                        const torusColor = perBondDashed || dashedColor || C1;
+                        this.drawAromaticRingTorus(atom, atom2, torusGeo, bondR, torusColor);
                     }
                 }
                 else if (renderBondOrder > 1) {
@@ -1348,6 +1507,9 @@ export class GLModel {
 
         options = options || {};
 
+        this._drawnAromaticRings = new Set();
+        this._ringCache = new Map();
+
         var ret = new Object3D();
         var cartoonAtoms = [];
         var lineGeometries: Record<number, Geometry> = {};
@@ -1356,7 +1518,11 @@ export class GLModel {
         var drawSphereFunc = this.drawAtomSphere;
         var sphereGeometry: Geometry = null;
         var stickGeometry: Geometry = null;
+        var torusGeometry: Geometry = null;
         if (options.supportsImposters) {
+            torusGeometry = new Geometry(true);
+            torusGeometry.imposter = true;
+            torusGeometry.radii = true; // radiusArray encodes outerR + billboard corner
             drawSphereFunc = this.drawAtomImposter;
             sphereGeometry = new Geometry(true);
             sphereGeometry.imposter = true;
@@ -1367,11 +1533,13 @@ export class GLModel {
             stickGeometry.drawnCaps = {};
         }
         else if (options.supportsAIA) {
+            torusGeometry = new Geometry(true);
             drawSphereFunc = this.drawAtomInstanced;
             sphereGeometry = new Geometry(false, true, true);
             sphereGeometry.instanced = true;
             stickGeometry = new Geometry(true); //don't actually have instanced sticks
         } else {
+            torusGeometry = new Geometry(true);
             sphereGeometry = new Geometry(true);
             stickGeometry = new Geometry(true);
         }
@@ -1412,7 +1580,7 @@ export class GLModel {
                 this.drawAtomClickSphere(atom);
                 this.drawAtomCross(atom, crossGeometries);
                 this.drawBondLines(atom, atoms, lineGeometries);
-                this.drawBondSticks(atom, atoms, stickGeometry);
+                this.drawBondSticks(atom, atoms, stickGeometry, torusGeometry);
 
                 if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                     //gradient color scheme range
@@ -1517,6 +1685,29 @@ export class GLModel {
                 var stickspheres = new Mesh(balls, ballMaterial);
                 ret.add(stickspheres);
             }
+        }
+
+        if (torusGeometry.vertices > 0) {
+            torusGeometry.initTypedArrays();
+            var torusMaterial: any;
+            if (torusGeometry.imposter) {
+                torusMaterial = new RingImposterMaterial({
+                    ambient: 0x000000,
+                    vertexColors: true,
+                    reflectivity: 0
+                });
+            } else {
+                torusMaterial = new MeshLambertMaterial({
+                    ambient: 0x000000,
+                    vertexColors: true,
+                    reflectivity: 0
+                });
+            }
+            if (opacities.stick < 1 && opacities.stick >= 0) {
+                torusMaterial.transparent = true;
+                torusMaterial.opacity = opacities.stick;
+            }
+            ret.add(new Mesh(torusGeometry, torusMaterial as Material));
         }
 
         //var linewidth;
@@ -3299,6 +3490,10 @@ export interface StickStyleSpec {
     opacity?: number;
     /** display nonbonded atoms as spheres */
     showNonBonded?: boolean;
+    /** Style for rendering aromatic (bond order 4) bonds.
+     *  "dashed" = one solid + one dashed bond (default)
+     *  "circle" = single bond + circle/torus inside the aromatic ring */
+    aromaticStyle?: "dashed" | "circle";
 }
 
 
