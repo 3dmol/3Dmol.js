@@ -91,8 +91,9 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
             var bgcolor = CC.color(viewerdiv.dataset.backgroundcolor);
             var bgalpha: string | number = viewerdiv.dataset.backgroundalpha;
             bgalpha = (bgalpha == undefined) ? 1.0 : parseFloat(bgalpha);
+            var hasExplicitStyle = !!viewerdiv.dataset.style;
             var style = { line: {} };
-            if (viewerdiv.dataset.style) style = specStringToObject(viewerdiv.dataset.style);
+            if (hasExplicitStyle) style = specStringToObject(viewerdiv.dataset.style);
             var select = {};
             if (viewerdiv.dataset.select) select = specStringToObject(viewerdiv.dataset.select);
             var selectstylelist = [];
@@ -148,7 +149,12 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
 
             //apply all the selections/styles parsed out above to the passed viewer
             var applyStyles = function (glviewer: GLViewer) {
-                glviewer.setStyle(select, style);
+                if (hasExplicitStyle) {
+                    glviewer.setStyle(select, style);
+                } else {
+                    // Use addStyle to preserve any embedded styles (e.g. 3DMOL_STYLE from SDF)
+                    glviewer.addStyle(select, style);
+                }
 
                 if (UI) {
                     UI.createSelectionAndStyle(select, style);
