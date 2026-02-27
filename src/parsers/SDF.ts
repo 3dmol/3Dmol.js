@@ -29,7 +29,8 @@ const apply3DmolStyle = function (
     return;
   }
 
-  const frameAtoms = atoms[atoms.length - 1];
+  const frameIdx = atoms.length - 1;
+  const frameAtoms = atoms[frameIdx];
 
   if (styleObj.bonds && typeof styleObj.bonds === "object") {
     const bonds = styleObj.bonds;
@@ -70,9 +71,6 @@ const apply3DmolStyle = function (
   }
 
   if (Object.keys(styleObj).length > 0) {
-    if (!atoms.modelData) atoms.modelData = [];
-    const frameIdx = atoms.length - 1;
-    if (!atoms.modelData[frameIdx]) atoms.modelData[frameIdx] = {};
     atoms.modelData[frameIdx].style = styleObj;
   }
 };
@@ -140,6 +138,8 @@ const addBond = function (curFrame: any[], from: number, to: number, order: numb
 
 const parseV2000 = function (lines: any, options: ParserOptionsSpec) {
   const atoms: any & Record<string, any> = [[]];
+  const modelData = atoms.modelData = [] as any[];
+  modelData.push({});  // entry for frame 0
   const noH = typeof options.keepH !== "undefined" ? !options.keepH : false;
   let lineIndex = 0;
 
@@ -192,7 +192,10 @@ const parseV2000 = function (lines: any, options: ParserOptionsSpec) {
     lineIndex = parseSDProperties(lines, lineIndex + offset, atoms, serialToIndex, start);
 
     if (!options.multimodel) break;
-    if (!options.onemol) atoms.push([]);
+    if (!options.onemol) {
+      atoms.push([]);
+      modelData.push({});  // 1:1 with frames — prevents undefined on frame switch
+    }
   }
   return atoms;
 };
@@ -205,6 +208,8 @@ const parseV2000 = function (lines: any, options: ParserOptionsSpec) {
 
 const parseV3000 = function (lines: any, options: ParserOptionsSpec) {
   const atoms: any[][] & Record<string, any> = [[]];
+  const modelData = atoms.modelData = [] as any[];
+  modelData.push({});  // entry for frame 0
   const noH = typeof options.keepH !== "undefined" ? !options.keepH : false;
   let lineIndex = 0;
 
@@ -280,7 +285,10 @@ const parseV3000 = function (lines: any, options: ParserOptionsSpec) {
     lineIndex = parseSDProperties(lines, lineIndex + offset, atoms, serialToIndex, start);
 
     if (!options.multimodel) break;
-    if (!options.onemol) atoms.push([]);
+    if (!options.onemol) {
+      atoms.push([]);
+      modelData.push({});  // 1:1 with frames
+    }
 
   }
   return atoms;

@@ -14,31 +14,41 @@ describe('Function SDF | parseV2000 |', ()=>{
     test("Atoms is empty when input data is not greater than 3 lines",()=>{
         let test_data1 = "line1\nline2\nline3";
         let test_atoms1 = $3Dmol.Parsers.SDF(test_data1, {});
-        expect(test_atoms1).toEqual([[]]);
+        expect(test_atoms1.length).toBe(1);
+        expect(test_atoms1[0]).toEqual([]);
+        expect(test_atoms1.modelData).toEqual([{}]);
     });
 
     test("Atoms is empty when length of line 4 of input data is less than 38",()=>{
         let test_data2 = "line1\nline2\nline3\nlessthan38";
         let test_atoms2 = $3Dmol.Parsers.SDF(test_data2, {});
-        expect(test_atoms2).toEqual([[]]);
+        expect(test_atoms2.length).toBe(1);
+        expect(test_atoms2[0]).toEqual([]);
+        expect(test_atoms2.modelData).toEqual([{}]);
     });
 
     test("Atoms is empty when atomCount is not a number", ()=>{
         let test_data3 = "line1\nline2\nline3\natomCount";
         let test_atoms3 = $3Dmol.Parsers.SDF(test_data3, {});
-        expect(test_atoms3).toEqual([[]]);
+        expect(test_atoms3.length).toBe(1);
+        expect(test_atoms3[0]).toEqual([]);
+        expect(test_atoms3.modelData).toEqual([{}]);
     });
 
     test("Atoms is empty when atomCount is not greater than 0", ()=>{
         let test_data4 = "line1\nline2\nline3\n -1";
         let test_atoms4 = $3Dmol.Parsers.SDF(test_data4, {});
-        expect(test_atoms4).toEqual([[]]);
+        expect(test_atoms4.length).toBe(1);
+        expect(test_atoms4[0]).toEqual([]);
+        expect(test_atoms4.modelData).toEqual([{}]);
     });
 
     test("Atoms is empty when the number of lines of input is less than 4 + atomCount + bondCount", ()=>{
         let test_data5 = "line1\nline2\nline3\n  1 0 ";// atomCount=0, bondCount=1
         let test_atoms5 = $3Dmol.Parsers.SDF(test_data5, {});
-        expect(test_atoms5).toEqual([[]]);
+        expect(test_atoms5.length).toBe(1);
+        expect(test_atoms5[0]).toEqual([]);
+        expect(test_atoms5.modelData).toEqual([{}]);
     });
 
     test("Length of atoms is 1", ()=>{

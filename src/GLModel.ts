@@ -1998,7 +1998,7 @@ export class GLModel {
             }
             model.molObj = null;
             if (model.modelDatas && framenum < model.modelDatas.length) {
-                model.modelData = model.modelDatas[framenum];
+                model.modelData = model.modelDatas[framenum] || {};
                 if (model.unitCellObjects && viewer) {
                     viewer.removeUnitCell(model);
                     viewer.addUnitCell(model);
@@ -2127,7 +2127,7 @@ export class GLModel {
         var mData = parsedAtoms.modelData;
         if (mData) {
             if (Array.isArray(mData)) {
-                this.modelData = mData[0];
+                this.modelData = mData[0] || {};
                 this.modelDatas = mData;
             } else {
                 this.modelData = mData;
