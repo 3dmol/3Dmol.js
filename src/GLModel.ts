@@ -6,7 +6,7 @@ import { Geometry, Material, StickImposterMaterial } from "./WebGL";
 import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3, XYZ } from "./WebGL/math";
 import { Color, CC, ColorschemeSpec, ColorSpec } from "./colors";
-import { InstancedMaterial, SphereImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
+import { InstancedMaterial, SphereImposterMaterial, RingImposterMaterial, MeshLambertMaterial, Object3D, Mesh, LineBasicMaterial, Line, LineStyle } from "./WebGL";
 import { CAP, GLDraw } from "./GLDraw"
 import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
@@ -129,6 +129,8 @@ export class GLModel {
     private readonly defaultCartoonQuality: number;
     // bonds as cylinders
     private readonly defaultStickRadius = 0.25;
+    private _drawnAromaticRings: Set<string> = new Set();
+    private _ringCache: Map<string, number[] | null> = new Map();
 
     constructor(mid, options?, viewer?) {
 
@@ -662,6 +664,86 @@ export class GLModel {
         this.drawSphereImposter(geo, atom as XYZ, radius, C);
     };
 
+    // 3D-aware ring imposter using analytical annulus test.
+    // Encodes the ring plane normal so the fragment shader can project
+    // correctly when the ring is tilted relative to the camera.
+    //
+    // Encoding (4 vertices per ring):
+    //   position  = ring center (same for all 4)
+    //   normal    = ringNormal * minorR  (direction = ring normal, length = minorR)
+    //   color     = (r, g, ±b)  sign(b) = Y billboard corner
+    //   radius    = ±outerR     sign    = X billboard corner
+    private drawRingImposter(geo: Geometry, center: XYZ, ringNormal: XYZ,
+                             majorRadius: number, minorRadius: number, C: Color) {
+        var geoGroup = geo.updateGeoGroup(4);
+        var startv = geoGroup.vertices;
+        var start = startv * 3;
+        var vertexArray = geoGroup.vertexArray;
+        var colorArray = geoGroup.colorArray;
+        var normalArray = geoGroup.normalArray;
+        var radiusArray = geoGroup.radiusArray;
+        var outerR = majorRadius + minorRadius;
+
+        // All 4 vertices share the same center position
+        for (var i = 0; i < 4; i++) {
+            vertexArray[start + 3 * i] = center.x;
+            vertexArray[start + 3 * i + 1] = center.y;
+            vertexArray[start + 3 * i + 2] = center.z;
+        }
+
+        // Normal = ringNormal scaled by minorR (direction + magnitude encoding)
+        var scaledNx = ringNormal.x * minorRadius;
+        var scaledNy = ringNormal.y * minorRadius;
+        var scaledNz = ringNormal.z * minorRadius;
+        for (var i = 0; i < 4; i++) {
+            normalArray[start + 3 * i] = scaledNx;
+            normalArray[start + 3 * i + 1] = scaledNy;
+            normalArray[start + 3 * i + 2] = scaledNz;
+        }
+
+        // Color: RGB with sign of blue encoding Y billboard corner
+        //   vertices 0,3: +b (Y = +outerR)
+        //   vertices 1,2: -b (Y = -outerR)
+        var b = Math.abs(C.b);
+        if (b < 0.0001) b = 0.0001; // ensure nonzero so sign is meaningful
+        colorArray[start + 0] = C.r;
+        colorArray[start + 1] = C.g;
+        colorArray[start + 2] = b;       // vertex 0: Y+
+
+        colorArray[start + 3] = C.r;
+        colorArray[start + 4] = C.g;
+        colorArray[start + 5] = -b;      // vertex 1: Y-
+
+        colorArray[start + 6] = C.r;
+        colorArray[start + 7] = C.g;
+        colorArray[start + 8] = -b;      // vertex 2: Y-
+
+        colorArray[start + 9] = C.r;
+        colorArray[start + 10] = C.g;
+        colorArray[start + 11] = b;      // vertex 3: Y+
+
+        // Radius: ±outerR, sign encodes X billboard corner
+        //   vertices 0,1: -outerR (X = -outerR)
+        //   vertices 2,3: +outerR (X = +outerR)
+        radiusArray[startv + 0] = -outerR;  // vertex 0: X-
+        radiusArray[startv + 1] = -outerR;  // vertex 1: X-
+        radiusArray[startv + 2] = outerR;   // vertex 2: X+
+        radiusArray[startv + 3] = outerR;   // vertex 3: X+
+
+        geoGroup.vertices += 4;
+
+        // Two faces
+        var faceArray = geoGroup.faceArray;
+        var faceoffset = geoGroup.faceidx;
+        faceArray[faceoffset + 0] = startv;
+        faceArray[faceoffset + 1] = startv + 1;
+        faceArray[faceoffset + 2] = startv + 2;
+        faceArray[faceoffset + 3] = startv + 2;
+        faceArray[faceoffset + 4] = startv + 3;
+        faceArray[faceoffset + 5] = startv;
+        geoGroup.faceidx += 6;
+    };
+
     /**
      * Calculate dashed line segments along a bond, with proper centering and two-color support.
      *
@@ -755,28 +837,111 @@ export class GLModel {
 
     // Calculate segments for solid two-color bonds (split at midpoint)
     private calculateTwoColorSegments(from: XYZ, to: XYZ, colors: Color[]) {
-        var segments = [];
+        const segments = [];
         if (colors.length <= 1) {
             segments.push({ from: new Vector3(from.x, from.y, from.z), to: new Vector3(to.x, to.y, to.z), color: colors[0] });
         } else {
-            var mp = new Vector3((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2);
+            const mp = new Vector3((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2);
             segments.push({ from: new Vector3(from.x, from.y, from.z), to: mp, color: colors[0] });
             segments.push({ from: mp, to: new Vector3(to.x, to.y, to.z), color: colors[1] });
         }
         return segments;
     }
 
+    // BFS for the smallest ring containing the bond (atomIdx1–atomIdx2).
+    // Results are cached per render pass in _ringCache.
+    private findSmallestRing(atomIdx1: number, atomIdx2: number, maxRingSize: number = 8): number[] | null {
+        const lo = atomIdx1 < atomIdx2 ? atomIdx1 : atomIdx2;
+        const hi = atomIdx1 < atomIdx2 ? atomIdx2 : atomIdx1;
+        const cacheKey = lo + "," + hi;
+        if (this._ringCache.has(cacheKey)) return this._ringCache.get(cacheKey);
+
+        const queue: number[][] = [[atomIdx1]];
+        const visited = new Set<number>([atomIdx1]);
+
+        while (queue.length > 0) {
+            const path = queue.shift();
+            const current = path[path.length - 1];
+
+            // Ring would be path.length atoms + the direct bond back
+            if (path.length >= maxRingSize) continue;
+
+            const atom = this.atoms[current];
+            if (!atom || !atom.bonds) continue;
+
+            for (let i = 0; i < atom.bonds.length; i++) {
+                const neighbor = atom.bonds[i];
+
+                // Skip the direct bond between the two endpoints
+                if (current === atomIdx1 && neighbor === atomIdx2) continue;
+                if (current === atomIdx2 && neighbor === atomIdx1) continue;
+
+                if (neighbor === atomIdx2 && path.length >= 2) {
+                    const ring = [...path, atomIdx2];
+                    this._ringCache.set(cacheKey, ring);
+                    return ring;
+                }
+
+                if (!visited.has(neighbor)) {
+                    visited.add(neighbor);
+                    queue.push([...path, neighbor]);
+                }
+            }
+        }
+
+        this._ringCache.set(cacheKey, null);
+        return null;
+    }
+
+    // Choose which side of a multi-bond gets the dashed line.
+    // For ring bonds, places dashes toward the ring interior; otherwise falls back
+    // to the neighbor-centroid heuristic.
+    private chooseDashedSide(atom: AtomSpec, atom2: AtomSpec, p1: Vector3, p2: Vector3, v: Vector3): boolean {
+        const ring = this.findSmallestRing(atom.index, atom2.index);
+
+        if (ring && ring.length >= 3) {
+            // Bond is in a ring - use ring centroid for dash side
+            const centroid = new Vector3(0, 0, 0);
+            for (let ri = 0; ri < ring.length; ri++) {
+                const ra = this.atoms[ring[ri]];
+                centroid.x += ra.x;
+                centroid.y += ra.y;
+                centroid.z += ra.z;
+            }
+            centroid.multiplyScalar(1.0 / ring.length);
+
+            const mid = new Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+            const toRing = new Vector3(
+                centroid.x - mid.x,
+                centroid.y - mid.y,
+                centroid.z - mid.z
+            );
+
+            const dot = v.x * toRing.x + v.y * toRing.y + v.z * toRing.z;
+            const vLen = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+            const toLen = Math.sqrt(toRing.x * toRing.x + toRing.y * toRing.y + toRing.z * toRing.z);
+
+            if (toLen >= 0.001 && Math.abs(dot) >= 0.05 * vLen * toLen) {
+                return dot > 0;
+            }
+            // Ring centroid is nearly on the bond axis - fall back to neighbor heuristic
+        }
+
+        // No ring or degenerate ring geometry - use neighbor heuristic
+        return this.chooseDashedPlusV(atom, atom2, p1, p2, v);
+    }
+
     // Determine which side of a multi-bond should have the dashed line.
     // Returns true if dashed should be on the +v side (toward neighbors).
     // Uses immediate neighbor positions for stability across conformations.
     private chooseDashedPlusV(atom: AtomSpec, atom2: AtomSpec, p1: Vector3, p2: Vector3, v: Vector3) {
-        var neighborCenter = new Vector3(0, 0, 0);
-        var count = 0;
+        const neighborCenter = new Vector3(0, 0, 0);
+        let count = 0;
 
         // Add atom's neighbors (except atom2)
-        for (var i = 0; i < atom.bonds.length; i++) {
+        for (let i = 0; i < atom.bonds.length; i++) {
             if (atom.bonds[i] === atom2.index) continue;
-            var neighbor = this.atoms[atom.bonds[i]];
+            const neighbor = this.atoms[atom.bonds[i]];
             if (neighbor) {
                 neighborCenter.x += neighbor.x;
                 neighborCenter.y += neighbor.y;
@@ -786,9 +951,9 @@ export class GLModel {
         }
 
         // Add atom2's neighbors (except atom)
-        for (var i = 0; i < atom2.bonds.length; i++) {
+        for (let i = 0; i < atom2.bonds.length; i++) {
             if (atom2.bonds[i] === atom.index) continue;
-            var neighbor = this.atoms[atom2.bonds[i]];
+            const neighbor = this.atoms[atom2.bonds[i]];
             if (neighbor) {
                 neighborCenter.x += neighbor.x;
                 neighborCenter.y += neighbor.y;
@@ -800,24 +965,91 @@ export class GLModel {
         if (count === 0) return false;
         neighborCenter.multiplyScalar(1.0 / count);
 
-        var mid = new Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-        var toNeighbors = new Vector3(
+        const mid = new Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+        const toNeighbors = new Vector3(
             neighborCenter.x - mid.x,
             neighborCenter.y - mid.y,
             neighborCenter.z - mid.z
         );
 
-        var dot = v.x * toNeighbors.x + v.y * toNeighbors.y + v.z * toNeighbors.z;
+        const dot = v.x * toNeighbors.x + v.y * toNeighbors.y + v.z * toNeighbors.z;
 
         // If nearly perpendicular, use canonical v direction
-        var vLen = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-        var toLen = Math.sqrt(toNeighbors.x * toNeighbors.x + toNeighbors.y * toNeighbors.y + toNeighbors.z * toNeighbors.z);
+        const vLen = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+        const toLen = Math.sqrt(toNeighbors.x * toNeighbors.x + toNeighbors.y * toNeighbors.y + toNeighbors.z * toNeighbors.z);
 
         if (toLen < 0.001 || Math.abs(dot) < 0.1 * vLen * toLen) {
             return false; // Use canonical v direction
         }
 
         return dot > 0;
+    }
+
+    // Draw a torus inside the aromatic ring that contains this bond.
+    // Each ring is drawn once per render pass (deduplicated by sorted atom indices).
+    private drawAromaticRingTorus(atom: AtomSpec, atom2: AtomSpec, geo: Geometry, bondR: number, color: Color) {
+        const ring = this.findSmallestRing(atom.index, atom2.index);
+        if (!ring || ring.length < 3) return;
+
+        const ringKey = ring.slice().sort((a, b) => a - b).join(",");
+        if (this._drawnAromaticRings.has(ringKey)) return;
+        this._drawnAromaticRings.add(ringKey);
+
+        // centroid
+        const centroid = new Vector3(0, 0, 0);
+        for (let ri = 0; ri < ring.length; ri++) {
+            const ra = this.atoms[ring[ri]];
+            centroid.x += ra.x;
+            centroid.y += ra.y;
+            centroid.z += ra.z;
+        }
+        centroid.multiplyScalar(1.0 / ring.length);
+
+        // ring-plane normal (Newell's method)
+        const normal = new Vector3(0, 0, 0);
+        for (let ri = 0; ri < ring.length; ri++) {
+            const cur = this.atoms[ring[ri]];
+            const next = this.atoms[ring[(ri + 1) % ring.length]];
+            normal.x += (cur.y - next.y) * (cur.z + next.z);
+            normal.y += (cur.z - next.z) * (cur.x + next.x);
+            normal.z += (cur.x - next.x) * (cur.y + next.y);
+        }
+        const nLen = Math.sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+        if (nLen < 1e-4) return; // degenerate (collinear) ring
+        normal.multiplyScalar(1.0 / nLen);
+
+        // average distance from centroid to ring atoms
+        let avgDist = 0;
+        let maxSphereR = 0;
+        for (let ri = 0; ri < ring.length; ri++) {
+            const ra = this.atoms[ring[ri]];
+            const dx = ra.x - centroid.x;
+            const dy = ra.y - centroid.y;
+            const dz = ra.z - centroid.z;
+            avgDist += Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (ra.style?.sphere && !ra.style.sphere.hidden && ra.style.sphere.radius) {
+                const sr = this.getRadiusFromStyle(ra, ra.style.sphere);
+                if (sr > maxSphereR) maxSphereR = sr;
+            }
+        }
+        avgDist /= ring.length;
+
+        const minorRadius = bondR * 0.5;
+        // Two clearance constraints:
+        // 1) Bond sticks: torus outer edge + bondR gap < apothem
+        //    majorRadius + minorRadius + bondR < apothem
+        // 2) Atom spheres: torus outer edge + bondR gap < avgDist - sphereR
+        //    majorRadius + minorRadius + bondR < avgDist - sphereR
+        const apothem = avgDist * Math.cos(Math.PI / ring.length);
+        const bondLimit = apothem - minorRadius - 2 * bondR;
+        const sphereLimit = avgDist - minorRadius - maxSphereR - bondR;
+        const majorRadius = Math.max(minorRadius, Math.min(bondLimit, sphereLimit));
+
+        if (geo.imposter) {
+            this.drawRingImposter(geo, centroid, normal, majorRadius, minorRadius, color);
+        } else {
+            GLDraw.drawTorus(geo, centroid, normal, majorRadius, minorRadius, color);
+        }
     }
 
     static drawStickImposter(geo: Geometry, from: XYZ, to: XYZ, radius: number, color: Color, fromCap: CAP = 0, toCap: CAP = 0) {
@@ -885,7 +1117,7 @@ export class GLModel {
     };
 
     // draws cylinders and small spheres (at bond radius)
-    private drawBondSticks(atom: AtomSpec, atoms: AtomSpec[], geo: Geometry) {
+    private drawBondSticks(atom: AtomSpec, atoms: AtomSpec[], geo: Geometry, torusGeo?: Geometry) {
         if (!atom.style.stick)
             return;
         var style = atom.style.stick;
@@ -896,30 +1128,29 @@ export class GLModel {
         var doubleBondScale = style.doubleBondScaling || 0.4;
         var tripleBondScale = style.tripleBondScaling || 0.25;
 
-        var bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
-        var bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
+        const bondDashLength = style.dashedBondConfig?.dashLength || 0.1;
+        const bondGapLength = style.dashedBondConfig?.gapLength || 0.25;
+        const aromaticStyle = style.aromaticStyle || "dashed";
 
         var bondR = atomBondR;
         var atomSingleBond = style.singleBonds || false;
         var atomDashedBonds = style.dashedBonds || false;
         var fromCap = 0, toCap = 0;
-        var atomneedsi, atom2needsi, i, singleBond, bstyle;
+        var atomneedsi, atom2needsi, i, singleBond;
         var cylinder1a, cylinder1b, cylinder1c, cylinder2a, cylinder2b, cylinder2c;
 
-        var C1 = getColorFromStyle(atom, style);
-
+        var atomColor = getColorFromStyle(atom, style);
         var mp, mp2, mp3;
 
         if (!atom.capDrawn && atom.bonds.length < 4)
             fromCap = 2;
 
         // Get custom colors from dashedBondConfig if specified
-        var solidColor = style.dashedBondConfig?.solidColor ? CC.color(style.dashedBondConfig.solidColor) as Color : null;
-        var dashedColor = style.dashedBondConfig?.dashedColor ? CC.color(style.dashedBondConfig.dashedColor) as Color : null;
+        const solidColor = style.dashedBondConfig?.solidColor ? CC.color(style.dashedBondConfig.solidColor) as Color : null;
+        const dashedColor = style.dashedBondConfig?.dashedColor ? CC.color(style.dashedBondConfig.dashedColor) as Color : null;
 
-        var self = this;
-        var selectCylDrawMethod = (bondOrder) => {
-            var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
+        const selectCylDrawMethod = (bondOrder) => {
+            const drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
 
             if (!atomDashedBonds && bondOrder % 1 === 0) {
                 // Integer bond order - solid
@@ -927,11 +1158,11 @@ export class GLModel {
                     if (!color2 || color1 === color2) {
                         drawMethod(geo, from, to, radius, color1, fromCap, toCap);
                     } else {
-                        var segments = self.calculateTwoColorSegments(from, to, [color1, color2]);
-                        for (var si = 0; si < segments.length; si++) {
-                            var seg = segments[si];
-                            var fc = (si === 0) ? fromCap : 0;
-                            var tc = (si === segments.length - 1) ? toCap : 0;
+                        const segments = this.calculateTwoColorSegments(from, to, [color1, color2]);
+                        for (let si = 0; si < segments.length; si++) {
+                            const seg = segments[si];
+                            const fc = (si === 0) ? fromCap : 0;
+                            const tc = (si === segments.length - 1) ? toCap : 0;
                             drawMethod(geo, seg.from, seg.to, radius, seg.color, fc, tc);
                         }
                     }
@@ -940,8 +1171,8 @@ export class GLModel {
 
             // Fractional bond order - dashed
             return (geo, from, to, radius, color1, color2, fromCap = 0, toCap = 0) => {
-                var colors = color2 ? [color1, color2] : [color1];
-                var segments = self.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
+                const colors = color2 ? [color1, color2] : [color1];
+                const segments = this.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
                 segments.forEach(segment => {
                     drawMethod(geo, segment.from, segment.to, radius, segment.color, fromCap, toCap);
                 });
@@ -949,30 +1180,38 @@ export class GLModel {
         };
 
         for (i = 0; i < atom.bonds.length; i++) {
-            // Treat aromatic bond type (4) as 1.5 for rendering
-            var rawBondOrder = atom.bondOrder[i];
-            var renderBondOrder = (rawBondOrder === 4) ? 1.5 : rawBondOrder;
+            const rawBondOrder = atom.bondOrder[i];
+            const isAromatic = rawBondOrder === 4;
+            let renderBondOrder: number;
+            if (isAromatic) {
+                // "circle" draws a single bond + torus per ring
+                // "dashed" draws one solid + one dashed bond (1.5 order)
+                renderBondOrder = (aromaticStyle === "circle") ? 1 : 1.5;
+            } else {
+                renderBondOrder = rawBondOrder;
+            }
 
-            var drawCyl = selectCylDrawMethod(renderBondOrder);
-            var j = atom.bonds[i]; // our neighbor
-            var atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
+            const drawCyl = selectCylDrawMethod(renderBondOrder);
+            const j = atom.bonds[i]; // our neighbor
+            const atom2 = atoms[j]; //parsePDB, etc should only add defined bonds
             mp = mp2 = mp3 = null;
             if (atom.index < atom2.index) {// only draw if less, this
                 // lets us combine
                 // cylinders of the same
                 // color
                 toCap = 0;
-                var style2 = atom2.style;
+                const style2 = atom2.style;
                 if (!style2.stick || style2.stick.hidden)
                     continue; // don't sweat the details
 
-                var C2 = getColorFromStyle(atom2, style2.stick);
+                let C1 = atomColor;
+                let C2 = getColorFromStyle(atom2, style2.stick);
 
                 //support bond specific styles
                 bondR = atomBondR;
                 singleBond = atomSingleBond;
-                if (atom.bondStyles && atom.bondStyles[i]) {
-                    bstyle = atom.bondStyles[i];
+                const bstyle = atom.bondStyles?.[i];
+                if (bstyle) {
                     if (bstyle.iswire) {
                         continue;
                     }
@@ -985,14 +1224,20 @@ export class GLModel {
                         C2 = CC.color(bstyle.color2) as Color;
                     }
                 }
-                var p1 = new Vector3(atom.x, atom.y, atom.z);
-                var p2 = new Vector3(atom2.x, atom2.y, atom2.z);
+                const p1 = new Vector3(atom.x, atom.y, atom.z);
+                const p2 = new Vector3(atom2.x, atom2.y, atom2.z);
 
-                // Determine colors for solid and dashed portions
-                var solid1 = solidColor || C1;
-                var solid2 = solidColor || C2;
-                var dashed1 = dashedColor || C1;
-                var dashed2 = dashedColor || C2;
+                // Determine colors and dash geometry for solid/dashed portions
+                // Priority: per-bond dashedBondConfig > per-bond color1/color2 > global dashedBondConfig > atom color
+                const perBondSolid = bstyle?.dashedBondConfig?.solidColor ? CC.color(bstyle.dashedBondConfig.solidColor) as Color : null;
+                const perBondDashed = bstyle?.dashedBondConfig?.dashedColor ? CC.color(bstyle.dashedBondConfig.dashedColor) as Color : null;
+                const hasPerBondColor = bstyle && (typeof bstyle.color1 !== "undefined" || typeof bstyle.color2 !== "undefined");
+                const solid1 = perBondSolid || (hasPerBondColor ? C1 : (solidColor || C1));
+                const solid2 = perBondSolid || (hasPerBondColor ? C2 : (solidColor || C2));
+                const dashed1 = perBondDashed || (hasPerBondColor ? C1 : (dashedColor || C1));
+                const dashed2 = perBondDashed || (hasPerBondColor ? C2 : (dashedColor || C2));
+                const perBondDashLength = bstyle?.dashedBondConfig?.dashLength || bondDashLength;
+                const perBondGapLength = bstyle?.dashedBondConfig?.gapLength || bondGapLength;
 
                 // draw cylinders
                 if (renderBondOrder <= 1 || singleBond || renderBondOrder > 3) {
@@ -1025,6 +1270,11 @@ export class GLModel {
                             atom2.intersectionShape.sphere.push(sphere2);
                         }
                     }
+
+                    if (isAromatic && aromaticStyle === "circle") {
+                        const torusColor = perBondDashed || dashedColor || C1;
+                        this.drawAromaticRingTorus(atom, atom2, torusGeo, bondR, torusColor);
+                    }
                 }
                 else if (renderBondOrder > 1) {
                     //multi bond caps
@@ -1037,18 +1287,41 @@ export class GLModel {
                         mtoCap = 2;
                     }
 
-                    var dir = p2.clone();
-                    var v = null;
+                    const dir = p2.clone();
                     dir.sub(p1);
 
-                    var r, r2, p1a, p1b, p2a, p2b;
-                    v = this.getSideBondV(atom, atom2, i);
+                    let r, r2, p1a, p1b, p2a, p2b;
+                    const v = this.getSideBondV(atom, atom2, i);
 
                     // Determine dashed bond placement for fractional orders (aromatic)
-                    var isDashedBondFlipped = false;
+                    let isDashedBondFlipped = false;
                     if (renderBondOrder % 1 !== 0) {
-                        isDashedBondFlipped = this.chooseDashedPlusV(atom, atom2, p1, p2, v);
+                        if (bstyle?.dashedBondFlip != null) {
+                            isDashedBondFlipped = bstyle.dashedBondFlip;
+                        } else {
+                            isDashedBondFlipped = this.chooseDashedSide(atom, atom2, p1, p2, v);
+                        }
                     }
+
+                    const multiBondDrawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
+
+                    const drawSolidHalf = (from, to, radius, c1, c2, fc, tc) => {
+                        if (c1 != c2) {
+                            const m = new Vector3().addVectors(from, to).multiplyScalar(0.5);
+                            multiBondDrawMethod(geo, from, m, radius, c1, fc, 0);
+                            multiBondDrawMethod(geo, m, to, radius, c2, 0, tc);
+                        } else {
+                            multiBondDrawMethod(geo, from, to, radius, c1, fc, tc);
+                        }
+                    };
+
+                    const drawDashedHalf = (from, to, radius, c1, c2, fc, tc) => {
+                        const colors = (c1 != c2) ? [c1, c2] : [c1];
+                        const segments = this.calculateDashes(from, to, radius, perBondDashLength, perBondGapLength, colors);
+                        segments.forEach(segment => {
+                            multiBondDrawMethod(geo, segment.from, segment.to, radius, segment.color || c1, fc, tc);
+                        });
+                    };
 
                     if (renderBondOrder > 1 && renderBondOrder <= 2) {
                         // Fractional double bond (aromatic, 1.5, etc)
@@ -1066,46 +1339,18 @@ export class GLModel {
                         p2b = p1b.clone();
                         p2b.add(dir);
 
-                        // Determine colors for solid and dashed portions
-                        var solid1 = solidColor || C1;
-                        var solid2 = solidColor || C2;
-                        var dashed1 = dashedColor || C1;
-                        var dashed2 = dashedColor || C2;
-
-                        var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
-
-                        // Draw solid bond
-                        var drawSolid = (from, to, radius, c1, c2, fc, tc) => {
-                            if (c1 != c2) {
-                                var m = new Vector3().addVectors(from, to).multiplyScalar(0.5);
-                                drawMethod(geo, from, m, radius, c1, fc, 0);
-                                drawMethod(geo, m, to, radius, c2, 0, tc);
-                            } else {
-                                drawMethod(geo, from, to, radius, c1, fc, tc);
-                            }
-                        };
-
-                        // Draw dashed bond
-                        var drawDashed = (from, to, radius, c1, c2, fc, tc) => {
-                            var colors = (c1 != c2) ? [c1, c2] : [c1];
-                            var segments = self.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
-                            segments.forEach(segment => {
-                                drawMethod(geo, segment.from, segment.to, radius, segment.color || c1, fc, tc);
-                            });
-                        };
-
-                        if (renderBondOrder == 2) {
+                        if (renderBondOrder === 2) {
                             // Integer double bond - both solid
-                            drawSolid(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
-                            drawSolid(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
                         } else {
                             // Fractional double bond (1.x) - one solid, one dashed
                             if (!isDashedBondFlipped) {
-                                drawSolid(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
-                                drawDashed(p1b, p2b, r2, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
+                                drawDashedHalf(p1b, p2b, r2, dashed1, dashed2, mfromCap, mtoCap);
                             } else {
-                                drawDashed(p1a, p2a, r2, dashed1, dashed2, mfromCap, mtoCap);
-                                drawSolid(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                                drawDashedHalf(p1a, p2a, r2, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
                             }
                         }
 
@@ -1119,8 +1364,8 @@ export class GLModel {
                                 .multiplyScalar(0.5);
 
                             // Account for flip - dashed bond has radius r2
-                            var raRadius = (renderBondOrder == 2) ? r : (isDashedBondFlipped ? r2 : r);
-                            var rbRadius = (renderBondOrder == 2) ? r : (isDashedBondFlipped ? r : r2);
+                            const raRadius = (renderBondOrder === 2) ? r : (isDashedBondFlipped ? r2 : r);
+                            const rbRadius = (renderBondOrder === 2) ? r : (isDashedBondFlipped ? r : r2);
 
                             if (atomneedsi) {
                                 cylinder1a = new Cylinder(p1a, mp, raRadius);
@@ -1138,7 +1383,7 @@ export class GLModel {
                     }
                     else if (renderBondOrder > 2 && renderBondOrder <= 3) {
                         r = bondR * tripleBondScale;
-                        var r3 = r * (renderBondOrder - 2); // dashed bond thinner for fractional
+                        const r3 = r * (renderBondOrder - 2); // dashed bond thinner for fractional
                         v.cross(dir);
                         v.normalize();
                         v.multiplyScalar(r * 3);
@@ -1153,43 +1398,21 @@ export class GLModel {
                         p2b = p1b.clone();
                         p2b.add(dir);
 
-                        var drawMethod = geo.imposter ? GLModel.drawStickImposter : GLDraw.drawCylinder;
-
-                        // Draw solid bond helper
-                        var drawSolidTriple = (from, to, radius, c1, c2, fc, tc) => {
-                            if (c1 != c2) {
-                                var m = new Vector3().addVectors(from, to).multiplyScalar(0.5);
-                                drawMethod(geo, from, m, radius, c1, fc, 0);
-                                drawMethod(geo, m, to, radius, c2, 0, tc);
-                            } else {
-                                drawMethod(geo, from, to, radius, c1, fc, tc);
-                            }
-                        };
-
-                        // Draw dashed bond helper
-                        var drawDashedTriple = (from, to, radius, c1, c2, fc, tc) => {
-                            var colors = (c1 != c2) ? [c1, c2] : [c1];
-                            var segments = self.calculateDashes(from, to, radius, bondDashLength, bondGapLength, colors);
-                            segments.forEach(segment => {
-                                drawMethod(geo, segment.from, segment.to, radius, segment.color || c1, fc, tc);
-                            });
-                        };
-
-                        if (renderBondOrder == 3) {
+                        if (renderBondOrder === 3) {
                             // Integer triple bond - all solid
-                            drawSolidTriple(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
-                            drawSolidTriple(p1, p2, r, C1, C2, fromCap, toCap);
-                            drawSolidTriple(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1a, p2a, r, C1, C2, mfromCap, mtoCap);
+                            drawSolidHalf(p1, p2, r, C1, C2, fromCap, toCap);
+                            drawSolidHalf(p1b, p2b, r, C1, C2, mfromCap, mtoCap);
                         } else {
                             // Fractional triple bond (2.x) - one dashed
                             if (!isDashedBondFlipped) {
-                                drawSolidTriple(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
-                                drawSolidTriple(p1, p2, r, solid1, solid2, fromCap, toCap);
-                                drawDashedTriple(p1b, p2b, r3, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1a, p2a, r, solid1, solid2, mfromCap, mtoCap);
+                                drawSolidHalf(p1, p2, r, solid1, solid2, fromCap, toCap);
+                                drawDashedHalf(p1b, p2b, r3, dashed1, dashed2, mfromCap, mtoCap);
                             } else {
-                                drawDashedTriple(p1a, p2a, r3, dashed1, dashed2, mfromCap, mtoCap);
-                                drawSolidTriple(p1, p2, r, solid1, solid2, fromCap, toCap);
-                                drawSolidTriple(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
+                                drawDashedHalf(p1a, p2a, r3, dashed1, dashed2, mfromCap, mtoCap);
+                                drawSolidHalf(p1, p2, r, solid1, solid2, fromCap, toCap);
+                                drawSolidHalf(p1b, p2b, r, solid1, solid2, mfromCap, mtoCap);
                             }
                         }
 
@@ -1205,8 +1428,8 @@ export class GLModel {
                                 .multiplyScalar(0.5);
 
                             // Account for flip - dashed bond has radius r3
-                            var raRadius = (renderBondOrder == 3) ? r : (isDashedBondFlipped ? r3 : r);
-                            var rbRadius = (renderBondOrder == 3) ? r : (isDashedBondFlipped ? r : r3);
+                            const raRadius = (renderBondOrder === 3) ? r : (isDashedBondFlipped ? r3 : r);
+                            const rbRadius = (renderBondOrder === 3) ? r : (isDashedBondFlipped ? r : r3);
 
                             if (atomneedsi) {
                                 cylinder1a = new Cylinder(p1a.clone(), mp.clone(), raRadius);
@@ -1239,8 +1462,8 @@ export class GLModel {
         //also, if any bonds were drawn as multiples, need sphere
         for (i = 0; i < atom.bonds.length; i++) {
             singleBond = atomSingleBond;
-            if (atom.bondStyles && atom.bondStyles[i]) {
-                bstyle = atom.bondStyles[i];
+            var bstyle = atom.bondStyles?.[i];
+            if (bstyle) {
                 if (bstyle.singleBond) singleBond = true;
                 if (bstyle.radius && bstyle.radius != atomBondR) {
                     differentradii = true;
@@ -1263,10 +1486,10 @@ export class GLModel {
             //do not use bond style as this can be variable, particularly
             //with jmol export of double/triple bonds
             if (geo.imposter) {
-                this.drawSphereImposter(geo.sphereGeometry, atom as XYZ, bondR, C1);
+                this.drawSphereImposter(geo.sphereGeometry, atom as XYZ, bondR, atomColor);
             }
             else {
-                GLDraw.drawSphere(geo, atom, bondR, C1);
+                GLDraw.drawSphere(geo, atom, bondR, atomColor);
             }
         }
 
@@ -1284,6 +1507,9 @@ export class GLModel {
 
         options = options || {};
 
+        this._drawnAromaticRings = new Set();
+        this._ringCache = new Map();
+
         var ret = new Object3D();
         var cartoonAtoms = [];
         var lineGeometries: Record<number, Geometry> = {};
@@ -1292,7 +1518,11 @@ export class GLModel {
         var drawSphereFunc = this.drawAtomSphere;
         var sphereGeometry: Geometry = null;
         var stickGeometry: Geometry = null;
+        var torusGeometry: Geometry = null;
         if (options.supportsImposters) {
+            torusGeometry = new Geometry(true);
+            torusGeometry.imposter = true;
+            torusGeometry.radii = true; // radiusArray encodes outerR + billboard corner
             drawSphereFunc = this.drawAtomImposter;
             sphereGeometry = new Geometry(true);
             sphereGeometry.imposter = true;
@@ -1303,11 +1533,13 @@ export class GLModel {
             stickGeometry.drawnCaps = {};
         }
         else if (options.supportsAIA) {
+            torusGeometry = new Geometry(true);
             drawSphereFunc = this.drawAtomInstanced;
             sphereGeometry = new Geometry(false, true, true);
             sphereGeometry.instanced = true;
             stickGeometry = new Geometry(true); //don't actually have instanced sticks
         } else {
+            torusGeometry = new Geometry(true);
             sphereGeometry = new Geometry(true);
             stickGeometry = new Geometry(true);
         }
@@ -1348,7 +1580,7 @@ export class GLModel {
                 this.drawAtomClickSphere(atom);
                 this.drawAtomCross(atom, crossGeometries);
                 this.drawBondLines(atom, atoms, lineGeometries);
-                this.drawBondSticks(atom, atoms, stickGeometry);
+                this.drawBondSticks(atom, atoms, stickGeometry, torusGeometry);
 
                 if (typeof (atom.style.cartoon) !== "undefined" && !atom.style.cartoon.hidden) {
                     //gradient color scheme range
@@ -1453,6 +1685,29 @@ export class GLModel {
                 var stickspheres = new Mesh(balls, ballMaterial);
                 ret.add(stickspheres);
             }
+        }
+
+        if (torusGeometry.vertices > 0) {
+            torusGeometry.initTypedArrays();
+            var torusMaterial: any;
+            if (torusGeometry.imposter) {
+                torusMaterial = new RingImposterMaterial({
+                    ambient: 0x000000,
+                    vertexColors: true,
+                    reflectivity: 0
+                });
+            } else {
+                torusMaterial = new MeshLambertMaterial({
+                    ambient: 0x000000,
+                    vertexColors: true,
+                    reflectivity: 0
+                });
+            }
+            if (opacities.stick < 1 && opacities.stick >= 0) {
+                torusMaterial.transparent = true;
+                torusMaterial.opacity = opacities.stick;
+            }
+            ret.add(new Mesh(torusGeometry, torusMaterial as Material));
         }
 
         //var linewidth;
@@ -1743,7 +1998,7 @@ export class GLModel {
             }
             model.molObj = null;
             if (model.modelDatas && framenum < model.modelDatas.length) {
-                model.modelData = model.modelDatas[framenum];
+                model.modelData = model.modelDatas[framenum] || {};
                 if (model.unitCellObjects && viewer) {
                     viewer.removeUnitCell(model);
                     viewer.addUnitCell(model);
@@ -1872,10 +2127,8 @@ export class GLModel {
         var mData = parsedAtoms.modelData;
         if (mData) {
             if (Array.isArray(mData)) {
-                this.modelData = mData[0];
-                if (options.frames) {
-                    this.modelDatas = mData;
-                }
+                this.modelData = mData[0] || {};
+                this.modelDatas = mData;
             } else {
                 this.modelData = mData;
             }
@@ -1888,9 +2141,19 @@ export class GLModel {
         }
 
         if (this.frames.length == 0) { //first call
+            // Build frames and modelDatas in one pass, skipping empty frames.
+            // modelDatas (from SDF parsing) uses raw parsed indices, so we
+            // compact it here to stay aligned with this.frames.
+            const remapped = this.modelDatas ? [] as any[] : null;
             for (let i = 0; i < parsedAtoms.length; i++) {
-                if (parsedAtoms[i].length != 0)
+                if (parsedAtoms[i].length != 0) {
                     this.frames.push(parsedAtoms[i]);
+                    if (remapped) remapped.push(this.modelDatas[i] || null);
+                }
+            }
+            if (remapped) {
+                this.modelDatas = remapped;
+                if (remapped[0]) this.modelData = remapped[0];
             }
             if (this.frames[0])
                 this.atoms = this.frames[0];
@@ -1916,6 +2179,18 @@ export class GLModel {
         if (options.vibrate && options.vibrate.frames && options.vibrate.amplitude) {
             //fill in vibrational modes
             this.vibrate(options.vibrate.frames, options.vibrate.amplitude);
+        }
+
+        // Apply embedded 3DMOL_STYLE model-level styles from SDF parsing.
+        // modelDatas was already remapped to match this.frames indices above.
+        if (this.modelDatas) {
+            for (let i = 0; i < this.modelDatas.length; i++) {
+                if (this.modelDatas[i]?.style) {
+                    this.setStyle({frame: i}, this.modelDatas[i].style, true);
+                }
+            }
+        } else if (mData && mData.style) {
+            this.setStyle({}, mData.style, true);
         }
 
         if (options.style) {
@@ -3182,9 +3457,9 @@ export interface DashedBondSpec {
     dashLength?: number;
     /** length of gap (default 0.25) */
     gapLength?: number;
-    // Color for the solid portion of aromatic bonds (default: atom color)
+    /** Color for the solid portion of aromatic bonds (default: atom color) */
     solidColor?: ColorSpec;
-    // Color for the dashed portion of aromatic bonds (default: atom color)
+    /** Color for the dashed portion of aromatic bonds (default: atom color) */
     dashedColor?: ColorSpec;
 }
 
@@ -3215,6 +3490,10 @@ export interface StickStyleSpec {
     opacity?: number;
     /** display nonbonded atoms as spheres */
     showNonBonded?: boolean;
+    /** Style for rendering aromatic (bond order 4) bonds.
+     *  "dashed" = one solid + one dashed bond (default)
+     *  "circle" = single bond + circle/torus inside the aromatic ring */
+    aromaticStyle?: "dashed" | "circle";
 }
 
 
@@ -3261,4 +3540,10 @@ export interface BondStyle {
     color1?: ColorSpec;
     /**  */
     color2?: ColorSpec;
+    /** Override which side of a fractional bond (e.g. aromatic 1.5) gets the dashed line.
+     *  true = dashed on +v side, false = dashed on -v side.
+     *  When absent, automatically determined via ring detection. */
+    dashedBondFlip?: boolean;
+    /** Override dashed bond colors for this specific bond */
+    dashedBondConfig?: DashedBondSpec;
 }

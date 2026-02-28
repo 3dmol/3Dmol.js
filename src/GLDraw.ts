@@ -950,4 +950,122 @@ export namespace GLDraw {
 
     };
 
+    /**
+     * Draw a torus (ring/donut shape) for aromatic ring visualization.
+     * @memberof GLDraw
+     * @param {Geometry} geo - Target geometry
+     * @param {Point} center - Center of the torus
+     * @param {Point} normal - Normal vector to the ring plane
+     * @param {number} majorRadius - Radius from center to tube center
+     * @param {number} minorRadius - Radius of the tube cross-section
+     * @param {Colored} color - Color of the torus
+     * @param {number} majorSegments - Segments around the ring (default 16)
+     * @param {number} minorSegments - Segments around the tube (default 4)
+     */
+    export function drawTorus(
+        geo: Geometry,
+        center: Point,
+        normal: Point,
+        majorRadius: number,
+        minorRadius: number,
+        color: Colored,
+        majorSegments: number = 16,
+        minorSegments: number = 4
+    ) {
+        const nVec = new Vector3(normal.x, normal.y, normal.z);
+        const nLen = Math.sqrt(nVec.x * nVec.x + nVec.y * nVec.y + nVec.z * nVec.z);
+        if (nLen < 1e-4) return;
+        nVec.multiplyScalar(1 / nLen);
+
+        // orthonormal basis in the ring plane
+        let up = new Vector3(0, 1, 0);
+        if (Math.abs(nVec.x * up.x + nVec.y * up.y + nVec.z * up.z) > 0.9) {
+            up = new Vector3(1, 0, 0);
+        }
+        const uVec = new Vector3();
+        uVec.crossVectors(nVec, up).normalize();
+        const vVec = new Vector3();
+        vVec.crossVectors(uVec, nVec).normalize();
+
+        const totalVerts = (majorSegments + 1) * (minorSegments + 1);
+        const geoGroup = geo.updateGeoGroup(totalVerts);
+
+        const start = geoGroup.vertices;
+        const vertexArray = geoGroup.vertexArray;
+        const colorArray = geoGroup.colorArray;
+        const normalArray = geoGroup.normalArray;
+        const faceArray = geoGroup.faceArray;
+        const lineArray = geoGroup.lineArray;
+
+        for (let i = 0; i <= majorSegments; i++) {
+            const theta = (i / majorSegments) * 2 * Math.PI;
+            const cosTheta = Math.cos(theta);
+            const sinTheta = Math.sin(theta);
+
+            const radX = cosTheta * uVec.x + sinTheta * vVec.x;
+            const radY = cosTheta * uVec.y + sinTheta * vVec.y;
+            const radZ = cosTheta * uVec.z + sinTheta * vVec.z;
+
+            const ringX = center.x + majorRadius * radX;
+            const ringY = center.y + majorRadius * radY;
+            const ringZ = center.z + majorRadius * radZ;
+
+            for (let j = 0; j <= minorSegments; j++) {
+                const phi = (j / minorSegments) * 2 * Math.PI;
+                const cosPhi = Math.cos(phi);
+                const sinPhi = Math.sin(phi);
+
+                const nx = cosPhi * radX + sinPhi * nVec.x;
+                const ny = cosPhi * radY + sinPhi * nVec.y;
+                const nz = cosPhi * radZ + sinPhi * nVec.z;
+
+                const idx = i * (minorSegments + 1) + j;
+                const offset = 3 * (start + idx);
+
+                vertexArray[offset] = ringX + minorRadius * nx;
+                vertexArray[offset + 1] = ringY + minorRadius * ny;
+                vertexArray[offset + 2] = ringZ + minorRadius * nz;
+
+                normalArray[offset] = nx;
+                normalArray[offset + 1] = ny;
+                normalArray[offset + 2] = nz;
+
+                colorArray[offset] = color.r;
+                colorArray[offset + 1] = color.g;
+                colorArray[offset + 2] = color.b;
+            }
+        }
+
+        geoGroup.vertices += totalVerts;
+
+        for (let i = 0; i < majorSegments; i++) {
+            for (let j = 0; j < minorSegments; j++) {
+                const a = start + i * (minorSegments + 1) + j;
+                const b = start + i * (minorSegments + 1) + (j + 1);
+                const c = start + (i + 1) * (minorSegments + 1) + (j + 1);
+                const d = start + (i + 1) * (minorSegments + 1) + j;
+
+                const faceoffset = geoGroup.faceidx;
+                faceArray[faceoffset] = a;
+                faceArray[faceoffset + 1] = b;
+                faceArray[faceoffset + 2] = d;
+                faceArray[faceoffset + 3] = b;
+                faceArray[faceoffset + 4] = c;
+                faceArray[faceoffset + 5] = d;
+                geoGroup.faceidx += 6;
+
+                const lineoffset = geoGroup.lineidx;
+                lineArray[lineoffset] = a;
+                lineArray[lineoffset + 1] = b;
+                lineArray[lineoffset + 2] = a;
+                lineArray[lineoffset + 3] = d;
+                lineArray[lineoffset + 4] = b;
+                lineArray[lineoffset + 5] = c;
+                lineArray[lineoffset + 6] = c;
+                lineArray[lineoffset + 7] = d;
+                geoGroup.lineidx += 8;
+            }
+        }
+    };
+
 }

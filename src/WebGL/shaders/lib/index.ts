@@ -5,6 +5,7 @@ export * from "./lambertdouble"
 export * from "./outline"
 export * from "./screen"
 export * from "./screenaa"
+export * from "./ringimposter"
 export * from "./sphereimposter"
 export * from "./sphereimposteroutline"
 export * from "./sprite"
@@ -21,6 +22,7 @@ import { outline } from "./outline"
 import { screen } from "./screen"
 import { screenaa } from "./screenaa"
 import { ssao } from "./ssao"
+import { ringimposter } from "./ringimposter"
 import { sphereimposter } from "./sphereimposter"
 import { sphereimposteroutline } from "./sphereimposteroutline"
 import { sprite } from "./sprite"
@@ -39,6 +41,7 @@ export const ShaderLib: Record<string, Shader> = {
     screen,
     screenaa,
     ssao,
+    ringimposter,
     sphereimposter,
     sphereimposteroutline,
     sprite,
