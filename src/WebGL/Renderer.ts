@@ -511,6 +511,21 @@ export class Renderer {
         this._gl.vertexAttribPointer(attributes.color, 3, this._gl.FLOAT, false, 0, 0);
       }
 
+      // Per-vertex alpha (issue #166) -- optional stride-1 stream. A program can declare the
+      // attribute while a given group lacks the buffer (e.g. imposter stick caps share the
+      // sphere-imposter shader but never allocate alphaArray): the attribute stays disabled
+      // there, so it MUST be given a generic value of 1.0 or those fragments read alpha=0
+      // and the caps vanish. disableAttributes() above has already reset the enable state.
+      if (attributes.alpha >= 0) {
+        if (geometryGroup.__webglAlphaBuffer !== undefined) {
+          this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglAlphaBuffer);
+          this.enableAttribute(attributes.alpha);
+          this._gl.vertexAttribPointer(attributes.alpha, 1, this._gl.FLOAT, false, 0, 0);
+        } else {
+          this._gl.vertexAttrib1f(attributes.alpha, 1.0);
+        }
+      }
+
       // Normals
       if (attributes.normal >= 0) {
         this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer);
@@ -531,6 +546,26 @@ export class Renderer {
         this.enableAttribute(attributes.radius);
         this._gl.vertexAttribPointer(attributes.radius, 1, this._gl.FLOAT, false, 0, 0);
       }
+    }
+
+    // SORTED TRANSLUCENT PATH (issue #166): a mesh whose geometry carries per-vertex alpha
+    // renders WITHOUT the depth-prime (see unrollBufferMaterial), so blending correctness
+    // comes from draw order instead: sort the imposter quads back-to-front for the current
+    // camera and re-upload the index buffer. Every quad's four vertices share the atom
+    // center, so the sort key is one view-space z per quad, read off the vertex array.
+    // Runs each frame -- the order is view-dependent; ~16k quads/group sorts in well under
+    // a millisecond. (Groups sort independently; cross-group order is not guaranteed, the
+    // same granularity limit the renderer's per-object sort already has.)
+    if (
+      material.transparent &&
+      object.geometry &&
+      object.geometry.alpha &&
+      geometryGroup.faceArray &&
+      geometryGroup.__webglFaceBuffer !== undefined
+    ) {
+      this.sortAlphaQuads(geometryGroup, object);
+      this._gl.bindBuffer(this._gl.ELEMENT_ARRAY_BUFFER, geometryGroup.__webglFaceBuffer);
+      this._gl.bufferData(this._gl.ELEMENT_ARRAY_BUFFER, geometryGroup.faceArray, this._gl.DYNAMIC_DRAW);
     }
 
     // Render
@@ -1317,6 +1352,9 @@ export class Renderer {
         if (geometryGroup.__webglColorBuffer !== undefined)
           this._gl.deleteBuffer(geometryGroup.__webglColorBuffer);
 
+        if (geometryGroup.__webglAlphaBuffer !== undefined)
+          this._gl.deleteBuffer(geometryGroup.__webglAlphaBuffer);
+
         if (geometryGroup.__webglNormalBuffer !== undefined)
           this._gl.deleteBuffer(geometryGroup.__webglNormalBuffer);
 
@@ -1565,6 +1603,7 @@ export class Renderer {
       "lineDistance",
       "offset",
       "radius",
+      "alpha",
     ];
 
     /*
@@ -1880,6 +1919,39 @@ export class Renderer {
     object.__webglActive = false;
   }
 
+  // Scratch for sortAlphaQuads, reused across frames so the per-frame sort allocates nothing.
+  private _sortKeys: Float32Array | null = null;
+  private _sortOrder: number[] = [];
+
+  // Back-to-front quad sort for per-vertex-alpha imposter geometry (issue #166).
+  // Rewrites the group's faceArray in place: quad q's indices are always [4q,4q+1,4q+2,
+  // 4q+2,4q+3,4q] (see GLModel.drawSphereImposter), so regenerating the six-index groups in
+  // sorted order is idempotent and never touches the vertex data.
+  private sortAlphaQuads(geometryGroup, object) {
+    const nQuads = (geometryGroup.vertices / 4) | 0;
+    if (nQuads < 2 || !geometryGroup.vertexArray) return;
+    const va = geometryGroup.vertexArray;
+    const fa = geometryGroup.faceArray;
+    const m = object._modelViewMatrix.elements;
+    if (!this._sortKeys || this._sortKeys.length < nQuads) {
+      this._sortKeys = new Float32Array(nQuads);
+    }
+    const keys = this._sortKeys, order = this._sortOrder;
+    order.length = nQuads;
+    for (let q = 0; q < nQuads; q++) {
+      const o = q * 12; // the quad's first vertex IS the atom center (all four are)
+      keys[q] = m[2] * va[o] + m[6] * va[o + 1] + m[10] * va[o + 2] + m[14];
+      order[q] = q;
+    }
+    // The camera looks down -z in view space: most negative z = farthest = drawn first.
+    order.sort((a, b) => keys[a] - keys[b]);
+    for (let p = 0; p < nQuads; p++) {
+      const v = order[p] * 4, f = p * 6;
+      fa[f] = v; fa[f + 1] = v + 1; fa[f + 2] = v + 2;
+      fa[f + 3] = v + 2; fa[f + 4] = v + 3; fa[f + 5] = v;
+    }
+  }
+
   private removeInstances(objList, object) {
     for (var o = objList.length - 1; o >= 0; --o) {
       if (objList[o].object === object) objList.splice(o, 1);
@@ -1904,7 +1976,11 @@ export class Renderer {
       globject.opaque = null;
       globject.volumetric = null;
       globject.transparent = material;
-      if (!material.wireframe) {
+      // SORTED TRANSLUCENT PATH (issue #166): geometry carrying per-vertex alpha skips the
+      // depth-prime. The prime elects one translucent layer per pixel -- correct for a
+      // translucent SURFACE, but per-atom translucency needs LAYERS to accumulate, so these
+      // meshes get back-to-front quad sorting in renderBuffer instead (see sortAlphaQuads).
+      if (!material.wireframe && !object.geometry?.alpha) {
         let blankMaterial = material.clone();
         blankMaterial.opacity = 0.0;
         globject.transparentDepth = blankMaterial;
@@ -1965,6 +2041,15 @@ export class Renderer {
       this._gl.bufferData(this._gl.ARRAY_BUFFER, geometryGroup.radiusArray, hint);
     }
 
+    // per-vertex alpha buffers (issue #166)
+    if (
+      geometryGroup.alphaArray &&
+      geometryGroup.__webglAlphaBuffer !== undefined
+    ) {
+      this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglAlphaBuffer);
+      this._gl.bufferData(this._gl.ARRAY_BUFFER, geometryGroup.alphaArray, hint);
+    }
+
     // face (index) buffers
     if (
       geometryGroup.faceArray &&
@@ -1992,6 +2077,9 @@ export class Renderer {
   private createMeshBuffers(geometryGroup) {
     if (geometryGroup.radiusArray) {
       geometryGroup.__webglRadiusBuffer = this._gl.createBuffer();
+    }
+    if (geometryGroup.alphaArray) {
+      geometryGroup.__webglAlphaBuffer = this._gl.createBuffer();
     }
     if (geometryGroup.useOffset) {
       geometryGroup.__webglOffsetBuffer = this._gl.createBuffer();
@@ -2271,7 +2359,10 @@ export class Renderer {
         if ((this._outlineEnabled || material.outline) &&
           !material.wireframe &&
           material.shaderID !== "basic" &&
-          material.opacity !== 0.0) {
+          material.opacity !== 0.0 &&
+          !object.geometry?.alpha) {
+          // ^ per-vertex-alpha meshes (issue #166) draw NO outline: the outline material is
+          // opaque, so it would overpaint the very translucency the mesh exists to render.
           let outmat: any = this._outlineMaterial;
           if (material.shaderID == "sphereimposter") {
             outmat = this._outlineSphereImposterMaterial;

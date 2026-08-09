@@ -10,6 +10,7 @@ uniform float uDepth;
 uniform vec3 directionalLightColor[ 1 ];
 
 varying vec3 vColor;
+varying float vAlpha;
 varying vec2 mapping;
 varying float rval;
 varying vec3 vLight;
@@ -41,7 +42,11 @@ void main() {
     float shadowFactor = texture2D(shading,vec2(gl_FragCoord.x/float(dim.x),gl_FragCoord.y/float(dim.y))).r;
     color *= shadowFactor;
 #endif    
-    gl_FragColor = vec4(color, opacity*opacity );
+    // Per-vertex alpha (issue #166) applies LINEARLY: a user styling opacity:0.25 on an atom
+    // expects a quarter-strength ghost. Only the material opacity keeps this shader's legacy
+    // squared response curve, so whole-model opacity renders bit-identical to before
+    // (vAlpha defaults to 1.0 via the attribute's generic value when no alphaArray exists).
+    gl_FragColor = vec4(color, opacity*opacity*vAlpha );
 
     if(fogNear != fogFar) {
         float depth = -cameraPos.z;

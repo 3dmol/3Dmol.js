@@ -11,6 +11,7 @@ export class GeometryGroup {
   colorArray: Float32Array | null = null;
   normalArray: Float32Array | null = null;
   radiusArray: Float32Array | null = null;
+  alphaArray: Float32Array | null = null;
   faceArray: Uint16Array | null = null;
   lineArray: Uint16Array | null = null;
   atomArray: Array<AtomSpec> = Array<AtomSpec>();
@@ -331,7 +332,8 @@ export class GeometryGroup {
       normalArr = this.normalArray,
       faceArr = this.faceArray,
       lineArr = this.lineArray,
-      radiusArr = this.radiusArray;
+      radiusArr = this.radiusArray,
+      alphaArr = this.alphaArray;
 
     //subarray to avoid copying and reallocating memory
     this.vertexArray = vertexArr?.subarray(0, this.vertices * 3) || null;
@@ -353,6 +355,9 @@ export class GeometryGroup {
     if (radiusArr) {
       this.radiusArray = radiusArr.subarray(0, this.vertices);
     }
+    if (alphaArr) {
+      this.alphaArray = alphaArr.subarray(0, this.vertices);
+    }
 
     if (reallocatemem) {
       //actually copy smaller arrays to save memory
@@ -365,6 +370,8 @@ export class GeometryGroup {
       if (this.colorArray) this.colorArray = new Float32Array(this.colorArray);
       if (this.radiusArray)
         this.radiusArray = new Float32Array(this.radiusArray);
+      if (this.alphaArray)
+        this.alphaArray = new Float32Array(this.alphaArray);
     }
     this.__inittedArrays = true;
   }
@@ -376,6 +383,7 @@ export class Geometry extends EventDispatcher {
   hasTangents: boolean =  false;
   dynamic: boolean = true; // the intermediate typed arrays will be deleted when set to false;
   radii: boolean;
+  alpha: boolean;
   mesh: boolean;
   offset: boolean;
   verticesNeedUpdate: boolean = false;
@@ -390,11 +398,12 @@ export class Geometry extends EventDispatcher {
   sphereGeometry?: Geometry;
   drawnCaps?: any;
   
-  constructor(mesh = false, radii = false, offset = false) {
+  constructor(mesh = false, radii = false, offset = false, alpha=false) {
     super();
     this.id = GeometryIDCount++;
     this.mesh = mesh; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
     this.radii = radii;
+    this.alpha = alpha;
     this.offset = offset; //offset buffer used for instancing
   }
 
@@ -443,6 +452,9 @@ export class Geometry extends EventDispatcher {
     }
     if (this.radii) {
       ret.radiusArray = new Float32Array(BUFFERSIZE);
+    }
+    if (this.alpha) {
+      ret.alphaArray = new Float32Array(BUFFERSIZE);
     }
     ret.useOffset = this.offset;
   
