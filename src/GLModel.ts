@@ -135,8 +135,12 @@ export class GLModel {
     // this SEPARATE geometry during createMolObj's scan, so opaque atoms keep the opaque pass.
     // One mesh holding both breaks under the renderer's transparentDepth prime: the ghost
     // surfaces' depth suppresses the opaque atoms BEHIND them in the same mesh, so ghosts
-    // blend against the background and read as dark, not translucent. Set only while
-    // createMolObj runs on the imposter path; null otherwise.
+    // blend against the background and read as dark, not translucent.
+    //
+    // Non-null ONLY while createMolObj runs on the imposter path AND the sphere-styled atoms
+    // disagree about opacity. A model where they all agree is indistinguishable from the
+    // pre-existing whole-model style, so it keeps the legacy material path and this stays
+    // null -- which is what makes the reroute below unreachable for that case.
     private _transSphereGeo: Geometry | null = null;
 
     constructor(mid, options?, viewer?) {
@@ -674,6 +678,9 @@ export class GLModel {
         var radius = this.getRadiusFromStyle(atom, style);
         var C = getColorFromStyle(atom, style);
         var alpha = (style.opacity !== undefined) ? parseFloat(style.opacity as any) : 1.0;
+        // The twin exists only when this model's sphere opacities disagree (see
+        // _transSphereGeo), so when every atom shares one value this cannot fire and the
+        // whole model renders through the legacy material path exactly as it always has.
         if (alpha < 1.0 && this._transSphereGeo) {
             geo = this._transSphereGeo;
         }
