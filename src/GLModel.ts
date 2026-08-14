@@ -1542,6 +1542,25 @@ export class GLModel {
         var sphereGeometry: Geometry = null;
         var stickGeometry: Geometry = null;
         var torusGeometry: Geometry = null;
+
+        // Per-atom sphere opacity (issue #166) is only meaningful when sphere-styled atoms
+        // actually DISAGREE about opacity -- that is the case the consensus scan below warns
+        // about ("opacity is ambiguous") and then resolves by clamping every sphere to opaque,
+        // discarding the translucency the caller asked for. A model whose spheres share one
+        // value has always rendered correctly through the material, so it must keep doing so:
+        // opacity is a pre-existing whole-model style, and a uniform value is indistinguishable
+        // from that legacy usage. Deciding here, before any geometry exists, is what lets the
+        // draw loop below stay single-pass.
+        var sphereOpacityVaries = false;
+        let seenSphereOpacity: number | null = null;
+        for (let a = 0, na = atoms.length; a < na; a++) {
+            const sstyle = atoms[a]?.style?.sphere;
+            if (!sstyle || sstyle.hidden) continue;
+            const o = (sstyle.opacity !== undefined) ? parseFloat(sstyle.opacity as any) : 1.0;
+            if (seenSphereOpacity === null) seenSphereOpacity = o;
+            else if (o !== seenSphereOpacity) { sphereOpacityVaries = true; break; }
+        }
+
         if (options.supportsImposters) {
             torusGeometry = new Geometry(true);
             torusGeometry.imposter = true;
@@ -1552,9 +1571,14 @@ export class GLModel {
             // Per-atom opacity (issue #166): translucent atoms get their OWN geometry so the
             // opaque ones stay in the opaque pass (see _transSphereGeo). Only this twin
             // allocates alphaArray; drawAtomImposter reroutes atoms with opacity < 1 into it.
-            this._transSphereGeo = new Geometry(true);
-            this._transSphereGeo.imposter = true;
-            this._transSphereGeo.alpha = true;
+            // Built ONLY when opacities disagree: left null, the reroute in drawAtomImposter
+            // cannot fire, every sphere lands in sphereGeometry, and the whole feature is
+            // inert -- which is what keeps uniform-opacity models on their legacy path.
+            if (sphereOpacityVaries) {
+                this._transSphereGeo = new Geometry(true);
+                this._transSphereGeo.imposter = true;
+                this._transSphereGeo.alpha = true;
+            }
             stickGeometry = new Geometry(true, true);
             stickGeometry.imposter = true;
             stickGeometry.sphereGeometry = new Geometry(true); //for caps
@@ -1586,14 +1610,13 @@ export class GLModel {
                 if ((atom.clickable || atom.hoverable) && atom.intersectionShape === undefined)
                     atom.intersectionShape = { sphere: [], cylinder: [], line: [], triangle: [] };
 
-                // PER-ATOM SPHERE OPACITY (issue #166): on the imposter path, sphere opacity
-                // rides per-vertex in alphaArray (see drawAtomImposter), so differing values
-                // are the feature, not an ambiguity -- sphere is excluded from the consensus
-                // scan below. Non-imposter sphere paths keep the legacy one-value-per-model
-                // material behavior, so sphere stays in their scan.
-                testOpacities = options.supportsImposters ?
-                    { line: undefined, cross: undefined, stick: undefined } :
-                    { line: undefined, cross: undefined, stick: undefined, sphere: undefined };
+                // PER-ATOM SPHERE OPACITY (issue #166): sphere stays in this scan unconditionally.
+                // When opacities agree it is what sets sphereMaterial.opacity below, i.e. the
+                // legacy whole-model path. When they DISAGREE the scan's own ambiguity branch
+                // clamps opacities.sphere to 1, which is exactly right now: the translucent
+                // atoms have been rerouted to _transSphereGeo and carry their opacity per-vertex,
+                // so what remains in sphereGeometry is the opaque subset.
+                testOpacities = { line: undefined, cross: undefined, stick: undefined, sphere: undefined };
                 for (j in testOpacities) {
                     if (atom.style[j]) {
                         if (atom.style[j].opacity)
@@ -1605,7 +1628,12 @@ export class GLModel {
 
                     if (opacities[j]) {
                         if (testOpacities[j] != undefined && opacities[j] != testOpacities[j]) {
-                            console.log("Warning: " + j + " opacity is ambiguous");
+                            // Disagreeing SPHERE opacities are no longer an ambiguity (issue
+                            // #166) -- those atoms render per-vertex out of _transSphereGeo, so
+                            // the warning would fire on correct usage. The clamp still stands:
+                            // it is what leaves the remaining opaque subset opaque.
+                            if (!(j === 'sphere' && sphereOpacityVaries))
+                                console.log("Warning: " + j + " opacity is ambiguous");
                             opacities[j] = 1;
                         }
 

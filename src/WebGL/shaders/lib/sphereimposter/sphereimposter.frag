@@ -42,11 +42,14 @@ void main() {
     float shadowFactor = texture2D(shading,vec2(gl_FragCoord.x/float(dim.x),gl_FragCoord.y/float(dim.y))).r;
     color *= shadowFactor;
 #endif    
-    // Per-vertex alpha (issue #166) applies LINEARLY: a user styling opacity:0.25 on an atom
-    // expects a quarter-strength ghost. Only the material opacity keeps this shader's legacy
-    // squared response curve, so whole-model opacity renders bit-identical to before
-    // (vAlpha defaults to 1.0 via the attribute's generic value when no alphaArray exists).
-    gl_FragColor = vec4(color, opacity*opacity*vAlpha );
+    // Per-vertex alpha (issue #166) goes through the SAME squared response curve as the
+    // material opacity it stands in for. A sphere styled opacity:0.4 must land on the same
+    // rendered alpha whether that 0.4 arrives as material.opacity (all atoms agree) or as
+    // vAlpha (they disagree) -- otherwise editing one atom's opacity would visibly shift
+    // every other atom, as the model flips between the two paths.
+    // vAlpha is 1.0 for geometries with no alphaArray, via the attribute's generic value,
+    // so this collapses to the original opacity*opacity everywhere else.
+    gl_FragColor = vec4(color, opacity*opacity*vAlpha*vAlpha );
 
     if(fogNear != fogFar) {
         float depth = -cameraPos.z;
