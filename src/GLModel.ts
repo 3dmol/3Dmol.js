@@ -131,6 +131,17 @@ export class GLModel {
     private readonly defaultStickRadius = 0.25;
     private _drawnAromaticRings: Set<string> = new Set();
     private _ringCache: Map<string, number[] | null> = new Map();
+    // Per-atom sphere opacity (issue #166), imposter path: translucent atoms are routed into
+    // this SEPARATE geometry during createMolObj's scan, so opaque atoms keep the opaque pass.
+    // One mesh holding both breaks under the renderer's transparentDepth prime: the ghost
+    // surfaces' depth suppresses the opaque atoms BEHIND them in the same mesh, so ghosts
+    // blend against the background and read as dark, not translucent.
+    //
+    // Non-null ONLY while createMolObj runs on the imposter path AND the sphere-styled atoms
+    // disagree about opacity. A model where they all agree is indistinguishable from the
+    // pre-existing whole-model style, so it keeps the legacy material path and this stays
+    // null -- which is what makes the reroute below unreachable for that case.
+    private _transSphereGeo: Geometry | null = null;
 
     constructor(mid, options?, viewer?) {
 
@@ -589,7 +600,7 @@ export class GLModel {
 
     };
 
-    private drawSphereImposter(geo: Geometry, center: XYZ, radius: number, C: Color) {
+    private drawSphereImposter(geo: Geometry, center: XYZ, radius: number, C: Color, alpha: number=1.0) {
         //create flat square
         var geoGroup = geo.updateGeoGroup(4);
         var i;
@@ -612,6 +623,17 @@ export class GLModel {
             colorArray[start + 3 * i] = C.r;
             colorArray[start + 3 * i + 1] = C.g;
             colorArray[start + 3 * i + 2] = C.b;
+        }
+
+        // Stride-1 side array: indexed by VERTEX NUMBER (startv), unlike the stride-3 arrays
+        // around it which use the float offset (start = startv*3). Null when this geometry
+        // didn't opt into alpha (e.g. stick caps) -- those callers render opaque via the
+        // default parameter and no array is touched.
+        var alphaArray = geoGroup.alphaArray;
+        if (alphaArray) {
+            for (i = 0; i < 4; i++) {
+                alphaArray[startv + i] = alpha;
+            }
         }
 
         normalArray[start + 0] = -radius;
@@ -655,13 +677,20 @@ export class GLModel {
 
         var radius = this.getRadiusFromStyle(atom, style);
         var C = getColorFromStyle(atom, style);
+        var alpha = (style.opacity !== undefined) ? parseFloat(style.opacity as any) : 1.0;
+        // The twin exists only when this model's sphere opacities disagree (see
+        // _transSphereGeo), so when every atom shares one value this cannot fire and the
+        // whole model renders through the legacy material path exactly as it always has.
+        if (alpha < 1.0 && this._transSphereGeo) {
+            geo = this._transSphereGeo;
+        }
 
         if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
             var center = new Vector3(atom.x, atom.y, atom.z);
             atom.intersectionShape.sphere.push(new Sphere(center, radius));
         }
 
-        this.drawSphereImposter(geo, atom as XYZ, radius, C);
+        this.drawSphereImposter(geo, atom as XYZ, radius, C, alpha);
     };
 
     // 3D-aware ring imposter using analytical annulus test.
@@ -1509,6 +1538,7 @@ export class GLModel {
 
         this._drawnAromaticRings = new Set();
         this._ringCache = new Map();
+        this._transSphereGeo = null;
 
         var ret = new Object3D();
         var cartoonAtoms = [];
@@ -1519,6 +1549,25 @@ export class GLModel {
         var sphereGeometry: Geometry = null;
         var stickGeometry: Geometry = null;
         var torusGeometry: Geometry = null;
+
+        // Per-atom sphere opacity (issue #166) is only meaningful when sphere-styled atoms
+        // actually DISAGREE about opacity -- that is the case the consensus scan below warns
+        // about ("opacity is ambiguous") and then resolves by clamping every sphere to opaque,
+        // discarding the translucency the caller asked for. A model whose spheres share one
+        // value has always rendered correctly through the material, so it must keep doing so:
+        // opacity is a pre-existing whole-model style, and a uniform value is indistinguishable
+        // from that legacy usage. Deciding here, before any geometry exists, is what lets the
+        // draw loop below stay single-pass.
+        var sphereOpacityVaries = false;
+        let seenSphereOpacity: number | null = null;
+        for (let a = 0, na = atoms.length; a < na; a++) {
+            const sstyle = atoms[a]?.style?.sphere;
+            if (!sstyle || sstyle.hidden) continue;
+            const o = (sstyle.opacity !== undefined) ? parseFloat(sstyle.opacity as any) : 1.0;
+            if (seenSphereOpacity === null) seenSphereOpacity = o;
+            else if (o !== seenSphereOpacity) { sphereOpacityVaries = true; break; }
+        }
+
         if (options.supportsImposters) {
             torusGeometry = new Geometry(true);
             torusGeometry.imposter = true;
@@ -1526,6 +1575,17 @@ export class GLModel {
             drawSphereFunc = this.drawAtomImposter;
             sphereGeometry = new Geometry(true);
             sphereGeometry.imposter = true;
+            // Per-atom opacity (issue #166): translucent atoms get their OWN geometry so the
+            // opaque ones stay in the opaque pass (see _transSphereGeo). Only this twin
+            // allocates alphaArray; drawAtomImposter reroutes atoms with opacity < 1 into it.
+            // Built ONLY when opacities disagree: left null, the reroute in drawAtomImposter
+            // cannot fire, every sphere lands in sphereGeometry, and the whole feature is
+            // inert -- which is what keeps uniform-opacity models on their legacy path.
+            if (sphereOpacityVaries) {
+                this._transSphereGeo = new Geometry(true);
+                this._transSphereGeo.imposter = true;
+                this._transSphereGeo.alpha = true;
+            }
             stickGeometry = new Geometry(true, true);
             stickGeometry.imposter = true;
             stickGeometry.sphereGeometry = new Geometry(true); //for caps
@@ -1557,6 +1617,12 @@ export class GLModel {
                 if ((atom.clickable || atom.hoverable) && atom.intersectionShape === undefined)
                     atom.intersectionShape = { sphere: [], cylinder: [], line: [], triangle: [] };
 
+                // PER-ATOM SPHERE OPACITY (issue #166): sphere stays in this scan unconditionally.
+                // When opacities agree it is what sets sphereMaterial.opacity below, i.e. the
+                // legacy whole-model path. When they DISAGREE the scan's own ambiguity branch
+                // clamps opacities.sphere to 1, which is exactly right now: the translucent
+                // atoms have been rerouted to _transSphereGeo and carry their opacity per-vertex,
+                // so what remains in sphereGeometry is the opaque subset.
                 testOpacities = { line: undefined, cross: undefined, stick: undefined, sphere: undefined };
                 for (j in testOpacities) {
                     if (atom.style[j]) {
@@ -1569,7 +1635,12 @@ export class GLModel {
 
                     if (opacities[j]) {
                         if (testOpacities[j] != undefined && opacities[j] != testOpacities[j]) {
-                            console.log("Warning: " + j + " opacity is ambiguous");
+                            // Disagreeing SPHERE opacities are no longer an ambiguity (issue
+                            // #166) -- those atoms render per-vertex out of _transSphereGeo, so
+                            // the warning would fire on correct usage. The clamp still stands:
+                            // it is what leaves the remaining opaque subset opaque.
+                            if (!(j === 'sphere' && sphereOpacityVaries))
+                                console.log("Warning: " + j + " opacity is ambiguous");
                             opacities[j] = 1;
                         }
 
@@ -1636,6 +1707,8 @@ export class GLModel {
                 });
             }
             if (opacities.sphere < 1 && opacities.sphere >= 0) {
+                // Legacy whole-model opacity (non-imposter paths; on the imposter path,
+                // per-atom opacity rides the translucent twin below instead).
                 sphereMaterial.transparent = true;
                 sphereMaterial.opacity = opacities.sphere;
             }
@@ -1643,6 +1716,28 @@ export class GLModel {
             sphere = new Mesh(sphereGeometry, sphereMaterial);
             ret.add(sphere);
         }
+
+        // Translucent sphere imposters (per-atom opacity, issue #166): their own mesh, so
+        // ghosts blend over the opaque atoms behind them instead of depth-suppressing them.
+        // The vertices carry the opacity values; material.opacity stays 1 -- setting it
+        // would double-fade every atom.
+        if (this._transSphereGeo && this._transSphereGeo.vertices > 0) {
+            this._transSphereGeo.initTypedArrays();
+            var sphereMaterialTrans: any = new SphereImposterMaterial({
+                ambient: 0x000000,
+                vertexColors: true,
+                reflectivity: 0
+            });
+            sphereMaterialTrans.transparent = true;
+            // No depth WRITES from ghosts: the renderer's back-to-front quad sort owns
+            // ghost-vs-ghost order now (sortAlphaQuads), and a near ghost stamping the depth
+            // buffer would discard the far ghosts behind it -- the exact single-layer clamp
+            // the sorted path exists to remove. Depth TEST stays on, so opaque geometry in
+            // front still occludes ghosts correctly.
+            sphereMaterialTrans.depthWrite = false;
+            ret.add(new Mesh(this._transSphereGeo, sphereMaterialTrans));
+        }
+        this._transSphereGeo = null;
 
         // add stick geometry
         if (stickGeometry.vertices > 0) {

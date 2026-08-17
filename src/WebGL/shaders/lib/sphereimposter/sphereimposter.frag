@@ -10,6 +10,7 @@ uniform float uDepth;
 uniform vec3 directionalLightColor[ 1 ];
 
 varying vec3 vColor;
+varying float vAlpha;
 varying vec2 mapping;
 varying float rval;
 varying vec3 vLight;
@@ -41,7 +42,16 @@ void main() {
     float shadowFactor = texture2D(shading,vec2(gl_FragCoord.x/float(dim.x),gl_FragCoord.y/float(dim.y))).r;
     color *= shadowFactor;
 #endif    
-    gl_FragColor = vec4(color, opacity*opacity );
+    // Per-vertex alpha (issue #166) applies LINEARLY: an atom styled opacity:0.5 renders at
+    // 0.5. The material opacity keeps this shader's historical squared response, so existing
+    // whole-model translucency is bit-identical to before -- vAlpha is 1.0 there (the
+    // attribute's generic value, since geometries without an alphaArray never bind one), and
+    // this collapses to the original opacity*opacity.
+    //
+    // The two therefore disagree: whole-model 0.5 renders like 0.25, per-atom 0.5 renders at
+    // 0.5. That is deliberate. Squaring vAlpha to match would make the new API inherit a
+    // legacy quirk, and unsquaring the material would change every committed reference image.
+    gl_FragColor = vec4(color, opacity*opacity*vAlpha );
 
     if(fogNear != fogFar) {
         float depth = -cameraPos.z;
