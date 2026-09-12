@@ -3486,14 +3486,16 @@ export class GLViewer {
      * Sets to last frame if framenum out of range
      *
      * @param {number} framenum - fame index to use, starts at zero
+     * @param {Object} options - {fast: true} replays the frame's coordinates into each model's
+     *   existing geometry instead of rebuilding it (see GLModel.setFrame); off by default
      * @return {Promise}
      */
-    public setFrame(framenum: number) {
+    public setFrame(framenum: number, options: { fast?: boolean } = {}) {
         this.viewer_frame = framenum;
         let viewer = this;
         return new Promise<void>(function (resolve) {
             var modelMap = viewer.models.map(function (model) {
-                return model.setFrame(framenum);
+                return model.setFrame(framenum, options);
             });
             Promise.all(modelMap)
                 .then(function () { resolve(); });
@@ -3541,7 +3543,8 @@ export class GLViewer {
     /**
      * Animate all models in viewer from their respective frames
      * @param {Object} options - can specify interval (speed of animation), loop (direction
-     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, and reps (numer of repetitions, 0 indicates infinite loop)
+     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, reps (numer of repetitions, 0 indicates infinite loop),
+     * and fast (replay coordinates into existing geometry instead of rebuilding each frame; see setFrame)
      *
      */
 
@@ -3549,6 +3552,7 @@ export class GLViewer {
         this.incAnim();
         var interval = 100;
         var loop = "forward";
+        var frameOpts = { fast: !!options.fast };
         var reps = Infinity;
         options = options || {};
         if (options.interval) {
@@ -3578,21 +3582,21 @@ export class GLViewer {
         var display = function (direction) {
             time = new Date();
             if (direction == "forward") {
-                self.setFrame(currFrame)
+                self.setFrame(currFrame, frameOpts)
                     .then(function () {
                         currFrame = (currFrame + inc) % mostFrames;
                         resolve();
                     });
             }
             else if (direction == "backward") {
-                self.setFrame((mostFrames - 1) - currFrame)
+                self.setFrame((mostFrames - 1) - currFrame, frameOpts)
                     .then(function () {
                         currFrame = (currFrame + inc) % mostFrames;
                         resolve();
                     });
             }
             else { //back and forth
-                self.setFrame(currFrame)
+                self.setFrame(currFrame, frameOpts)
                     .then(function () {
                         currFrame += inc;
                         inc *= (((currFrame % (mostFrames - 1)) == 0) ? -1 : 1);

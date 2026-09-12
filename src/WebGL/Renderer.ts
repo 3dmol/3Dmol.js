@@ -1888,10 +1888,24 @@ export class Renderer {
       geometryGroup;
 
     if (object instanceof Mesh || object instanceof Line) {
+      // Animation fast path: when positions are the only thing that moved, respecify the
+      // position buffers alone rather than reallocating every array in the group. Colors or
+      // elements going dirty (or a group whose buffers don't exist yet) falls back to the full
+      // upload -- which is also what happens on the first build, since initGeometryBuffers
+      // marks colors dirty alongside vertices.
+      var positionsOnly =
+        (geometry.verticesNeedUpdate || geometry.normalsNeedUpdate) &&
+        !geometry.elementsNeedUpdate &&
+        !geometry.colorsNeedUpdate;
+
       for (var g = 0, gl = geometry.geometryGroups.length; g < gl; g++) {
         geometryGroup = geometry.geometryGroups[g];
 
-        if (
+        if (positionsOnly) {
+          if (!this.setPositionBuffersOnly(geometryGroup, geometry.verticesNeedUpdate, geometry.normalsNeedUpdate)) {
+            this.setBuffers(geometryGroup, this._gl.STATIC_DRAW);
+          }
+        } else if (
           geometry.verticesNeedUpdate ||
           geometry.elementsNeedUpdate ||
           geometry.colorsNeedUpdate ||
@@ -2003,6 +2017,38 @@ export class Renderer {
       }
 
     }
+  }
+
+  // Coordinate-only update: respecify just the position data in the buffers that already hold
+  // it, leaving color/radius/alpha/face buffers untouched. Valid because the animation path
+  // (GLModel.syncAtomPositions) never changes vertex COUNT -- the arrays were truncated to
+  // their final length by initTypedArrays before the first upload -- so the byte length here
+  // always matches what bufferData originally allocated.
+  //
+  // Normals count as position data here: a stick imposter stores its far endpoint in the normal
+  // array, so animating a bond dirties normals as well as vertices.
+  private setPositionBuffersOnly(geometryGroup, doVertices: boolean, doNormals: boolean): boolean {
+    var wrote = false;
+
+    if (doVertices && geometryGroup.vertexArray) {
+      var buffer =
+        geometryGroup.__webglOffsetBuffer !== undefined
+          ? geometryGroup.__webglOffsetBuffer
+          : geometryGroup.__webglVertexBuffer;
+      if (buffer === undefined || buffer === null) return false;
+      this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
+      this._gl.bufferSubData(this._gl.ARRAY_BUFFER, 0, geometryGroup.vertexArray);
+      wrote = true;
+    }
+
+    if (doNormals && geometryGroup.normalArray) {
+      if (geometryGroup.__webglNormalBuffer === undefined || geometryGroup.__webglNormalBuffer === null) return false;
+      this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglNormalBuffer);
+      this._gl.bufferSubData(this._gl.ARRAY_BUFFER, 0, geometryGroup.normalArray);
+      wrote = true;
+    }
+
+    return wrote;
   }
 
   private setBuffers(geometryGroup, hint) {
