@@ -20,6 +20,7 @@ import { ArrowSpec } from "GLShape";
 import { ParserOptionsSpec } from "./parsers/ParserOptionsSpec";
 import { LabelSpec } from "Label";
 import { assignBonds } from "./parsers/utils/assignBonds";
+import { resetIntersectionShapes } from "./intersectionShapes";
 
 /**
  * GLModel represents a group of related atoms
@@ -1665,6 +1666,9 @@ export class GLModel {
         this._coordIndex = new Map();
         for (let ai = 0; ai < atoms.length; ai++) this._coordIndex.set(atoms[ai], ai);
         this._coordAtomCount = atoms.length;
+
+        // Picking shapes are stored on atoms, so clear stale frame geometry before rebuilding.
+        resetIntersectionShapes(atoms);
 
         var ret = new Object3D();
         var cartoonAtoms = [];
