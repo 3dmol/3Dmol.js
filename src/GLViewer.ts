@@ -3512,15 +3512,17 @@ export class GLViewer {
      * before rendering frames that require asynchronous loading.
      *
      * @param {number} framenum - frame index to use, starts at zero
+     * @param {Object} options - {fast: true} replays the frame's coordinates into each model's
+     *   existing geometry instead of rebuilding it (see GLModel.setFrame); off by default
      * @return {Promise}
      */
-    public setFrame(framenum: number) {
+    public setFrame(framenum: number, options: { fast?: boolean } = {}) {
         // Resolve one shared timeline before updating local models and overlays,
         // so replaying getFrame() produces the same scene as the original request.
         const numFrames = this.getNumFrames();
         const requested = Number.isFinite(framenum) ? Math.trunc(framenum) : 0;
         this.viewer_frame = numFrames > 0 ? ((requested % numFrames) + numFrames) % numFrames : 0;
-        return Promise.all(this.models.filter(Boolean).map(model => model.setFrame(this.viewer_frame)))
+        return Promise.all(this.models.filter(Boolean).map(model => model.setFrame(this.viewer_frame, options)))
             .then(() => {});
     };
 
@@ -3565,7 +3567,8 @@ export class GLViewer {
     /**
      * Animate all models in viewer from their respective frames
      * @param {Object} options - can specify interval (speed of animation), loop (direction
-     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, and reps (numer of repetitions, 0 indicates infinite loop)
+     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, reps (numer of repetitions, 0 indicates infinite loop),
+     * and fast (replay coordinates into existing geometry instead of rebuilding each frame; see setFrame)
      *
      */
 
@@ -3575,6 +3578,7 @@ export class GLViewer {
         var loop = "forward";
         var reps = Infinity;
         options = options || {};
+        var frameOpts = { fast: !!options.fast };
         if (options.interval) {
             interval = options.interval;
         }
@@ -3602,21 +3606,21 @@ export class GLViewer {
         var display = function (direction) {
             time = new Date();
             if (direction == "forward") {
-                self.setFrame(currFrame)
+                self.setFrame(currFrame, frameOpts)
                     .then(function () {
                         currFrame = (currFrame + inc) % mostFrames;
                         resolve();
                     });
             }
             else if (direction == "backward") {
-                self.setFrame((mostFrames - 1) - currFrame)
+                self.setFrame((mostFrames - 1) - currFrame, frameOpts)
                     .then(function () {
                         currFrame = (currFrame + inc) % mostFrames;
                         resolve();
                     });
             }
             else { //back and forth
-                self.setFrame(currFrame)
+                self.setFrame(currFrame, frameOpts)
                     .then(function () {
                         currFrame += inc;
                         inc *= (((currFrame % (mostFrames - 1)) == 0) ? -1 : 1);

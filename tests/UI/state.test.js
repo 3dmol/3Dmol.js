@@ -719,8 +719,59 @@ describe("viewer trajectory state", () => {
         const instance = viewer([undefined, model]);
         const pending = instance.setFrame(frame);
         expect(instance.getFrame()).toBe(expected);
-        expect(model.setFrame).toHaveBeenCalledWith(expected);
+        expect(model.setFrame).toHaveBeenCalledWith(expected, {});
         await expect(pending).resolves.toBeUndefined();
+    });
+
+    test("fast frame updates preserve geometry after wrapping and fall back when replay is unavailable", async () => {
+        const model = modelWithFrames(3);
+        const instance = viewer([undefined, model]);
+        const geometry = {};
+        model.molObj = geometry;
+        const replay = jest.spyOn(model, "syncAtomPositions").mockReturnValue(true);
+
+        const pending = instance.setFrame(-1, { fast: true });
+        expect(instance.getFrame()).toBe(2);
+        expect(model.selectedAtoms({})[0].y).toBe(2);
+        expect(replay).toHaveBeenCalledTimes(1);
+        expect(model.molObj).toBe(geometry);
+        await expect(pending).resolves.toBeUndefined();
+
+        replay.mockReturnValue(false);
+        await instance.setFrame(-2, { fast: true });
+        expect(model.selectedAtoms({})[0].y).toBe(1);
+        expect(replay).toHaveBeenCalledTimes(2);
+        expect(model.molObj).toBeNull();
+
+        replay.mockClear();
+        model.molObj = geometry;
+        await instance.setFrame(0);
+        expect(replay).not.toHaveBeenCalled();
+        expect(model.molObj).toBeNull();
+    });
+
+    test.each([
+        [undefined, 0, false],
+        [{ fast: true, loop: "forward" }, 0, true],
+        [{ fast: true, loop: "backward" }, 2, true],
+        [{ fast: true, loop: "backAndForth" }, 0, true]
+    ])("animate(%j) forwards frame options", async (options, frame, fast) => {
+        jest.useFakeTimers();
+        const instance = Object.assign(viewer([modelWithFrames(3)]), {
+            animated: 0, animationTimers: new Set(),
+            render: jest.fn(), getCanvas: () => ({ isConnected: true })
+        });
+        const setFrame = jest.spyOn(instance, "setFrame");
+        try {
+            expect(instance.animate(options)).toBe(instance);
+            await jest.advanceTimersByTimeAsync(0);
+            expect(setFrame).toHaveBeenCalledWith(frame, { fast });
+            expect(instance.getFrame()).toBe(frame);
+            expect(instance.render).toHaveBeenCalledTimes(1);
+        } finally {
+            instance.stopAnimate();
+            jest.useRealTimers();
+        }
     });
 
     test.each([

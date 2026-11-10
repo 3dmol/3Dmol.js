@@ -6,9 +6,9 @@ print("Content-Type: text/html")     # HTML is following
 print()                               # blank line, end of headers
 
 import generate_tests
-import cgi, cgitb, sys
-
-cgitb.enable()
+import sys
+import traceback
+from urllib.parse import parse_qs
 
 testsys = generate_tests.TestSystem('../..') # hardcoded directory paths :-(
 testinfo = {}
@@ -18,8 +18,15 @@ for file in testsys.files:
         testinfo[example.name] = example
 
 #get name of user specified test
-form = cgi.FieldStorage()
-test = form.getvalue("test","test49")
+try:
+    query_string = sys.stdin.read()
+    params = parse_qs(query_string)
+    test = params.get("test", ["test49"])[0]
+except Exception as e:
+    print("<pre>")
+    traceback.print_exc()
+    print("</pre>")
+    sys.exit(1)
 
 if test not in testinfo:
     print("""<html ><head>
@@ -61,3 +68,4 @@ else:
         </script>        
         </body>
     </html>""" % (ex.script))
+

@@ -8,9 +8,11 @@ uniform vec3 directionalLightDirection[ 1 ];
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 color;
+attribute float alpha;
 
 varying vec2 mapping;
 varying vec3 vColor;
+varying float vAlpha;
 varying float rval;
 varying vec3 vLight;
 varying vec3 center;
@@ -18,6 +20,7 @@ varying vec3 center;
 void main() {
 
     vColor = color;
+    vAlpha = alpha;
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
     center = mvPosition.xyz;
     vec4 projPosition = projectionMatrix * mvPosition;
