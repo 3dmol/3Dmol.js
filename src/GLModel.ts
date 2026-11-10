@@ -1957,8 +1957,9 @@ export class GLModel {
     };
 
     /**
-     * Sets model's atomlist to specified frame
-     * Sets to last frame if framenum out of range
+     * Sets model's atomlist to the specified frame. Indices wrap modulo the
+     * frame count, so -1 selects the last frame and -2 the second to last.
+     * Fractional indices truncate toward zero; non-finite values use frame zero.
      *
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @return {Promise}
@@ -1972,9 +1973,8 @@ export class GLModel {
                 resolve();
                 return;
             }
-            if (framenum < 0 || framenum >= numFrames) {
-                framenum = numFrames - 1;
-            }
+            const requested = Number.isFinite(framenum) ? Math.trunc(framenum) : 0;
+            framenum = ((requested % numFrames) + numFrames) % numFrames;
             if (model.frames.url != undefined) {
                 var url = model.frames.url;
                 getbin(url + "/traj/frame/" + framenum + "/" + model.frames.path, undefined, 'POST', undefined).then(function (buffer) {

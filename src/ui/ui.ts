@@ -1,15 +1,32 @@
 import type { AtomSelectionSpec, AtomSpec } from '../specs';
 import type { AtomStyleSpec, GLModel } from '../GLModel';
-import type { StateManager } from './state';
+import type { StateManager, UIViewSettings } from './state';
 import { builtinColorSchemes, CC } from '../colors';
 import type { ColorSpec, ColorschemeSpec } from '../colors';
 import { TrajectoryControls } from './trajectory';
+import type { TrajectorySettings } from './trajectory';
 import { uiStyles } from './styles';
 import { SelectionEditor, selectionSummary } from './selection';
 
 export interface UIConfig {
     /** Start with the sidebar open. Small embedded viewers default to collapsed. */
     open?: boolean;
+    /** Initial settings for the view controls; omitted settings retain viewer defaults. */
+    view?: Partial<UIViewSettings>;
+    onViewChange?: (settings: UIViewSettings) => void;
+    onOpenChange?: (open: boolean) => void;
+    /** Called after a successful UI load, before state subscribers are notified. */
+    onModelLoaded?: (model: GLModel, source: UIModelSource) => void;
+}
+
+/** Describes a user-requested load without prescribing how an embedding stores it. */
+export interface UIModelSource {
+    kind: 'file' | 'pdb' | 'cid' | 'url';
+    value: string;
+    format: string;
+    data: string | ArrayBuffer;
+    frames: boolean;
+    name: string;
 }
 
 type Choice = [string, string];
@@ -77,6 +94,8 @@ export class UI {
     private readonly count = el('p', 'molui-count');
     private readonly trajectory: TrajectoryControls;
     private readonly appearance = select([]);
+    private readonly background = el('input');
+    private readonly projection = select([['perspective', 'Perspective'], ['orthographic', 'Orthographic']]);
     private readonly addSelectionButton: HTMLButtonElement;
     private readonly surfaceSelection = select([]);
     private readonly surfaceCalculation = select([['shown', 'Same as shown'], ['', 'All atoms']]);
@@ -96,9 +115,10 @@ export class UI {
     private abort?: AbortController;
     private originalPosition: string;
     private setPosition = false;
+    private initialized = false;
     private readonly onResize = () => this.resize();
 
-    constructor(public readonly state: StateManager, config: UIConfig = {}) {
+    constructor(public readonly state: StateManager, private readonly config: UIConfig = {}) {
         const viewer = state.viewer;
         const container = viewer.container;
         this.originalPosition = container.style.position;
@@ -198,6 +218,7 @@ export class UI {
             this.resize();
         }, 500);
         this.refresh(); this.resize();
+        this.initialized = true;
     }
 
     public resize(): void {
@@ -225,6 +246,9 @@ export class UI {
         const focusKey = this.element.contains(active) ? active?.dataset.focus : undefined;
         this.signature = this.modelSignature();
         this.renderModels(); this.renderFilters(); this.renderSelections(); this.renderSurfaces();
+        const view = this.state.getViewSettings();
+        this.background.value = view.background;
+        this.projection.value = view.projection;
         this.trajectory.refresh();
         if (focusKey) {
             const control = Array.from(this.element.querySelectorAll<HTMLElement>('[data-focus]'))
@@ -246,11 +270,25 @@ export class UI {
         }
     }
 
-    private setOpen(open: boolean): void {
+    public get isOpen(): boolean {
+        return !this.element.classList.contains('molui-closed');
+    }
+
+    public setOpen(open: boolean): void {
+        const changed = this.isOpen !== open;
         if (!open && this.panel.contains(document.activeElement)) this.toggle.focus();
         this.element.classList.toggle('molui-closed', !open);
         this.toggle.setAttribute('aria-expanded', String(open));
         this.resize();
+        if (changed && this.initialized) this.config.onOpenChange?.(open);
+    }
+
+    public getTrajectorySettings(): TrajectorySettings {
+        return this.trajectory.getSettings();
+    }
+
+    public setTrajectorySettings(settings: Partial<TrajectorySettings>): Promise<void> {
+        return this.trajectory.setSettings(settings);
     }
 
     private showError(text = ''): void {
@@ -289,6 +327,7 @@ export class UI {
             visible.input.addEventListener('change', () => {
                 if (visible.input.checked) model.show(); else model.hide();
                 this.state.viewer.render();
+                this.state.refresh();
             });
             actions.append(button('Focus', () => { this.state.viewer.zoomTo({ model: id }); this.state.viewer.render(); }),
                 button('Remove model', () => {
@@ -331,9 +370,12 @@ export class UI {
             this.loading = true; submit.disabled = true; submit.textContent = 'Loading…';
             form.setAttribute('aria-busy', 'true');
             this.abort = new AbortController();
+            const kind = source.value as UIModelSource['kind'];
+            const value = kind === 'file' ? file.files?.[0]?.name || '' : identifier.value.trim();
+            const frames = trajectory.input.checked;
             try {
                 let name: string; let data: string | ArrayBuffer; let fileFormat = format.value;
-                if (source.value === 'file') {
+                if (kind === 'file') {
                     const selected = file.files?.[0];
                     if (!selected) throw new Error('Choose a structure file first.');
                     name = selected.name;
@@ -341,13 +383,12 @@ export class UI {
                     else if (/\.gz$/i.test(name)) fileFormat += '.gz';
                     data = await this.readFile(selected, /(?:bcif|mmtf|gz)$/.test(fileFormat));
                 } else {
-                    const value = identifier.value.trim();
                     let url: URL;
-                    if (source.value === 'pdb') {
+                    if (kind === 'pdb') {
                         if (!/^[a-z0-9]{4}$/i.test(value)) throw new Error('Enter a four-character PDB ID, such as 1CRN.');
                         name = value.toUpperCase(); fileFormat = 'pdb';
                         url = new URL(`https://files.rcsb.org/view/${name}.pdb`);
-                    } else if (source.value === 'cid') {
+                    } else if (kind === 'cid') {
                         if (!/^\d+$/.test(value)) throw new Error('Enter a numeric PubChem compound ID.');
                         name = `CID ${value}`; fileFormat = 'sdf';
                         url = new URL(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${value}/SDF?record_type=3d`);
@@ -363,7 +404,7 @@ export class UI {
                     data = /(?:bcif|mmtf|gz)$/.test(fileFormat) ? await response.arrayBuffer() : await response.text();
                 }
                 if (this.destroyed) return;
-                const model = trajectory.input.checked ? this.state.viewer.addModelsAsFrames(data, fileFormat)
+                const model = frames ? this.state.viewer.addModelsAsFrames(data, fileFormat)
                     : this.state.viewer.addModel(data, fileFormat);
                 if (!model.selectedAtoms({}).length) {
                     this.state.viewer.removeModel(model);
@@ -374,6 +415,7 @@ export class UI {
                 model.setStyle({}, isPolymer(atoms) ? { cartoon: { color: 'spectrum' } } : { stick: {} });
                 if (isPolymer(atoms)) model.setStyle({ hetflag: true, not: { or: water.map(resn => ({ resn })) } }, { stick: {} });
                 this.state.viewer.zoomTo({ model: model.getID() }); this.state.viewer.render();
+                this.config.onModelLoaded?.(model, { kind, value, format: fileFormat, data, frames, name });
                 this.state.refresh();
                 details.open = false;
                 this.showError();
@@ -708,6 +750,10 @@ export class UI {
             actions.append(button('Focus', () => { this.state.viewer.zoomTo(entry.spec); this.state.viewer.render(); }),
                 button('Remove selection', () => this.state.removeSelection(entry.id), 'molui-danger'));
             content.append(labels.label);
+            const additive = check('Keep earlier representations', !!entry.additive);
+            additive.input.dataset.focus = `${entry.id}:additive`;
+            additive.input.addEventListener('change', () => this.state.setSelectionAdditive(entry.id, additive.input.checked));
+            content.append(additive.label);
             const available = (exclude?: string): Choice[] => {
                 const used = new Set(Array.from(entry.styles.values()).filter(style => style.id !== exclude)
                     .flatMap(style => Object.keys(style.spec)));
@@ -737,9 +783,9 @@ export class UI {
                 }, 'molui-danger'));
                 const keys = Object.keys(style.spec);
                 const kind = keys.length === 2 && keys.includes('stick') && keys.includes('sphere') ? 'ballstick'
-                    : keys.length > 1 ? 'combined' : keys[0] || 'line';
+                    : keys.length > 1 ? 'combined' : keys[0] || 'empty';
                 const choices: Choice[] = [['none', 'None'], ...available(style.id)];
-                if (!choices.some(([key]) => key === kind)) choices.unshift([kind, kind === 'combined' ? `Combined (${keys.join(' + ')})` : kind]);
+                if (!choices.some(([key]) => key === kind)) choices.unshift([kind, kind === 'combined' ? `Combined (${keys.join(' + ')})` : kind === 'empty' ? 'Hidden atoms' : kind]);
                 const representation = select(choices, kind);
                 const properties = (style.spec[keys[0]] || {}) as UIColors & { opacity?: number; colorfunc?: unknown };
                 const mixedColors = !!properties.colorfunc || keys.some(key => style.spec[key]?.color !== properties.color
@@ -778,9 +824,10 @@ export class UI {
                 });
                 opacity.addEventListener('change', () => update('opacity')); radius.addEventListener('change', () => update('radius'));
                 const fields = el('div', 'molui-style-grid');
-                fields.append(field('Representation', representation), ...colors.fields);
+                fields.append(field('Representation', representation), ...(kind === 'empty' ? [] : colors.fields));
                 const settings = this.styleSettings(style.spec, entry.id, style.id,
                     expanded.has(`${entry.id}:${style.id}`), [opacityField, radiusField]);
+                settings.hidden = kind === 'empty';
                 editor.append(styleHeader, fields, settings);
                 content.append(editor);
             }
@@ -846,11 +893,12 @@ export class UI {
         const actions = el('div', 'molui-actions');
         actions.append(button('Fit all', () => { this.state.viewer.zoomTo(); this.state.viewer.render(); }),
             button('Save PNG', () => this.download(this.state.viewer.pngURI(), 'molecule.png')));
-        const background = el('input'); background.type = 'color'; background.value = '#ffffff';
-        background.addEventListener('input', () => { this.state.viewer.setBackgroundColor(background.value, 1); this.state.viewer.render(); });
-        const projection = select([['perspective', 'Perspective'], ['orthographic', 'Orthographic']]);
-        projection.addEventListener('change', () => { this.state.viewer.setProjection(projection.value); this.state.viewer.render(); });
-        details.append(actions, field('Background', background), field('Projection', projection),
+        this.background.type = 'color';
+        this.background.dataset.focus = 'view:background';
+        this.projection.dataset.focus = 'view:projection';
+        this.background.addEventListener('input', () => this.state.setViewSettings({ background: this.background.value }));
+        this.projection.addEventListener('change', () => this.state.setViewSettings({ projection: this.projection.value as UIViewSettings['projection'] }));
+        details.append(actions, field('Background', this.background), field('Projection', this.projection),
             el('p', 'molui-muted', 'Drag to rotate. Scroll or pinch to zoom. Shift-drag or use two fingers to move the molecule.'));
         return details;
     }

@@ -96,7 +96,7 @@ describe('trajectory controls', () => {
             getFrame: () => current,
             isAnimated: () => animated,
             stopAnimate: jest.fn(() => { animated = false; }),
-            setFrame: jest.fn(frame => { current = frame; return Promise.resolve(); }),
+            setFrame: jest.fn(frame => { current = frames ? ((frame % frames) + frames) % frames : 0; return Promise.resolve(); }),
             render: jest.fn()
         };
         controls = new TrajectoryControls(viewer);
@@ -134,6 +134,49 @@ describe('trajectory controls', () => {
         expect(viewer.setFrame).toHaveBeenLastCalledWith(4);
         expect(button('Next frame').disabled).toBe(true);
         expect(button('First frame').disabled).toBe(false);
+    });
+
+    test('restores transport settings and awaits the requested frame before playback resumes', async () => {
+        let finish;
+        viewer.setFrame = jest.fn(frame => new Promise(resolve => {
+            finish = () => { current = frame; resolve(); };
+        }));
+        const restore = controls.setSettings({ frame: 3, fps: 24, loop: false, playing: true });
+        expect(controls.isPlaying).toBe(false);
+        expect(viewer.setFrame).toHaveBeenCalledWith(3);
+        finish(); await restore;
+        expect(controls.getSettings()).toEqual({ frame: 3, fps: 24, loop: false, playing: true });
+        expect(controls.element.querySelector('input[type=range]').value).toBe('4');
+        expect(button('Pause trajectory')).not.toBeNull();
+        await controls.setSettings({ playing: false });
+        expect(controls.isPlaying).toBe(false);
+    });
+
+    test('transport restoration wraps frame bounds and preserves custom speed choices', async () => {
+        animated = true;
+        await controls.setSettings({ frame: 999, fps: 12, loop: false, playing: false });
+        expect(viewer.stopAnimate).toHaveBeenCalled();
+        expect(controls.getSettings()).toEqual({ frame: 4, fps: 12, loop: false, playing: false });
+        expect(controls.element.querySelector('select').value).toBe('12');
+        await expect(controls.setSettings({ fps: 0 })).rejects.toThrow('Playback speed');
+        await expect(controls.setSettings({ frame: 1.5 })).rejects.toThrow('trajectory frame');
+    });
+
+    test.each([[-1, 4], [-2, 3], [-5, 0], [-6, 4], [5, 0], [6, 1]])('restoring frame %s wraps to %s', async (requested, expected) => {
+        await controls.setSettings({ frame: requested });
+        expect(viewer.setFrame).toHaveBeenLastCalledWith(requested);
+        expect(controls.getSettings().frame).toBe(expected);
+        expect(controls.element.querySelector('input[type=range]').value).toBe(String(expected + 1));
+    });
+
+    test.each([0, 1])('restoring a %s-frame scene resets the previous trajectory frame', async count => {
+        current = 4;
+        frames = count;
+        await controls.setSettings({ frame: 0, playing: false });
+        expect(viewer.setFrame).toHaveBeenLastCalledWith(0);
+        expect(current).toBe(0);
+        expect(controls.getSettings().frame).toBe(0);
+        expect(controls.element.hidden).toBe(true);
     });
 
     test('uses play/pause icons while keeping accessible names and pressed state', () => {

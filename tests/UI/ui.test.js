@@ -204,9 +204,9 @@ async function settle() { for (let index = 0; index < 6; index++) await Promise.
 describe('guided molecular viewer UI', () => {
     let states;
     let fetchOriginal;
-    const mount = () => {
+    const mount = (config = {}) => {
         const data = fixture();
-        const state = new StateManager(data.viewer, { open: true });
+        const state = new StateManager(data.viewer, { open: true, ...config });
         states.push(state);
         return { ...data, state, root: state.ui.element };
     };
@@ -249,6 +249,27 @@ describe('guided molecular viewer UI', () => {
         expect(first.root.classList.contains('molui-closed')).toBe(true);
         expect(first.root.querySelector('.molui-toggle').getAttribute('aria-expanded')).toBe('false');
         expect(second.root.classList.contains('molui-closed')).toBe(false);
+    });
+
+    test('embeddings can restore view and panel settings without manipulating control DOM', () => {
+        const onViewChange = jest.fn(), onOpenChange = jest.fn();
+        const { root, state, viewer } = mount({
+            view: { background: '#000066', projection: 'orthographic' }, onViewChange, onOpenChange
+        });
+        expect(field(root, 'Background').value).toBe('#000066');
+        expect(field(root, 'Projection').value).toBe('orthographic');
+        expect(onOpenChange).not.toHaveBeenCalled();
+        state.setViewSettings({ background: '#112233', projection: 'perspective' });
+        expect(field(root, 'Background').value).toBe('#112233');
+        choose(root, 'Projection', 'orthographic');
+        expect(viewer.setProjection).toHaveBeenLastCalledWith('orthographic');
+        expect(onViewChange).toHaveBeenLastCalledWith({ background: '#112233', backgroundAlpha: 1, projection: 'orthographic' });
+        state.ui.setOpen(false);
+        expect(state.ui.isOpen).toBe(false);
+        expect(onOpenChange).toHaveBeenLastCalledWith(false);
+        root.querySelector('.molui-toggle').click();
+        expect(state.ui.isOpen).toBe(true);
+        expect(onOpenChange).toHaveBeenLastCalledWith(true);
     });
 
     test('dependent choices preserve blank chains and residue zero without broadening a draft', () => {
@@ -532,7 +553,10 @@ describe('guided molecular viewer UI', () => {
     });
 
     test('loading a local trajectory adds video controls without autoplay or replacing models', async () => {
-        const { root, models, viewer } = mount();
+        const events = [];
+        const onModelLoaded = jest.fn(() => events.push('loaded'));
+        const { root, models, viewer, state } = mount({ onModelLoaded });
+        state.subscribe(() => events.push('changed'));
         const originalModels = [...models];
         const xyz = '2\nfirst\nC 0 0 0\nO 1 0 0\n2\nsecond\nC 0 1 0\nO 1 1 0\n';
         const read = jest.spyOn(FileReader.prototype, 'readAsText').mockImplementation(function () {
@@ -548,6 +572,10 @@ describe('guided molecular viewer UI', () => {
             expect(models).toHaveLength(3);
             expect(models.slice(0, 2)).toEqual(originalModels);
             expect(models[2].getNumFrames()).toBe(2);
+            expect(onModelLoaded).toHaveBeenCalledWith(models[2], {
+                kind: 'file', value: 'motion.xyz', name: 'motion.xyz', format: 'xyz', data: xyz, frames: true
+            });
+            expect(events[0]).toBe('loaded');
             expect(root.querySelector('.molui-trajectory').hidden).toBe(false);
             expect(root.querySelector('.molui-frame-count').textContent).toBe('Frame 1 / 2');
             expect(root.classList.contains('molui-has-trajectory')).toBe(true);
@@ -785,7 +813,8 @@ describe('guided molecular viewer UI', () => {
         const { root, state, viewer } = mount();
         let finish;
         viewer.addSurface = jest.fn(() => Object.assign(new Promise(resolve => { finish = resolve; }), { surfid: 7 }));
-        viewer.getSurface = id => id === 7 ? {} : undefined;
+        const pendingSurface = {};
+        viewer.getSurface = id => id === 7 ? pendingSurface : undefined;
         viewer.removeSurface = jest.fn();
         button(root, 'Add surface').click();
         expect(button(root, 'Add surface').disabled).toBe(true);
@@ -915,7 +944,8 @@ describe('guided molecular viewer UI', () => {
         const form = root.querySelector('.molui-surface-create');
         let finish;
         viewer.addSurface = jest.fn(() => Object.assign(new Promise(resolve => { finish = resolve; }), { surfid: 9 }));
-        viewer.getSurface = id => id === 9 ? {} : undefined;
+        const pendingSurface = {};
+        viewer.getSurface = id => id === 9 ? pendingSurface : undefined;
         button(form, 'Add surface').click();
         expect(button(form, 'Add surface').disabled).toBe(true);
         choose(form, 'Calculate using', partial);

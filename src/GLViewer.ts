@@ -3504,17 +3504,24 @@ export class GLViewer {
     /**
      * Sets the atomlists of all models in the viewer to specified frame.
      * Shapes and labels can also be displayed by frame.
-     * Sets to last frame if framenum out of range
+     * Indices wrap modulo the viewer's total frame count, so -1 selects its last
+     * frame. Models, shapes and labels receive that resolved frame; models with
+     * fewer frames wrap it to their own frame count. Fractional indices truncate
+     * toward zero; non-finite values use frame zero.
+     * The viewer's frame number updates immediately; await the returned promise
+     * before rendering frames that require asynchronous loading.
      *
-     * @param {number} framenum - fame index to use, starts at zero
+     * @param {number} framenum - frame index to use, starts at zero
      * @return {Promise}
      */
     public setFrame(framenum: number) {
-        const last = Math.max(0, this.getNumFrames() - 1);
-        const requested = Math.floor(framenum) || 0;
-        const frame = requested < 0 || requested > last ? last : requested;
-        return Promise.all(this.models.filter(Boolean).map(model => model.setFrame(frame)))
-            .then(() => { this.viewer_frame = frame; });
+        // Resolve one shared timeline before updating local models and overlays,
+        // so replaying getFrame() produces the same scene as the original request.
+        const numFrames = this.getNumFrames();
+        const requested = Number.isFinite(framenum) ? Math.trunc(framenum) : 0;
+        this.viewer_frame = numFrames > 0 ? ((requested % numFrames) + numFrames) % numFrames : 0;
+        return Promise.all(this.models.filter(Boolean).map(model => model.setFrame(this.viewer_frame)))
+            .then(() => {});
     };
 
     /**

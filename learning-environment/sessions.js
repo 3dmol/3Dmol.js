@@ -12,15 +12,37 @@ var joinSession = function(name) {
 var initSessions = function() {
     var initiator = false;
     var joined = false;
+    var pendingJoin = false;
+    var pendingCreate = false;
 
-    // Webserver needs to have appropriate rules to forward to flask
-    // https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root
-    if(window.location.hostname == 'localhost') {
-      // For debugging on localhost go straight to port to avoid having to setup webserver
-      socket = io.connect(window.location.hostname+":5000");
-    } else {
-      socket = io.connect(window.location.hostname);
-    }
+    joinSession = function(name) {
+        if (pendingJoin || pendingCreate) return;
+        session_name = name;
+        pendingJoin = true;
+        socket.emit('join session event', { name: name });
+    };
+
+    var showViewerControls = function(visible) {
+        var app = window.viewerApp;
+        if (app && app.state && app.state.ui && app.state.ui.element) {
+            app.state.ui.element.hidden = !visible;
+        } else {
+            $("#menu,#sidenav").toggle(visible);
+        }
+    };
+
+    var sessionChanged = function(name, following) {
+        if (window.viewerApp && typeof window.viewerApp.sessionChanged === 'function') {
+            window.viewerApp.sessionChanged(name, following);
+        }
+    };
+
+    // Local development can serve the viewer separately from Flask on port 5000.
+    // Other hosts preserve the page origin unless an embedding supplies a server.
+    var sessionServer = window.viewerSessionServer || (window.location.hostname === 'localhost'
+        ? window.location.protocol + '//localhost:5000'
+        : window.location.origin);
+    socket = io.connect(sessionServer);
     socket.on('connect', function() {
         socket.send('User has connected!');
     });
@@ -31,8 +53,8 @@ var initSessions = function() {
         $('#sessionconnect').hide();
         $('#sessioncontrol').hide();
         $('#sessionmonitor').hide();
-        $("#menu").show();
-        $("#sidenav").show();
+        showViewerControls(true);
+        sessionChanged(null, false);
     };
 
     // Open session connection dialog
@@ -48,7 +70,8 @@ var initSessions = function() {
 
     // Close dialog and show sessions button
     $('#sessionconnectclose').on('click', function() {
-        resetUpperRight();
+        if (pendingJoin || pendingCreate) endSession(true);
+        else resetUpperRight();
     });
 
     // as the user types a session name, check for validity
@@ -65,6 +88,7 @@ var initSessions = function() {
 
     // Update button based on existance of name
     socket.on('check session name response', function(msg) {
+        if (pendingJoin || pendingCreate || joined || initiator) return;
         $('#sessionconnectbutton').prop('disabled', false);
         if (msg == 'exists') {
             $('#sessionconnectbutton').html("Join");
@@ -75,17 +99,17 @@ var initSessions = function() {
 
     // Handle connecting to a session
     var connectSession = function() {
+        if (pendingJoin || pendingCreate) return;
         session_name = $('#session_name_input').val();
         if ($('#sessionconnectbutton').text() == "Create") {
+            pendingCreate = true;
             socket.emit('create session event', {
                 name : session_name,
-                state : glviewer.getInternalState(),
+                state : Object.assign({}, glviewer.getInternalState(), { frame: glviewer.getFrame() }),
                 view : glviewer.getView()
             });
         } else {
-            socket.emit('join session event', {
-                name : session_name,
-            });
+            joinSession(session_name);
         }
     };
 
@@ -98,6 +122,7 @@ var initSessions = function() {
 
     // Register change callbacks
     var viewUpdateCallback = function(new_view) {
+        if (!initiator || !session_name) return;
         socket.emit('viewer view change event', {
             name : session_name,
             view : new_view
@@ -105,16 +130,19 @@ var initSessions = function() {
     };
 
     var stateUpdateCallback = function(new_state) {
+        if (!initiator || !session_name) return;
         socket.emit('viewer state change event', {
             name : session_name,
-            state : new_state
+            state : Object.assign({}, new_state, { frame: glviewer.getFrame() })
         });
     };
 
     socket.on('create session response',function(msg) {
+        if (!pendingCreate || !session_name) return;
+        pendingCreate = false;
         if (msg) {
             console.log("session created successfully")
-            $('.sessionname').html(session_name);
+            $('.sessionname').text(session_name);
 
             // Setup callbacks
             glviewer.setViewChangeCallback(viewUpdateCallback);
@@ -128,69 +156,72 @@ var initSessions = function() {
         } else {
             alert("Session name was already taken/ could not be created. Try Again");
             initiator = 0;
+            session_name = null;
         }
     });
 
     socket.on('join session response', function(msg) {
+        if (!pendingJoin || !session_name) return;
+        pendingJoin = false;
         if (msg != "0") {
             joined = msg;
             // Close the connection create pane and open the connection monitoring
-            $('.sessionname').html(session_name);
+            $('.sessionname').text(session_name);
             $('#sessionbutton').hide();
             $('#sessionconnect').hide();
-            $("#menu").hide();
-            
             // Disable the sidebar
-            $("#sidenav").hide();
+            sessionChanged(session_name, true);
+            showViewerControls(false);
             $('#sessionmonitor').show();
 
-        } else
-            alert("Session Doesn't Exist")
+        } else {
+            session_name = null;
+            resetUpperRight();
+            alert("Session Doesn't Exist");
+        }
     });
 
-    var deleteSession = function() {
-        if (session_name)
-            socket.emit('delete session event', {
-                name : session_name
-            });
-        clearResultLabels();
+    var endSession = function(notifyServer) {
+        var name = session_name;
+        var wasInitiator = initiator;
+        var wasCreating = pendingCreate;
+        initiator = false;
+        joined = false;
+        pendingJoin = false;
+        pendingCreate = false;
         session_name = null;
-    };
-
-    var leaveSession = function() {
-        if (session_name) {
-            socket.emit('leave session event', {
-                name : session_name,
-            });
+        if (wasInitiator) {
+            glviewer.setViewChangeCallback(null);
+            glviewer.setStateChangeCallback(null);
         }
-        session_name = null;
+        if (notifyServer && name) {
+            socket.emit(wasInitiator || wasCreating ? 'delete session event' : 'leave session event', { name: name });
+        }
+        clearResultLabels();
+        clientFinishQuery();
+        resetUpperRight();
     };
 
-    $('#sessiondestroy').on('click', deleteSession);
-    $('#sessionleave').on('click', leaveSession);
+    // An embedding can leave a classroom before replacing its molecular scene.
+    window.leaveViewerSession = function() {
+        if (session_name || initiator || joined || pendingJoin || pendingCreate) endSession(true);
+    };
+    $('#sessiondestroy').on('click', window.leaveViewerSession);
+    $('#sessionleave').on('click', window.leaveViewerSession);
 
     // Make sure to unregister a session if user closes window
     $(window).on('beforeunload', function() {
-        if (initiator)
-            deleteSession();
-        else
-            leaveSession();
+        if (session_name) endSession(true);
     });
 
     var sessionEnded = function(reason) {
-        joined = false;
-        resetUpperRight();
-        clientFinishQuery();
+        if (joined || initiator) endSession(false);
     };
 
     socket.on('delete session response', function() {
+        if (!initiator) return;
         $('#createSession,#joinSession').prop('disabled', false);
-        initiator = 0;
-        // Remove callbacks
-        glviewer.setViewChangeCallback(null);
-        glviewer.setStateChangeCallback(null);
-        resetUpperRight();
-
+        endSession(false);
     });
 
     socket.on('leave session response', sessionEnded);
@@ -220,17 +251,25 @@ var initSessions = function() {
       console.log("Connect timeout");
     });    
     
-    socket.on('session count', setNumConnections);
+    socket.on('session count', function(count) {
+        if (initiator) setNumConnections(count);
+    });
 
     socket.on('viewer view change response', function(new_view) {
-        if (!initiator) {
+        if (joined && !initiator) {
             glviewer.setView(new_view);
         }
     });
 
     socket.on('viewer state change response', function(new_state) {
-        if (!initiator) {
-            glviewer.setInternalState(new_state);
+        if (joined && !initiator) {
+            if (window.viewerApp && typeof window.viewerApp.acceptSessionState === 'function') {
+                var applied = window.viewerApp.acceptSessionState(new_state);
+                applied.catch(window.viewerApp.showError);
+                return applied;
+            } else {
+                glviewer.setInternalState(new_state);
+            }
         }
     });
 
@@ -239,20 +278,20 @@ var initSessions = function() {
     // Remove result labels
     var clearResultLabels = function() {
         if (result_labels) {
-            for (let i = 0; i < result_labels.length; i++) {
-                glviewer.removeLabel(result_labels[i]);
-            }
+            if (result_labels.length) glviewer.removeLabels(result_labels);
             result_labels = [];
         }
     };
 
     $('#refreshresults').on('click', function() {
+        if (!initiator) return;
         socket.emit('query fetch', {
             name : session_name,
         });
      });
 
     $('#askbutton').on('click', function() {
+        if (!initiator) return;
         var val = $('#askbutton').text();
         if (val[0] == 'Q') { // start a query
             // tell server to query clients
@@ -284,14 +323,11 @@ var initSessions = function() {
     var current_hover_label = null;
     
     var clearQueryLabels = function() {
-      for(let i = 0; i < clicked_labels.length; i++) {
-          glviewer.removeLabel(clicked_labels[i]);
-      }
+      var labels = clicked_labels.slice();
+      if (current_hover_label) labels.push(current_hover_label);
+      if (labels.length) glviewer.removeLabels(labels);
       clicked_labels = [];
-      if(current_hover_label) {
-          glviewer.removeLabel(current_hover_label);
-          current_hover_label = null;
-      }
+      current_hover_label = null;
     };
     
     // Return information about what is currently clicked for the server
@@ -300,6 +336,7 @@ var initSessions = function() {
         return ret;
     };
     socket.on('query start response', function() {
+        if (!initiator && !joined) return;
         if (initiator) {
             $('#askbutton').html('Show Results');
             $('#responseinfo').html('Responses: 0');
@@ -361,6 +398,7 @@ var initSessions = function() {
     });
 
     socket.on('query end response', function() {
+        if (!initiator && !joined) return;
         if (initiator) {
             $('#askbutton').html('Query Atoms');
             $('#responseinfo').html('');
@@ -381,6 +419,7 @@ var initSessions = function() {
     });
     
     socket.on('query fetch response', function(query_result) {
+        if (!initiator) return;
         
         // First clear existing labels
         clearResultLabels();

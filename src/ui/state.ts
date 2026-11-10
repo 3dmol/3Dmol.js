@@ -1,7 +1,8 @@
 import type { AtomStyleSpec, GLModel } from "../GLModel";
 import type { GLViewer, SurfaceStyleSpec } from "../GLViewer";
-import type { Label } from "../Label";
+import type { Label, LabelSpec } from "../Label";
 import type { AtomSelectionSpec, AtomSpec } from "../specs";
+import { CC } from "../colors";
 import { UI, UIConfig } from "./ui";
 
 export interface UIStyle {
@@ -17,6 +18,17 @@ export interface UISelection {
     styles: Map<string, UIStyle>;
     hidden: boolean;
     labelsEnabled: boolean;
+    labelStyle?: LabelSpec;
+    /** Coordinate frame used for this selection's currently owned static labels. */
+    labelFrame?: number;
+    /** Preserve representations from earlier layers for matching atoms. */
+    additive?: boolean;
+}
+
+export interface UIViewSettings {
+    background: string;
+    backgroundAlpha: number;
+    projection: "perspective" | "orthographic";
 }
 
 export interface UISurface {
@@ -27,6 +39,8 @@ export interface UISurface {
     calculationSpec: AtomSelectionSpec;
     style: SurfaceStyleSpec;
     type: number;
+    /** Coordinate frame at which this static surface was calculated. */
+    frame?: number;
 }
 
 const surfaceTypes: Record<string, number> = { VDW: 1, SES: 2, SAS: 3, MS: 4 };
@@ -58,15 +72,30 @@ export class StateManager {
     private readonly inheritedStyles = new WeakMap<AtomStyleSpec, AtomStyleSpec>();
     private readonly selectionLabels = new Map<string, Label[]>();
     private readonly pendingSurfaces = new Map<number, {
-        spec: AtomSelectionSpec; calculationSpec: AtomSelectionSpec; removed: boolean
+        spec: AtomSelectionSpec; calculationSpec: AtomSelectionSpec; removed: boolean;
+        surface: ReturnType<GLViewer['getSurface']>
     }>();
     private sequence = 0;
     private disposed = false;
+    private viewSettings: UIViewSettings;
+    private batchDepth = 0;
+    private pendingLayerRender = false;
+    private pendingRefresh = false;
 
     constructor(public readonly viewer: GLViewer, private readonly config: UIConfig = {}) {
         // Reinitializing an embedded viewer must not leave duplicate panels/timers.
         if (viewer.ui && viewer.ui !== this) viewer.ui.destroy();
         viewer.ui = this;
+        const viewerConfig = viewer.getConfig?.();
+        this.viewSettings = {
+            background: this.backgroundHex(config.view?.background ?? viewerConfig?.backgroundColor ?? '#ffffff'),
+            backgroundAlpha: config.view?.backgroundAlpha ?? viewerConfig?.backgroundAlpha ?? 1,
+            projection: config.view?.projection ?? (viewerConfig?.orthographic ? 'orthographic' : 'perspective')
+        };
+        if (config.view) {
+            viewer.setBackgroundColor(this.viewSettings.background, this.viewSettings.backgroundAlpha);
+            viewer.setProjection(this.viewSettings.projection);
+        }
         this.initiateUI();
     }
 
@@ -74,6 +103,23 @@ export class StateManager {
         if (this.disposed) return () => undefined;
         this.listeners.add(listener);
         return () => { this.listeners.delete(listener); };
+    }
+
+    /** Apply related synchronous layer edits before rendering and notifying controls. */
+    public batch(callback: () => void): void {
+        this.batchDepth++;
+        try {
+            callback();
+        } finally {
+            this.batchDepth--;
+            if (!this.batchDepth) {
+                const render = this.pendingLayerRender;
+                const refresh = this.pendingRefresh;
+                this.pendingLayerRender = this.pendingRefresh = false;
+                if (render) this.renderLayers();
+                else if (refresh) this.refresh();
+            }
+        }
     }
 
     public addSelection(spec: AtomSelectionSpec = {}, sid?: string, name?: string): string {
@@ -120,11 +166,45 @@ export class StateManager {
         this.setSelectionVisible(id, this.selection(id).hidden);
     }
 
+    /** Choose whether this layer replaces or adds to earlier representations. */
+    public setSelectionAdditive(id: string, additive: boolean): void {
+        this.selection(id).additive = additive;
+        this.renderLayers();
+    }
+
     /** Toggle residue labels owned by this selection, leaving other labels alone. */
-    public setResidueLabels(id: string, enabled: boolean): void {
+    public setResidueLabels(id: string, enabled: boolean, style?: LabelSpec): void {
         const selection = this.selection(id);
+        if (style !== undefined) {
+            this.clearSelectionLabels(id);
+            selection.labelStyle = copy(style);
+        }
         selection.labelsEnabled = enabled;
         this.syncSelectionLabels(selection);
+        this.refresh();
+    }
+
+    /** Application-readable appearance settings maintained by the view controls. */
+    public getViewSettings(): UIViewSettings {
+        return { ...this.viewSettings };
+    }
+
+    /** Apply view settings and keep the corresponding UI controls in sync. */
+    public setViewSettings(patch: Partial<UIViewSettings>): void {
+        const next = { ...this.viewSettings, ...patch };
+        if (!Number.isFinite(next.backgroundAlpha) || next.backgroundAlpha < 0 || next.backgroundAlpha > 1) {
+            throw new Error('Background opacity must be between zero and one.');
+        }
+        if (next.projection !== 'perspective' && next.projection !== 'orthographic') {
+            throw new Error('Choose perspective or orthographic projection.');
+        }
+        next.background = this.backgroundHex(next.background);
+        if (Object.keys(next).every(key => next[key] === this.viewSettings[key])) return;
+        this.viewSettings = next;
+        this.viewer.setBackgroundColor(next.background, next.backgroundAlpha);
+        this.viewer.setProjection(next.projection);
+        this.viewer.render();
+        this.config.onViewChange?.(this.getViewSettings());
         this.refresh();
     }
 
@@ -201,7 +281,7 @@ export class StateManager {
             if (this.surfaceIncludesModel(pending.spec, model, modelCount) ||
                 this.surfaceIncludesModel(pending.calculationSpec, model, modelCount)) {
                 pending.removed = true;
-                if (this.viewer.getSurface(surfaceId)) this.viewer.removeSurface(surfaceId);
+                if (pending.surface && this.viewer.getSurface(surfaceId) === pending.surface) this.viewer.removeSurface(surfaceId);
             }
         }
         this.modelTitles.delete(id);
@@ -217,6 +297,7 @@ export class StateManager {
         const surfaceStyle = copy(style);
         const selection = copy(spec);
         const calculation = copy(calculationSpec);
+        const frame = this.viewer.getFrame?.() || 0;
         const shownAtoms = this.viewer.selectedAtoms(selection);
         if (!shownAtoms.length) throw new Error("Select atoms before creating a surface.");
         const calculationAtoms = new Set(this.viewer.selectedAtoms(calculation));
@@ -228,25 +309,34 @@ export class StateManager {
         // the returned promise is the stable ID in both cases.
         const pending = this.viewer.addSurface(surfaceType, surfaceStyle, selection, calculation) as
             Promise<unknown> & { surfid: number };
-        const entry = { spec: selection, calculationSpec: calculation, removed: false };
+        const entry = {
+            spec: selection, calculationSpec: calculation, removed: false,
+            surface: this.viewer.getSurface(pending.surfid)
+        };
+        const removeOwnedSurface = () => {
+            if (entry.surface && this.viewer.getSurface(pending.surfid) === entry.surface) {
+                this.viewer.removeSurface(pending.surfid);
+            }
+        };
         this.pendingSurfaces.set(pending.surfid, entry);
         try {
             await pending;
         } catch (error) {
-            if (this.viewer.getSurface(pending.surfid)) this.viewer.removeSurface(pending.surfid);
+            removeOwnedSurface();
             throw error;
         } finally {
-            this.pendingSurfaces.delete(pending.surfid);
+            if (this.pendingSurfaces.get(pending.surfid) === entry) this.pendingSurfaces.delete(pending.surfid);
         }
-        if (this.disposed || entry.removed) {
-            if (this.viewer.getSurface(pending.surfid)) this.viewer.removeSurface(pending.surfid);
+        if (this.disposed || entry.removed || this.viewer.getSurface(pending.surfid) !== entry.surface) {
+            removeOwnedSurface();
             throw new Error(this.disposed ? "The viewer controls were closed before the surface finished."
-                : "A model used by this surface was removed before it finished.");
+                : entry.removed ? "A model used by this surface was removed before it finished."
+                    : "This surface was removed before it finished.");
         }
         const id = this.nextID("surface");
         this.surfaces.set(id, {
             id, name, surfaceId: pending.surfid, spec: selection, calculationSpec: calculation,
-            style: surfaceStyle, type: surfaceType
+            style: surfaceStyle, type: surfaceType, frame
         });
         this.viewer.render();
         this.refresh();
@@ -285,7 +375,7 @@ export class StateManager {
         this.surfaces.set(id, {
             id, name: "Molecular surface", surfaceId, spec: copy(spec), style: copy(style),
             calculationSpec: copy(calculationSpec ?? this.viewer.getSurface(surfaceId)?.allsel ?? spec),
-            type: this.surfaceType(type)
+            type: this.surfaceType(type), frame: this.viewer.getFrame?.() || 0
         });
         this.refresh();
         return id;
@@ -299,6 +389,10 @@ export class StateManager {
     /** Notify controls after models or coordinates are changed by application code. */
     public refresh(): void {
         if (this.disposed) return;
+        if (this.batchDepth) {
+            this.pendingRefresh = true;
+            return;
+        }
         for (const [id, surface] of this.surfaces) {
             if (!this.viewer.getSurface(surface.surfaceId)) this.surfaces.delete(id);
         }
@@ -342,10 +436,16 @@ export class StateManager {
         if (!selection.labelsEnabled || selection.hidden) {
             this.clearSelectionLabels(selection.id);
         } else if (!this.selectionLabels.has(selection.id)) {
-            this.selectionLabels.set(selection.id, this.viewer.addResLabels(selection.spec, {
+            const frame = this.viewer.getFrame?.() ?? 0;
+            this.selectionLabels.set(selection.id, this.viewer.addResLabels(selection.spec, copy(selection.labelStyle ?? {
                 fontSize: 12, showBackground: false, fontColor: '#000066'
-            }));
+            })));
+            selection.labelFrame = frame;
         }
+    }
+
+    private backgroundHex(color: string): string {
+        return `#${CC.color(color).getHex().toString(16).padStart(6, '0')}`;
     }
 
     private nextID(kind: string): string {
@@ -415,6 +515,10 @@ export class StateManager {
 
     private renderLayers(): void {
         if (this.disposed) return;
+        if (this.batchDepth) {
+            this.pendingLayerRender = true;
+            return;
+        }
         const atoms = this.captureStyles();
         for (const atom of atoms) atom.style = copy(this.baseline.get(atom));
         // Invalidate model geometry after restoring style objects, including when
@@ -424,7 +528,7 @@ export class StateManager {
             if (selection.hidden) continue;
             const styles = Array.from(selection.styles.values()).filter(style => !style.hidden);
             if (!styles.length) continue;
-            this.viewer.setStyle(selection.spec, {});
+            if (!selection.additive) this.viewer.setStyle(selection.spec, {});
             for (const style of styles) this.viewer.addStyle(selection.spec, copy(style.spec));
         }
         for (const atom of atoms) {

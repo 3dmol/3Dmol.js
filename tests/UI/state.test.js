@@ -118,6 +118,138 @@ describe("UI appearance state", () => {
         state.destroy();
     });
 
+    test("nested batches apply complete appearance layers with one render and notification", () => {
+        const { model, viewer } = fixture();
+        const state = new StateManager(viewer);
+        const notify = jest.fn(); state.subscribe(notify);
+        const apply = jest.spyOn(viewer, 'setStyle');
+        state.batch(() => {
+            state.createSelectionAndStyle({}, { cartoon: {} });
+            state.batch(() => {
+                const detail = state.addSelection({ elem: 'C' });
+                state.addStyle({ stick: { radius: 0.2 } }, detail);
+                state.renameSelection(detail, 'Carbon');
+                state.refresh();
+                expect(apply).not.toHaveBeenCalled();
+                expect(viewer.render).not.toHaveBeenCalled();
+                expect(notify).not.toHaveBeenCalled();
+            });
+            expect(apply).not.toHaveBeenCalled();
+            expect(viewer.render).not.toHaveBeenCalled();
+        });
+        expect(model.selectedAtoms({ elem: 'C' })[0].style).toEqual({ stick: { radius: 0.2 } });
+        expect(model.selectedAtoms({ elem: 'O' })[0].style).toEqual({ cartoon: {} });
+        expect(viewer.render).toHaveBeenCalledTimes(1);
+        expect(notify).toHaveBeenCalledTimes(1);
+        state.destroy();
+    });
+
+    test("batch cleanup flushes completed edits on error and does not leave future edits suspended", () => {
+        const { viewer } = fixture();
+        const state = new StateManager(viewer);
+        const notify = jest.fn(); state.subscribe(notify);
+        expect(() => state.batch(() => {
+            state.createSelectionAndStyle({}, { stick: {} });
+            throw new Error('Interrupted edits');
+        })).toThrow('Interrupted edits');
+        expect(viewer.render).toHaveBeenCalledTimes(1);
+        expect(notify).toHaveBeenCalledTimes(1);
+        state.createSelectionAndStyle({ elem: 'C' }, { sphere: {} });
+        expect(viewer.render).toHaveBeenCalledTimes(2);
+        expect(notify).toHaveBeenCalledTimes(2);
+        state.destroy();
+    });
+
+    test("additive layers preserve earlier styles and can return to replacing them", () => {
+        const { model, viewer } = fixture();
+        const state = new StateManager(viewer);
+        const base = state.createSelectionAndStyle({}, { stick: { radius: 0.2 } });
+        const detail = state.createSelectionAndStyle({ elem: 'C' }, { sphere: { scale: 0.3 } });
+        state.setSelectionAdditive(detail, true);
+        for (const frame of model.getInternalState().frames) {
+            expect(frame[0].style).toEqual({ stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
+            expect(frame[1].style).toEqual({ stick: { radius: 0.2 } });
+        }
+        state.setSelectionAdditive(detail, false);
+        expect(model.selectedAtoms({ elem: 'C' })[0].style).toEqual({ sphere: { scale: 0.3 } });
+        state.setSelectionAdditive(detail, true);
+        state.removeSelection(base);
+        expect(model.selectedAtoms({ elem: 'C' })[0].style).toEqual({ line: {}, sphere: { scale: 0.3 } });
+        state.destroy();
+    });
+
+    test("explicit residue-label styling survives toggles and selection edits without mutating the caller", () => {
+        const { viewer } = fixture();
+        const state = new StateManager(viewer);
+        const id = state.addSelection({ elem: 'C' });
+        const style = { fontSize: 14, backgroundOpacity: 0.8, screenOffset: { x: 2, y: 3 } };
+        state.setResidueLabels(id, true, style);
+        style.screenOffset.x = 50;
+        state.setResidueLabels(id, false);
+        state.setResidueLabels(id, true);
+        state.addSelection({ elem: 'O' }, id);
+        expect(viewer.addResLabels).toHaveBeenLastCalledWith({ elem: 'O' }, {
+            fontSize: 14, backgroundOpacity: 0.8, screenOffset: { x: 2, y: 3 }
+        });
+        state.setResidueLabels(id, true, {});
+        expect(viewer.addResLabels).toHaveBeenLastCalledWith({ elem: 'O' }, {});
+        state.destroy();
+    });
+
+    test("view settings notify embeddings and keep an independent readable snapshot", () => {
+        const { viewer } = fixture();
+        viewer.setBackgroundColor = jest.fn(); viewer.setProjection = jest.fn();
+        const onViewChange = jest.fn();
+        const state = new StateManager(viewer, { view: { background: 'navy', projection: 'orthographic' }, onViewChange });
+        expect(viewer.setBackgroundColor).toHaveBeenLastCalledWith('#000080', 1);
+        expect(viewer.setProjection).toHaveBeenLastCalledWith('orthographic');
+        const changed = jest.fn(); state.subscribe(changed);
+        state.setViewSettings({ backgroundAlpha: 0.5 });
+        expect(onViewChange).toHaveBeenCalledWith({ background: '#000080', backgroundAlpha: 0.5, projection: 'orthographic' });
+        expect(changed).toHaveBeenCalledTimes(1);
+        state.getViewSettings().background = '#ff0000';
+        expect(state.getViewSettings().background).toBe('#000080');
+        expect(() => state.setViewSettings({ backgroundAlpha: -1 })).toThrow();
+        state.destroy();
+    });
+
+    test("static residue labels remember their creation frame until they are recreated", () => {
+        const { viewer } = fixture();
+        let frame = 2;
+        viewer.getFrame = () => frame;
+        const state = new StateManager(viewer);
+        const id = state.addSelection({ elem: 'C' });
+        state.setResidueLabels(id, true);
+        expect(state.selections.get(id).labelFrame).toBe(2);
+        frame = 5;
+        state.addStyle({ stick: {} }, id);
+        state.setResidueLabels(id, true);
+        expect(viewer.addResLabels).toHaveBeenCalledTimes(1);
+        expect(state.selections.get(id).labelFrame).toBe(2);
+        state.setResidueLabels(id, false);
+        frame = 4;
+        state.setResidueLabels(id, true);
+        expect(viewer.addResLabels).toHaveBeenCalledTimes(2);
+        expect(state.selections.get(id).labelFrame).toBe(4);
+        state.destroy();
+    });
+
+    test("surface snapshots remember the calculation frame rather than the completion frame", async () => {
+        const { viewer, surfaceObjects } = fixture();
+        let frame = 3, finish;
+        viewer.getFrame = () => frame;
+        viewer.addSurface = jest.fn(() => {
+            surfaceObjects.set(8, {});
+            return Object.assign(new Promise(resolve => { finish = resolve; }), { surfid: 8 });
+        });
+        const state = new StateManager(viewer);
+        const pending = state.addSurface(1, {}, {});
+        frame = 5; finish(8);
+        const id = await pending;
+        expect(state.surfaces.get(id).frame).toBe(3);
+        state.destroy();
+    });
+
     test("renaming trims text and keeps atom and representation settings intact", () => {
         const { model, viewer } = fixture();
         const state = new StateManager(viewer);
@@ -399,6 +531,48 @@ describe("UI appearance state", () => {
         state.destroy();
     });
 
+    test.each(['destroyed', 'failed', 'replaced'])("stale %s surface work cannot remove a new surface that reused its ID", async outcome => {
+        const { viewer, surfaceObjects } = fixture();
+        let finish, fail;
+        viewer.addSurface.mockImplementation(() => {
+            surfaceObjects.set(9, { owner: 'old' });
+            return Object.assign(new Promise((resolve, reject) => { finish = resolve; fail = reject; }), { surfid: 9 });
+        });
+        const state = new StateManager(viewer);
+        const pending = state.addSurface(1, {}, {});
+        if (outcome === 'destroyed') state.destroy();
+        surfaceObjects.clear();
+        const replacement = { owner: 'new' };
+        surfaceObjects.set(9, replacement);
+        if (outcome === 'failed') fail(new Error('Old calculation failed'));
+        else finish(9);
+        await expect(pending).rejects.toThrow(outcome === 'destroyed' ? 'closed'
+            : outcome === 'failed' ? 'Old calculation failed' : 'removed before it finished');
+        expect(viewer.getSurface(9)).toBe(replacement);
+        expect(viewer.removeSurface).not.toHaveBeenCalled();
+        expect(state.surfaces.size).toBe(0);
+        state.destroy();
+    });
+
+    test("finishing stale work retains tracking for a newer pending surface using the same ID", async () => {
+        const { viewer, target, other } = modelRemovalFixture();
+        const completions = [];
+        viewer.addSurface = () => {
+            viewer.surfaces[44] = [];
+            return Object.assign(new Promise(resolve => completions.push(resolve)), { surfid: 44 });
+        };
+        const state = new StateManager(viewer);
+        const old = state.addSurface(1, {}, { model: other });
+        const current = state.addSurface(1, {}, { model: target });
+        completions[0](44);
+        await expect(old).rejects.toThrow('removed before it finished');
+        state.removeModel(target);
+        expect(viewer.getSurface(44)).toBeUndefined();
+        completions[1](44);
+        await expect(current).rejects.toThrow('model used by this surface was removed');
+        state.destroy();
+    });
+
     test("destroy releases subscriptions and repeated installation disposes the old UI", () => {
         const { viewer } = fixture();
         const first = new StateManager(viewer);
@@ -518,29 +692,92 @@ describe("viewer trajectory state", () => {
         });
     }
 
-    test("setFrame commits only after model updates finish and propagates failures", async () => {
+    function modelWithFrames(count, id = 0) {
+        const model = new $3Dmol.GLModel(id);
+        model.addMolData(Array.from({ length: count }, (_, frame) => `1\nframe ${frame}\nC 0 ${frame} 0\n`).join(''), "xyz", {
+            multimodel: true, frames: true
+        });
+        return model;
+    }
+
+    test("setFrame updates immediately while its promise waits for models and propagates failures", async () => {
         let finish;
         const model = { getNumFrames: () => 3, setFrame: jest.fn(() => new Promise(resolve => { finish = resolve; })) };
         const instance = viewer([model]);
         const pending = instance.setFrame(2);
-        expect(instance.getFrame()).toBe(0);
+        expect(instance.getFrame()).toBe(2);
         finish();
-        await pending;
+        await expect(pending).resolves.toBeUndefined();
         expect(instance.getFrame()).toBe(2);
         model.setFrame.mockRejectedValue(new Error("Frame unavailable"));
         await expect(instance.setFrame(1)).rejects.toThrow("Frame unavailable");
-        expect(instance.getFrame()).toBe(2);
+        expect(instance.getFrame()).toBe(1);
     });
 
-    test("clamps frame requests and skips removed models", async () => {
+    test.each([[50, 2], [-2, 1], [1.5, 1]])("resolves viewer frame %s before updating models and skips removed models", async (frame, expected) => {
         const model = { getNumFrames: () => 3, setFrame: jest.fn(() => Promise.resolve()) };
         const instance = viewer([undefined, model]);
-        await instance.setFrame(50);
-        expect(instance.getFrame()).toBe(2);
-        expect(model.setFrame).toHaveBeenLastCalledWith(2);
-        await instance.setFrame(-2);
-        expect(instance.getFrame()).toBe(2);
-        expect(model.setFrame).toHaveBeenLastCalledWith(2);
+        const pending = instance.setFrame(frame);
+        expect(instance.getFrame()).toBe(expected);
+        expect(model.setFrame).toHaveBeenCalledWith(expected);
+        await expect(pending).resolves.toBeUndefined();
+    });
+
+    test.each([
+        [-1, 2, 0], [-2, 1, 1], [-3, 0, 0], [-4, 2, 0],
+        [0, 0, 0], [1, 1, 1], [3, 0, 0], [4, 1, 1],
+        [1.9, 1, 1], [-1.9, 2, 0], [NaN, 0, 0], [Infinity, 0, 0], [-Infinity, 0, 0]
+    ])("frame %s immediately renders one wrapped overlay and each model's wrapped coordinates", async (frame, expected, shorterExpected) => {
+        const model = modelWithFrames(2);
+        const longer = modelWithFrames(3, 1);
+        model.globj = jest.fn();
+        longer.globj = jest.fn();
+        const shapes = [0, 1, 2].map(frame => ({ frame, globj: jest.fn(), removegl: jest.fn() }));
+        const labels = [0, 1, 2].map(frame => ({ frame, sprite: {} }));
+        const visible = new Set();
+        const instance = Object.assign(viewer([undefined, model, longer], shapes, labels), {
+            renderer: { setViewport: jest.fn(), supportedExtensions: () => ({}) },
+            updateClickables: jest.fn(), getView: jest.fn(), setView: jest.fn(), surfaces: {},
+            modelGroup: { add: sprite => visible.add(sprite), remove: sprite => visible.delete(sprite) }
+        });
+
+        const pending = instance.setFrame(frame);
+        instance.render();
+        expect(instance.getFrame()).toBe(expected);
+        expect(model.selectedAtoms({})[0].y).toBe(shorterExpected);
+        expect(longer.selectedAtoms({})[0].y).toBe(expected);
+        for (const shape of shapes) {
+            expect(shape.globj).toHaveBeenCalledTimes(shape.frame === expected ? 1 : 0);
+            expect(shape.removegl).toHaveBeenCalledTimes(shape.frame === expected ? 0 : 1);
+        }
+        expect([...visible]).toEqual([labels[expected].sprite]);
+        await pending;
+        expect(instance.getFrame()).toBe(expected);
+    });
+
+    test("negative viewer frames and replayed getFrame values preserve a shared timeline across model lengths", async () => {
+        const shorter = modelWithFrames(3);
+        const longer = modelWithFrames(5, 1);
+        const instance = viewer([shorter, longer]);
+        const coordinates = () => [shorter, longer].map(model => model.selectedAtoms({})[0].y);
+        await instance.setFrame(-1);
+        expect(instance.getFrame()).toBe(4);
+        expect(coordinates()).toEqual([1, 4]);
+        const savedFrame = instance.getFrame();
+        const savedCoordinates = coordinates();
+        await instance.setFrame(0);
+        await instance.setFrame(instance.getNumFrames() - 1);
+        expect(coordinates()).toEqual(savedCoordinates);
+        await instance.setFrame(savedFrame);
+        expect(instance.getFrame()).toBe(savedFrame);
+        expect(coordinates()).toEqual(savedCoordinates);
+    });
+
+    test.each([[-1, 3], [-2, 2], [-4, 0], [-5, 3], [4, 0], [5, 1]])("direct model frame %s wraps to %s", async (frame, expected) => {
+        const model = modelWithFrames(4);
+        const pending = model.setFrame(frame);
+        expect(model.selectedAtoms({})[0].y).toBe(expected);
+        await expect(pending).resolves.toBeUndefined();
     });
 
     test("counts shape and label frames in sparse scenes, including frame zero", () => {
@@ -554,9 +791,15 @@ describe("viewer trajectory state", () => {
         expect(instance.selectedAtoms({ model: [0, 99] })).toEqual([]);
     });
 
-    test("setting an empty model frame preserves its empty atom list", async () => {
+    test.each([-2, 0, 7])("frame %s keeps empty scenes at zero and empty model atoms intact", async frame => {
         const model = new $3Dmol.GLModel(0);
-        await model.setFrame(0);
+        const empty = viewer();
+        const instance = viewer([undefined, model]);
+        const pending = instance.setFrame(frame);
+        expect(instance.getFrame()).toBe(0);
+        await expect(pending).resolves.toBeUndefined();
+        await expect(empty.setFrame(frame)).resolves.toBeUndefined();
+        expect(empty.getFrame()).toBe(0);
         expect(model.getInternalState().atoms).toEqual([]);
     });
 });

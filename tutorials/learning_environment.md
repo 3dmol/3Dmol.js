@@ -30,6 +30,14 @@ By default, this will launch a server on port 5000, e.g. `http://HOSTNAME:5000/`
 Your network must allow external connections to the specified port.
 Do <b>not</b> run this command as superuser to run the server on the privileged default webserver port 80 without consulting with a network security specialist.
 
+The viewer connects to the session server at the page's origin, preserving its protocol and port. On `localhost`, it defaults to port 5000 so the viewer and Flask server can run separately during development. To use another session server, set `window.viewerSessionServer` before `initSessions()` runs, for example in a script in the viewer page:
+
+```javascript
+window.viewerSessionServer = 'http://localhost:6000';
+```
+
+Set it to `window.location.origin` to use the page's port on localhost, or to the full URL of another session server.
+
 Note that files put in the `3dmol` directory can be referenced as relative paths within the `url=` component.  For example: `http://localhost:5000/static/viewer.html?url=molecule.sdf&style=stick`
 
 

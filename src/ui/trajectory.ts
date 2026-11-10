@@ -1,5 +1,13 @@
 import type { GLViewer } from "../GLViewer";
 
+export interface TrajectorySettings {
+    fps: number;
+    loop: boolean;
+    playing: boolean;
+    /** Zero-based index; negative and overflowing inputs wrap like GLViewer.setFrame(). */
+    frame: number;
+}
+
 type TransportIcon = "first" | "previous" | "play" | "pause" | "next" | "last";
 
 const iconPaths: Record<TransportIcon, string> = {
@@ -33,6 +41,8 @@ export class TrajectoryControls {
     private wasConnected = false;
     private pending = false;
     private queuedFrame?: number;
+    private frameLoad?: Promise<void>;
+    private settingsRevision = 0;
     private totalFrames = 0;
     private currentFrame = 0;
     private position?: { left: number; top: number };
@@ -125,6 +135,45 @@ export class TrajectoryControls {
 
     get isPlaying(): boolean {
         return this.playing || this.viewer.isAnimated();
+    }
+
+    /** Read transport settings without exposing or depending on its DOM. */
+    getSettings(): TrajectorySettings {
+        return {
+            fps: Number(this.speed.value), loop: this.loop.checked,
+            playing: this.isPlaying, frame: this.clamp(this.viewer.getFrame())
+        };
+    }
+
+    /** Restore transport settings after models have been loaded. */
+    async setSettings(settings: Partial<TrajectorySettings>): Promise<void> {
+        if (this.destroyed) return;
+        if (settings.fps !== undefined && (!Number.isFinite(settings.fps) || settings.fps <= 0 || settings.fps > 240)) {
+            throw new Error('Playback speed must be between zero and 240 frames per second.');
+        }
+        if (settings.frame !== undefined && !Number.isInteger(settings.frame)) {
+            throw new Error('Choose an integer trajectory frame.');
+        }
+        const revision = ++this.settingsRevision;
+        const playing = settings.playing ?? this.isPlaying;
+        this.pause();
+        this.refresh();
+        if (settings.fps !== undefined) {
+            const value = String(settings.fps);
+            if (!Array.from(this.speed.options).some(option => option.value === value)) {
+                const option = this.document.createElement('option');
+                option.value = value; option.textContent = `${value} fps`;
+                this.speed.append(option);
+            }
+            this.speed.value = value;
+        }
+        if (settings.loop !== undefined) this.loop.checked = settings.loop;
+        if (settings.frame !== undefined) await this.queueFrame(settings.frame, true);
+        else if (this.pending) await this.frameLoad;
+        if (this.destroyed || revision !== this.settingsRevision) return;
+        if (!this.error.hidden) throw new Error(this.error.textContent || 'Unable to load trajectory frame.');
+        if (playing) this.togglePlayback();
+        else this.updateControls();
     }
 
     private get requestedFrame(): number {
@@ -401,10 +450,14 @@ export class TrajectoryControls {
         this.queueFrame(frame);
     }
 
-    private queueFrame(frame: number): void {
-        this.queuedFrame = this.clamp(frame);
-        this.slider.value = String(this.queuedFrame + 1);
-        if (!this.pending) void this.loadQueuedFrames();
+    private queueFrame(frame: number, wrap = false): Promise<void> {
+        // Explicit settings use the viewer's modulo semantics; pointer/keyboard
+        // scrubbing stays within the transport's displayed bounds.
+        this.queuedFrame = wrap ? frame : this.clamp(frame);
+        const shownFrame = wrap && this.totalFrames ? ((frame % this.totalFrames) + this.totalFrames) % this.totalFrames : this.clamp(frame);
+        this.slider.value = String(shownFrame + 1);
+        if (!this.pending) this.frameLoad = this.loadQueuedFrames();
+        return this.frameLoad ?? Promise.resolve();
     }
 
     private async loadQueuedFrames(): Promise<void> {
@@ -419,7 +472,7 @@ export class TrajectoryControls {
                 this.updateControls();
                 await this.viewer.setFrame(frame);
                 if (this.destroyed) return;
-                this.currentFrame = frame;
+                this.currentFrame = this.clamp(this.viewer.getFrame());
                 this.viewer.render();
             }
         } catch (error) {
