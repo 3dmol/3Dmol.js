@@ -21,14 +21,16 @@ The contents of the viewer can be set and manipulated through the use of `data-`
  - **data-type** The value is the file format (default pdb; can be pdb, sdf, xyz, mol2, or cube).  
  - **data-backgroundcolor** The background color (default black).
  - **data-backgroundalpha** The background alpha (default opaque: 1.0).
+ - **data-options** Options for parser.
  - **data-select** The value is an {@link AtomSpec} selection specification.
  - **data-style** The value is a style specification.
  - **data-surface** A surface style specification.
  - **data-labelres** A residue label style specification.
- - **data-zoomto** An {@link AtomSpec} selection specification to zoom to.
  - **data-spin** If set will spin the model using {@link GLViewer#spin}. Can specify axis and speed (e.g. data-spin='axis:z;speed:10')
  - **data-callback** JavaScript function to call upon viewer creation.  Receives {@link GLViewer} object as argument.
  - **data-ui** If set will show the UI for the viewer.
+  - **data-zoomto** An {@link AtomSpec} selection specification to zoom to.
+
  
  Multiple selections, styles, residue labels, and surfaces can be provided by appending a suffix
  each tag.  
