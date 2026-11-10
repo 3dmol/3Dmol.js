@@ -1969,8 +1969,8 @@ export class GLModel {
         let viewer = this.viewer;
         return new Promise<void>(function (resolve, reject) {
             if (numFrames == 0) {
-                //return;
                 resolve();
+                return;
             }
             if (framenum < 0 || framenum >= numFrames) {
                 framenum = numFrames - 1;
@@ -3040,6 +3040,11 @@ export class GLModel {
         }
         this.molObj = null;
     };
+
+    /** Whether this model is hidden from the viewer. */
+    public isHidden(): boolean {
+        return !!this.hidden;
+    }
 
     /**
      * Don't show this model in future renderings. Keep all styles and state

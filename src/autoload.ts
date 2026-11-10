@@ -1,5 +1,6 @@
 //auto-initialization
 
+import type { StateManager } from "./ui/state";
 import { GLViewer, createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
 import { get, getbin, makeFunction, specStringToObject } from "./utilities";
@@ -149,33 +150,32 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
 
             //apply all the selections/styles parsed out above to the passed viewer
             var applyStyles = function (glviewer: GLViewer) {
-                if (hasExplicitStyle) {
+                if (UI && hasExplicitStyle) {
+                    // Record UI layers before applying them so the initial appearance
+                    // can be restored when a layer is disabled or removed.
+                    UI.createSelectionAndStyle(select, style);
+                } else if (hasExplicitStyle) {
                     glviewer.setStyle(select, style);
                 } else {
-                    // Use addStyle to preserve any embedded styles (e.g. 3DMOL_STYLE from SDF)
+                    // Preserve styles embedded in molecular files.
                     glviewer.addStyle(select, style);
-                }
-
-                if (UI) {
-                    UI.createSelectionAndStyle(select, style);
                 }
 
                 for (i = 0; i < selectstylelist.length; i++) {
                     let sel = selectstylelist[i][0] || {};
                     let sty = selectstylelist[i][1] || { "line": {} };
-                    glviewer.setStyle(sel, sty);
                     if (UI) {
-                        UI.createSelectionAndStyle(select, style);
+                        UI.createSelectionAndStyle(sel, sty);
+                    } else {
+                        glviewer.setStyle(sel, sty);
                     }
                 }
                 for (i = 0; i < surfaces.length; i++) {
                     let sel = surfaces[i][0] || {};
                     let sty = surfaces[i][1] || {};
-                    let viewer = glviewer;
-
                     if (UI) {
-                        viewer.addSurface(SurfaceType.VDW, sty, sel, sel).then((surfid: any) => {
-                            UI.loadSurface("VDW", sel, sty, surfid);
+                        UI.addSurface(SurfaceType.VDW, sty, sel).catch(error => {
+                            console.warn("Unable to create UI surface:", error);
                         });
                     }
                     else {
@@ -211,8 +211,11 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                         UI.initiateUI();
                 }
 
-                if(viewerdiv.dataset.ui && $3Dmol.StateManager) {
-                    UI = new $3Dmol.StateManager(glviewer); // Creates the UI state management tool
+                const StateManagerClass = (window.$3Dmol as typeof window.$3Dmol & {
+                    StateManager?: typeof StateManager
+                })?.StateManager;
+                if (viewerdiv.dataset.ui && viewerdiv.dataset.ui !== 'false' && StateManagerClass) {
+                    UI = glviewer.ui || new StateManagerClass(glviewer);
                 }
             } catch (error) {
                 console.log(error);

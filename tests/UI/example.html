@@ -1,10 +1,21 @@
-<html>
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3Dmol.js UI example</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    .viewer_3Dmoljs { height: 100%; width: 100%; position: relative; }
+  </style>
+  <!-- The UI registers with the core library, so preserve this execution order. -->
+  <script src="../../build/3Dmol.js" defer></script>
+  <script src="../../build/3Dmol.ui.js" defer></script>
+</head>
 
 <body>
-  <script src="https://code.jquery.com/jquery-3.6.3.min.js"
-    integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
-  <script src="../../build/3Dmol.js" async></script>
-  <div style="height: 100%; width: 100%; position: relative;" class='viewer_3Dmoljs' data-pdb='2POR'
+  <div class='viewer_3Dmoljs' data-pdb='2POR'
     data-backgroundcolor='0xffffff' data-style='stick' data-ui='true'></div>
 </body>
 

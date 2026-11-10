@@ -1,5 +1,6 @@
 //a molecular viewer based on GLMol
 
+import type { StateManager } from "./ui/state";
 import { decode, encode, toRGBA8 } from 'upng-js';
 import { AtomStyleSpec, GLModel, LineStyleSpec } from "./GLModel";
 import { ArrowSpec, BoxSpec, CurveSpec, CustomShapeSpec, CylinderSpec, GLShape, IsoSurfaceSpec, LineSpec, ShapeSpec, SphereSpec, splitMesh } from "./GLShape";
@@ -81,6 +82,9 @@ class Surface extends Array<SurfObj> {
  * @class
 */
 export class GLViewer {
+    /** Optional controls, installed by the separate 3Dmol.ui bundle. */
+    public ui?: StateManager;
+
     // private class variables
     private static numWorkers = 4; // number of threads for surface generation
     private static maxVolume = 64000; // how much to break up surface calculations
@@ -1963,7 +1967,7 @@ export class GLViewer {
                     var index = selm[i];
                     //support python backward indexing
                     if (index < 0) index += this.models.length;
-                    ms.push(this.models[index]);
+                    if (this.models[index]) ms.push(this.models[index]);
                 } else {
                     ms.push(selm[i]);
                 }
@@ -2605,16 +2609,33 @@ export class GLViewer {
 
      */
     public removeLabel(label: Label) {
-        //todo: don't do the linear search
-        for (var i = 0; i < this.labels.length; i++) {
-            if (this.labels[i] == label) {
-                this.labels.splice(i, 1);
-                label.dispose();
-                this.modelGroup.remove(label.sprite);
-                break;
-            }
+        return this.removeLabels([label]);
+    };
+
+    /**
+     * Remove the supplied labels in one batch and redraw once. Labels not owned
+     * by this viewer are ignored; duplicate entries are removed only once.
+     *
+     * @param {Label[]} labels - labels to remove
+     * @return {GLViewer} this viewer
+     */
+    public removeLabels(labels: readonly Label[]) {
+        if (!labels.length) return this;
+        const requested = new Set(labels);
+        const removed = new Set<Label>();
+        let retained = 0;
+        // Compact in one pass, preserving order and the array shared with linked
+        // viewers instead of searching and splicing for each requested label.
+        for (const label of this.labels) {
+            if (requested.has(label)) removed.add(label);
+            else this.labels[retained++] = label;
         }
-        this.show();
+        this.labels.length = retained;
+        for (const label of removed) {
+            this.modelGroup.remove(label.sprite);
+            label.dispose();
+        }
+        if (removed.size) this.show();
         return this;
     };
 
@@ -3489,15 +3510,11 @@ export class GLViewer {
      * @return {Promise}
      */
     public setFrame(framenum: number) {
-        this.viewer_frame = framenum;
-        let viewer = this;
-        return new Promise<void>(function (resolve) {
-            var modelMap = viewer.models.map(function (model) {
-                return model.setFrame(framenum);
-            });
-            Promise.all(modelMap)
-                .then(function () { resolve(); });
-        });
+        const last = Math.max(0, this.getNumFrames() - 1);
+        const requested = Math.floor(framenum) || 0;
+        const frame = requested < 0 || requested > last ? last : requested;
+        return Promise.all(this.models.filter(Boolean).map(model => model.setFrame(frame)))
+            .then(() => { this.viewer_frame = frame; });
     };
 
     /**
@@ -3516,17 +3533,17 @@ export class GLViewer {
     public getNumFrames() {
         var mostFrames = 0;
         for (let i = 0; i < this.models.length; i++) {
-            if (this.models[i].getNumFrames() > mostFrames) {
+            if (this.models[i] && this.models[i].getNumFrames() > mostFrames) {
                 mostFrames = this.models[i].getNumFrames();
             }
         }
         for (let i = 0; i < this.shapes.length; i++) {
-            if (this.shapes[i].frame && this.shapes[i].frame >= mostFrames) {
+            if (this.shapes[i] && this.shapes[i].frame !== undefined && this.shapes[i].frame >= mostFrames) {
                 mostFrames = this.shapes[i].frame + 1;
             }
         }
         for (let i = 0; i < this.labels.length; i++) {
-            if (this.labels[i].frame && this.labels[i].frame >= mostFrames) {
+            if (this.labels[i] && this.labels[i].frame !== undefined && this.labels[i].frame >= mostFrames) {
                 mostFrames = this.labels[i].frame + 1;
             }
         }
@@ -4097,17 +4114,20 @@ export class GLViewer {
     private carveUpExtent(extent, atomlist: AtomSpec[], atomstoshow: AtomSpec[]) {
         let ret = [];
 
-        let index2atomlist = {}; //map from atom.index to position in atomlist
+        // Atom indices are local to each model. Surface selections may combine
+        // models, and their independently copied atoms cannot be keyed by identity.
+        const atomKey = (atom: AtomSpec) => `${atom.model}:${atom.index}`;
+        const index2atomlist = new Map<string, number>();
         for (let i = 0, n = atomlist.length; i < n; i++) {
-            index2atomlist[atomlist[i].index] = i;
+            index2atomlist.set(atomKey(atomlist[i]), i);
         }
 
-        let atomsToListIndex = function (atoms) {
+        let atomsToListIndex = function (atoms: AtomSpec[]) {
             //return a list of indices into atomlist
             let ret = [];
             for (let i = 0, n = atoms.length; i < n; i++) {
-                if (atoms[i].index in index2atomlist)
-                    ret.push(index2atomlist[atoms[i].index]);
+                const index = index2atomlist.get(atomKey(atoms[i]));
+                if (index !== undefined) ret.push(index);
             }
             return ret;
         };

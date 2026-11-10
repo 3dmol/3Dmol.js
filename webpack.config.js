@@ -44,13 +44,7 @@ base_config = {
 umd_config = {
   entry: {
     "3Dmol": ["./src/index.ts", "./src/SurfaceWorker.js", "./src/exporter.js"],
-    "3Dmol.ui": [
-      "./src/ui/ui.js",
-      "./src/ui/state.js",
-      "./src/ui/icon.js",
-      "./src/ui/form.js",
-      "./src/ui/defaultValues.js",
-    ],
+    "3Dmol.ui": ["./src/ui/index.ts"],
   },
   output: {
     library: "[name]",

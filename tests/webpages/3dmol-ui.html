@@ -1,38 +1,43 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-
+<!doctype html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>3dmol UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3Dmol.js TypeScript UI demo</title>
   <style>
-    .viewer_3Dmoljs {
-      border-bottom: 1px solid black;
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      padding: 0;
-      margin: 0;
-    }
+    body { margin: 0; background: #eef2f4; color: #172d39; font: 15px system-ui, sans-serif; }
+    main { max-width: 1400px; margin: auto; padding: 16px; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    .demo-viewer { position: relative; width: 100%; height: 680px; border: 1px solid #dbe4e6; border-radius: 16px; overflow: hidden; }
+    #trajectory { height: 440px; }
+    @media (max-width: 600px) { main { padding: 8px; } .demo-viewer { height: 620px; } }
   </style>
-</head>
-
-<body>
   <script src="../../build/3Dmol.js"></script>
   <script src="../../build/3Dmol.ui.js"></script>
-  <!-- Different divs to test out different input to ui -->
-  <!-- <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true'></div> -->
-  <!-- <div style="height: 100vh;" id='new_canvas_test'></div> -->
-  <!-- <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A"}' data-style='{ "cartoon" : { "color" : "spectrum"} }' data-surface="VDW"></div> -->
-  <!-- <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A"}' data-style='{ "cartoon" : { "color" : "spectrum"} }'></div> -->
-  <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true'
-    data-select='{"elem": "C", "hetflag" : true, "byres" : true}' data-style='{"sphere":{"radius": 0.6}, "stick" : {}}'
-    data-select1='{"chain" : "A"}' data-style1='{ "cartoon" : { "color" : "spectrum"}}' data-select2='{"chain" : "A"}'
-    data-style2='{ "cartoon" : { "color" : "spectrum"}}' data-select3='{"elem" : "C"}'
-    data-style3='{ "sphere" : { "radius" : "0.2"}}' data-surface3="opacity:.7;color:white"></div>
-  <!-- <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain" : "A", "byres" : true}' data-style='{"sphere":{"radius": 0.4}, "stick" : {}}' data-select1='{"chain" : "A", "byres" : true}' data-style1='{ "cartoon" : { "color" : "spectrum"}}'></div> -->
-  <!-- <div style="height: 100vh;" class='viewer_3Dmoljs' data-pdb='2POR' data-backgroundcolor='0xffffff' data-ui='true' data-select='{"chain": "A", "hetflag" : true}' data-style='{"sphere":{"radius": 0.4}, "stick" : {}}'></div> -->
+</head>
+<body>
+<main>
+  <h1>Molecule explorer</h1>
+  <p>Explore a protein, load your own structures, and use guided selections to change their appearance.</p>
+  <div id="protein" class="demo-viewer viewer_3Dmoljs" data-ui="true" data-href="../test_structs/1YCR.pdb"
+    data-backgroundcolor="#edf2f4" data-style="cartoon:color=spectrum"
+    data-select1="chain:B" data-style1="stick:colorscheme=greenCarbon"></div>
+  <h2>Trajectory controls</h2>
+  <p>A small synthetic trajectory for testing playback. This viewer has its own controls.</p>
+  <div id="trajectory" class="demo-viewer"></div>
+</main>
+<script>
+  const trajectoryViewer = $3Dmol.createViewer('trajectory', { backgroundColor: '#edf2f4' });
+  let frames = '';
+  for (let i = 0; i < 40; i++) {
+    const y = Math.sin(i / 40 * Math.PI * 2) * 0.35;
+    frames += `3\nFrame ${i + 1}\nO 0 0 0\nH 0.76 ${0.58 + y} 0\nH -0.76 ${0.58 - y} 0\n`;
+  }
+  trajectoryViewer.addModelsAsFrames(frames, 'xyz');
+  trajectoryViewer.setStyle({}, { stick: { radius: 0.12 }, sphere: { scale: 0.28 } });
+  trajectoryViewer.zoomTo(); trajectoryViewer.render();
+  const trajectoryControls = new $3Dmol.StateManager(trajectoryViewer);
+  trajectoryControls.setModelTitle('Water · synthetic motion');
+</script>
 </body>
-
 </html>

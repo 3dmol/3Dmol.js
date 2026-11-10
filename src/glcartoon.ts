@@ -897,6 +897,20 @@ const naResns = { "DA": true, "DG": true, "A": true, "G": true, "DT": true, "DC"
 
 
 export function drawCartoon(group, atomList, gradientrange, quality = 10) {
+    // Arrowheads and helix tubes use temporary secondary-structure markers.
+    // Partial backbones and trace styles can skip the geometry paths that reset
+    // them, and some tube endpoints originally belong to coils rather than helices.
+    const secondaryStructure = atomList.map(atom => atom.ss);
+    try {
+        drawCartoonGeometry(group, atomList, gradientrange, quality);
+    } finally {
+        for (let i = 0; i < atomList.length; i++) {
+            if (atomList[i].ss !== secondaryStructure[i]) atomList[i].ss = secondaryStructure[i];
+        }
+    }
+}
+
+function drawCartoonGeometry(group, atomList, gradientrange, quality) {
 
     let num = quality;
     let div = quality;
