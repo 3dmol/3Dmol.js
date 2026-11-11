@@ -511,17 +511,17 @@ export class Renderer {
         this._gl.vertexAttribPointer(attributes.color, 3, this._gl.FLOAT, false, 0, 0);
       }
 
-      // Per-vertex alpha (issue #166) -- optional stride-1 stream. A program can declare the
-      // attribute while a given group lacks the buffer (e.g. imposter stick caps share the
-      // sphere-imposter shader but never allocate alphaArray): the attribute stays disabled
-      // there, so it MUST be given a generic value of 1.0 or those fragments read alpha=0
-      // and the caps vanish. disableAttributes() above has already reset the enable state.
+      // Per-vertex alpha is optional; ordinary spheres and stick caps use constant 1.0.
+      // The shared context can retain enabled arrays from another renderer that this
+      // instance does not track, so explicitly disable the array before using a constant.
       if (attributes.alpha >= 0) {
         if (geometryGroup.__webglAlphaBuffer !== undefined) {
           this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglAlphaBuffer);
           this.enableAttribute(attributes.alpha);
           this._gl.vertexAttribPointer(attributes.alpha, 1, this._gl.FLOAT, false, 0, 0);
         } else {
+          this._gl.disableVertexAttribArray(attributes.alpha);
+          this._enabledAttributes[attributes.alpha] = false;
           this._gl.vertexAttrib1f(attributes.alpha, 1.0);
         }
       }
