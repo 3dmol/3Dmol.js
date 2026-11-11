@@ -39,17 +39,18 @@ class Example():
         #construct all javascript test    
         text = ''
 
+        if self.datas:
+            text += "var dataWrappers=[];\n"
         for data in self.datas:
-            text += "var wrapper=$.parseHTML(`"+data+"`);\n$('body').append(wrapper);\n"
+            text += "var wrapper=$.parseHTML(`"+data+"`);\ndataWrappers.push(wrapper);\n$('body').append(wrapper);\n"
             
         for div in self.divs:
             text += "var objectHTML=$.parseHTML(`"+div+"`);\n$(\"body\").append(objectHTML);\n"
+        if self.datas:
+            text += "var original_callback=callback;\ncallback=function(viewer){try{original_callback(viewer);}finally{dataWrappers.forEach(function(wrapper){$(wrapper).remove();});}};\n"
         if self.divs:
             # remove the div when done with it
-            text += "var finished_with_div_callback = function() { callback(viewer); "
-            if self.datas:
-                text += "$(wrapper).remove(); "
-            text += "$(objectHTML).remove();}\n"
+            text += "var finished_with_div_callback = function() { callback(viewer); $(objectHTML).remove(); }\n"
             prescript = ''
             for s in self.prescripts:
                 prescript += s.replace('viewer.render()','viewer.render(callback)')
@@ -176,8 +177,7 @@ if __name__ == '__main__':
     
         for file in test.files:
             for example in file.examples:
-                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){\nconsole.log(err);\nvar li=document.createElement('li');li.innerHTML=name+' '+err;document.getElementById('summary_scroll').appendChild(li);callback(viewer);}},\n")
+                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){\nconsole.log(err);\nvar li=document.createElement('li');li.innerHTML=name+' '+err;document.getElementById('summary_list').appendChild(li);callback(viewer);}},\n")
         f.write("};")
-
 
 

@@ -8,7 +8,7 @@ export interface TrajectorySettings {
     frame: number;
 }
 
-type TransportIcon = "first" | "previous" | "play" | "pause" | "next" | "last";
+type TransportIcon = "first" | "previous" | "play" | "pause" | "next" | "last" | "minimize" | "trajectory";
 
 const iconPaths: Record<TransportIcon, string> = {
     first: "M6 5v14M19 5l-9 7 9 7V5Z",
@@ -16,14 +16,19 @@ const iconPaths: Record<TransportIcon, string> = {
     play: "M8 5v14l11-7Z",
     pause: "M6 5h4v14H6ZM14 5h4v14h-4Z",
     next: "M9 5l9 7-9 7",
-    last: "M18 5v14M5 5l9 7-9 7V5Z"
+    last: "M18 5v14M5 5l9 7-9 7V5Z",
+    minimize: "M5 12h14",
+    trajectory: "M3 4h18v16H3ZM3 8h18M3 16h18M7 4v4M17 4v4M7 16v4M17 16v4M10 10l5 2-5 2Z"
 };
+let nextTrajectoryId = 0;
 
 /** Accessible transport controls for the frames of all models in a viewer. */
 export class TrajectoryControls {
     readonly element: HTMLElement;
+    readonly toggleElement: HTMLButtonElement;
 
     private readonly document: Document;
+    private readonly minimizeButton: HTMLButtonElement;
     private readonly playButton: HTMLButtonElement;
     private readonly firstButton: HTMLButtonElement;
     private readonly previousButton: HTMLButtonElement;
@@ -37,6 +42,8 @@ export class TrajectoryControls {
     private readonly refreshTimer: ReturnType<typeof setInterval>;
     private playbackTimer?: ReturnType<typeof setTimeout>;
     private playing = false;
+    private enabled = true;
+    private minimized = false;
     private destroyed = false;
     private wasConnected = false;
     private pending = false;
@@ -49,11 +56,13 @@ export class TrajectoryControls {
     private floatingRoot?: HTMLElement;
     private drag?: { pointerId: number; startX: number; startY: number; anchor: Element; grabX: number; grabY: number; moving: boolean };
 
-    constructor(private readonly viewer: GLViewer, private readonly onError?: (message: string) => void) {
+    constructor(private readonly viewer: GLViewer, private readonly onError?: (message: string) => void,
+        private readonly onLayoutChange?: () => void) {
         this.document = viewer.getCanvas().ownerDocument;
         const document = this.document;
         this.element = document.createElement("section");
         this.element.className = "molui-trajectory";
+        this.element.id = `molui-trajectory-${++nextTrajectoryId}`;
         this.element.setAttribute("aria-label", "Trajectory controls");
         this.element.tabIndex = 0;
         const moveInstructions = "Drag to move. When the widget is focused, arrow keys move; Shift moves farther. Home or double-click the background resets position.";
@@ -68,6 +77,17 @@ export class TrajectoryControls {
             event.stopPropagation();
             this.resetPosition();
         });
+        this.toggleElement = this.button("trajectory", "Show trajectory controls", () => {
+            this.setMinimized(false);
+            if (this.isVisible) this.minimizeButton.focus({ preventScroll: true });
+        });
+        this.toggleElement.classList.add("molui-trajectory-toggle", "molui-icon");
+        this.toggleElement.setAttribute("aria-controls", this.element.id);
+        this.minimizeButton = this.button("minimize", "Minimize trajectory controls", () => {
+            this.setMinimized(true);
+            if (!this.toggleElement.hidden) this.toggleElement.focus({ preventScroll: true });
+        });
+        this.minimizeButton.classList.add("molui-trajectory-minimize", "molui-icon");
 
         const heading = document.createElement("div");
         heading.className = "molui-trajectory-header";
@@ -76,7 +96,7 @@ export class TrajectoryControls {
         this.frameCount.className = "molui-frame-count";
         // Frame updates must not interrupt a screen reader on every animation tick.
         this.frameCount.setAttribute("aria-live", "off");
-        heading.append(this.frameCount);
+        heading.append(this.frameCount, this.minimizeButton);
 
         const transport = document.createElement("div");
         transport.className = "molui-trajectory-transport";
@@ -135,6 +155,46 @@ export class TrajectoryControls {
 
     get isPlaying(): boolean {
         return this.playing || this.viewer.isAnimated();
+    }
+
+    get isMinimized(): boolean { return this.minimized; }
+
+    /** Whether the expanded transport is available for layout. */
+    get isVisible(): boolean { return !this.destroyed && this.enabled && !this.minimized && this.totalFrames > 1; }
+
+    /** Show or hide this control independently of the viewer's edit controls. */
+    setEnabled(enabled: boolean): void {
+        if (this.destroyed) return;
+        this.enabled = enabled;
+        if (!enabled) this.stopPlayback();
+        this.refresh();
+    }
+
+    /** Collapse to its launcher without changing the frame or playback settings. */
+    setMinimized(minimized: boolean): void {
+        if (this.destroyed) return;
+        this.minimized = minimized;
+        this.refresh();
+    }
+
+    private updateVisibility(): void {
+        const visible = this.isVisible;
+        const showToggle = !this.destroyed && this.enabled && this.minimized && this.totalFrames > 1;
+        const changed = this.element.hidden === visible || this.toggleElement.hidden === showToggle;
+        this.element.hidden = !visible;
+        this.toggleElement.hidden = !showToggle;
+        this.toggleElement.setAttribute("aria-expanded", String(visible));
+        if (!visible) {
+            this.endDrag();
+            this.floatingRoot?.classList.remove("molui-trajectory-floating");
+        } else if (this.position) {
+            if (this.floatingRoot !== this.element.parentElement) {
+                this.floatingRoot?.classList.remove("molui-trajectory-floating");
+                this.floatingRoot = this.element.parentElement ?? undefined;
+            }
+            this.floatingRoot?.classList.add("molui-trajectory-floating");
+        }
+        if (changed) this.onLayoutChange?.();
     }
 
     /** Read transport settings without exposing or depending on its DOM. */
@@ -379,8 +439,8 @@ export class TrajectoryControls {
         }
         const count = Number(this.viewer.getNumFrames());
         this.totalFrames = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
-        this.element.hidden = this.totalFrames <= 1;
-        if (this.playing && (this.totalFrames <= 1 || this.document.hidden || !this.element.isConnected)) {
+        this.updateVisibility();
+        if (this.playing && (!this.enabled || this.totalFrames <= 1 || this.document.hidden || !this.element.isConnected)) {
             this.stopPlayback();
         }
         // An externally started viewer animation owns frame changes until paused.
@@ -433,7 +493,7 @@ export class TrajectoryControls {
             return;
         }
         this.refresh();
-        if (this.totalFrames <= 1 || this.document.hidden) return;
+        if (!this.enabled || this.totalFrames <= 1 || this.document.hidden) return;
         this.playing = true;
         this.error.hidden = true;
         if (this.requestedFrame >= this.totalFrames - 1) {
@@ -514,18 +574,19 @@ export class TrajectoryControls {
     }
 
     private readonly onVisibilityChange = (): void => {
-        if (this.document.hidden) this.pause();
+        if (this.enabled && this.document.hidden) this.pause();
     };
 
     /** Release timers and listeners; an in-flight load will no longer render. */
     destroy(): void {
         if (this.destroyed) return;
-        this.pause();
+        if (this.enabled) this.pause();
         this.destroyed = true;
         this.resetPosition();
         this.queuedFrame = undefined;
         clearInterval(this.refreshTimer);
         this.document.removeEventListener("visibilitychange", this.onVisibilityChange);
         this.element.remove();
+        this.toggleElement.remove();
     }
 }

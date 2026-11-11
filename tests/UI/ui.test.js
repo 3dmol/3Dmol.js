@@ -30,7 +30,7 @@ afterAll(() => {
 function fixture() {
     const container = document.createElement('div');
     container.style.position = 'static';
-    Object.defineProperties(container, { clientWidth: { value: 900 }, clientHeight: { value: 600 } });
+    Object.defineProperties(container, { clientWidth: { value: 900, configurable: true }, clientHeight: { value: 600, configurable: true } });
     const canvas = document.createElement('canvas');
     container.append(canvas);
     document.body.append(container);
@@ -270,6 +270,98 @@ describe('guided molecular viewer UI', () => {
         root.querySelector('.molui-toggle').click();
         expect(state.ui.isOpen).toBe(true);
         expect(onOpenChange).toHaveBeenLastCalledWith(true);
+    });
+
+    test.each([
+        [{}, true, true],
+        [{ edit: false }, false, true],
+        [{ trajectory: false }, true, false],
+        [{ edit: false, trajectory: false }, false, false]
+    ])('control availability is independent for %j', (config, edit, trajectory) => {
+        const { root, state, viewer } = mount(config);
+        viewer.addModelsAsFrames('1\nfirst\nC 0 0 0\n1\nsecond\nC 1 0 0\n', 'xyz');
+        state.refresh();
+        expect(state.getControls()).toEqual({ edit, trajectory });
+        expect(root.querySelector('.molui-toggle').hidden).toBe(!edit);
+        expect(root.querySelector('.molui-panel').hidden).toBe(!edit);
+        expect(root.querySelector('.molui-trajectory').hidden).toBe(!trajectory);
+        expect(root.querySelector('.molui-trajectory-toggle').hidden).toBe(true);
+        expect(root.classList.contains('molui-no-edit')).toBe(!edit);
+        expect(root.classList.contains('molui-has-trajectory')).toBe(trajectory);
+        state.ui.setOpen(true);
+        expect(state.ui.isOpen).toBe(edit);
+        state.ui.setTrajectoryMinimized(true);
+        expect(root.querySelector('.molui-trajectory').hidden).toBe(true);
+        expect(root.querySelector('.molui-trajectory-toggle').hidden).toBe(!trajectory);
+        expect(root.classList.contains('molui-has-trajectory')).toBe(false);
+    });
+
+    test('availability can change without recreating controls or losing appearance state', () => {
+        const onOpenChange = jest.fn();
+        const { root, state, viewer } = mount({ onOpenChange });
+        viewer.addModelsAsFrames('1\nfirst\nC 0 0 0\n1\nsecond\nC 1 0 0\n', 'xyz');
+        state.refresh();
+        button(root, 'Add selection').click();
+        const selection = [...state.selections.values()][0];
+        state.ui.setTrajectoryMinimized(true);
+        state.setControls({ edit: false });
+        expect(state.getControls()).toEqual({ edit: false, trajectory: true });
+        expect(state.ui.isOpen).toBe(false);
+        expect(onOpenChange).toHaveBeenLastCalledWith(false);
+        expect(root.querySelector('.molui-toggle').hidden).toBe(true);
+        expect(root.querySelector('.molui-trajectory-toggle').hidden).toBe(false);
+        state.setControls({ trajectory: false });
+        jest.advanceTimersByTime(1000);
+        state.refresh();
+        expect(root.querySelector('.molui-trajectory').hidden).toBe(true);
+        expect(root.querySelector('.molui-trajectory-toggle').hidden).toBe(true);
+        state.setControls({ edit: true, trajectory: true });
+        expect(state.ui.isTrajectoryMinimized).toBe(true);
+        root.querySelector('.molui-toggle').click();
+        root.querySelector('.molui-trajectory-toggle').click();
+        expect(state.ui.isOpen).toBe(true);
+        expect(state.ui.isTrajectoryMinimized).toBe(false);
+        expect(root.querySelector('.molui-trajectory').hidden).toBe(false);
+        expect(root.classList.contains('molui-has-trajectory')).toBe(true);
+        expect(state.ui.element).toBe(root);
+        expect([...state.selections.values()]).toEqual([selection]);
+    });
+
+    test('trajectory-only controls follow data added and removed by the host while minimized', () => {
+        const { root, state, viewer } = mount({ edit: false });
+        const panel = root.querySelector('.molui-trajectory');
+        const launcher = root.querySelector('.molui-trajectory-toggle');
+        state.ui.setTrajectoryMinimized(true);
+        expect(panel.hidden).toBe(true);
+        expect(launcher.hidden).toBe(true);
+        const model = viewer.addModelsAsFrames('1\nfirst\nC 0 0 0\n1\nsecond\nC 1 0 0\n', 'xyz');
+        jest.advanceTimersByTime(500);
+        expect(panel.hidden).toBe(true);
+        expect(launcher.hidden).toBe(false);
+        viewer.removeModel(model);
+        jest.advanceTimersByTime(500);
+        expect(panel.hidden).toBe(true);
+        expect(launcher.hidden).toBe(true);
+        expect(root.classList.contains('molui-has-trajectory')).toBe(false);
+        expect(root.querySelector('.molui-toggle').hidden).toBe(true);
+    });
+
+    test('restoring playback in a tiny viewer closes the sidebar to reveal its controls', () => {
+        const { root, state, viewer, container } = mount();
+        Object.defineProperties(container, { clientWidth: { value: 360 }, clientHeight: { value: 280 } });
+        viewer.addModelsAsFrames('1\nfirst\nC 0 0 0\n1\nsecond\nC 1 0 0\n', 'xyz');
+        state.refresh();
+        state.ui.resize();
+        state.ui.setTrajectoryMinimized(true);
+        expect(state.ui.isOpen).toBe(true);
+        root.querySelector('.molui-trajectory-toggle').click();
+        expect(state.ui.isOpen).toBe(false);
+        expect(root.querySelector('.molui-trajectory').hidden).toBe(false);
+        expect(document.activeElement.getAttribute('aria-label')).toBe('Minimize trajectory controls');
+        state.ui.setTrajectoryMinimized(true);
+        state.ui.setOpen(true);
+        state.ui.setTrajectoryMinimized(false);
+        expect(state.ui.isOpen).toBe(false);
     });
 
     test('dependent choices preserve blank chains and residue zero without broadening a draft', () => {

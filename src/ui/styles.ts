@@ -5,7 +5,7 @@ export const uiStyles: string = `
   --molui-muted: #595974;
   --molui-border: #dcdced;
   --molui-accent: #000066;
-  --molui-paper: #fcfcff;
+  --molui-paper: rgb(252 252 255 / 96%);
   position: absolute;
   inset: 0;
   z-index: 10;
@@ -51,13 +51,16 @@ export const uiStyles: string = `
   outline: 3px solid #5454c4;
   outline-offset: 3px;
 }
-.molui-toggle {
+.molui-toggle, .molui-trajectory-toggle {
   position: absolute;
   top: 12px;
   left: 12px;
   pointer-events: auto;
   box-shadow: 0 3px 14px #0000661a;
 }
+.molui-trajectory-toggle { left: 56px; }
+.molui-no-edit .molui-trajectory-toggle { left: 12px; }
+.molui-trajectory-toggle svg { width: 20px; height: 20px; pointer-events: none; }
 .molui-panel {
   position: absolute;
   top: 56px;
@@ -71,6 +74,8 @@ export const uiStyles: string = `
   overflow: hidden;
   pointer-events: auto;
   background: var(--molui-paper);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   border: 1px solid var(--molui-border);
   border-radius: 12px;
   box-shadow: 0 12px 36px #0000661f, 0 2px 8px #0000660d;
@@ -280,7 +285,8 @@ export const uiStyles: string = `
 }
 .molui-trajectory:focus-visible { outline: 3px solid #5454c4; outline-offset: 2px; }
 .molui-trajectory-dragging { cursor: grabbing; }
-.molui-trajectory-header { grid-row: 1; grid-column: 2; min-width: 0; display: flex; align-items: center; justify-content: flex-end; }
+.molui-trajectory-header { grid-row: 1; grid-column: 2; min-width: 0; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.molui button.molui-trajectory-minimize { flex: 0 0 24px; width: 24px; height: 26px; min-width: 24px; min-height: 26px; padding: 0; border-color: transparent; background: transparent; color: var(--molui-muted); }
 .molui-frame-count { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--molui-muted); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .molui-trajectory svg { display: block; width: 16px; height: 16px; flex: 0 0 auto; pointer-events: none; }
 .molui-trajectory-transport { grid-row: 1; grid-column: 1; min-width: 0; display: flex; justify-content: center; gap: 1px; }
@@ -314,6 +320,8 @@ export const uiStyles: string = `
   .molui-selection-visibility { flex-basis: 40px; }
   .molui button.molui-selection-collapse { flex-basis: 40px; min-width: 40px; min-height: 40px; }
   .molui button.molui-icon { width: 40px; height: 40px; }
+  .molui-trajectory-toggle { left: 60px; }
+  .molui button.molui-trajectory-minimize { flex-basis: 40px; width: 40px; height: 40px; min-width: 40px; min-height: 40px; }
   .molui .molui-header > button.molui-icon { width: 40px; height: 40px; min-height: 40px; }
   .molui-body > .molui-section:first-of-type > summary { padding-right: 48px; }
   .molui-status { min-height: 48px; padding-right: 60px; }

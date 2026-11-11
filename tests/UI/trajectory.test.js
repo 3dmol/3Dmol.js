@@ -49,7 +49,7 @@ describe('trajectory controls', () => {
         const root = document.createElement('div');
         root.className = 'molui';
         document.body.append(root);
-        root.append(controls.element);
+        root.append(controls.element, controls.toggleElement);
         const bounds = { left: 100, top: 50, width: 600, height: 400 };
         const rect = ({ left, top, width, height }) => ({ left, top, width, height,
             x: left, y: top, right: left + width, bottom: top + height });
@@ -100,7 +100,7 @@ describe('trajectory controls', () => {
             render: jest.fn()
         };
         controls = new TrajectoryControls(viewer);
-        document.body.append(controls.element);
+        document.body.append(controls.element, controls.toggleElement);
     });
 
     afterEach(() => {
@@ -112,6 +112,7 @@ describe('trajectory controls', () => {
 
     test('appears only for multiple frames and never starts playback on load', () => {
         expect(controls.element.hidden).toBe(false);
+        expect(controls.toggleElement.hidden).toBe(true);
         expect(button('First frame').disabled).toBe(true);
         expect(viewer.setFrame).not.toHaveBeenCalled();
         frames = 1;
@@ -121,6 +122,111 @@ describe('trajectory controls', () => {
         controls.refresh();
         expect(controls.element.hidden).toBe(false);
         expect(controls.element.querySelector('output').textContent).toBe('Frame 1 / 7');
+    });
+
+    test('minimizes to an accessible launcher and restores keyboard focus', () => {
+        const minimize = button('Minimize trajectory controls');
+        const toggle = controls.toggleElement;
+        expect(toggle.getAttribute('aria-controls')).toBe(controls.element.id);
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        expect(toggle.getAttribute('aria-label')).toBe('Show trajectory controls');
+        expect(toggle.querySelector('svg').getAttribute('aria-hidden')).toBe('true');
+        minimize.focus();
+        minimize.click();
+        expect(controls.isMinimized).toBe(true);
+        expect(controls.isVisible).toBe(false);
+        expect(controls.element.hidden).toBe(true);
+        expect(toggle.hidden).toBe(false);
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        expect(document.activeElement).toBe(toggle);
+        toggle.click();
+        expect(controls.isMinimized).toBe(false);
+        expect(controls.isVisible).toBe(true);
+        expect(controls.element.hidden).toBe(false);
+        expect(toggle.hidden).toBe(true);
+        expect(document.activeElement).toBe(minimize);
+    });
+
+    test('programmatic minimization does not steal focus or change playback settings', async () => {
+        const other = document.createElement('button');
+        document.body.append(other);
+        other.focus();
+        await controls.setSettings({ fps: 5, loop: false, frame: 1, playing: true });
+        controls.setMinimized(true);
+        expect(document.activeElement).toBe(other);
+        expect(controls.getSettings()).toEqual({ fps: 5, loop: false, frame: 1, playing: true });
+        jest.advanceTimersByTime(200);
+        await settle();
+        expect(current).toBe(2);
+        controls.setMinimized(false);
+        expect(document.activeElement).toBe(other);
+        expect(controls.getSettings()).toEqual({ fps: 5, loop: false, frame: 2, playing: true });
+    });
+
+    test.each([0, 1])('minimized controls remain absent with %s frames and return when data arrives', count => {
+        controls.setMinimized(true);
+        frames = count;
+        jest.advanceTimersByTime(250);
+        expect(controls.element.hidden).toBe(true);
+        expect(controls.toggleElement.hidden).toBe(true);
+        frames = 5;
+        jest.advanceTimersByTime(250);
+        expect(controls.element.hidden).toBe(true);
+        expect(controls.toggleElement.hidden).toBe(false);
+    });
+
+    test('disabling hides both controls, stops UI playback, and retains minimization on re-enable', async () => {
+        button('Play trajectory').click();
+        controls.setMinimized(true);
+        controls.setEnabled(false);
+        jest.advanceTimersByTime(500);
+        await settle();
+        expect(controls.isPlaying).toBe(false);
+        expect(controls.element.hidden).toBe(true);
+        expect(controls.toggleElement.hidden).toBe(true);
+        expect(viewer.setFrame).not.toHaveBeenCalled();
+        controls.setEnabled(true);
+        expect(controls.isMinimized).toBe(true);
+        expect(controls.toggleElement.hidden).toBe(false);
+        expect(controls.isPlaying).toBe(false);
+        controls.setMinimized(false);
+        controls.setEnabled(false);
+        expect(controls.element.hidden).toBe(true);
+        expect(controls.toggleElement.hidden).toBe(true);
+        controls.setEnabled(true);
+        expect(controls.element.hidden).toBe(false);
+    });
+
+    test('disabling does not pause animation owned by the host application', () => {
+        animated = true;
+        controls.setEnabled(false);
+        Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+        document.dispatchEvent(new Event('visibilitychange'));
+        jest.advanceTimersByTime(500);
+        controls.destroy();
+        expect(viewer.stopAnimate).not.toHaveBeenCalled();
+        expect(animated).toBe(true);
+    });
+
+    test('notifies the host when availability or minimization changes without repeated layout work', () => {
+        controls.destroy();
+        const layout = jest.fn();
+        controls = new TrajectoryControls(viewer, undefined, layout);
+        document.body.append(controls.element, controls.toggleElement);
+        layout.mockClear();
+        controls.setMinimized(true);
+        expect(layout).toHaveBeenCalledTimes(1);
+        controls.refresh();
+        expect(layout).toHaveBeenCalledTimes(1);
+        controls.setEnabled(false);
+        expect(layout).toHaveBeenCalledTimes(2);
+        controls.setEnabled(true);
+        expect(layout).toHaveBeenCalledTimes(3);
+        frames = 1;
+        controls.refresh();
+        expect(layout).toHaveBeenCalledTimes(4);
+        controls.destroy();
+        expect(controls.toggleElement.isConnected).toBe(false);
     });
 
     test('steps and seeks with one-based labels and correct boundary controls', async () => {
@@ -228,6 +334,26 @@ describe('trajectory controls', () => {
         controls.refresh();
         expect(controls.element.style.left).toBe('80px');
         expect(viewer.setFrame).not.toHaveBeenCalled();
+    });
+
+    test('minimizing ends a drag, releases floating layout space, and restores the moved position', () => {
+        const { root, start, moveTo } = geometry();
+        start();
+        moveTo(80, 70);
+        controls.setMinimized(true);
+        expect(root.classList.contains('molui-trajectory-floating')).toBe(false);
+        expect(controls.element.classList.contains('molui-trajectory-dragging')).toBe(false);
+        expect(controls.element.releasePointerCapture).toHaveBeenCalledWith(1);
+        moveTo(180, 170);
+        expect(controls.element.style.left).toBe('80px');
+        controls.setMinimized(false);
+        expect(root.classList.contains('molui-trajectory-floating')).toBe(true);
+        expect(controls.element.style.left).toBe('80px');
+        expect(controls.element.style.top).toBe('70px');
+        controls.setEnabled(false);
+        expect(root.classList.contains('molui-trajectory-floating')).toBe(false);
+        controls.setEnabled(true);
+        expect(root.classList.contains('molui-trajectory-floating')).toBe(true);
     });
 
     test.each(['', '.molui-trajectory-header', '.molui-trajectory-transport', '.molui-trajectory-options'])(

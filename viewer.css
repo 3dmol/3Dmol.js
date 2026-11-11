@@ -5,8 +5,14 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; font: 14px/
 .viewer-actions { position: fixed; top: 12px; right: 12px; z-index: 20; display: flex; gap: 8px; }
 .viewer-actions button, .rightdialog button { box-sizing: border-box; min-height: 36px; border: 1px solid #dcdced; border-radius: 8px; background: #fcfcff; color: #000066; cursor: pointer; font: inherit; padding: 5px 10px; }
 .viewer-actions button { display: inline-flex; align-items: center; justify-content: center; width: 36px; padding: 7px; box-shadow: 0 3px 14px #0000661a; }
+.viewer-actions button, #gldiv .molui-toggle {
+    background: rgb(252 252 255 / 50%);
+
+}
 .viewer-actions svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.viewer-actions button:hover, .rightdialog button:hover { background: #efeffb; }
+.rightdialog button:hover { background: #efeffb; }
+.viewer-actions button:hover, #gldiv .molui-toggle:hover:not(:disabled) { background: rgb(239 239 251 / 84%); }
+.viewer-actions button:active, #gldiv .molui-toggle:active:not(:disabled) { background: rgb(226 226 246 / 84%); }
 .rightdialog button:disabled { opacity: .5; cursor: default; }
 .viewer-actions button:focus-visible, .rightdialog :is(button, input):focus-visible { outline: 3px solid #5454c4; outline-offset: 2px; }
 #viewer-message { position: fixed; bottom: 12px; left: 12px; z-index: 30; max-width: min(520px, calc(100% - 50px)); padding: 10px 12px; border: 1px solid #efd0cf; border-radius: 8px; background: #fff1ef; color: #982e37; overflow-wrap: anywhere; }

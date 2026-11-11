@@ -3,7 +3,7 @@ import type { GLViewer, SurfaceStyleSpec } from "../GLViewer";
 import type { Label, LabelSpec } from "../Label";
 import type { AtomSelectionSpec, AtomSpec } from "../specs";
 import { CC } from "../colors";
-import { UI, UIConfig } from "./ui";
+import { UI, UIConfig, UIControlOptions } from "./ui";
 
 export interface UIStyle {
     id: string;
@@ -408,6 +408,15 @@ export class StateManager {
 
     public showUI(): UI {
         return this.initiateUI();
+    }
+
+    /** Enable the edit dialog and trajectory controls independently. */
+    public setControls(options: UIControlOptions): void {
+        if (!this.disposed) this.ui?.setControls(options);
+    }
+
+    public getControls(): Required<UIControlOptions> {
+        return this.ui.getControls();
     }
 
     public updateUI(): void {

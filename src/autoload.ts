@@ -214,8 +214,19 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 const StateManagerClass = (window.$3Dmol as typeof window.$3Dmol & {
                     StateManager?: typeof StateManager
                 })?.StateManager;
-                if (viewerdiv.dataset.ui && viewerdiv.dataset.ui !== 'false' && StateManagerClass) {
-                    UI = glviewer.ui || new StateManagerClass(glviewer);
+                const uiEnabled = !!viewerdiv.dataset.ui && viewerdiv.dataset.ui !== 'false';
+                const uiOptions = {
+                    edit: viewerdiv.dataset.uiEdit === undefined ? uiEnabled : viewerdiv.dataset.uiEdit !== 'false',
+                    trajectory: viewerdiv.dataset.uiTrajectory === undefined ? uiEnabled : viewerdiv.dataset.uiTrajectory !== 'false'
+                };
+                const hasUIOptions = ['ui', 'uiEdit', 'uiTrajectory'].some(key => viewerdiv.dataset[key] !== undefined);
+                if (StateManagerClass && (uiOptions.edit || uiOptions.trajectory || (glviewer.ui && hasUIOptions))) {
+                    if (glviewer.ui) {
+                        UI = glviewer.ui;
+                        UI.setControls(uiOptions);
+                    } else {
+                        UI = new StateManagerClass(glviewer, uiOptions);
+                    }
                 }
             } catch (error) {
                 console.log(error);

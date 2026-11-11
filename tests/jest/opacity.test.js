@@ -20,6 +20,7 @@ let $3Dmol = require("../../build/3Dmol.js");
 // The model is driven directly rather than through a viewer -- no canvas, no WebGL context,
 // no mocking -- and globj() is handed supportsImposters explicitly, the same way exportVRML
 // pins its options, so the imposter path is exercised deterministically.
+// Shared-context rendering is checked separately by node tests/webgl/opacity-browser.cjs.
 
 const PDB = [
     "ATOM      1  N   ALA A   1      0.000   0.000   0.000  1.00 90.00           N",

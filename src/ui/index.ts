@@ -2,7 +2,7 @@ import { UI } from './ui';
 import { StateManager } from './state';
 
 export { UI, StateManager };
-export type { UIConfig, UIModelSource } from './ui';
+export type { UIConfig, UIControlOptions, UIModelSource } from './ui';
 export type { UISelection, UIStyle, UISurface, UIViewSettings } from './state';
 export type { TrajectorySettings } from './trajectory';
 

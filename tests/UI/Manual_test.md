@@ -14,6 +14,13 @@ Load `build/3Dmol.js` followed by `build/3Dmol.ui.js`:
 const viewer = $3Dmol.createViewer('viewer', { backgroundColor: 'white' });
 const controls = new $3Dmol.StateManager(viewer, { open: true });
 // Existing data-ui="true" embeddings continue to work.
+// Enable just playback controls: new $3Dmol.StateManager(viewer, { edit: false }).
+// Change availability without rebuilding the controls:
+controls.setControls({ edit: false, trajectory: true });
+controls.setControls({ edit: true });
+// Minimize or restore playback without changing its settings:
+controls.ui.setTrajectoryMinimized(true);
+controls.ui.setTrajectoryMinimized(false);
 // Programmatic model changes are detected automatically; refresh immediately:
 controls.refresh();
 // Repeated initialization does not create another panel.
@@ -116,6 +123,16 @@ promise for the UI surface ID. `loadSurface` registers an existing viewer surfac
   XYZ, GRO, or LAMMPS files. Uncheck it to use the first model only.
 - A model with one frame has no playback bar; multiple frames reveal it without
   starting playback. Frames added later with `setCoordinates` also reveal it.
+- Minimize playback to the icon in the upper left and restore it. Playback,
+  current frame, speed, Loop, and a dragged position are retained. With both
+  controls enabled the icon sits beside the hamburger; with only trajectory
+  controls enabled it takes the hamburger's position. Removing the trajectory
+  hides both the bar and icon, including after minimizing.
+- Attach with `{ edit: false, trajectory: true }`, `{ edit: true, trajectory: false }`,
+  and neither option: only the requested controls should be available, with both
+  enabled by default. Change availability using `controls.setControls(...)`.
+  Repeat for embeddings with `data-ui="true"`, `data-ui="true" data-ui-edit="false"`,
+  `data-ui="true" data-ui-trajectory="false"`, and just `data-ui-trajectory="true"`.
 - Test Play/Pause, first/previous/next/last, slider arrow keys and dragging, speed,
   and loop. Displayed frame numbers are one-based. Playback affects all models;
   shorter trajectories hold their final frame.
@@ -134,7 +151,8 @@ promise for the UI surface ID. `loadSurface` registers an existing viewer surfac
   again retries. Hiding the tab or removing the viewer stops UI playback.
 - Collapse the sidebar: playback stays reachable. In viewers shorter than 320px,
   close the sidebar to reveal docked playback and recover space for settings;
-  a manually positioned bar remains reachable.
+  a manually positioned bar remains reachable. Restoring minimized playback in
+  these short viewers closes the sidebar so the playback bar is visible.
 
 ## Responsive and accessible behavior
 

@@ -8,9 +8,18 @@ import type { TrajectorySettings } from './trajectory';
 import { uiStyles } from './styles';
 import { SelectionEditor, selectionSummary } from './selection';
 
-export interface UIConfig {
+export interface UIControlOptions {
+    /** Make the edit dialog and its hamburger button available. Defaults to true. */
+    edit?: boolean;
+    /** Make trajectory controls available when there are multiple frames. Defaults to true. */
+    trajectory?: boolean;
+}
+
+export interface UIConfig extends UIControlOptions {
     /** Start with the sidebar open. Small embedded viewers default to collapsed. */
     open?: boolean;
+    /** Offer local file loading alongside PDB, PubChem, and URL sources. Defaults to true. */
+    allowLocalFiles?: boolean;
     /** Initial settings for the view controls; omitted settings retain viewer defaults. */
     view?: Partial<UIViewSettings>;
     onViewChange?: (settings: UIViewSettings) => void;
@@ -116,6 +125,9 @@ export class UI {
     private originalPosition: string;
     private setPosition = false;
     private initialized = false;
+    private editEnabled = true;
+    private trajectoryEnabled = true;
+    private trajectoryMinimized = false;
     private readonly onResize = () => this.resize();
 
     constructor(public readonly state: StateManager, private readonly config: UIConfig = {}) {
@@ -189,8 +201,9 @@ export class UI {
         surfaces.append(surfaceForm, this.surfaceList);
         body.append(this.status, models, selections, surfaces, this.viewControls());
         this.panel.append(header, body);
-        this.trajectory = new TrajectoryControls(viewer, message => this.showError(message));
-        this.element.append(this.toggle, this.panel, this.trajectory.element);
+        this.trajectory = new TrajectoryControls(viewer, message => this.showError(message),
+            () => this.updateTrajectoryLayout());
+        this.element.append(this.toggle, this.panel, this.trajectory.element, this.trajectory.toggleElement);
         // Prevent viewer gesture handlers from treating controls as canvas interaction.
         for (const event of ['mousedown', 'pointerdown', 'touchstart', 'wheel', 'dblclick', 'contextmenu']) {
             this.element.addEventListener(event, e => e.stopPropagation());
@@ -201,6 +214,7 @@ export class UI {
             }
         });
         container.append(this.element);
+        this.setControls(config);
         this.setOpen(config.open ?? (container.clientWidth >= 640 && container.clientHeight >= 340));
         this.unsubscribe = state.subscribe(() => this.refresh());
         window.addEventListener('resize', this.onResize);
@@ -214,7 +228,6 @@ export class UI {
             if (document.hidden) return;
             const signature = this.modelSignature();
             if (signature !== this.signature) this.refresh();
-            this.element.classList.toggle('molui-has-trajectory', viewer.getNumFrames() > 1);
             this.resize();
         }, 500);
         this.refresh(); this.resize();
@@ -225,8 +238,20 @@ export class UI {
         this.element.classList.toggle('molui-compact', this.state.viewer.container.clientWidth < 640);
         this.element.classList.toggle('molui-small', this.state.viewer.container.clientHeight < 440);
         this.element.classList.toggle('molui-tiny', this.state.viewer.container.clientHeight < 320);
+        this.updateTrajectoryLayout();
+    }
+
+    private updateTrajectoryLayout(): void {
+        // The trajectory constructor can notify before the field is assigned.
+        if (!this.trajectory || this.destroyed) return;
+        const restoring = this.trajectoryMinimized && !this.trajectory.isMinimized;
+        this.trajectoryMinimized = this.trajectory.isMinimized;
+        // Tiny viewers cannot show the sidebar and docked playback together.
+        if (restoring && this.trajectory.isVisible && this.isOpen && this.element.classList.contains('molui-tiny')
+            && !this.element.classList.contains('molui-trajectory-floating')) this.setOpen(false);
+        this.element.classList.toggle('molui-has-trajectory', this.trajectory.isVisible);
         this.trajectory.resize();
-        this.element.style.setProperty('--molui-trajectory-space', `${this.trajectory.element.offsetHeight + 24}px`);
+        this.element.style.setProperty('--molui-trajectory-space', `${this.trajectory.isVisible ? this.trajectory.element.offsetHeight + 24 : 12}px`);
     }
 
     public refresh(): void {
@@ -255,7 +280,7 @@ export class UI {
                 .find(node => node.dataset.focus === focusKey);
             control?.focus({ preventScroll: true });
         }
-        this.element.classList.toggle('molui-has-trajectory', this.state.viewer.getNumFrames() > 1);
+        this.updateTrajectoryLayout();
     }
 
     public destroy(): void {
@@ -275,12 +300,43 @@ export class UI {
     }
 
     public setOpen(open: boolean): void {
+        open = this.editEnabled && open;
         const changed = this.isOpen !== open;
-        if (!open && this.panel.contains(document.activeElement)) this.toggle.focus();
+        if (!open && this.panel.contains(document.activeElement)) {
+            if (this.editEnabled) this.toggle.focus();
+            else (document.activeElement as HTMLElement)?.blur();
+        }
         this.element.classList.toggle('molui-closed', !open);
+        this.panel.hidden = !open;
         this.toggle.setAttribute('aria-expanded', String(open));
         this.resize();
         if (changed && this.initialized) this.config.onOpenChange?.(open);
+    }
+
+    /** Enable each group of controls independently; omitted options stay unchanged. */
+    public setControls(options: UIControlOptions): void {
+        if (this.destroyed) return;
+        this.editEnabled = options.edit ?? this.editEnabled;
+        this.trajectoryEnabled = options.trajectory ?? this.trajectoryEnabled;
+        this.toggle.hidden = !this.editEnabled;
+        this.element.classList.toggle('molui-no-edit', !this.editEnabled);
+        if (!this.editEnabled) this.setOpen(false);
+        this.trajectory.setEnabled(this.trajectoryEnabled);
+        this.updateTrajectoryLayout();
+    }
+
+    public getControls(): Required<UIControlOptions> {
+        return { edit: this.editEnabled, trajectory: this.trajectoryEnabled };
+    }
+
+    /** Collapse playback to its upper-left button, preserving playback and position. */
+    public setTrajectoryMinimized(minimized: boolean): void {
+        this.trajectory.setMinimized(minimized);
+        this.updateTrajectoryLayout();
+    }
+
+    public get isTrajectoryMinimized(): boolean {
+        return this.trajectory.isMinimized;
     }
 
     public getTrajectorySettings(): TrajectorySettings {
@@ -343,7 +399,9 @@ export class UI {
     private loadForm(): HTMLDetailsElement {
         const details = section('Load structure', !this.models().length);
         const form = el('form');
-        const source = select([['file', 'Local file'], ['pdb', 'PDB ID'], ['cid', 'PubChem CID'], ['url', 'URL']]);
+        const sources: Choice[] = [['pdb', 'PDB ID'], ['cid', 'PubChem CID'], ['url', 'URL']];
+        if (this.config.allowLocalFiles !== false) sources.unshift(['file', 'Local file']);
+        const source = select(sources);
         const file = el('input'); file.type = 'file';
         file.accept = formats.map(format => `.${format},.${format}.gz`).join(',');
         const identifier = el('input'); identifier.type = 'text'; identifier.autocomplete = 'off';
@@ -363,7 +421,8 @@ export class UI {
                 : source.value === 'file' ? 'Files stay in your browser. New structures are added to the scene.' : 'New structures are added to the scene.';
         };
         source.addEventListener('change', update); update();
-        form.append(field('Source', source), fileField, identifierField, formatField, trajectory.label, help, submit);
+        form.append(field('Source', source), ...(this.config.allowLocalFiles !== false ? [fileField] : []),
+            identifierField, formatField, trajectory.label, help, submit);
         form.addEventListener('submit', async event => {
             event.preventDefault();
             if (this.loading) return;

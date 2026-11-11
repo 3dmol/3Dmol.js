@@ -6,7 +6,7 @@ print("Content-Type: text/html")     # HTML is following
 print()                               # blank line, end of headers
 
 import generate_tests
-import sys
+import sys, os
 import traceback
 from urllib.parse import parse_qs
 
@@ -19,12 +19,12 @@ for file in testsys.files:
 
 #get name of user specified test
 try:
-    query_string = sys.stdin.read()
+    query_string = os.environ.get("QUERY_STRING", "")
     params = parse_qs(query_string)
     test = params.get("test", ["test49"])[0]
 except Exception as e:
     print("<pre>")
-    traceback.print_exc()
+    traceback.print_exc(file=sys.stdout)
     print("</pre>")
     sys.exit(1)
 

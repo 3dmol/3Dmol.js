@@ -231,6 +231,7 @@
         function makeState(scene = {}) {
             state = new lib.StateManager(viewer, {
                 open: scene.open ?? (!modelList(viewer).length && !scene.session ? true : undefined),
+                allowLocalFiles: false,
                 view: scene.view, onOpenChange: () => scheduleSync(true),
                 onModelLoaded(model, source) {
                     const descriptor = { kind: source.kind, value: source.value || source.name, format: source.format, frames: source.frames, title: source.name, baseStyles: baselineStyles(model) };
@@ -393,7 +394,18 @@
                     if (source.hidden) model.hide(); resources.set(model, { ...copy(source), format: loaded.format });
                 }
                 const initialColors = captureColors();
-                applyAtomColors(); makeState(scene);
+                applyAtomColors();
+                // Layers, surfaces and trajectory controls render as they are
+                // restored. Fit the requested frame before any of those renders,
+                // then keep its camera fixed while rebuilding frame-specific data.
+                if (scene.models.length) {
+                    await viewer.setFrame(scene.view?.frame ?? 0);
+                    if (token !== generation || disposed) return;
+                }
+                viewer.zoomTo();
+                if (scene.view?.slab) viewer.setSlab(scene.view.slab.near, scene.view.slab.far);
+                if (scene.view?.camera) viewer.setView(scene.view.camera);
+                makeState(scene);
                 modelList(viewer).forEach((model, i) => state.modelTitles.set(model.getID(), scene.models[i].title || scene.models[i].value));
                 const labels = [];
                 state.batch(() => {
@@ -428,8 +440,6 @@
                 }
                 await state.ui.setTrajectorySettings({ ...scene.view, frame: scene.view?.frame ?? 0 });
                 if (token !== generation || disposed) return;
-                viewer.zoomTo(); if (scene.view?.camera) viewer.setView(scene.view.camera);
-                if (scene.view?.slab) viewer.setSlab(scene.view.slab.near, scene.view.slab.far);
                 installPicking(); viewer.render(); state.refresh();
                 if (scene.session) { await enableSessions(); if (token === generation) win.joinSession(scene.session); }
                 if (token !== generation || disposed) return;

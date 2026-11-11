@@ -351,6 +351,72 @@ const puppeteer = require('puppeteer');
             await page.evaluate(() => document.querySelector('.molui-geometry').scrollIntoView({ block: 'center' }));
             await page.screenshot({ path: '/tmp/3dmol-ui-shape-controls.png' });
         }
+        // Collapsing playback recovers sidebar space and leaves an accessible launcher.
+        await page.setViewport({ width: 360, height: 640 });
+        const expandedLayout = await page.evaluate(() => {
+            viewer.resize(); controls.updateUI();
+            const hamburger = document.querySelector('.molui-toggle').getBoundingClientRect();
+            return {
+                left: hamburger.left, top: hamburger.top, right: hamburger.right,
+                panelBottom: document.querySelector('.molui-panel').getBoundingClientRect().bottom,
+                view: viewer.getView(), frame: viewer.getFrame()
+            };
+        });
+        await page.click('button[aria-label="Minimize trajectory controls"]');
+        await page.evaluate(expected => {
+            controls.refresh(); controls.updateUI();
+            const launcher = document.querySelector('.molui-trajectory-toggle');
+            const box = launcher.getBoundingClientRect();
+            if (!document.querySelector('.molui-trajectory').hidden || launcher.hidden
+                || !launcher.querySelector('svg') || launcher.getAttribute('aria-expanded') !== 'false'
+                || document.activeElement !== launcher || !controls.ui.isTrajectoryMinimized) {
+                throw new Error('Minimized trajectory launcher is missing, unfocused, or inaccessible');
+            }
+            if (box.top !== expected.top || box.left <= expected.right) throw new Error('Trajectory launcher overlaps the hamburger');
+            if (document.querySelector('.molui-panel').getBoundingClientRect().bottom <= expected.panelBottom + 20) {
+                throw new Error('Minimizing playback did not release reserved sidebar space');
+            }
+            if (viewer.getFrame() !== expected.frame || JSON.stringify(viewer.getView()) !== JSON.stringify(expected.view)) {
+                throw new Error('Minimizing playback changed the molecule');
+            }
+        }, expandedLayout);
+        if (process.env.UI_SCREENSHOTS) await page.screenshot({ path: '/tmp/3dmol-ui-minimized-playback.png' });
+        await page.keyboard.press('Enter');
+        await page.evaluate(() => {
+            if (document.querySelector('.molui-trajectory').hidden || !document.querySelector('.molui-trajectory-toggle').hidden
+                || controls.ui.isTrajectoryMinimized) throw new Error('Keyboard did not restore trajectory controls');
+            controls.setControls({ edit: false });
+        });
+        await page.click('button[aria-label="Minimize trajectory controls"]');
+        await page.evaluate(expected => {
+            const launcher = document.querySelector('.molui-trajectory-toggle');
+            const box = launcher.getBoundingClientRect();
+            if (!document.querySelector('.molui-toggle').hidden || document.querySelector('.molui-panel').getBoundingClientRect().height) {
+                throw new Error('Trajectory-only mode still exposes the edit controls');
+            }
+            if (box.left !== expected.left || box.top !== expected.top) throw new Error('Trajectory-only launcher must occupy the hamburger position');
+            controls.setControls({ trajectory: false });
+            controls.refresh();
+            if (!launcher.hidden || !document.querySelector('.molui-trajectory').hidden) throw new Error('Disabled trajectory controls reappeared');
+            controls.setControls({ edit: true });
+            if (document.querySelector('.molui-toggle').hidden || !launcher.hidden) throw new Error('Edit-only mode exposes trajectory controls');
+            controls.setControls({ trajectory: true });
+            if (launcher.hidden) throw new Error('Enabling trajectory controls lost the minimized state');
+            controls.ui.setTrajectoryMinimized(false);
+            controls.ui.setOpen(true);
+        }, expandedLayout);
+        await page.click('button[aria-label="Minimize trajectory controls"]');
+        await page.setViewport({ width: 360, height: 280 });
+        await page.evaluate(() => { viewer.resize(); controls.updateUI(); });
+        await page.click('.molui-trajectory-toggle');
+        await page.evaluate(() => {
+            const bar = document.querySelector('.molui-trajectory');
+            if (controls.ui.isOpen || bar.hidden || getComputedStyle(bar).visibility === 'hidden'
+                || document.activeElement !== bar.querySelector('[aria-label="Minimize trajectory controls"]')) {
+                throw new Error('Restoring playback in a tiny viewer must close the sidebar and focus visible controls');
+            }
+            controls.ui.setOpen(true);
+        });
         for (const [width, height] of [[1100, 760], [640, 400], [360, 640], [320, 480], [360, 280]]) {
             await page.setViewport({ width, height });
             await page.evaluate(() => { viewer.resize(); controls.updateUI(); });
@@ -449,6 +515,55 @@ const puppeteer = require('puppeteer');
             if (viewer.ui.selections.size !== 2) throw new Error('Autoload layers missing');
             viewer.ui.destroy();
         });
+        await page.evaluate(() => {
+            const host = document.getElementById('viewer');
+            const data = document.getElementById('inline-molecule');
+            data.textContent = '1\nCarbon\nC 0 0 0\n1\nCarbon\nC 1 0 0\n';
+            host.dataset.options = 'multimodel:true;frames:true';
+            for (const [flags, edit, trajectory] of [
+                [{ ui: 'true' }, true, true],
+                [{ uiTrajectory: 'true' }, false, true],
+                [{ ui: 'false', uiTrajectory: 'true' }, false, true],
+                [{ ui: 'true', uiEdit: 'false' }, false, true],
+                [{ ui: 'true', uiTrajectory: 'false' }, true, false],
+                [{ uiEdit: 'true' }, true, false],
+                [{ ui: 'false' }, false, false]
+            ]) {
+                viewer.removeAllModels();
+                for (const key of ['ui', 'uiEdit', 'uiTrajectory']) delete host.dataset[key];
+                Object.assign(host.dataset, flags);
+                $3Dmol.autoload(viewer);
+                if (viewer.getNumFrames() !== 2) throw new Error('Embedded trajectory fixture did not load frames');
+                if (!edit && !trajectory) {
+                    if (viewer.ui) throw new Error('Disabled embedded UI was created');
+                    continue;
+                }
+                const root = viewer.ui.ui.element;
+                if (root.querySelector('.molui-toggle').hidden === edit
+                    || root.querySelector('.molui-trajectory').hidden === trajectory) {
+                    throw new Error(`Embedded control flags were not respected: ${JSON.stringify(flags)}`);
+                }
+                viewer.ui.destroy();
+            }
+            viewer.removeAllModels();
+            delete host.dataset.ui;
+            host.dataset.uiTrajectory = 'true';
+            data.textContent = '1\nCarbon\nC 0 0 0\n';
+            $3Dmol.autoload(viewer);
+            const controls = viewer.ui;
+            const root = controls.ui.element;
+            controls.ui.setTrajectoryMinimized(true);
+            if (!root.querySelector('.molui-trajectory').hidden || !root.querySelector('.molui-trajectory-toggle').hidden) {
+                throw new Error('A single-frame embedding exposes trajectory controls');
+            }
+            viewer.addModelsAsFrames('1\nCarbon\nC 0 0 0\n1\nCarbon\nC 1 0 0\n', 'xyz');
+            controls.refresh();
+            if (root.querySelector('.molui-trajectory-toggle').hidden) throw new Error('Adding frames did not reveal the trajectory launcher');
+            viewer.removeAllModels();
+            controls.refresh();
+            if (!root.querySelector('.molui-trajectory-toggle').hidden) throw new Error('Removing frames left the trajectory launcher visible');
+            controls.destroy();
+        });
         // Compact desktop spacing must not shrink the interactive touch targets.
         const touch = await browser.newPage();
         touch.on('pageerror', error => errors.push(error.message));
@@ -469,10 +584,10 @@ const puppeteer = require('puppeteer');
             }
         });
         const touchInitial = await touch.evaluate(() => {
-            const header = document.querySelector('.molui-trajectory-header').getBoundingClientRect();
+            const counter = document.querySelector('.molui-frame-count').getBoundingClientRect();
             const bar = document.querySelector('.molui-trajectory').getBoundingClientRect();
             if (bar.height > 140) throw new Error('Touch playback should stay compact');
-            return { x: header.x + header.width / 2, y: header.bottom - 5, top: bar.top, view: viewer.getView(), frame: viewer.getFrame() };
+            return { x: counter.x + counter.width / 2, y: counter.y + counter.height / 2, top: bar.top, view: viewer.getView(), frame: viewer.getFrame() };
         });
         const touchSession = await touch.createCDPSession();
         await touchSession.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: touchInitial.x, y: touchInitial.y }] });
@@ -496,9 +611,22 @@ const puppeteer = require('puppeteer');
         await touch.waitForFunction(() => viewer.getFrame() === 1);
         assert.equal(await touch.locator('.molui-trajectory').map(node => node.getBoundingClientRect().top).wait(), touchMoved.top, 'Touch scrubbing moved the widget');
         if (process.env.UI_SCREENSHOTS) await touch.screenshot({ path: '/tmp/3dmol-ui-touch.png' });
+        await touch.tap('button[aria-label="Minimize trajectory controls"]');
+        await touch.evaluate(() => {
+            const launcher = document.querySelector('.molui-trajectory-toggle');
+            const box = launcher.getBoundingClientRect();
+            const hamburger = document.querySelector('.molui-toggle').getBoundingClientRect();
+            if (box.width < 40 || box.height < 40 || box.left <= hamburger.right || box.top !== hamburger.top) {
+                throw new Error('Touch trajectory launcher is too small or overlaps the hamburger');
+            }
+            controls.setControls({ edit: false });
+            if (launcher.getBoundingClientRect().left !== hamburger.left) throw new Error('Touch trajectory-only launcher is misplaced');
+        });
+        await touch.tap('.molui-trajectory-toggle');
+        assert.equal(await touch.locator('.molui-trajectory').map(node => node.getBoundingClientRect().top).wait(), touchMoved.top, 'Restoring playback lost its moved position');
         await touch.close();
         assert.deepEqual(errors, []);
-        console.log('WebGL UI smoke passed: selection editing, labels, style settings, surfaces, icon playback, mouse/touch dragging, keyboard placement, resizing, five viewport sizes, cleanup, autoload.');
+        console.log('WebGL UI smoke passed: selection editing, labels, style settings, surfaces, icon playback, minimizing, independent controls, mouse/touch dragging, keyboard placement, resizing, five viewport sizes, cleanup, autoload.');
     } finally {
         await browser.close();
     }
