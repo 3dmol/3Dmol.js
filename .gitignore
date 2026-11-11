@@ -19,7 +19,7 @@ nbproject
 /coverage
 /codecov
 PUBLISH
-
+THOUGHTS
 /tests/jest/render.test.js
 
 #Ignoring Virtual Environments for the Active Learning Environment Project

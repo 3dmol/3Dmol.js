@@ -831,6 +831,68 @@ describe("viewer trajectory state", () => {
         await expect(pending).resolves.toBeUndefined();
     });
 
+    describe("remote trajectory frames", () => {
+        const url = "https://trajectory.example";
+        const path = "data/md.xtc";
+        let model, instance, fetchMock;
+
+        beforeEach(async () => {
+            fetchMock = jest.spyOn(global, "fetch").mockImplementation(async request => {
+                if (request === `${url}/traj/numframes/${path}`) {
+                    return { ok: true, text: async () => "50\n" };
+                }
+                const match = request.match(/\/traj\/frame\/(\d+)\//);
+                if (!match) throw new Error(`Unexpected trajectory request: ${request}`);
+                const buffer = new ArrayBuffer(44 + 3 * Float32Array.BYTES_PER_ELEMENT);
+                new Float32Array(buffer, 44).set([Number(match[1]), 0, 0]);
+                return { ok: true, arrayBuffer: async () => buffer };
+            });
+            model = new $3Dmol.GLModel(0);
+            model.addAtoms([{ elem: "C", x: -1, y: 0, z: 0, bonds: [] }]);
+            await model.setCoordinatesFromURL(url, path);
+            instance = viewer([model]);
+        });
+
+        afterEach(() => fetchMock.mockRestore());
+
+        test("exposes the server's text frame count as a number", () => {
+            expect(model.getNumFrames()).toBe(50);
+            expect(instance.getNumFrames()).toBe(50);
+            expect(model.selectedAtoms({})[0].x).toBe(0);
+        });
+
+        test.each(["model", "viewer"])("%s requests the selected remote frame and wraps indices numerically", async target => {
+            for (const [requested, expected] of [[10, 10], [20, 20], [30, 30], [40, 40], [-1, 49], [-51, 49], [50, 0], [60, 10]]) {
+                await (target === "model" ? model : instance).setFrame(requested);
+                expect(fetchMock).toHaveBeenLastCalledWith(`${url}/traj/frame/${expected}/${path}`, {
+                    method: "POST", body: undefined
+                });
+                expect(model.selectedAtoms({})[0].x).toBe(expected);
+                if (target === "viewer") expect(instance.getFrame()).toBe(expected);
+            }
+        });
+
+        test("animation advances a remote trajectory in steps of ten", async () => {
+            jest.useFakeTimers();
+            const renderedFrames = [];
+            Object.assign(instance, {
+                animated: 0, animationTimers: new Set(),
+                render: () => renderedFrames.push(model.selectedAtoms({})[0].x),
+                getCanvas: () => ({ isConnected: true })
+            });
+            try {
+                instance.animate({ loop: "forward", reps: 1, step: 10 });
+                await jest.advanceTimersByTimeAsync(500);
+                expect(renderedFrames).toEqual([0, 10, 20, 30, 40]);
+                expect(instance.getFrame()).toBe(40);
+                expect(instance.isAnimated()).toBe(false);
+            } finally {
+                instance.stopAnimate();
+                jest.useRealTimers();
+            }
+        });
+    });
+
     test("counts shape and label frames in sparse scenes, including frame zero", () => {
         expect(viewer([], [undefined, { frame: 0 }]).getNumFrames()).toBe(1);
         expect(viewer([undefined], [undefined, { frame: 2 }], [undefined, { frame: 4 }]).getNumFrames()).toBe(5);

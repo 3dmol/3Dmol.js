@@ -3539,7 +3539,7 @@ export class GLViewer {
      *
      * @return {number}
      */
-    public getNumFrames() {
+    public getNumFrames(): number {
         var mostFrames = 0;
         for (let i = 0; i < this.models.length; i++) {
             if (this.models[i] && this.models[i].getNumFrames() > mostFrames) {

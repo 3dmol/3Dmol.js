@@ -2145,11 +2145,11 @@ export class GLModel {
     };
 
     /**
-     * Returns model's frames property, a list of atom lists
+     * Returns the number of frames in the model.
      *
      * @return {number}
      */
-    public getNumFrames() {
+    public getNumFrames(): number {
         return (this.frames.numFrames != undefined) ? this.frames.numFrames : this.frames.length;
     };
 
@@ -3586,8 +3586,9 @@ export class GLModel {
         if (this.box) this.setupDFS();
         if (!url.startsWith('http'))
             url = 'http://' + url;
-        return get(url + "/traj/numframes/" + path, function (numFrames) {
-            if (!isNaN(parseInt(numFrames))) {
+        return get(url + "/traj/numframes/" + path, function (response: string) {
+            const numFrames = parseInt(response, 10);
+            if (!isNaN(numFrames)) {
                 self.frames.push(self.atoms);
                 self.frames.numFrames = numFrames;
                 self.frames.url = url;
