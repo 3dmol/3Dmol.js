@@ -23,18 +23,18 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v6
       with:
         cache: npm
         node-version: 24
 
     - name: Cache NPM Dependencies
       id: cache-npm
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       env:
         cache-name: cache-node-modules
       with:
@@ -52,9 +52,9 @@ jobs:
         npm run build:prod
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v4
       with:
         languages: ${{ matrix.language }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v4

@@ -11,16 +11,17 @@ on:
 jobs:
   cover:
     if: ${{ github.event.workflow_run.conclusion != 'failure' }}
+    # Node 24 actions require Actions Runner 2.327.1 or newer.
     runs-on: self-hosted
     timeout-minutes: 60
     permissions:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
 
@@ -36,8 +37,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 60
       - name: Upload coverage to Codecov
-        # v5 preserves compatibility with the existing self-hosted runner.
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           # Keep this version in sync with requirements-codecov.txt.
           version: v11.3.2
