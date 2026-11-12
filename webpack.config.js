@@ -5,10 +5,7 @@ const { merge } = require("webpack-merge");
 const pkg = require("./package.json");
 const ESLintPlugin = require("eslint-webpack-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
-
-const banner = `${pkg.name} v${pkg.version}
-${pkg.description}
-Author: ${pkg.author}`;
+const { getBuildInfo } = require('./scripts/build-info.cjs');
 
 base_config = {
   target: "web",
@@ -33,7 +30,6 @@ base_config = {
       MMTF: path.resolve(__dirname, "./src/vendor/mmtf.js"),
       $: "jquery",
     }),
-    new webpack.BannerPlugin({ banner }),
     new ESLintPlugin({ exclude: ["node_modules"] }),
   ],
   stats: {
@@ -94,8 +90,26 @@ env_config = {
 };
 
 module.exports = function (env, argv) {
+  const buildInfo = getBuildInfo(__dirname, pkg.version);
+  const banner = `${pkg.name} v${buildInfo.version}
+Git: ${buildInfo.gitDescribe || 'unavailable'}
+Commit: ${buildInfo.commit || 'unavailable'}
+${pkg.description}
+Author: ${pkg.author}`;
+  const build_config = {
+    plugins: [
+      new webpack.DefinePlugin({
+        __3DMOL_BUILD_INFO__: JSON.stringify(buildInfo),
+      }),
+      new webpack.BannerPlugin({
+        banner,
+        // Retain the banner after minification, before source maps are generated.
+        stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE + 1,
+      }),
+    ],
+  };
   return [
-    merge(base_config, umd_config, env_config[argv["mode"]]),
-    merge(base_config, es6_config, env_config[argv["mode"]]),
+    merge(base_config, umd_config, env_config[argv["mode"]], build_config),
+    merge(base_config, es6_config, env_config[argv["mode"]], build_config),
   ];
 };

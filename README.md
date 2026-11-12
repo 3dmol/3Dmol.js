@@ -94,6 +94,21 @@ the project. If you use nvm, run `nvm install` and `nvm use` from the repository
 root to select the version in `.nvmrc`. See [CONTRIBUTING.md](CONTRIBUTING.md)
 for contribution and coverage upload instructions.
 
+Builds include the package version and Git revision in each bundle's header and
+in `$3Dmol.buildInfo` (also available as the `buildInfo` ES module export):
+
+```js
+console.log($3Dmol.buildInfo);
+// { version: "2.5.5", gitDescribe: "2.5.5-25-g07ff4af4-dirty",
+//   commit: "<full commit hash>", dirty: true }
+```
+
+The Git description uses the nearest reachable tag, commit count, and abbreviated
+hash; an exact tag is shown by itself. Without tags it uses the abbreviated hash.
+`-dirty` indicates changes to tracked files; untracked files are not included.
+Builds without Git or checkout metadata still include the package version, with
+`gitDescribe`, `commit`, and `dirty` set to `null`. No build timestamp is included.
+
 ## Contact
 
 Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes+3dmol@pitt.edu).

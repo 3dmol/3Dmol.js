@@ -1,4 +1,5 @@
 export * from "./autoload";
+export * from "./buildInfo";
 export * from "./colors";
 export * from "./glcartoon";
 export * from "./GLDraw";
