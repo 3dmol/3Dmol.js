@@ -68,8 +68,7 @@ An un-minified file is also provided for debugging purposes:
 The files hosted by 3Dmol.org closely track the development version and so will change frequently. If you desire more stability you may copy the files into your own project or, alternatively, we host release snapshots on the <a href="https://cdnjs.com/libraries/3Dmol">cdnjs</a> content delivery network (note that you must specify the release version). **Do not use the CDN minified version** (3Dmol-min.min.js).  The CDN autominifier does not generate correct code and `3Dmol-min.js` is alread minified.
 
 ```{@lang html}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js"></script>
 ```
 
 Using the CDN will likely provide the best network performance to your users, but features will lag behind the development branch as we only plan to tag new releases a few times a year.
