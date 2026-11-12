@@ -1,5 +1,15 @@
 # Contributing Guidelines to 3Dmol.js
 
+Use Node.js 24 and npm 10 or newer for development. Run
+`nvm install` and `nvm use` from the repository root to use `.nvmrc`.
+
+The security overrides in `package.json` update the modern `glob` and
+`minimatch` dependencies used by Jest, coverage, and glcheck. They deliberately
+leave legacy versions alone because those consumers use different APIs.
+Remove the overrides when the parent packages adopt patched versions. When
+changing them, check test discovery, coverage generation, and glcheck rendering
+as well as the regular tests and build.
+
 ## Bug Report
  
  1. Ensure that the bug has not already been reported.

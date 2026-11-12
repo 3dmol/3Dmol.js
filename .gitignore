@@ -25,6 +25,7 @@ THOUGHTS
 #Ignoring Virtual Environments for the Active Learning Environment Project
 .env
 .venv
+.venv-codecov/
 env/
 venv/
 ENV/

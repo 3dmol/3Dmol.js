@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Function LAMMPSTRJ | Input:Al.lammpstrj | Atoms should match the snapshot (assignBonds is undefined/false) 1`] = `
 [

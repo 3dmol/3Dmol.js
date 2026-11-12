@@ -12,61 +12,70 @@
         "includePattern": "\\.(jsx|js|ts|tsx)$"
     },
     "templates": {
-        "search": true,
-        "cleverLinks": true,
-        "monospaceLinks": false,
-        "footer": "",
-        "copyright":"3Dmol.js © 2019-2025",
-        "linenums"              : true,
-        "collapseSymbols"       : false,
-        "inverseNav"            : true,
-        "highlightTutorialCode" : true
+        "default": {
+            "outputSourceFiles": true,
+            "staticFiles": {
+                "include": ["./jsdoc"],
+                "includePattern": "/fonts/"
+            }
+        }
     },
-    "markdown"  : {
+    "markdown": {
         "hardwrap": true,
         "idInHeadings": true
     },
-    "opts":{
+    "opts": {
         "encoding": "utf8",
         "destination": "doc/",
         "recurse": true,
         "verbose": true,
-        "template": "./node_modules/clean-jsdoc-theme",
-        "copyright": "3Dmol.js © 2019-2023",
-        "theme_opts": {
-            "default_theme": "light",
-            "includeFilesListInHomepage": true,
-            "homepageTitle": "3Dmol.js",
-            "displayModuleHeader": true,
-            "footer":"3Dmol.js © 2019-2024 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburgh</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
-            "title": "3Dmol.js",
-            "create_style": "article ul li { list-style: disc}",
-            "menu": [
-                {
-                    "title": " Documentation",
-                    "link": "https://3dmol.org/doc/index.html"
-                },
-                {
-                    "title": "Tutorials",
-                    "link": "tutorial-home.html"
-                },
-                {
-                  "title": "GitHub",
-                  "link": "https://github.com/3dmol/3Dmol.js",
-                  "target": "_blank"
-                }
-            ],
-            "meta": [
-                {
-                    "name": "Author",
-                    "content": "David Koes & 3Dmoljs Contributors"
-                },
-                {
-                    "name": "Description",
-                    "content": "A modern, object-oriented JavaScript library for visualizing molecular data"
-                }
-            ]
+        "template": "./jsdoc",
+        "tutorials": "tutorials/",
+        "basePath": "/doc/",
+        "siteName": "3Dmol.js",
+        "footer": "3Dmol.js © 2019-2024 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburgh</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
+        "fonts": {
+            "heading": "Work Sans",
+            "body": "Open Sans",
+            "mono": "Inconsolata, monospace"
         },
-        "tutorials": "tutorials/"
+        "colors": {
+            "bg": "#ffffff",
+            "bgMuted": "#f7f7f7",
+            "fg": "#111111",
+            "fgMuted": "#666666",
+            "accent": "#007bff",
+            "accentFg": "#ffffff",
+            "border": "#dddddd"
+        },
+        "customCssFile": "./jsdoc/classic.css",
+        "menu": [
+            {
+                "id": "home",
+                "title": "Documentation",
+                "target": "_self"
+            },
+            {
+                "title": "Tutorials",
+                "link": "/doc/tutorials/home/",
+                "target": "_self"
+            },
+            {
+                "title": "GitHub",
+                "link": "https://github.com/3dmol/3Dmol.js",
+                "target": "_blank"
+            }
+        ],
+        "meta": [
+            {
+                "name": "Author",
+                "content": "David Koes & 3Dmoljs Contributors"
+            },
+            {
+                "name": "Description",
+                "content": "A modern, object-oriented JavaScript library for visualizing molecular data"
+            }
+        ],
+        "progress": false
     }
 }

@@ -29,9 +29,9 @@ Features include:
 
 ## Getting Started
 
-Molecular data can be shared and visualized without writing any HTML using only a declarative URL specification and our hosted viewer (see {@tutorial url}).
+Molecular data can be shared and visualized without writing any HTML using only a declarative URL specification and our hosted viewer (see [Viewing Molecules with the 3Dmol Server](tutorial-url.html)).
 
-Viewers can be quickly embedded in any HTML document using just two lines of source code (see {@tutorial embeddable}).
+Viewers can be quickly embedded in any HTML document using just two lines of source code (see [Embedding a 3Dmol Viewer](tutorial-embeddable.html)).
 
 #### Mouse Controls
 

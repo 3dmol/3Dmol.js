@@ -28,7 +28,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         cache: npm
-        node-version: 20
+        node-version: 24
 
     - name: Cache NPM Dependencies
       id: cache-npm

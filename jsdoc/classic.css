@@ -1,0 +1,157 @@
+/* Keep the familiar 3Dmol documentation typography without changing v5's
+   responsive layout or its reader controls. Local family names ensure that
+   these bundled fonts take precedence over the theme's Google Fonts. */
+@font-face {
+    font-family: "3Dmol Work Sans";
+    src: url("../fonts/WorkSans-Bold.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "3Dmol Open Sans";
+    src: url("../fonts/OpenSans-Regular.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "3Dmol Inconsolata";
+    src: url("../fonts/Inconsolata-Regular.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+:root {
+    --clean-font-heading: "3Dmol Work Sans", "Work Sans", sans-serif;
+    --clean-font-body: "3Dmol Open Sans", "Open Sans", sans-serif;
+    --clean-font-mono: "3Dmol Inconsolata", Inconsolata, monospace;
+}
+
+/* Desktop links use the static header; mobile keeps the theme's drawer. */
+.docs-top-menu {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.docs-top-menu a {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    color: var(--clean-fg);
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.docs-top-menu a:is(:hover, [aria-current="page"]) {
+    background: var(--clean-bg-muted);
+}
+
+.docs-top-menu a:focus-visible {
+    outline: 2px solid var(--clean-accent);
+    outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+    .docs-top-menu { display: flex; }
+    .docs-has-top-menu [data-island="sidebar"] > nav > ul,
+    .docs-has-top-menu [data-island="sidebar"] > nav > ul + hr {
+        display: none;
+    }
+}
+
+main :is(h1, h2, h3, h4, h5, h6) {
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+main h2 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+main :is(h3, h4, h5, h6) {
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+main h3 > code.shiki-inline {
+    font-weight: 700;
+    line-height: inherit;
+}
+
+/* The old sidebar was a light gray panel. Use theme tokens so the same
+   treatment remains legible when the reader switches to dark mode. */
+[data-island="sidebar"] {
+    background: var(--clean-bg-muted);
+    padding-block: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+[data-island="sidebar"] :is(a, button) {
+    border-radius: 0.25rem;
+}
+
+[data-island="sidebar"] button[aria-expanded] {
+    font-family: var(--clean-font-heading);
+    font-weight: 700;
+}
+
+main a {
+    font-weight: 400;
+    text-decoration: none;
+}
+
+main a:hover {
+    text-decoration: underline;
+}
+
+main :is(th, td) {
+    padding: 0.5rem 0.75rem;
+}
+
+article ul li {
+    list-style: disc;
+}
+
+/* Only the light palette reproduces the old colors. Retain the upstream
+   dark palette and syntax colors, including their contrast adjustments. */
+html:not([data-theme="dark"]) {
+    --clean-link: #007bff;
+}
+
+html:not([data-theme="dark"]) [data-island="sidebar"] :is(a, button):hover {
+    background-color: #eee;
+}
+
+html:not([data-theme="dark"]) [data-island="sidebar"] a[aria-current="page"] {
+    background-color: #e0e0e0;
+}
+
+html:not([data-theme="dark"]) main pre.shiki {
+    /* Shiki writes its light background inline. */
+    background-color: #f7f7f7 !important;
+}
+
+html:not([data-theme="dark"]) main th {
+    background-color: #eee;
+}
+
+html:not([data-theme="dark"]) main td {
+    background-color: #f7f7f7;
+    color: #111;
+}
+
+/* Limit overrides of Shiki's inline token colors to API member signatures;
+   prose snippets and runnable examples retain their syntax highlighting. */
+html:not([data-theme="dark"]) main h3 > code.shiki-inline > .line:first-child > span:first-child {
+    color: #293a80 !important;
+}
+
+html:not([data-theme="dark"]) main h3 > code.shiki-inline .sig-param {
+    color: #00918e !important;
+}

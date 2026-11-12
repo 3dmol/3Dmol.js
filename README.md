@@ -87,6 +87,13 @@ viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
 
 Please check out our documentation at [3dmol.js](https://3dmol.org/doc/index.html). We have tutorials, as well as the stable release of the platform.
 
+## Development
+
+Use Node.js 24 and npm 10 or newer to build and test
+the project. If you use nvm, run `nvm install` and `nvm use` from the repository
+root to select the version in `.nvmrc`. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for contribution and coverage upload instructions.
+
 ## Contact
 
 Please address any questions or concerns to [dkoes@pitt.edu](mailto:dkoes+3dmol@pitt.edu).

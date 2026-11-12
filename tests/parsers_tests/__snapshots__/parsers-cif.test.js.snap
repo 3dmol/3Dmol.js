@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Function cif | Input: multiple.cif | option: assignBonds | Atoms should match the snapshot (assignBonds: false) 1`] = `
 [

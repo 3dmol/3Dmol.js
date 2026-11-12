@@ -1,5 +1,5 @@
 {
-    "postCreateCommand": "nvm install 16.16.0 && npm run build",
+    "postCreateCommand": "nvm install && npm run build",
     "customizations": {
         "vscode": {
             "extensions": [

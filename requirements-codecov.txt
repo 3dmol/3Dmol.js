@@ -1,0 +1,2 @@
+# Keep this version in sync with .github/workflows/Coverage.yml.
+codecov-cli==11.3.2

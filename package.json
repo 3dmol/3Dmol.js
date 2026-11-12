@@ -24,8 +24,8 @@
     "testEnvironment": "jest-fixed-jsdom"
   },
   "engines": {
-    "npm": ">=8.11",
-    "node": ">=16.16.0"
+    "npm": ">=10",
+    "node": ">=24.0.0"
   },
   "license": "BSD-3-Clause",
   "main": "build/3Dmol.js",
@@ -44,6 +44,7 @@
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py -min",
     "generate:jest": "python3 tests/jest/generate_jest_render_tests.py",
     "cover": "npm run generate:jest && npx jest --coverage --verbose",
+    "codecov": "codecovcli --disable-telem upload-coverage --disable-search --file coverage/lcov.info --plugin noop",
     "doc": "rm -rf doc/ && npx jsdoc -c jsdoc.conf.json src doc.md"
   },
   "dependencies": {
@@ -56,27 +57,27 @@
     "@babel/core": "^7.20.7",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/plugin-transform-typescript": "^7.20.7",
+    "@jsdoc/salty": "^0.2.12",
     "@types/pako": "^2.0.0",
     "better-docs": "github:3dmol/better-docs#master",
-    "canvas": "^2.11.0",
-    "clean-jsdoc-theme": "github:3dmol/clean-jsdoc-theme#master",
-    "codecov": "^3.8.3",
+    "canvas": "^3.2.3",
+    "clean-jsdoc-theme": "^5.2.1",
     "del": "^7.0.0",
     "eslint": "^9.0.0",
     "eslint-webpack-plugin": "^5.0.0",
     "glcheck": "github:3dmol/glcheck",
-    "jest": "^29.0.0",
-    "jest-environment-jsdom": "^29.3.1",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
     "jest-fixed-jsdom": "^0.0.9",
     "jest-webgl-canvas-mock": "^0.2",
     "jquery": "^3.6.3",
+    "js-yaml": "^4.3.2",
     "jsdoc": "^4.0.0",
-    "jsdom": "^20.0.3",
+    "jsdom": "^26.1.0",
     "jsdom-worker": "^0.3.0",
     "node-fetch": "^2.7.0",
     "raw-loader": "^4.0.2",
     "source-map-support": "^0.5.21",
-    "taffydb": "^2.7.3",
     "terser-webpack-plugin": "^5.3.6",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
@@ -86,5 +87,9 @@
     "webpack": "^5.75.0",
     "webpack-bundle-analyzer": "^4.7.0",
     "webpack-cli": "^5.0.1"
+  },
+  "overrides": {
+    "glob@>=9 <14.0.2": "^14.0.5",
+    "minimatch@>=7 <11.0.1": "^11.0.8"
   }
 }
