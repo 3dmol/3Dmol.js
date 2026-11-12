@@ -57,12 +57,13 @@
     "@babel/core": "^7.20.7",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/plugin-transform-typescript": "^7.20.7",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.39.5",
     "@jsdoc/salty": "^0.2.12",
     "@types/pako": "^2.0.0",
     "better-docs": "github:3dmol/better-docs#master",
     "canvas": "^3.2.3",
     "clean-jsdoc-theme": "^5.2.1",
-    "del": "^7.0.0",
     "eslint": "^9.0.0",
     "eslint-webpack-plugin": "^5.0.0",
     "glcheck": "github:3dmol/glcheck",
@@ -81,7 +82,6 @@
     "terser-webpack-plugin": "^5.3.6",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
-    "tsc": "^2.0.4",
     "typescript": "^5.6.3",
     "url-loader": "^4.1.1",
     "webpack": "^5.75.0",
@@ -90,6 +90,12 @@
   },
   "overrides": {
     "glob@>=9 <14.0.2": "^14.0.5",
-    "minimatch@>=7 <11.0.1": "^11.0.8"
+    "minimatch@>=7 <11.0.1": "^11.0.8",
+    "better-docs": {
+      "react-ace": "^15.0.0"
+    },
+    "estree-to-babel": {
+      "c8": "^10.1.3"
+    }
   }
 }
