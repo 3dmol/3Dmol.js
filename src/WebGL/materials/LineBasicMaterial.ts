@@ -15,11 +15,13 @@ export class LineBasicMaterial extends Material {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material: T = new LineBasicMaterial() as T): T {
+  clone<T extends LineBasicMaterial>(material: T): T;
+  clone(material?: LineBasicMaterial): LineBasicMaterial;
+  clone(material: LineBasicMaterial = new LineBasicMaterial()): LineBasicMaterial {
 
     super.clone.call(this, material);
 
     material.color.copy(this.color);
-    return material as T;
+    return material;
   }
 }

@@ -166,7 +166,10 @@ export class TrajectoryControls {
     setEnabled(enabled: boolean): void {
         if (this.destroyed) return;
         this.enabled = enabled;
-        if (!enabled) this.stopPlayback();
+        if (!enabled) {
+            this.settingsRevision++;
+            this.stopPlayback();
+        }
         this.refresh();
     }
 
@@ -205,7 +208,10 @@ export class TrajectoryControls {
         };
     }
 
-    /** Restore transport settings after models have been loaded. */
+    /**
+     * Restore transport settings after models have been loaded.
+     * A newer restore, seek, play/pause action, or disable supersedes pending playback restoration.
+     */
     async setSettings(settings: Partial<TrajectorySettings>): Promise<void> {
         if (this.destroyed) return;
         if (settings.fps !== undefined && (!Number.isFinite(settings.fps) || settings.fps <= 0 || settings.fps > 240)) {
@@ -214,9 +220,9 @@ export class TrajectoryControls {
         if (settings.frame !== undefined && !Number.isInteger(settings.frame)) {
             throw new Error('Choose an integer trajectory frame.');
         }
-        const revision = ++this.settingsRevision;
         const playing = settings.playing ?? this.isPlaying;
         this.pause();
+        const revision = this.settingsRevision;
         this.refresh();
         if (settings.fps !== undefined) {
             const value = String(settings.fps);
@@ -232,7 +238,7 @@ export class TrajectoryControls {
         else if (this.pending) await this.frameLoad;
         if (this.destroyed || revision !== this.settingsRevision) return;
         if (!this.error.hidden) throw new Error(this.error.textContent || 'Unable to load trajectory frame.');
-        if (playing) this.togglePlayback();
+        if (playing && !this.isPlaying) this.togglePlayback();
         else this.updateControls();
     }
 
@@ -452,6 +458,7 @@ export class TrajectoryControls {
 
     /** Pause playback, including an animation started through viewer.animate(). */
     pause(): void {
+        this.settingsRevision++;
         this.stopPlayback();
         if (this.viewer.isAnimated()) this.viewer.stopAnimate();
         this.updateControls();
@@ -494,6 +501,7 @@ export class TrajectoryControls {
         }
         this.refresh();
         if (!this.enabled || this.totalFrames <= 1 || this.document.hidden) return;
+        this.settingsRevision++;
         this.playing = true;
         this.error.hidden = true;
         if (this.requestedFrame >= this.totalFrames - 1) {

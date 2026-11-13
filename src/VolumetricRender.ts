@@ -1,7 +1,9 @@
 import { Sphere } from "./WebGL/shapes";
 import { Vector3, Matrix4, XYZ } from "./WebGL/math";
 import { VolumetricMaterial, Mesh, Texture, Object3D, Material } from "./WebGL";
+import { disposeObjectResources } from "./WebGL/disposeObjectResources";
 import { CC } from "./colors";
+import type { ColorSpec } from "./colors";
 import { GLShape } from "./GLShape";
 import { AtomSelectionSpec } from "specs";
 import { GLViewer } from "GLViewer";
@@ -12,15 +14,19 @@ import { GLViewer } from "GLViewer";
  * VolumetricRenderer style specification
 */
 export interface VolumetricRendererSpec {
-    /** list of objects containing @color, @opacity and @value properties to specify color per voxel data value */
-    transferfn?: { color: unknown; opacity: unknown; value: unknown }[];
+    /** list of objects containing @color, @opacity and @value properties to specify color per voxel data value.
+     * Requires at least two points with finite numeric values (numbers or numeric strings) spanning a nonzero range that can be sampled without numeric overflow.
+     * Opacity ranges from 0 (transparent) to 1 (opaque); numeric strings are also accepted.
+     * The input array and point objects are not modified.
+     * Missing or invalid transfer functions log a warning and skip rendering. */
+    transferfn?: { color: ColorSpec; opacity: number | string; value: number | string }[];
     /** number of times to sample each voxel approximately (default 5) */
     subsamples?: number;
     /**  coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
     coords?: XYZ[];
-    /** selection around which to include data */
+    /** Selection around which to include data, resolved using the supplied viewer when coords are omitted. */
     selection?: AtomSelectionSpec;
-    /** distance around coords to include data [default = 2.0] */
+    /** distance around coords or selection to include data [default = 2.0] */
     seldist?: number; 
 };
 
@@ -30,8 +36,8 @@ export interface VolumetricRendererSpec {
  * @class
  *
  * @param {VolumeData} data - volumetric data
- * @param {VolumetricRenderSpec} spec - specification of volumetric render
- * @returns {$3Dmol.GLShape}
+ * @param {VolumetricRendererSpec} spec - specification of volumetric render
+ * @param {GLViewer} [viewer] - Viewer used to resolve spec.selection when coords are not supplied.
  */
 export class GLVolumetricRender {
 
@@ -73,17 +79,34 @@ export class GLVolumetricRender {
                 unit: XYZ; origin: XYZ; data: number[]; getIndex: (arg0: number, arg1: number, arg2: number) => number; }, 
         spec: VolumetricRendererSpec, viewer?: GLViewer) {
         spec = spec || {};
-        var transferfn = Object.assign([], spec.transferfn);
+        // Array.from also exposes sparse entries so they are validated below.
+        var transferfn: any[] = Array.isArray(spec.transferfn) ? Array.from(spec.transferfn) : [];
+        if (transferfn.length < 2 || transferfn.some(point => !point ||
+            (typeof point.value !== "number" && typeof point.value !== "string") ||
+            !Number.isFinite(parseFloat(String(point.value))))) {
+            console.warn("Volumetric rendering requires at least two transfer function points with finite values.");
+            this.hidden = true;
+            return;
+        }
         this.subsamples = spec.subsamples || 5.0;
 
         let TRANSFER_BUFFER_SIZE = 256;
 
-        // arrange points based on position property
-        transferfn.forEach(function (a: { value: any; }) { a.value = parseFloat(a.value); });
+        // Normalize private point records, leaving the caller's values and order intact.
+        for (let i = 0; i < transferfn.length; i++) {
+            const point = transferfn[i];
+            transferfn[i] = {
+                value: parseFloat(point.value), color: point.color, opacity: point.opacity
+            };
+        }
         transferfn.sort(function (a: { value: number; }, b: { value: number; }) { return a.value - b.value; });
         this.min = transferfn[0].value;
-        if (transferfn.length == 0) transferfn.push(transferfn[0]); //need at least two
         this.max = transferfn[transferfn.length - 1].value;
+        if (!Number.isFinite((this.max - this.min) * TRANSFER_BUFFER_SIZE) || this.min === this.max) {
+            console.warn("Volumetric rendering requires a nonzero transfer function range that can be sampled without numeric overflow.");
+            this.hidden = true;
+            return;
+        }
 
         // create and fill an array of interpolated values per 2 colors
         var pos1, pos2, color1, color2, R, G, B, A, alpha1, alpha2;
@@ -111,6 +134,25 @@ export class GLVolumetricRender {
 
         this.transferfunctionbuffer = new Uint8ClampedArray(this.transferfunctionbuffer);
 
+        // Sampling distances are lengths, independent of grid rotation or reflection.
+        let spacing: number[];
+        if (data.matrix) {
+            const e = data.matrix.elements;
+            spacing = [
+                Math.hypot(e[0], e[1], e[2]),
+                Math.hypot(e[4], e[5], e[6]),
+                Math.hypot(e[8], e[9], e[10])
+            ];
+        } else {
+            spacing = [Math.abs(data.unit.x), Math.abs(data.unit.y), Math.abs(data.unit.z)];
+        }
+        if (spacing.some(step => !Number.isFinite(step) || step <= 0)) {
+            console.warn("Volumetric rendering requires finite, nonzero voxel spacing.");
+            this.hidden = true;
+            return;
+        }
+        this.minunit = Math.min(...spacing);
+
         //need to create transformation matrix that maps model points into
         //texture space
         // need extent (bounding box dimensions), maxdepth (box diagonal), 
@@ -120,11 +162,9 @@ export class GLVolumetricRender {
             //figure out bounding box of transformed grid
             let start = new Vector3(0, 0, 0);
             let end = new Vector3(data.size.x, data.size.y, data.size.z);
-            let unit = new Vector3(1, 1, 1);
 
             start.applyMatrix4(data.matrix);
             end.applyMatrix4(data.matrix);
-            unit.applyMatrix4(data.matrix).sub(start);
 
             this.extent = [[start.x, start.y, start.z], [end.x, end.y, end.z]];
 
@@ -147,8 +187,6 @@ export class GLVolumetricRender {
             let zoff = end.z - start.z;
             this.maxdepth = Math.sqrt(xoff * xoff + yoff * yoff + zoff * zoff);
 
-            this.minunit = Math.min(Math.min(unit.x, unit.y), unit.z);
-
             //invert onto grid, then scale by grid dimensions to get
             //normalized texture coordinates
             this.texmatrix = new Matrix4().identity().scale({ x: data.size.x, y: data.size.y, z: data.size.z });
@@ -164,7 +202,6 @@ export class GLVolumetricRender {
             //scale doesn't apply to the translation vector, so preapply it
             this.texmatrix.makeTranslation(-data.origin.x / xoff, -data.origin.y / yoff, -data.origin.z / zoff);
             this.texmatrix.scale({ x: 1.0 / xoff, y: 1.0 / yoff, z: 1.0 / zoff });
-            this.minunit = Math.min(Math.min(data.unit.x, data.unit.y), data.unit.z);
 
             //need the bounding box so we can intersect with rays
             this.extent = [[data.origin.x, data.origin.y, data.origin.z],
@@ -199,42 +236,71 @@ export class GLVolumetricRender {
                 console.log('Need to provide viewer to volumetric renderer if selection specified.');
             }
         }
-        // volume selectivity based on given coords and distance
-        if (spec.coords !== undefined && spec.seldist !== undefined) {
-            let mask = new Uint8Array(data.data.length);
-            //for each coordinate
-            let d = spec.seldist;
-            let d2 = d * d;
-            for (let i = 0, n = spec.coords.length; i < n; i++) {
-                let c = spec.coords[i];
-                let minx = c.x - d, miny = c.y - d, minz = c.z - d;
-                let maxx = c.x + d, maxy = c.y + d, maxz = c.z + d;
-                if (data.getIndex(minx, miny, minz) >= 0 || data.getIndex(maxx, maxy, maxz) >= 0) {
-                    //bounding box overlaps grid
-                    //iterate over the grid points in the seldist bounding box
-                    //minunit may be inefficient if axes have very different units. oh well.
-                    for (let x = minx; x < maxx; x += this.minunit) {
-                        for (let y = miny; y < maxy; y += this.minunit) {
-                            for (let z = minz; z < maxz; z += this.minunit) {
-                                let idx = data.getIndex(x, y, z);
-                                if (idx >= 0 && !mask[idx]) {
-                                    //if not already masked, check distance
-                                    let distsq = (x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) + (z - c.z) * (z - c.z);
-                                    if (distsq < d2) {
-                                        mask[idx] = 1;
-                                    }
-                                }
-                            }
+        this.data = data;
+        // Select voxel centers without modifying the caller's volume.
+        if (spec.coords !== undefined) {
+            const d = spec.seldist === undefined ? 2.0 : spec.seldist;
+            if (!Number.isFinite(d) || d < 0) {
+                console.warn("Volumetric selection requires a finite, nonnegative distance.");
+                this.hidden = true;
+                return;
+            }
+            const d2 = d * d;
+            const size = data.size;
+            // Keep axis-aligned origins and spacing at their original precision.
+            const world = data.matrix ? data.matrix.elements : [
+                data.unit.x, 0, 0, 0,
+                0, data.unit.y, 0, 0,
+                0, 0, data.unit.z, 0,
+                data.origin.x, data.origin.y, data.origin.z, 1
+            ];
+            const determinant =
+                world[0] * (world[5] * world[10] - world[9] * world[6]) -
+                world[4] * (world[1] * world[10] - world[9] * world[2]) +
+                world[8] * (world[1] * world[6] - world[5] * world[2]);
+            if (data.matrix && (!Number.isFinite(determinant) || determinant === 0)) {
+                console.warn("Volumetric selection requires an invertible grid transform.");
+                this.hidden = true;
+                return;
+            }
+            const inverse = data.matrix ? new Matrix4().getInverse(data.matrix as Matrix4) : null;
+            const inv = inverse && inverse.elements;
+            // A world-space sphere becomes an ellipsoid in grid coordinates.
+            const rx = d * (inv ? Math.hypot(inv[0], inv[4], inv[8]) : 1 / Math.abs(data.unit.x));
+            const ry = d * (inv ? Math.hypot(inv[1], inv[5], inv[9]) : 1 / Math.abs(data.unit.y));
+            const rz = d * (inv ? Math.hypot(inv[2], inv[6], inv[10]) : 1 / Math.abs(data.unit.z));
+            const masked = new Float32Array(data.data.length).fill(Infinity);
+            for (const c of spec.coords) {
+                const center = inverse ? new Vector3(c.x, c.y, c.z).applyMatrix4(inverse) : new Vector3(
+                    (c.x - data.origin.x) / data.unit.x,
+                    (c.y - data.origin.y) / data.unit.y,
+                    (c.z - data.origin.z) / data.unit.z
+                );
+                // Conservative bounds include edge candidates; the distance test is exact.
+                const minx = Math.max(0, Math.floor(center.x - rx));
+                const maxx = Math.min(size.x - 1, Math.ceil(center.x + rx));
+                const miny = Math.max(0, Math.floor(center.y - ry));
+                const maxy = Math.min(size.y - 1, Math.ceil(center.y + ry));
+                const minz = Math.max(0, Math.floor(center.z - rz));
+                const maxz = Math.min(size.z - 1, Math.ceil(center.z + rz));
+                for (let x = minx; x <= maxx; x++) {
+                    for (let y = miny; y <= maxy; y++) {
+                        const px = world[0] * x + world[4] * y + world[12] - c.x;
+                        const py = world[1] * x + world[5] * y + world[13] - c.y;
+                        const pz = world[2] * x + world[6] * y + world[14] - c.z;
+                        let idx = (x * size.y + y) * size.z + minz;
+                        for (let z = minz; z <= maxz; z++, idx++) {
+                            if (masked[idx] !== Infinity) continue;
+                            const dx = px + world[8] * z;
+                            const dy = py + world[9] * z;
+                            const dz = pz + world[10] * z;
+                            if (dx * dx + dy * dy + dz * dz < d2) masked[idx] = data.data[idx];
                         }
                     }
                 }
             }
-            //any place mask is zero, make infinite in data
-            for (let i = 0, n = data.data.length; i < n; i++) {
-                if (mask[i] == 0) data.data[i] = Infinity;
-            }
+            this.data = Object.assign(Object.create(Object.getPrototypeOf(data)), data, { data: masked });
         }
-        this.data = data;
     }
 
     /**
@@ -246,8 +312,12 @@ export class GLVolumetricRender {
 
         if (this.renderedShapeObj) {
             group.remove(this.renderedShapeObj);
+            disposeObjectResources(this.renderedShapeObj, {
+                geometries: false, volumeTextures: true
+            });
             this.renderedShapeObj = null;
         }
+        this.shapeObj = null;
 
         if (this.hidden)
             return;
@@ -282,14 +352,12 @@ export class GLVolumetricRender {
 
     removegl(group: { remove: (arg0: any) => void; }) {
         if (this.renderedShapeObj) {
-            // dispose of geos and materials
-            if (this.renderedShapeObj.geometry !== undefined)
-                this.renderedShapeObj.geometry.dispose();
-            if (this.renderedShapeObj.material !== undefined)
-                this.renderedShapeObj.material.dispose();
             group.remove(this.renderedShapeObj);
+            disposeObjectResources(this.renderedShapeObj, { geometries: false, volumeTextures: true });
             this.renderedShapeObj = null;
         }
+        // Invalid volume input may return from the constructor before creating geometry.
+        this.geo?.dispose();
         this.shapeObj = null;
     };
 

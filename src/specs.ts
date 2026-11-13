@@ -4,7 +4,16 @@
 import { Matrix4, Vector3 } from "WebGL";
 import { AtomStyleSpec, BondStyle, GLModel } from "./GLModel";
 import { GLViewer } from "./GLViewer";
+import type { GLShape } from "./GLShape";
 import { ColorSpec } from "./colors";
+
+/** Ray intersection with a clickable or hoverable atom or shape. */
+export interface PickingIntersection {
+  /** Atom or shape intersected by the picking ray. */
+  clickable: AtomSpec | GLShape;
+  /** Distance along the picking ray. */
+  distance: number;
+}
 
 /**
  * Atom representation. Depending on the input file format, not all fields may be defined.
@@ -44,7 +53,7 @@ export interface AtomSpec {
   index?: number;
   /** Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon) */
   atom?: string;
-  /** Array of atom ids this atom is bonded to */
+  /** Indices of bonded atoms in this model's atom array (not input-file serial numbers). */
   bonds?: number[];
   /** Secondary structure identifier (for cartoon render; e.g. 'h' for helix) */
   ss?: string;
@@ -52,7 +61,7 @@ export interface AtomSpec {
   ssend?: boolean;
   /** true if this atom forms only single bonds or no bonds at all */
   singleBonds?: boolean;
-  /** Array of this atom's bond orders, corresponding to bonds identfied by 'bonds' */
+  /** Array of this atom's bond orders, corresponding to the atom indices in 'bonds' */
   bondOrder?: number[];
   /** Optional mapping of additional properties */
   properties?: Record<string, any>;
@@ -62,14 +71,18 @@ export interface AtomSpec {
   pdbline?: string;
   /** Set this flag to true to enable click selection handling for this atom */
   clickable?: boolean;
-  /** Callback click handler function to be executed on this atom and its parent viewer */
-  callback?: (atom: AtomSpec, viewer: GLViewer) => void;
+  /** Click handler receiving the atom, viewer, mouse or touch event, viewer container, and intersections sorted nearest first. */
+  callback?: (atom: AtomSpec, viewer: GLViewer, event: MouseEvent | TouchEvent,
+    container: HTMLElement | null, intersects: PickingIntersection[]) => void;
   /** Set this flag to true to enable hover selection handling for this atom */
   hoverable?: boolean;
-  /** Callback hover handler function to be executed on this atom and its parent viewer */
-  hover_callback?: (atom: AtomSpec, viewer: GLViewer) => void;
-  /** Callback handling "unhover" to be executed on this atom and its parent viewer */
-  unhover_callback?: (atom: AtomSpec, viewer: GLViewer) => void;
+  /** Hover handler receiving the atom, viewer, mouse or touch event, viewer container, and intersections sorted nearest first. */
+  hover_callback?: (atom: AtomSpec, viewer: GLViewer, event: MouseEvent | TouchEvent,
+    container: HTMLElement | null, intersects: PickingIntersection[]) => void;
+  /** Unhover handler with the same arguments as the hover handler.
+   * The event and intersections can be undefined when hover is cleared. */
+  unhover_callback?: (atom: AtomSpec, viewer: GLViewer, event: MouseEvent | TouchEvent | undefined,
+    container: HTMLElement | null, intersects: PickingIntersection[] | undefined) => void;
   /** for selection, inverts the meaning of the selection */
   invert?: boolean;
   /** style of atom */
@@ -92,11 +105,22 @@ export interface AtomSpec {
   dz?: number;
 }
 
+// Ordinary scalar atom fields can match either one value or a list of values.
+// Preserve structured and array-valued atom fields, which use different semantics.
+type AtomSelectionValue<T> = [Extract<T, string | number | boolean>] extends [never]
+  ? T
+  : T | Extract<T, string | number | boolean>[];
+
+type AtomSelectionFields = {
+  [K in keyof AtomSpec]: AtomSelectionValue<AtomSpec[K]>;
+};
+
 /**
  * Atom selection object. Used to specify what atoms should be selected.  Can include
  * any field from {@link AtomSpec} in which case atoms must equal the specified value.
- * All fields must match for the selection to hold. If values
- * are provided as a list, then only one value of the list must match.
+ * All fields must match for the selection to hold. Ordinary string, number, and
+ * boolean atom fields also accept lists; only one value of each list must match.
+ * Selection controls such as invert and byres keep their individual types.
  * @extends AtomSpec
  * @example
  * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
@@ -109,7 +133,7 @@ export interface AtomSpec {
  * });
  */
 export interface AtomSelectionSpec
-  extends Omit<AtomSpec, "bonds" | "model" | "index" | "resi"> {
+  extends Omit<AtomSelectionFields, "bonds" | "model" | "index" | "resi" | "invert"> {
   /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
   model?: GLModel | number | GLModel[] | number[];
   /** frame index of individual frame to style; will apply to all frames if not set */
@@ -136,7 +160,6 @@ export interface AtomSelectionSpec
   or?: AtomSelectionSpec[] & { __cached_results?: any };
   /** take the inverse of the provided {@link AtomSelectionSpec} */
   not?: AtomSelectionSpec;
-  contextMenuEnabled?: boolean;
 }
 
 /**

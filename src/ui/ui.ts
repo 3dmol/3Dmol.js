@@ -122,6 +122,7 @@ export class UI {
     private surfacePending = false;
     private renamingSelection = false;
     private abort?: AbortController;
+    private container?: HTMLElement;
     private originalPosition: string;
     private setPosition = false;
     private initialized = false;
@@ -133,10 +134,6 @@ export class UI {
     constructor(public readonly state: StateManager, private readonly config: UIConfig = {}) {
         const viewer = state.viewer;
         const container = viewer.container;
-        this.originalPosition = container.style.position;
-        if (getComputedStyle(container).position === 'static') {
-            container.style.position = 'relative'; this.setPosition = true;
-        }
         const style = el('style'); style.textContent = uiStyles;
         this.element.append(style);
         this.element.setAttribute('aria-label', 'Molecular viewer controls');
@@ -173,7 +170,7 @@ export class UI {
         const surfaces = section('Surfaces', false);
         const surfaceForm = el('div', 'molui-surface-create');
         const surfaceColors = this.colorControls({}, 'surface-new');
-        const type = select([['1', 'Van der Waals'], ['2', 'Solvent excluded'], ['3', 'Solvent accessible'], ['4', 'Molecular']]);
+        const type = select([['1', 'Van der Waals'], ['4', 'Solvent excluded'], ['3', 'Solvent accessible'], ['2', 'Molecular']]);
         const opacity = range(0.1, 1, 0.05, 0.7);
         const opacityField = field('Opacity · 70%', opacity);
         opacity.addEventListener('input', () => opacityField.firstElementChild.textContent = `Opacity · ${Math.round(Number(opacity.value) * 100)}%`);
@@ -213,7 +210,7 @@ export class UI {
                 this.setOpen(false); this.toggle.focus(); event.stopPropagation();
             }
         });
-        container.append(this.element);
+        this.attachContainer(container);
         this.setControls(config);
         this.setOpen(config.open ?? (container.clientWidth >= 640 && container.clientHeight >= 340));
         this.unsubscribe = state.subscribe(() => this.refresh());
@@ -234,10 +231,33 @@ export class UI {
         this.initialized = true;
     }
 
+    private restorePosition(): void {
+        if (this.setPosition && this.container.style.position === 'relative') {
+            this.container.style.position = this.originalPosition;
+        }
+    }
+
+    private attachContainer(container: HTMLElement): void {
+        if (container === this.container) return;
+        if (this.container) {
+            this.observer?.unobserve(this.container);
+            this.restorePosition();
+        }
+        this.container = container;
+        this.originalPosition = container.style.position;
+        this.setPosition = getComputedStyle(container).position === 'static';
+        if (this.setPosition) container.style.position = 'relative';
+        container.append(this.element);
+        this.observer?.observe(container);
+    }
+
     public resize(): void {
-        this.element.classList.toggle('molui-compact', this.state.viewer.container.clientWidth < 640);
-        this.element.classList.toggle('molui-small', this.state.viewer.container.clientHeight < 440);
-        this.element.classList.toggle('molui-tiny', this.state.viewer.container.clientHeight < 320);
+        if (this.destroyed) return;
+        const container = this.state.viewer.container;
+        this.attachContainer(container);
+        this.element.classList.toggle('molui-compact', container.clientWidth < 640);
+        this.element.classList.toggle('molui-small', container.clientHeight < 440);
+        this.element.classList.toggle('molui-tiny', container.clientHeight < 320);
         this.updateTrajectoryLayout();
     }
 
@@ -290,9 +310,7 @@ export class UI {
         window.removeEventListener('resize', this.onResize);
         this.trajectory.destroy();
         this.element.remove();
-        if (this.setPosition && this.state.viewer.container.style.position === 'relative') {
-            this.state.viewer.container.style.position = this.originalPosition;
-        }
+        this.restorePosition();
     }
 
     public get isOpen(): boolean {

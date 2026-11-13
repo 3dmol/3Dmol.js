@@ -43,6 +43,7 @@ export type SpriteMeta = {
  */
 export class SpritePlugin {
   private gl?: WebGLRenderingContext;
+  private disposed = false;
   private renderer: any;
   private precision?: number;
   private sprite: SpriteMeta = {
@@ -57,6 +58,7 @@ export class SpritePlugin {
   sprites?: Sprite[];
 
   init(renderer: any) {
+    if (this.disposed || this.sprite.program) return;
     this.gl = renderer.context as WebGLRenderingContext;
     this.renderer = renderer;
 
@@ -96,6 +98,11 @@ export class SpritePlugin {
     this.sprite.faces[i++] = 2;
     this.sprite.faces[i++] = 3;
 
+    this.sprite.program = this.createProgram(
+      ShaderLib.sprite,
+      this.precision || 1 /** added default to single precision */
+    );
+
     this.sprite.vertexBuffer = this.gl.createBuffer();
     this.sprite.elementBuffer = this.gl.createBuffer();
 
@@ -111,11 +118,6 @@ export class SpritePlugin {
       this.gl.ELEMENT_ARRAY_BUFFER,
       this.sprite.faces,
       this.gl.STATIC_DRAW
-    );
-
-    this.sprite.program = this.createProgram(
-      ShaderLib.sprite,
-      this.precision || 1 /** added default to single precision */
     );
 
     this.sprite.attributes = {};
@@ -193,6 +195,7 @@ export class SpritePlugin {
     viewportHeight: number,
     inFront?: boolean
   ) {
+    if (this.disposed) return;
     if (!this.gl) throw new Error("WebGLRenderer not initialized");
     let sprites: unknown[] = [];
     scene?.__webglSprites?.forEach((sprite) => {
@@ -386,51 +389,73 @@ export class SpritePlugin {
     this.gl.enable(this.gl.CULL_FACE);
   }
 
+  /** Release sprite resources while leaving the renderer's shared context usable. */
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    if (this.gl) {
+      if (this.sprite.vertexBuffer) this.gl.deleteBuffer(this.sprite.vertexBuffer);
+      if (this.sprite.elementBuffer) this.gl.deleteBuffer(this.sprite.elementBuffer);
+      if (this.sprite.program) this.gl.deleteProgram(this.sprite.program);
+    }
+    this.sprite.vertexBuffer = this.sprite.elementBuffer = this.sprite.program = null;
+    this.sprite.vertices = this.sprite.faces = this.sprite.uniforms = null;
+    this.sprite.attributes = {};
+    this.sprites = undefined;
+    this.renderer = undefined;
+    this.gl = undefined;
+  }
+
   private createProgram(shader: Shader, precision: number): WebGLProgram {
     if (!this.gl) throw new Error("WebGL Rendering context not found");
-    var program = this.gl.createProgram();
-
+    const program = this.gl.createProgram();
     if (!program) throw new Error("Error creating webgl program");
+    let fragmentShader: WebGLShader = null;
+    let vertexShader: WebGLShader = null;
+    let attached = false;
+    try {
+      fragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+      vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
+      if (!fragmentShader)
+        throw new Error("Unable to create fragment shader SpritePlugin.createProgram");
+      if (!vertexShader)
+        throw new Error("Unable to create vertex shader SpritePlugin.createProgram");
 
-    var fragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-    var vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);
-
-    if (!fragmentShader)
-      throw new Error(
-        "Unable to create fragment shader SpritePlugin.createProgram"
-      );
-    if (!vertexShader)
-      throw new Error(
-        "Unable to create vertex shader SpritePlugin.createProgram"
-      );
-
-    var prefix = "precision " + precision + " float;\n";
-
-    this.gl.shaderSource(fragmentShader, prefix + shader.fragmentShader);
-    this.gl.shaderSource(vertexShader, prefix + shader.vertexShader);
-
-    this.gl.compileShader(fragmentShader);
-    this.gl.compileShader(vertexShader);
-
-    if (
-      !this.gl.getShaderParameter(fragmentShader, this.gl.COMPILE_STATUS) ||
-      !this.gl.getShaderParameter(vertexShader, this.gl.COMPILE_STATUS)
-    ) {
-      throw new Error(`Error compiling shader: 
-      ${this.gl.getShaderInfoLog(fragmentShader)} 
+      const prefix = "precision " + precision + " float;\n";
+      this.gl.shaderSource(fragmentShader, prefix + shader.fragmentShader);
+      this.gl.shaderSource(vertexShader, prefix + shader.vertexShader);
+      this.gl.compileShader(fragmentShader);
+      this.gl.compileShader(vertexShader);
+      if (
+        !this.gl.getShaderParameter(fragmentShader, this.gl.COMPILE_STATUS) ||
+        !this.gl.getShaderParameter(vertexShader, this.gl.COMPILE_STATUS)
+      ) {
+        throw new Error(`Error compiling shader:
+      ${this.gl.getShaderInfoLog(fragmentShader)}
       ${this.gl.getShaderInfoLog(vertexShader)}`);
+      }
+      this.gl.attachShader(program, fragmentShader);
+      this.gl.attachShader(program, vertexShader);
+      attached = true;
+      this.gl.linkProgram(program);
+      if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS))
+        console.error("Could not initialize shader");
+      return program;
+    } catch (error) {
+      this.gl.deleteProgram(program);
+      attached = false;
+      throw error;
+    } finally {
+      // Shader objects can be deleted after linking; the program retains its executable.
+      if (attached) {
+        this.gl.detachShader(program, fragmentShader);
+        this.gl.detachShader(program, vertexShader);
+      }
+      if (fragmentShader) this.gl.deleteShader(fragmentShader);
+      if (vertexShader) this.gl.deleteShader(vertexShader);
     }
-
-    this.gl.attachShader(program, fragmentShader);
-    this.gl.attachShader(program, vertexShader);
-
-    this.gl.linkProgram(program);
-
-    if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS))
-      console.error("Could not initialize shader");
-
-    return program;
   }
+
 }
 function painterSortStable(a: any, b: any): number {
   if (a.z !== b.z) {

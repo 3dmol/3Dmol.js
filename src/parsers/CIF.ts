@@ -296,6 +296,7 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
       atom.bonds = [];
       atom.ss = "c";
       atom.serial = i;
+      atom.index = atoms[atoms.length - 1].length;
       atom.bondOrder = [];
       atom.properties = {};
       atoms[atoms.length - 1].push(atom);
@@ -439,7 +440,9 @@ export function CIF(str: string, options: ParserOptionsSpec = {}) {
     ) {
       assignPDBBonds(atoms[i], options);
     }
-    computeSecondaryStructure(atoms[i], options.hbondCutoff);
+    if (!options.noComputeSecondaryStructure) {
+      computeSecondaryStructure(atoms[i], options.hbondCutoff);
+    }
     processSymmetries(
       modelData[i].symmetries,
       atoms[i],

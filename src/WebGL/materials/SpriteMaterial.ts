@@ -37,7 +37,9 @@ export class SpriteMaterial extends Material {
       this.scaleByViewPort = !this.sizeAttenuation;
   }
 
-  clone<T extends this>(material = new SpriteMaterial() as T): T {
+  clone<T extends SpriteMaterial>(material: T): T;
+  clone(material?: SpriteMaterial): SpriteMaterial;
+  clone(material: SpriteMaterial = new SpriteMaterial()): SpriteMaterial {
     super.clone.call(this, material);
 
     material.color.copy(this.color);

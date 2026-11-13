@@ -7,7 +7,9 @@ export class SphereImposterMaterial extends ImposterMaterial {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material: T = new SphereImposterMaterial() as T): T {
+  clone<T extends SphereImposterMaterial>(material: T): T;
+  clone(material?: SphereImposterMaterial): SphereImposterMaterial;
+  clone(material: SphereImposterMaterial = new SphereImposterMaterial()): SphereImposterMaterial {
     super.clone.call(this, material);
     return material;
   }

@@ -43,7 +43,15 @@ describe("Common Tests", () => {
 
 	test("Gradient get bogus", () => {
 		let grad = 2;
-		expect($3Dmol.Gradient.getGradient(grad)).toBe(2);
+		const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+		try {
+			const fallback = $3Dmol.Gradient.getGradient(grad);
+			expect(fallback).toBeInstanceOf($3Dmol.Gradient.RWB);
+			expect(fallback.range()).toEqual([-1, 1]);
+			expect(warn).toHaveBeenCalledTimes(1);
+		} finally {
+			warn.mockRestore();
+		}
 	});
 
 	test("Gradient get RWB", () => {

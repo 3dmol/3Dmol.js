@@ -43,7 +43,8 @@ export interface UISurface {
     frame?: number;
 }
 
-const surfaceTypes: Record<string, number> = { VDW: 1, SES: 2, SAS: 3, MS: 4 };
+// Match the public SurfaceType enum without importing the surface engine into the UI bundle.
+const surfaceTypes: Record<string, number> = { VDW: 1, SES: 4, SAS: 3, MS: 2 };
 
 /** Copy configuration objects without losing callbacks, colors or gradient instances. */
 function copy<T>(value: T): T {
@@ -56,11 +57,28 @@ function copy<T>(value: T): T {
     return value;
 }
 
+/** Compare the values copied above, retaining identity for callbacks and class instances. */
+function sameStyleValue(left: unknown, right: unknown): boolean {
+    if (Object.is(left, right)) return true;
+    if (!left || !right || typeof left !== "object" || typeof right !== "object") return false;
+    if (Array.isArray(left)) {
+        if (!Array.isArray(right) || left.length !== right.length) return false;
+    } else if (Array.isArray(right) || Object.getPrototypeOf(left) !== Object.prototype ||
+        Object.getPrototypeOf(right) !== Object.prototype) {
+        return false;
+    }
+    const keys = Object.keys(left);
+    return keys.length === Object.keys(right).length && keys.every(key =>
+        Object.prototype.hasOwnProperty.call(right, key) && sameStyleValue(left[key], right[key]));
+}
+
 /**
  * Owns UI appearance layers without taking ownership of the rest of the scene.
  * Each enabled selection replaces the styles on its atoms, in list order; its
  * own styles are additive. Disabling/removing a layer restores earlier layers
- * or the original atom styles. Coordinates, callbacks and labels are preserved.
+ * or their underlying atom styles. Programmatic style changes on unaffected atoms
+ * become their latest baseline; UI layers retain priority on atoms they restyle.
+ * Coordinates, callbacks and labels are preserved.
  */
 export class StateManager {
     public readonly selections = new Map<string, UISelection>();
@@ -69,8 +87,11 @@ export class StateManager {
     public ui: UI;
     private readonly listeners = new Set<() => void>();
     private readonly baseline = new WeakMap<AtomSpec, AtomStyleSpec>();
+    private readonly styledByUI = new WeakSet<AtomSpec>();
     private readonly inheritedStyles = new WeakMap<AtomStyleSpec, AtomStyleSpec>();
     private readonly selectionLabels = new Map<string, Label[]>();
+    // Weak keys avoid retaining removed geometry while an old UI entry still exists.
+    private readonly surfaceOwners = new WeakMap<ReturnType<GLViewer['getSurface']>, WeakSet<UISurface>>();
     private readonly pendingSurfaces = new Map<number, {
         spec: AtomSelectionSpec; calculationSpec: AtomSelectionSpec; removed: boolean;
         surface: ReturnType<GLViewer['getSurface']>
@@ -123,7 +144,7 @@ export class StateManager {
     }
 
     public addSelection(spec: AtomSelectionSpec = {}, sid?: string, name?: string): string {
-        const id = sid || this.nextID("selection");
+        const id = sid || this.nextID("selection", this.selections);
         const existing = this.selections.get(id);
         if (existing) {
             this.clearSelectionLabels(id);
@@ -210,7 +231,7 @@ export class StateManager {
 
     public addStyle(spec: AtomStyleSpec, sid: string, stid?: string): string {
         const selection = this.selection(sid);
-        const id = stid || this.nextID("style");
+        const id = stid || this.nextID("style", selection.styles);
         const previous = selection.styles.get(id);
         selection.styles.set(id, { id, spec: copy(spec), hidden: previous?.hidden || false });
         this.renderLayers();
@@ -239,10 +260,10 @@ export class StateManager {
     /** Import an appearance from an embedding's data-select/data-style options. */
     public createSelectionAndStyle(spec: AtomSelectionSpec, style: AtomStyleSpec): string {
         // Separate layers preserve order, including overlapping numbered selections.
-        const id = this.nextID("selection");
+        const id = this.nextID("selection", this.selections);
         const styles = new Map<string, UIStyle>();
         if (Object.keys(style).length) {
-            const styleId = this.nextID("style");
+            const styleId = this.nextID("style", styles);
             styles.set(styleId, { id: styleId, spec: copy(style), hidden: false });
         }
         this.selections.set(id, {
@@ -273,7 +294,7 @@ export class StateManager {
         for (const [surfaceId, surface] of this.surfaces) {
             if (this.surfaceIncludesModel(surface.spec, model, modelCount) ||
                 this.surfaceIncludesModel(surface.calculationSpec, model, modelCount)) {
-                if (this.viewer.getSurface(surface.surfaceId)) this.viewer.removeSurface(surface.surfaceId);
+                if (this.ownsSurface(surface)) this.viewer.removeSurface(surface.surfaceId);
                 this.surfaces.delete(surfaceId);
             }
         }
@@ -305,8 +326,8 @@ export class StateManager {
         if (shownAtoms.some(atom => !calculationAtoms.has(atom))) {
             throw new Error("Calculation atoms must include all shown atoms.");
         }
-        // The completion result differs for symmetry-expanded surfaces. surfid on
-        // the returned promise is the stable ID in both cases.
+        // Capture the ID before completion so removal and ID reuse can be tracked
+        // while surface generation is pending.
         const pending = this.viewer.addSurface(surfaceType, surfaceStyle, selection, calculation) as
             Promise<unknown> & { surfid: number };
         const entry = {
@@ -327,17 +348,17 @@ export class StateManager {
         } finally {
             if (this.pendingSurfaces.get(pending.surfid) === entry) this.pendingSurfaces.delete(pending.surfid);
         }
-        if (this.disposed || entry.removed || this.viewer.getSurface(pending.surfid) !== entry.surface) {
+        if (this.disposed || entry.removed || !entry.surface || this.viewer.getSurface(pending.surfid) !== entry.surface) {
             removeOwnedSurface();
             throw new Error(this.disposed ? "The viewer controls were closed before the surface finished."
                 : entry.removed ? "A model used by this surface was removed before it finished."
                     : "This surface was removed before it finished.");
         }
-        const id = this.nextID("surface");
-        this.surfaces.set(id, {
+        const id = this.nextID("surface", this.surfaces);
+        this.registerSurface({
             id, name, surfaceId: pending.surfid, spec: selection, calculationSpec: calculation,
             style: surfaceStyle, type: surfaceType, frame
-        });
+        }, entry.surface);
         this.viewer.render();
         this.refresh();
         return id;
@@ -346,7 +367,12 @@ export class StateManager {
     /** Change colors or material settings without recomputing surface geometry. */
     public updateSurface(id: string, patch: SurfaceStyleSpec): void {
         const surface = this.surfaces.get(id);
-        if (!surface || !this.viewer.getSurface(surface.surfaceId)) return;
+        if (!surface) return;
+        if (!this.ownsSurface(surface)) {
+            this.surfaces.delete(id);
+            this.refresh();
+            return;
+        }
         const style = { ...copy(surface.style), ...copy(patch) };
         if (patch.colorscheme !== undefined || patch.color !== undefined) {
             delete style.voldata; delete style.volscheme; delete style.volformat; delete style.map;
@@ -362,21 +388,23 @@ export class StateManager {
     public removeSurface(id: string): void {
         const surface = this.surfaces.get(id);
         if (!surface) return;
-        if (this.viewer.getSurface(surface.surfaceId)) this.viewer.removeSurface(surface.surfaceId);
+        const owned = this.ownsSurface(surface);
+        if (owned) this.viewer.removeSurface(surface.surfaceId);
         this.surfaces.delete(id);
-        this.viewer.render();
+        if (owned) this.viewer.render();
         this.refresh();
     }
 
     /** Register a surface already created by autoload or an embedding. */
     public loadSurface(type: string | number, spec: AtomSelectionSpec,
         style: SurfaceStyleSpec, surfaceId: number, calculationSpec?: AtomSelectionSpec): string {
-        const id = this.nextID("surface");
-        this.surfaces.set(id, {
+        const id = this.nextID("surface", this.surfaces);
+        const surface = this.viewer.getSurface(surfaceId);
+        this.registerSurface({
             id, name: "Molecular surface", surfaceId, spec: copy(spec), style: copy(style),
-            calculationSpec: copy(calculationSpec ?? this.viewer.getSurface(surfaceId)?.allsel ?? spec),
+            calculationSpec: copy(calculationSpec ?? surface?.allsel ?? spec),
             type: this.surfaceType(type), frame: this.viewer.getFrame?.() || 0
-        });
+        }, surface);
         this.refresh();
         return id;
     }
@@ -394,7 +422,7 @@ export class StateManager {
             return;
         }
         for (const [id, surface] of this.surfaces) {
-            if (!this.viewer.getSurface(surface.surfaceId)) this.surfaces.delete(id);
+            if (!this.ownsSurface(surface)) this.surfaces.delete(id);
         }
         for (const listener of this.listeners) listener();
     }
@@ -457,8 +485,12 @@ export class StateManager {
         return `#${CC.color(color).getHex().toString(16).padStart(6, '0')}`;
     }
 
-    private nextID(kind: string): string {
-        return `${kind}-${++this.sequence}`;
+    private nextID(kind: string, entries: ReadonlyMap<string, unknown>): string {
+        let id: string;
+        do {
+            id = `${kind}-${++this.sequence}`;
+        } while (entries.has(id));
+        return id;
     }
 
     private selection(id: string): UISelection {
@@ -484,6 +516,21 @@ export class StateManager {
         // Surfaces without an explicit model scope can contain atoms from every
         // model. Conservatively remove them instead of leaving stale geometry.
         return spec.model === undefined || this.referencesModel(spec, model, modelCount);
+    }
+
+    /** Bind an entry to its current surface object, since numeric IDs can be reused. */
+    private registerSurface(entry: UISurface, surface: ReturnType<GLViewer['getSurface']>): void {
+        if (surface) {
+            let owners = this.surfaceOwners.get(surface);
+            if (!owners) this.surfaceOwners.set(surface, owners = new WeakSet<UISurface>());
+            owners.add(entry);
+        }
+        this.surfaces.set(entry.id, entry);
+    }
+
+    private ownsSurface(entry: UISurface): boolean {
+        const surface = this.viewer.getSurface(entry.surfaceId);
+        return !!surface && !!this.surfaceOwners.get(surface)?.has(entry);
     }
 
     private surfaceType(type: string | number): number {
@@ -517,6 +564,10 @@ export class StateManager {
                 // appearances; inherit the original baseline in that case.
                 const inherited = atom.style && this.inheritedStyles.get(atom.style);
                 this.baseline.set(atom, copy(inherited || atom.style || {}));
+            } else if (!this.styledByUI.has(atom)) {
+                // An atom outside the UI's current appearance layers can be
+                // restyled by its embedding between any two UI edits.
+                this.baseline.set(atom, copy(atom.style || {}));
             }
         }
         return atoms;
@@ -541,7 +592,14 @@ export class StateManager {
             for (const style of styles) this.viewer.addStyle(selection.spec, copy(style.spec));
         }
         for (const atom of atoms) {
-            if (atom.style) this.inheritedStyles.set(atom.style, this.baseline.get(atom));
+            const baseline = this.baseline.get(atom);
+            if (!sameStyleValue(atom.style, baseline)) {
+                this.styledByUI.add(atom);
+                if (atom.style) this.inheritedStyles.set(atom.style, baseline);
+            } else {
+                this.styledByUI.delete(atom);
+                if (atom.style) this.inheritedStyles.delete(atom.style);
+            }
         }
         for (const selection of this.selections.values()) this.syncSelectionLabels(selection);
         this.viewer.render();

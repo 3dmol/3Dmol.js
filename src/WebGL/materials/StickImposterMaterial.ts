@@ -7,7 +7,9 @@ export class StickImposterMaterial extends ImposterMaterial {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material = new StickImposterMaterial() as T): T {
+  clone<T extends StickImposterMaterial>(material: T): T;
+  clone(material?: StickImposterMaterial): StickImposterMaterial;
+  clone(material: StickImposterMaterial = new StickImposterMaterial()): StickImposterMaterial {
     super.clone.call(this, material);
     return material;
   }

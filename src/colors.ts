@@ -16,9 +16,9 @@ export type ColorConstructorArg = number | Color | Colored | undefined;
 /**
  * @class
    *
-   * @param r red 8bit number or numeric value of full color
-   * @param g green 8bit number
-   * @param b blue 8bit number
+   * @param {ColorConstructorArg} [r=0] Packed RGB color or color object; with multiple components, the red component from 0 to 1.
+   * @param {number} [g=0] Green component from 0 to 1 when RGB components are supplied.
+   * @param {number} [b=0] Blue component from 0 to 1 when RGB components are supplied.
    */
 
 export class Color implements Colored {

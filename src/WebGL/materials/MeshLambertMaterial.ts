@@ -43,7 +43,9 @@ export class MeshLambertMaterial extends Material {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material: T = new MeshLambertMaterial() as T): T {
+  clone<T extends MeshLambertMaterial>(material: T): T;
+  clone(material?: MeshLambertMaterial): MeshLambertMaterial;
+  clone(material: MeshLambertMaterial = new MeshLambertMaterial()): MeshLambertMaterial {
     super.clone.call(this, material);
 
     material.color.copy(this.color);
@@ -74,6 +76,6 @@ export class MeshLambertMaterial extends Material {
     material.morphTargets = this.morphTargets;
     material.morphNormals = this.morphNormals;
 
-    return material as T;
+    return material;
   }
 }

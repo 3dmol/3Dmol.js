@@ -1,4 +1,5 @@
-import { Geometry, Material } from "./WebGL";
+import { Geometry, GeometryGroup, Material } from "./WebGL";
+import { disposeObjectResources } from "./WebGL/disposeObjectResources";
 import { Sphere, Cylinder, Triangle } from "./WebGL/shapes";
 import { Vector3, XYZ } from "./WebGL/math";
 import { clamp } from "./WebGL/math";
@@ -19,14 +20,15 @@ import { GLViewer } from "GLViewer";
  * A GLShape is a collection of user specified shapes.
  * 
  * @class
- * @extends {ShapeSpec}
- * @param {number} sid - Unique identifier
  * @param {ShapeSpec} stylespec - shape style specification
  */
 export class GLShape {
 
     // Marching cube, to match with protein surface generation
     private static ISDONE = 2;
+
+    // Split custom groups retain the indices used by subsequent per-vertex color updates.
+    private static readonly customVertexIndices = new WeakMap<GeometryGroup, Uint32Array>();
 
     private static finalizeGeo(geo) {
         //to avoid creating a bunch of geometries, we leave geoGroup untruncated
@@ -38,43 +40,45 @@ export class GLShape {
         }
     };
 
-    /* 
-     * 
-     * @param {Geometry}
-     *            geo
+    /** Write colors in a separate pass, with uniform/direct/mapped paths selected once. */
+    private static updateGroupColor(group: GeometryGroup, color: Color | Color[], vertexIndices?: Uint32Array) {
+        const colors = group.colorArray;
+        if (!Array.isArray(color)) {
+            const { r, g, b } = color;
+            for (let i = 0, end = group.vertices * 3; i < end; i += 3) {
+                colors[i] = r;
+                colors[i + 1] = g;
+                colors[i + 2] = b;
+            }
+        } else if (vertexIndices) {
+            for (let i = 0, end = group.vertices; i < end; ++i) {
+                const c = color[vertexIndices[i]];
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+        } else {
+            for (let i = 0, end = group.vertices; i < end; ++i) {
+                const c = color[i];
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+        }
+    }
+
+    /*
+     * @param {Geometry} geo
      * @param {Color | colorlike} color
      */
     static updateColor(geo: Geometry, color) {
-
         color = color || CC.color(color);
         geo.colorsNeedUpdate = true;
-
-        var r, g, b;
-        if (color.constructor !== Array) {
-            r = color.r;
-            g = color.g;
-            b = color.b;
-        }
-
-
+        const perVertex = Array.isArray(color);
         for (let gg in geo.geometryGroups) {
-
-            let geoGroup = geo.geometryGroups[gg];
-            let colorArr = geoGroup.colorArray;
-
-            for (let i = 0, il = geoGroup.vertices; i < il; ++i) {
-
-                if (color.constructor === Array) {
-                    let c = color[i];
-                    r = c.r;
-                    g = c.g;
-                    b = c.b;
-                }
-
-                colorArr[i * 3] = r;
-                colorArr[i * 3 + 1] = g;
-                colorArr[i * 3 + 2] = b;
-            }
+            const group = geo.geometryGroups[gg];
+            GLShape.updateGroupColor(group, color,
+                perVertex ? GLShape.customVertexIndices.get(group) : undefined);
         }
     };
 
@@ -477,41 +481,28 @@ export class GLShape {
     };
 
     //helper function for adding an appropriately sized mesh
-    private static addCustomGeo(shape: GLShape, geo: Geometry, mesh, color, clickable) {
+    private static addCustomGeo(shape: GLShape, geo: Geometry, mesh: MeshSlice, color, clickable) {
         var geoGroup = geo.addGeoGroup();
+        if (mesh.vertexIndices) GLShape.customVertexIndices.set(geoGroup, mesh.vertexIndices);
+        // Explicit colorArr is already local to this slice; otherwise use source indices.
+        const colorIndices = mesh.colorArr ? undefined : mesh.vertexIndices;
         var vertexArr = mesh.vertexArr, normalArr = mesh.normalArr,
             faceArr = mesh.faceArr;
 
         geoGroup.vertices = vertexArr.length;
         geoGroup.faceidx = faceArr.length;
 
-        var offset, v, a, b, c, i, il, r, g;
+        var offset, v, a, b, c, i, il;
         var vertexArray = geoGroup.vertexArray;
-        var colorArray = geoGroup.colorArray;
 
-        if (color.constructor !== Array) {
-            r = color.r;
-            g = color.g;
-            b = color.b;
-        }
         for (i = 0, il = geoGroup.vertices; i < il; ++i) {
             offset = i * 3;
             v = vertexArr[i];
             vertexArray[offset] = v.x;
             vertexArray[offset + 1] = v.y;
             vertexArray[offset + 2] = v.z;
-
-            if (color.constructor === Array) {
-                c = color[i];
-                r = c.r;
-                g = c.g;
-                b = c.b;
-            }
-
-            colorArray[offset] = r;
-            colorArray[offset + 1] = g;
-            colorArray[offset + 2] = b;
         }
+        GLShape.updateGroupColor(geoGroup, mesh.colorArr || color, colorIndices);
 
         if (clickable) {
             for (i = 0, il = geoGroup.faceidx / 3; i < il; ++i) {
@@ -575,7 +566,7 @@ export class GLShape {
      *            customSpec
      */
     static drawCustom = function (shape: GLShape, geo: Geometry, customSpec: CustomShapeSpec) {
-        var mesh = customSpec;
+        var mesh: MeshSlice = customSpec;
         var vertexArr = mesh.vertexArr;
         var faceArr = mesh.faceArr;
         if (vertexArr.length === 0 || faceArr.length === 0) {
@@ -583,16 +574,14 @@ export class GLShape {
                 .warn("Error adding custom shape component: No vertices and/or face indices supplied!");
         }
 
-        var color = customSpec.color;
-        if (typeof (color) == 'undefined') {
-            color = shape.color;
-        }
-        color = CC.color(color);
+        const color: Color | Color[] = CC.color(
+            customSpec.color === undefined ? shape.color : customSpec.color);
 
         //var firstgeo = geo.geometryGroups.length;
-        var splits = splitMesh(mesh);
+        // Use the source palette directly, avoiding temporary color arrays for each slice.
+        var splits = splitMesh(mesh, true);
         for (var i = 0, n = splits.length; i < n; i++) {
-            GLShape.addCustomGeo(shape, geo, splits[i], splits[i].colorArr ? splits[i].colorArr : color, customSpec.clickable);
+            GLShape.addCustomGeo(shape, geo, splits[i], color, customSpec.clickable);
         }
     };
 
@@ -1172,9 +1161,9 @@ export class GLShape {
                 arrowSpec.start.y || 0, arrowSpec.start.z || 0);
         }
 
-        if (arrowSpec.dir instanceof Vector3 && typeof (arrowSpec.length) === 'number') {
-            var end = arrowSpec.dir.clone().multiplyScalar(arrowSpec.length).add(
-                arrowSpec.start);
+        if (arrowSpec.dir && typeof (arrowSpec.length) === 'number') {
+            var end = new Vector3(arrowSpec.dir.x, arrowSpec.dir.y, arrowSpec.dir.z)
+                .multiplyScalar(arrowSpec.length).add(arrowSpec.start);
             arrowSpec.end = end;
         }
         else if (!arrowSpec.end) {
@@ -1221,7 +1210,9 @@ export class GLShape {
     /**
      * Create isosurface from volumetric data.
      * @param {VolumeData} data - volumetric input data
-     * @param {IsoSurfaceSpec} isoSpec - volumetric data shape specification
+     * @param {IsoSurfaceSpec} volSpec - volumetric data shape specification
+     * @param {Function} [callback] - Called without arguments after the isosurface is created.
+     * @param {GLViewer} [viewer] - Viewer used to resolve volSpec.selection when coords are not supplied.
      * @example //the user can specify a selected region for the isosurface 
      $.get('../test_structs/benzene-homo.cube', function(data){
               var voldata = new $3Dmol.VolumeData(data, "cube");
@@ -1246,6 +1237,22 @@ export class GLShape {
             });
      */
     addIsosurface(data, volSpec:IsoSurfaceSpec, callback?, viewer?: GLViewer) {//may want to cache the arrays generated when selectedRegion ==true
+
+        if (volSpec.selectedRegion && volSpec.coords === undefined) {
+            volSpec.coords = volSpec.selectedRegion; //backwards compat for incorrectly documented feature
+        }
+        if (volSpec.coords === undefined && volSpec.selection !== undefined) {
+            if(!viewer) {
+                console.log("addIsosurface needs viewer is selection provided.");
+            } else {
+                volSpec.coords = viewer.selectedAtoms(volSpec.selection) as XYZ[];
+            }
+        }
+        if (volSpec.coords !== undefined && volSpec.coords.length === 0) {
+            this.updateStyle(volSpec);
+            if (typeof callback === "function") callback();
+            return;
+        }
 
         var isoval = (volSpec.isoval !== undefined && typeof (volSpec.isoval) === "number") ? volSpec.isoval
             : 0.0;
@@ -1291,16 +1298,6 @@ export class GLShape {
         var newvertices = [];
         var newfaces = [];
 
-        if (volSpec.selectedRegion && volSpec.coords === undefined) {
-            volSpec.coords = volSpec.selectedRegion; //backwards compat for incorrectly documented feature
-        }
-        if (volSpec.coords === undefined && volSpec.selection !== undefined) {
-            if(!viewer) {
-                console.log("addIsosurface needs viewer is selection provided.");
-            } else {
-                volSpec.coords = viewer.selectedAtoms(volSpec.selection) as XYZ[];
-            }
-        }
         if (volSpec.coords !== undefined) {
 
             var xmax = volSpec.coords[0].x,
@@ -1408,9 +1405,9 @@ export class GLShape {
     /** 
      * @deprecated Use addIsosurface instead
      * Creates custom shape from volumetric data 
-     * @param {string} data - Volumetric input data 
+     * @param {string|ArrayBuffer|Uint8Array|Int8Array} data - Volumetric input data
      * @param {string} fmt - Input data format (e.g. 'cube' for cube file format)
-     * @param {IsoSurfaceSpec} isoSpec - Volumetric data shape specification
+     * @param {IsoSurfaceSpec} volSpec - Volumetric data shape specification
      */
     public addVolumetricData(data, fmt, volSpec: IsoSurfaceSpec) {
         data = new VolumeData(data, fmt);
@@ -1433,8 +1430,10 @@ export class GLShape {
 
         if (this.renderedShapeObj) {
             group.remove(this.renderedShapeObj);
+            disposeObjectResources(this.renderedShapeObj, { geometries: false });
             this.renderedShapeObj = null;
         }
+        this.shapeObj = null;
 
         if (this.hidden)
             return;
@@ -1491,14 +1490,13 @@ export class GLShape {
 
     removegl(group) {
         if (this.renderedShapeObj) {
-            // dispose of geos and materials
-            if (this.renderedShapeObj.geometry !== undefined)
-                this.renderedShapeObj.geometry.dispose();
-            if (this.renderedShapeObj.material !== undefined)
-                this.renderedShapeObj.material.dispose();
             group.remove(this.renderedShapeObj);
+            disposeObjectResources(this.renderedShapeObj, { geometries: false });
             this.renderedShapeObj = null;
         }
+        // These geometries survive redraws, including redraws that hide the shape.
+        this.geo.dispose();
+        if (this.linegeo !== this.geo) this.linegeo.dispose();
         this.shapeObj = null;
     };
 
@@ -1519,17 +1517,37 @@ export class GLShape {
 
 
 
-export function splitMesh(mesh) {
-    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave a little breathing room (require at least 2)
-    //peel off 64k vertices rsvh into their own mesh
-    //duplicating vertices and normals as necessary to preserve faces and lines
+interface MeshSlice<V extends XYZ = XYZ> {
+    vertexArr?: V[];
+    normalArr?: XYZ[];
+    faceArr?: number[];
+    colorArr?: Color[];
+    /** Original vertex indices, when requested for later custom-shape recoloring. */
+    vertexIndices?: Uint32Array;
+}
 
+export function splitMesh<V extends XYZ>(mesh: MeshSlice<V>, keepVertexIndices = false): MeshSlice<V>[] {
+    var MAXVERT = 64000; //webgl only supports 2^16 elements, leave room to finish a triangle
+    // Duplicate vertices and their attributes as needed to keep each triangle together.
     if (mesh.vertexArr.length < MAXVERT) return [mesh]; //typical case
 
-    var slices: any = [{ vertexArr: [], normalArr: [], faceArr: [] }];
-    if (mesh.colorArr) slices.colorArr = [];
-    var vertSlice = []; //indexed by original vertex to get current slice
-    var vertIndex = []; //indexed by original vertex to get index within slice
+    const newSlice = (): MeshSlice<V> => {
+        const slice: MeshSlice<V> = { vertexArr: [], normalArr: [], faceArr: [] };
+        if (mesh.colorArr) slice.colorArr = [];
+        if (keepVertexIndices) {
+            slice.vertexIndices = new Uint32Array(Math.min(MAXVERT + 2, mesh.vertexArr.length, mesh.faceArr.length));
+        }
+        return slice;
+    };
+    const finishSlice = (slice: MeshSlice<V>) => {
+        if (slice.vertexIndices && slice.vertexIndices.length !== slice.vertexArr.length) {
+            // Copy instead of retaining an oversized backing buffer for sparse/partial slices.
+            slice.vertexIndices = slice.vertexIndices.slice(0, slice.vertexArr.length);
+        }
+    };
+    const slices: MeshSlice<V>[] = [newSlice()];
+    var vertSlice: number[] = []; //indexed by original vertex to get current slice
+    var vertIndex: number[] = []; //indexed by original vertex to get index within slice
     var currentSlice = 0;
 
     //for each face, make sure all three vertices (or copies) are in the same slice
@@ -1545,18 +1563,19 @@ export function splitMesh(mesh) {
                 vertIndex[v] = slice.vertexArr.length;
                 slice.vertexArr.push(mesh.vertexArr[v]);
                 if (mesh.normalArr && mesh.normalArr[v]) slice.normalArr.push(mesh.normalArr[v]);
-                if (mesh.colorArr && mesh.colorArr[v]) slice.colorArr.push(mesh.colorArr[v]);
+                if (mesh.colorArr) slice.colorArr.push(mesh.colorArr[v]);
+                if (slice.vertexIndices) slice.vertexIndices[vertIndex[v]] = v;
             }
             slice.faceArr.push(vertIndex[v]);
         }
 
-        if (slice.vertexArr.length >= MAXVERT) {
-            //new slice
-            slices.push({ vertexArr: [], normalArr: [], faceArr: [] });
-            if (mesh.colorArr) slices.colorArr = [];
+        if (slice.vertexArr.length >= MAXVERT && i + 3 < nf) {
+            finishSlice(slice);
+            slices.push(newSlice());
             currentSlice++;
         }
     }
+    finishSlice(slices[currentSlice]);
     return slices;
 };
 
@@ -1610,11 +1629,11 @@ export interface IsoSurfaceSpec extends ShapeSpec {
     coords?: XYZ[];
     /** selection around which to include data (alternative to coords) */
     selection?: AtomSelectionSpec;
-    /** distance around coords to include data [default = 2.0] */
+    /** distance around coords or selection to include data [default = 2.0] */
     seldist?: number;
     /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
     voldata?: VolumeData;
-    /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
+    /** Coloring scheme for mapping volumetric data to vertex color. A built-in gradient can be described with gradient, min, max, and optional mid fields. */
     volscheme?: GradientType;
     /** format of voldata if not a $3Dmol.VolumeData object */
     volformat?: string;
@@ -1635,9 +1654,9 @@ export interface ArrowSpec extends ShapeSpec {
     start?: XYZ;
     /** ending position */
     end?: XYZ;
-    /** direction to extend from start (instead of specifying end) */
+    /** Direction vector, supplied as {x, y, z} or a Vector3. It is multiplied by length and added to start instead of using end. */
     dir?: XYZ;
-    /** length to extend in dir direction from start (instead of specifying end) */
+    /** Scale applied to dir; equals the arrow length when dir is a unit vector. */
     length?: number;
     /** radius (default 0.1A) */
     radius?: number;

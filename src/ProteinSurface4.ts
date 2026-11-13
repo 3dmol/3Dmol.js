@@ -28,7 +28,7 @@ import {Vector3} from "./WebGL/math"
  * @property VDW - van der Waals surface
  * @property MS - Molecular surface
  * @property SAS - Solvent accessible surface
- * @property SES - Solvent exposed surface
+ * @property SES - Solvent excluded surface
  */
 export enum SurfaceType {
     VDW = 1,
@@ -767,10 +767,13 @@ export class ProteinSurface {
         }
     }
 
+    // Include canonical and uppercase spellings for direct lookup from parsed or legacy atoms.
     readonly vdwRadii = {
             "H" : 1.2,
             "Li" : 1.82,
+            "LI" : 1.82,
             "Na" : 2.27,
+            "NA" : 2.27,
             "K" : 2.75,
             "C" : 1.7,
             "N" : 1.55,
@@ -779,19 +782,28 @@ export class ProteinSurface {
             "P" : 1.80,
             "S" : 1.80,
             "CL" : 1.75,
+            "Cl" : 1.75,
             "BR" : 1.85,
+            "Br" : 1.85,
             "SE" : 1.90,
+            "Se" : 1.90,
             "ZN" : 1.39,
+            "Zn" : 1.39,
             "CU" : 1.4,
+            "Cu" : 1.4,
             "NI" : 1.63,
+            "Ni" : 1.63,
             "X" : 2
         };
     
-    private getVDWIndex(atom:any) {
-        if(!atom.elem || typeof(this.vdwRadii[atom.elem]) == "undefined") {
-            return "X";
-        }
-        return atom.elem;
+    /** Accept parser-style element symbols and legacy uppercase radius keys. */
+    private getVDWIndex(atom: { elem?: string }): string {
+        const elem = atom.elem;
+        if (typeof elem !== "string" || !elem) return "X";
+        // Keep existing table keys and avoid allocating strings for common elements.
+        if (typeof this.vdwRadii[elem] === "number") return elem;
+        const upper = elem.toUpperCase();
+        return typeof this.vdwRadii[upper] === "number" ? upper : "X";
     };
     
 

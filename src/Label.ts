@@ -3,10 +3,10 @@ import {
   Texture,
   SpriteMaterial,
   Sprite,
-  Vector2,
   Material,
 } from "./WebGL";
 import { Gradient } from "./Gradient";
+import type { GradientSpec, GradientType } from "./Gradient";
 import { Color, CC, ColorSpec } from "./colors";
 import {XYZ} from "./WebGL/math"
 
@@ -55,8 +55,12 @@ function getColor(style: any, stylealpha?: any, init?: any) {
 export interface LabelSpec {
 /** font name, default sans-serif */
   font?: string;
-  /** height of text, default 18 */
+  /** font size in pixels, default 18 */
   fontSize?: number;
+  /** render text in bold, default false */
+  bold?: boolean;
+  /** padding around text in pixels; defaults to 4 when omitted or zero */
+  padding?: number;
   /** font color, default white */
   fontColor?: ColorSpec;
   /** font opacity, default 1 */
@@ -69,24 +73,30 @@ export interface LabelSpec {
   borderOpacity?: number;
   /** color of background, default black */
   backgroundColor?: ColorSpec;
+  /** left-to-right background gradient, used instead of backgroundColor */
+  backgroundGradient?: GradientSpec | GradientType;
   /** opacity of background, default 1.0 */
   backgroundOpacity?: number;
   /** coordinates for label */
   position?: XYZ;
-  /** x,y,z pixel offset of label from position; for screen labels z is a z-index */
-  screenOffset?: Vector2;
-  /** always put labels in front of model */
+  /** x,y pixel offset of label from position */
+  screenOffset?: { x: number; y: number };
+  /** always put labels in front of model, default true */
   inFront?: boolean;
   /** show background rounded rectangle, default true */
   showBackground?: boolean;
-  /** position is in screen (not model) coordinates which are pixel offsets from the upper left corner */
+  /** position uses screen coordinates: x and y are pixel offsets from the upper left corner; z is clamped to [0,1] */
   useScreen?: boolean;
-  /** An elment to draw into the label. Any CanvasImageSource is allowed.  Label is resized to size of image */
+  /** An image to draw into the label. Any CanvasImageSource is allowed. The label expands to fit the image. */
   backgroundImage?: any;
+  /** minimum label width in pixels when backgroundImage is set; omitted or zero uses the image width */
+  backgroundWidth?: number;
+  /** minimum label height in pixels when backgroundImage is set; omitted or zero uses the image height */
+  backgroundHeight?: number;
   /** how to orient the label w/respect to position: "topLeft" (default),
    * "topCenter", "topRight", "centerLeft", "center", "centerRight",
-   * "bottomLeft", "bottomCenter", "bottomRight", or an arbitrary offset */
-  alignment?: string | Vector2;
+   * "bottomLeft", "bottomCenter", "bottomRight", or an arbitrary x,y alignment vector */
+  alignment?: string | { x: number; y: number };
   /** if set, only display in this frame of an animation */
   frame?: number;
 }
@@ -94,7 +104,7 @@ export interface LabelSpec {
 /**
  * Renderable labels
  * @constructor $3Dmol.Label
- * @param {string} tag - Label text
+ * @param {string} text - Label text
  * @param {LabelSpec} parameters Label style and font specifications
  */
 export class Label {

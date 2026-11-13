@@ -8,8 +8,10 @@ export class EventDispatcher {
     if (listenerArray !== undefined) {
       event.target = this;
 
-      for (var i = 0, l = listenerArray.length; i < l; i++)
-        listenerArray[i].call(this, event);
+      // Disposing a resource removes its listener during this dispatch.
+      const listeners = listenerArray.slice();
+      for (var i = 0, l = listeners.length; i < l; i++)
+        listeners[i].call(this, event);
     }
   }
 
@@ -17,8 +19,10 @@ export class EventDispatcher {
     if (!listener) {
       this.listeners[type] = [];
     } else {
-      var index = this.listeners[type].indexOf(listener);
-      if (index !== -1) this.listeners[type].splice(index, 1);
+      const listeners = this.listeners[type];
+      if (!listeners) return;
+      var index = listeners.indexOf(listener);
+      if (index !== -1) listeners.splice(index, 1);
     }
   }
 

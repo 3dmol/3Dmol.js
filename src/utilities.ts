@@ -176,26 +176,53 @@ export class PausableTimer {
     countdown: number;
     fn: any;
     arg: any;
+    private paused = false;
+    private pending = true;
+    private canceled = false;
 
     constructor(fn, countdown, arg?) {
         this.fn = fn;
         this.arg = arg;
         this.countdown = countdown;
+        this.schedule(countdown);
+    }
+
+    private schedule(countdown: number) {
         this.start_time = new Date().getTime();
-        this.ident = setTimeout(fn, countdown, arg);
+        const timer = this;
+        const fn = this.fn;
+        this.ident = setTimeout(function (arg) {
+            timer.pending = false;
+            fn.call(this, arg);
+        }, countdown, this.arg);
     }
 
     cancel() {
         clearTimeout(this.ident);
+        this.pending = false;
+        this.canceled = true;
     }
 
     pause() {
-        clearTimeout(this.ident);
-        this.total_time_run = new Date().getTime() - this.start_time;
+        if (this.paused || this.canceled) return;
+        this.paused = true;
+        // Remember pauses during an async callback without replaying that callback.
+        if (this.pending) {
+            clearTimeout(this.ident);
+            this.total_time_run += new Date().getTime() - this.start_time;
+        }
     }
 
     resume() {
-        this.ident = setTimeout(this.fn, Math.max(0, this.countdown - this.total_time_run), this.arg);
+        if (!this.paused || this.canceled) return;
+        this.paused = false;
+        if (this.pending) {
+            this.schedule(Math.max(0, this.countdown - this.total_time_run));
+        }
+    }
+
+    isPaused() {
+        return this.paused;
     }
 
 };
@@ -346,8 +373,9 @@ function checkStatus(response) {
 /**
  * Fetch data from URL
  * 
- * @param uri URL
- * @param callback Function to call with data 
+ * @param {string} uri - URL to fetch.
+ * @param {Function} [callback] - Called with the response text.
+ * @return {Promise} Resolves to the response text, or the callback return value when supplied. Rejects on request or callback failure.
  */
 export function get(uri, callback?) {
     var promise = fetch(uri).then(checkStatus).then((response) => response.text());
@@ -362,9 +390,9 @@ export function get(uri, callback?) {
  * arraybuffer to callback.
  * @param {string} uri - location of data
  * @param {Function} [callback] - Function to call with arraybuffer as argument.  
- * @param {string} [request] - type of request
+ * @param {string} [request] - Use "POST" to submit postdata; otherwise uses GET.
  * @param {string} [postdata] - data for POST request
- * @return {Promise}
+ * @return {Promise} Resolves to the ArrayBuffer, or the callback return value when supplied. Rejects on request or callback failure.
  */
 export function getbin(uri, callback?, request?, postdata?) {
     var promise;
@@ -383,15 +411,14 @@ export function getbin(uri, callback?, request?, postdata?) {
 
 
 /**
- * Load a PDB/PubChem structure into existing viewer. Automatically calls 'zoomTo' and 'render' on viewer after loading model
- * @param {string} query - String specifying pdb or pubchem id; must be prefaced with "pdb: " or "cid: ", respectively
+ * Load a PDB/PubChem structure or URL into an existing viewer. Calls 'zoomTo' and 'render' after loading succeeds.
+ * @param {string} query - Structure query prefixed with "pdb:", "bcif:", "cid:", or "url:".
  * @param {GLViewer} viewer - Add new model to existing viewer
  * @param {Object} options - Specify additional options
- *                           format: file format to download, if multiple are available, default format is pdb
- *                           pdbUri: URI to retrieve PDB files, default URI is http://www.rcsb.org/pdb/files/
- * @param {Function} [callback] - Function to call with model as argument after data is loaded.
-  
- * @return {GLModel} GLModel, Promise if callback is not provided
+ *                           format: file format to download for PDB queries, default format is bcif
+ *                           pdbUri: URI to retrieve PDB files, default URI is https://files.rcsb.org/view/
+ * @param {Function} [callback] - Called with the model after the asynchronous load attempt, including failures. On failure, the error is logged before calling the callback.
+ * @return {GLModel|Promise<GLModel>|undefined} With a callback, returns the model immediately. Otherwise returns a Promise that resolves to the loaded model or rejects with the load error. Invalid PDB or PubChem identifiers display an alert and return undefined before starting the request or calling the callback.
  * @example
  viewer.setBackgroundColor(0xffffffff);
        $3Dmol.download('pdb:2nbd',viewer,{onemol: true,multimodel: true},function(m) {
@@ -424,38 +451,16 @@ export function download(query, viewer: GLViewer, options, callback?) {
 
     var handler = function (ret) {
         m.addMolData(ret, type, options);
-        viewer.zoomTo();
-        viewer.render();
     };
 
     if (query.substring(0, 5) === 'bcif:') {
+        type = 'bcif';
         query = query.substring(5).toUpperCase();
         uri = "https://models.rcsb.org/" + query + '.bcif.gz';
         if (options && typeof options.noComputeSecondaryStructure === 'undefined') {
             //when fetch directly from pdb, trust structure annotations
             options.noComputeSecondaryStructure = true;
         }
-        promise = new Promise(function (resolve) {
-            getbin(uri)
-                .then(function (ret) {
-                    handler(ret);
-                    resolve(m);
-                }).catch(function () {
-                    //models.rcsb.org has rate limits and can fail, fallback to text
-                    pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
-                    uri = pdbUri + query + ".pdb";
-                    type = "pdb";
-                    console.warn("falling back to pdb format");
-                    get(uri).then(function (data) {
-                        handler(data);
-                        resolve(m);
-                    }).catch(function (e) {
-                        handler("");
-                        resolve(m);
-                        console.error("fetch of " + uri + " failed: " + e.statusText);
-                    });
-                }); 
-        });
     }
     else {
         if (query.substring(0, 4) === 'pdb:') {
@@ -465,8 +470,8 @@ export function download(query, viewer: GLViewer, options, callback?) {
             }
 
             if (options && typeof options.noComputeSecondaryStructure === 'undefined') {
-                //when fetch directly from pdb, trust structure annotations
-                options.noComputeSecondaryStructure = true;
+                // CIF does not read structure annotations, so keep computing them by default.
+                options.noComputeSecondaryStructure = !/^(?:cif|mcif)(?:\.gz)?$/i.test(type);
             }
             query = query.substring(4).toUpperCase();
             if (!query.match(/^[1-9][A-Za-z0-9]{3}$/)) {
@@ -493,43 +498,37 @@ export function download(query, viewer: GLViewer, options, callback?) {
             uri = query.substring(4);
             type = uri;
         }
+    }
 
-        promise = new Promise(function (resolve) {
-            if (type == 'bcif') { //binary data
-                getbin(uri)
-                    .then(function (ret) {
-                        handler(ret);
-                        resolve(m);
-                    }).catch(function () {
-                        //if mmtf server is being annoying, fallback to text
-                        pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
-                        uri = pdbUri + query + ".pdb";
-                        type = "pdb";
-                        console.warn("falling back to pdb format");
-                        get(uri).then(function (data) {
-                            handler(data);
-                            resolve(m);
-                        }).catch(function (e) {
-                            handler("");
-                            resolve(m);
-                            console.error("fetch of " + uri + " failed: " + e.statusText);
-                        });
-                    }); //an error msg has already been printed
-            }
-            else {
-                get(uri).then(function (data) {
-                    handler(data);
-                    resolve(m);
-                }).catch(function (e) {
-                    handler("");
-                    resolve(m);
-                    console.error("fetch of " + uri + " failed: " + e.statusText);
-                });
-            }
+    // Keep request/setup failures asynchronous and preserve the actual rejection.
+    promise = Promise.resolve().then(function () {
+        return type == 'bcif' ? getbin(uri) : get(uri);
+    }).then(handler);
+
+    if (type == 'bcif') {
+        promise = promise.catch(function () {
+            //models.rcsb.org has rate limits and can fail, fallback to text
+            pdbUri = options && options.pdbUri ? options.pdbUri : "https://files.rcsb.org/view/";
+            uri = pdbUri + query + ".pdb";
+            type = "pdb";
+            console.warn("falling back to pdb format");
+            return get(uri).then(handler);
         });
     }
+
+    // A rendering error must not trigger another download or append data twice.
+    promise = promise.then(function () {
+        if (!viewer.isDestroyed?.()) {
+            viewer.zoomTo();
+            viewer.render();
+        }
+        return m;
+    });
     if (callback) {
         promise.then(function (m) {
+            callback(m);
+        }, function (error) {
+            console.error("Unable to load " + uri, error);
             callback(m);
         });
         return m;
@@ -540,7 +539,7 @@ export function download(query, viewer: GLViewer, options, callback?) {
 
 /**  Return proper color for atom given style
  * @param {AtomSpec} atom
- * @param {AtomStyle} style
+ * @param {Object} style - Color options: color, colorscheme, or colorfunc.
  * @return {Color}
  */
 export function getColorFromStyle(atom, style): Color {
@@ -582,7 +581,7 @@ export function getColorFromStyle(atom, style): Color {
             prop = scheme.prop;
             var grad = scheme.gradient; //redefining scheme
             if(!(grad instanceof GradientType)) {
-                grad = getGradient(scheme);
+                grad = getGradient(typeof grad === "string" ? scheme : grad);
             }
             let range = grad.range() || [-1, 1]; //sensible default
             val = getAtomProperty(atom, prop);

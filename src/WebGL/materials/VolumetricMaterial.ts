@@ -26,7 +26,9 @@ export class VolumetricMaterial extends Material {
     // this.fog = true; // TODO: to integrate the new shader with the fog stuff
     this.setValues(parameters);
   }
-  clone<T extends this>(material = new VolumetricMaterial() as T): T {
+  clone<T extends VolumetricMaterial>(material: T): T;
+  clone(material?: VolumetricMaterial): VolumetricMaterial;
+  clone(material: VolumetricMaterial = new VolumetricMaterial()): VolumetricMaterial {
     super.clone.call(this, material);
     material.transparent = this.transparent;
     material.volumetric = this.volumetric;

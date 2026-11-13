@@ -69,8 +69,11 @@ export class Material extends EventDispatcher {
     }
   }
 
-  //TODO: might want to look into blending equations
-  clone<T extends this>(material = new Material() as T): T {
+  /** Copy material settings into a supplied destination, or create a new Material. */
+  clone<T extends Material>(material: T): T;
+  clone(material?: Material): Material;
+  clone(material: Material = new Material()): Material {
+    //TODO: might want to look into blending equations
     material.name = this.name;
 
     material.side = this.side;

@@ -10,6 +10,8 @@ import {
   NearestFilter,
 } from "./constants/TextureConstants";
 import { Light } from "./core";
+import type { Geometry, Texture } from "./core";
+import type { Material } from "./materials";
 import { Color } from "../colors";
 import {
   MeshOutlineMaterial,
@@ -20,6 +22,7 @@ import { Matrix4, Vector3, Matrix3 } from "./math";
 import { Mesh, Line, Sprite } from "./objects";
 import { ShaderLib, ShaderUtils } from "./shaders";
 import { SpritePlugin } from "./SpritePlugin";
+import { disposeMaterials } from "./disposeObjectResources";
 
 // share a single offscreen renderer across all Renderers 
 var _offscreen_singleton = null;
@@ -60,6 +63,10 @@ export class Renderer {
   private _offscreen: OffscreenCanvas = null;
   private _bitmap: ImageBitmapRenderingContext = null;
   // internal properties
+  private _disposed = false;
+  private _geometries?: Set<Geometry>;
+  private _materials?: Set<Material>;
+  private _textures?: Set<Texture>;
   private _programs = [];
   private _programs_counter = 0;
   private _webglversion = 1;
@@ -237,6 +244,45 @@ export class Renderer {
 
   // API
 
+  /** Release this renderer's GPU resources without losing a shared context or removing its canvas. */
+  dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
+
+    // Scene owners may already have queued material disposal for a later microtask.
+    // Detach our listeners and release allocations now; those later events remain harmless.
+    for (const geometry of this._geometries || []) this.onGeometryDispose({ target: geometry });
+    for (const texture of this._textures || []) this.onTextureDispose({ target: texture });
+    for (const material of this._materials || []) this.onMaterialDispose({ target: material });
+    disposeMaterials([
+      this._outlineMaterial,
+      this._outlineSphereImposterMaterial,
+      this._outlineStickImposterMaterial,
+    ]);
+    this.sprites.dispose();
+
+    if (this._gl) {
+      for (const entry of this._programs) this._gl.deleteProgram(entry.program);
+      for (const texture of [this._targetTexture, this._depthTexture, this._shadingTexture, this._scratchTexture]) {
+        if (texture) this._gl.deleteTexture(texture);
+      }
+      if (this._screenQuadVBO) this._gl.deleteBuffer(this._screenQuadVBO);
+      if (this._fb) this._gl.deleteFramebuffer(this._fb);
+    }
+    this._programs = [];
+    this._screenshader = this._AOshader = this._blurshader = null;
+    this._targetTexture = this._depthTexture = this._shadingTexture = this._scratchTexture = null;
+    this._screenQuadVBO = this._fb = null;
+    this._outlineMaterial = this._outlineSphereImposterMaterial = this._outlineStickImposterMaterial = null;
+    this._currentProgram = this._currentCamera = this._currentGeometryGroupHash = null;
+    this._currentMaterialId = -1;
+    this._sortKeys = null;
+    this._sortOrder.length = 0;
+    this.info.memory.programs = this.info.memory.geometries = this.info.memory.textures = 0;
+    this._extInstanced = this._extFragDepth = this._extFloatLinear = this._extColorBufferFloat = null;
+    this.context = this._gl = this._offscreen = this._bitmap = null;
+  }
+
   supportedExtensions() {
     return {
       supportsAIA: Boolean(this._extInstanced),
@@ -254,7 +300,7 @@ export class Renderer {
   }
 
   isLost() {
-    return this._gl == null || this._gl.isContextLost();
+    return this._disposed || this._gl == null || this._gl.isContextLost();
   }
 
   getPrecision() {
@@ -270,6 +316,12 @@ export class Renderer {
   }
 
   enableOutline(parameters) {
+    if (this._disposed) return;
+    disposeMaterials([
+      this._outlineMaterial,
+      this._outlineSphereImposterMaterial,
+      this._outlineStickImposterMaterial,
+    ]);
     this._outlineMaterial = new MeshOutlineMaterial(parameters);
     this._outlineSphereImposterMaterial = new SphereImposterOutlineMaterial(
       parameters
@@ -286,8 +338,9 @@ export class Renderer {
 
   enableAmbientOcclusion(parameters) {
     if (parameters) {
-      if (parameters.strength) this._AOstrength = parameters.strength;
-      if (parameters.scale) this._AOradius = parameters.scale;
+      if (parameters.strength !== undefined) this._AOstrength = parameters.strength;
+      if (parameters.radius !== undefined) this._AOradius = parameters.radius;
+      else if (parameters.scale !== undefined) this._AOradius = parameters.scale;
     }
     this._AOEnabled = this._AOstrength > 0;
   }
@@ -297,6 +350,7 @@ export class Renderer {
   }
 
   setViewport() {
+    if (this._disposed) return;
     if (this._offscreen) {
       //set viewport is called before every render, so setup offscreen size here
       this._offscreen.width = this._canvas.width;
@@ -323,6 +377,7 @@ export class Renderer {
   }
 
   setSize(width, height) {
+    if (this._disposed) return;
     //zooming (in the browser) changes the pixel ratio and width/height
     this.devicePixelRatio =
       window.devicePixelRatio !== undefined ? window.devicePixelRatio : 1;
@@ -359,6 +414,7 @@ export class Renderer {
   }
 
   clear(color, depth, stencil) {
+    if (this._disposed) return;
     var bits = 0;
     if (color === undefined || color) bits |= this._gl.COLOR_BUFFER_BIT;
     if (depth === undefined || depth) bits |= this._gl.DEPTH_BUFFER_BIT;
@@ -436,7 +492,9 @@ export class Renderer {
   // We need to attach appropriate uniform variables to material after shaders
   // have been chosen
   initMaterial(material, lights, fog, objects) {
-    material.addEventListener("dispose", this.onMaterialDispose.bind(this));
+    if (this._disposed) return;
+    material.addEventListener("dispose", this.onMaterialDispose);
+    (this._materials ||= new Set()).add(material);
 
     var parameters, shaderID;
 
@@ -673,9 +731,15 @@ export class Renderer {
     );
   }
 
+  private canRenderAmbientOcclusion(): boolean {
+    return !!(this._fb && this._screenshader && this._AOshader && this._blurshader);
+  }
+
   /* Setup the shading buffer to reflect desired shading (ambient occlusion) values.
     Only the matching object with materialType are considered. */
   setShading(scene, camera, materialType) {
+    if (!this.canRenderAmbientOcclusion()) return;
+
     //identify all matching objects
     let lights = scene.__lights;
     let fog = scene.fog;
@@ -685,6 +749,12 @@ export class Renderer {
       let webglObject = scene.__webglObjects[i];
 
       if (webglObject.render && webglObject[materialType]) {
+        // Opaque depth materials are only needed when an AO pass actually runs.
+        if (materialType === "opaque" && !webglObject.opaque.wireframe && !webglObject.opaqueDepth) {
+          const depthMaterial = webglObject.opaque.clone();
+          depthMaterial.opacity = 0.0;
+          webglObject.opaqueDepth = depthMaterial;
+        }
         renderList.push(webglObject);
       }
     }
@@ -809,6 +879,7 @@ export class Renderer {
   }
 
   render(scene, camera) {
+    if (this._disposed) return;
     if (camera instanceof Camera === false) {
       console.error("Renderer.render: camera is not an instance of Camera.");
       return;
@@ -879,6 +950,8 @@ export class Renderer {
       }
     }
 
+    hasAO = hasAO && this.canRenderAmbientOcclusion();
+
     // set matrices for immediate objects
 
     // opaque pass (front-to-back order)
@@ -905,7 +978,7 @@ export class Renderer {
     this.renderObjects(scene.__webglObjects, false, "transparent", camera, lights, fog, true);
 
     //volumetric is separate
-    if (hasvolumetric && this._fb) {
+    if (hasvolumetric && this._fb && this._screenshader) {
       //disconnect depth texture from framebuffer so we can read it
       this._gl.framebufferTexture2D(
         this._gl.FRAMEBUFFER,
@@ -937,7 +1010,16 @@ export class Renderer {
 
   //setup framebuffer for drawing into, assumes buffers already allocated
   setFrameBuffer() {
+    if (this._disposed) return;
     if (this.isWebGL1() || !this._fb) return;
+    if (!this._screenshader) {
+      // Keep ordinary geometry and labels visible if presentation fails.
+      this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
+      this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
+      this._gl.scissor(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
+      this.setViewport(); // Restore the appropriate cell for a viewer grid.
+      return;
+    }
     let width = this._viewportWidth;
     let height = this._viewportHeight;
 
@@ -1054,75 +1136,86 @@ export class Renderer {
     );
   }
 
-  //allocate buffers for framebuffer, needs to be called with every resize
+  // Allocate once; setFrameBuffer resizes texture storage for the current viewport.
+  // Explicit initialization retries only missing postprocessing programs.
   initFrameBuffer() {
+    if (this._disposed) return;
     // only needed/works with webgl2
     if (this.isWebGL1()) return;
 
-    let width = this._viewportWidth;
-    let height = this._viewportHeight;
+    if (!this._fb) {
+      let width = this._viewportWidth;
+      let height = this._viewportHeight;
 
-    //when using framebuffer, always draw from origin, will shift the viewport when we render
-    this._gl.enable(this._gl.SCISSOR_TEST);
-    this._gl.scissor(0, 0, width, height);
-    this._gl.viewport(0, 0, width, height);
+      //when using framebuffer, always draw from origin, will shift the viewport when we render
+      this._gl.enable(this._gl.SCISSOR_TEST);
+      this._gl.scissor(0, 0, width, height);
+      this._gl.viewport(0, 0, width, height);
 
-    //create textures and frame buffer, will be initialized in setFrameBuffer
-    this._targetTexture = this._gl.createTexture();
-    this._depthTexture = this._gl.createTexture();
-    this._shadingTexture = this._gl.createTexture();
-    this._scratchTexture = this._gl.createTexture();
-    this._fb = this._gl.createFramebuffer();
+      //create textures and frame buffer, will be initialized in setFrameBuffer
+      this._targetTexture = this._gl.createTexture();
+      this._depthTexture = this._gl.createTexture();
+      this._shadingTexture = this._gl.createTexture();
+      this._scratchTexture = this._gl.createTexture();
+      this._fb = this._gl.createFramebuffer();
 
-    // build screenshader
-    var screenshader = this._antialias ? ShaderLib.screenaa : ShaderLib.screen;
+      // create the vertex array and attrib array for the full screenquad
+      var verts = [
+        // First triangle:
+        1.0, 1.0, -1.0, 1.0, -1.0, -1.0,
+        // Second triangle:
+        -1.0, -1.0, 1.0, -1.0, 1.0, 1.0,
+      ];
+      this._screenQuadVBO = this._gl.createBuffer();
+      this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._screenQuadVBO);
+      this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(verts), this._gl.STATIC_DRAW);
+    }
 
-    this._screenshader = this.buildProgram(
-      screenshader.fragmentShader,
-      screenshader.vertexShader,
-      screenshader.uniforms,
-      {}
-    );
-    this._vertexattribpos = this._gl.getAttribLocation(this._screenshader, "vertexPosition");
-    // create the vertex array and attrib array for the full screenquad
-    var verts = [
-      // First triangle:
-      1.0, 1.0, -1.0, 1.0, -1.0, -1.0,
-      // Second triangle:
-      -1.0, -1.0, 1.0, -1.0, 1.0, 1.0,
-    ];
-    this._screenQuadVBO = this._gl.createBuffer();
-    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, this._screenQuadVBO);
-    this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(verts), this._gl.STATIC_DRAW);
+    // Do not reacquire successful programs: buildProgram increments their reference counts.
+    if (!this._screenshader) {
+      var screenshader = this._antialias ? ShaderLib.screenaa : ShaderLib.screen;
+      this._screenshader = this.buildProgram(
+        screenshader.fragmentShader,
+        screenshader.vertexShader,
+        screenshader.uniforms,
+        {}
+      );
+      if (this._screenshader) {
+        this._vertexattribpos = this._gl.getAttribLocation(this._screenshader, "vertexPosition");
+      }
+    }
 
-    // build aoshader
-    let aoshader = ShaderLib.ssao;
+    if (!this._AOshader) {
+      let aoshader = ShaderLib.ssao;
+      this._AOshader = this.buildProgram(
+        aoshader.fragmentShader,
+        aoshader.vertexShader,
+        aoshader.uniforms,
+        {}
+      );
+      if (this._AOshader) {
+        this._aovertexattribpos = this._gl.getAttribLocation(this._AOshader, "vertexPosition");
+      }
+    }
 
-    this._AOshader = this.buildProgram(
-      aoshader.fragmentShader,
-      aoshader.vertexShader,
-      aoshader.uniforms,
-      {}
-    );
-    this._aovertexattribpos = this._gl.getAttribLocation(this._AOshader, "vertexPosition");
-    // create the vertex array and attrib array for the full screenquad
-
-    //blur shader
-    let bshader = ShaderLib.blur;
-
-    this._blurshader = this.buildProgram(
-      bshader.fragmentShader,
-      bshader.vertexShader,
-      bshader.uniforms,
-      {}
-    );
-    this._blurvertexattribpos = this._gl.getAttribLocation(this._blurshader, "vertexPosition");
-
+    if (!this._blurshader) {
+      let bshader = ShaderLib.blur;
+      this._blurshader = this.buildProgram(
+        bshader.fragmentShader,
+        bshader.vertexShader,
+        bshader.uniforms,
+        {}
+      );
+      if (this._blurshader) {
+        this._blurvertexattribpos = this._gl.getAttribLocation(this._blurshader, "vertexPosition");
+      }
+    }
   }
 
   renderFrameBuffertoScreen() {
+    if (this._disposed) return;
     // only needed/works with webgl2
-    if (this.isWebGL1() || this._fb === null) return;
+    if (this.isWebGL1() || this._fb === null || !this._screenshader) return;
 
     this.setViewport(); //draw texture in correct viewport
 
@@ -1180,7 +1273,10 @@ export class Renderer {
     // update must be called after objects adding / removal
     // This sends typed arrays to GL buffers for each geometryGroup
     for (var o = 0, ol = scene.__webglObjects.length; o < ol; o++) {
-      this.updateObject(scene.__webglObjects[o].object);
+      const object = scene.__webglObjects[o].object;
+      // A shared geometry can be disposed while another object still uses it.
+      if (!object.geometry.__webglInit) this.addObject(object, scene);
+      this.updateObject(object);
     }
   }
 
@@ -1214,10 +1310,12 @@ export class Renderer {
   }
 
   setTexture(texture, slot, is3D) {
+    if (this._disposed) return;
     if (texture.needsUpdate) {
       if (!texture.__webglInit) {
         texture.__webglInit = true;
-        texture.addEventListener("dispose", this.onTextureDispose.bind(this));
+        texture.addEventListener("dispose", this.onTextureDispose);
+        (this._textures ||= new Set()).add(texture);
         texture.__webglTexture = this._gl.createTexture();
         this.info.memory.textures++;
       }
@@ -1335,36 +1433,26 @@ export class Renderer {
 
   private deallocateGeometry(geometry) {
     geometry.__webglInit = undefined;
-
-    if (geometry.__webglVertexBuffer !== undefined)
-      this._gl.deleteBuffer(geometry.__webglVertexBuffer);
-
-    if (geometry.__webglColorBuffer !== undefined)
-      this._gl.deleteBuffer(geometry.__webglColorBuffer);
-
-    if (geometry.geometryGroups !== undefined) {
-      for (var g = 0, gl = geometry.groups; g < gl; g++) {
-        var geometryGroup = geometry.geometryGroups[g];
-
-        if (geometryGroup.__webglVertexBuffer !== undefined)
-          this._gl.deleteBuffer(geometryGroup.__webglVertexBuffer);
-
-        if (geometryGroup.__webglColorBuffer !== undefined)
-          this._gl.deleteBuffer(geometryGroup.__webglColorBuffer);
-
-        if (geometryGroup.__webglAlphaBuffer !== undefined)
-          this._gl.deleteBuffer(geometryGroup.__webglAlphaBuffer);
-
-        if (geometryGroup.__webglNormalBuffer !== undefined)
-          this._gl.deleteBuffer(geometryGroup.__webglNormalBuffer);
-
-        if (geometryGroup.__webglFaceBuffer !== undefined)
-          this._gl.deleteBuffer(geometryGroup.__webglFaceBuffer);
-
-        if (geometryGroup.__webglLineBuffer !== undefined)
-          this._gl.deleteBuffer(geometryGroup.__webglLineBuffer);
+    const bufferNames = [
+      "__webglVertexBuffer", "__webglColorBuffer", "__webglAlphaBuffer",
+      "__webglNormalBuffer", "__webglFaceBuffer", "__webglLineBuffer",
+      "__webglOffsetBuffer", "__webglRadiusBuffer",
+    ];
+    const releaseBuffers = (buffers) => {
+      let allocated = false;
+      for (const name of bufferNames) {
+        if (buffers[name] !== undefined) {
+          this._gl.deleteBuffer(buffers[name]);
+          delete buffers[name];
+          allocated = true;
+        }
       }
-    }
+      // createMeshBuffers/createLineBuffers count each allocated group once.
+      if (allocated) this.info.memory.geometries--;
+    };
+    releaseBuffers(geometry);
+    for (const group of geometry.geometryGroups || []) releaseBuffers(group);
+    this._currentGeometryGroupHash = null;
   }
 
   private deallocateMaterial(material) {
@@ -1373,6 +1461,7 @@ export class Renderer {
     if (program === undefined) return;
 
     material.program = undefined;
+    if (this._currentMaterialId === material.id) this._currentMaterialId = -1;
 
     // only deallocate GL program if this was the last use of shared program
     // assumed there is only single copy of any program in the _programs
@@ -1413,6 +1502,10 @@ export class Renderer {
       this._programs = newPrograms;
 
       this._gl.deleteProgram(program);
+      if (this._currentProgram === program) {
+        this._currentProgram = null;
+        this._currentGeometryGroupHash = null;
+      }
 
       this.info.memory.programs--;
     }
@@ -1420,44 +1513,39 @@ export class Renderer {
 
   private deallocateTexture(texture) {
     if (texture.image && texture.image.__webglTextureCube) {
-      // cube texture
-
       this._gl.deleteTexture(texture.image.__webglTextureCube);
+      delete texture.image.__webglTextureCube;
     } else {
-      // 2D texture
-
       if (!texture.__webglInit) return;
-
-      texture.__webglInit = false;
       this._gl.deleteTexture(texture.__webglTexture);
     }
-  }
-
-  private onGeometryDispose(event) {
-    var geometry = event.target;
-    geometry.removeEventListener("dispose", this.onGeometryDispose);
-
-    this.deallocateGeometry(geometry);
-
-    this.info.memory.geometries--;
-  }
-
-  private onTextureDispose(event) {
-    var texture = event.target;
-
-    texture.removeEventListener("dispose", this.onTextureDispose);
-
-    this.deallocateTexture(texture);
-
+    texture.__webglInit = false;
+    delete texture.__webglTexture;
+    texture.needsUpdate = true;
     this.info.memory.textures--;
   }
 
-  private onMaterialDispose(event) {
+  private readonly onGeometryDispose = (event) => {
+    var geometry = event.target;
+    geometry.removeEventListener("dispose", this.onGeometryDispose);
+    this._geometries?.delete(geometry);
+    this.deallocateGeometry(geometry);
+  };
+
+  private readonly onTextureDispose = (event) => {
+    var texture = event.target;
+    texture.removeEventListener("dispose", this.onTextureDispose);
+    this._textures?.delete(texture);
+    this.deallocateTexture(texture);
+  };
+
+  private readonly onMaterialDispose = (event) => {
     var material = event.target;
     material.removeEventListener("dispose", this.onMaterialDispose);
-
+    this._materials?.delete(material);
     this.deallocateMaterial(material);
-  }
+    material.needsUpdate = true;
+  };
 
   // Compile and return shader
   private getShader(type, str) {
@@ -1480,7 +1568,10 @@ export class Renderer {
     if (type === "fragment") shader = this._gl.createShader(this._gl.FRAGMENT_SHADER);
     else if (type === "vertex") shader = this._gl.createShader(this._gl.VERTEX_SHADER);
 
-    if (shader == null) return null;
+    if (shader == null) {
+      console.error("Could not create " + type + " shader");
+      return null;
+    }
 
     this._gl.shaderSource(shader, str);
     this._gl.compileShader(shader);
@@ -1488,6 +1579,7 @@ export class Renderer {
     if (!this._gl.getShaderParameter(shader, this._gl.COMPILE_STATUS)) {
       console.error(this._gl.getShaderInfoLog(shader));
       console.error("could not initialize shader");
+      this._gl.deleteShader(shader);
       return null;
     }
 
@@ -1497,6 +1589,7 @@ export class Renderer {
   // Compile appropriate shaders (if necessary) from source code and attach to
   // gl program.
   private buildProgram(fragmentShader, vertexShader, uniforms, parameters) {
+    if (this._disposed) return null;
     var p, pl, program, code;
     var chunks = [];
 
@@ -1532,7 +1625,10 @@ export class Renderer {
 
     // Set up new program and compile shaders
     program = this._gl.createProgram();
-    if (program == null) return null;
+    if (program == null) {
+      console.error("Could not create shader program");
+      return null;
+    }
 
     // set up precision
     var precision = this._precision;
@@ -1559,13 +1655,30 @@ export class Renderer {
     );
     var glVertexShader = this.getShader("vertex", prefix_vertex + vertexShader);
 
-    if (glVertexShader != null) this._gl.attachShader(program, glVertexShader);
-    if (glFragmentShader != null) this._gl.attachShader(program, glFragmentShader);
+    if (!glVertexShader || !glFragmentShader) {
+      if (glVertexShader) this._gl.deleteShader(glVertexShader);
+      if (glFragmentShader) this._gl.deleteShader(glFragmentShader);
+      this._gl.deleteProgram(program);
+      return null;
+    }
+
+    this._gl.attachShader(program, glVertexShader);
+    this._gl.attachShader(program, glFragmentShader);
 
     this._gl.linkProgram(program);
+    // The linked program retains its executable without the shader objects.
+    for (const shader of [glVertexShader, glFragmentShader]) {
+      if (shader) {
+        this._gl.detachShader(program, shader);
+        this._gl.deleteShader(shader);
+      }
+    }
 
-    if (!this._gl.getProgramParameter(program, this._gl.LINK_STATUS))
-      console.error("Could not initialize shader");
+    if (!this._gl.getProgramParameter(program, this._gl.LINK_STATUS)) {
+      console.error("Could not link shader program: " + this._gl.getProgramInfoLog(program));
+      this._gl.deleteProgram(program);
+      return null;
+    }
 
     // gather and cache uniform variables and attributes
 
@@ -1825,9 +1938,10 @@ export class Renderer {
   // Objects adding
 
   private addObject(object, scene) {
+    if (this._disposed) return;
     var g, gl, geometry, geometryGroup;
 
-    if (!object.__webglInit) {
+    if (!object.__webglInit || (object.geometry && !object.geometry.__webglInit)) {
       object.__webglInit = true;
 
       object._modelViewMatrix = new Matrix4();
@@ -1838,7 +1952,8 @@ export class Renderer {
         object.geometry.__webglInit === undefined
       ) {
         object.geometry.__webglInit = true;
-        object.geometry.addEventListener("dispose", this.onGeometryDispose.bind(this));
+        object.geometry.addEventListener("dispose", this.onGeometryDispose);
+        (this._geometries ||= new Set()).add(object.geometry);
       }
 
       if (object instanceof Mesh || object instanceof Line) {
@@ -1968,7 +2083,10 @@ export class Renderer {
 
   private removeInstances(objList, object) {
     for (var o = objList.length - 1; o >= 0; --o) {
-      if (objList[o].object === object) objList.splice(o, 1);
+      if (objList[o].object === object) {
+        this.releaseBufferMaterials(objList[o]);
+        objList.splice(o, 1);
+      }
     }
   }
 
@@ -1978,7 +2096,19 @@ export class Renderer {
     }
   }
 
+  private releaseBufferMaterials(globject) {
+    // Only these pass materials are renderer-owned; the base material and its
+    // textures remain owned by the scene object. Deferred retirement lets the
+    // replacement passes reuse their programs during this render.
+    disposeMaterials([globject.opaqueDepth, globject.transparentDepth, globject.opaqueShaded].filter(Boolean));
+    globject.opaqueDepth = null;
+    globject.transparentDepth = null;
+    globject.opaqueShaded = null;
+    globject.hasAO = false;
+  }
+
   private unrollBufferMaterial(globject) {
+    this.releaseBufferMaterials(globject);
     var object = globject.object;
     var material = object.material;
 
@@ -2003,11 +2133,6 @@ export class Renderer {
       globject.opaque = material;
       globject.transparent = null;
       globject.volumetric = null;
-      if (!material.wireframe) {
-        let blankMaterial = material.clone();
-        blankMaterial.opacity = 0.0;
-        globject.opaqueDepth = blankMaterial;
-      }
       if (material.hasAO) {
         globject.hasAO = true;
       }
@@ -2381,7 +2506,7 @@ export class Renderer {
 
         //convert to AO if needed
         if ((webglObject.hasAO || this._AOEnabled) &&
-          webglObject[materialType + "Shaded"]) {
+          this.canRenderAmbientOcclusion() && webglObject[materialType + "Shaded"]) {
           material = webglObject[materialType + "Shaded"];
         }
         if (!material) continue;

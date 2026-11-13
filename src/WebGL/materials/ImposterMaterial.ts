@@ -37,7 +37,9 @@ export class ImposterMaterial extends Material {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material: T = new ImposterMaterial() as T): T {
+  clone<T extends ImposterMaterial>(material: T): T;
+  clone(material?: ImposterMaterial): ImposterMaterial;
+  clone(material: ImposterMaterial = new ImposterMaterial()): ImposterMaterial {
     super.clone.call(this, material);
 
     material.color.copy(this.color);

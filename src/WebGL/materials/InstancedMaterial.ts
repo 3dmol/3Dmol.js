@@ -37,8 +37,10 @@ export class InstancedMaterial extends Material {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material: T = new InstancedMaterial() as T): T {
-    super.clone.call(this, material as T);
+  clone<T extends InstancedMaterial>(material: T): T;
+  clone(material?: InstancedMaterial): InstancedMaterial;
+  clone(material: InstancedMaterial = new InstancedMaterial()): InstancedMaterial {
+    super.clone.call(this, material);
 
     material.color.copy(this.color);
     material.ambient.copy(this.ambient);

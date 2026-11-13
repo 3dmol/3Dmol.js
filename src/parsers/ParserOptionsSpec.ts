@@ -2,14 +2,17 @@
 * File formats supported by 3Dmol.js
 * @typedef FileFormats
 * @category Parsers
+* @prop bcif Binary Crystallographic Information File format
 * @prop cdjson,json  Chemical JSON format
 * @prop cube Gaussian cube format
-* @prop gro  Gromacs topology format, need to add coordinates to resulting model.
+* @prop gro Gromacs structure format, including atom coordinates.
+* @prop lammpstrj LAMMPS trajectory format
 * @prop mcif,cif Crystallographic Information File, the successor to PDB that makes you miss the PDB file format
 * @prop mmtf Macromolecular Transmission Format, the successor to PDB that is totally awesome
 * @prop mol2 Sybyl Mol2 format
 * @prop pdb The venerable Protein Data Bank format
-* @prop pqr Like PDB but with partial charges which are read into the partialcharge atom property
+* @prop pdbqt AutoDock PDBQT format
+* @prop pqr PDB-like format with charge and radius, stored in atom properties. Charges are available as properties.charge and properties.partialCharge.
 * @prop prmtop Amber topology file, must add coordinates
 * @prop sdf MDL MOL format, supports multiple models and meta data
 * @prop vasp VASP format (CONTCAR, POSCAR)
@@ -26,22 +29,22 @@ import { AtomStyleSpec } from "GLModel";
  export interface ParserOptionsSpec {
   /** true if you want to add to a new frame and false otherwise ; supported by all */
   frames?: boolean;
-  /** object specifying the vibration behavior ; supported by all */
+  /** Generate vibration frames from atom displacement vectors when both frames and amplitude are supplied and nonzero. */
   vibrate?: {
-    /** vibrate.frames - number of frames to be created, default to 10 ; supported by all */
+    /** Number of vibration frames to create. */
     frames?: number;
-    /** vibrate.amplitude -amplitude of distortion, default to 1 (full) ; supported by all */
+    /** Scale applied to the atom displacement vectors. */
     amplitude?: number
   };
-  /** specifies whether or not multiple models are being defined ; supported by xyz,sdf, or mol2 */
+  /** Read multiple models when supported by the input format. */
   multimodel?: boolean;
-  /** specifies weather or not the model is of one molecule ; Supported by xyz , sdf , mol2 */
+  /** Combine parsed models into one atom list when supported by the format, typically together with multimodel. */
   onemol?: boolean;
-  /** do not strip hydrogens ; supported by sdf,mol2 */
+  /** Retain hydrogens in parsers that can strip them, including pdb, pdbqt, sdf, mol2, mmtf, and bcif. */
   keepH?: boolean;
   /** used to define ChemDoodle styles ; supported by cdjson */
   parseStyle?: unknown;
-  /** boolean dictating weather or not to do assembly ; supported by mcif, pdb */
+  /** Apply assembly or symmetry transformations from the input; supported by cif/mcif, pdb, mmtf, and bcif. */
   doAssembly?: boolean;
   /**  Set to true if you wish to duplicate assembly atoms otherwise false ; supported by all formats with symmetries.  Not duplicating will result in faster rendering but it will not be possible to individually style symmetries. */
   duplicateAssemblyAtoms?: boolean;
@@ -51,13 +54,14 @@ import { AtomStyleSpec } from "GLModel";
   normalizeAssembly?: boolean;
   /** do not detect bonds between symmetries generated with duplicateAssemblyAtoms (cif only - other formats never make bonds between symmetries) */
   dontConnectDuplicatedAtoms?: boolean;
-  /** boolean dictating the presence of a secondary structure ; supported by pdb */
+  /** Do not compute secondary structure; supported by pdb, mmtf, and pqr. */
   noSecondaryStructure?: boolean;
-  /** do not compute ss ; supported by pdb, mmtf, cif */
+  /** Do not compute secondary structure; supported by pdb, mmtf, cif/mcif, and bcif.
+   * CIF does not read file annotations, so disabling computation leaves residues as coil. */
   noComputeSecondaryStructure?: boolean;
-  /** maximum distance used for identifying hydrogen bonds when computing secondary structure; supported by pdb, mmtf, cif */
+  /** Maximum hydrogen-bond distance in angstroms when computing secondary structure; supported by pdb, pqr, mmtf, cif, and bcif. */
   hbondCutoff?: number;
-  /** which alternate location to select, if present; '*' to load all ; supported by pdb */
+  /** Alternate location to select, if present; '*' loads all; supported by pdb, mmtf, and bcif. */
   altLoc?: string;
   /** index of the assembly in symmetry ; supported by mmtf */
   assemblyIndex?: number;

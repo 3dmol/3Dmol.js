@@ -1,5 +1,6 @@
 import { base64ToArray } from "./utilities";
 import { Vector3, Matrix4 } from "./WebGL/math";
+import type { XYZ } from "./WebGL/math";
 import { VASP } from "./parsers/VASP";
 import { CUBE } from "./parsers/CUBE";
 import { inflate } from "pako";
@@ -7,6 +8,7 @@ import { inflate } from "pako";
 
 interface VolumeDataOptions {
     negate?: boolean;
+    /** Normalize to zero mean and unit variance; constant maps become all zeros. */
     normalize?: boolean;
 };
 
@@ -15,9 +17,9 @@ interface VolumeDataOptions {
  * functionality.
  *
  * @class
- * @param {string} str - volumetric data
- * @param {string} format - format of supplied data (cube, dx, vasp); append .gz if compressed
- * @param {Object} options - normalize (zero mean, unit variance), negate
+ * @param {string|ArrayBuffer|Uint8Array|Int8Array} str - Text or binary volumetric data; CCP4 data may also be supplied as a base64-encoded string.
+ * @param {string} format - Format of supplied data (cube, dx, vasp, or ccp4); append .gz if compressed.
+ * @param {Object} [options] - normalize (zero mean, unit variance), negate
  */
 export class VolumeData {
 
@@ -80,10 +82,14 @@ export class VolumeData {
                     this.data[i] = -this.data[i];
                 }
             }
-            if (options.normalize) {
+            if (options.normalize && this.data.length > 0) {
                 var total = 0.0;
                 for (let i = 0, n = this.data.length; i < n; i++) {
                     total += this.data[i];
+                }
+                if (!Number.isFinite(total)) {
+                    console.warn("VolumeData: Cannot normalize non-finite voxel values.");
+                    return;
                 }
                 var mean = total / this.data.length;
                 total = 0;
@@ -91,19 +97,42 @@ export class VolumeData {
                     var diff = this.data[i] - mean;
                     total += diff * diff; //variance is ave of squared difference with mean
                 }
-                var variance = total / this.data.length;
-                //now normalize
+                var standardDeviation = Math.sqrt(total / this.data.length);
+                // Constant maps have no variation; center them at zero.
                 for (let i = 0, n = this.data.length; i < n; i++) {
-                    this.data[i] = (this.data[i] - mean) / variance;
+                    this.data[i] = standardDeviation > 0 ? (this.data[i] - mean) / standardDeviation : 0;
                 }
             }
         }
     }
 
+    // Read one scalar per voxel, ignoring trailing whitespace and format metadata.
+    private parseScalarData(raw: string): void {
+        const dimensions = [this.size.x, this.size.y, this.size.z];
+        const count = this.size.x * this.size.y * this.size.z;
+        const tokens = raw.match(/\S+/g) || [];
+        if (dimensions.some(n => !Number.isSafeInteger(n) || n <= 0) ||
+            !Number.isSafeInteger(count) || tokens.length < count) {
+            console.warn("VolumeData: Invalid grid dimensions or incomplete voxel data.");
+            this.data = new Float32Array(0);
+            return;
+        }
+        tokens.length = count;
+        const data = Float32Array.from(tokens, Number);
+        if (!data.every(Number.isFinite)) {
+            console.warn("VolumeData: Expected finite numeric voxel values.");
+            this.data = new Float32Array(0);
+            return;
+        }
+        this.data = data;
+    }
+
     /**
      * @function $3Dmol.VolumeData.getIndex
-     * @param {number} x,y,z - the coordinates
-     * @returns - index into flat array closest to provided coordinate; -1 if invalid
+     * @param {number} x - Finite world-space x coordinate.
+     * @param {number} y - Finite world-space y coordinate.
+     * @param {number} z - Finite world-space z coordinate.
+     * @returns {number} Flat index after transforming to grid coordinates and rounding, or -1 when the rounded coordinates are outside the grid.
      */
     getIndex(x: number, y: number, z: number) {
 
@@ -139,8 +168,10 @@ export class VolumeData {
 
     /**
      * @function $3Dmol.VolumeData.getVal
-     * @param {number} x,y,z - the coordinates
-     * @returns - value closest to provided coordinate; zero if coordinate invalid
+     * @param {number} x - Finite world-space x coordinate.
+     * @param {number} y - Finite world-space y coordinate.
+     * @param {number} z - Finite world-space z coordinate.
+     * @returns {number} Value at the rounded grid coordinates, or zero when they are outside the grid.
      */
     getVal(x: number, y: number, z: number) {
         let i = this.getIndex(x, y, z);
@@ -148,21 +179,29 @@ export class VolumeData {
         return this.data[i];
     };
 
-    getCoordinates = function (index: number) {
+    /**
+     * Return world coordinates for a flat grid index, with z varying fastest.
+     * @param {number} index - Integer index from zero through size.x * size.y * size.z - 1.
+     * @returns {XYZ} Coordinates after the grid matrix or origin/unit transform.
+     */
+    getCoordinates = function (index: number): XYZ {
+        const x = Math.floor(index / (this.size.y * this.size.z));
+        const y = Math.floor(index / this.size.z) % this.size.y;
+        const z = index % this.size.z;
 
-        var x = index / (this.size.y * this.size.z);
-        var y = index % (this.size.y * this.size.z);
-        var z = index % this.size.z;
-
-        x *= this.unit.x;
-        y *= this.unit.y;
-        z *= this.unit.z;
-
-        x += this.origin.x;
-        y += this.origin.y;
-        z += this.origin.z;
-
-        return { x: x, y: y, z: z };
+        if (this.matrix) {
+            const e = this.matrix.elements;
+            return {
+                x: e[0] * x + e[4] * y + e[8] * z + e[12],
+                y: e[1] * x + e[5] * y + e[9] * z + e[13],
+                z: e[2] * x + e[6] * y + e[10] * z + e[14]
+            };
+        }
+        return {
+            x: x * this.unit.x + this.origin.x,
+            y: y * this.unit.y + this.origin.y,
+            z: z * this.unit.z + this.origin.z
+        };
     };
 
     /*
@@ -267,7 +306,7 @@ export class VolumeData {
         var recounts = /gridpositions\s+counts\s+(\d+)\s+(\d+)\s+(\d+)/;
         var reorig = /^origin\s+(\S+)\s+(\S+)\s+(\S+)/;
         var redelta = /^delta\s+(\S+)\s+(\S+)\s+(\S+)/;
-        var follows = /data follows/;
+        var follows = /data\s+follows/;
         var i = 0;
 
         for (i = 0; i < lines.length; i++) {
@@ -319,14 +358,13 @@ export class VolumeData {
                 break;
             }
         }
-        i += 1;
         if (!this.size || !this.origin || !this.unit || !this.size) {
             console.error("Error parsing dx format");
             return;
         }
-        var raw = lines.splice(i).join(" ");
-        var rawArray = raw.split(/[\s\r]+/);
-        this.data = Float32Array.from(rawArray, parseFloat);
+        // Data may begin on the same line as "data follows".
+        var raw = lines.slice(i).join(" ").replace(/^.*?data\s+follows\s*/, "");
+        this.parseScalarData(raw);
     };
 
     // parse cube data
@@ -350,10 +388,8 @@ export class VolumeData {
 
         var headerlines = 6;
         if (atomsnum < 0) headerlines++; //see: http://www.ks.uiuc.edu/Research/vmd/plugins/molfile/cubeplugin.html
-        var raw = lines.splice(natoms + headerlines).join(" ");
-        raw = raw.replace(/^\s+/, '');
-        var rawArray = raw.split(/[\s\r]+/);
-        this.data = Float32Array.from(rawArray, parseFloat);
+        var raw = lines.slice(natoms + headerlines).join(" ");
+        this.parseScalarData(raw);
 
     };
 

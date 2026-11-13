@@ -47,12 +47,16 @@ export type GradientSpec = {
   map?: Record<string, unknown>
 };
 
-//return a Gradient object, even if what is specified is descriptive
+/** Resolve a gradient description or preserve a custom gradient object.
+ * Unknown names and non-gradient inputs warn and fall back to RWB over [-1, 1].
+ */
 export function getGradient(grad: GradientSpec|GradientType): GradientType {
-  if (grad instanceof GradientType) {
-    return grad;
-  } else if (grad.gradient !== undefined && builtinGradients[grad.gradient]
-  ) {
+  if (grad instanceof GradientType || (grad &&
+    typeof (grad as GradientType).range === "function" &&
+    typeof (grad as GradientType).valueToHex === "function")) {
+    return grad as GradientType;
+  } else if (grad && typeof grad.gradient === "string" &&
+    Object.prototype.hasOwnProperty.call(builtinGradients, grad.gradient)) {
     let min = grad.min === undefined ? -1 : grad.min;
     let max = grad.max === undefined ? 1 : grad.max;
     if (grad.mid === undefined) {
@@ -64,14 +68,15 @@ export function getGradient(grad: GradientSpec|GradientType): GradientType {
     } else {
       return new builtinGradients[grad.gradient](min, max, grad.mid);
     }
-  } else if(typeof(grad.gradient) == "string" && grad.gradient.startsWith('linear_')) {
+  } else if (grad && typeof grad.gradient === "string" && grad.gradient.startsWith('linear_')) {
     let colors = grad.gradient.split('_');
     colors.shift();
     let min = grad.min === undefined ? -1 : grad.min;
     let max = grad.max === undefined ? 1 : grad.max;    
     return new CustomLinear(min,max,colors);
   }
-  return grad as GradientType;
+  console.warn("Invalid gradient specification; using RWB over [-1, 1].", grad);
+  return new RWB(-1, 1);
 }
 
 /**
@@ -316,9 +321,11 @@ export class Sinebow extends GradientType {
 
 
 /**
- * Custom linear gradient using user supplied colors.
+ * Custom linear gradient with colors evenly spaced from min to max.
+ * Equal min and max values use the midpoint of the color ramp.
+ * An empty palette uses black; a one-color palette is constant.
  * Reverse gradients are supported when min>max so that the colors are displayed in reverse order.
- * Midpoints are not supported - color map should be specified to get desired middle color.
+ * A custom numeric midpoint is not supported; specify colors to choose the middle color.
  * 
  * @param {number} min 
  * @param {number} max
@@ -386,17 +393,20 @@ export class CustomLinear extends GradientType {
 
     if (val === undefined) return 0xffffff;
 
+    let nsteps = this.colors.length - 1;
+    if (nsteps < 0) return 0x000000;
+    if (nsteps === 0) return this.colors[0].getHex();
+
     var norm = normalizeValue(lo, hi, val);
     lo = norm.lo;
     hi = norm.hi;
     val = norm.val;
 
-    let nsteps = this.colors.length;
-    let stepsize = (hi - lo) / nsteps;
-    let startpos = Math.min(Math.floor((val - lo) / stepsize), nsteps - 1);
-    let endpos = Math.min(startpos + 1, nsteps - 1);
+    let position = (hi === lo ? 0.5 : (val - lo) / (hi - lo)) * nsteps;
+    let startpos = Math.min(Math.floor(position), nsteps);
+    let endpos = Math.min(startpos + 1, nsteps);
 
-    let frac = (val - lo - (startpos * stepsize)) / stepsize;
+    let frac = position - startpos;
 
     let startcol = this.colors[startpos];
     let endcol = this.colors[endpos];
@@ -410,7 +420,7 @@ export class CustomLinear extends GradientType {
 
 /**
  * built in gradient schemes
- * The user can pass these strings directly as the gradient
+ * Use these names as the gradient property of a GradientSpec.
  * @prop rwb - red/white/blue, supports setting a mid point for white
  * @prop roygb - rainbow
  * @prop sinebow - rainbow with better saturation properties

@@ -227,6 +227,7 @@ export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { h
 
     v3.subVectors(v2, v1);
     var bondLengthSq = v3.lengthSq();
+    if (bondLengthSq === 0) continue;
     v3.normalize();
 
     w_0.subVectors(v1, raycaster.ray.origin);
@@ -243,6 +244,9 @@ export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { h
     s_c = (normProj * rayProj - lineProj) / denom;
     t_c = (rayProj - normProj * lineProj) / denom;
 
+    // Restrict the closest points to the segment and the forward ray.
+    if (s_c < 0 || s_c * s_c > bondLengthSq || t_c < 0) continue;
+
     v1.add(v3.multiplyScalar(s_c)); // Q_c
     v2.copy(raycaster.ray.direction)
       .multiplyScalar(t_c)
@@ -250,7 +254,7 @@ export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { h
 
     closestDistSq = v3.subVectors(v2, v1).lengthSq();
 
-    if (closestDistSq < precisionSq && s_c * s_c < bondLengthSq)
+    if (closestDistSq < precisionSq)
       intersects.push({ clickable: clickable, distance: t_c });
   }
   for (i = 0, il = intersectionShape.sphere.length; i < il; i++) {

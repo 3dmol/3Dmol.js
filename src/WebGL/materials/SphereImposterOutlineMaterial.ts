@@ -19,7 +19,9 @@ export class SphereImposterOutlineMaterial extends ImposterMaterial {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material: T = new SphereImposterOutlineMaterial() as T): T {
+  clone<T extends SphereImposterOutlineMaterial>(material: T): T;
+  clone(material?: SphereImposterOutlineMaterial): SphereImposterOutlineMaterial;
+  clone(material: SphereImposterOutlineMaterial = new SphereImposterOutlineMaterial()): SphereImposterOutlineMaterial {
     super.clone.call(this, material);
     material.outlineColor = this.outlineColor;
     material.outlineWidth = this.outlineWidth;

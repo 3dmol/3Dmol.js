@@ -7,7 +7,9 @@ export class RingImposterMaterial extends ImposterMaterial {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material = new RingImposterMaterial() as T): T {
+  clone<T extends RingImposterMaterial>(material: T): T;
+  clone(material?: RingImposterMaterial): RingImposterMaterial;
+  clone(material: RingImposterMaterial = new RingImposterMaterial()): RingImposterMaterial {
     super.clone.call(this, material);
     return material;
   }

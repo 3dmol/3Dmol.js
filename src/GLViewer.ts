@@ -1,6 +1,7 @@
 //a molecular viewer based on GLMol
 
 import type { StateManager } from "./ui/state";
+import { viewers as autoloadViewers } from "./autoload";
 import { decode, encode, toRGBA8 } from 'upng-js';
 import { AtomStyleSpec, GLModel, LineStyleSpec } from "./GLModel";
 import { ArrowSpec, BoxSpec, CurveSpec, CustomShapeSpec, CylinderSpec, GLShape, IsoSurfaceSpec, LineSpec, ShapeSpec, SphereSpec, splitMesh } from "./GLShape";
@@ -23,6 +24,7 @@ interface SurfObj {
     done: Boolean;
     finished: Boolean;
     lastGL?: any;
+    lastGLMaterial?: Material;
     symmetries?: any[];
     style?: SurfaceStyleSpec;
 }
@@ -86,6 +88,10 @@ export class GLViewer {
     public ui?: StateManager;
 
     // private class variables
+    private static readonly canvasOwners = new WeakMap<HTMLCanvasElement, { viewers: Set<GLViewer>; owned: boolean }>();
+    private destroyed = false;
+    private eventBody?: HTMLElement;
+    private eventWindow?: Window;
     private static numWorkers = 4; // number of threads for surface generation
     private static maxVolume = 64000; // how much to break up surface calculations
 
@@ -97,9 +103,20 @@ export class GLViewer {
     private camerax: number;
     private _viewer: GLViewer;
     private glDOM: HTMLCanvasElement | null = null;
+    // Keep listener identities stable across container moves and canvas replacements.
+    private readonly onContextLost: EventListener = this._handleLostContext.bind(this);
+    private readonly onMouseDown: EventListener = this._handleMouseDown.bind(this);
+    private readonly onMouseScroll: EventListener = this._handleMouseScroll.bind(this);
+    private readonly onMouseMove: EventListener = this._handleMouseMove.bind(this);
+    private readonly onContextMenu: EventListener = this._handleContextMenu.bind(this);
+    private readonly onMouseUp: EventListener = this._handleMouseUp.bind(this);
+    private readonly onWindowResize: EventListener = () => { this.resize(); };
 
     private models: GLModel[] = []; // atomistic molecular models
     private surfaces: Record<number, Surface> = {};
+    private surfaceJobs?: Map<Surface, Set<() => void>>;
+    private pendingSurfaceMaterials = new Set<Material>();
+    private retiringSurfaceMaterials?: Set<Material>;
     private shapes = []; // Generic shapes
     private labels: Label[] = [];
     private clickables = []; //things you can click on
@@ -120,6 +137,7 @@ export class GLViewer {
     private fov = 20;
 
     private linkedViewers = [];
+    private linkedFrom = new Set<GLViewer>();
     private renderer: Renderer | null = null;
 
     private row: number;
@@ -158,6 +176,8 @@ export class GLViewer {
     private dq = new Quaternion(0, 0, 0, 1);
     private animated = 0;
     private animationTimers = new Set<PausableTimer>();
+    private motionTimers = new Set<ReturnType<typeof setTimeout>>();
+    private captureCancellations = new Set<() => void>();
     private isDragging = false;
     private mouseStartX = 0;
     private mouseStartY = 0;
@@ -172,8 +192,11 @@ export class GLViewer {
     private hoverTimeout: any;
     private longTouchTimeout: any;
 
-    private divwatcher: any;
-    private intwatcher: any;
+    private divwatcher?: ResizeObserver;
+    private intwatcher?: IntersectionObserver;
+    private removalObserver?: MutationObserver;
+    private removalTimeout?: ReturnType<typeof setTimeout>;
+    private checkContainerRemoval?: () => void;
     private spinInterval: any;
 
 
@@ -213,6 +236,7 @@ export class GLViewer {
     };
 
     private setupRenderer() {
+        this.renderer?.dispose();
         let rendopt = {
             ...this.config,
             preserveDrawingBuffer: true, //so we can export images
@@ -253,6 +277,7 @@ export class GLViewer {
     };
 
     private _handleLostContext(event) {
+        if (this.destroyed) return;
 
         //when contexts go missing, try to regenerate any that are visible on screen
         //but no more than CONTEXTS_PER_VIEWPORT (if this is set higher than the
@@ -287,22 +312,119 @@ export class GLViewer {
         this.ASPECT = this.renderer.getAspect(this.WIDTH, this.HEIGHT);
         this.renderer.setSize(this.WIDTH, this.HEIGHT);
         this.container.append(this.renderer.domElement);
+        if (this.glDOM && this.glDOM !== this.renderer.domElement) this.detachCanvas();
         this.glDOM = this.renderer.domElement;
+        let owners = GLViewer.canvasOwners.get(this.glDOM);
+        if (!owners) {
+            owners = { viewers: new Set(), owned: !this.config.canvas || !!this.config.viewers };
+            GLViewer.canvasOwners.set(this.glDOM, owners);
+        }
+        owners.viewers.add(this);
 
         (this.glDOM as any)._3dmol_viewer = this;
-        this.glDOM.addEventListener("webglcontextlost", this._handleLostContext.bind(this));
+        this.glDOM.addEventListener("webglcontextlost", this.onContextLost);
 
         if (!this.nomouse) {
             // user can request that the mouse handlers not be installed
-            this.glDOM.addEventListener('mousedown', this._handleMouseDown.bind(this), { passive: false });
-            this.glDOM.addEventListener('touchstart', this._handleMouseDown.bind(this), { passive: false });
-            this.glDOM.addEventListener('wheel', this._handleMouseScroll.bind(this), { passive: false });
-            this.glDOM.addEventListener('mousemove', this._handleMouseMove.bind(this), { passive: false });
-            this.glDOM.addEventListener('touchmove', this._handleMouseMove.bind(this), { passive: false });
-            this.glDOM.addEventListener("contextmenu", this._handleContextMenu.bind(this), { passive: false });
+            this.glDOM.addEventListener('mousedown', this.onMouseDown, { passive: false });
+            this.glDOM.addEventListener('touchstart', this.onMouseDown, { passive: false });
+            this.glDOM.addEventListener('wheel', this.onMouseScroll, { passive: false });
+            this.glDOM.addEventListener('mousemove', this.onMouseMove, { passive: false });
+            this.glDOM.addEventListener('touchmove', this.onMouseMove, { passive: false });
+            this.glDOM.addEventListener("contextmenu", this.onContextMenu, { passive: false });
         }
 
     };
+
+    private detachCanvas() {
+        const canvas = this.glDOM;
+        if (!canvas) return undefined;
+        canvas.removeEventListener('webglcontextlost', this.onContextLost);
+        canvas.removeEventListener('mousedown', this.onMouseDown);
+        canvas.removeEventListener('touchstart', this.onMouseDown);
+        canvas.removeEventListener('wheel', this.onMouseScroll);
+        canvas.removeEventListener('mousemove', this.onMouseMove);
+        canvas.removeEventListener('touchmove', this.onMouseMove);
+        canvas.removeEventListener('contextmenu', this.onContextMenu);
+        const owners = GLViewer.canvasOwners.get(canvas);
+        owners?.viewers.delete(this);
+        const next = owners?.viewers.values().next().value;
+        if ((canvas as any)._3dmol_viewer === this) {
+            if (next) (canvas as any)._3dmol_viewer = next;
+            else delete (canvas as any)._3dmol_viewer;
+        }
+        if (!owners?.viewers.size) GLViewer.canvasOwners.delete(canvas);
+        this.glDOM = null;
+        return { canvas, remove: !!owners?.owned && !owners.viewers.size };
+    }
+
+    private watchContainerRemoval() {
+        this.removalObserver?.disconnect();
+        this.removalObserver = undefined;
+        clearTimeout(this.removalTimeout);
+        this.removalTimeout = undefined;
+        this.checkContainerRemoval = undefined;
+        if (this.destroyed || this.config.autoDestroy === false) return;
+        const container = this.container;
+        const document = container.ownerDocument;
+        const Observer = document.defaultView?.MutationObserver;
+        if (!Observer) return;
+        let wasConnected = container.isConnected;
+        let ancestors: Node[] = [];
+        let observingDetached = false;
+        const check = (records: MutationRecord[] = []) => {
+            if (this.destroyed || this.container !== container) return;
+            const connected = container.isConnected;
+            const next: Node[] = [];
+            // Follow shadow hosts as well as ordinary parents, including closed roots.
+            for (let node: Node = container; node; node = node.parentNode || (node as ShadowRoot).host) {
+                if (node !== container) next.push(node);
+            }
+            if (!next.includes(document)) next.push(document);
+            wasConnected = wasConnected || connected;
+            // A first mount and removal can happen before delivery. Reconstruct parent links
+            // backward: the records may also include mutations made after a subtree was detached.
+            if (!wasConnected && records.length) {
+                const parents = new Map<Node, Node | null>();
+                for (let i = records.length - 1; i >= 0 && !wasConnected; i--) {
+                    const record = records[i];
+                    record.addedNodes.forEach(node => parents.set(node, null));
+                    record.removedNodes.forEach(node => parents.set(node, record.target));
+                    const seen = new Set<Node>();
+                    for (let node: Node = container; node && !seen.has(node);) {
+                        if (node.nodeType === 9) { wasConnected = true; break; }
+                        seen.add(node);
+                        node = parents.has(node) ? parents.get(node) : node.parentNode || (node as ShadowRoot).host;
+                    }
+                }
+            }
+            if (observingDetached !== !connected || next.length !== ancestors.length ||
+                next.some((node, index) => node !== ancestors[index])) {
+                this.removalObserver.disconnect();
+                // Connected viewers need only their ancestor chain, not every page mutation.
+                for (const node of next) this.removalObserver.observe(node, {
+                    childList: true, subtree: node === document && !connected
+                });
+                ancestors = next;
+                observingDetached = !connected;
+            }
+            if (connected) {
+                clearTimeout(this.removalTimeout);
+                this.removalTimeout = undefined;
+            } else if (wasConnected && this.removalTimeout === undefined) {
+                // Let synchronous and queued microtask moves finish before retiring the viewer.
+                this.removalTimeout = setTimeout(() => {
+                    this.removalTimeout = undefined;
+                    if (this.destroyed || this.container !== container) return;
+                    if (container.isConnected) check();
+                    else this.destroy();
+                }, 0);
+            }
+        };
+        this.removalObserver = new Observer(check);
+        this.checkContainerRemoval = check;
+        check();
+    }
 
     private decAnim() {
         //decrement the number of animations currently
@@ -360,6 +482,7 @@ export class GLViewer {
     // display scene
     //if nolink is set/true, don't propagate changes to linked viewers
     private show(nolink?) {
+        if (this.destroyed) return;
         this.renderer.setViewport();
         if (!this.scene)
             return;
@@ -370,6 +493,7 @@ export class GLViewer {
 
         //have any scene change trigger a callback
         if (this.viewChangeCallback) this.viewChangeCallback(this._viewer.getView());
+        if (this.destroyed) return;
 
         if (!nolink && this.linkedViewers.length > 0) {
             var view = this._viewer.getView();
@@ -474,6 +598,7 @@ export class GLViewer {
 
     //set current_hover to sel (which can be null), calling appropraite callbacks
     private setHover(selected, event?, intersects?) {
+        if (this.destroyed) return;
         
         if (selected && selected.hidden) {
             selected = null;
@@ -484,7 +609,10 @@ export class GLViewer {
             if (typeof (this.current_hover.unhover_callback) != "function") {
                 this.current_hover.unhover_callback = makeFunction(this.current_hover.unhover_callback);
             }
-            this.current_hover.unhover_callback(this.current_hover, this._viewer, event, this.container, intersects);
+            if (typeof (this.current_hover.unhover_callback) === "function") {
+                this.current_hover.unhover_callback(this.current_hover, this._viewer, event, this.container, intersects);
+                if (this.destroyed) return;
+            }
         }
         this.current_hover = selected;
 
@@ -507,7 +635,7 @@ export class GLViewer {
             var selected = intersects[0].clickable;
             
             this.setHover(selected, event, intersects);
-            this.current_hover = selected;
+            if (!this.destroyed) this.current_hover = selected;
         }
         else {
             this.setHover(null);
@@ -730,33 +858,40 @@ export class GLViewer {
 
         // this event is bound to the body element, not the container,
         // so no need to put it inside initContainer()
-        document.body.addEventListener('mouseup', this._handleMouseUp.bind(this));
-        document.body.addEventListener('touchend', this._handleMouseUp.bind(this));
+        this.eventBody = document.body;
+        this.eventBody.addEventListener('mouseup', this.onMouseUp);
+        this.eventBody.addEventListener('touchend', this.onMouseUp);
 
         this.initContainer(this.container);
         if (this.config.style) { //enable setting style in constructor
             this.setViewStyle(this.config as ViewStyle);
         }
 
-        window.addEventListener("resize", this.resize.bind(this));
+        this.eventWindow = window;
+        this.eventWindow.addEventListener("resize", this.onWindowResize);
 
         if (typeof (window.ResizeObserver) !== "undefined") {
-            this.divwatcher = new window.ResizeObserver(this.resize.bind(this));
+            this.divwatcher = new window.ResizeObserver((entries) => {
+                // Ignore entries queued for a container the viewer has left.
+                if (!this.destroyed && entries.some(entry => entry.target === this.container)) {
+                    this.resize();
+                }
+            });
             this.divwatcher.observe(this.container);
         }
 
         if (typeof (window.IntersectionObserver) !== "undefined") {
             //make sure a viewer that is becoming visible is alive
-            let intcallback = (entries, observer) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        this.resize();
-                    }
-                });
-            };
-            this.intwatcher = new window.IntersectionObserver(intcallback);
+            this.intwatcher = new window.IntersectionObserver((entries) => {
+                this.checkContainerRemoval?.();
+                if (!this.destroyed && entries.some(entry => entry.target === this.container && entry.isIntersecting)) {
+                    this.resize();
+                }
+            });
             this.intwatcher.observe(this.container);
         }
+
+        this.watchContainerRemoval();
 
         try {
             if (typeof (this.callback) === "function")
@@ -769,11 +904,12 @@ export class GLViewer {
     };
 
     /**
-    * Return a list of objects that intersect that at the specified viewer position.
+    * Return intersection records for objects at the specified normalized viewer position.
     *
-    * @param x - x position in screen coordinates
-    * @param y - y position in screen coordinates
-    * @param {Object[]} - list of objects or selection object specifying what object to check for targeting
+    * @param {number} x - Normalized horizontal coordinate: -1 at the left edge, +1 at the right edge.
+    * @param {number} y - Normalized vertical coordinate: -1 at the bottom edge, +1 at the top edge.
+    * @param {Object[]|AtomSelectionSpec} objects - Objects to test, or an atom selection.
+    * @return {Object[]} Intersection records sorted by distance, nearest first.
     */
     public targetedObjects(x: number, y: number, objects) {
         var mouse = {
@@ -789,9 +925,9 @@ export class GLViewer {
         return this.raycaster.intersectObjects(this.modelGroup, objects);
     };
 
-    /** Convert model coordinates to screen coordinates.
-     * @param {object | list} - an object or list of objects with x,y,z attributes (e.g. an atom)
-     * @return {object | list} - and object or list of {x: screenX, y: screenY}
+    /** Convert model coordinates to page coordinates in pixels.
+     * @param {XYZ|XYZ[]} coords - A point or list of points with x, y, and z coordinates.
+     * @return {Object|Object[]} A point or list of points with x and y page coordinates, matching the input shape.
      */
     public modelToScreen(coords) {
         let returnsingle = false;
@@ -825,9 +961,10 @@ export class GLViewer {
 
     /**
      * For a given screen (x,y) displacement return model displacement
-     * @param{x} x displacement in screen coordinates
-     * @param{y} y displacement in screen corodinates
-     * @param{modelz} z coordinate in model coordinates to compute offset for, default is model axis
+     * @param {number} x - Horizontal displacement in pixels.
+     * @param {number} y - Vertical displacement in pixels.
+     * @param {number} [modelz] - Depth at which to compute the offset; defaults to the rotation group depth.
+     * @return {Vector3} Model displacement.
     */
     public screenOffsetToModel(x: number, y: number, modelz?) {
         var dx = x / this.WIDTH;
@@ -847,8 +984,9 @@ export class GLViewer {
     /**
      * Distance from screen coordinate to model coordinate assuming screen point
      * is projected to the same depth as model coordinate
-     * @param{screen} xy screen coordinate
-     * @param{model} xyz model coordinate
+     * @param {Object} screen - Point with x and y page coordinates in pixels.
+     * @param {XYZ} model - Point in model coordinates.
+     * @return {number} Distance in model units.
     */
     public screenToModelDistance(screen: XYZ, model) {
         let offset = this.canvasOffset();
@@ -867,6 +1005,7 @@ export class GLViewer {
 
     /**
      * Set a callback to call when the view has potentially changed.
+     * @param {function|null} callback - Receives the array returned by getView(); null clears the callback.
      *
     */
     public setViewChangeCallback(callback) {
@@ -875,7 +1014,8 @@ export class GLViewer {
     };
 
     /**
-     * Set a callback to call when the view has potentially changed.
+     * Set a callback called by render() with the current internal state.
+     * @param {function|null} callback - Receives the object returned by getInternalState(); null clears the callback.
      *
     */
     public setStateChangeCallback(callback) {
@@ -902,8 +1042,8 @@ export class GLViewer {
     };
 
     /**
-     * Return object representing internal state of
-     * the viewer appropriate for passing to setInternalState
+     * Return model state appropriate for passing to setInternalState.
+     * Labels, shapes, and surfaces are not captured.
      *
     */
     public getInternalState() {
@@ -920,8 +1060,8 @@ export class GLViewer {
     };
 
     /**
-     * Overwrite internal state of the viewer with passed  object
-     * which should come from getInternalState.
+     * Clear the scene and restore models from an object returned by getInternalState.
+     * Existing labels, shapes, and surfaces are removed and are not restored.
      *
     */
     public setInternalState(state) {
@@ -945,8 +1085,8 @@ export class GLViewer {
     /**
      * Set lower and upper limit stops for zoom.
      *
-     * @param {lower} - limit on zoom in (positive number).  Default 0.
-     * @param {upper} - limit on zoom out (positive number).  Default infinite.
+     * @param {number} lower - limit on zoom in (positive number). Default 0.
+     * @param {number} upper - limit on zoom out (positive number). Default infinite.
      * @example
       $3Dmol.get("data/set1_122_complex.mol2", function(moldata) {
             var m = viewer.addModel(moldata);
@@ -967,7 +1107,7 @@ export class GLViewer {
     /**
      * Set camera parameters (distance to the origin and field of view)
      *
-     * @param {parameters} - new camera parameters, with possible fields
+     * @param {Object} parameters - new camera parameters, with possible fields
      *                       being fov for the field of view, z for the
      *                       distance to the origin, and orthographic (boolean)
      *                       for kind of projection (default false).
@@ -988,7 +1128,7 @@ export class GLViewer {
 
         if (parameters.z !== undefined) {
             this.CAMERA_Z = parameters.z;
-            this.camera.z = this.CAMERA_Z;
+            this.camera.position.z = this.CAMERA_Z;
         }
         if (parameters.orthographic !== undefined) {
             this.camera.ortho = parameters.orthographic;
@@ -997,6 +1137,7 @@ export class GLViewer {
     };
 
     public _handleMouseDown(ev) {
+        if (this.destroyed) return;
         ev.preventDefault();
         if (!this.scene)
             return;
@@ -1023,6 +1164,7 @@ export class GLViewer {
         let self = this;
         if (ev.targetTouches && ev.targetTouches.length === 1) {
             this.longTouchTimeout = setTimeout(function () {
+                if (self.destroyed) return;
                 if (self.touchHold == true) {
                     // console.log('Touch hold', x,y);
                     self.glDOM = self.renderer.domElement;
@@ -1045,6 +1187,7 @@ export class GLViewer {
     };
 
     public _handleMouseUp(ev) {
+        if (this.destroyed) return;
         // handle touch
         this.touchHold = false;
 
@@ -1062,6 +1205,7 @@ export class GLViewer {
     }
 
     public _handleMouseScroll(ev) { // Zoom
+        if (this.destroyed) return;
         ev.preventDefault();
         if (!this.scene)
             return;
@@ -1100,12 +1244,17 @@ export class GLViewer {
     /**
      * Return a promise that resolves to an animated PNG image URI of
      viewer contents (base64 encoded) for nframes of viewer changes.
+     * Resolves to undefined if destroy() occurs before all frames are captured.
      * @return {Promise}
      */
     public apngURI(nframes: number) {
+        if (this.destroyed) return Promise.resolve(undefined);
         let viewer = this;
+        const canvas = this.getCanvas();
         nframes = nframes ? nframes : 1;
         return new Promise(function (resolve) {
+            const cancel = () => resolve(undefined);
+            viewer.captureCancellations.add(cancel);
             let framecnt = 0;
             let oldcb = viewer.viewChangeCallback;
             let bufpromise = [];
@@ -1115,12 +1264,13 @@ export class GLViewer {
                 delays.push(Date.now() - lasttime);
                 lasttime = Date.now();
                 bufpromise.push(new Promise(resolve => {
-                    viewer.getCanvas().toBlob(function (blob) {
+                    canvas.toBlob(function (blob) {
                         blob.arrayBuffer().then(resolve);
                     }, "image/png");
                 }));
                 framecnt += 1;
                 if (framecnt == nframes) {
+                    viewer.captureCancellations.delete(cancel);
                     viewer.viewChangeCallback = oldcb;
 
                     Promise.all(bufpromise).then((buffers) => {
@@ -1131,8 +1281,8 @@ export class GLViewer {
                             let img = decode(buffers[i]);
                             rgbas.push(toRGBA8(img)[0]);
                         }
-                        let width = viewer.getCanvas().width;
-                        let height = viewer.getCanvas().height;
+                        let width = canvas.width;
+                        let height = canvas.height;
                         let apng = encode(rgbas, width, height, 0, delays);
                         let blob = new Blob([apng], { type: 'image/png' });
                         let fr = new FileReader();
@@ -1156,7 +1306,7 @@ export class GLViewer {
     };
 
     /**
-     * Return renderer element.
+     * Return the underlying WebGL renderer.
      */
     public getRenderer() {
         return this.renderer;
@@ -1166,7 +1316,7 @@ export class GLViewer {
          * Set the duration of the hover delay
          *
          * @param {number}
-         *            [hoverDuration] - an optional parameter that denotes
+         *            [duration] - an optional parameter that denotes
          *            the duration of the hover delay (in milliseconds) before the hover action is called
          *
      */
@@ -1193,6 +1343,7 @@ export class GLViewer {
     }
 
     public _handleMouseMove(ev) { // touchmove
+        if (this.destroyed) return;
 
         clearTimeout(this.hoverTimeout);
         ev.preventDefault();
@@ -1212,6 +1363,7 @@ export class GLViewer {
         // hover timeout
         if (this.current_hover !== null) {
             this.handleHoverContinue(mouse.x, mouse.y);
+            if (this.destroyed) return;
         }
 
         var mode = 0;
@@ -1225,7 +1377,7 @@ export class GLViewer {
         if (this.hoverables.length > 0) {
             this.hoverTimeout = setTimeout(
                 function () {
-                    self.handleHoverSelection(mouse.x, mouse.y, ev);
+                    if (!self.destroyed) self.handleHoverSelection(mouse.x, mouse.y, ev);
                 },
                 this.hoverDuration);
         }
@@ -1292,6 +1444,7 @@ export class GLViewer {
     public userContextMenuHandler: Function | null = null;
 
     public _handleContextMenu(ev) {
+        if (this.destroyed) return;
         ev.preventDefault();
         if (this.closeEnoughForClick(ev)) {
             var x = this.mouseStartX;
@@ -1323,22 +1476,36 @@ export class GLViewer {
 
     /**
      * Change the viewer's container element
-     * Also useful if the original container element was removed from the DOM.
+     * Moves before automatic removal cleanup runs preserve the viewer. Set autoDestroy
+     * to false when retaining a detached viewer for later reuse. A detached new container
+     * is allowed and is monitored for removal after its first attachment.
      *
      * @param {Object | string} element
-     *            Either HTML element or string identifier. Defaults to the element used to initialize the viewer.
+     *            Either HTML element or string identifier. Defaults to the current container.
 
      */
     public setContainer(element) {
+        if (this.destroyed) return this;
         let elem = getElement(element) || this.container;
+        const previousContainer = this.container;
         this.initContainer(elem);
+        if (elem !== previousContainer) {
+            this.divwatcher?.unobserve(previousContainer);
+            this.divwatcher?.observe(elem);
+            this.intwatcher?.unobserve(previousContainer);
+            this.intwatcher?.observe(elem);
+            this.watchContainerRemoval();
+            this.ui?.updateUI();
+        } else {
+            this.checkContainerRemoval?.();
+        }
         return this;
     };
 
     /**
      * Set the background color (default white)
      *
-     * @param {number}
+     * @param {ColorSpec}
      *            hex Hexcode specified background color, or standard color spec
      * @param {number}
      *            a Alpha level (default 1.0)
@@ -1417,8 +1584,8 @@ export class GLViewer {
         }
         if (parameters.style.includes("ambientOcclusion")) {
             var params: any = {};
-            if (parameters.strength) params.strength = parameters.strength;
-            if (parameters.radius) params.radius = parameters.radius;
+            if (parameters.strength !== undefined) params.strength = parameters.strength;
+            if (parameters.radius !== undefined) params.radius = parameters.radius;
             this.renderer.enableAmbientOcclusion(params);
         } else {
             this.renderer.disableAmbientOcclusion();
@@ -1461,6 +1628,8 @@ export class GLViewer {
      *
      */
     public resize() {
+        if (this.destroyed) return this;
+        this.checkContainerRemoval?.();
         this.WIDTH = this.getWidth();
         this.HEIGHT = this.getHeight();
         let regen = false;
@@ -1500,7 +1669,7 @@ export class GLViewer {
             if (this.viewers) {
                 for (let i = 0, n = this.viewers.length; i < n; i++) {
                     for (let j = 0, m = this.viewers[i].length; j < m; j++) {
-                        this.viewers[i][j].render(null, options);
+                        this.viewers[i][j]?.render(null, options);
                     }
                 }
             }
@@ -1516,10 +1685,8 @@ export class GLViewer {
     /**
      * Return specified model
      *
-     * @param {number}
-     *            [id=last model id] - Retrieve model with specified id
-     * @default Returns last model added to viewer or null if there are no models
-     * @return {GLModel}
+     * @param {number|GLModel} [id] - Model or model ID. Missing or unknown IDs use the last model.
+     * @return {GLModel|null} The requested model, or null if there are no models.
      *
      * @example // Retrieve reference to first GLModel added var m =
      *    $3Dmol.download("pdb:1UBQ",viewer,{},function(m1){
@@ -1565,6 +1732,7 @@ export class GLViewer {
      *
      */
     public spin(axis, speed: number = 1, only_when_visable: boolean = false) {
+        if (this.destroyed) return;
         clearInterval(this.spinInterval);
         if (typeof axis == 'undefined')
             axis = 'y';
@@ -1584,6 +1752,7 @@ export class GLViewer {
 
         this.spinInterval = setInterval(
             function () {
+                if (viewer.destroyed) return;
                 if (!viewer.getCanvas().isConnected && viewer.renderer.isLost()) {
                     clearInterval(viewer.spinInterval);
                 }
@@ -1594,6 +1763,14 @@ export class GLViewer {
 
     };
 
+    private scheduleMotion(callback: () => void, delay: number) {
+        const timer = setTimeout(() => {
+            this.motionTimers.delete(timer);
+            if (!this.destroyed) callback();
+        }, delay);
+        this.motionTimers.add(timer);
+    }
+
     //animate motion between current position and passed position
     // can set some parameters to null
     //if fixed is true will enforce the request animation, otherwise
@@ -1603,6 +1780,7 @@ export class GLViewer {
     //return array includes final position, but not current
     //the returned array includes an animate method
     private animateMotion(duration: number, fixed: boolean, mpos: Vector3, rz: number, rot: Quaternion, cam: Vector3) {
+        if (this.destroyed) return;
         var interval = 20;
         var nsteps: number = Math.ceil(duration / interval);
         if (nsteps < 1) nsteps = 1;
@@ -1638,13 +1816,13 @@ export class GLViewer {
                 self.camera.lookAt(p.cam);
 
                 if (step < steps.length) {
-                    setTimeout(callback, interval);
+                    self.scheduleMotion(callback, interval);
                 } else {
                     self.decAnim();
                 }
                 self.show();
             };
-            setTimeout(callback, interval);
+            this.scheduleMotion(callback, interval);
 
         } else { //relative update
             var delta: any = {};
@@ -1682,13 +1860,13 @@ export class GLViewer {
                 }
 
                 if (step < nsteps) {
-                    setTimeout(callback, interval);
+                    self.scheduleMotion(callback, interval);
                 } else {
                     self.decAnim();
                 }
                 self.show();
             };
-            setTimeout(callback, interval);
+            this.scheduleMotion(callback, interval);
         }
     };
 
@@ -1797,9 +1975,11 @@ export class GLViewer {
      * @param {Array.<number>} arg Array formatted identically to the return value of getView */
     public setView(arg, nolink?) {
 
-        if (arg === undefined ||
-            !(arg instanceof Array || arg.length !== 8))
+        if (!Array.isArray(arg) || (arg.length !== 8 && arg.length !== 10))
             return this;
+        for (let i = 0; i < arg.length; i++) {
+            if (!Number.isFinite(arg[i])) return this;
+        }
 
         if (!this.modelGroup || !this.rotationGroup)
             return this;
@@ -1828,6 +2008,7 @@ export class GLViewer {
      *
      */
     public render(callback?, exts?) {
+        if (this.destroyed) return this;
         this.renderer.setViewport();
         this.updateClickables(); //must render for clickable styles to take effect
         var view = this.getView();
@@ -1835,6 +2016,7 @@ export class GLViewer {
         if (this.stateChangeCallback) {
             //todo: have ability to only send delta updates
             this.stateChangeCallback(this.getInternalState());
+            if (this.destroyed) return this;
         }
 
         var i, n;
@@ -1871,6 +2053,7 @@ export class GLViewer {
             }
         }
 
+        let retiredSurfaceMaterials: Set<Material> | undefined;
         for (i in this.surfaces) { // this is an object with possible holes
             if (!this.surfaces.hasOwnProperty(i)) continue;
             var surfArr = this.surfaces[i];
@@ -1894,8 +2077,14 @@ export class GLViewer {
                         }
 
                         // remove partially rendered surface
-                        if (surfArr[n].lastGL)
+                        if (surfArr[n].lastGL) {
                             this.modelGroup.remove(surfArr[n].lastGL);
+                            if (surfArr[n].lastGLMaterial && surfArr[n].lastGLMaterial !== surfArr[n].mat) {
+                                if (!retiredSurfaceMaterials) retiredSurfaceMaterials = new Set<Material>();
+                                retiredSurfaceMaterials.add(surfArr[n].lastGLMaterial);
+                            }
+                        }
+                        surfArr[n].lastGLMaterial = surfArr[n].mat;
 
                         // create new surface
                         var smesh = null;
@@ -1905,7 +2094,7 @@ export class GLViewer {
                             smesh = new Line(geo, surfArr[n].mat);
                         }
                         else {
-                            if ('wireframe' in surfArr.style && surfArr.style.wireframe) {
+                            if (surfArr[n].mat.wireframe) {
                                 geo.setUpWireframe();
                             }
                             smesh = new Mesh(geo, surfArr[n].mat);
@@ -1939,7 +2128,9 @@ export class GLViewer {
             }
         }
 
+        if (retiredSurfaceMaterials) this.disposeUnusedSurfaceMaterials(retiredSurfaceMaterials);
         this.setView(view); // Calls show() => renderer render
+        if (this.destroyed) return this;
         if (typeof callback === 'function') {
             callback(this);
         }
@@ -2032,7 +2223,7 @@ export class GLViewer {
     * Returns valid values for the specified attribute in the given selection
     * @param {string} attribute
     * @param {AtomSelectionSpec} sel
-    * @return {Array.<Object>}
+    * @return {string[]}
     *
     */
     public getUniqueValues(attribute: string, sel?: AtomSelectionSpec) {
@@ -2113,7 +2304,7 @@ export class GLViewer {
      * @param {number} y Relative change in view coordinates of camera
      * @param {number}
      *            [animationDuration] - an optional parameter that denotes
-     *            the duration of a zoom animation
+     *            the duration of the translation animation in milliseconds
      * @param {Boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation         *
      * @example     $3Dmol.get('data/4csv.pdb', function(data) {
@@ -2160,7 +2351,7 @@ export class GLViewer {
      * @param {number} y Relative change in y screen coordinate
      * @param {number}
      *            [animationDuration] - an optional parameter that denotes
-     *            the duration of a zoom animation
+     *            the duration of the translation animation in milliseconds
      * @param {Boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation         *
      * @example     $3Dmol.get('data/4csv.pdb', function(data) {
@@ -2179,7 +2370,7 @@ export class GLViewer {
 
         if (animationDuration > 0) {
             this.animateMotion(animationDuration, fixedPath,
-                this.modelGroup.position,
+                final_position,
                 this.rotationGroup.position.z,
                 this.rotationGroup.quaternion,
                 this.lookingAt);
@@ -2234,7 +2425,7 @@ export class GLViewer {
      *            properties to select. Default: all atoms in viewer
      * @param {number}
      *            [animationDuration] - an optional parameter that denotes
-     *            the duration of a zoom animation
+     *            the duration of the centering animation in milliseconds
      * @param {Boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation         *
      * @example // if the user were to pass the animationDuration value to
@@ -2334,10 +2525,10 @@ export class GLViewer {
     };
 
     /**
-     * Zoom to center of atom selection.  The slab will be set appropriately for
-     * the selection, unless an empty selection is provided, in which case there will be no slab.
+     * Zoom to the center of an atom selection and adjust the clipping slab to include all atoms.
+     * An empty selection object selects the whole scene, including shapes, and uses a wider finite slab.
      *
-     * @param {Object}
+     * @param {AtomSelectionSpec}
      *            [sel] - Selection specification specifying model and atom
      *            properties to select. Default: all atoms in viewer
      * @param {number}
@@ -2498,7 +2689,7 @@ export class GLViewer {
      *            text - Label text
      * @param {LabelSpec}
      *            options - Label style specification
-      @param {AtomSelection}
+     * @param {AtomSelectionSpec}
      *            sel - Set position of label to center of this selection
      * @param {boolean} noshow - if true, do not immediately display label - when adding multiple labels this is more efficient
      * @return {Label}
@@ -2551,8 +2742,9 @@ export class GLViewer {
      * The label text will be [resn][resi]
      *
      * @param {AtomSelectionSpec} sel
-     * @param {AtomStyleSpec} style
+     * @param {LabelSpec} style
      * @param {boolean} byframe - if true, create labels for every individual frame, not just current
+     * @return {Label[]} The newly created labels.
      *
      * @example
          $3Dmol.download("mmtf:2ll5",viewer,{},function(){
@@ -2574,7 +2766,7 @@ export class GLViewer {
      *
      * @param {string} prop - property name
      * @param {AtomSelectionSpec} sel
-     * @param {AtomStyleSpec} style
+     * @param {LabelSpec} style
      *
      * * @example
          $3Dmol.download("cid:5291",viewer,{},function(){
@@ -2757,7 +2949,7 @@ export class GLViewer {
      * Add shape object to viewer
      * @see {GLShape}
      *
-     * @param {ShapeSpec} shapeSpec - style specification for label
+     * @param {ShapeSpec} shapeSpec - style specification for the shape
      * @return {GLShape}
      */
     public addShape(shapeSpec: ShapeSpec) {
@@ -2798,9 +2990,11 @@ export class GLViewer {
         return this;
     };
 
-    //gets the center of the selection
-    private getSelectionCenter(spec: AtomSelectionSpec): XYZ {
-        if (spec.hasOwnProperty("x") && spec.hasOwnProperty("y") && spec.hasOwnProperty("z"))
+    // Numeric coordinate triples are positions; other objects select atoms.
+    private getSelectionCenter(spec?: AtomSelectionSpec | XYZ): XYZ | undefined {
+        // Let GLShape apply its own defaults when a position was omitted.
+        if (spec == null) return undefined;
+        if (typeof spec.x === "number" && typeof spec.y === "number" && typeof spec.z === "number")
             return spec as XYZ;
         var atoms = this.getAtomsFromSel(spec);
         if (atoms.length == 0)
@@ -2814,7 +3008,7 @@ export class GLViewer {
      * Create and add sphere shape. This method provides a shorthand
      * way to create a spherical shape object
      *
-     * @param {SphereShapeSpec} spec - Sphere shape style specification
+     * @param {SphereSpec} spec - Sphere shape style specification
      * @return {GLShape}
      @example
 
@@ -3207,7 +3401,7 @@ export class GLViewer {
     * @param {integer} A - number of times to replicate cell in X dimension.
     * @param {integer} B - number of times to replicate cell in Y dimension.  If absent, X value is used.
     * @param {integer} C - number of times to replicate cell in Z dimension.  If absent, Y value is used.
-    * @param {GLModel} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
+    * @param {GLModel|number} model - Model with unit cell information (e.g., pdb derived).  If omitted uses most recently added model.
     * @param {boolean} addBonds - Create bonds between unit cells based on distances.
     * @param {boolean} prune - Keep only atoms that are within the original unit cell (i.e., on edges).  Alternatively, call replicateUnitCell(1).
       @example
@@ -3349,7 +3543,7 @@ export class GLViewer {
     /**
      * Add custom shape component from user supplied function
      *
-     * @param {CustomSpec} spec - Style specification
+     * @param {CustomShapeSpec} spec - Style specification
      * @return {GLShape}
      @example
      function triangle(viewer) {
@@ -3390,11 +3584,12 @@ export class GLViewer {
     };
 
     /**
-     * Construct isosurface from volumetric data in gaussian cube format
-     * @param {String} data - Input file contents
+     * Construct an isosurface from volumetric data in the specified format.
+     * If spec includes transferfn, create a volumetric renderer instead.
+     * @param {string|ArrayBuffer|Uint8Array|Int8Array} data - Input file contents
      * @param {String} format - Input file format
      * @param {VolumetricRendererSpec|IsoSurfaceSpec} spec - Shape style specification
-     * @return {GLShape}
+     * @return {GLShape|GLVolumetricRender}
      *
      * @example
 
@@ -3448,9 +3643,9 @@ export class GLViewer {
     /**
      * Create volumetric renderer for volumetricData
      * @param {VolumeData} data - volumetric data
-     * @param {VolumetricRenderSpec} spec - specification of volumetric render
+     * @param {VolumetricRendererSpec} spec - specification of volumetric render
      *
-     * @return {GLShape}
+     * @return {GLVolumetricRender}
      *
      */
     public addVolumetricRender(data, spec: VolumetricRendererSpec) {
@@ -3473,7 +3668,7 @@ export class GLViewer {
     /**
      * Enable/disable fog for content far from the camera
      *
-     * @param {boolean} fog whether to enable or disable the fog
+     * @param {boolean|FogSpec} fog - Enable or disable fog, or provide its start and end fractions.
      * 
      * @example
             $3Dmol.get('data/1jpy.cif', function(data) {
@@ -3535,7 +3730,7 @@ export class GLViewer {
     };
 
     /**
-     * Returns the number of frames that the model with the most frames in the viewer has
+     * Returns the largest frame count across models and frame-specific shapes and labels.
      *
      * @return {number}
      */
@@ -3565,14 +3760,16 @@ export class GLViewer {
 
 
     /**
-     * Animate all models in viewer from their respective frames
+     * Animate all models in viewer from their respective frames.
+     * Frame-load failures are logged and stop only the affected animation.
      * @param {Object} options - can specify interval (speed of animation), loop (direction
-     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, reps (numer of repetitions, 0 indicates infinite loop),
-     * and fast (replay coordinates into existing geometry instead of rebuilding each frame; see setFrame)
+     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, reps (number of repetitions, 0 indicates infinite loop),
+     * and fast (replay coordinates into existing geometry instead of rebuilding each frame; see setFrame).
      *
      */
 
     public animate(options) {
+        if (this.destroyed) return this;
         this.incAnim();
         var interval = 100;
         var loop = "forward";
@@ -3602,22 +3799,31 @@ export class GLViewer {
         var displayCount = 0;
         var displayMax = mostFrames * reps;
         var time = new Date();
-        var resolve, timer;
+        var resolve;
+        var timer: PausableTimer;
+        var stopOnError = function (error) {
+            if (!self.animationTimers.has(timer)) return;
+            timer.cancel();
+            self.animationTimers.delete(timer);
+            self.decAnim();
+            console.warn("Unable to load animation frame.", error);
+        };
         var display = function (direction) {
+            if (!self.animationTimers.has(timer)) return;
             time = new Date();
             if (direction == "forward") {
                 self.setFrame(currFrame, frameOpts)
                     .then(function () {
                         currFrame = (currFrame + inc) % mostFrames;
                         resolve();
-                    });
+                    }, stopOnError);
             }
             else if (direction == "backward") {
                 self.setFrame((mostFrames - 1) - currFrame, frameOpts)
                     .then(function () {
                         currFrame = (currFrame + inc) % mostFrames;
                         resolve();
-                    });
+                    }, stopOnError);
             }
             else { //back and forth
                 self.setFrame(currFrame, frameOpts)
@@ -3625,12 +3831,16 @@ export class GLViewer {
                         currFrame += inc;
                         inc *= (((currFrame % (mostFrames - 1)) == 0) ? -1 : 1);
                         resolve();
-                    });
+                    }, stopOnError);
             }
         };
 
         resolve = function () {
+            // A stopped animation may still have a frame download in flight.
+            if (!self.animationTimers.has(timer)) return;
             self.render();
+            // Rendering can invoke callbacks that stop or replace this animation.
+            if (!self.animationTimers.has(timer)) return;
             if (!self.getCanvas().isConnected) {
                 //we no longer exist as part of the DOM
                 self.stopAnimate();
@@ -3643,9 +3853,11 @@ export class GLViewer {
             else {
                 var newInterval = interval - (new Date().getTime() - time.getTime());
                 newInterval = (newInterval > 0) ? newInterval : 0;
+                var paused = timer.isPaused();
                 timer.cancel();
                 self.animationTimers.delete(timer);
                 timer = new PausableTimer(display, newInterval, loop);
+                if (paused) timer.pause();
                 self.animationTimers.add(timer);
             }
         };
@@ -3656,17 +3868,21 @@ export class GLViewer {
     };
 
     /**
-     * Stop animation of all models in viewer
+     * Stop animation of all models in viewer.
+     * Camera motions continue and remain included in isAnimated().
+     * Pending frame loads are not aborted, but cannot restart a stopped animation.
      */
     public stopAnimate() {
-        this.animated = 0;
+        // Only model animations are canceled; camera motions keep their own count.
+        this.animated = Math.max(0, this.animated - this.animationTimers.size);
         this.animationTimers.forEach(function (timer: PausableTimer) { timer.cancel(); });
         this.animationTimers = new Set();
         return this;
     };
 
     /**
-     * Pause animation of all models in viewer
+     * Pause animation of all models in viewer.
+     * An in-flight frame may finish rendering; subsequent frames wait for resumeAnimate().
      */
     public pauseAnimate() {
         this.animationTimers.forEach(function (timer) { timer.pause(); });
@@ -3869,7 +4085,7 @@ export class GLViewer {
     };
 
     /** return a VRML string representation of the scene.  Include VRML header information
-     * @return VRML
+     * @return {string} VRML representation.
      */
     public exportVRML() {
         var savedmodelGroup = this.modelGroup;
@@ -4047,7 +4263,7 @@ export class GLViewer {
      *
      * @param {number} numFrames - number of frames to be created, default to 10
      * @param {number} amplitude - amplitude of distortion, default to 1 (full)
-     * @param {boolean} bothWays - if true, extend both in positive and negative directions by numFrames
+     * @param {boolean} bothways - if true, extend both in positive and negative directions by numFrames
      * @param {ArrowSpec} arrowSpec - specification for drawing animated arrows. If color isn't specified, atom color (sphere, stick, line preference) is used.
      */
     public vibrate(numFrames: number, amplitude: number, bothways: boolean, arrowSpec: ArrowSpec) {
@@ -4222,7 +4438,7 @@ export class GLViewer {
      *            mat
      * @return {Mesh}
      */
-    private static generateSurfaceMesh(atoms: AtomSpec[], VandF, mat: MeshLambertMaterial) {
+    private static generateSurfaceMesh(atoms: AtomSpec[], VandF, mat: MeshLambertMaterial, style?: SurfaceStyleSpec) {
         var geo = new Geometry(true);
         // Only one group per call to generate surface mesh (addSurface
         // should split up mesh render)
@@ -4230,13 +4446,15 @@ export class GLViewer {
 
         // set colors for vertices
         var colors = [];
-        for (let i = 0, il = atoms.length; i < il; i++) {
-            var atom = atoms[i];
-            if (atom) {
-                if (typeof (atom.surfaceColor) != "undefined") {
-                    colors[i] = atom.surfaceColor;
-                } else if (atom.color) // map from atom
-                    colors[i] = CC.color(atom.color);
+        if (style === undefined) {
+            for (let i = 0, il = atoms.length; i < il; i++) {
+                var atom = atoms[i];
+                if (atom) {
+                    if (typeof (atom.surfaceColor) != "undefined") {
+                        colors[i] = atom.surfaceColor;
+                    } else if (atom.color) // map from atom
+                        colors[i] = CC.color(atom.color);
+                }
             }
         }
 
@@ -4255,7 +4473,13 @@ export class GLViewer {
         var colorArray = geoGroup.colorArray;
         let atomArray = geoGroup.atomArray;
 
-        if (mat.voldata && mat.volscheme) {
+        if (style !== undefined) {
+            // Resolve restyled colors after trimming the geometry arrays below.
+            for (let i = 0, il = v.length; i < il; i++) {
+                atomArray[i] = atoms[v[i].atomid];
+            }
+        }
+        else if (mat.voldata && mat.volscheme) {
             //convert volumetric data into colors
             var scheme = mat.volscheme;
             var voldata = mat.voldata;
@@ -4286,6 +4510,9 @@ export class GLViewer {
         var faces = VandF.faces;
         geoGroup.faceidx = faces.length;// *3;
         geo.initTypedArrays();
+        if (style !== undefined) {
+            GLViewer.colorSurfaceGeometry(geo, style, mat);
+        }
 
         var verts = geoGroup.vertexArray;
         var normalArray = geoGroup.normalArray;
@@ -4419,8 +4646,6 @@ export class GLViewer {
      * Adds an explicit mesh as a surface object.
      * @param {Mesh}
      *            mesh
-     * @param {Object}
-     *            style
      * @returns {number} surfid
      */
     public addMesh(mesh: Mesh) {
@@ -4428,10 +4653,14 @@ export class GLViewer {
             geo: mesh.geometry,
             mat: mesh.material,
             done: true,
-            finished: false //the rendered finishes surfaces when they are done
+            finished: false, //the renderer finishes surfaces when they are done
+            symmetries: []
         };
         var surfid = this.nextSurfID();
         this.surfaces[surfid] = new Surface([surfobj]);
+        this.surfaces[surfid].style = { wireframe: mesh.material.wireframe };
+        // A dispose listener may reattach another material from the retiring batch.
+        this.retiringSurfaceMaterials?.delete(mesh.material);
         return surfid;
     };
 
@@ -4451,17 +4680,23 @@ export class GLViewer {
 
     /**
      * Add surface representation to atoms
-     * @param {SurfaceType|string} type - Surface type (VDW, MS, SAS, or SES)
+     * @param {SurfaceType|string} stype - Surface type (VDW, MS, SAS, or SES); string names are case-insensitive.
      * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
      * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
      * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
      * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
-     * @param {function} surfacecallback - function to be called after setting the surface
-     * @return {Promise} promise - Returns a promise that ultimately resovles to the surfid.  Returns surfid immediately if surfacecallback is specified.  Returned promise has a [surfid, GLViewer, style, atomsel, allsel, focus] fields for immediate access.
+     * @param {function} surfacecallback - Optional completion callback. Receives the surface ID normally.
+     * With symmetry preprocessing, receives an array repeating that ID once per contributing model
+     * (an empty array if no models contribute).
+     * @return {Promise|number} Without a callback, returns a Promise resolving to the numeric surface ID;
+     * its surfid property exposes that ID immediately. With a callback, returns the numeric ID immediately.
+     * Removing the surface stops pending generation and still resolves its original ID (and invokes
+     * the callback); the ID does not imply that the surface still exists. Destroying the viewer
+     * also settles the Promise but suppresses the completion callback.
      */
     public addSurface(stype: SurfaceType | string, style: SurfaceStyleSpec = {}, atomsel: AtomSelectionSpec = {},
         allsel?: AtomSelectionSpec, focus?: AtomSelectionSpec, surfacecallback?) {
-        // type 1: VDW 3: SAS 4: MS 2: SES
+        // type 1: VDW 2: MS 3: SAS 4: SES
         // if sync is true, does all work in main thread, otherwise uses
         // workers
         // with workers, must ensure group is the actual modelgroup since
@@ -4480,7 +4715,7 @@ export class GLViewer {
 
         if (typeof stype == "string") {
             if (GLViewer.surfaceTypeMap[stype.toUpperCase()] !== undefined)
-                type = GLViewer.surfaceTypeMap[stype];
+                type = GLViewer.surfaceTypeMap[stype.toUpperCase()];
             else {
                 console.log("Surface type : " + stype + " is not recognized");
             }
@@ -4514,191 +4749,175 @@ export class GLViewer {
         }
 
         var addSurfaceHelper = function addSurfaceHelper(surfobj: SurfObj, atomlist: AtomSpec[], atomsToShow: AtomSpec[]) {
-            //function returns promise with surfid resolved
-            if (!focus) {
-                focusSele = atomsToShow;
-            } else {
-                focusSele = GLViewer.shallowCopy(self.getAtomsFromSel(focus));
-            }
-
-            var atom;
-            //                var time = new Date();
-            var extent = getExtent(atomsToShow, true);
-            if (style.map && style.map.prop) {
-                // map color space using already set atom properties
-                var prop = style.map.prop;
-                let scheme = getGradient(style.map.scheme || style.map.gradient || new Gradient.RWB());
-                let range = scheme.range();
-                if (!range) {
-                    range = getPropertyRange(atomsToShow, prop);
+            const job = self.createSurfaceJob(surf, surfid);
+            if (!job.active()) return job.promise;
+            try {
+                if (!focus) {
+                    focusSele = atomsToShow;
+                } else {
+                    focusSele = GLViewer.shallowCopy(self.getAtomsFromSel(focus));
                 }
-                style.colorscheme = { prop: prop as string, gradient: scheme };
 
-            }
+                var atom;
+                //                var time = new Date();
+                var extent = getExtent(atomsToShow, true);
+                if (style.map && style.map.prop) {
+                    // map color space using already set atom properties
+                    var prop = style.map.prop;
+                    let scheme = getGradient(style.map.scheme || style.map.gradient || new Gradient.RWB());
+                    let range = scheme.range();
+                    if (!range) {
+                        range = getPropertyRange(atomsToShow, prop);
+                    }
+                    style.colorscheme = { prop: prop as string, gradient: scheme };
 
-            //cache surface color on each atom
-            for (let i = 0, il = atomlist.length; i < il; i++) {
-                atom = atomlist[i];
-                atom.surfaceColor = getColorFromStyle(atom, style);
-            }
+                }
 
-            var totalVol = GLViewer.volume(extent); // used to scale resolution
-            var extents = self.carveUpExtent(extent, atomlist, atomsToShow);
+                //cache surface color on each atom
+                for (let i = 0, il = atomlist.length; i < il; i++) {
+                    if (!job.active()) return job.promise;
+                    atom = atomlist[i];
+                    atom.surfaceColor = getColorFromStyle(atom, style);
+                }
 
-            if (focusSele && focusSele.length && focusSele.length > 0) {
-                var seleExtent = getExtent(focusSele, true);
-                // sort by how close to center of seleExtent
-                var sortFunc = function (a, b) {
-                    var distSq = function (ex, sele) {
-                        // distance from e (which has no center of mass) and
-                        // sele which does
-                        var e = ex.extent;
-                        var x = e[1][0] - e[0][0];
-                        var y = e[1][1] - e[0][1];
-                        var z = e[1][2] - e[0][2];
-                        var dx = (x - sele[2][0]);
-                        dx *= dx;
-                        var dy = (y - sele[2][1]);
-                        dy *= dy;
-                        var dz = (z - sele[2][2]);
-                        dz *= dz;
+                if (!job.active()) return job.promise;
 
-                        return dx + dy + dz;
+                var totalVol = GLViewer.volume(extent); // used to scale resolution
+                var extents = self.carveUpExtent(extent, atomlist, atomsToShow);
+
+                if (focusSele && focusSele.length && focusSele.length > 0) {
+                    var seleExtent = getExtent(focusSele, true);
+                    // sort by how close to center of seleExtent
+                    var sortFunc = function (a, b) {
+                        var distSq = function (ex, sele) {
+                            // distance from e (which has no center of mass) and
+                            // sele which does
+                            var e = ex.extent;
+                            var x = e[1][0] - e[0][0];
+                            var y = e[1][1] - e[0][1];
+                            var z = e[1][2] - e[0][2];
+                            var dx = (x - sele[2][0]);
+                            dx *= dx;
+                            var dy = (y - sele[2][1]);
+                            dy *= dy;
+                            var dz = (z - sele[2][2]);
+                            dz *= dz;
+
+                            return dx + dy + dz;
+                        };
+                        var d1 = distSq(a, seleExtent);
+                        var d2 = distSq(b, seleExtent);
+                        return d1 - d2;
                     };
-                    var d1 = distSq(a, seleExtent);
-                    var d2 = distSq(b, seleExtent);
-                    return d1 - d2;
-                };
-                extents.sort(sortFunc);
-            }
-
-            var reducedAtoms = [];
-            // to reduce amount data transfered, just pass x,y,z,serial and elem
-            for (let i = 0, il = atomlist.length; i < il; i++) {
-                atom = atomlist[i];
-                reducedAtoms[i] = {
-                    x: atom.x,
-                    y: atom.y,
-                    z: atom.z,
-                    serial: i,
-                    elem: atom.elem
-                };
-            }
-
-            var sync = !!(syncSurface);
-            if (typeof $3Dmol == "undefined" || typeof $3Dmol.SurfaceWorker == "undefined") {
-                console.log(
-                    "$3Dmol.SurfaceWorker is not defined, using synchronous surface generation.",
-                );
-                sync = true;
-            }
-
-            if (sync) { // don't use worker, still break up for memory purposes
-
-                // to keep the browser from locking up, call through setTimeout
-                var callSyncHelper = function callSyncHelper(i) {
-                    return new Promise<void>(function (resolve) {
-                        var VandF = GLViewer.generateMeshSyncHelper(type as SurfaceType, extents[i].extent,
-                            extents[i].atoms, extents[i].toshow, reducedAtoms,
-                            totalVol);
-                        //complicated surfaces sometimes have > 2^16 vertices
-                        var VandFs = splitMesh({ vertexArr: VandF.vertices, faceArr: VandF.faces });
-                        for (var vi = 0, vl = VandFs.length; vi < vl; vi++) {
-                            VandF = {
-                                vertices: VandFs[vi].vertexArr,
-                                faces: VandFs[vi].faceArr
-                            };
-                            var mesh = GLViewer.generateSurfaceMesh(atomlist, VandF, mat);
-                            mergeGeos(surfobj.geo, mesh);
-                        }
-                        self.render();
-                        resolve();
-                    });
-                };
-                var promises = [];
-                for (let i = 0; i < extents.length; i++) {
-                    promises.push(callSyncHelper(i));
-                }
-                return Promise.all(promises)
-                    .then(function () {
-                        surfobj.done = true;
-                        self.render(); // for consistency with parallel case, call render when done
-                        return Promise.resolve(surfid);
-                    });
-
-                // TODO: Asynchronously generate geometryGroups (not separate
-                // meshes) and merge them into a single geometry
-            } else { // use worker
-
-                var workers = [];
-                if (type < 0)
-                    type = 0; // negative reserved for atom data
-                for (let i = 0, il = GLViewer.numWorkers; i < il; i++) {
-                    var w = new Worker($3Dmol.SurfaceWorker);
-                    workers.push(w);
-                    w.postMessage({
-                        'type': -1,
-                        'atoms': reducedAtoms,
-                        'volume': totalVol
-                    });
+                    extents.sort(sortFunc);
                 }
 
-                return new Promise(function (resolve, reject) {
-                    var cnt = 0;
-
-                    var releaseMemory = function () {
-                        if (!workers || !workers.length) return;
-                        workers.forEach(function (worker) {
-                            if (worker && worker.terminate) {
-                                worker.terminate();
-                            }
-                        });
+                var reducedAtoms = [];
+                // to reduce amount data transfered, just pass x,y,z,serial and elem
+                for (let i = 0, il = atomlist.length; i < il; i++) {
+                    atom = atomlist[i];
+                    reducedAtoms[i] = {
+                        x: atom.x,
+                        y: atom.y,
+                        z: atom.z,
+                        serial: i,
+                        elem: atom.elem
                     };
+                }
 
-                    var rfunction = function (event) {
-                        var VandFs = splitMesh({
-                            vertexArr: event.data.vertices,
-                            faceArr: event.data.faces
-                        });
-                        for (var i = 0, vl = VandFs.length; i < vl; i++) {
-                            var VandF = {
-                                vertices: VandFs[i].vertexArr,
-                                faces: VandFs[i].faceArr
-                            };
-                            var mesh = GLViewer.generateSurfaceMesh(atomlist, VandF, mat);
-                            mergeGeos(surfobj.geo, mesh);
+                var sync = !!(syncSurface);
+                if (typeof $3Dmol == "undefined" || typeof $3Dmol.SurfaceWorker == "undefined") {
+                    console.log(
+                        "$3Dmol.SurfaceWorker is not defined, using synchronous surface generation.",
+                    );
+                    sync = true;
+                }
+
+
+                const mergeChunk = function (VandF) {
+                    if (!job.active()) return false;
+                    // Complicated surfaces sometimes have more than 2^16 vertices.
+                    const chunks = splitMesh({ vertexArr: VandF.vertices, faceArr: VandF.faces });
+                    for (const chunk of chunks) {
+                        if (!job.active()) return false;
+                        const mesh = GLViewer.generateSurfaceMesh(atomlist, {
+                            vertices: chunk.vertexArr, faces: chunk.faceArr
+                        }, surfobj.mat as MeshLambertMaterial,
+                        surfobj.mat === mat ? undefined : surf.style);
+                        // Coloring callbacks may remove the surface while constructing a chunk.
+                        if (!job.active()) {
+                            mesh.geometry.dispose();
+                            return false;
                         }
-                        self.render();
+                        mergeGeos(surfobj.geo, mesh);
+                    }
+                    return true;
+                };
 
-                        //    console.log("async mesh generation " + (+new Date() - time) + "ms");
-                        cnt++;
-                        if (cnt == extents.length) {
+                if (sync) { // Preserve synchronous generation, checking reentrant callbacks between chunks.
+                    for (let i = 0; i < extents.length && job.active(); i++) {
+                        const VandF = GLViewer.generateMeshSyncHelper(type as SurfaceType, extents[i].extent,
+                            extents[i].atoms, extents[i].toshow, reducedAtoms, totalVol);
+                        if (!mergeChunk(VandF)) break;
+                        self.render();
+                    }
+                    Promise.resolve().then(function () {
+                        if (job.active()) {
                             surfobj.done = true;
-                            releaseMemory();
-                            resolve(surfid); //caller of helper will resolve callback if present
+                            self.render();
+                        }
+                        job.finish();
+                    }).catch(job.fail);
+                } else { // use workers
+                    if (!job.active()) return job.promise;
+                    if (extents.length === 0) {
+                        surfobj.done = true;
+                        job.finish();
+                        return job.promise;
+                    }
+                    if (type < 0) type = 0; // negative reserved for atom data
+                    const workers: Worker[] = [];
+                    let count = 0;
+                    const onmessage = function (event) {
+                        if (!job.active()) return;
+                        try {
+                            if (!mergeChunk(event.data)) return;
+                            self.render();
+                            if (!job.active()) return;
+                            if (++count === extents.length) {
+                                surfobj.done = true;
+                                job.finish();
+                            }
+                        } catch (error) {
+                            job.fail(error);
                         }
                     };
-
-                    var efunction = function (event) {
-                        releaseMemory();
+                    const onerror = function (event) {
+                        if (!job.active()) return;
                         console.log(event.message + " (" + event.filename + ":" + event.lineno + ")");
-                        reject(event);
+                        job.fail(event);
                     };
-
-                    for (let i = 0; i < extents.length; i++) {
-                        var worker = workers[i % workers.length];
-                        worker.onmessage = rfunction;
-                        worker.onerror = efunction;
-
-                        worker.postMessage({
-                            'type': type,
-                            'expandedExtent': extents[i].extent,
-                            'extendedAtoms': extents[i].atoms,
-                            'atomsToShow': extents[i].toshow
+                    for (let i = 0; i < GLViewer.numWorkers; i++) {
+                        const worker = new Worker($3Dmol.SurfaceWorker);
+                        workers.push(worker);
+                        job.workers.add(worker);
+                        worker.onmessage = onmessage;
+                        worker.onerror = onerror;
+                        worker.postMessage({ type: -1, atoms: reducedAtoms, volume: totalVol });
+                    }
+                    for (let i = 0; i < extents.length && job.active(); i++) {
+                        workers[i % workers.length].postMessage({
+                            type: type,
+                            expandedExtent: extents[i].extent,
+                            extendedAtoms: extents[i].atoms,
+                            atomsToShow: extents[i].toshow
                         });
                     }
-                });
+                }
+            } catch (error) {
+                job.fail(error);
             }
+            return job.promise;
         };
 
         style = style || {};
@@ -4709,6 +4928,8 @@ export class GLViewer {
         surf.atomsel = atomsel;
         surf.allsel = allsel;
         surf.focus = focus;
+        // Register before generation: coloring and render callbacks can remove this surface.
+        this.surfaces[surfid] = surf;
         var promise = null;
         if (symmetries) { //do preprocessing
             var modelsAtomList = {};
@@ -4749,19 +4970,100 @@ export class GLViewer {
             });
             promise = addSurfaceHelper(surf[surf.length - 1], atomlist, atomsToShow);
         }
-        this.surfaces[surfid] = surf;
-        promise.surfid = surfid;
-
         if (surfacecallback && typeof (surfacecallback) == "function") {
             promise.then(function (surfid) {
-                surfacecallback(surfid);
+                if (!self.isDestroyed()) surfacecallback(surfid);
             });
             return surfid;
         }
         else {
+            if (symmetries) promise = promise.then(() => surfid);
+            promise.surfid = surfid;
             return promise;
         }
     };
+
+    // Keep jobs attached to the Surface object: numeric IDs can be reused after removal.
+    private createSurfaceJob(surface: Surface, surfid: number) {
+        const jobs = this.surfaceJobs ?? (this.surfaceJobs = new Map());
+        let pending = jobs.get(surface);
+        if (!pending) jobs.set(surface, pending = new Set());
+        const workers = new Set<Worker>();
+        let settled = false;
+        let resolve: (id: number) => void;
+        let reject: (error: unknown) => void;
+        const promise = new Promise<number>((res, rej) => { resolve = res; reject = rej; });
+        const release = () => {
+            pending.delete(finish);
+            if (pending.size === 0) jobs.delete(surface);
+            for (const worker of workers) {
+                worker.onmessage = null;
+                worker.onerror = null;
+                worker.terminate();
+            }
+            workers.clear();
+        };
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            release();
+            resolve(surfid);
+        };
+        const fail = (error: unknown) => {
+            if (settled) return;
+            settled = true;
+            release();
+            reject(error);
+        };
+        const active = () => {
+            if (settled) return false;
+            if (this.surfaces[surfid] !== surface || this.isDestroyed()) {
+                finish();
+                return false;
+            }
+            return true;
+        };
+        pending.add(finish);
+        return { promise, workers, active, finish, fail };
+    }
+
+    private cancelSurfaceJobs(surface: Surface) {
+        const pending = this.surfaceJobs?.get(surface);
+        if (pending) for (const cancel of pending) cancel();
+    }
+
+    // Keep completed geometry and chunks arriving after a restyle on the same color path.
+    private static colorSurfaceGeometry(geometry: Geometry, style: SurfaceStyleSpec, mat: MeshLambertMaterial) {
+        if (style.color) {
+            mat.color = CC.color(style.color);
+            geometry.colorsNeedUpdate = true;
+            const c = CC.color(style.color);
+            geometry.setColor(c);
+        }
+        else if (mat.voldata && mat.volscheme) {
+            //convert volumetric data into colors
+            const scheme = mat.volscheme;
+            const voldata = mat.voldata;
+            const cc = CC;
+            const range = scheme.range() || [-1, 1];
+            geometry.setColors(function (x, y, z) {
+                let val = voldata.getVal(x, y, z);
+                let col = cc.color(scheme.valueToHex(val, range));
+                return col;
+            });
+        } else {
+            geometry.colorsNeedUpdate = true;
+            for (let geo of geometry.geometryGroups) {
+                for (let j = 0; j < geo.vertices; j++) {
+                    let c = getColorFromStyle(geo.atomArray[j], style);
+                    let off = 3 * j;
+                    geo.colorArray[off] = c.r;
+                    geo.colorArray[off + 1] = c.g;
+                    geo.colorArray[off + 2] = c.b;
+                }
+            }
+        }
+    }
 
     /**
      * Set the surface material to something else, must render change
@@ -4782,46 +5084,48 @@ export class GLViewer {
         adjustVolumeStyle(style);
         if (this.surfaces[surf]) {
             var surfArr = this.surfaces[surf];
+            surfArr.style = style;
+            const retiredMaterials = new Set<Material>();
             for (let i = 0; i < surfArr.length; i++) {
+                retiredMaterials.add(surfArr[i].mat);
                 var mat = surfArr[i].mat = GLViewer.getMatWithStyle(style);
                 surfArr[i].mat.side = FrontSide;
                 if (style.wireframe) {
                     surfArr[i].geo.setUpWireframe();
                 }
-                if (style.color) {
-                    surfArr[i].mat.color = CC.color(style.color);
-                    surfArr[i].geo.colorsNeedUpdate = true;
-                    const c = CC.color(style.color);
-                    surfArr[i].geo.setColor(c);
-                }
-                else if (mat.voldata && mat.volscheme) {
-                    //convert volumetric data into colors
-                    const scheme = mat.volscheme;
-                    const voldata = mat.voldata;
-                    const cc = CC;
-                    const range = scheme.range() || [-1, 1];
-                    surfArr[i].geo.setColors(function (x, y, z) {
-                        let val = voldata.getVal(x, y, z);
-                        let col = cc.color(scheme.valueToHex(val, range));
-                        return col;
-                    });
-                } else {
-                    surfArr[i].geo.colorsNeedUpdate = true;
-                    for (let geo of surfArr[i].geo.geometryGroups) {
-                        for (let j = 0; j < geo.vertices; j++) {
-                            let c = getColorFromStyle(geo.atomArray[j], style);
-                            let off = 3 * j;
-                            geo.colorArray[off] = c.r;
-                            geo.colorArray[off + 1] = c.g;
-                            geo.colorArray[off + 2] = c.b;
-                        }
-                    }
-                }
+                GLViewer.colorSurfaceGeometry(surfArr[i].geo, style, mat);
                 surfArr[i].finished = false; // trigger redraw
             }
+            this.disposeUnusedSurfaceMaterials(retiredMaterials);
         }
         return this;
     };
+
+    // Recheck ownership at retirement so other surfaces and same-turn reattachments
+    // keep their materials. Deferral also lets replacement draws reuse shader programs.
+    private disposeUnusedSurfaceMaterials(materials: Iterable<Material>) {
+        const schedule = this.pendingSurfaceMaterials.size === 0;
+        for (const material of materials) this.pendingSurfaceMaterials.add(material);
+        if (!schedule || this.pendingSurfaceMaterials.size === 0) return;
+        Promise.resolve().then(() => {
+            const pending = this.pendingSurfaceMaterials;
+            this.pendingSurfaceMaterials = new Set<Material>();
+            this.retiringSurfaceMaterials = pending;
+            try {
+                for (const id in this.surfaces) {
+                    if (!this.surfaces.hasOwnProperty(id)) continue;
+                    for (const surface of this.surfaces[id]) {
+                        if (!surface) continue;
+                        pending.delete(surface.mat);
+                        if (surface.lastGLMaterial) pending.delete(surface.lastGLMaterial);
+                    }
+                }
+                for (const material of pending) material.dispose();
+            } finally {
+                this.retiringSurfaceMaterials = undefined;
+            }
+        });
+    }
 
     /**
      * Return surface object
@@ -4832,21 +5136,27 @@ export class GLViewer {
     };
 
     /**
-     * Remove surface with given ID
+     * Remove surface with given ID. Unknown IDs are ignored.
      * @param {number} surf - surface id
+     * @return {GLViewer} this viewer
      */
     public removeSurface(surf: number) {
         var surfArr = this.surfaces[surf];
+        if (!surfArr) return this;
+        delete this.surfaces[surf];
+        this.cancelSurfaceJobs(surfArr);
+        const retiredMaterials = new Set<Material>();
         for (var i = 0; i < surfArr.length; i++) {
-            if (surfArr[i] && surfArr[i].lastGL) {
-                if (surfArr[i].geo !== undefined)
-                    surfArr[i].geo.dispose();
-                if (surfArr[i].mat !== undefined)
-                    surfArr[i].mat.dispose();
-                this.modelGroup.remove(surfArr[i].lastGL); // remove from scene
+            if (surfArr[i]) {
+                retiredMaterials.add(surfArr[i].mat);
+                if (surfArr[i].lastGLMaterial) retiredMaterials.add(surfArr[i].lastGLMaterial);
+            }
+            if (surfArr[i]) {
+                if (surfArr[i].geo !== undefined) surfArr[i].geo.dispose();
+                if (surfArr[i].lastGL) this.modelGroup.remove(surfArr[i].lastGL);
             }
         }
-        delete this.surfaces[surf];
+        this.disposeUnusedSurfaceMaterials(retiredMaterials);
         this.show();
         return this;
     };
@@ -4854,20 +5164,26 @@ export class GLViewer {
     /** Remove all surfaces.
      **/
     public removeAllSurfaces() {
-        for (var n in this.surfaces) {
-            if (!this.surfaces.hasOwnProperty(n)) continue;
-            var surfArr = this.surfaces[n];
+        const retiredMaterials = new Set<Material>();
+        const surfaces = { ...this.surfaces };
+        // Preserve the registry object, but detach the snapshot before disposal callbacks run.
+        for (const id in surfaces) delete this.surfaces[id];
+        for (var n in surfaces) {
+            if (!surfaces.hasOwnProperty(n)) continue;
+            var surfArr = surfaces[n];
+            this.cancelSurfaceJobs(surfArr);
             for (var i = 0; i < surfArr.length; i++) {
-                if (surfArr[i] && surfArr[i].lastGL) {
-                    if (surfArr[i].geo !== undefined)
-                        surfArr[i].geo.dispose();
-                    if (surfArr[i].mat !== undefined)
-                        surfArr[i].mat.dispose();
-                    this.modelGroup.remove(surfArr[i].lastGL); // remove from scene
+                if (surfArr[i]) {
+                    retiredMaterials.add(surfArr[i].mat);
+                    if (surfArr[i].lastGLMaterial) retiredMaterials.add(surfArr[i].lastGLMaterial);
+                }
+                if (surfArr[i]) {
+                    if (surfArr[i].geo !== undefined) surfArr[i].geo.dispose();
+                    if (surfArr[i].lastGL) this.modelGroup.remove(surfArr[i].lastGL);
                 }
             }
-            delete this.surfaces[n];
         }
+        this.disposeUnusedSurfaceMaterials(retiredMaterials);
         this.show();
         return this;
     };
@@ -4890,6 +5206,80 @@ export class GLViewer {
 
         return ret;
     };
+
+    /** Return true after destroy() has permanently disposed this viewer. */
+    public isDestroyed(): boolean {
+        return this.destroyed === true;
+    }
+
+    /**
+     * Permanently release this viewer's controls, timers, listeners, and graphics resources.
+     * Repeated calls are harmless. Create a new viewer before doing further rendering or scene work.
+     * Called automatically after removal of a previously connected container, unless autoDestroy is false.
+     * Shared grid canvases remain until the last viewer is destroyed. A standalone
+     * caller-supplied canvas is retained; generated canvases are removed.
+     * @return {GLViewer} this viewer
+     */
+    public destroy(): GLViewer {
+        if (this.destroyed) return this;
+        this.destroyed = true;
+        this.removalObserver?.disconnect();
+        clearTimeout(this.removalTimeout);
+        this.removalObserver = this.removalTimeout = this.checkContainerRemoval = undefined;
+        this.stopAnimate();
+        for (const timer of this.motionTimers) clearTimeout(timer);
+        this.motionTimers.clear();
+        this.animated = 0;
+        clearInterval(this.spinInterval);
+        clearTimeout(this.hoverTimeout);
+        clearTimeout(this.longTouchTimeout);
+        this.touchHold = false;
+        this.isDragging = false;
+        this.current_hover = null;
+        for (const cancel of this.captureCancellations) cancel();
+        this.captureCancellations.clear();
+        this.callback = this.viewChangeCallback = this.stateChangeCallback = this.userContextMenuHandler = null;
+        this.divwatcher?.disconnect();
+        this.intwatcher?.disconnect();
+        this.divwatcher = this.intwatcher = undefined;
+        this.eventBody?.removeEventListener('mouseup', this.onMouseUp);
+        this.eventBody?.removeEventListener('touchend', this.onMouseUp);
+        this.eventWindow?.removeEventListener('resize', this.onWindowResize);
+        this.eventBody = this.eventWindow = undefined;
+        const detached = this.detachCanvas();
+        this.ui?.destroy();
+        this.ui = undefined;
+
+        for (const target of this.linkedViewers) target.linkedFrom?.delete(this);
+        for (const source of this.linkedFrom || []) {
+            source.linkedViewers = source.linkedViewers.filter(viewer => viewer !== this);
+        }
+        this.linkedViewers.length = 0;
+        this.linkedFrom?.clear();
+        if (this.viewers) {
+            for (const row of this.viewers) {
+                for (let i = 0; i < row.length; i++) if (row[i] === this) row[i] = null;
+            }
+        }
+        this.viewers = undefined;
+        for (const id of Object.keys(autoloadViewers)) {
+            if (autoloadViewers[id] === this) delete autoloadViewers[id];
+        }
+
+        // removeAllLabels only detaches sprites; explicitly retire their textures too.
+        this.removeLabels(this.labels.slice());
+        this.clear();
+        const pendingMaterials = this.pendingSurfaceMaterials;
+        this.pendingSurfaceMaterials = new Set();
+        for (const material of pendingMaterials) material.dispose();
+        this.renderer?.dispose?.();
+        if (detached?.remove) detached.canvas.remove();
+        this.clickables.length = this.hoverables.length = this.contextMenuEnabledObjects.length = 0;
+        this.renderer = this.scene = this.modelGroup = this.rotationGroup = null;
+        this.container = null;
+        this.config = {};
+        return this;
+    }
 
     /** Clear scene of all objects
      * */
@@ -4960,10 +5350,13 @@ export class GLViewer {
      * Synchronize this view matrix of this viewer to the passed viewer.
      * When the viewpoint of this viewer changes, the other viewer will
      * be set to this viewer's view.
-     * @param {GLViewer} otherview
+     * @param {GLViewer} otherviewer
      */
     public linkViewer(otherviewer: GLViewer) {
+        if (this.destroyed || otherviewer.isDestroyed()) return this;
         this.linkedViewers.push(otherviewer);
+        if (!otherviewer.linkedFrom) otherviewer.linkedFrom = new Set();
+        otherviewer.linkedFrom.add(this);
         return this;
     };
 
@@ -4999,9 +5392,9 @@ export class GLViewer {
     };
 
     /**
-     * Set the default cartoon quality for newly created models.  Default is 5.
+     * Set the default cartoon quality for newly created models.  Default is 10.
      * Current models are not affected.
-     * @number quality, higher results in higher resolution renders
+     * @param {number} val - Quality; higher values increase rendering resolution.
      */
     public setDefaultCartoonQuality(val: number) {
         this.config.cartoonQuality = val;
@@ -5014,7 +5407,8 @@ export class GLViewer {
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
  * @param {Object | string} element - Either HTML element or string identifier
  * @param {ViewerSpec} [config] Viewer configuration
- * @return {GLViewer} GLViewer, null if unable to instantiate WebGL
+ * @return {GLViewer|undefined} The viewer, or undefined if the container element is not found.
+ * @throws {string} If viewer construction fails.
  * @example
    var viewer = $3Dmol.createViewer(
      'gldiv', //id of div to create canvas in
@@ -5041,11 +5435,11 @@ export function createViewer(element, config?: ViewerSpec) {
 };
 
 /**
- * Create and initialize an appropriate a grid of viewers that share a WebGL canvas
+ * Create and initialize a grid of viewers that share a WebGL canvas
  * @param {Object | string} element - Either HTML element or string identifier
- * @param {GridSpec} [config] - grid configuration
- * @param {ViewerGridSpec} [viewer_config] - Viewer specification to apply to all subviewers
- * @return [[GLViewer]] 2D array of GLViewers
+ * @param {ViewerGridSpec} [config] - grid configuration
+ * @param {ViewerSpec} [viewer_config] - Viewer specification to apply to all subviewers
+ * @return {GLViewer[][]|undefined} A 2D array of viewers, or undefined if the container is not found.
  * @example
    var viewers = $3Dmol.createViewerGrid(
      'gldiv', //id of div to create canvas in
@@ -5227,9 +5621,16 @@ export interface ViewStyle {
  * GLViewer input specification
  */
 export interface ViewerSpec {
+    /**
+     * Automatically destroy the viewer when its previously connected container is removed.
+     * Defaults to true. Cleanup is deferred to the next timer task so synchronous and
+     * microtask reparenting is safe. Initially detached containers remain usable until mounted.
+     * Set false to keep a viewer detached across tasks; call destroy() when finished with it.
+     */
+    autoDestroy?: boolean;
     /** Callback function to be executed with this viewer after setup is complete */
     callback?: (viewer: ViewerSpec) => void;
-    /** Object defining default atom colors as atom => color property value pairs for all models within this viewer */
+    /** Default atom colors as element-symbol-to-color mappings for models in this viewer. */
     defaultcolors?: Record<string, ColorSpec>;
     /**
      * Whether to disable disable handling of mouse events.
@@ -5327,7 +5728,7 @@ export interface SurfaceStyleSpec {
     color?: ColorSpec;
     /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
     voldata?: VolumeData;
-    /** coloring scheme for mapping volumetric data to vertex color, if not a Gradient object, show describe a builtin gradient one by providing an object with gradient, min, max, and (optionally) mid fields. */
+    /** Gradient for mapping volumetric values to vertex colors, or a builtin gradient description with gradient, min, max, and optional mid fields. */
     volscheme?: Gradient;
     /** format of voldata if not a {VolumeData} object */
     volformat?: string;
@@ -5338,7 +5739,7 @@ export interface SurfaceStyleSpec {
 };
 
 
-/** Style specification ofr unit cell shape.  */
+/** Style specification for a unit cell shape. */
 export interface UnitCellStyleSpec {
     /** line style used to draw box */
     box?: LineStyleSpec;
@@ -5366,6 +5767,6 @@ export interface UnitCellStyleSpec {
 export interface FogSpec {
     /** Fraction within the slab where fog starts to be linearly added. Default 0.4. */
     fogStart?: number;
-    /** Fraction with the slab where fog ends (nothing visible after this point). Default 1.0. */
+    /** Fraction within the slab where fog ends (nothing visible after this point). Default 1.0. */
     fogEnd?: number;
 }

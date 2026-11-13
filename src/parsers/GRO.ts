@@ -4,7 +4,8 @@ import { assignPDBBonds } from "./utils/assignPDBBonds";
 import { atomNameToElem } from "./utils/atomNameToElem";
 
 /**
- * Parse a gro file from str and create atoms
+ * Parse a gro file from str and create atoms.
+ * The optional box property contains orthorhombic box lengths in angstroms.
  *
  * @param {string} str
  * @param {ParserOptionsSpec} options
@@ -13,7 +14,7 @@ import { atomNameToElem } from "./utils/atomNameToElem";
  */
 
 export function GRO(str: string, options: ParserOptionsSpec) {
-  const allatoms: AtomSpec[][] & { box?: string[] } = [];
+  const allatoms: AtomSpec[][] & { box?: number[] } = [];
   const lines = str.split(/\r?\n|\r/);
   while (lines.length > 0) {
     const atomCount = parseInt(lines[1]);
@@ -56,10 +57,7 @@ export function GRO(str: string, options: ParserOptionsSpec) {
       const last = lines[offset++];
       const box = last.trim().split(/\s+/);
       if (box.length === 3) {
-        for (let b = 0; b < 3; b++) {
-          box[b] = (parseFloat(box[b]) * 10.0).toString();
-        }
-        allatoms.box = box;
+        allatoms.box = box.map(value => parseFloat(value) * 10.0);
       }
     }
     lines.splice(0, ++offset);

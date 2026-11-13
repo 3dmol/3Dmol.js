@@ -9,7 +9,7 @@ viewer.setStyle({chain:'A'},{sphere:{colorscheme:'greenCarbon'}});
 viewer.setStyle({chain:'B'},{stick:{colorscheme:'greenCarbon'}});
 viewer.setStyle({chain:'C'},{cartoon:{colorscheme:'greenCarbon'}});
 viewer.setStyle({chain:'D'},{line:{colorscheme:'greenCarbon',linewidth:20}});
-viewer.addSurface("vdw",{colorscheme:'whiteCarbon',opacity:0.8},{chain:'D'});
+viewer.addSurface("sas",{colorscheme:'whiteCarbon',opacity:0.8},{chain:'D'});
 viewer.zoomTo();
 viewer.render();
 /* 

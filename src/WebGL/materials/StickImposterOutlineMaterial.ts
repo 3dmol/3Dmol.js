@@ -25,7 +25,9 @@ export class StickImposterOutlineMaterial extends ImposterMaterial {
     this.setValues(parameters);
   }
 
-  clone<T extends this>(material = new StickImposterOutlineMaterial() as T): T {
+  clone<T extends StickImposterOutlineMaterial>(material: T): T;
+  clone(material?: StickImposterOutlineMaterial): StickImposterOutlineMaterial;
+  clone(material: StickImposterOutlineMaterial = new StickImposterOutlineMaterial()): StickImposterOutlineMaterial {
     super.clone.call(this, material);
     material.outlineColor = this.outlineColor;
     material.outlineWidth = this.outlineWidth;

@@ -3,6 +3,7 @@
 //its serial number.
 //A glmodel knows how to apply the styles on each atom to create a gl object
 import { Geometry, Material, StickImposterMaterial } from "./WebGL";
+import { disposeObjectResources } from "./WebGL/disposeObjectResources";
 import { Sphere, Cylinder } from "./WebGL/shapes";
 import { Vector3, Matrix4, conversionMatrix3, Matrix3, XYZ } from "./WebGL/math";
 import { Color, CC, ColorschemeSpec, ColorSpec } from "./colors";
@@ -11,7 +12,7 @@ import { CAP, GLDraw } from "./GLDraw"
 import { CartoonStyleSpec, drawCartoon } from "./glcartoon";
 import { elementColors } from "./colors";
 import { get, deepCopy, extend, getExtent, getAtomProperty, makeFunction, getPropertyRange, specStringToObject, getbin, getColorFromStyle, inflateString } from "./utilities";
-import { Gradient } from "./Gradient";
+import { Gradient, GradientType } from "./Gradient";
 import { Parsers } from "./parsers";
 import { NetCDFReader } from "netcdfjs"
 import { AtomSelectionSpec, AtomSpec } from "./specs";
@@ -107,7 +108,8 @@ export class GLModel {
     // private variables
     private atoms: AtomSpec[] = [];
     private frames: any = [];
-    private box: any = null;
+    private frameRequest = 0;
+    private box: number[] | null = null;
     private atomdfs: any = null; //depth first search over connected components
     private id = 0;
     private hidden: any = false;
@@ -2006,8 +2008,8 @@ export class GLModel {
     };
 
     /**
-     * Return viewer associated with this model.
-     * @returns GLViewer
+     * Return the viewer associated with this model, if one was provided.
+     * @returns {GLViewer|undefined}
      */
     public getViewer() {
         return this.viewer;
@@ -2030,6 +2032,7 @@ export class GLModel {
      *
     */
     public setInternalState(state) {
+        this.frameRequest++;
         this.atoms = state.atoms;
         this.frames = state.frames;
         this.molObj = null;
@@ -2193,6 +2196,8 @@ export class GLModel {
      * Sets model's atomlist to the specified frame. Indices wrap modulo the
      * frame count, so -1 selects the last frame and -2 the second to last.
      * Fractional indices truncate toward zero; non-finite values use frame zero.
+     * Only the latest requested remote frame is applied. Superseded responses are
+     * ignored and their promises resolve, including when those downloads fail.
      *
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @param {Object} options - {fast: true} replays the frame's coordinates into the existing
@@ -2215,34 +2220,48 @@ export class GLModel {
                 resolve();
                 return;
             }
+            const request = ++model.frameRequest;
             const requested = Number.isFinite(framenum) ? Math.trunc(framenum) : 0;
             framenum = ((requested % numFrames) + numFrames) % numFrames;
             if (model.frames.url != undefined) {
-                var url = model.frames.url;
-                getbin(url + "/traj/frame/" + framenum + "/" + model.frames.path, undefined, 'POST', undefined).then(function (buffer) {
+                const frames = model.frames;
+                const atoms = model.atoms;
+                const atomCount = atoms.length;
+                const atomIndexMap: number[] | undefined = frames.atomIndexMap;
+                const isCurrent = () => request === model.frameRequest && model.frames === frames &&
+                    model.atoms === atoms && atoms.length === atomCount;
+                var url = frames.url;
+                getbin(url + "/traj/frame/" + framenum + "/" + frames.path, undefined, 'POST', undefined).then(function (buffer) {
+                    if (!isCurrent()) {
+                        resolve();
+                        return;
+                    }
                     var values = new Float32Array(buffer, 44);
                     var count = 0;
-                    for (var i = 0; i < model.atoms.length; i++) {
-                        model.atoms[i].x = values[count++];
-                        model.atoms[i].y = values[count++];
-                        model.atoms[i].z = values[count++];
+                    for (var i = 0; i < atomCount; i++) {
+                        if (atomIndexMap) count = 3 * atomIndexMap[i];
+                        atoms[i].x = values[count++];
+                        atoms[i].y = values[count++];
+                        atoms[i].z = values[count++];
                     }
                     //if a box was provided, check to see if we need to wrap connected components
                     if (model.box && model.atomdfs) {
                         model.adjustCoordinatesToBox();
                     }
-                    // coordinates were written into the live atoms: replay them in place
-                    if (options.fast && !model.syncAtomPositions()) model.molObj = null;
+                    // Commit geometry changes after loading; rendering may have occurred while waiting.
+                    if (!options.fast || !model.syncAtomPositions()) model.molObj = null;
                     resolve();
-                }).catch(reject);
+                }).catch(function (error) {
+                    if (isCurrent()) reject(error);
+                    else resolve();
+                });
             }
             else {
                 model.atoms = model.frames[framenum];
                 // a different atom list, same atoms in the same order: indices resolve into it
-                if (options.fast && !model.syncAtomPositions()) model.molObj = null;
+                if (!options.fast || !model.syncAtomPositions()) model.molObj = null;
                 resolve();
             }
-            if (!options.fast) model.molObj = null;
             if (model.modelDatas && framenum < model.modelDatas.length) {
                 model.modelData = model.modelDatas[framenum] || {};
                 if (model.unitCellObjects && viewer) {
@@ -2254,9 +2273,9 @@ export class GLModel {
     };
 
     /**
-     * Add atoms as frames of model
+     * Append one frame to the model.
      *
-     * @param {AtomSpec[]} atoms - atoms to be added
+     * @param {AtomSpec[]} atoms - atoms comprising the new frame
      */
     public addFrame(atoms: AtomSpec[]) {
         this.frames.push(atoms);
@@ -2264,7 +2283,7 @@ export class GLModel {
 
 
     /**
-     * If model atoms have dx, dy, dz properties (in some xyz files), vibrate populates the model's frame property based on parameters.
+     * If model atoms have dx, dy, dz properties (in some xyz files), vibrate generates trajectory frames from those displacements.
      * Model can then be animated
      *
      * @param {number} numFrames - number of frames to be created, default to 10
@@ -2723,10 +2742,11 @@ export class GLModel {
         else
             return parseFloat(val);
     }
-    /** return list of atoms selected by sel, this is specific to glmodel
+    /** Return atoms matching a selection in this model.
      *
      * @param {AtomSelectionSpec} sel
-     * @return {Object[]}
+     * @param {AtomSpec[]} [from] - Initial candidate atoms; defaults to the current frame.
+     * @return {AtomSpec[]} References to the selected atoms.
      * @example
      $3Dmol.download("pdb:4wwy",viewer,{},function(){
               var atoms = viewer.selectedAtoms({chain:'A'});
@@ -2908,12 +2928,13 @@ export class GLModel {
         assignBonds(this.atoms, { assignBonds: true });
     }
 
-    /** Remove specified atoms from model
+    /** Remove specified atoms from the current frame and update bond indices.
+     * Distinct local frames remain independent, as with addAtoms(). For remote
+     * trajectories, surviving atoms retain their original coordinate slots.
      *
      * @param {AtomSpec[]} badatoms - list of atoms
      */
     public removeAtoms(badatoms: AtomSpec[]) {
-        this.molObj = null;
         // make map of all baddies
         var baddies = [];
         var i;
@@ -2922,17 +2943,27 @@ export class GLModel {
         }
 
         // create list of good atoms
-        var newatoms = [];
+        const newatoms: AtomSpec[] = [];
+        const remote = this.frames.url !== undefined;
+        const previousMap: number[] | undefined = this.frames.atomIndexMap;
+        const atomIndexMap: number[] = [];
         for (i = 0; i < this.atoms.length; i++) {
             var a = this.atoms[i];
-            if (!baddies[a.index])
+            if (!baddies[a.index]) {
                 newatoms.push(a);
+                if (remote) atomIndexMap.push(previousMap ? previousMap[i] : i);
+            }
         }
+        if (newatoms.length === this.atoms.length) return;
 
-        // clear it all out
-        this.atoms = [];
+        // Ignore pending downloads that were requested for the old topology.
+        this.frameRequest++;
+        if (remote) this.frames.atomIndexMap = atomIndexMap;
+        // Preserve the stored current frame instead of leaving its old atoms behind.
+        this.atoms.length = 0;
         // and add back in to get updated bonds
         this.addAtoms(newatoms);
+        if (this.atomdfs) this.setupDFS();
     };
 
 
@@ -3082,7 +3113,7 @@ export class GLModel {
 
     /** enable context menu of selected atoms
      *
-     * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
+     * @param {AtomSelectionSpec} sel - atom selection to apply context-menu settings to
      * @param {boolean} contextMenuEnabled - whether contextMenu-handling is enabled for the selection
      */
     public enableContextMenu(sel: AtomSelectionSpec, contextMenuEnabled) {
@@ -3134,12 +3165,20 @@ export class GLModel {
         if (atoms.length > 0)
             this.molObj = null; // force rebuild
 
-        if (typeof scheme === 'string' && typeof (Gradient.builtinGradients[scheme]) != "undefined") {
-            scheme = new Gradient.builtinGradients[scheme]();
+        let gradient: GradientType;
+        if (typeof scheme === 'string') {
+            if (Object.prototype.hasOwnProperty.call(Gradient.builtinGradients, scheme)) {
+                gradient = new Gradient.builtinGradients[scheme]();
+            } else {
+                console.warn("Unknown gradient; using RWB.", scheme);
+                // Keep the existing automatic property range for named gradients.
+                gradient = new Gradient.RWB();
+            }
+        } else {
+            gradient = Gradient.getGradient(scheme);
         }
-        scheme = scheme as Gradient;
         if (!range) { //no explicit range, get from scheme
-            range = scheme.range();
+            range = gradient.range();
         }
 
         if (!range) { //no range in scheme, compute the range for this model
@@ -3150,7 +3189,7 @@ export class GLModel {
             a = atoms[i];
             var val = getAtomProperty(a, prop);
             if (val != null) {
-                a.color = scheme.valueToHex(parseFloat(a.properties[prop]), range);
+                a.color = gradient.valueToHex(parseFloat(val), range);
             }
         }
     };
@@ -3158,7 +3197,7 @@ export class GLModel {
     /**
      * @deprecated use setStyle and colorfunc attribute
      * @param {AtomSelectionSpec} sel - selection object
-     * @param {function} func - function to be used to set the color
+     * @param {function} colorfun - function receiving an atom and returning its color
      @example
       $3Dmol.download("pdb:4UAA",viewer,{},function(){
               viewer.setBackgroundColor(0xffffffff);
@@ -3189,7 +3228,7 @@ export class GLModel {
 
     /** Convert the model into an object in the format of a ChemDoodle JSON model.
      *
-     * @param {boolean} whether or not to include style information. Defaults to false.
+     * @param {boolean} [includeStyles=false] - Whether to include style information.
      * @return {Object}
      */
     public toCDObject(includeStyles: boolean = false) {
@@ -3246,10 +3285,10 @@ export class GLModel {
      *
      * Intended for animation: mutate `model.selectedAtoms()` / `model.atoms` x/y/z however you
      * like (linear interpolation between two conformations, torsion-space folding, MD frames)
-     * and then call this instead of setFrame/setCoordinates. Those go through globj, which
-     * regenerates every geometry in the model from scratch each frame. Here only position data
-     * changes, so colors, radii, per-atom alphas and face indices are left alone and the
-     * renderer respecifies just the affected buffers.
+     * and then call this to update rendered positions. By default, setFrame and setCoordinates
+     * invalidate geometry for rebuilding; setFrame's fast option also uses this method.
+     * Here only position data changes, so colors, radii, per-atom alphas and face indices
+     * are left alone and the renderer respecifies just the affected buffers.
      *
      * Covers sphere imposters, stick imposters (including their joint caps and color-split
      * half-bonds) and lines. NOT covered: cartoon, cross, surface, instanced and non-imposter
@@ -3360,16 +3399,17 @@ export class GLModel {
         return dirty.length > 0;
     };
 
-    /** manage the globj for this model in the possed modelGroup - if it has to be regenerated, remove and add
+    /** Manage this model's renderable object in the supplied group, rebuilding it when necessary.
      *
      * @param {Object3D} group
-     * @param Object options
+     * @param {Object} options
      */
     public globj(group, options) {
         if (this.molObj === null || options.regen) { // have to regenerate
             this.molObj = this.createMolObj(this.atoms, options);
             if (this.renderedMolObj) { // previously rendered, remove
                 group.remove(this.renderedMolObj);
+                disposeObjectResources(this.renderedMolObj);
                 this.renderedMolObj = null;
             }
             this.renderedMolObj = this.molObj.clone();
@@ -3382,7 +3422,7 @@ export class GLModel {
     };
 
     /** return a VRML string representation of the model.  Does not include VRML header information
-     * @return VRML
+     * @return {string} VRML text without a header.
      */
     public exportVRML() {
         //todo: export spheres and cylinder objects instead of all mesh
@@ -3396,10 +3436,8 @@ export class GLModel {
      */
     public removegl(group) {
         if (this.renderedMolObj) {
-            //dispose of geos and materials
-            if (this.renderedMolObj.geometry !== undefined) this.renderedMolObj.geometry.dispose();
-            if (this.renderedMolObj.material !== undefined) this.renderedMolObj.material.dispose();
             group.remove(this.renderedMolObj);
+            disposeObjectResources(this.renderedMolObj);
             this.renderedMolObj = null;
         }
         this.molObj = null;
@@ -3452,7 +3490,7 @@ export class GLModel {
      *
      * @param {String} prop - property name
      * @param {AtomSelectionSpec} sel
-     * @param {LabelSpec} options
+     * @param {LabelSpec} style
      */
     public addPropertyLabels(prop: string, sel: AtomSelectionSpec, style: LabelSpec) {
         let atoms = this.selectedAtoms(sel);
@@ -3476,12 +3514,13 @@ export class GLModel {
 
 
     /** Create labels for residues of selected atoms.
-     * Will create a single label at the center of mass of all atoms
-     * with the same chain,resn, and resi.
+     * Creates one label at the arithmetic mean of the selected atom coordinates
+     * for each group with the same chain, resn, and resi.
      *
      * @param {AtomSelectionSpec} sel
-     * @param {LabelSpec} options
-     * @param {boolean} byframe - if true, create labels for every individual frame, not just current; frames must be loaded already
+     * @param {LabelSpec} style
+     * @param {boolean} [byframe=false] - If true, create labels for each already loaded frame.
+     * @return {Label[]} The labels created.
      */
     public addResLabels(sel: AtomSelectionSpec, style: LabelSpec, byframe: boolean = false) {
         let viewer = this.viewer;
@@ -3576,33 +3615,46 @@ export class GLModel {
 
     /**
     * Set coordinates from remote trajectory file.
+    * Superseded responses are ignored and their promises resolve.
     * @param {string} url - contains the url where mdsrv has been hosted
     * @param {string} path - contains the path of the file (<root>/filename)
     * @return {Promise}
     */
     public setCoordinatesFromURL(url: string, path: string) {
+        const request = ++this.frameRequest;
         this.frames = [];
+        const frames = this.frames;
+        const atoms = this.atoms;
+        const atomCount = atoms.length;
+        const isCurrent = () => request === this.frameRequest && this.frames === frames &&
+            this.atoms === atoms && atoms.length === atomCount && frames.length === 0;
         var self = this;
         if (this.box) this.setupDFS();
         if (!url.startsWith('http'))
             url = 'http://' + url;
-        return get(url + "/traj/numframes/" + path, function (response: string) {
+        return get(url + "/traj/numframes/" + path).then(function (response: string) {
+            if (!isCurrent()) return;
             const numFrames = parseInt(response, 10);
             if (!isNaN(numFrames)) {
-                self.frames.push(self.atoms);
-                self.frames.numFrames = numFrames;
-                self.frames.url = url;
-                self.frames.path = path;
+                frames.push(atoms);
+                frames.numFrames = numFrames;
+                frames.url = url;
+                frames.path = path;
                 return self.setFrame(0);
             }
+        }, function (error) {
+            if (isCurrent()) return Promise.reject(error);
         });
     };
 
 
     /**
-    * Set coordinates for the atoms from provided trajectory file.
-    * @param {string|ArrayBuffer} str - contains the data of the file
+    * Set coordinates for the atoms from provided trajectory data.
+    * Invalid or unsupported input returns an empty array without changing the existing atoms or frames.
+    * Parsing and validation failures log a warning.
+    * @param {string|ArrayBuffer|number[][][]} str - trajectory file data or coordinates with shape frames x atoms x 3
     * @param {string} format - contains the format of the file (mdcrd, inpcrd, pdb, netcdf, or array).  Arrays should be TxNx3 where T is the number of timesteps and N the number of atoms.
+    * @return {AtomSpec[][]} Loaded frames, or an empty array when no coordinates were loaded.
       @example
          let m = viewer.addModel()  //create an empty model
          m.addAtoms([{x:0,y:0,z:0,elem:'C'},{x:2,y:0,z:0,elem:'C'}]) //provide a list of dictionaries representing the atoms
@@ -3614,7 +3666,7 @@ export class GLModel {
          viewer.render();
     */
 
-    public setCoordinates(str: string | ArrayBuffer, format: string) {
+    public setCoordinates(str: string | ArrayBuffer | number[][][], format: string) {
         format = format || "";
         if (!str)
             return []; // leave an empty model
@@ -3623,16 +3675,53 @@ export class GLModel {
             // unzip gzipped files
             format = format.replace(/\.gz$/, '');
             try {
-                str = inflateString(str)
+                str = inflateString(str as string | ArrayBuffer)
             } catch (err) {
-                console.log(err);
+                console.warn("setCoordinates: Unable to decompress trajectory data.", err);
+                return [];
             }
         }
         var supportedFormats = { "mdcrd": "", "inpcrd": "", "pdb": "", "netcdf": "", "array": "" };
         if (supportedFormats.hasOwnProperty(format)) {
-            this.frames = [];
-            var atomCount = this.atoms.length;
-            var values = GLModel.parseCrd(str, format);
+            const invalid = (message: string): AtomSpec[][] => {
+                console.warn("setCoordinates: " + message);
+                return [];
+            };
+            const atomCount = this.atoms.length;
+            if (atomCount === 0) {
+                return invalid("Cannot set coordinates on a model with no atoms.");
+            }
+            if (format === "array" || Array.isArray(str)) {
+                if (!Array.isArray(str)) {
+                    return invalid("Array coordinates must have shape frames x atoms x 3.");
+                }
+                for (const frame of str) {
+                    if (!Array.isArray(frame) || frame.length !== atomCount) {
+                        return invalid(`Each trajectory frame must contain ${atomCount} atoms.`);
+                    }
+                    for (const point of frame) {
+                        if (!Array.isArray(point) || point.length !== 3 ||
+                            !Number.isFinite(point[0]) || !Number.isFinite(point[1]) || !Number.isFinite(point[2])) {
+                            return invalid("Each atom must have three finite numeric coordinates.");
+                        }
+                    }
+                }
+            }
+            let values: number[];
+            try {
+                values = GLModel.parseCrd(str, format);
+            } catch (err) {
+                return invalid("Unable to parse trajectory data: " + String(err));
+            }
+            if (values.length === 0 || values.length % (3 * atomCount) !== 0) {
+                return invalid(`Trajectory must contain complete frames of ${atomCount} atoms.`);
+            }
+            for (const value of values) {
+                if (!Number.isFinite(value)) {
+                    return invalid("Trajectory coordinates must be finite numbers.");
+                }
+            }
+            const frames: AtomSpec[][] = [];
             var count = 0;
             while (count < values.length) {
                 var temp = [];
@@ -3647,9 +3736,12 @@ export class GLModel {
                     temp[i].z = values[count++];
                 }
 
-                this.frames.push(temp);
+                frames.push(temp);
             }
-            this.atoms = this.frames[0];
+            this.frameRequest++;
+            this.frames = frames;
+            this.atoms = frames[0];
+            this.molObj = null;
             return this.frames;
         }
         return [];
@@ -3790,7 +3882,7 @@ export interface LineStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring */
     color?: ColorSpec;
-    /**  Allows the user to provide a function for setting the colorschemes. */
+    /** Function receiving an atom and returning its color; used when colorscheme is not set. */
     colorfunc?: Function;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
@@ -3814,7 +3906,7 @@ export interface CrossStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring */
     color?: ColorSpec;
-    /**  Allows the user to provide a function for setting the colorschemes. */
+    /** Function receiving an atom and returning its color; used when colorscheme is not set. */
     colorfunc?: Function;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
@@ -3854,7 +3946,7 @@ export interface StickStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring */
     color?: ColorSpec;
-    /**  Allows the user to provide a function for setting the colorschemes. */
+    /** Function receiving an atom and returning its color; used when colorscheme is not set. */
     colorfunc?: Function;
     /** opacity (zero to one), must be the same for all atoms in a model */
     opacity?: number;
@@ -3870,7 +3962,7 @@ export interface StickStyleSpec {
 /** Sphere (spacefill) style specification
  */
 export interface SphereStyleSpec {
-    /** do not show sticks */
+    /** do not show spheres */
     hidden?: boolean;
     /** fixed radius of sphere */
     radius?: number;
@@ -3880,18 +3972,19 @@ export interface SphereStyleSpec {
     colorscheme?: ColorschemeSpec;
     /** fixed coloring */
     color?: ColorSpec;
-    /**  Allows the user to provide a function for setting the colorschemes. */
+    /** Function receiving an atom and returning its color; used when colorscheme is not set. */
     colorfunc?: Function;
-    /** opacity (zero to one), must be the same for all atoms in a model */
+    /** Opacity from zero to one. Sphere imposters support different values per atom;
+     * other rendering paths require one value for all sphere-styled atoms in the model. */
     opacity?: number;
 }
 
 /** Invisible click sphere style specification.  This lets you set
- * larger (or smaller) click targets on atoms then the default radii or
+ * larger (or smaller) click targets on atoms than the default radii or
  * have clickable atoms even if they aren't being rendered visibly.
  */
 export interface ClickSphereStyleSpec {
-    /** do not show sticks */
+    /** do not add this invisible sphere to the atom's picking geometry */
     hidden?: boolean;
     /** fixed radius of sphere */
     radius?: number;

@@ -20,6 +20,11 @@ export var viewers: any = {};
 //viewer and callback are used by the testing harness
 export function autoload(viewer?: any, callback?: (arg0: any) => void) {
     var i: string | number, dataname: string, type: string;
+    const canceled = (glviewer: GLViewer) => {
+        if (!glviewer?.isDestroyed?.()) return false;
+        processing_autoinit = false;
+        return true;
+    };
     if (document.querySelector(".viewer_3Dmoljs") != null)
         autoinit = true;
 
@@ -150,6 +155,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
 
             //apply all the selections/styles parsed out above to the passed viewer
             var applyStyles = function (glviewer: GLViewer) {
+                if (canceled(glviewer)) return;
                 if (UI && hasExplicitStyle) {
                     // Record UI layers before applying them so the initial appearance
                     // can be restored when a layer is disabled or removed.
@@ -162,6 +168,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 }
 
                 for (i = 0; i < selectstylelist.length; i++) {
+                    if (canceled(glviewer)) return;
                     let sel = selectstylelist[i][0] || {};
                     let sty = selectstylelist[i][1] || { "line": {} };
                     if (UI) {
@@ -171,6 +178,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     }
                 }
                 for (i = 0; i < surfaces.length; i++) {
+                    if (canceled(glviewer)) return;
                     let sel = surfaces[i][0] || {};
                     let sty = surfaces[i][1] || {};
                     if (UI) {
@@ -184,15 +192,18 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
 
                 }
                 for (i = 0; i < labels.length; i++) {
+                    if (canceled(glviewer)) return;
                     let sel = labels[i][0] || {};
                     let sty = labels[i][1] || {};
                     glviewer.addResLabels(sel, sty);
                 }
 
+                if (canceled(glviewer)) return;
                 glviewer.render();
+                if (canceled(glviewer)) return;
                 glviewer.zoomTo(zoomto);
 
-                if (spin) {
+                if (spin && !canceled(glviewer)) {
                     glviewer.spin(spin.axis, spin.speed);
                 }
             };
@@ -238,14 +249,17 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 //load multiple data elements in serial
                 let i = 0;
                 let process = ((viewerdiv, glviewer) => function (moldata: any) {
+                    if (canceled(glviewer)) return;
                     //add moldata to viewer and load next model
                     uri = datauri[i]; //this is where the moldata came from
                     var type = viewerdiv.dataset.type || viewerdiv.dataset.datatype || datatypes[i];
                     glviewer.addModel(moldata, type, options);
+                    if (canceled(glviewer)) return;
                     if (UI) {
                         var modelName = viewerdiv.dataset[datatypes[i]];
                         UI.setModelTitle(modelName);
                     }
+                    if (canceled(glviewer)) return;
                     i +=1;
                     if (i < datauri.length) {
                         get(datauri[i]).then(process);
@@ -253,6 +267,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     else {
                         // or finalize if this is the last model
                         applyStyles(glviewer);
+                        if (canceled(glviewer)) return;
                         if (viewerdiv.dataset.callback) {
                             //evaluate javascript in the string, if it resolves to a function,
                             //call it with the viewer
@@ -260,7 +275,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                             runres(glviewer);                            
                         }
                         processing_autoinit = false;
-                        if (callback) callback(glviewer);
+                        if (callback && !canceled(glviewer)) callback(glviewer);
                     }
                 })(viewerdiv,glviewer);
 
@@ -272,6 +287,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
             }
             else {
 
+                if (canceled(glviewer)) return;
                 if (viewerdiv.dataset.element) {
                     var moldataid = "#" + viewerdiv.dataset.element;
                     var molelem = document.querySelector(moldataid);
@@ -281,6 +297,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 }
 
                 applyStyles(glviewer);
+                if (canceled(glviewer)) return;
                 if (viewerdiv.dataset.callback) {
                     //evaluate javascript in the string, if it resolves to a function,
                     //call it with the viewer
@@ -288,7 +305,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     runres(glviewer);                    
                 }
                 processing_autoinit = false;
-                if (callback)
+                if (callback && !canceled(glviewer))
                     callback(glviewer);
             }
         });

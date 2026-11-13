@@ -11,7 +11,9 @@ export class MeshDoubleLambertMaterial extends MeshLambertMaterial {
     super(parameters);
   }
 
-  clone<T extends this>(material: T = new MeshDoubleLambertMaterial() as T): T {
+  clone<T extends MeshDoubleLambertMaterial>(material: T): T;
+  clone(material?: MeshDoubleLambertMaterial): MeshDoubleLambertMaterial;
+  clone(material: MeshDoubleLambertMaterial = new MeshDoubleLambertMaterial()): MeshDoubleLambertMaterial {
     super.clone.call(this, material);
     return material;
   }
