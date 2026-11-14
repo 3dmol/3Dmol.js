@@ -4557,7 +4557,7 @@ export class GLViewer {
         }
 
         var faces = VandF.faces;
-        geoGroup.faceidx = faces.length;// *3;
+        geoGroup.faceidx = faces.length;
         geo.initTypedArrays();
         if (style !== undefined) {
             GLViewer.colorSurfaceGeometry(geo, style, mat);
@@ -4570,7 +4570,6 @@ export class GLViewer {
         // Setup colors, faces, and normals
         for (let i = 0, il = faces.length; i < il; i += 3) {
 
-            // var a = faces[i].a, b = faces[i].b, c = faces[i].c;
             var a = faces[i], b = faces[i + 1], c = faces[i + 2];
             var offsetA = a * 3, offsetB = b * 3, offsetC = c * 3;
 
@@ -4625,17 +4624,10 @@ export class GLViewer {
      */
     private static generateMeshSyncHelper(type: SurfaceType, expandedExtent,
         extendedAtoms: AtomSpec[], atomsToShow: AtomSpec[], atoms: AtomSpec[], vol: number) {
-        //            var time = new Date();
         var ps = new ProteinSurface();
         ps.initparm(expandedExtent, (type === 1) ? false : true, vol);
 
-        //            var time2 = new Date();
-        //console.log("initialize " + (time2 - time) + "ms");
-
         ps.fillvoxels(atoms, extendedAtoms);
-
-        //            var time3 = new Date();
-        //console.log("fillvoxels " + (time3 - time2) + "  " + (time3 - time) + "ms");
 
         ps.buildboundary();
 
@@ -4645,13 +4637,7 @@ export class GLViewer {
             ps.fillvoxelswaals(atoms, extendedAtoms);
         }
 
-        //            var time4 = new Date();
-        //console.log("buildboundaryetc " + (time4 - time3) + "  " + (time4 - time) + "ms");
-
         ps.marchingcube(type);
-
-        //            var time5 = new Date();
-        //console.log("marching cube " + (time5 - time4) + "  "+ (time5 - time) + "ms");
 
         return ps.getFacesAndVertices(atomsToShow);
     };
@@ -4808,7 +4794,6 @@ export class GLViewer {
                 }
 
                 var atom;
-                //                var time = new Date();
                 var extent = getExtent(atomsToShow, true);
                 if (style.map && style.map.prop) {
                     // map color space using already set atom properties

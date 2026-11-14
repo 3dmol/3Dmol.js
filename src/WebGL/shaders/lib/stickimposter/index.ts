@@ -7,7 +7,7 @@ import vertexShader from './stickimposter.vert';
 const fragmentShader = [stickimposterFragmentShaderStart, stickimposterFragmentShaderEnd].join('\n');
 
 export const stickimposter: Shader = {
-    fragmentShader: fragmentShader,
-    vertexShader: vertexShader,
+    fragmentShader,
+    vertexShader,
     uniforms
 }

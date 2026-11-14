@@ -75,12 +75,9 @@ var w_0 = new Vector3(); // for cylinders, cylinder.c1 - ray.origin
 var v1 = new Vector3(); // all purpose local vector
 var v2 = new Vector3();
 var v3 = new Vector3();
-var matrixPosition = new Vector3();
 
 //object is a Sphere or (Bounding) Box
 export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { hidden?: boolean; intersectionShape: any; boundingSphere: Sphere | undefined; }, raycaster: Raycaster, intersects: any[]) {
-  matrixPosition.getPositionFromMatrix(group.matrixWorld);
-
   if (clickable.intersectionShape === undefined) return intersects;
   if (clickable.hidden) return intersects;
   var intersectionShape = clickable.intersectionShape;
@@ -193,9 +190,6 @@ export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { h
 
       closestDistSq = v3.subVectors(v1, v2).lengthSq();
       var radiusSq = cylinder.radius * cylinder.radius;
-
-      //Smoothing?
-      //if (closestDistSq > radiusSq) radiusSq += precisionSq;
 
       // closest distance between ray and cylinder axis not greater than cylinder radius;
       // might intersect this cylinder between atom and bond midpoint

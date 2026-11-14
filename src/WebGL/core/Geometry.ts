@@ -209,80 +209,27 @@ export class GeometryGroup {
 
     var oldindent = indent;
     indent += " "; //inshape
-    if (material instanceof LineBasicMaterial || material.wireframe) {
-      ret +=
-        indent +
-        "geometry IndexedLineSet {\n" +
-        indent +
-        " colorPerVertex TRUE\n" +
-        indent +
-        " coord Coordinate {\n" +
-        indent +
-        "  point [\n";
-      let x: string | number, y: string | number, z: string | number;
-      for (let i = 0; i < this.vertices; ++i) {
-        let offset = i * 3;
-        x = this.vertexArray?.[offset];
-        y = this.vertexArray?.[offset + 1];
-        z = this.vertexArray?.[offset + 2];
-        ret += indent + "   " + x + " " + y + " " + z + ",\n";
-      }
-      ret += indent + "  ]\n";
-      ret += indent + " }\n"; //end coordinate
+    const lines = material instanceof LineBasicMaterial || material.wireframe;
+    ret += indent + (lines ? "geometry IndexedLineSet {\n" : "geometry IndexedFaceSet {\n") +
+      indent + " colorPerVertex TRUE\n";
+    if (!lines) {
+      ret += indent + " normalPerVertex TRUE\n" + indent + " solid FALSE\n";
+    }
 
-      if (this.colorArray && !material.wireframe) {
-        ret += indent + " color Color {\n" + indent + "  color [\n";
-        for (let i = 0; i < this.vertices; ++i) {
-          let offset = i * 3;
-          x = this.colorArray[offset];
-          y = this.colorArray[offset + 1];
-          z = this.colorArray[offset + 2];
-          ret += indent + "   " + x + " " + y + " " + z + ",\n";
-        }
-        ret += indent + "  ]\n";
-        ret += indent + " }\n"; //end color
-      }
+    //vertices
+    ret += indent + " coord Coordinate {\n" + indent + "  point [\n";
+    let x: string | number, y: string | number, z: string | number;
+    for (let i = 0; i < this.vertices; ++i) {
+      let offset = i * 3;
+      x = this.vertexArray?.[offset];
+      y = this.vertexArray?.[offset + 1];
+      z = this.vertexArray?.[offset + 2];
+      ret += indent + "   " + x + " " + y + " " + z + ",\n";
+    }
+    ret += indent + "  ]\n";
+    ret += indent + " }\n"; //end coordinate
 
-      ret += indent + " coordIndex [\n";
-      if(material.wireframe && this.faceArray) {
-        for (let i = 0; i < this.faceidx; i += 3) {
-          x = this.faceArray?.[i];
-          y = this.faceArray?.[i + 1];
-          z = this.faceArray?.[i + 2];
-          ret += indent + "  " + x + ", " + y + ", " + z + ", -1,\n";
-        }
-      }  else {
-        for (let i = 0; i < this.vertices-1; i += 2) {
-          ret += indent + "  " + i + ", " + (i + 1) + ", -1,\n";
-        }
-      }
-      ret += indent + " ]\n";
-      ret += indent + "}\n"; //geometry
-    } else {
-      //faces
-      ret +=
-        indent +
-        "geometry IndexedFaceSet {\n" +
-        indent +
-        " colorPerVertex TRUE\n" +
-        indent +
-        " normalPerVertex TRUE\n" +
-        indent +
-        " solid FALSE\n";
-
-      //vertices
-      ret += indent + " coord Coordinate {\n" + indent + "  point [\n";
-      let x: string | number, y: string | number, z: string | number;
-      for (let i = 0; i < this.vertices; ++i) {
-        let offset = i * 3;
-        x = this.vertexArray?.[offset];
-        y = this.vertexArray?.[offset + 1];
-        z = this.vertexArray?.[offset + 2];
-        ret += indent + "   " + x + " " + y + " " + z + ",\n";
-      }
-      ret += indent + "  ]\n";
-      ret += indent + " }\n"; //end coordinate
-
+    if (!lines) {
       //normals
       ret += indent + " normal Normal {\n" + indent + "  vector [\n";
       for (let i = 0; i < this.vertices; ++i) {
@@ -294,32 +241,37 @@ export class GeometryGroup {
       }
       ret += indent + "  ]\n";
       ret += indent + " }\n"; //end normal
+    }
 
-      //colors
-      if (this.colorArray) {
-        ret += indent + " color Color {\n" + indent + "  color [\n";
-        for (let i = 0; i < this.vertices; ++i) {
-          let offset = i * 3;
-          x = this.colorArray[offset];
-          y = this.colorArray[offset + 1];
-          z = this.colorArray[offset + 2];
-          ret += indent + "   " + x + " " + y + " " + z + ",\n";
-        }
-        ret += indent + "  ]\n";
-        ret += indent + " }\n"; //end color
+    //colors
+    if (this.colorArray && (!lines || !material.wireframe)) {
+      ret += indent + " color Color {\n" + indent + "  color [\n";
+      for (let i = 0; i < this.vertices; ++i) {
+        let offset = i * 3;
+        x = this.colorArray[offset];
+        y = this.colorArray[offset + 1];
+        z = this.colorArray[offset + 2];
+        ret += indent + "   " + x + " " + y + " " + z + ",\n";
       }
+      ret += indent + "  ]\n";
+      ret += indent + " }\n"; //end color
+    }
 
-      //faces
-      ret += indent + " coordIndex [\n";
+    ret += indent + " coordIndex [\n";
+    if (!lines || (material.wireframe && this.faceArray)) {
       for (let i = 0; i < this.faceidx; i += 3) {
         x = this.faceArray?.[i];
         y = this.faceArray?.[i + 1];
         z = this.faceArray?.[i + 2];
         ret += indent + "  " + x + ", " + y + ", " + z + ", -1,\n";
       }
-      ret += indent + " ]\n"; //end faces
-      ret += indent + "}\n"; //geometry
+    } else {
+      for (let i = 0; i < this.vertices - 1; i += 2) {
+        ret += indent + "  " + i + ", " + (i + 1) + ", -1,\n";
+      }
     }
+    ret += indent + " ]\n";
+    ret += indent + "}\n"; //geometry
 
     ret += oldindent + "}"; //shape
     return ret;

@@ -3,6 +3,12 @@
 Use Node.js 24 and npm 10 or newer for development. Run
 `nvm install` and `nvm use` from the repository root to use `.nvmrc`.
 
+The Jest and coverage commands pass `--no-sparkplug` directly to Node to
+avoid the intermittent Node 24 V8 garbage-collector crash tracked in
+[nodejs/node#62393](https://github.com/nodejs/node/issues/62393). Jest workers
+inherit the flag; it is not allowed in `NODE_OPTIONS`. Remove this workaround
+when the supported Node version includes the fix.
+
 The security overrides in `package.json` update the modern `glob` and
 `minimatch` dependencies used by Jest, coverage, and glcheck. They deliberately
 leave legacy versions alone because those consumers use different APIs.

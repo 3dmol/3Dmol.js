@@ -95,35 +95,12 @@ export class Renderer {
   private _textureMatrix = new Matrix4();
   private _fullProjModelMatrix = new Matrix4();
   private _fullProjModelMatrixInv = new Matrix4();
-  // light arrays cach
+  // Directional light arrays used by the shaders.
   private _direction = new Vector3();
   private _lightsNeedUpdate = true;
   private _lights = {
-    ambient: [0, 0, 0],
     directional: {
-      length: 0,
       colors: [],
-      positions: [],
-    },
-    point: {
-      length: 0,
-      colors: [],
-      positions: [],
-      distances: [],
-    },
-    spot: {
-      length: 0,
-      colors: [],
-      positions: [],
-      distances: [],
-      directions: [],
-      anglesCos: [],
-      exponents: [],
-    },
-    hemi: {
-      length: 0,
-      skyColors: [],
-      groundColors: [],
       positions: [],
     },
   };
@@ -538,7 +515,7 @@ export class Renderer {
     // Sets up proper vertex and fragment shaders and attaches them to webGL
     // program
     // Also sets appropriate uniform variables
-    program = this.setProgram(camera, lights, fog, material, object, this);
+    program = this.setProgram(camera, lights, fog, material, object);
     if (!program) return;
 
     attributes = program.attributes;
@@ -1012,6 +989,25 @@ export class Renderer {
   }
 
 
+  private resizeDepthTexture(texture: WebGLTexture, width: number, height: number) {
+    this._gl.bindTexture(this._gl.TEXTURE_2D, texture);
+    this._gl.texImage2D(
+      this._gl.TEXTURE_2D,
+      0,
+      (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
+      width,
+      height,
+      0,
+      this._gl.DEPTH_COMPONENT,
+      this._gl.FLOAT,
+      null
+    );
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
+    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
+  }
+
   // Texture storage belongs to this renderer, even when its GL context is shared.
   private resizeFrameBufferTextures(width: number, height: number) {
     if (width === this._framebufferWidth && height === this._framebufferHeight) return;
@@ -1034,61 +1030,10 @@ export class Renderer {
     this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
     this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
 
-    //depth texture
-    this._gl.bindTexture(this._gl.TEXTURE_2D, this._depthTexture);
-    this._gl.texImage2D(
-      this._gl.TEXTURE_2D,
-      0,
-      (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
-      width,
-      height,
-      0,
-      this._gl.DEPTH_COMPONENT,
-      this._gl.FLOAT,
-      null
-    );
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
-    this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
-
-    //shading texture - for AO and maybe eventually shadows? I don't like shadows
+    this.resizeDepthTexture(this._depthTexture, width, height);
     if (this._shadingTexture) {
-      this._gl.bindTexture(this._gl.TEXTURE_2D, this._shadingTexture);
-      this._gl.texImage2D(
-        this._gl.TEXTURE_2D,
-        0,
-        (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
-        width,
-        height,
-        0,
-        this._gl.DEPTH_COMPONENT,
-        this._gl.FLOAT,
-        null
-      );
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
-
-      //scratch texture, needed by AO to do blur
-      this._gl.bindTexture(this._gl.TEXTURE_2D, this._scratchTexture);
-      this._gl.texImage2D(
-        this._gl.TEXTURE_2D,
-        0,
-        (this._gl as WebGL2RenderingContext).DEPTH_COMPONENT32F,
-        width,
-        height,
-        0,
-        this._gl.DEPTH_COMPONENT,
-        this._gl.FLOAT,
-        null
-      );
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, this._gl.NEAREST);
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, this._gl.NEAREST);
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
-      this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
-
+      this.resizeDepthTexture(this._shadingTexture, width, height);
+      this.resizeDepthTexture(this._scratchTexture, width, height);
     }
     this._framebufferWidth = width;
     this._framebufferHeight = height;
@@ -1677,12 +1622,10 @@ export class Renderer {
 
     this._gl.linkProgram(program);
     // The linked program retains its executable without the shader objects.
-    for (const shader of [glVertexShader, glFragmentShader]) {
-      if (shader) {
-        this._gl.detachShader(program, shader);
-        this._gl.deleteShader(shader);
-      }
-    }
+    this._gl.detachShader(program, glVertexShader);
+    this._gl.deleteShader(glVertexShader);
+    this._gl.detachShader(program, glFragmentShader);
+    this._gl.deleteShader(glFragmentShader);
 
     if (!this._gl.getProgramParameter(program, this._gl.LINK_STATUS)) {
       console.error("Could not link shader program: " + this._gl.getProgramInfoLog(program));
@@ -1729,10 +1672,6 @@ export class Renderer {
       "alpha",
     ];
 
-    /*
-     * for (a in attributes) identifiers.push(a);
-     */
-
     for (i = 0; i < identifiers.length; i++) {
       var attributeVar = identifiers[i];
       program.attributes[attributeVar] = this._gl.getAttribLocation(
@@ -1752,7 +1691,7 @@ export class Renderer {
     return program;
   }
 
-  private setProgram(camera, lights, fog, material, object, renderer) {
+  private setProgram(camera, lights, fog, material, object) {
     if (material.needsUpdate) {
       if (material.program) this.deallocateMaterial(material);
 
@@ -1848,7 +1787,7 @@ export class Renderer {
         // lighting
 
         if (this._lightsNeedUpdate) {
-          this.setupLights(program, lights);
+          this.setupLights(lights);
           this._lightsNeedUpdate = false;
         }
 
@@ -1889,8 +1828,8 @@ export class Renderer {
         m_uniforms.transfermin.value = object.material.transfermin;
         m_uniforms.subsamples.value = object.material.subsamples;
 
-        renderer.setTexture(object.material.transferfn, 4, false);
-        renderer.setTexture(object.material.map, 3, true);
+        this.setTexture(object.material.transferfn, 4, false);
+        this.setTexture(object.material.map, 3, true);
         //depth texture from the renderbuffer, for volumetric integration with surfaces
         this._gl.activeTexture(this._gl.TEXTURE5);
         this._gl.bindTexture(this._gl.TEXTURE_2D, this._depthTexture);
@@ -2200,15 +2139,12 @@ export class Renderer {
     var vertexArray = geometryGroup.vertexArray;
     var colorArray = geometryGroup.colorArray;
 
-    // offset buffers
-    if (geometryGroup.__webglOffsetBuffer !== undefined) {
-      this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglOffsetBuffer);
-      this._gl.bufferData(this._gl.ARRAY_BUFFER, vertexArray, hint);
-    } else {
-      //normal, non-instanced case
-      this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglVertexBuffer);
-      this._gl.bufferData(this._gl.ARRAY_BUFFER, vertexArray, hint);
-    }
+    // Instanced geometry uploads positions to the offset buffer.
+    this._gl.bindBuffer(this._gl.ARRAY_BUFFER,
+      geometryGroup.__webglOffsetBuffer !== undefined
+        ? geometryGroup.__webglOffsetBuffer
+        : geometryGroup.__webglVertexBuffer);
+    this._gl.bufferData(this._gl.ARRAY_BUFFER, vertexArray, hint);
     // color buffers
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, geometryGroup.__webglColorBuffer);
     this._gl.bufferData(this._gl.ARRAY_BUFFER, colorArray, hint);
@@ -2357,19 +2293,15 @@ export class Renderer {
     return 0;
   }
 
-  private setupLights(program, lights) {
+  private setupLights(lights) {
     var l,
       ll,
       light,
-      r = 0,
-      g = 0,
-      b = 0,
       color,
       intensity,
       zlights = this._lights,
       dirColors = zlights.directional.colors,
       dirPositions = zlights.directional.positions,
-      dirLength = 0,
       dirOffset = 0;
 
     for (l = 0, ll = lights.length; l < ll; l++) {
@@ -2397,15 +2329,8 @@ export class Renderer {
         dirColors[dirOffset + 2] = color.b * intensity;
 
         dirOffset += 3;
-
-        dirLength++;
       }
     }
-
-    zlights.ambient[0] = r;
-    zlights.ambient[1] = g;
-    zlights.ambient[2] = b;
-    zlights.directional.length = dirLength;
   }
 
   private initGL() {

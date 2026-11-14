@@ -123,7 +123,6 @@ export class SpritePlugin {
     );
 
     this.sprite.attributes = {};
-    const uniforms = {} as Partial<UniformsValueType>;
 
     this.sprite.attributes.position = this.gl.getAttribLocation(
       this.sprite.program,
@@ -134,60 +133,24 @@ export class SpritePlugin {
       "uv"
     );
 
-    uniforms.uvOffset = this.gl.getUniformLocation(
-      this.sprite.program,
-      "uvOffset"
-    );
-    uniforms.uvScale = this.gl.getUniformLocation(
-      this.sprite.program,
-      "uvScale"
-    );
-    uniforms.rotation = this.gl.getUniformLocation(
-      this.sprite.program,
-      "rotation"
-    );
-    uniforms.scale = this.gl.getUniformLocation(this.sprite.program, "scale");
-    uniforms.alignment = this.gl.getUniformLocation(
-      this.sprite.program,
-      "alignment"
-    );
-    uniforms.color = this.gl.getUniformLocation(this.sprite.program, "color");
-    uniforms.map = this.gl.getUniformLocation(this.sprite.program, "map");
-    uniforms.opacity = this.gl.getUniformLocation(
-      this.sprite.program,
-      "opacity"
-    );
-    uniforms.useScreenCoordinates = this.gl.getUniformLocation(
-      this.sprite.program,
-      "useScreenCoordinates"
-    );
-    uniforms.screenPosition = this.gl.getUniformLocation(
-      this.sprite.program,
-      "screenPosition"
-    );
-    uniforms.modelViewMatrix = this.gl.getUniformLocation(
-      this.sprite.program,
-      "modelViewMatrix"
-    );
-    uniforms.projectionMatrix = this.gl.getUniformLocation(
-      this.sprite.program,
-      "projectionMatrix"
-    );
-    uniforms.fogNear = this.gl.getUniformLocation(
-      this.sprite.program,
-      "fogNear"
-    );
-    uniforms.fogFar = this.gl.getUniformLocation(this.sprite.program, "fogFar");
-    uniforms.fogColor = this.gl.getUniformLocation(
-      this.sprite.program,
-      "fogColor"
-    );
-    uniforms.alphaTest = this.gl.getUniformLocation(
-      this.sprite.program,
-      "alphaTest"
-    );
-
-    this.sprite.uniforms = uniforms as UniformsValueType;
+    this.sprite.uniforms = {
+      uvOffset: this.gl.getUniformLocation(this.sprite.program, "uvOffset"),
+      uvScale: this.gl.getUniformLocation(this.sprite.program, "uvScale"),
+      rotation: this.gl.getUniformLocation(this.sprite.program, "rotation"),
+      scale: this.gl.getUniformLocation(this.sprite.program, "scale"),
+      alignment: this.gl.getUniformLocation(this.sprite.program, "alignment"),
+      color: this.gl.getUniformLocation(this.sprite.program, "color"),
+      map: this.gl.getUniformLocation(this.sprite.program, "map"),
+      opacity: this.gl.getUniformLocation(this.sprite.program, "opacity"),
+      useScreenCoordinates: this.gl.getUniformLocation(this.sprite.program, "useScreenCoordinates"),
+      screenPosition: this.gl.getUniformLocation(this.sprite.program, "screenPosition"),
+      modelViewMatrix: this.gl.getUniformLocation(this.sprite.program, "modelViewMatrix"),
+      projectionMatrix: this.gl.getUniformLocation(this.sprite.program, "projectionMatrix"),
+      fogNear: this.gl.getUniformLocation(this.sprite.program, "fogNear"),
+      fogFar: this.gl.getUniformLocation(this.sprite.program, "fogFar"),
+      fogColor: this.gl.getUniformLocation(this.sprite.program, "fogColor"),
+      alphaTest: this.gl.getUniformLocation(this.sprite.program, "alphaTest"),
+    };
   }
 
   render(

@@ -35,7 +35,7 @@
     "build:dev": "webpack --mode development",
     "build:prod": "webpack --mode production",
     "prepare": "npm run build:dev  && npm run build:prod",
-    "jest": "npx jest --testPathIgnorePatterns=render.test.js",
+    "jest": "node --no-sparkplug node_modules/jest/bin/jest.js --testPathIgnorePatterns=render.test.js",
     "test": "npm run generate:tests && npm run generate:jest && npm run jest && npm run glcheck",
     "glcheck": "npm run clean:glcheck && npm run generate:glcheck && npm run test:glcheck",
     "test:glcheck": "npx glcheck --config ./tests/glcheck/glcheck.config.json",
@@ -43,7 +43,7 @@
     "generate:tests": "python3 tests/auto/generate_tests.py",
     "generate:glcheck": "python3 ./tests/glcheck/generate_glcheck_render_tests.py -min",
     "generate:jest": "python3 tests/jest/generate_jest_render_tests.py",
-    "cover": "npm run generate:jest && npx jest --coverage --verbose",
+    "cover": "npm run generate:jest && node --no-sparkplug node_modules/jest/bin/jest.js --coverage --verbose",
     "codecov": "codecovcli --disable-telem upload-coverage --disable-search --file coverage/lcov.info --plugin noop",
     "doc": "rm -rf doc/ && npx jsdoc -c jsdoc.conf.json src doc.md"
   },

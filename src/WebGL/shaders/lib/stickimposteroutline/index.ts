@@ -8,7 +8,7 @@ import vertexShader from "./stickimposteroutline.vert";
 const fragmentShader = stickimposterFragmentShaderStart + stickimposterFragmentShaderEnd;
 
 export const stickimposteroutline: Shader = {
-    fragmentShader: fragmentShader,
-    vertexShader: vertexShader,
+    fragmentShader,
+    vertexShader,
     uniforms
 }
