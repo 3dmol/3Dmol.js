@@ -57,6 +57,8 @@ export interface LabelSpec {
   font?: string;
   /** font size in pixels, default 18 */
   fontSize?: number;
+  /** texture pixels per label pixel, default 2; use 1 for the original resolution */
+  resolution?: number;
   /** render text in bold, default false */
   bold?: boolean;
   /** padding around text in pixels; defaults to 4 when omitted or zero */
@@ -149,6 +151,8 @@ export class Label {
 
   setContext() {
     var style = this.stylespec;
+    const resolution = Number.isFinite(style.resolution) && style.resolution >= 1
+      ? style.resolution : 2;
     var useScreen =
       typeof style.useScreen == "undefined" ? false : style.useScreen;
 
@@ -230,9 +234,16 @@ export class Label {
       if (h > height) height = h;
     }
 
-    this.canvas.width = width;
-    this.canvas.height = height;
+    // Keep the existing integer display size while rasterizing more texture pixels.
+    const logicalWidth = Math.floor(width);
+    const logicalHeight = Math.floor(height);
+    this.canvas.width = Math.ceil(logicalWidth * resolution);
+    this.canvas.height = Math.ceil(logicalHeight * resolution);
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.setTransform(
+      logicalWidth > 0 ? this.canvas.width / logicalWidth : 1, 0,
+      0, logicalHeight > 0 ? this.canvas.height / logicalHeight : 1, 0, 0
+    );
 
     bold = "";
     if (style.bold) bold = "bold ";
@@ -323,6 +334,8 @@ export class Label {
 
     // canvas contents will be used for a texture
     var texture = new Texture(this.canvas);
+    texture.logicalWidth = logicalWidth;
+    texture.logicalHeight = logicalHeight;
     texture.needsUpdate = true;
     this.sprite.material = new SpriteMaterial({
       map: texture,

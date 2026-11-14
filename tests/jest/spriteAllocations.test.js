@@ -106,6 +106,19 @@ test("zero-size viewport keeps the previous nonfinite scale values", () => {
     expect(env.plugin.renderList).toHaveLength(0);
 });
 
+test.each([false, true])("higher-resolution textures preserve sprite size and screen offsets (screen: %s)", screen => {
+    const env = fixture(), label = sprite(7, -3, {
+        useScreenCoordinates: screen, alignment: { x: -1, y: 1 }, screenOffset: { x: 12, y: -8 },
+        map: { name: 7, image: { width: 192, height: 96 }, logicalWidth: 64, logicalHeight: 32 }
+    });
+    label.scale = { x: 3, y: 4 };
+    env.draw([label]);
+    expect(env.gl.uniform2f).toHaveBeenCalledWith("scale", (64 * 2 / 400) * 3, (32 * 2 / 200) * 4);
+    expect(env.gl.uniform2f).toHaveBeenCalledWith("alignment", -0.625, 0.5);
+    if (screen) expect(env.gl.uniform3f).toHaveBeenCalledWith("screenPosition", -0.8, 0.4, 0);
+    else expect(env.gl.uniformMatrix4fv).toHaveBeenCalledWith("modelViewMatrix", false, label._modelViewMatrix.elements);
+});
+
 test("empty and nonmatching passes do no GL work", () => {
     const env = fixture();
     env.draw([]); env.draw([sprite(1, 0, { depthTest: false })]);

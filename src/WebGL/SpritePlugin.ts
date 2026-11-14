@@ -294,8 +294,8 @@ export class SpritePlugin {
 
       if (material.map && material.map.image && material.map.image.width) {
         this.gl.uniform1f(uniforms?.alphaTest || null, material.alphaTest);
-        var w = material.map.image.width;
-        var h = material.map.image.height;
+        var w = material.map.logicalWidth ?? material.map.image.width;
+        var h = material.map.logicalHeight ?? material.map.image.height;
 
         let scaleX = (w * this.renderer.devicePixelRatio) / viewportWidth;
         let scaleY = (h * this.renderer.devicePixelRatio) / viewportHeight;

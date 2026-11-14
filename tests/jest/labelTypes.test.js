@@ -22,7 +22,7 @@ test("published label types accept supported style options", () => {
             bold: false, padding: 0, backgroundWidth: 0, backgroundHeight: 0,
             backgroundImage: canvas,
             backgroundGradient: { gradient: 'linear', colors: ['red', 'blue'] },
-            fontSize: 18, fontColor: 'white', position: { x: 1, y: 2, z: 3 }
+            fontSize: 18, resolution: 2, fontColor: 'white', position: { x: 1, y: 2, z: 3 }
         };
         class CustomGradient extends GradientType {
             range() { return [0, 1]; }
@@ -40,6 +40,8 @@ test("published label types accept supported style options", () => {
         const badBold: LabelSpec = { bold: 'true' };
         // @ts-expect-error padding is numeric
         const badPadding: LabelSpec = { padding: '4' };
+        // @ts-expect-error resolution is numeric
+        const badResolution: LabelSpec = { resolution: '2' };
         // @ts-expect-error width is numeric
         const badWidth: LabelSpec = { backgroundWidth: '160' };
         // @ts-expect-error height is numeric

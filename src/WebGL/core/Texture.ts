@@ -21,6 +21,9 @@ export class Texture extends EventDispatcher {
   id: number;
   name: string;
   image: any;
+  /** Optional display dimensions for textures rasterized above their logical size. */
+  logicalWidth?: number;
+  logicalHeight?: number;
   mapping: any;
   wrapS: number;
   wrapT: number;
@@ -85,6 +88,8 @@ export class Texture extends EventDispatcher {
   clone(texture = new Texture()): Texture {
 
     texture.image = this.image;
+    texture.logicalWidth = this.logicalWidth;
+    texture.logicalHeight = this.logicalHeight;
 
     texture.mapping = this.mapping;
 
