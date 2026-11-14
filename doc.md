@@ -14,12 +14,12 @@
   }, 50);
 </script>
 
-3Dmol.js is an object-oriented, WebGL based JavaScript library for online molecular visualization - No Java required!
-With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. 
+3Dmol.js is an object-oriented JavaScript library for molecular visualization in browsers with WebGL support. With 3Dmol.js, you can add beautifully rendered molecular visualizations to your web applications. 
 
 Features include:
 
-- Support for pdb, sdf, mol2, xyz, and cube formats
+- Molecular structure and trajectory formats listed in {@link FileFormats}, including PDB, mmCIF, BinaryCIF, SDF, MOL2, and XYZ
+- Volumetric data for isosurfaces and volume rendering (see {@link VolumeData})
 - Parallelized molecular surface computation
 - Sphere, stick, line, cross, cartoon, and surface styles
 - Atom property based selection and styling
@@ -31,7 +31,19 @@ Features include:
 
 Molecular data can be shared and visualized without writing any HTML using only a declarative URL specification and our hosted viewer (see [Viewing Molecules with the 3Dmol Server](tutorial-url.html)).
 
-Viewers can be quickly embedded in any HTML document using just two lines of source code (see [Embedding a 3Dmol Viewer](tutorial-embeddable.html)).
+Viewers can be embedded in an HTML document using a script and a sized container (see [Embedding a 3Dmol Viewer](tutorial-embeddable.html)). For application code, start with [Using the JavaScript API](tutorial-code.html). For notebooks, use the [py3Dmol wrapper](https://github.com/3dmol/3Dmol.js/tree/master/py3Dmol).
+
+### Finding the right API
+
+| Task | Reference |
+| --- | --- |
+| Create and configure a viewer | {@link createViewer}, {@link ViewerSpec}, {@link GLViewer} |
+| Load molecular data or trajectories | {@link GLViewer#addModel}, {@link GLViewer#addModelsAsFrames}, {@link ParserOptionsSpec}, {@link FileFormats} |
+| Select atoms and set representations | {@link AtomSelectionSpec}, {@link AtomStyleSpec} |
+| Add surfaces, shapes, and labels | {@link SurfaceStyleSpec}, {@link GLShape}, {@link LabelSpec} |
+| Load volumetric data | {@link VolumeData}, {@link IsoSurfaceSpec}, {@link VolumetricRendererSpec} |
+
+The [API index for agents](llms.txt) links to Markdown generated from the same source comments as this reference. It is a navigation entry point, not a separately maintained API description. Use the documentation and TypeScript declarations from the version of 3Dmol.js you are running; published development documentation may include APIs absent from an older release.
 
 #### Mouse Controls
 
@@ -48,7 +60,7 @@ Viewers can be quickly embedded in any HTML document using just two lines of sou
 
 ### Including it in your web project
 
-#### Method 1: using the latest version
+#### Method 1: Using the latest version
 
 The library is available as a single minified JavaScript:
 
@@ -63,18 +75,18 @@ An un-minified file is also provided for debugging purposes:
 ```
 
 
-#### Method 2: using a CDN
+#### Method 2: Using a CDN
 
-The files hosted by 3Dmol.org closely track the development version and so will change frequently. If you desire more stability you may copy the files into your own project or, alternatively, we host release snapshots on the <a href="https://cdnjs.com/libraries/3Dmol">cdnjs</a> content delivery network (note that you must specify the release version). **Do not use the CDN minified version** (3Dmol-min.min.js).  The CDN autominifier does not generate correct code and `3Dmol-min.js` is alread minified.
+The files hosted by 3Dmol.org track development and may change without a version change in your page. For reproducible deployments, pin a release on a CDN, as below, or serve a specific build yourself. `3Dmol-min.js` is already minified; use that file rather than applying another CDN minifier such as `3Dmol-min.min.js`.
 
 ```{@lang html}
 <script src="https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js"></script>
 ```
 
-Using the CDN will likely provide the best network performance to your users, but features will lag behind the development branch as we only plan to tag new releases a few times a year.
+A pinned release does not automatically receive later fixes or features. Update the version deliberately and validate your application against that release.
 
 
-#### Method 3: using an ES6 style import
+#### Method 3: Using an ES6 style import
 
 If you are using a bundler such as [Webpack](https://webpack.js.org/) or [Parcel](https://parceljs.org/) and your code is in [TypeScript](https://www.typescriptlang.org/) or using ES6 imports (and after maybe using [Babel](https://babeljs.io/) to transpile it), then you will want to import it like this:
 
@@ -94,13 +106,15 @@ console.log($3Dmol);
 });
 ```
 
-or if you use an expose-loader to make jquery globally visible you can use flat imports.
+Alternatively, a bundler can use a static import. The core viewer does not require a separately loaded jQuery global.
 
 ```{@lang javascript}
 import * as $3Dmol from '3dmol/build/3Dmol.js';
 ```
 
-Note that even when loaded as a module, the $3Dmol window global will be populated.
+The `3Dmol.js` bundle used above also populates `window.$3Dmol`. Native ES module builds are available as `build/3Dmol.es6.js` and `build/3Dmol.es6-min.js`; these export the core API without assigning that global. The optional UI is a separate `3Dmol.ui` bundle. Load browser-dependent code on the client, after a DOM is available; importing it during server-side rendering is not supported.
+
+For TypeScript projects, importing the package name `3dmol` lets the compiler resolve its bundled `build/types/index.d.ts` declarations through the package metadata.
 
 ### Using the source code
 
@@ -112,19 +126,24 @@ cd 3Dmol.js
 npm install
 ```
 
-The `npm install` command will take care of building the project with webpack. To rebuild it again use `npm run build`. This will allow you to access the completely built file at `build/3Dmol.js`.
+Use Node.js 24 and npm 10 or newer as specified in the repository. With lifecycle scripts enabled, `npm install` builds the development and production bundles through `prepare`. `npm run build` also generates the example tests and documentation. The development bundle is `build/3Dmol.js`; see [CONTRIBUTING.md](https://github.com/3dmol/3Dmol.js/blob/master/CONTRIBUTING.md) for the development workflow.
 
 Since 3Dmol.js is licensed under the permissive BSD open-source license, you are free
-to copy this code and use it any any project, as long the code is properly acknowledged.
+to copy this code and use it in any project, as long as the code is properly acknowledged.
 
-Every 3Dmol.js viewer canvas corresponds to a {@link $3Dmol.GLViewer} object. The viewer object
+A {@link GLViewer} manages one view. A viewer grid can share a canvas between multiple viewers. The viewer object
 includes methods for setting viewer properties and for creating and manipulating molecular models, surfaces
 and custom geometric shapes within the view.
 
-A {@link $3Dmol.GLModel} object represents molecular data.  Each model object stores its own
-rendering data and provides a convient way to reference a defined part of the scene.
+A {@link GLModel} object represents molecular data. Each model stores its own
+atoms and rendering data. {@link AtomSpec} describes an individual atom;
+{@link AtomSelectionSpec} identifies atoms to operate on, and {@link AtomStyleSpec}
+defines their representations. These objects serve different purposes.
 
-Models are manipulated and styled using {@link AtomSpec} JavaScript objects.
+After changing models or styles, call {@link GLViewer#render} to update the scene.
+Use {@link GLViewer#zoomTo} to fit the camera to the selected atoms. Loading data
+and computing surfaces can be asynchronous; follow the completion contract on
+the method before using its result.
 
 An example of a viewer that manipulates the styles of the embedded objects is shown below.  View the source code for the implementation details.
 
@@ -144,7 +163,7 @@ If this software is useful in your work, please use the following citation:
 
 Due to limited resources, our focus is on developing 3Dmol.js as a molecular viewer library, rather than a full featured cheminformatics/bioinformatics toolkit.
 
-For example, adding support for WebGL 2.0 has a higher priority than adding editing functionality to the hosted viewer.
+The hosted viewer and optional UI provide scene controls; molecular editing and chemical analysis are separate concerns from the core visualization API.
 
 We hope others use 3Dmol.js as a building block for such web applications and look forward to collaborating with web developers to deliver the visualization functionality needed to enable them. Of course, if additional resources become available we may expand the scope of our efforts. However, the goal is to keep the core of 3Dmol.js as small as possible and focused on visualization.
 
@@ -154,7 +173,7 @@ Time permitting, we will add support for additional formats as they are requeste
 
 ### Does 3Dmol.js work with touch devices?
 
-Yes, as long as they support WebGL. For example, it runs great in Safari on an iPad running iOS 8.
+Touch controls are supported in browsers with WebGL enabled. The controls are listed above. Available graphics memory and browser limits can affect the size of structures and surfaces a device can display.
 
 ## Contact
 

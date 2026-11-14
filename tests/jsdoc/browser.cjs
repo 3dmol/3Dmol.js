@@ -103,6 +103,9 @@ const server = http.createServer((request, response) => {
                     await request.continue();
                 } else if (url.hostname.toLowerCase() === '3dmol.org' && bundles.has(url.pathname)) {
                     await request.respond({ status: 200, contentType: 'text/javascript', body: bundles.get(url.pathname) });
+                } else if (url.hostname.toLowerCase() === '3dmol.org' && url.pathname === '/tests/auto/data/Al.lammpstrj') {
+                    await request.respond({ status: 200, contentType: 'text/plain', headers: { 'Access-Control-Allow-Origin': '*' },
+                        body: fs.readFileSync(path.join(root, 'tests/auto/data/Al.lammpstrj')) });
                 } else if (url.hostname === 'files.rcsb.org' && /\.pdb$/i.test(url.pathname)) {
                     await request.respond({ status: 200, contentType: 'text/plain', headers: { 'Access-Control-Allow-Origin': '*' }, body: pdb });
                 } else if (/(^|\.)(google-analytics\.com|googletagmanager\.com)$/.test(url.hostname)) {
@@ -162,7 +165,12 @@ const server = http.createServer((request, response) => {
         await page.keyboard.press('Escape');
 
         await page.goto(origin + '/doc/tutorials/embeddable/', { waitUntil: 'networkidle0' });
-        await waitForViewers(2);
+        await waitForViewers(3);
+        assert.deepEqual(await page.evaluate(() => {
+            const viewer = window.$3Dmol.viewers['trajectory-example'];
+            return { frames: viewer.getNumFrames(), controls: viewer.ui.getControls() };
+        }), { frames: 5, controls: { edit: false, trajectory: true } },
+        'The trajectory example should load all frames with only playback controls');
         await page.waitForFunction(() => {
             const viewer = Object.values(window.$3Dmol.viewers).find(item => item.ui);
             return viewer?.ui?.ui?.element?.isConnected &&

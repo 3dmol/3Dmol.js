@@ -33,6 +33,8 @@
         "tutorials": "tutorials/",
         "basePath": "/doc/",
         "siteName": "3Dmol.js",
+        "siteUrl": "https://3dmol.org",
+        "llmsTxt": { "full": false, "api": true },
         "footer": "3Dmol.js © 2019-2024 | <a href='https://pitt.edu/' target='_blank'>University of Pittsburgh</a> | <a href='https://github.com/3dmol/3Dmol.js/blob/master/LICENSE' target='_blank'>License</a>",
         "fonts": {
             "heading": "Work Sans",

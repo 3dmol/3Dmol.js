@@ -78,8 +78,11 @@ class Surface extends Array<SurfObj> {
 }
 
 /**
- * WebGL-based 3Dmol.js viewer
- * Note: The preferred method of instantiating a GLViewer is through {@link createViewer}
+ * WebGL-based molecular viewer. Create one with {@link createViewer} inside a
+ * container with a nonzero width and height. Load molecular data with
+ * {@link GLViewer#addModel}, select atoms with {@link AtomSelectionSpec}, and
+ * style them with {@link AtomStyleSpec}. Call {@link GLViewer#render} after
+ * changing models or styles. Call {@link GLViewer#destroy} when finished.
  *
  * @class
 */
@@ -1068,15 +1071,21 @@ export class GLViewer {
     };
 
     /**
-     * Return configuration of viewer
+     * Return the viewer's configuration object, not a copy.
+     * Use the corresponding viewer methods to update active rendering settings;
+     * changing this object alone does not apply every setting.
+     * @return {ViewerSpec}
      */
     public getConfig() {
         return this.config;
     };
 
     /**
-     * Set the configuration object.  Note that some settings may only
-     * have an effect at viewer creation time.
+     * Replace the stored configuration object. This does not merge with the
+     * previous configuration or reinitialize the viewer. Ambient occlusion is
+     * applied immediately when supplied; use dedicated setters for other live
+     * changes. Many {@link ViewerSpec} settings are read only during creation.
+     * @param {ViewerSpec} c - Replacement configuration.
      */
     public setConfig(c: ViewerSpec) {
         this.config = c;
@@ -1129,8 +1138,10 @@ export class GLViewer {
     /**
      * Set lower and upper limit stops for zoom.
      *
-     * @param {number} lower - limit on zoom in (positive number). Default 0.
-     * @param {number} upper - limit on zoom out (positive number). Default infinite.
+     * Limits are camera-to-model distances in model units. Omitted arguments
+     * retain the current limits; a new viewer has no zoom limits.
+     * @param {number} [lower] - Minimum distance (zoom-in limit). Zero disables this limit.
+     * @param {number} [upper] - Positive maximum distance (zoom-out limit).
      * @example
       $3Dmol.get("data/set1_122_complex.mol2", function(moldata) {
             var m = viewer.addModel(moldata);
@@ -1149,7 +1160,9 @@ export class GLViewer {
     };
 
     /**
-     * Set camera parameters (distance to the origin and field of view)
+     * Update camera distance, field of view, or projection mode.
+     * Omitted fields retain their values. Field of view is in degrees, and z is
+     * in model units. Call render() to display the change.
      *
      * @param {Object} parameters - new camera parameters, with possible fields
      *                       being fov for the field of view, z for the
@@ -1281,7 +1294,11 @@ export class GLViewer {
     };
 
     /**
-     * Return image URI of viewer contents (base64 encoded).     *
+     * Return a PNG data URI of the current canvas, including all panels when
+     * using {@link createViewerGrid}. Pending interactive redraws are flushed.
+     * Call render() first after changing scene contents, and await asynchronous
+     * model or surface loading before capturing its result.
+     * @return {string} Base64-encoded PNG data URI.
      */
     public pngURI() {
         const canvas = this.getCanvas();
@@ -1296,10 +1313,13 @@ export class GLViewer {
     };
 
     /**
-     * Return a promise that resolves to an animated PNG image URI of
-     viewer contents (base64 encoded) for nframes of viewer changes.
+     * Capture subsequent viewer redraws as an animated PNG data URI.
+     * This method does not start an animation or request redraws; use animate(),
+     * spin(), or render() to produce them. It temporarily replaces the view-change
+     * callback and restores that callback when capture completes.
      * Resolves to undefined if destroy() occurs before all frames are captured.
-     * @return {Promise}
+     * @param {number} [nframes=1] - Number of subsequent redraws to capture.
+     * @return {Promise<string|undefined>} Base64-encoded PNG data URI, or undefined on cancellation.
      */
     public apngURI(nframes: number) {
         if (this.destroyed) return Promise.resolve(undefined);
@@ -1367,12 +1387,9 @@ export class GLViewer {
     };
 
     /**
-         * Set the duration of the hover delay
-         *
-         * @param {number}
-         *            [duration] - an optional parameter that denotes
-         *            the duration of the hover delay (in milliseconds) before the hover action is called
-         *
+     * Set the delay before an atom's hover callback runs.
+     * The initial viewer delay is 500 milliseconds unless configured otherwise.
+     * @param {number} duration - Hover delay in milliseconds.
      */
     public setHoverDuration(duration?: number) {
         this.hoverDuration = duration;
@@ -1657,7 +1674,8 @@ export class GLViewer {
         this.camera.updateProjectionMatrix();
     }
     /**
-     * Set viewer width independently of the HTML container.  This is probably not what you want.
+     * Set the canvas width independently of the HTML container. This is probably not what you want.
+     * For responsive layouts, size the container with CSS and use {@link GLViewer#resize}.
      *
      * @param {number} w Width in pixels
      */
@@ -1668,7 +1686,8 @@ export class GLViewer {
     };
 
     /**
-     * Set viewer height independently of the HTML container.  This is probably not what you want.
+     * Set the canvas height independently of the HTML container. This is probably not what you want.
+     * For responsive layouts, size the container with CSS and use {@link GLViewer#resize}.
      *
      * @param {number} h Height in pixels
      */
@@ -1936,7 +1955,7 @@ export class GLViewer {
      *            Axis can also be specified as a vector.
      * @param {number}
      *            [animationDuration] - an optional parameter that denotes
-     *            the duration of the rotation animation. Default 0 (no animation)
+     *            the duration of the rotation animation in milliseconds. Default 0 (no animation)
      * @param {boolean} [fixedPath] - if true animation is constrained to
      *      requested motion, overriding updates that happen during the animation         *
      * @example     $3Dmol.download('cid:4000', viewer, {}, function() {
@@ -2015,9 +2034,14 @@ export class GLViewer {
         q.z, q.w];
     };
 
-    /** Sets the view to the specified translation, zoom, and rotation.
-     *
-     * @param {Array.<number>} arg Array formatted identically to the return value of getView */
+    /** Restore translation, zoom, and rotation from {@link GLViewer#getView}.
+     * Invalid arrays are ignored. This restores the viewpoint only, not models,
+     * styles, projection settings, or clipping planes.
+     * @param {Array.<number>} arg - Eight finite numbers in getView() order. A legacy
+     * ten-number array may append the rotation group's x and y translation.
+     * @param {boolean} [nolink=false] - Suppress updates to linked viewers.
+     * @return {GLViewer} This viewer.
+     */
     public setView(arg, nolink?) {
 
         if (!Array.isArray(arg) || (arg.length !== 8 && arg.length !== 10))
@@ -2048,9 +2072,13 @@ export class GLViewer {
 
     // apply styles, models, etc in viewer
     /**
-     * Render current state of viewer, after
-     * adding/removing models, applying styles, etc.
-     *
+     * Rebuild and draw the current scene after adding or removing models,
+     * changing styles, or updating interaction settings. This is synchronous;
+     * it does not wait for downloads, frame loading, or surface computation.
+     * Await those operations separately before rendering their completed result.
+     * @param {function} [callback] - Called with this viewer after the draw.
+     * @param {Object} [exts] - Internal renderer extension options; normally omitted.
+     * @return {GLViewer} This viewer, for chaining.
      */
     public render(callback?, exts?) {
         if (this.destroyed) return this;
@@ -2255,10 +2283,12 @@ export class GLViewer {
     }
 
 
-    /** return list of atoms selected by sel
-     *
-     * @param {AtomSelectionSpec} sel
-     * @return {AtomSpec[]}
+    /** Return atoms matching a selection across the selected models.
+     * Selection is evaluated separately in each model; distance-based selectors
+     * such as within do not search other models. Returned atoms are live model
+     * objects, not copies.
+     * @param {AtomSelectionSpec} [sel={}] - Selection; omitted selects all atoms.
+     * @return {AtomSpec[]} Matching atoms from the models' current frames.
      */
     public selectedAtoms(sel: AtomSelectionSpec): AtomSpec[] {
         return this.getAtomsFromSel(sel);
@@ -2288,10 +2318,11 @@ export class GLViewer {
     };
 
     /**
-     * Return pdb output of selected atoms (if atoms from pdb input)
-     *
-     * @param {AtomSelectionSpec} sel - Selection specification specifying model and atom properties to select.  Default: all atoms in viewer
-     * @return {string} PDB string of selected atoms
+     * Return the original PDB atom records saved during parsing.
+     * Use only with atoms that have a pdbline field. The output retains original
+     * coordinates and does not serialize later coordinate edits, bonds, or headers.
+     * @param {AtomSelectionSpec} [sel={}] - Atoms whose original records are included.
+     * @return {string} Original records separated by newlines.
      */
     public pdbData(sel: AtomSelectionSpec) {
         var atoms = this.getAtomsFromSel(sel);
@@ -2736,7 +2767,7 @@ export class GLViewer {
      * @param {LabelSpec}
      *            options - Label style specification
      * @param {AtomSelectionSpec}
-     *            sel - Set position of label to center of this selection
+     *            sel - Position at the selection's mean atom position, overriding options.position.
      * @param {boolean} noshow - if true, do not immediately display label - when adding multiple labels this is more efficient
      * @return {Label}
      *
@@ -3756,7 +3787,33 @@ export class GLViewer {
      * @param {Object} options - {fast: true} replays the frame's coordinates into each model's
      *   existing geometry instead of rebuilding it (see GLModel.setFrame); off by default.
      *   Without fast, this refreshes geometry even when the selected frame has not changed.
-     * @return {Promise}
+     * @return {Promise<void>} Resolves when all models have selected or loaded the frame.
+     * @example <caption>Await the selected frame before drawing frame-specific labels.</caption>
+     * var pdb = [
+     *   "MODEL        1",
+     *   "HETATM    1  C1  LIG A   1      -0.600  -1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600  -1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL",
+     *   "MODEL        2",
+     *   "HETATM    1  C1  LIG A   1      -0.600   1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600   1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL"
+     * ].join("\n");
+     * viewer.addModelsAsFrames(pdb, "pdb");
+     * viewer.setStyle({}, {stick: {radius: 0.25}, sphere: {scale: 0.3}});
+     * viewer.addLabel("Frame 0", {
+     *   frame: 0, useScreen: true, position: {x: 12, y: 20, z: 0},
+     *   fontColor: "black", showBackground: false
+     * });
+     * viewer.addLabel("Frame 1 (selected with -1)", {
+     *   frame: 1, useScreen: true, position: {x: 12, y: 20, z: 0},
+     *   fontColor: "black", showBackground: false
+     * });
+     * (async function () {
+     *   await viewer.setFrame(-1);
+     *   viewer.zoomTo();
+     *   viewer.render();
+     * })();
      */
     public setFrame(framenum: number, options: { fast?: boolean } = {}) {
         // Resolve one shared timeline before updating local models and overlays,
@@ -3809,9 +3866,14 @@ export class GLViewer {
     /**
      * Animate all models in viewer from their respective frames.
      * Frame-load failures are logged and stop only the affected animation.
-     * @param {Object} options - can specify interval (speed of animation), loop (direction
-     * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, reps (number of repetitions, 0 indicates infinite loop),
-     * and fast (replay coordinates into existing geometry instead of rebuilding each frame; see setFrame).
+     * @param {Object} [options={}] - Playback settings.
+     * @param {number} [options.interval=100] - Target interval between frames in milliseconds.
+     * @param {string} [options.loop="forward"] - "forward", "backward", or "backAndForth".
+     * @param {number} [options.step=1] - Number of frames advanced per update.
+     * @param {number} [options.startFrame=0] - Starting position in the playback sequence.
+     * @param {number} [options.reps=0] - Number of repetitions; 0 repeats indefinitely.
+     * @param {boolean} [options.fast=false] - Replay coordinates into existing geometry;
+     * see {@link GLViewer#setFrame} for limitations.
      * By default, models with one frame are also refreshed so direct atom edits and dynamic
      * color functions take effect during playback.
      *
@@ -3967,11 +4029,15 @@ export class GLViewer {
         return options;
     }
     /**
-     * Create and add model to viewer, given molecular data and its format
+     * Parse molecular data and add a model to the viewer. This does not fetch a
+     * URL; use {@link download}, {@link get}, or {@link getbin} to retrieve data.
+     * Set styles and call render() to display the model. Without data, creates
+     * an empty model that can be populated with {@link GLModel#addAtoms}.
      *
-     * @param {string} data - Input data
-     * @param {string} format - Input format ('pdb', 'sdf', 'xyz', 'pqr', or 'mol2')
-     * @param {ParserOptionsSpec} options - format dependent options. Attributes depend on the input file format.
+     * @param {string|ArrayBuffer|Uint8Array|Object} [data] - File contents or parser-specific input.
+     * @param {string} [format] - Format key or filename (see {@link FileFormats}).
+     * Specify the format explicitly when known; content-based guessing is limited.
+     * @param {ParserOptionsSpec} [options] - Options supported by the selected parser.
      * @example
 
 
@@ -3999,12 +4065,35 @@ export class GLViewer {
     };
 
     /**
-     * Given multimodel file and its format, add atom data to the viewer as separate models
-     * and return list of these models
+     * Parse a multimodel file into separate models in this viewer.
+     * For a single model with animation frames, use {@link GLViewer#addModelsAsFrames}.
+     * For one combined model, use {@link GLViewer#addAsOneMolecule}.
      *
-     * @param {string} data - Input data
-     * @param {string} format - Input format (see {@link FileFormats})
-     * @return {Array<GLModel>}
+     * @param {string|ArrayBuffer|Uint8Array|Object} data - File contents or parser-specific input.
+     * @param {string} format - Input format (see {@link FileFormats}).
+     * @param {ParserOptionsSpec} [options] - Parser options; multimodel and frames are enabled internally.
+     * @return {Array<GLModel>} The viewer's complete model array, including pre-existing
+     * models and any empty slots left by model removal; not only the newly added models.
+     * @example <caption>Load both structures as independently styled models.</caption>
+     * var pdb = [
+     *   "MODEL        1",
+     *   "HETATM    1  C1  LIG A   1      -0.600  -1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600  -1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL",
+     *   "MODEL        2",
+     *   "HETATM    1  C1  LIG A   1      -0.600   1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600   1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL"
+     * ].join("\n");
+     * var models = viewer.addModels(pdb, "pdb");
+     * models[0].setStyle({}, {stick: {color: "royalblue", radius: 0.3}});
+     * models[1].setStyle({}, {stick: {color: "orange", radius: 0.3}});
+     * viewer.addLabel("Two models / two atoms each", {
+     *   useScreen: true, position: {x: 12, y: 20, z: 0},
+     *   fontSize: 14, fontColor: "black", showBackground: false
+     * });
+     * viewer.zoomTo();
+     * viewer.render();
      */
     public addModels(data, format: string, options?) {
         options = this.getModelOpt(options);
@@ -4029,8 +4118,9 @@ export class GLViewer {
 
     /**
      * Create and add model to viewer. Given multimodel file and its format,
-     * different atomlists are stored in model's frame
-     * property and model's atoms are set to the 0th frame
+     * each structure becomes a frame of the same model, initially displaying
+     * frame zero. Use {@link GLViewer#setFrame} for a single frame or
+     * {@link GLViewer#animate} for playback.
      *
      * @param {string} data - Input data
      * @param {string} format - Input format (see {@link FileFormats})
@@ -4044,6 +4134,26 @@ export class GLViewer {
               viewer.zoomTo();
               viewer.render();
           });
+     * @example <caption>Load the same input as one model with two frames.</caption>
+     * var pdb = [
+     *   "MODEL        1",
+     *   "HETATM    1  C1  LIG A   1      -0.600  -1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600  -1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL",
+     *   "MODEL        2",
+     *   "HETATM    1  C1  LIG A   1      -0.600   1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600   1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL"
+     * ].join("\n");
+     * var model = viewer.addModelsAsFrames(pdb, "pdb");
+     * model.setStyle({}, {stick: {radius: 0.25}, sphere: {scale: 0.3}});
+     * // Frame zero is displayed initially; the other structure is not drawn yet.
+     * viewer.addLabel("One model / two frames / frame 0", {
+     *   useScreen: true, position: {x: 12, y: 20, z: 0},
+     *   fontSize: 14, fontColor: "black", showBackground: false
+     * });
+     * viewer.zoomTo();
+     * viewer.render();
      */
     public addModelsAsFrames(data, format: string, options?) {
         options = this.getModelOpt(options);
@@ -4058,7 +4168,8 @@ export class GLViewer {
 
     /**
      * Create and add model to viewer. Given multimodel file and its format,
-     * all atoms are added to one model
+     * all structures are combined into one model, displayed together rather than
+     * as animation frames. Use {@link GLViewer#addModels} for separate models.
      *
      * @param {string} data - Input data
      * @param {string} format - Input format (see {@link FileFormats})
@@ -4071,6 +4182,25 @@ export class GLViewer {
               viewer.zoomTo();
               viewer.render();
           });
+     * @example <caption>Combine the same input into one model displaying all atoms.</caption>
+     * var pdb = [
+     *   "MODEL        1",
+     *   "HETATM    1  C1  LIG A   1      -0.600  -1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600  -1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL",
+     *   "MODEL        2",
+     *   "HETATM    1  C1  LIG A   1      -0.600   1.500   0.000  1.00  0.00           C",
+     *   "HETATM    2  O1  LIG A   1       0.600   1.500   0.000  1.00  0.00           O",
+     *   "ENDMDL"
+     * ].join("\n");
+     * var model = viewer.addAsOneMolecule(pdb, "pdb");
+     * model.setStyle({}, {stick: {radius: 0.25}, sphere: {scale: 0.3}});
+     * viewer.addLabel("One model / four atoms together", {
+     *   useScreen: true, position: {x: 12, y: 20, z: 0},
+     *   fontSize: 14, fontColor: "black", showBackground: false
+     * });
+     * viewer.zoomTo();
+     * viewer.render();
      */
     public addAsOneMolecule(data, format: string, options?) {
         options = this.getModelOpt(options);
@@ -4181,7 +4311,11 @@ export class GLViewer {
     }
 
     /**
-     * Set style properties to all selected atoms
+     * Replace all style properties on selected atoms. Styles on unselected
+     * atoms are unchanged. Pass an empty style object to hide the selection,
+     * or use {@link GLViewer#addStyle} to preserve existing representations.
+     * With one argument, that argument is a style applied to all atoms.
+     * Call render() to display the change.
      *
      * @param {AtomSelectionSpec} sel - Atom selection specification.  Can be omitted to select all.
      * @param {AtomStyleSpec} style - Style spec to apply to specified atoms
@@ -4214,7 +4348,10 @@ export class GLViewer {
     };
 
     /**
-     * Add style properties to all selected atoms
+     * Merge style properties into selected atoms' existing styles.
+     * Existing representations are retained; properties supplied for the same
+     * representation overwrite matching properties. With one argument, that
+     * argument is a style applied to all atoms. Call render() to display the change.
      *
      * @param {AtomSelectionSpec} sel - Atom selection specification.  Can be omitted to select all
      * @param {AtomStyleSpec} style - style spec to add to specified atoms
@@ -4227,6 +4364,31 @@ export class GLViewer {
     viewer.zoomTo();
     viewer.render();
     });
+     * @example <caption>Replacement on the left; additive styling on the right.</caption>
+     * function addPair(x) {
+     *   var model = viewer.addModel();
+     *   model.addAtoms([
+     *     {elem: "C", x: x, y: -0.8, z: 0, bonds: [1], bondOrder: [1]},
+     *     {elem: "O", x: x, y: 0.8, z: 0, bonds: [0], bondOrder: [1]}
+     *   ]);
+     *   return model;
+     * }
+     * var left = addPair(-2);
+     * var right = addPair(2);
+     * viewer.setStyle({}, {sphere: {radius: 0.55}});
+     * // setStyle removes the left model's spheres; addStyle retains the right ones.
+     * viewer.setStyle({model: left}, {stick: {radius: 0.2, color: "orange"}});
+     * viewer.addStyle({model: right}, {stick: {radius: 0.2, color: "orange"}});
+     * viewer.addLabel("setStyle", {
+     *   position: {x: -2, y: 1.8, z: 0}, alignment: "center",
+     *   fontColor: "black", showBackground: false
+     * });
+     * viewer.addLabel("addStyle", {
+     *   position: {x: 2, y: 1.8, z: 0}, alignment: "center",
+     *   fontColor: "black", showBackground: false
+     * });
+     * viewer.zoomTo();
+     * viewer.render();
      */
     public addStyle(sel: AtomSelectionSpec, style: AtomStyleSpec);
     public addStyle(sel: AtomStyleSpec);
@@ -4264,7 +4426,7 @@ export class GLViewer {
         this.applyToModels("setClickable", sel, clickable, callback);
         return this;
     };
-    /** Set hoverable and callback of selected atoms
+    /** Set hover handling for selected atoms. Call render() to update hit testing.
      *
      * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
      * @param {boolean} hoverable - whether hover-handling is enabled for the selection
@@ -4716,11 +4878,12 @@ export class GLViewer {
     /**
      * Add surface representation to atoms
      * @param {SurfaceType|string} stype - Surface type (VDW, MS, SAS, or SES); string names are case-insensitive.
-     * @param {SurfaceStyleSpec} style - optional style specification for surface material (e.g. for different coloring scheme, etc)
-     * @param {AtomSelectionSpec} atomsel - Show surface for atoms in this selection
-     * @param {AtomSelectionSpec} allsel - Use atoms in this selection to calculate surface; may be larger group than 'atomsel'
-     * @param {AtomSelectionSpec} focus - Optionally begin rendering surface specified atoms
-     * @param {function} surfacecallback - Optional completion callback. Receives the surface ID normally.
+     * @param {SurfaceStyleSpec} [style={}] - Surface material and coloring.
+     * @param {AtomSelectionSpec} [atomsel={}] - Atoms whose surface is displayed; defaults to all atoms.
+     * @param {AtomSelectionSpec} [allsel] - Atoms used to calculate the surface;
+     * defaults to atomsel. A larger selection includes neighboring atoms' occlusion.
+     * @param {AtomSelectionSpec} [focus] - Prioritize chunks near these atoms; does not change the final surface.
+     * @param {function} [surfacecallback] - Completion callback. Receives the surface ID normally.
      * With symmetry preprocessing, receives an array repeating that ID once per contributing model
      * (an empty array if no models contribute).
      * @return {Promise|number} Without a callback, returns a Promise resolving to the numeric surface ID;
@@ -4728,6 +4891,40 @@ export class GLViewer {
      * Removing the surface stops pending generation and still resolves its original ID (and invokes
      * the callback); the ID does not imply that the surface still exists. Destroying the viewer
      * also settles the Promise but suppresses the completion callback.
+     * Use the Promise form to handle computation failures, which reject the Promise.
+     * @example <caption>Use neighboring atoms for occlusion while displaying only the selected surface.</caption>
+     * function addPair(x) {
+     *   var model = viewer.addModel();
+     *   model.addAtoms([
+     *     {elem: "C", x: x, y: 0, z: 0},
+     *     {elem: "C", x: x + 1.8, y: 0, z: 0}
+     *   ]);
+     *   return model;
+     * }
+     * var left = addPair(-4);
+     * var right = addPair(3);
+     * viewer.setStyle({}, {sphere: {radius: 0.3, color: "black"}});
+     * viewer.addLabel("Isolated atom", {
+     *   position: {x: -4, y: 2.3, z: 0}, alignment: "center",
+     *   fontColor: "black", showBackground: false
+     * });
+     * viewer.addLabel("Neighbor occlusion", {
+     *   position: {x: 3, y: 2.3, z: 0}, alignment: "center",
+     *   fontColor: "black", showBackground: false
+     * });
+     * (async function () {
+     *   await Promise.all([
+     *     viewer.addSurface("VDW", {opacity: 0.8, color: "royalblue"},
+     *       {model: left, index: 0}, {model: left, index: 0}),
+     *     viewer.addSurface("VDW", {opacity: 0.8, color: "orange"},
+     *       {model: right, index: 0}, {model: right})
+     *   ]);
+     *   // Both surfaces are complete before drawing and exporting the image.
+     *   viewer.zoomTo();
+     *   viewer.zoom(0.65); // Include the surfaces beyond the atom centers.
+     *   viewer.render();
+     *   var imageURI = viewer.pngURI(); // Use this data URI as an img element's src.
+     * })();
      */
     public addSurface(stype: SurfaceType | string, style: SurfaceStyleSpec = {}, atomsel: AtomSelectionSpec = {},
         allsel?: AtomSelectionSpec, focus?: AtomSelectionSpec, surfacecallback?) {
@@ -5317,8 +5514,11 @@ export class GLViewer {
         return this;
     }
 
-    /** Clear scene of all objects
-     * */
+    /** Remove models, surfaces, labels, and shapes while keeping this viewer reusable.
+     * For permanent cleanup of controls, timers, and graphics resources, use
+     * {@link GLViewer#destroy}.
+     * @return {GLViewer} This viewer.
+     */
     public clear() {
         this.removeAllSurfaces();
         this.removeAllModels();
@@ -5383,9 +5583,9 @@ export class GLViewer {
 
 
     /**
-     * Synchronize this view matrix of this viewer to the passed viewer.
-     * When the viewpoint of this viewer changes, the other viewer will
-     * be set to this viewer's view.
+     * Link viewpoint changes from this viewer to another viewer.
+     * This link is one-way: also call linkViewer on the other viewer for
+     * bidirectional synchronization. Only the viewpoint is linked, not scene contents.
      * @param {GLViewer} otherviewer
      */
     public linkViewer(otherviewer: GLViewer) {
@@ -5444,7 +5644,8 @@ export class GLViewer {
 
 /**
  * Create and initialize an appropriate viewer at supplied HTML element using specification in config
- * @param {Object | string} element - Either HTML element or string identifier
+ * @param {HTMLElement|Object|string} element - Container element, jQuery object,
+ * or element ID without a leading "#". Give the container a nonzero width and height.
  * @param {ViewerSpec} [config] Viewer configuration
  * @return {GLViewer|undefined} The viewer, or undefined if the container element is not found.
  * @throws {string} If viewer construction fails.
@@ -5474,8 +5675,12 @@ export function createViewer(element, config?: ViewerSpec) {
 };
 
 /**
- * Create and initialize a grid of viewers that share a WebGL canvas
- * @param {Object | string} element - Either HTML element or string identifier
+ * Create a grid of viewers that share one WebGL canvas.
+ * Access panels as viewers[row][column], with row zero at the top and column
+ * zero at the left. Supply positive integer rows and cols in config.
+ * A PNG captured from any panel includes the whole shared canvas.
+ * @param {HTMLElement|Object|string} element - Container element, jQuery object,
+ * or element ID without a leading "#".
  * @param {ViewerGridSpec} [config] - grid configuration
  * @param {ViewerSpec} [viewer_config] - Viewer specification to apply to all subviewers
  * @return {GLViewer[][]|undefined} A 2D array of viewers, or undefined if the container is not found.
@@ -5645,7 +5850,8 @@ export interface AmbientOcclusionStyle {
  * View style configuration
  */
 export interface ViewStyle {
-    /** How to style viewer: outline|ambientOcclusion|none */
+    /** Effect names: "outline", "ambientOcclusion", or both in one string.
+     * An empty string or "none" disables both effects. */
     style?: string;
     /** Ambient occlusion strength (darkness) of shading (default 1.0) */
     strength?: number;
@@ -5672,7 +5878,7 @@ export interface ViewerSpec {
     /** Default atom colors as element-symbol-to-color mappings for models in this viewer. */
     defaultcolors?: Record<string, ColorSpec>;
     /**
-     * Whether to disable disable handling of mouse events.
+     * Whether to disable the built-in mouse and touch handlers (default false).
      * If you want to use your own mouse handlers, set this then bind your handlers to the canvas object.
                   The default 3Dmol.js handlers are available for use:
                   'mousedown touchstart': viewer._handleMouseDown,
@@ -5680,40 +5886,40 @@ export interface ViewerSpec {
                   'mousemove touchmove': viewer._handleMouseMove
      */
     nomouse?: boolean | string;
-    /** Color of the canvas background */
+    /** Canvas background color, default "#ffffff". */
     backgroundColor?: string;
-    /** Alpha transparency of canvas background */
+    /** Canvas background opacity from 0 (transparent) to 1 (opaque), default 1. */
     backgroundAlpha?: number;
-    /** */
+    /** Initial camera x coordinate in model units, default 0; used for stereo views. */
     camerax?: number | string;
-    /** */
+    /** Delay in milliseconds before a hover callback, default 500. */
     hoverDuration?: number;
     /** id of the canvas */
     id?: string;
-    /** default 10 */
+    /** Default cartoon quality for new models, default 10. Higher values increase resolution. */
     cartoonQuality?: number;
-    /** */
+    /** Internal grid row, counted from the bottom; set by {@link createViewerGrid}. */
     row?: number;
-    /** */
+    /** Internal grid column; set by {@link createViewerGrid}. */
     col?: number;
-    /** */
+    /** Grid row count; normally supplied through {@link ViewerGridSpec}. */
     rows?: number;
-    /** */
+    /** Grid column count; normally supplied through {@link ViewerGridSpec}. */
     cols?: number;
-    /** */
+    /** Existing canvas to use. Grid viewers share the canvas created by {@link createViewerGrid}. */
     canvas?: HTMLCanvasElement;
     viewers?: GLViewer[];
-    /** */
+    /** Minimum model extent used by zoomTo(), in model units; default 5. */
     minimumZoomToDistance?: number;
-    /** */
+    /** Minimum camera-to-model distance for zoom controls; unset means no lower limit. */
     lowerZoomLimit?: number;
-    /** */
+    /** Maximum camera-to-model distance for zoom controls; unset means no upper limit. */
     upperZoomLimit?: number;
-    /** Enable antialiasing */
+    /** Enable antialiasing, default true. */
     antialias?: boolean;
     /** Render upscaled to 2x resolution. Defaults to antialiasing setting. Ignored for Retina displays. */
     upscale?: boolean;
-    /** */
+    /** Apply mouse controls to all panels in a viewer grid, default false. */
     control_all?: boolean;
     /** Orthographic instead of perspective rendering. Default false. */
     orthographic?: boolean;
@@ -5732,9 +5938,9 @@ export interface ViewerSpec {
  * Grid GLViewer input specification
  */
 export interface ViewerGridSpec {
-    /** number of rows in grid */
+    /** Positive integer number of rows; required when creating a grid. */
     rows?: number;
-    /** number of columns in grid */
+    /** Positive integer number of columns; required when creating a grid. */
     cols?: number;
     /** if true, mouse events are linked */
     control_all?: boolean;

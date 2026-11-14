@@ -1,8 +1,6 @@
 import { GradientType } from "./Gradient";
 
-/* @interface
- *
- */
+/** RGB components in the range 0 to 1. Set opacity separately in the relevant style. */
 export interface Colored {
   r: number;
   g: number;
@@ -337,12 +335,18 @@ export const htmlColors: Record<string, ColorSpec> = {
 };
 
 /**
- * Color representation. A hex number, html color name, or object with r/g/b properties
+ * Color representation: a packed RGB number such as 0xff0000, an HTML color name,
+ * a hex string such as #ff0000 or #f00, an rgb(...) string, or an object with r/g/b
+ * components from 0 to 1. The alpha component of rgba(...) strings is ignored;
+ * set opacity separately in the style.
  */
 export type ColorSpec =  number | string | Colored;
 
 /**
-*  Colorscheme specification.
+*  Atom coloring by a built-in scheme name, a numeric property gradient, or a
+*  discrete property-to-color map. Property lookup checks atom.properties before
+*  top-level AtomSpec fields. A colorscheme takes precedence over a fixed style color.
+*  For numeric comparisons across models, provide the same min/max or gradient range.
 *  @see builtinColorSchemes
 */
 export type ColorschemeSpec = string | {

@@ -7,7 +7,7 @@ import { builtinColorSchemes, CC, elementColors, htmlColors, Color } from "./col
 import { IsoSurfaceSpec } from "GLShape";
 import { inflate, InflateFunctionOptions, Data } from "pako"
 
-//simplified version of jquery extend
+/** Copy defined own properties from src1 onto obj1 and return obj1 (a shallow merge). */
 export function extend(obj1, src1) {
     for (var key in src1) {
         if (src1.hasOwnProperty(key) && src1[key] !== undefined) {
@@ -82,10 +82,12 @@ export function adjustVolumeStyle(style: IsoSurfaceSpec) {
 };
 
 
-/*
- * computes the bounding box around the provided atoms
- * @param {AtomSpec[]} atomlist
- * @return {Array}
+/**
+ * Compute coordinate bounds and the arithmetic mean position of the supplied atoms.
+ * @param {AtomSpec[]} atomlist - Atoms with finite x, y, and z coordinates.
+ * @param {boolean} [ignoreSymmetries=false] - Exclude transformed symmetry positions.
+ * @return {number[][]} Minimum corner, maximum corner, and mean position, each as
+ * [x, y, z]. An empty atom list returns three [0, 0, 0] vectors.
  */
 export function getExtent(atomlist, ignoreSymmetries?) {
     var xmin, ymin, zmin, xmax, ymax, zmax, xsum, ysum, zsum, cnt;
@@ -135,12 +137,14 @@ export function getExtent(atomlist, ignoreSymmetries?) {
 };
 
 
-/* get the min and max values of the specified property in the provided
-* @function $3Dmol.getPropertyRange
-* @param {AtomSpec[]} atomlist - list of atoms to evaluate
-* @param {string} prop - name of property 
-* @return {Array} - [min, max] values
-*/
+/**
+ * Get the minimum and maximum values of an atom property.
+ * Uses {@link getAtomProperty}, so entries in atom.properties take precedence
+ * over same-named fields on the atom itself.
+ * @param {AtomSpec[]} atomlist - Atoms to evaluate.
+ * @param {string} prop - Numeric property name.
+ * @return {number[]} [min, max]; [0, 0] when no finite range is available.
+ */
 export function getPropertyRange(atomlist, prop) {
     var min = Number.POSITIVE_INFINITY;
     var max = Number.NEGATIVE_INFINITY;
@@ -227,9 +231,10 @@ export class PausableTimer {
 
 };
 
-/*
- * Convert a base64 encoded string to a Uint8Array
- * @param {string} base64 encoded string
+/**
+ * Decode base64 into bytes.
+ * @param {string} base64 - Base64 text without a data URI prefix.
+ * @return {Uint8Array} Decoded bytes.
  */
 export function base64ToArray(base64) {
     var binary_string = window.atob(base64);
@@ -241,8 +246,12 @@ export function base64ToArray(base64) {
     return bytes;
 };
 
-//return the value of an atom property prop, or null if non existent
-// looks first in properties, then in the atom itself
+/**
+ * Read an atom property, first from atom.properties and then from the atom itself.
+ * @param {AtomSpec} atom - Atom to inspect.
+ * @param {string} prop - Property name.
+ * @return {*} Property value, or null if neither location defines it.
+ */
 export function getAtomProperty(atom, prop) {
     var val = null;
     if (atom.properties &&
@@ -273,20 +282,19 @@ export function mergeGeos(geometry, mesh) {
 };
 
 
-/*
- * Parse a string that represents a style or atom selection and convert it
- * into an object.  The goal is to make it easier to write out these specifications
- * without resorting to json. Objects cannot be defined recursively.
- * ; - delineates fields of the object 
- * : - if the field has a value other than an empty object, it comes after a colon
- * , - delineates key/value pairs of a value object
- *     If the value object consists of ONLY keys (no = present) the keys are 
- *     converted to a list.  Otherwise a object of key/value pairs is created with
- *     any missing values set to null
- * = OR ~ - separates key/value pairs of a value object, if not provided value is null
- *     twiddle is supported since = has special meaning in URLs
- * @param (String) str
- * @returns {Object}
+/**
+ * Parse a style or selection from JSON or the compact syntax used by embedded
+ * viewers and viewer URLs. JSON supports nested specifications. Compact syntax
+ * has one level of nesting: semicolons separate fields, a colon introduces a
+ * value, commas separate list items or property assignments, and = or ~ assigns
+ * a nested property. A field without a value becomes an empty object.
+ * For example, "chain:A;resi:1,2" selects a chain and residue list, and
+ * "stick:radius=0.2,color=blue" describes a stick style.
+ * Numeric and boolean scalar values are converted; comma-separated list items
+ * remain strings. Use JSON for nested selections such as and, or, and within.
+ * @param {string|Object|null|undefined} str - Specification. Objects, null, and
+ * undefined pass through unchanged; "all" becomes an empty selection object.
+ * @returns {*} Parsed specification.
  */
 export function specStringToObject(str) {
     if (typeof (str) === "object") {
@@ -411,12 +419,22 @@ export function getbin(uri, callback?, request?, postdata?) {
 
 
 /**
- * Load a PDB/PubChem structure or URL into an existing viewer. Calls 'zoomTo' and 'render' after loading succeeds.
- * @param {string} query - Structure query prefixed with "pdb:", "bcif:", "cid:", or "url:".
- * @param {GLViewer} viewer - Add new model to existing viewer
- * @param {Object} options - Specify additional options
- *                           format: file format to download for PDB queries, default format is bcif
- *                           pdbUri: URI to retrieve PDB files, default URI is https://files.rcsb.org/view/
+ * Load a PDB/PubChem structure or URL into an existing viewer. Calls zoomTo()
+ * and render() after loading succeeds. An empty model is added immediately,
+ * including when validation or loading later fails. Use the Promise form when
+ * the caller needs to distinguish success from failure.
+ * @param {string} query - Structure query prefixed with "pdb:", "bcif:", "cid:",
+ * or "url:". Without a prefix, four characters imply a PDB ID, a numeric value
+ * implies a PubChem CID, and other strings are treated as URLs. The legacy
+ * "mmtf:" prefix is redirected to BCIF. Cross-origin URLs must permit browser access.
+ * @param {GLViewer} viewer - Viewer to receive the new model.
+ * @param {ParserOptionsSpec} options - Options passed to the model's parser,
+ * plus the download options below. Pass {} for defaults.
+ * @param {string} [options.format="bcif"] - Format requested for a "pdb:" query.
+ * Failed BCIF requests fall back to text PDB. For "url:" queries the URL supplies
+ * the format; use get()/getbin() and addModel() to specify a format explicitly.
+ * @param {string} [options.pdbUri="https://files.rcsb.org/view/"] - Base URI for
+ * text PDB downloads and BCIF fallback, including its trailing slash.
  * @param {Function} [callback] - Called with the model after the asynchronous load attempt, including failures. On failure, the error is logged before calling the callback.
  * @return {GLModel|Promise<GLModel>|undefined} With a callback, returns the model immediately. Otherwise returns a Promise that resolves to the loaded model or rejects with the load error. Invalid PDB or PubChem identifiers display an alert and return undefined before starting the request or calling the callback.
  * @example
@@ -613,7 +631,12 @@ export function getColorFromStyle(atom, style): Color {
     return C;
 };
 
-//given a string selector, element, or jquery object, return the HTMLElement
+/**
+ * Resolve a viewer container.
+ * @param {HTMLElement|Object|string} element - Element, jQuery object, or element
+ * ID without a leading "#"; strings are not arbitrary CSS selectors.
+ * @return {HTMLElement|null} Container, or null when the ID is not found.
+ */
 export function getElement(element): HTMLElement | null {
     let ret = element;
     if (typeof (element) === "string") {

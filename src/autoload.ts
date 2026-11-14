@@ -11,13 +11,24 @@ export var processing_autoinit = false;
 
 /**
  * Contains a dictionary of embedded viewers created from HTML elements
- * with a the viewer_3Dmoljs css class indexed by their id (or numerically
- * if they do not have an id).
+ * with the viewer_3Dmoljs CSS class, indexed by element ID or by an automatically
+ * assigned number when no ID is present. Viewers created by createViewer() are
+ * not added to this dictionary. Destroying an embedded viewer removes its entry.
 */
 export var viewers: any = {};
 
-//Create embedded viewer from HTML attributes if true
-//viewer and callback are used by the testing harness
+/**
+ * Create embedded viewers for elements with the viewer_3Dmoljs CSS class,
+ * using their data attributes. Runs automatically when document.readyState
+ * reaches "complete". Call after adding embedded-viewer elements dynamically;
+ * each call processes all matching elements, including previously processed ones.
+ * Loading remote data is asynchronous; use an element's data-callback attribute
+ * to access its viewer after loading and initial styling.
+ * @param {GLViewer} [viewer] - Existing viewer used by the render-test harness.
+ * Normally omit this argument to create a viewer for each element.
+ * @param {function} [callback] - Harness callback, called with each initialized viewer.
+ * @see {@tutorial embeddable}
+ */
 export function autoload(viewer?: any, callback?: (arg0: any) => void) {
     var i: string | number, dataname: string, type: string;
     const canceled = (glviewer: GLViewer) => {
@@ -216,7 +227,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                 if (glviewer == null) {
                     glviewer = viewers[viewerdiv.id || nviewers++] = createViewer(viewerdiv, config);
                 } else {
-                    glviewer.setBackgroundColor(bgcolor, bgalpha);
+                    glviewer.setBackgroundColor(config.backgroundColor, config.backgroundAlpha);
                     glviewer.setConfig(config);
                     if (UI) 
                         UI.initiateUI();

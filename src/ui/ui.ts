@@ -8,6 +8,7 @@ import type { TrajectorySettings } from './trajectory';
 import { uiStyles } from './styles';
 import { SelectionEditor, selectionSummary } from './selection';
 
+/** Availability of the optional viewer controls. Disabling controls does not remove models. */
 export interface UIControlOptions {
     /** Make the edit dialog and its hamburger button available. Defaults to true. */
     edit?: boolean;
@@ -15,6 +16,7 @@ export interface UIControlOptions {
     trajectory?: boolean;
 }
 
+/** Configuration for {@link StateManager} and its optional {@link UI} controls. */
 export interface UIConfig extends UIControlOptions {
     /** Start with the sidebar open. Small embedded viewers default to collapsed. */
     open?: boolean;
@@ -22,7 +24,9 @@ export interface UIConfig extends UIControlOptions {
     allowLocalFiles?: boolean;
     /** Initial settings for the view controls; omitted settings retain viewer defaults. */
     view?: Partial<UIViewSettings>;
+    /** Called when StateManager.setViewSettings changes the managed appearance. */
     onViewChange?: (settings: UIViewSettings) => void;
+    /** Called when the edit panel opens or closes after initialization. */
     onOpenChange?: (open: boolean) => void;
     /** Called after a successful UI load, before state subscribers are notified. */
     onModelLoaded?: (model: GLModel, source: UIModelSource) => void;
@@ -88,7 +92,13 @@ function isPolymer(atoms: AtomSpec[]): boolean {
 }
 function errorText(error: unknown): string { return error instanceof Error ? error.message : String(error); }
 
-/** Guided, instance-scoped controls for an existing viewer. Use StateManager to attach. */
+/**
+ * Guided controls for an existing viewer, supplied by the optional `3Dmol.ui` bundle.
+ * Load that bundle after the core browser bundle and construct a {@link StateManager}
+ * to attach controls. The manager is available as `viewer.ui`; its `ui` property
+ * holds this control panel. Declarative embeds can instead request `data-ui`.
+ * @see UIConfig
+ */
 export class UI {
     public readonly element = el('div', 'molui');
     private readonly panel = el('aside', 'molui-panel');
@@ -306,6 +316,11 @@ export class UI {
         this.updateTrajectoryLayout();
     }
 
+    /**
+     * Remove this panel and release its listeners, timers, and pending UI load.
+     * Prefer {@link StateManager#destroy} when disposing the manager as well;
+     * neither operation destroys the underlying viewer.
+     */
     public destroy(): void {
         if (this.destroyed) return;
         this.destroyed = true;
@@ -320,6 +335,7 @@ export class UI {
         return !this.element.classList.contains('molui-closed');
     }
 
+    /** Open or close the edit panel. It remains closed while edit controls are disabled. */
     public setOpen(open: boolean): void {
         open = this.editEnabled && open;
         const changed = this.isOpen !== open;
@@ -360,10 +376,16 @@ export class UI {
         return this.trajectory.isMinimized;
     }
 
+    /** Return a snapshot of playback speed, loop state, playback state, and frame. */
     public getTrajectorySettings(): TrajectorySettings {
         return this.trajectory.getSettings();
     }
 
+    /**
+     * Apply supplied playback settings; omitted settings retain their values.
+     * Await completion when changing the frame. Invalid frame or speed values reject.
+     * @see TrajectorySettings
+     */
     public setTrajectorySettings(settings: Partial<TrajectorySettings>): Promise<void> {
         return this.trajectory.setSettings(settings);
     }

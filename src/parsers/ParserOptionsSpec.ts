@@ -1,33 +1,15 @@
-/**
-* File formats supported by 3Dmol.js
-* @typedef FileFormats
-* @category Parsers
-* @prop bcif Binary Crystallographic Information File format
-* @prop cdjson,json  Chemical JSON format
-* @prop cube Gaussian cube format
-* @prop gro Gromacs structure format, including atom coordinates.
-* @prop lammpstrj LAMMPS trajectory format
-* @prop mcif,cif Crystallographic Information File, the successor to PDB that makes you miss the PDB file format
-* @prop mmtf Macromolecular Transmission Format, the successor to PDB that is totally awesome
-* @prop mol2 Sybyl Mol2 format
-* @prop pdb The venerable Protein Data Bank format
-* @prop pdbqt AutoDock PDBQT format
-* @prop pqr PDB-like format with charge and radius, stored in atom properties. Charges are available as properties.charge and properties.partialCharge.
-* @prop prmtop Amber topology file, must add coordinates
-* @prop sdf MDL MOL format, supports multiple models and meta data
-* @prop vasp VASP format (CONTCAR, POSCAR)
-* @prop xyz XYZ cartesian coordinates format
-*/
-
 import { AtomStyleSpec } from "GLModel";
 
 
 /**
-  * Parser options specification. Used to specify the options of a GLModel.  Depending on the input file format, not all fields may be defined.
+  * Options for reading molecular structures with GLViewer.addModel or GLModel.addMolData.
+  * Options are format-dependent; unsupported options have no effect. Use multimodel
+  * to request multiple structures, frames to append them as trajectory frames to an
+  * existing model, or onemol to combine them when the parser supports it. See {@link FileFormats}.
   * @category Parsers
   */
  export interface ParserOptionsSpec {
-  /** true if you want to add to a new frame and false otherwise ; supported by all */
+  /** On subsequent addMolData calls, append parsed structures as new frames instead of adding their atoms to the current frame. Does not itself enable reading multiple structures; use multimodel for that. */
   frames?: boolean;
   /** Generate vibration frames from atom displacement vectors when both frames and amplitude are supplied and nonzero. */
   vibrate?: {
@@ -40,7 +22,7 @@ import { AtomStyleSpec } from "GLModel";
   multimodel?: boolean;
   /** Combine parsed models into one atom list when supported by the format, typically together with multimodel. */
   onemol?: boolean;
-  /** Retain hydrogens in parsers that can strip them, including pdb, pdbqt, sdf, mol2, mmtf, and bcif. */
+  /** Retain hydrogens in parsers that can strip them. Defaults to false for pdb/pdbqt, mmtf, and bcif, and true for sdf and mol2. Other parsers may always retain hydrogens. */
   keepH?: boolean;
   /** used to define ChemDoodle styles ; supported by cdjson */
   parseStyle?: unknown;
@@ -61,14 +43,14 @@ import { AtomStyleSpec } from "GLModel";
   noComputeSecondaryStructure?: boolean;
   /** Maximum hydrogen-bond distance in angstroms when computing secondary structure; supported by pdb, pqr, mmtf, cif, and bcif. */
   hbondCutoff?: number;
-  /** Alternate location to select, if present; '*' loads all; supported by pdb, mmtf, and bcif. */
+  /** Alternate location to select (default A), in addition to atoms without an alternate location. Use '*' to load all; supported by pdb/pdbqt, mmtf, and bcif. */
   altLoc?: string;
   /** index of the assembly in symmetry ; supported by mmtf */
   assemblyIndex?: number;
-  /** for formats without explicit bonds (e.g. PDB, xyz) infer bonding (default true).  */
+  /** Infer bonds from coordinates where supported. Defaults to true for pdb/pdbqt, xyz, cif/mcif, and bcif; LAMMPSTRJ requires true explicitly. Disabling inference does not remove bonds supplied by the file. */
   assignBonds?: boolean;
-  /** for formats without explicit bonds, if assigning bonds to not assign bonds to common cations */
+  /** When inferring bonds, do not assign bonds to common cations. */
   unboundCations?: boolean;
-  /** set model to this style after parsing */
+  /** Apply this style after parsing, replacing the default or file-supplied atom styles. */
   style?: AtomStyleSpec;
  };

@@ -83,7 +83,7 @@ Atoms can be selected based upon properties defined in the {@link AtomSelectionS
 
 [`https://3Dmol.org/viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resn:TRP;chain:B&style=stick)
 
-Some atom properties, such as residue ids and names, can be specified in a comma separated list.  In this case, *any* property may match to select the atom. For example, `select=resi:19,23,26;chain:B` selects the three residues 19, 23, and 26 on chain B:
+Some atom properties, such as residue ids and names, can be specified in a comma separated list.  In this case, any value in that list may match that property, while other properties must still match. For example, `select=resi:19,23,26;chain:B` selects the three residues 19, 23, and 26 on chain B:
 
 [`https://3Dmol.org/viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick`](../viewer.html?pdb=1YCR&select=resi:19,23,26;chain:B&style=stick)
 
@@ -112,13 +112,13 @@ Characteristics of each style, such as line width and color, may also be set.  T
 [`https://3Dmol.org/viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5`](../viewer.html?pdb=4KW4&style=cartoon:color~spectrum;stick:radius~0.25,colorscheme~greenCarbon&select=bonds:0&style=sphere:radius~0.5)
 
 
-{@link AtomStyleSpec} provides for a list of possible atom style specification options.
+{@link AtomStyleSpec} lists the available atom style options. The URL shorthand and JSON form configure the same API objects; use the reference for option types and defaults.
 
 The `addstyle` directive adds representations without clearing existing ones. Legacy `colorbyelement` and `colorbyproperty` directives are also accepted. Repeated selectors and style directives retain their order when the scene is opened and edited.
 
 ##### Adding a surface #####
 
-A surface style specification draws the Van der Waals surface of the currently selected atoms.  It can specify the opacity and color of the surface.
+A surface style specification draws the Van der Waals surface of the currently selected atoms. The same selection supplies the atoms used to calculate this surface. See {@link SurfaceStyleSpec} for opacity, color, and other settings. Use the JavaScript {@link GLViewer#addSurface} API when the displayed atoms and calculation atoms need different selections.
 
 [`https://3Dmol.org/viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon`](../viewer.html?pdb=4KW4&select=resn:HOH;invert:1&style=cartoon&surface=opacity:0.8;colorscheme:whiteCarbon)
 

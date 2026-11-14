@@ -44,8 +44,8 @@ function removeSourceLines(text, basePath) {
     });
 }
 
-function repairLinks(text, aliases, basePath) {
-    const resolve = value => {
+function repairLinks(text, aliases, basePath, resolveLink) {
+    const resolve = resolveLink || (value => {
         if (value.startsWith('../')) {
             const url = new URL(value, `https://docs.invalid${basePath}`);
             return url.pathname + url.search + url.hash;
@@ -53,7 +53,7 @@ function repairLinks(text, aliases, basePath) {
         const relative = value.replace(/^\.\//, '');
         const file = relative.split(/[?#]/, 1)[0];
         return aliases.has(file) ? basePath + relative : value;
-    };
+    });
     // Keep executable code and comments intact, while still fixing external
     // script src attributes. Only opening tags need their URLs adjusted.
     text = text.replace(/<!--([\s\S]*?)-->|<(script|style)\b[^>]*>[\s\S]*?<\/\2\s*>|<[A-Za-z][^>]*>/gi, tag => {
@@ -62,11 +62,65 @@ function repairLinks(text, aliases, basePath) {
         let opening = replaceAttribute(tag.slice(0, end), 'href', resolve);
         opening = replaceAttribute(opening, 'src', resolve);
         opening = replaceAttribute(opening, 'data-pdb-url', resolve);
+        opening = replaceAttribute(opening, 'sourceHref', resolve);
         return opening + tag.slice(end);
     });
     // Generated Markdown retains ordinary tutorial links alongside components.
     return text.replace(/(\]\()([^\s)]+)(\))/g,
         (match, open, href, close) => `${open}${resolve(href)}${close}`);
+}
+
+// Markdown is consumed directly, so links must name actual files rather than
+// the theme's root-relative HTML routes. Build the map from emitted files: the
+// theme owns slug generation, including namespaced symbols and tutorials.
+function markdownLinkResolver(files, currentFile, aliases, hashRoutes, basePath) {
+    const targets = new Map();
+    for (const file of files) {
+        if (!file.endsWith('index.html')) continue;
+        const route = file.slice(0, -'index.html'.length);
+        targets.set(file, file);
+        targets.set(route, file);
+        targets.set(route.replace(/\/$/, ''), file);
+    }
+    for (const file of files) {
+        if (!file.endsWith('index.md')) continue;
+        const route = file.slice(0, -'index.md'.length);
+        targets.set(file, file);
+        targets.set(route, file);
+        targets.set(route.replace(/\/$/, ''), file);
+        const html = route + 'index.html';
+        if (targets.has(html)) targets.set(html, file);
+    }
+    return value => {
+        if (/^(?:[a-z][a-z\d+.-]*:|\/\/|[?#])/i.test(value)) return value;
+        const match = value.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+        if (!match) return value;
+        const [, pathname, query = '', fragment = ''] = match;
+        const candidates = pathname.startsWith('/')
+            ? [pathname.startsWith(basePath) ? pathname.slice(basePath.length) : pathname.slice(1)]
+            : [path.posix.normalize(path.posix.join(path.posix.dirname(currentFile), pathname)),
+                pathname.replace(/^\.\//, '')];
+        for (const candidate of candidates) {
+            let target = targets.get(candidate);
+            let hash = fragment;
+            if (aliases.has(candidate)) {
+                let legacyHash = fragment.slice(1);
+                try { legacyHash = decodeURIComponent(legacyHash); } catch {}
+                const moved = hashRoutes.get(candidate)?.get(legacyHash);
+                const route = moved ? moved.slice(basePath.length) : aliases.get(candidate);
+                target = targets.get(route);
+                hash = moved ? '' : fragment.replace(/^#([.~])?/, '#').replace(/_/g, '').toLowerCase();
+            }
+            if (target) return basePath + target + query + hash;
+        }
+        // Preserve the existing treatment of restored tutorial assets, whose
+        // ../ paths were authored relative to the documentation root.
+        if (value.startsWith('../')) {
+            const url = new URL(value, `https://docs.invalid${basePath}`);
+            return url.pathname + url.search + url.hash;
+        }
+        return value;
+    };
 }
 
 function escapeHtml(value) {
@@ -156,8 +210,10 @@ async function finish(destination, { basePath = '/doc/', legacyLinks = new Map()
         }
     }
     for (const [file, text] of contents) {
-        const transform = content => repairLinks(removeSourceLines(content, basePath), aliases, basePath);
-        const updated = file.endsWith('.md') ? outsideCodeFences(text, transform) : transform(text);
+        const markdown = file.endsWith('.md');
+        const resolve = markdown ? markdownLinkResolver(files, file, aliases, hashRoutes, basePath) : undefined;
+        const transform = content => removeSourceLines(repairLinks(content, aliases, basePath, resolve), basePath);
+        const updated = markdown ? outsideCodeFences(text, transform) : transform(text);
         if (updated !== text) await fs.writeFile(path.join(destination, file), updated);
     }
     for (const [file, route] of aliases) {

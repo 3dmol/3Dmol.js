@@ -88,7 +88,7 @@ test('repairs restored HTML assets and known legacy links on nested pages', asyn
     expect(html).toContain('href="https://example.com/GLViewer.html"');
     expect(html).toContain('href="/doc/glviewer/"');
     expect(html).toContain('src="//example.com/image.png"');
-    expect(await read('tutorials/code/index.md')).toContain('[Viewer](/doc/GLViewer.html#addModel)');
+    expect(await read('tutorials/code/index.md')).toContain('[Viewer](/doc/glviewer/index.md#addmodel)');
 });
 
 test('preserves fenced Markdown code while repairing links and source components outside fences', async () => {
@@ -109,7 +109,7 @@ test('preserves fenced Markdown code while repairing links and source components
     await finish(destination, { legacyLinks });
     const markdown = await read('glviewer/index.md');
     expect(markdown).toContain(fences);
-    expect(markdown).toContain('[Tutorial](/doc/tutorial-code.html)');
+    expect(markdown).toContain('[Tutorial](/doc/tutorials/code/index.md)');
     expect(markdown).toContain('href="/source/viewer-ts/" label="viewer.ts"');
     expect(markdown).toContain('sourceHref="/source/viewer-ts/" sourceLabel="viewer.ts"');
     expect(markdown).toContain('href="/tests/example.html"');
@@ -181,4 +181,71 @@ test('redirects globals that moved to standalone pages without replacing the glo
         vm.runInNewContext(script, { location: { hash, search: '?example=1', replace } });
         expect(replace).toHaveBeenCalledWith(target);
     }
+});
+
+
+test('links Markdown to emitted companion files under a custom base path', async () => {
+    await write('source/glviewer-ts/index.html', '<pre>source</pre>');
+    await write('tutorials/code/index.md', '---\nkind: guide\n---\n# Code\n');
+    await write('tutorials/code/index.html', '<h1>Code</h1>');
+    const original = await read('glviewer/index.md');
+    await write('glviewer/index.md', original + [
+        '[Root route](/global#createviewer)',
+        '[Prefixed route](/reference/api/global/?mode=plain#createviewer)',
+        '[Sibling route](../global#createviewer)',
+        '[Sibling file](../global/index.html#createviewer)',
+        '[Current file](./index.md#render)',
+        '[Legacy](GLViewer.html?mode=plain#addModel)',
+        '[Absolute legacy](/reference/api/GLViewer.html#addModel)',
+        '[Current anchor](#render)',
+        '<SourceLink href="/source/glviewer-ts/#L42" label="GLViewer.ts:42" />',
+        '<MemberMeta sourceHref="../source/glviewer-ts/#L42" sourceLabel="GLViewer.ts:42" />',
+        '<a href="/source/glviewer-ts/index.html#L42">GLViewer.ts:42</a>',
+        '[External](https://example.com/global#createviewer)',
+        '[Protocol relative](//example.com/glviewer)',
+        '[Email](mailto:author@example.com)',
+        '[Unknown](/unrelated-page#keepCase)',
+        '<a href="https://example.com/source/glviewer-ts/#L42">external.ts:42</a>'
+    ].join('\n'));
+    await write('tutorials/code/index.md', (await read('tutorials/code/index.md'))
+        + '[Nested relative](../../glviewer/#render)\n');
+    await finish(destination, { legacyLinks, basePath: '/reference/api/' });
+    const markdown = await read('glviewer/index.md');
+    for (const expected of [
+        '[Root route](/reference/api/global/index.md#createviewer)',
+        '[Prefixed route](/reference/api/global/index.md?mode=plain#createviewer)',
+        '[Sibling route](/reference/api/global/index.md#createviewer)',
+        '[Sibling file](/reference/api/global/index.md#createviewer)',
+        '[Current file](/reference/api/glviewer/index.md#render)',
+        '[Legacy](/reference/api/glviewer/index.md?mode=plain#addmodel)',
+        '[Absolute legacy](/reference/api/glviewer/index.md#addmodel)',
+        '[Current anchor](#render)',
+        'href="/reference/api/source/glviewer-ts/index.html" label="GLViewer.ts"',
+        'sourceHref="/reference/api/source/glviewer-ts/index.html" sourceLabel="GLViewer.ts"',
+        'href="/reference/api/source/glviewer-ts/index.html">GLViewer.ts</a>',
+        '[External](https://example.com/global#createviewer)',
+        '[Protocol relative](//example.com/glviewer)',
+        '[Email](mailto:author@example.com)',
+        '[Unknown](/unrelated-page#keepCase)',
+        'href="https://example.com/source/glviewer-ts/#L42">external.ts:42</a>'
+    ]) expect(markdown).toContain(expected);
+    expect(await read('tutorials/code/index.md')).toContain(
+        '[Nested relative](/reference/api/glviewer/index.md#render)');
+    // Every rewritten local file exists, and repeating postprocessing is stable.
+    for (const match of markdown.matchAll(/\/reference\/api\/([^#?"\s)]+\.(?:md|html))/g)) {
+        await expect(fs.access(path.join(destination, match[1]))).resolves.toBeUndefined();
+    }
+    await finish(destination, { legacyLinks, basePath: '/reference/api/' });
+    expect(await read('glviewer/index.md')).toBe(markdown);
+});
+
+test('resolves legacy Markdown links to symbols with their own emitted pages', async () => {
+    await write('colorspec/index.md', '---\nkind: typedef\nlongname: ColorSpec\n---\n');
+    await write('colorspec/index.html', '<h1>ColorSpec</h1>');
+    await write('glviewer/index.md', (await read('glviewer/index.md'))
+        + '[Color](global.html?mode=plain#ColorSpec)\n');
+    await finish(destination, { legacyLinks: new Map([
+        ...legacyLinks, ['ColorSpec', 'global.html#ColorSpec']
+    ]) });
+    expect(await read('glviewer/index.md')).toContain('[Color](/doc/colorspec/index.md?mode=plain)');
 });

@@ -1,8 +1,11 @@
 import { CC, Color, ColorSpec } from "./colors";
 
+/** Interface for numeric color gradients, including user-defined gradients. */
 export abstract class GradientType {
   gradient?: string;
+  /** Map a numeric value to a packed RGB integer. An explicit range overrides the stored range. */
   abstract valueToHex(value: number, range?: number[]): number;
+  /** Return the configured [minimum, maximum], or null when the caller should supply a range. */
   abstract range(): number[] | null;
 }
 
@@ -29,12 +32,11 @@ export function normalizeValue(
 * @see builtinGradients
 */
 export type GradientSpec = {
-  /** Kind of gradient. E.g. RWB, ROYGB, sinebow.  Can also specify linear[_color]* as a
-   * shorthand for CustomLinear and passing a colors array.   */
+  /** Name from builtinGradients (case-sensitive). Use rwb, roygb, sinebow, or linear; RWB and ROYGB are also accepted. The linear_color1_color2 form is shorthand for a CustomLinear color list. */
   gradient?: string;
-  /** Lower range of gradient */
+  /** Range start (default -1 when resolved by getGradient). Reversing min and max reverses the colors. */
   min?: number;
-  /** Upper range of gradient */
+  /** Range end (default 1 when resolved by getGradient). */
   max?: number;
   /**  {AtomSpec} property to use for gradient calculation.  E.g., 'b' for temperature factors of a PDB. */
   prop?: string;

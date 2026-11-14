@@ -5,38 +5,45 @@
 #when you click on the images they will create a webgl instance
 #the user should be able to select exactly what tests they wish to run (this can get pretty sophisticated)
 #at some point there will be image comparison
-import os, re, glob, sys
+import os, re, glob, sys, json, subprocess
 from posixpath import abspath
+from pathlib import Path
 #from IPython.core.magics import script
 
 def script_string(typedef,text):
     string="function "+typedef+"{"+text+"}\n"
     return string
 
+def extract_files(files):
+    """Parse all files in one Node process using the installed TypeScript parser."""
+    helper = Path(__file__).with_name("extract_examples.cjs")
+    result = subprocess.run(["node", str(helper)], input=json.dumps(files),
+                            text=True, capture_output=True)
+    if result.returncode:
+        raise ValueError("Unable to extract render examples:\n" + result.stderr)
+    return json.loads(result.stdout)
+
+
 class Example():
-    def __init__(self,name,text):
+    def __init__(self, name, text, prepared=None):
         self.name=name.replace(".","_")
         self.name=self.name.replace("/","_")
         self.name=self.name.replace("_3Dmol_","")
         self.name=self.name.replace("___","")
         self.name=self.name.replace("_tests_","")
         if self.name.startswith('3'): self.name = '_'+self.name
-        self.text=self.parse(text)
-    
-    def parse(self,text):
-        self.script = re.sub(re.compile(r'/\*.*?\*/',re.DOTALL),'',text) #example without comments
-        self.divs = re.findall(re.compile(r'/\*\s*@div\s*(.*?)\*/',re.DOTALL),text) #all div code
-        self.datas = re.findall(re.compile(r'/\*\s*@data\s*(.*?)\*/',re.DOTALL),text) #all data
-        self.prescripts = re.findall(re.compile(r'/\*\s*@script\s*(.*?)\*/',re.DOTALL),text) #script to run before div
+        if prepared is None:
+            prepared = extract_files([{"filename": name + ".js", "kind": "builtin", "text": text}])[0]["examples"][0]
+        self.text=self.parse(prepared)
 
-        #make sure callback is called
-        self.script = self.script.replace('viewer.render()','viewer.render(callback)')
-        if not re.search(r'viewer.render(.*callback)', self.script) and len(self.divs) == 0:
-            self.script += "\nviewer.render(callback);\n";
-        
-        if self.script.count("viewer.render(callback)") > 1:
-            sys.stderr.write("More than one 'viewer.render' call in %s.  FIX THIS NOW!\n"%self.name)
-        #construct all javascript test    
+    def parse(self, prepared):
+        self.script = prepared["script"]
+        self.divs = prepared["divs"]
+        self.datas = prepared["datas"]
+        self.prescripts = prepared["prescripts"]
+
+        #construct all javascript test
+        script = self.script
         text = ''
 
         if self.datas:
@@ -50,112 +57,78 @@ class Example():
             text += "var original_callback=callback;\ncallback=function(viewer){try{original_callback(viewer);}finally{dataWrappers.forEach(function(wrapper){$(wrapper).remove();});}};\n"
         if self.divs:
             # remove the div when done with it
-            text += "var finished_with_div_callback = function() { callback(viewer); $(objectHTML).remove(); }\n"
+            text += "var original_div_callback = callback;\ncallback = function(viewer) { try { original_div_callback(viewer); } finally { $(objectHTML).remove(); } };\n"
             prescript = ''
             for s in self.prescripts:
-                prescript += s.replace('viewer.render()','viewer.render(callback)')
+                prescript += s
             
             if 'viewer.render(callback)' in prescript: # presumably callback in prescript
-                prescript = prescript.replace('viewer.render(callback)','viewer.render(finished_with_div_callback)')
                 text += prescript
                 text += "$3Dmol.autoload(viewer);\n"                
             elif 'viewer.render(callback)' in self.script: # test code calls callback
-                self.script.replace('viewer.render(callback)','viewer.render(finished_with_div_callback)')
                 text += "$3Dmol.autoload(viewer);\n"
             else:
-                text += "$3Dmol.autoload(viewer,finished_with_div_callback);\n"
+                text += "$3Dmol.autoload(viewer,callback);\n"
         
         #code should happen after data is initialized
-        text += self.script
+        text += script
         
         return text
         
 class File():
-    def __init__(self,filename,filetype,contents):
-        self.filename=filename
-        self.filetype=filetype
-        if(self.filetype=="generated"):
-            self.examples=self.getExamples(contents)
-        else:
-            self.examples = [Example(os.path.basename(filename)[0:-3],contents)]
+    def __init__(self, filename, filetype, contents, extracted=None):
+        self.filename = filename
+        self.filetype = filetype
+        if extracted is None:
+            extracted = extract_files([{"filename": filename, "kind": filetype, "text": contents}])[0]["examples"]
+        self.examples = self.getExamples(contents, extracted)
 
-    def getExamples(self, text):
-        nearests=[]
-        filename=self.filename
-        filename=re.sub(r'.*/src/',"",filename)
-
-        #extract  example block from before function/methods
-        fex =  re.findall(r'@example(((?!\*/).)*?)\*/\s+(export\s+function|public|\s*)\s+(\S+)\s*\(',text,re.DOTALL)
-         #extract just code and name
-        fex = [(m[0],m[-1]) for m in fex]
-
-        #and from typedefs
-        tex = re.findall(r'@typedef\s+(\S+)\s+((?!\*/).)*@example(.*?)\*/',text,re.DOTALL)
-        tex = [(m[-1],m[0]) for m in tex]
-        
-        #classes
-        cex =  re.findall(r'@example(((?!\*/).)*?)\*/\s+export (class|const|enum|interface)\s+(\S+)',text,re.DOTALL)
-        cex = [(m[0],m[-1]) for m in cex]
-
-
-        def makename(name):
-            #massage file/func name
-            flname=filename+"_"+name
-            
-            flname=flname.replace(".","_")
-            flname=flname.replace("/","_")
-            flname=flname.replace("3Dmol_","")
-            flname=flname.replace(" ","")
-            flname=flname.replace("3Dmol","")
-            flname=flname.replace("3","_3")
-            flname=flname.replace('$','') #special character in jquery
-
-            return flname
-
+    def getExamples(self, text, extracted=None):
+        if extracted is None:
+            extracted = extract_files([{"filename": self.filename, "kind": self.filetype, "text": text}])[0]["examples"]
+        filename = re.sub(r'.*/src/', "", self.filename)
         examples = []
-        for code,name in fex+tex+cex:
-            code = code.replace('*','')
-            name = makename(name)
-            #look for @directives and stop the code there
-            m = re.search(r'(^.*?)@(\S+).*',code,re.DOTALL)
-            if m:
-                code = m.group(1)
-                if m.group(2) == 'example':
-                    print(f"Need to handle multiple examples in {name}")
-            examples.append(Example(name,code))
-
-
+        for entry in extracted:
+            if self.filetype == "generated":
+                # Preserve the historical first-example names and existing image
+                # baselines. Additional examples use their one-based ordinal.
+                name = filename + "_" + entry["name"]
+                name = name.replace(".", "_").replace("/", "_")
+                name = name.replace("3Dmol_", "").replace(" ", "")
+                name = name.replace("3Dmol", "").replace("3", "_3").replace('$', '')
+                if entry["ordinal"] > 1:
+                    name += "_" + str(entry["ordinal"])
+            else:
+                name = os.path.basename(self.filename)[:-3]
+            examples.append(Example(name, entry["code"], entry))
         return examples
 
 
 class TestSystem():
-    def __init__(self,d):
-        self.files=self.declareFiles(d)
+    def __init__(self, d):
+        self.files = self.declareFiles(d)
 
-    def declareFiles(self,d):
-        manual_tests_path=abspath(d+"/tests/auto/tests/")
-        examples_path=abspath(d+"/src")
-        files=[]
-        # typescript files
-        for filename in glob.glob(examples_path+'/*.ts'):
-            with open(filename, 'r', encoding='utf-8') as file:
-                contents = file.read()
-                files.append(File(filename,"generated",contents))
-
-        #these are the files with examples in them
-        for filename in glob.glob(examples_path+'/*.js'):
-            with open(filename,'r', encoding="utf-8") as text:
-                contents = text.read()
-                files.append(File(filename,"generated",contents))
-        #these are the built in tests
-        for filename in glob.glob(manual_tests_path+'/*.js'):
-            with open(filename,"r", encoding="utf-8") as text:
-                contents = text.read()
-                if '/* skip */' not in contents:
-                    files.append(File(filename,"builtin",contents))
-        
-        #print("Found %d files"%len(files))
-        
+    def declareFiles(self, d):
+        root = Path(d).resolve()
+        sources = sorted((root / "src").rglob("*.ts")) + sorted((root / "src").rglob("*.js"))
+        manual = sorted((root / "tests/auto/tests").glob("*.js"))
+        inputs = []
+        for filename in sources + manual:
+            text = filename.read_text(encoding="utf-8")
+            kind = "builtin" if filename in manual else "generated"
+            if kind == "builtin" and '/* skip */' in text:
+                continue
+            inputs.append({"filename": str(filename), "kind": kind, "text": text})
+        extracted = extract_files(inputs)
+        files = [File(source["filename"], source["kind"], source["text"], result["examples"])
+                 for source, result in zip(inputs, extracted)]
+        owners = {}
+        for file in files:
+            for example in file.examples:
+                if example.name in owners:
+                    raise ValueError("Duplicate render example name %r in %s and %s" %
+                                     (example.name, owners[example.name], file.filename))
+                owners[example.name] = file.filename
         return files
 
 if __name__ == '__main__':
@@ -177,7 +150,18 @@ if __name__ == '__main__':
     
         for file in test.files:
             for example in file.examples:
-                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){\nconsole.log(err);\nvar li=document.createElement('li');li.innerHTML=name+' '+err;document.getElementById('summary_list').appendChild(li);callback(viewer);}},\n")
+                f.write(example.name+": function(viewer,callback,name='"+example.name+"'){try{\n"+example.text+"\n}catch(err){\nconsole.log(err);\nvar summary=document.getElementById('summary_list');if(summary){var li=document.createElement('li');li.textContent=name+' '+err;summary.appendChild(li);}throw err;}},\n")
         f.write("};")
 
-
+    # The web server needs only Python and this build artifact, not Node or
+    # TypeScript on its CGI PATH. Keep one extractor for every test harness.
+    manifest = {
+        "version": 1,
+        "examples": {
+            example.name: {field: getattr(example, field)
+                           for field in ("script", "divs", "datas", "prescripts")}
+            for file in test.files for example in file.examples
+        }
+    }
+    Path(path).with_name("examples.json").write_text(
+        json.dumps(manifest, ensure_ascii=False) + "\n", encoding="utf-8")

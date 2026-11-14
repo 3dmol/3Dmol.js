@@ -17,7 +17,10 @@ import { GLViewer } from "GLViewer";
 
 
 /**
- * A GLShape is a collection of user specified shapes.
+ * A GLShape holds custom geometry such as spheres, arrows, meshes, and isosurfaces.
+ * Create it through GLViewer.addShape or a viewer shape helper so it belongs to the
+ * scene. Call viewer.render() after adding geometry or updating styles. Use
+ * GLViewer.removeShape to remove it and release rendering resources.
  * 
  * @class
  * @param {ShapeSpec} stylespec - shape style specification
@@ -646,13 +649,6 @@ export class GLShape {
     private components: any;
     private shapeObj: any;
     private renderedShapeObj: any;
-    /**
-     * Custom renderable shape
-     * 
-     * @constructor 
-     * 
-     * @param {ShapeSpec} stylespec
-     */
     constructor(stylespec: ShapeSpec) {
 
         this.stylespec = stylespec || {};
@@ -677,7 +673,9 @@ export class GLShape {
         this.linegeo = new Geometry(true);
     };
 
-    /** Update shape with new style specification
+    /** Merge supplied style properties into this shape's existing style.
+     * This changes appearance, not geometry dimensions or coordinates. Call
+     * viewer.render() to display the changes.
      * @param {ShapeSpec} newspec
        @example 
         let sphere = viewer.addSphere({center:{x:0,y:0,z:0},radius:10.0,color:'red'});
@@ -1235,6 +1233,71 @@ export class GLShape {
               viewer.zoomTo();
               viewer.render();
             });
+     * @example <caption>Positive and negative contours of an inline scalar grid</caption>
+     * // An OpenDX grid with z varying fastest and two lobes of opposite sign.
+     * var values = [];
+     * for (var ix = 0; ix < 13; ix++) {
+     *   for (var iy = 0; iy < 13; iy++) {
+     *     for (var iz = 0; iz < 13; iz++) {
+     *       var x = -3 + ix * 0.5, y = -3 + iy * 0.5, z = -3 + iz * 0.5;
+     *       values.push(Math.exp(-((x + 1.4) ** 2 + y * y + z * z))
+     *         - Math.exp(-((x - 1.4) ** 2 + y * y + z * z)));
+     *     }
+     *   }
+     * }
+     * var dx = [
+     *   "object 1 class gridpositions counts 13 13 13", "origin -3 -3 -3",
+     *   "delta 0.5 0 0", "delta 0 0.5 0", "delta 0 0 0.5",
+     *   "object 2 class gridconnections counts 13 13 13",
+     *   "object 3 class array type double rank 0 items 2197 data follows",
+     *   values.join(" ")
+     * ].join("\n");
+     * var volume = new $3Dmol.VolumeData(dx, "dx");
+     * viewer.addIsosurface(volume, {isoval: 0.25, color: "blue", smoothness: 1});
+     * viewer.addIsosurface(volume, {isoval: -0.25, color: "red", smoothness: 1});
+     * viewer.addLabel("+0.25", {position: {x: -1.4, y: -1.6, z: 0},
+     *   alignment: "topCenter", fontSize: 16, backgroundColor: "blue"});
+     * viewer.addLabel("-0.25", {position: {x: 1.4, y: -1.6, z: 0},
+     *   alignment: "topCenter", fontSize: 16, backgroundColor: "red"});
+     * viewer.zoomTo();
+     * viewer.zoom(0.8);
+     * viewer.render();
+     * @example <caption>Omitted and empty spatial selections have different meanings</caption>
+     * // Each panel has the same radial density. Only the unrestricted map is drawn.
+     * function radialVolume(centerX) {
+     *   var values = [];
+     *   for (var ix = 0; ix < 7; ix++) {
+     *     for (var iy = 0; iy < 7; iy++) {
+     *       for (var iz = 0; iz < 7; iz++) {
+     *         var x = -1.5 + ix * 0.5, y = -1.5 + iy * 0.5, z = -1.5 + iz * 0.5;
+     *         values.push(Math.exp(-(x * x + y * y + z * z)));
+     *       }
+     *     }
+     *   }
+     *   return new $3Dmol.VolumeData([
+     *     "object 1 class gridpositions counts 7 7 7",
+     *     "origin " + (centerX - 1.5) + " -1.5 -1.5",
+     *     "delta 0.5 0 0", "delta 0 0.5 0", "delta 0 0 0.5",
+     *     "object 2 class gridconnections counts 7 7 7",
+     *     "object 3 class array type double rank 0 items 343 data follows",
+     *     values.join(" ")
+     *   ].join("\n"), "dx");
+     * }
+     * viewer.addModel().addAtoms([-4, 0, 4].map(function(x) {
+     *   return {elem: "C", x: x, y: 0, z: 0};
+     * }));
+     * viewer.setStyle({}, {sphere: {radius: 0.12, color: "gray"}});
+     * viewer.addIsosurface(radialVolume(-4), {isoval: 0.25, color: "seagreen"});
+     * viewer.addIsosurface(radialVolume(0), {isoval: 0.25, color: "red", coords: []});
+     * viewer.addIsosurface(radialVolume(4), {isoval: 0.25, color: "blue",
+     *   selection: {elem: "N"}}); // No nitrogen atoms: the selection is empty.
+     * ["unrestricted", "coords: []", "no N atoms"].forEach(function(text, i) {
+     *   viewer.addLabel(text, {position: {x: -4 + i * 4, y: -1.7, z: 0},
+     *     alignment: "topCenter", fontSize: 12, backgroundColor: "black"});
+     * });
+     * viewer.zoomTo();
+     * viewer.zoom(0.8);
+     * viewer.render();
      */
     addIsosurface(data, volSpec:IsoSurfaceSpec, callback?, viewer?: GLViewer) {//may want to cache the arrays generated when selectedRegion ==true
 
@@ -1586,7 +1649,7 @@ export interface ShapeSpec {
     /** Either a single color for the whole object or an array specifying the color at each vertex ({@link CustomShapeSpec}). */
     color?: ColorSpec | ColorSpec[];
     alpha?: number; //prefer opacity
-    /** transparency, between 0 (invisible) and 1 (opaque) */
+    /** Opacity between 0 (invisible) and 1 (opaque), default 1. */
     opacity?: number;
     /** draw as wireframe, not surface */
     wireframe?: boolean;
@@ -1596,20 +1659,23 @@ export interface ShapeSpec {
     linewidth?: number;
     /** if true, user can click on object to trigger callback */
     clickable?: boolean;
-    /** function to call on click */
+    /** Click handler receiving (shape, viewer, event, container, intersections). Intersections are sorted nearest first. */
     callback?: Func;
     /** if true, user can hover on object to trigger callback */
     hoverable?: boolean;
-    /** hover callback */
+    /** Hover handler receiving (shape, viewer, event, container, intersections). */
     hover_callback?: Func;
-    /** unhover callback */
+    /** Unhover handler with the hover arguments; event and intersections can be undefined when hover is cleared. */
     unhover_callback?: Func;
     /** if true, user can right-click or long press to trigger callback */
     contextMenuEnabled?: boolean;
     /** if set, only display in this frame of an animation */
     frame?: number;
+    /** Visible faces: FrontSide, BackSide, or DoubleSide (default). */
     side?: number;
+    /** Volumetric data sampled at vertices for coloring, together with volscheme. */
     voldata?: VolumeData;
+    /** Gradient for mapping sampled volume values to vertex colors. */
     volscheme?: GradientType
 };
 
@@ -1619,17 +1685,17 @@ export interface ShapeSpec {
  * @extends ShapeSpec
  */
 export interface IsoSurfaceSpec extends ShapeSpec {
-    /** specifies the isovalue to draw surface at */
+    /** Isovalue (default 0). Positive values enclose higher densities; negative values enclose lower densities. */
     isoval?: number;
     /** if true uses voxel style rendering */
     voxel?: boolean;
     /** amount to smooth surface (default 1) */
     smoothness?: number;
-    /** coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
+    /** Coordinates in angstroms around which to retain surface vertices. Omit for the entire surface; an empty array produces no geometry. Takes precedence over selection. */
     coords?: XYZ[];
-    /** selection around which to include data (alternative to coords) */
+    /** Atom selection resolved by the viewer when coords is omitted. An empty selection produces no geometry. */
     selection?: AtomSelectionSpec;
-    /** distance around coords or selection to include data [default = 2.0] */
+    /** Distance in angstroms around coords or selection within which to retain surface vertices (default 2). */
     seldist?: number;
     /** volumetric data for vertex coloring, can be VolumeData object or raw data if volformat is specified */
     voldata?: VolumeData;
@@ -1638,8 +1704,11 @@ export interface IsoSurfaceSpec extends ShapeSpec {
     /** format of voldata if not a $3Dmol.VolumeData object */
     volformat?: string;
 
+    /** @deprecated Use coords. */
     selectedRegion?: XYZ[]; //deprecated
+    /** @deprecated Use seldist. */
     selectedOffset?: number; //deprecated
+    /** @deprecated Use seldist. */
     radius?: number; //also deprecated
 };
 
@@ -1757,7 +1826,7 @@ export interface BoxSpec extends ShapeSpec {
 export interface CustomShapeSpec extends ShapeSpec {
     /** List of vertex positions */
     vertexArr?: XYZ[];
-    /** List of normal vectors for each vertex */
+    /** Optional normal vector for each vertex; normals are computed from faces when omitted. */
     normalArr?: XYZ[];
     /** List of triangles to build the custom shape. Each triangle is defined by the indices of 3 vertices in vertexArr, so the array length should be 3 times the number of faces. */
     faceArr?: number[];

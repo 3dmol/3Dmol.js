@@ -16,7 +16,9 @@ export interface PickingIntersection {
 }
 
 /**
- * Atom representation. Depending on the input file format, not all fields may be defined.
+ * Atom representation. Coordinates are in angstroms. Depending on the input file
+ * format, not all fields may be defined. Use index for positions in a model atom
+ * array; serial is an input identifier and need not be contiguous or unique.
  */
 export interface AtomSpec {
   /** Parent residue name */
@@ -49,7 +51,7 @@ export interface AtomSpec {
   rescode?: string;
   /** Atom's serial id number */
   serial?: number;
-  /** Index of atom in molecule */
+  /** Zero-based index in the model atom array; may change when atoms are removed. */
   index?: number;
   /** Atom name; may be more specific than 'elem' (e.g 'CA' for alpha carbon) */
   atom?: string;
@@ -63,7 +65,7 @@ export interface AtomSpec {
   singleBonds?: boolean;
   /** Array of this atom's bond orders, corresponding to the atom indices in 'bonds' */
   bondOrder?: number[];
-  /** Optional mapping of additional properties */
+  /** Additional data such as charge or custom numeric properties. Property coloring checks this mapping before top-level atom fields. */
   properties?: Record<string, any>;
   /** Atom b factor data */
   b?: number;
@@ -121,6 +123,10 @@ type AtomSelectionFields = {
  * All fields must match for the selection to hold. Ordinary string, number, and
  * boolean atom fields also accept lists; only one value of each list must match.
  * Selection controls such as invert and byres keep their individual types.
+ * An empty object matches all atoms. Missing atom fields do not match. Distances
+ * are in angstroms, and spatial selections are evaluated separately within each
+ * model. After matching fields, selection expansion is applied in the order
+ * expand, within, then byres.
  * @extends AtomSpec
  * @example
  * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
@@ -131,12 +137,55 @@ type AtomSelectionFields = {
  *  viewer.setStyle({resi:["91-95","42-50"]},{cartoon:{color:"green",thickness:1.0}});
  *  viewer.render();
  * });
+ * @example <caption>Combine boolean clauses while distinguishing atom indices from residue numbers.</caption>
+ * var model = viewer.addModel();
+ * model.addAtoms([
+ *   {elem: "C", x: -3, y: 0, z: 0, resi: 10},
+ *   {elem: "N", x: -1, y: 0, z: 0, resi: 10},
+ *   {elem: "O", x: 1, y: 0, z: 0, resi: 20},
+ *   {elem: "S", x: 3, y: 0, z: 0, resi: 30}
+ * ]);
+ * viewer.setStyle({}, {sphere: {radius: 0.5, color: "lightgray"}});
+ * viewer.setStyle({model: model.getID(), and: [
+ *   {or: [{elem: "N"}, {elem: "O"}]},
+ *   {not: {resi: 20}}
+ * ]}, {sphere: {radius: 0.8, color: "orange"}});
+ * // Only nitrogen matches: index 1, residue 10, in this model.
+ * viewer.addLabel("Selected: index 1 / resi 10", {
+ *   useScreen: true, position: {x: 12, y: 20, z: 0},
+ *   fontSize: 14, fontColor: "black", showBackground: false
+ * });
+ * viewer.zoomTo();
+ * viewer.render();
+ * @example <caption>Spatial selections stay within each model, even when models overlap.</caption>
+ * var first = viewer.addModel();
+ * first.addAtoms([
+ *   {elem: "C", x: -2, y: 0, z: 0},
+ *   {elem: "O", x: -0.4, y: 0, z: 0},
+ *   {elem: "N", x: 2, y: 0, z: 0}
+ * ]);
+ * var second = viewer.addModel();
+ * second.addAtoms([{elem: "N", x: -2, y: 1.5, z: 0}]);
+ * viewer.setStyle({}, {sphere: {radius: 0.4, color: "lightgray"}});
+ * viewer.setStyle({model: second}, {sphere: {radius: 0.4, color: "green"}});
+ * viewer.setStyle({elem: "C"}, {sphere: {radius: 0.5, color: "black"}});
+ * // Oxygen is near carbon in the first model; the green atom belongs to another model.
+ * viewer.setStyle({within: {distance: 2, sel: {elem: "C"}}},
+ *   {sphere: {radius: 0.65, color: "orange"}});
+ * // expand includes the carbon seed as well as the nearby oxygen, but not the green atom.
+ * viewer.addStyle({elem: "C", expand: 2}, {cross: {radius: 0.9, color: "royalblue"}});
+ * viewer.addLabel("within: orange; expand: blue crosses", {
+ *   useScreen: true, position: {x: 12, y: 20, z: 0},
+ *   fontSize: 12, fontColor: "black", showBackground: false
+ * });
+ * viewer.zoomTo();
+ * viewer.render();
  */
 export interface AtomSelectionSpec
   extends Omit<AtomSelectionFields, "bonds" | "model" | "index" | "resi" | "invert"> {
-  /** a single model or list of models from which atoms should be selected.  Can also specify by numerical creation order.  Reverse indexing is allowed (-1 specifies last added model). */
+  /** A model object or model ID, or an array of either. IDs are returned by GLModel.getID(). A single negative number counts back from the next model ID (-1 is the most recently assigned ID); removed models leave gaps. */
   model?: GLModel | number | GLModel[] | number[];
-  /** frame index of individual frame to style; will apply to all frames if not set */
+  /** For setStyle, select a loaded frame to style; otherwise styles apply to all loaded frames. Does not change the frame queried by selectedAtoms; use setFrame for that. */
   frame?: number;
   /** index of the atom or atoms to select */
   index?: number | number[];
@@ -148,9 +197,9 @@ export interface AtomSelectionSpec
   predicate?: (atom: AtomSpec) => boolean;
   /** if set, inverts the meaning of the selection */
   invert?: boolean;
-  /** if set, expands the selection to include all atoms of any residue that has any atom selected */
+  /** If present, expand through bonds to atoms with the same chain and residue number as selected atoms. Omit this field to disable residue expansion. */
   byres?: boolean;
-  /** expands the selection to include all atoms within a given distance from the selection */
+  /** Expand the selection by a distance in angstroms within the same model. */
   expand?: number | string;
   /** intersects the selection with the set of atoms within a given distance from another selection */
   within?: WithinSelectionSpec;
@@ -166,7 +215,10 @@ export interface AtomSelectionSpec
  * Within selection object. Used to find the subset of an atom selection that is within
  * some distance from another atom selection. When added as a field of an {@link AtomSelectionSpec},
  * intersects the set of atoms in that selection with the set of atoms within a given
- * distance from the given {@link AtomSelectionSpec}.
+ * distance from the given {@link AtomSelectionSpec}. The distance comparison is
+ * strictly greater than zero and strictly less than distance, so coincident atoms
+ * and atoms exactly on the boundary are excluded. Both selections are evaluated
+ * within each model; this does not measure distances between separate models.
  * @example
  * $3Dmol.download("pdb:2EJ0",viewer,{},function(){
  *  viewer.setStyle({chain: 'A', within:{distance: 10, sel:{chain: 'B'}}}, {sphere:{}});

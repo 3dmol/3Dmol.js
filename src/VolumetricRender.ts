@@ -11,10 +11,11 @@ import { GLViewer } from "GLViewer";
 
 
 /**
- * VolumetricRenderer style specification
+ * Style for GLViewer.addVolumetricRender. Unlike an isosurface, volume rendering
+ * accumulates color and opacity along viewing rays through the grid.
 */
 export interface VolumetricRendererSpec {
-    /** list of objects containing @color, @opacity and @value properties to specify color per voxel data value.
+    /** Transfer-function points with color, opacity, and value fields. Colors and opacity are interpolated between points sorted by value.
      * Requires at least two points with finite numeric values (numbers or numeric strings) spanning a nonzero range that can be sampled without numeric overflow.
      * Opacity ranges from 0 (transparent) to 1 (opaque); numeric strings are also accepted.
      * The input array and point objects are not modified.
@@ -22,11 +23,11 @@ export interface VolumetricRendererSpec {
     transferfn?: { color: ColorSpec; opacity: number | string; value: number | string }[];
     /** number of times to sample each voxel approximately (default 5) */
     subsamples?: number;
-    /**  coordinates around which to include data; use viewer.selectedAtoms() to convert an AtomSelectionSpec to coordinates */
+    /** Coordinates in angstroms around which to include voxel centers. Omit to use the entire grid; an empty array masks the entire volume. Takes precedence over selection. */
     coords?: XYZ[];
     /** Selection around which to include data, resolved using the supplied viewer when coords are omitted. */
     selection?: AtomSelectionSpec;
-    /** distance around coords or selection to include data [default = 2.0] */
+    /** Radius in angstroms around coords or selection (default 2). Must be finite and nonnegative. Masking leaves the supplied VolumeData unchanged. */
     seldist?: number; 
 };
 

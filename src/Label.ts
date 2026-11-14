@@ -51,13 +51,36 @@ function getColor(style: any, stylealpha?: any, init?: any) {
   return ret;
 }
 
-/** Label style specification */
+/** Text label appearance and placement. Pixel sizes are logical display pixels;
+ * resolution increases texture detail without changing the displayed size.
+ * Create labels with GLViewer.addLabel and update them with GLViewer.setLabelStyle.
+ * @example <caption>Screen and world anchors with different texture resolutions</caption>
+ * viewer.addModel().addAtoms([
+ *   {elem: "C", x: -2, y: 0, z: 0}, {elem: "O", x: 2, y: 0, z: 0}
+ * ]);
+ * viewer.setStyle({}, {sphere: {radius: 0.7}});
+ * // The two world labels follow the model when the view rotates.
+ * [1, 3].forEach(function(resolution, i) {
+ *   viewer.addLabel("world: " + resolution + "x", {
+ *     position: {x: -2 + i * 4, y: -1.1, z: 0}, alignment: "topCenter",
+ *     fontSize: 16, resolution: resolution, backgroundColor: "navy"
+ *   });
+ *   // Higher texture resolution sharpens text without enlarging the label.
+ *   viewer.addLabel("screen: " + resolution + "x", {
+ *     position: {x: 16, y: 16 + i * 34, z: 0}, useScreen: true,
+ *     fontSize: 16, resolution: resolution, backgroundColor: "darkgreen"
+ *   });
+ * });
+ * viewer.zoomTo();
+ * viewer.rotate(25, "z");
+ * viewer.render();
+ */
 export interface LabelSpec {
 /** font name, default sans-serif */
   font?: string;
   /** font size in pixels, default 18 */
   fontSize?: number;
-  /** texture pixels per label pixel, default 2; use 1 for the original resolution */
+  /** Texture pixels per label pixel (default 2). Must be a finite number at least 1; invalid values use 2. Larger values increase texture memory. */
   resolution?: number;
   /** render text in bold, default false */
   bold?: boolean;
@@ -71,7 +94,7 @@ export interface LabelSpec {
   borderThickness?: number;
   /** color of border, default backgroundColor */
   borderColor?: ColorSpec;
-  /** opacity of border */
+  /** Border opacity; defaults to the background opacity. */
   borderOpacity?: number;
   /** color of background, default black */
   backgroundColor?: ColorSpec;
@@ -79,7 +102,7 @@ export interface LabelSpec {
   backgroundGradient?: GradientSpec | GradientType;
   /** opacity of background, default 1.0 */
   backgroundOpacity?: number;
-  /** coordinates for label */
+  /** Label anchor in world coordinates (angstroms), or screen pixels when useScreen is true. GLViewer.addLabel can also position a label at the center of a selection. */
   position?: XYZ;
   /** x,y pixel offset of label from position */
   screenOffset?: { x: number; y: number };
@@ -99,12 +122,13 @@ export interface LabelSpec {
    * "topCenter", "topRight", "centerLeft", "center", "centerRight",
    * "bottomLeft", "bottomCenter", "bottomRight", or an arbitrary x,y alignment vector */
   alignment?: string | { x: number; y: number };
-  /** if set, only display in this frame of an animation */
+  /** If set, display only when the viewer is on this zero-based animation frame. */
   frame?: number;
 }
 
 /**
- * Renderable labels
+ * A text label and its rendering resources. Normally created with GLViewer.addLabel.
+ * Remove it with GLViewer.removeLabel so the viewer also releases its resources.
  * @constructor $3Dmol.Label
  * @param {string} text - Label text
  * @param {LabelSpec} parameters Label style and font specifications
@@ -131,18 +155,20 @@ export class Label {
     this.frame = this.stylespec.frame;
   }
 
+  /** Return the current style object by reference. Use GLViewer.setLabelStyle to
+   * apply changes and rebuild the label texture. */
   getStyle() {
     return this.stylespec;
   }
 
-  /** Hide this label. */
+  /** Hide this label. Call viewer.render() to refresh the displayed scene. */
   public hide() {
     if(this.sprite) {
       this.sprite.visible = false;
     }
   }
 
-  /** Show a hidden label. */
+  /** Show a hidden label. Call viewer.render() to refresh the displayed scene. */
   public show() {
     if(this.sprite) {
       this.sprite.visible = true;

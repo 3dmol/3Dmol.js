@@ -1,6 +1,6 @@
 // A model is a collection of related atoms.  Bonds are only allowed between
-//atoms in the same model.  An atom is uniquely specified by its model id and
-//its serial number.
+//atoms in the same model. An atom in a frame is located by its model id and
+//atom-array index; input-file serial numbers need not be unique.
 //A glmodel knows how to apply the styles on each atom to create a gl object
 import { Geometry, Material, StickImposterMaterial } from "./WebGL";
 import { disposeObjectResources } from "./WebGL/disposeObjectResources";
@@ -23,7 +23,10 @@ import { LabelSpec } from "Label";
 import { assignBonds } from "./parsers/utils/assignBonds";
 
 /**
- * GLModel represents a group of related atoms
+ * GLModel represents a group of related atoms, their bonds, styles, and optional
+ * trajectory frames. Obtain models from GLViewer.addModel or GLViewer.getModel.
+ * Bonds connect atoms within one model. Style and atom changes take effect on the
+ * next viewer.render(); model mutators generally do not return the model for chaining.
  * @class
  */
 export class GLModel {
@@ -2031,8 +2034,9 @@ export class GLModel {
     }
 
     /**
-     * Return object representing internal state of
-     * the model appropriate for passing to setInternalState
+     * Return atom and frame references suitable for setInternalState. This is not a
+     * deep copy or a complete serialization of model metadata; editing the returned
+     * arrays also edits the model.
      *
     */
     public getInternalState() {
@@ -2054,7 +2058,9 @@ export class GLModel {
     };
 
     /**
-     * Returns crystallographic information if present.
+     * Return the crystallographic metadata object, or null when none is available.
+     * A fractional-to-Cartesian matrix is computed from cell parameters if missing.
+     * The returned object is a live reference, not a copy.
      *
      *
      */
@@ -2077,9 +2083,9 @@ export class GLModel {
     /**
      * Set crystallographic information using three angles and three lengths
      *
-     * @param {number} a - length of unit cell side
-     * @param {number} b - length of unit cell side
-     * @param {number} c - length of unit cell side
+     * @param {number} [a=1] - Unit cell side length in angstroms.
+     * @param {number} [b=1] - Unit cell side length in angstroms.
+     * @param {number} [c=1] - Unit cell side length in angstroms.
      * @param {number} alpha - unit cell angle in degrees (default 90)
      * @param {number} beta - unit cell angle in degrees (default 90)
      * @param {number} gamma - unit cell angle in degrees (default 90)
@@ -2124,7 +2130,7 @@ export class GLModel {
 
     /**
      * Returns list of rotational/translational matrices if there is BIOMT data
-     * Otherwise returns a list of just the ID matrix
+     * Otherwise returns a list containing the identity matrix
      *
      * @return {Array<Matrix4>}
      *
@@ -2289,7 +2295,8 @@ export class GLModel {
     };
 
     /**
-     * Append one frame to the model.
+     * Append one atom array by reference as a frame. This does not switch frames or
+     * infer bonds; provide initialized atoms and call setFrame to select it.
      *
      * @param {AtomSpec[]} atoms - atoms comprising the new frame
      */
@@ -2396,7 +2403,9 @@ export class GLModel {
         }
     };
 
-    /** add atoms to this model from molecular data string
+    /** Load molecular data into this model. The first load initializes frames and
+     * selects the first nonempty frame. Later loads append atoms to the current frame
+     * unless options.frames is true. Use options.multimodel to read multiple structures.
      *
      * @param {string|ArrayBuffer} data - atom structure file input data string, for gzipped input use ArrayBuffer
      * @param {string} format - input file string format (e.g 'pdb', 'sdf', 'sdf.gz', etc.)
@@ -2883,7 +2892,10 @@ export class GLModel {
     };
 
 
-    /** Add list of new atoms to model.  Adjusts bonds appropriately.
+    /** Add atoms to the current frame, remapping bonds among the supplied atoms.
+     * Missing input indices and serials are filled in on newatoms. Atom records are
+     * shallow-copied; existing nested properties and styles may remain shared. Bonds
+     * to atoms outside newatoms are discarded; no bonds are inferred automatically.
      *
      * @param {AtomSpec[]} newatoms
      * @example
@@ -2983,11 +2995,14 @@ export class GLModel {
     };
 
 
-    /** Set atom style of selected atoms
+    /** Set the style of selected atoms. With one argument, treat it as the style
+     * and select all atoms. By default this replaces all representations on matching
+     * atoms; add=true merges representation properties. Applies to every loaded
+     * frame unless sel.frame selects one. Call viewer.render() to display changes.
      *
-     * @param {AtomSelectionSpec} sel
-     * @param {AtomStyleSpec} style
-     * @param {boolean} add - if true, add to current style, don't replace
+     * @param {AtomSelectionSpec|AtomStyleSpec|string} sel - Selection, or style when used alone.
+     * @param {AtomStyleSpec|string} [style] - Style object or style specification string.
+     * @param {boolean} [add=false] - Merge into the current style instead of replacing it.
      @example
     $3Dmol.download("pdb:4UB9",viewer,{},function(){
               viewer.setBackgroundColor(0xffffffff);
@@ -3062,7 +3077,7 @@ export class GLModel {
      *
      * @param {AtomSelectionSpec} sel - atom selection to apply clickable settings to
      * @param {boolean} clickable - whether click-handling is enabled for the selection
-     * @param {function} callback - function called when an atom in the selection is clicked
+     * @param {function} callback - Handler with the arguments documented by AtomSpec.callback.
 
      */
     public setClickable(sel: AtomSelectionSpec, clickable: boolean, callback) {
@@ -3092,8 +3107,8 @@ export class GLModel {
     *
     * @param {AtomSelectionSpec} sel - atom selection to apply hoverable settings to
     * @param {boolean} hoverable - whether hover-handling is enabled for the selection
-    * @param {function} hover_callback - function called when an atom in the selection is hovered over
-    * @param {function} unhover_callback - function called when the mouse moves out of the hover area
+    * @param {function} hover_callback - Handler with the arguments documented by AtomSpec.hover_callback.
+    * @param {function} unhover_callback - Handler with the arguments documented by AtomSpec.unhover_callback.
     */
     public setHoverable(sel: AtomSelectionSpec, hoverable: boolean, hover_callback, unhover_callback) {
 
@@ -3169,10 +3184,26 @@ export class GLModel {
         }
     };
 
-    /**
-     * @param {AtomSelectionSpec} sel
-     * @param {string} prop
-     * @param {Gradient|string} scheme
+    /** Set base atom colors from a numeric property in the current frame.
+     * Explicit style colors, colorschemes, or color functions can override these colors.
+     * Missing properties leave the atom color unchanged. Call viewer.render() after updating.
+     *
+     * @param {AtomSelectionSpec} sel - Atoms to color.
+     * @param {string} prop - Property name; atom.properties is checked before top-level fields.
+     * @param {Gradient|string} scheme - Gradient object or name from builtinGradients.
+     * @param {number[]} [range] - Minimum and maximum. Defaults to the gradient range,
+     * then the range of the selected atoms; supply one shared range to compare models.
+     * @example
+     * var model = viewer.addModel();
+     * model.addAtoms([
+     *   {elem: "C", x: -3, y: 0, z: 0, properties: {score: -1}},
+     *   {elem: "C", x: 0, y: 0, z: 0, properties: {score: 0}},
+     *   {elem: "C", x: 3, y: 0, z: 0, properties: {score: 1}}
+     * ]);
+     * model.setStyle({}, {sphere: {radius: 1}});
+     * model.setColorByProperty({}, "score", "rwb", [-1, 1]);
+     * viewer.zoomTo();
+     * viewer.render();
      */
     public setColorByProperty(sel: AtomSelectionSpec, prop: string, scheme: Gradient | string, range?) {
         var i, a;
@@ -3674,7 +3705,10 @@ export class GLModel {
 
 
     /**
-    * Set coordinates for the atoms from provided trajectory data.
+    * Replace trajectory frames with coordinates for the existing atoms and select
+    * the first frame. Load topology first: every frame must have the same atom count
+    * and order as the current model. Atom identity, bonds, and styles are reused;
+    * this method does not infer a new topology from the coordinates.
     * Invalid or unsupported input returns an empty array without changing the existing atoms or frames.
     * Parsing and validation failures log a warning.
     * @param {string|ArrayBuffer|number[][][]} str - trajectory file data or coordinates with shape frames x atoms x 3
@@ -4017,16 +4051,18 @@ export interface ClickSphereStyleSpec {
     scale?: number;
 }
 
-/** Style for individual bond. */
+/** Style override for one entry in an atom's bonds array. Atom line or stick
+ * styles must also be enabled for the corresponding representation to appear. */
 export interface BondStyle {
+    /** Draw this bond with line geometry when true, or stick geometry otherwise. */
     iswire?: boolean;
-    /**  */
+    /** Render a multiple bond as a single bond without changing its bond order. */
     singleBond?: boolean;
-    /**  */
+    /** Override stick radius in angstroms. */
     radius?: number;
-    /**  */
+    /** Color of the half adjacent to the atom holding this bond style. */
     color1?: ColorSpec;
-    /**  */
+    /** Color of the half adjacent to the bonded atom. */
     color2?: ColorSpec;
     /** Override which side of a fractional bond (e.g. aromatic 1.5) gets the dashed line.
      *  true = dashed on +v side, false = dashed on -v side.

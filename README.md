@@ -37,11 +37,18 @@ We support the use of both PDB queries as well as PDB files.
 
 ![Alt Text](examples/example1.png)
 
-First you simply create the viewer with a div's id.
+Create the viewer inside an existing element with a nonzero width and height.
+The following example uses jQuery to find the element; `createViewer` also accepts
+the element itself or its ID string, so jQuery is not required by your application.
 ```javascript
 var viewer = $3Dmol.createViewer($("#div"));
 ```
-Then you can download a protein data bank model (here pdb:1MO8) and display it with the styling of your choosing.
+Then download a Protein Data Bank structure (here `pdb:1MO8`) and style it in the
+completion callback after a successful load. Loading, styling, fitting the camera
+with `zoomTo`, and drawing with `render` are separate operations; `download` performs
+an initial camera fit on success. Its callback also runs after a load failure;
+use the [Promise form](https://3dmol.org/doc/global.html#download) when you need to
+handle errors explicitly.
 
 ```javascript
 $3Dmol.download("pdb:1MO8",viewer,{multimodel:true, frames:true},function(){
@@ -51,7 +58,11 @@ $3Dmol.download("pdb:1MO8",viewer,{multimodel:true, frames:true},function(){
 
 ```
 #### Surfaces
-We also support the use of surfaces that are asynchronously loaded and support different color schemes
+Molecular surfaces are computed asynchronously by default and support different
+color schemes. The example below assumes `viewer` already contains a model,
+`volumedata` contains Cube-format text, and `range` contains its scalar color limits.
+See [addSurface](https://3dmol.org/doc/GLViewer.html#addSurface) for completion and
+surface-removal semantics.
 
 ![Alt Text](examples/example2.png)
 
@@ -85,14 +96,28 @@ viewer.addCylinder({start:{x:15.0,y:0.0,z:0.0},
 
 ## Documentation
 
-Please check out our documentation at [3dmol.js](https://3dmol.org/doc/index.html). We have tutorials, as well as the stable release of the platform.
+Start with the [JavaScript tutorial](https://3dmol.org/doc/tutorial-code.html),
+then use the [GLViewer reference](https://3dmol.org/doc/GLViewer.html) and its linked
+selection, style, and parser specifications. For notebooks, see
+[py3Dmol](py3Dmol/README.md). The optional controls are documented in the
+[embedding tutorial](https://3dmol.org/doc/tutorial-embeddable.html).
+
+For agents and text-based tools, [llms.txt](llms.txt) points to the generated API
+index and per-page Markdown. These are generated from the same TypeScript comments
+and tutorials as the HTML reference; there is no separately maintained API manual.
+The npm package also includes TypeScript declarations under `build/types`.
+
+The hosted documentation and `3Dmol.org/build` bundles follow development. For a
+reproducible application, pin a package or CDN release and consult matching source
+comments and declarations. See the [installation guide](https://3dmol.org/doc/index.html)
+for the available bundles.
 
 ## Development
 
 Use Node.js 24 and npm 10 or newer to build and test
 the project. If you use nvm, run `nvm install` and `nvm use` from the repository
 root to select the version in `.nvmrc`. See [CONTRIBUTING.md](CONTRIBUTING.md)
-for contribution and coverage upload instructions.
+for contribution, documentation, and testing instructions.
 
 Builds include the package version and Git revision in each bundle's header and
 in `$3Dmol.buildInfo` (also available as the `buildInfo` ES module export):

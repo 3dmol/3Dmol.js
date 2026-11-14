@@ -40,31 +40,33 @@ def tostr(arg):
         return json.dumps(arg.tolist()) #numpy arrays and torch tensor
         
 class view(object):
-    '''A class for constructing embedded 3Dmol.js views in ipython notebooks.
-       The results are completely static which means there is no need for there
-       to be an active kernel but also that there is no communication between
-       the javascript viewer and ipython.
+    '''Construct HTML/JavaScript views for IPython notebooks and exported pages.
+       Displayed views remain interactive without a running kernel. Python queues
+       browser commands; JavaScript results and events are not returned to Python.
+       The page still needs JavaScript, WebGL, and any referenced network resources.
 
-       Optionally, a viewergrid tuple (rows,columns) can be passed to create
-       a grid of viewers in a single canvas object.  Successive commands than need to
-       specify which viewer they apply to (with viewer=(r,c)) or will apply to all
-       viewers in the grid.
+       A viewergrid tuple (rows, columns) creates a grid sharing one canvas.
+       Commands apply to all cells unless viewer=(row, column) selects one cell
+       using zero-based indices. getModel requires a cell when a grid is enabled.
 
-       The API for the created object is exactly that for $3Dmol.GLViewer, with
-       the exception that the functions all return None.
-       http://3dmol.org/doc/GLViewer.html
+       Forwarded methods use the GLViewer API with JSON-serializable positional
+       arguments and return this Python view for chaining, not JavaScript results.
+       getModel returns a proxy for queuing GLModel calls. Python callbacks and
+       browser-side promises are not supported across this one-way interface.
+       https://3dmol.org/doc/GLViewer.html
     '''
     def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),format=None,js='https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js'):
         '''Create a 3Dmol.js view.
-            width -- width in pixels of container
-            height -- height in pixels of container
+            width -- container width in pixels (int) or a CSS dimension string
+            height -- container height in pixels (int) or a CSS dimension string
             query -- optional argument to provide to $3Dmol.download
             viewergrid -- optional tuple (rows,columns) to define grid
+            linked -- whether mouse controls affect all grid cells (default True)
             data -- molecular data to provide to addModel, with viewer grid can be indexed (r,c)
             format -- format of provided data
             style -- style to apply, with viewer grid can be indexed (r,c)
             options -- optional options to provide to $3Dmol.download or addModel
-            js -- url for 3Dmol.js'''
+            js -- 3Dmol.js bundle URL; the first view loads the library for the page'''
         divid = "3dmolviewer_UNIQUEID"
         warnid = "3dmolwarning_UNIQUEID"
         self.uniqueid = None
@@ -221,9 +223,11 @@ if(warn) {
 
 
     def write_html(self, f=None, fullpage=False):
-      '''Write html to reproduce viewer in a web page to a file.
-      f -- file name (str) or writeable file object; if unspecified html string is returned
-      fullpage -- instead of specified width/height make viewer fill the web page
+      '''Export the queued scene as HTML without requiring notebook display.
+      f -- file name (str) or writable file object; omitted returns an HTML fragment
+      fullpage -- fill the page instead of using the configured size when writing f;
+                  this option is not applied when returning a string
+      Referenced scripts and remote molecular data are not embedded by this method.
       '''
       
       if f == None:
@@ -246,7 +250,9 @@ if(warn) {
       
     @using_ipython
     def png(self):
-        '''output png image of viewer, which must already be instantiated'''
+        '''Display a PNG of an already instantiated viewer in notebook output.
+        The image is generated in the browser; no image bytes are returned to Python.
+        '''
         if not self.uniqueid:
             raise AssertionError('Must instantiate viewer before generating image.')
         script = '''<img id="img_{0}">
@@ -258,7 +264,9 @@ if(warn) {
     
     @using_ipython
     def apng(self, nframes=1):
-        '''output animated image of viewer, which must already be instantiated. nframes changes will be captured.'''
+        '''Display an APNG of an already instantiated viewer in notebook output.
+        Capture nframes rendered changes; no image bytes are returned to Python.
+        '''
         if not self.uniqueid:
             raise AssertionError('Must instantiate viewer before generating animated image.')
         script = '''<img id="img_{0}">
@@ -292,6 +300,10 @@ if(warn) {
         return makejs #return from getattr
 
     def getModel(self,*args,**kwargs):
+      """Return a proxy for queuing GLModel methods, not its atom data.
+      Positional arguments are forwarded to GLViewer.getModel. With a viewer grid,
+      viewer=(row, column) is required. Proxy calls return the parent Python view.
+      """
       if self.viewergrid:
         if kwargs and 'viewer' in kwargs:
           coords = kwargs['viewer']

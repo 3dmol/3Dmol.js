@@ -832,15 +832,17 @@ export class Matrix4 {
 mRotation = new Matrix4();
 mScale = new Matrix4();
 
-/**
+/** A three-component coordinate or vector. Plain objects are accepted; a Vector3
+ * instance is not required. Units depend on the consuming API: molecular positions
+ * normally use angstroms, while screen labels use pixels.
  * @interface
  */
 export interface XYZ {
-  /**  */
+  /** X component. */
   x: number;
-  /**  */
+  /** Y component. */
   y: number;
-  /**  */
+  /** Z component. */
   z: number;
 }
 

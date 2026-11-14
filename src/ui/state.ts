@@ -79,6 +79,12 @@ function sameStyleValue(left: unknown, right: unknown): boolean {
  * or their underlying atom styles. Programmatic style changes on unaffected atoms
  * become their latest baseline; UI layers retain priority on atoms they restyle.
  * Coordinates, callbacks and labels are preserved.
+ *
+ * Available from the optional `3Dmol.ui` bundle, loaded after the core browser
+ * bundle. Construction attaches controls and sets `viewer.ui` to this manager,
+ * replacing any previous manager. Use {@link StateManager#refresh} after direct
+ * model changes and {@link StateManager#destroy} to detach the controls.
+ * @see UIConfig
  */
 export class StateManager {
     public readonly selections = new Map<string, UISelection>();
@@ -120,6 +126,7 @@ export class StateManager {
         this.initiateUI();
     }
 
+    /** Subscribe to state refreshes; returns a function that removes the subscription. */
     public subscribe(listener: () => void): () => void {
         if (this.disposed) return () => undefined;
         this.listeners.add(listener);
@@ -451,6 +458,12 @@ export class StateManager {
         if (!this.disposed) this.ui?.resize();
     }
 
+    /**
+     * Detach controls, remove labels owned by UI selections, and release subscribers.
+     * Leaves the viewer, models, styles, and completed surfaces in place. Pending
+     * UI-created surfaces are discarded when their calculation finishes.
+     * Safe to call repeatedly. Use GLViewer.destroy() to dispose the entire viewer.
+     */
     public destroy(): void {
         if (this.disposed) return;
         this.disposed = true;

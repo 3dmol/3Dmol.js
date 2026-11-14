@@ -50,7 +50,7 @@
 }
 </style>
 
-The most simple way to display and style a 3Dmol instance is by embedding 3Dmol parameters [within a URL](./tutorial-url.html) or [within HTML tags](./tutorial-embeddable.html). 
+The simplest way to display and style a 3Dmol viewer is by embedding 3Dmol parameters [within a URL](./tutorial-url.html) or [within HTML tags](./tutorial-embeddable.html).
 
 However, if you are interacting with this viewer from your own web pages then you may want to take advantage of the 3Dmol API.
 
@@ -64,7 +64,7 @@ First, make sure your HTML document links to the 3Dmol code.
 <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 ```
 
-Now create a container tag in the HTML document that will hold the vizualisation.
+Now create a container element in the HTML document that will hold the visualization.
 
 ```
 <div id="container-01" class="mol-container"></div>
@@ -82,7 +82,7 @@ Note: 3Dmol will adopt the size of the container so we need to make sure this si
 </style>
 ```
  
-Once the web page has loaded, we can create a new instance of 3Dmol.
+Once the script has loaded and the container exists, create a viewer. The core API accepts an HTML element, an element ID, or a jQuery-wrapped element; jQuery is not required.
 
 To make sure everything works, we are going to add a sphere, set the camera, render the scene, then add a zoom.
 
@@ -134,6 +134,8 @@ Use `fetch()` to load PDB data from a URL, then pass the text to the viewer. Che
     .catch(error => console.error(error));
 ```
 
+The loading example is an alternative to the first example: reuse its existing `viewer`, or create a viewer in a separate container. The `/path/to/your/pdb/files/1ycr.pdb` URL is a placeholder for your own file. A call to `addModel` parses data already in memory; it does not fetch a URL.
+
 All these methods (and more) are covered in detail in the [API documentation for GLViewer](GLViewer.html).
 
 The interactive examples below include the 1YCR protein, so they also work when this documentation is opened as a local file.
@@ -152,7 +154,7 @@ When fetching a file from another origin, that server must allow the request thr
 
 ## Dynamic styles
 
-One of the advantages of using the API is that you have greater control of deciding how 3Dmol should interact to other events going on in the browser (user interaction, javascript events, etc). 
+The API lets your page respond to browser events by changing the molecular scene.
 
 Another advantage is that this also gives you more flexibility with styling.
 
@@ -164,7 +166,7 @@ Here we create our own function that will decide on the color of a particular at
   };
 ```
 
-Then we can apply that colouring function to a particular atom selection (in this case, all atoms in chain 'A')
+Apply that coloring function to an {@link AtomSelectionSpec} (here, all atoms in chain 'A'). The second argument is an {@link AtomStyleSpec}.
     
 ```
   viewer.setStyle({chain: 'A'}, {cartoon: {colorfunc: colorAsSnake}});
@@ -176,3 +178,21 @@ Then we can apply that colouring function to a particular atom selection (in thi
   <div id="container-03" class="mol-container"></div>
 </div>
 
+
+## Updating and disposing a viewer
+
+`setStyle` replaces the representations on the selected atoms. Use {@link GLViewer#addStyle}
+to add representations while keeping existing ones. After either operation, call
+{@link GLViewer#render} to display the change; the interactive example performs
+this final render for you. An empty selection object selects all atoms, while
+`model` restricts a selection to a particular model.
+
+Keep the viewer instance when updating a page. {@link GLViewer#clear} removes its
+scene contents for reuse. When the view is no longer needed, {@link GLViewer#destroy}
+releases controls, timers, and graphics resources permanently. See that method
+for automatic cleanup when a container is removed and the `autoDestroy` option.
+
+For trajectories, {@link GLViewer#addModelsAsFrames} loads multiple frames into
+one model. Await {@link GLViewer#setFrame} before rendering a chosen frame.
+For surfaces, follow the asynchronous return contract of {@link GLViewer#addSurface}
+before exporting an image or changing a completed surface.

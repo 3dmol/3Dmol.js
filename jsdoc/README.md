@@ -52,3 +52,21 @@ The browser checks can take a different generated output directory as their
 first argument. Both click all three tutorial buttons and inspect the rendered
 scenes. The local browser check covers `file://`, an HTTP site root, and a nested
 HTTP path. They use local fixtures and builds, and do not send analytics.
+
+## Agent access
+
+The theme's `llmsTxt` option generates `doc/llms.txt`, with absolute links to the
+companion Markdown already emitted for each API and tutorial page. `siteUrl`
+provides the origin and `basePath` provides the documentation path. The root
+`llms.txt` only points to this generated index and the project entry points.
+Update source comments or tutorials to change both human and agent documentation;
+do not maintain a second method catalog. `full: false` avoids generating a
+concatenated copy of the entire site.
+
+Markdown pages retain signature and member metadata components as text; agents
+can read their attributes without running JavaScript. The generated index excludes
+source-code viewer pages, but the source files and npm `build/types` declarations
+remain useful for checking implementation details and release-specific signatures.
+After a theme upgrade, verify that every Markdown URL in `doc/llms.txt` resolves
+to a generated page and that no protected-HTML placeholders remain. Publish the
+Markdown files and `llms.txt` alongside the HTML, not just the rendered pages.

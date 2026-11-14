@@ -1,8 +1,12 @@
 import type { GLViewer } from "../GLViewer";
 
+/** Playback settings read and updated through the optional {@link UI} controls. */
 export interface TrajectorySettings {
+    /** Target frames per second, greater than zero and at most 240; loading may limit playback speed. */
     fps: number;
+    /** Repeat after the last frame when true; otherwise stop at the last frame. */
     loop: boolean;
+    /** Whether playback is active. Frame changes are asynchronous. */
     playing: boolean;
     /** Zero-based index; negative and overflowing inputs wrap like GLViewer.setFrame(). */
     frame: number;

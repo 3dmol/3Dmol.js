@@ -7,14 +7,18 @@ import { inflate } from "pako";
 
 
 interface VolumeDataOptions {
+    /** Negate all voxel values before optional normalization. */
     negate?: boolean;
     /** Normalize to zero mean and unit variance; constant maps become all zeros. */
     normalize?: boolean;
 };
 
 /**
- * $3Dmol.VolumeData stores volumetric data. This includes file parsing
- * functionality.
+ * A scalar grid parsed from a density or potential map. Use GLViewer.addIsosurface
+ * to draw a contour or GLViewer.addVolumetricRender to display a density volume.
+ * Grid positions are mapped into world coordinates by origin/unit or matrix; flat
+ * data indices have z varying fastest. This is distinct from loading atom
+ * coordinates from a cube or VASP file with GLViewer.addModel.
  *
  * @class
  * @param {string|ArrayBuffer|Uint8Array|Int8Array} str - Text or binary volumetric data; CCP4 data may also be supplied as a base64-encoded string.
@@ -171,7 +175,7 @@ export class VolumeData {
      * @param {number} x - Finite world-space x coordinate.
      * @param {number} y - Finite world-space y coordinate.
      * @param {number} z - Finite world-space z coordinate.
-     * @returns {number} Value at the rounded grid coordinates, or zero when they are outside the grid.
+     * @returns {number} Value at the nearest grid point (no interpolation), or zero when rounded coordinates are outside the grid.
      */
     getVal(x: number, y: number, z: number) {
         let i = this.getIndex(x, y, z);

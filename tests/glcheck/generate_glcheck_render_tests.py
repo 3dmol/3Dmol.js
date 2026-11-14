@@ -7,7 +7,7 @@ import sys, re
 from os import mkdir, symlink
 from os.path import join as pathjoin, exists, abspath
 from posixpath import split
-from shutil import copytree, rmtree
+from shutil import copytree, copyfile, rmtree
 
 suffix = ''
 if len(sys.argv) > 1:
@@ -34,9 +34,7 @@ def replace_refs_to_test_structs(srccode: str) -> str:
 
 def preproc_src(string: str) -> str:
     string = replace_refs_to_test_structs(string)
-    #for the most part generate_tests does this, but it is necessary here
-    #to handle code in divs as we aren't using the post-processed versions
-    string = string.replace('viewer.render()','viewer.render(callback)')
+    # Completion callbacks are already inserted by the shared extractor.
     return string
 
 
@@ -51,6 +49,9 @@ mkdir(generationTargetDir)
 symlink(buildSrcDir, testAssetsDir,target_is_directory=True)
 symlink(dataSrcDir, dataAssetDir,target_is_directory=True)
 symlink(testStructsSrcDir, structAssetDir,target_is_directory=True)
+# Render fixtures use the installed dependency and work without a CDN request.
+copyfile(pathjoin(projectDir, 'node_modules', 'jquery', 'dist', 'jquery.min.js'),
+         pathjoin(generationTargetDir, 'jquery.min.js'))
 
 additionalCode = '';
 if suffix == '-prof': #coverage doesn't play nicely with webworker
@@ -66,7 +67,7 @@ f"""
     <head>
         <title>{example.name}</title>
         <script src="./assets/3Dmol{suffix}.js"></script>  
-        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="./jquery.min.js"></script>
 
         <script>{additionalCode}</script>       
     </head>

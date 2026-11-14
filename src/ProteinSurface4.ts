@@ -37,15 +37,19 @@ export enum SurfaceType {
     SES = 4
 };
 
-/** 
- * Render surface synchronously if true
- * @param {boolean} [$3Dmol.syncSurface=false]
- * @type {boolean} */
+/**
+ * Whether molecular surface geometry is calculated on the main thread instead
+ * of in Web Workers. Defaults to false. Set through setSyncSurface.
+ * @type {boolean}
+ */
 export var syncSurface = false;
 
 /**
- * 
- * @param {boolean} val - Whether surfaces should be rendered synchronously or in parallel.
+ * Choose the calculation mode for subsequent molecular surfaces in all viewers.
+ * Main-thread calculation can block interaction for large structures. This does
+ * not change the completion contract of GLViewer.addSurface or wait for existing
+ * surface jobs. Use addSurface's returned promise to wait for geometry.
+ * @param {boolean} val - True for main-thread calculation; false to use Web Workers.
  */
 export function setSyncSurface(val:boolean) {
     syncSurface = val;

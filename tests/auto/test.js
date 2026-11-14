@@ -173,6 +173,7 @@ $(document).ready(function(){
         var viewer=$3Dmol.createViewer($("#gldiv"),{id:key});
         var afterGlobals;
         var nexti = i+1; //just in case exception happens after i increment
+        var failed = false;
 
         //create the table row
         var tableRow=createRow(key);
@@ -193,15 +194,23 @@ $(document).ready(function(){
         
         //override default error handling (try/catch isn't sufficient due to callbacks)
         window.onerror = function(message, file, lineNumber) {
+            message = String(message);
             if(message.startsWith("ResizeObserver")) return true;
+            if(failed) return true;
+            failed = true;
             setError(message);
-            failures++;
             setTimeout(function() {runTest(nexti);}, 1); //let page update  
             return true; 
           };
+        window.onunhandledrejection = function(event) {
+            event.preventDefault();
+            window.onerror(event.reason && event.reason.message || event.reason);
+        };
           
         system[key](viewer,function(viewer){
+            if(failed) return;
             waitfor(function() { return viewer.surfacesFinished() && !viewer.isAnimated() } , true , 1000 , 0 , "" , function(){
+                if(failed) return;
                 var after=Date.now();
                 //gets the canvas
                 viewer.render();
@@ -224,6 +233,7 @@ $(document).ready(function(){
                 var differ=0;
 
                 var diff = resemble(canvasImageData).compareTo("../glcheck/reference-images/tests-glcheck-render-tests-"+key+".html.png").set3DmolTolerances().scaleToSameSize().onComplete(function(data){
+                    if(failed) return;
                     //scaletosamesize is necessary for retina displays
                     if(data.error) {
                         throw data.error; //probably need to create an image file

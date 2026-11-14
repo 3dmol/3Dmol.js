@@ -29,12 +29,10 @@ import generate_tests
 
 
 def preproc_src(string: str) -> str:
-    #for the most part generate_tests does this, but it is necessary here
-    #to handle code in divs as we aren't using the post-processed versions
+    # Completion callbacks are already inserted by the shared extractor.
     string = string.replace("../test_structs/","http://localhost:8125/tests/test_structs/")
     if 'mdsrv' not in string: #test93
         string = string.replace("data/","http://localhost:8125/tests/auto/data/")
-    string = string.replace('viewer.render()','viewer.render(callback)')
     return string
 
 

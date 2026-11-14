@@ -1,7 +1,7 @@
 
-This guide helps you with learning how to,
+Choose a starting point for your application:
 
-- [Use 3Dmol within your code](tutorial-code.html)
-- [Embedding a 3Dmol Viewer](tutorial-embeddable.html)
-- [Active Learning with 3Dmol.js](tutorial-learning_environment.html)
-- [Hosted 3Dmol.js viewer](tutorial-url.html) 
+- [Use the JavaScript API](tutorial-code.html) to load data, style atoms, and control a viewer.
+- [Embed a viewer in HTML](tutorial-embeddable.html) using declarative `data-` attributes.
+- [Run an active learning session](tutorial-learning_environment.html) with shared classroom views.
+- [Share a hosted viewer URL](tutorial-url.html) with molecular data and scene settings.

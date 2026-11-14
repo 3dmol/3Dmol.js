@@ -1,0 +1,16 @@
+# 3Dmol.js
+
+> JavaScript/TypeScript molecular visualization with WebGL.
+
+## Documentation
+
+- [Generated API and tutorial index](https://3dmol.org/doc/llms.txt): links to Markdown generated from the same source comments and tutorials as the HTML documentation.
+- [Getting started](https://3dmol.org/doc/index.html): installation, loading, and viewer concepts.
+- [Python wrapper](https://github.com/3dmol/3Dmol.js/blob/master/py3Dmol/README.md): py3Dmol usage and differences from the JavaScript API.
+- [Contributing](https://github.com/3dmol/3Dmol.js/blob/master/CONTRIBUTING.md): source locations, documentation generation, and example tests.
+
+Use the API index to retrieve the relevant class and specification pages on demand.
+The website follows the development checkout; when targeting an installed release,
+use that release's build/types declarations and matching source comments. In a
+checkout, npm run doc generates doc/llms.txt and the companion Markdown locally.
+Do not infer that an exported low-level renderer or parser is a viewer method.

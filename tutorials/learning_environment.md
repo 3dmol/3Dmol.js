@@ -8,7 +8,7 @@ The instructor can pose questions that the students then answer by clicking on a
 
 ## Self-Hosting
 
-The easiest way to use the 3Dmol.js active learning environment is through the hosted viewer at [https://3dmol.org](https://3dmol.org).  However, it may be desirable to host your own instance for your class.  A light-weight Flask webserver can quickly be brought up on a Ubuntu Linux machine with a few commands:
+The easiest way to use the 3Dmol.js active learning environment is through the hosted viewer at [https://3dmol.org/viewer.html](https://3dmol.org/viewer.html).  However, it may be desirable to host your own instance for your class.  A light-weight Flask webserver can quickly be brought up on a Ubuntu Linux machine with a few commands:
 
 
 ```{@lang bash}
@@ -26,6 +26,8 @@ cd learning-environment
 python3 server.py
 ```
 
+The commands above are a setup outline. Install the repository's supported Node.js 24 and npm 10 or newer before building; a distribution's default `npm` package may not meet those requirements. Install the Python dependencies in a virtual environment.
+
 By default, this will launch a server on port 5000, e.g. `http://HOSTNAME:5000/`.  The viewer is at `http://HOSTNAME:5000/static/viewer.html`.
 Your network must allow external connections to the specified port.
 Do <b>not</b> run this command as superuser to run the server on the privileged default webserver port 80 without consulting with a network security specialist.
@@ -38,10 +40,10 @@ window.viewerSessionServer = 'http://localhost:6000';
 
 Set it to `window.location.origin` to use the page's port on localhost, or to the full URL of another session server.
 
-Note that files put in the `3dmol` directory can be referenced as relative paths within the `url=` component.  For example: `http://localhost:5000/static/viewer.html?url=molecule.sdf&style=stick`
+The `learning-environment/static` symlink points to the repository root. Files placed in that root can be referenced as relative paths within the `url=` component.  For example: `http://localhost:5000/static/viewer.html?url=molecule.sdf&style=stick`
 
 
-If you already have a webserver running, you can redirect the websocket requests used by 3Dmol.js to the server running on port 5000.  For example, for apache the following is added to the configuration (see [here](https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root)</a>):
+If you already have a webserver running, you can redirect the websocket requests used by 3Dmol.js to the server running on port 5000.  For example, for apache the following is added to the configuration (see the [Socket.IO proxy discussion](https://stackoverflow.com/questions/36472920/apache-proxy-configuration-for-socket-io-project-not-in-root)):
 
 
 ```apache.conf

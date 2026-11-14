@@ -11,7 +11,7 @@ const compiled = ts.transpileModule(source, {
 }).outputText;
 
 describe('embedded control availability', () => {
-    let dom, host, viewer, StateManager, autoload;
+    let dom, host, viewer, createViewer, StateManager, autoload;
 
     beforeEach(() => {
         dom = new JSDOM('<!doctype html><div id="viewer" class="viewer_3Dmoljs"></div>');
@@ -27,13 +27,14 @@ describe('embedded control availability', () => {
             attachedViewer.ui = this;
         });
         dom.window.$3Dmol = { StateManager };
+        createViewer = jest.fn(() => viewer);
         const modules = {
-            './GLViewer': { createViewer: jest.fn(() => viewer) },
+            './GLViewer': { createViewer },
             './ProteinSurface4': { SurfaceType: { VDW: 1 } },
-            './colors': { CC: { color: () => 'white' } },
+            './colors': { CC: { color: value => value === undefined ? 'black' : value } },
             './utilities': {
-                specStringToObject: value => value === 'multimodel:true;frames:true'
-                    ? { multimodel: true, frames: true } : {}
+                specStringToObject: value => value?.startsWith('{') ? JSON.parse(value)
+                    : value === 'multimodel:true;frames:true' ? { multimodel: true, frames: true } : {}
             }
         };
         const exports = {};
@@ -46,6 +47,36 @@ describe('embedded control availability', () => {
     });
 
     afterEach(() => dom.window.close());
+
+    test.each([
+        ['config overrides both attributes',
+            { backgroundcolor: 'black', backgroundalpha: '0.9', config: '{"backgroundColor":"white","backgroundAlpha":0.25}' },
+            { backgroundColor: 'white', backgroundAlpha: 0.25 }],
+        ['config preserves a fully transparent background',
+            { backgroundcolor: 'black', backgroundalpha: '0.9', config: '{"backgroundColor":"white","backgroundAlpha":0}' },
+            { backgroundColor: 'white', backgroundAlpha: 0 }],
+        ['config overrides color while alpha falls back to its attribute',
+            { backgroundcolor: 'black', backgroundalpha: '0.4', config: '{"backgroundColor":"white"}' },
+            { backgroundColor: 'white', backgroundAlpha: 0.4 }],
+        ['config overrides alpha while color falls back to its attribute',
+            { backgroundcolor: 'red', backgroundalpha: '0.9', config: '{"backgroundAlpha":0.5}' },
+            { backgroundColor: 'red', backgroundAlpha: 0.5 }],
+        ['attributes supply the background without config',
+            { backgroundcolor: 'royalblue', backgroundalpha: '0.6' },
+            { backgroundColor: 'royalblue', backgroundAlpha: 0.6 }],
+        ['missing attributes default to opaque black', {},
+            { backgroundColor: 'black', backgroundAlpha: 1 }]
+    ])('%s for both new and reused viewers', (_description, attributes, expected) => {
+        Object.assign(host.dataset, attributes);
+        autoload();
+        expect(createViewer).toHaveBeenCalledWith(host, expected);
+
+        autoload(viewer);
+        // Stored config alone can be correct while the renderer still uses the
+        // attribute color. Reused viewers must apply the effective background.
+        expect(viewer.setConfig).toHaveBeenCalledWith(expected);
+        expect(viewer.setBackgroundColor).toHaveBeenCalledWith(expected.backgroundColor, expected.backgroundAlpha);
+    });
 
     test.each([
         [{ ui: 'true' }, { edit: true, trajectory: true }],
