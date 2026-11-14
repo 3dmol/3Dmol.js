@@ -60,7 +60,7 @@ export const uiStyles: string = `
 }
 .molui-trajectory-toggle { left: 56px; }
 .molui-no-edit .molui-trajectory-toggle { left: 12px; }
-.molui-trajectory-toggle svg { width: 20px; height: 20px; pointer-events: none; }
+.molui-toggle svg, .molui-trajectory-toggle svg { display: block; width: 20px; height: 20px; pointer-events: none; }
 .molui-panel {
   position: absolute;
   top: 56px;

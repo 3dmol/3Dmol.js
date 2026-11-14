@@ -139,8 +139,11 @@ export class UI {
         this.element.setAttribute('aria-label', 'Molecular viewer controls');
         this.panel.id = `molui-panel-${++nextId}`;
         this.panel.setAttribute('aria-label', 'Molecule settings');
-        this.toggle = button('☰', () => this.setOpen(this.element.classList.contains('molui-closed')),
+        this.toggle = button('', () => this.setOpen(this.element.classList.contains('molui-closed')),
             'molui-toggle molui-icon');
+        this.toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"'
+            + ' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">'
+            + '<path d="M4 6h16M4 12h16M4 18h16"/></svg>';
         this.toggle.setAttribute('aria-label', 'Toggle controls');
         this.toggle.title = 'Toggle controls';
         this.toggle.setAttribute('aria-controls', this.panel.id);

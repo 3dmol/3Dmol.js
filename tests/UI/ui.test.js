@@ -232,7 +232,7 @@ describe('guided molecular viewer UI', () => {
         for (const { root } of [first, second]) {
             const toggle = root.querySelector('.molui-toggle');
             expect(root.querySelector(`#${toggle.getAttribute('aria-controls')}`)).not.toBeNull();
-            expect(toggle.textContent).toBe('☰');
+            expect(toggle.querySelector('svg').getAttribute('aria-hidden')).toBe('true');
             expect(toggle.getAttribute('aria-label')).toBe('Toggle controls');
             expect(toggle.getAttribute('aria-expanded')).toBe('true');
             const header = root.querySelector('.molui-header');
