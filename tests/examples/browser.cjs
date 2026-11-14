@@ -172,65 +172,46 @@ async function viewerLifecycle(browser) {
     } finally { await page.close(); }
 }
 
-async function interactiveEmbedBackground(browser) {
-    // Exercise the actual tests.html runner, which reuses a viewer instead of
-    // constructing one from the embedded element as CGI/glcheck pages do.
+async function reusedViewerBackground(browser) {
+    // Run the same generated function and existing-viewer path as tests.html.
+    // glcheck owns reference-image comparisons; this checks the background bug.
     execFileSync('python3', ['tests/auto/generate_tests.py'], { cwd: root });
     const page = await browser.newPage();
     try {
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
-        await page.setRequestInterception(true);
-        page.on('request', async request => {
-            const url = new URL(request.url());
-            if (url.protocol === 'data:' || url.protocol === 'blob:') return request.continue();
-            if (url.origin !== 'http://render.test') return request.abort();
-            if (url.pathname === '/favicon.ico') return request.respond({ status: 204 });
-            const file = path.resolve(root, '.' + url.pathname);
-            if (!file.startsWith(root + path.sep) || !fs.existsSync(file)) return request.abort();
-            let body = fs.readFileSync(file);
-            if (url.pathname === '/tests/auto/tests.html') {
-                // Serve installed jQuery locally, without the CDN version's SRI hash.
-                body = body.toString().replace(/<script src="https:\/\/code\.jquery\.com\/[^\"]+"[\s\S]*?<\/script>/,
-                    '<script src="../../node_modules/jquery/dist/jquery.min.js"></script>');
-            } else if (url.pathname === '/tests/auto/build.js') {
-                body = body.toString() + '\nsystem = { embed_style_order: system.embed_style_order };\n';
-            }
-            const contentType = { '.html': 'text/html', '.js': 'text/javascript',
-                '.css': 'text/css', '.png': 'image/png' }[path.extname(file)] || 'application/octet-stream';
-            await request.respond({ status: 200, contentType, body });
-        });
-        await page.goto('http://render.test/tests/auto/tests.html');
-        // waitForFunction installs Puppeteer globals, which this runner correctly
-        // flags as leaks. Poll inside an evaluation without adding window fields.
-        await page.evaluate(async () => {
-            const deadline = Date.now() + 30000;
-            while (!document.querySelector('#summary_list .totaltime')) {
-                if (Date.now() > deadline) throw new Error('tests.html did not finish');
-                await new Promise(resolve => setTimeout(resolve, 25));
-            }
-        });
+        await page.setViewport({ width: 400, height: 400, deviceScaleFactor: 1 });
+        await page.setContent('<div id="viewer" style="width:400px;height:400px;position:relative"></div>');
+        await page.addScriptTag({ path: path.join(root, 'node_modules/jquery/dist/jquery.min.js') });
+        await page.addScriptTag({ path: core });
+        await page.addScriptTag({ path: path.join(root, 'tests/auto/build.js') });
         const result = await page.evaluate(() => {
-            const image = document.querySelector('#embed_style_order_row .rendered img');
-            const canvas = document.createElement('canvas');
-            canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
-            const context = canvas.getContext('2d');
-            context.drawImage(image, 0, 0);
-            const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-            let red = 0, green = 0;
-            for (let i = 0; i < pixels.length; i += 4) {
-                if (pixels[i] > pixels[i + 1] + 30 && pixels[i] > pixels[i + 2] + 30) red++;
-                if (pixels[i + 1] > pixels[i] + 30 && pixels[i + 1] > pixels[i + 2] + 30) green++;
-            }
-            return { background: Array.from(pixels.slice(0, 4)), red, green,
-                failures: Array.from(document.querySelectorAll('#summary_list .erroritem'), item => item.textContent) };
+            const viewer = $3Dmol.createViewer(document.getElementById('viewer'));
+            let captured;
+            try {
+                system.embed_style_order(viewer, rendered => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = rendered.getCanvas().width;
+                    canvas.height = rendered.getCanvas().height;
+                    const context = canvas.getContext('2d');
+                    context.drawImage(rendered.getCanvas(), 0, 0);
+                    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                    let red = 0, green = 0;
+                    for (let i = 0; i < pixels.length; i += 4) {
+                        if (pixels[i] > pixels[i + 1] + 30 && pixels[i] > pixels[i + 2] + 30) red++;
+                        if (pixels[i + 1] > pixels[i] + 30 && pixels[i + 1] > pixels[i + 2] + 30) green++;
+                    }
+                    captured = { reused: rendered === viewer, background: Array.from(pixels.slice(0, 4)), red, green };
+                });
+                return captured;
+            } finally { viewer.destroy(); }
         });
+        assert.ok(result?.reused, 'The inline embed must complete using the supplied viewer');
         assert.deepEqual(result.background, [255, 255, 255, 255],
-            'tests.html must apply data-config backgroundColor to the reused viewer renderer');
+            'data-config backgroundColor must reach the reused viewer renderer');
         assert.ok(result.red > 50 && result.green > 50, 'The captured scene must contain the embedded atoms');
-        assert.deepEqual(result.failures, []);
         assert.deepEqual(errors, []);
-        console.log('Interactive tests.html embed: white background, atom styles, and image comparison passed.');
+        console.log('Embedded background: reused viewer renders white background and expected atom colors.');
     } finally { await page.close(); }
 }
 
@@ -239,6 +220,6 @@ async function interactiveEmbedBackground(browser) {
     try {
         await pythonGrid(browser);
         await viewerLifecycle(browser);
-        await interactiveEmbedBackground(browser);
+        await reusedViewerBackground(browser);
     } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
