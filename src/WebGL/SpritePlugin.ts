@@ -44,6 +44,8 @@ export type SpriteMeta = {
 export class SpritePlugin {
   private gl?: WebGLRenderingContext;
   private disposed = false;
+  private readonly renderList: Sprite[] = [];
+  private rendering = false;
   private renderer: any;
   private precision?: number;
   private sprite: SpriteMeta = {
@@ -197,20 +199,37 @@ export class SpritePlugin {
   ) {
     if (this.disposed) return;
     if (!this.gl) throw new Error("WebGLRenderer not initialized");
-    let sprites: unknown[] = [];
-    scene?.__webglSprites?.forEach((sprite) => {
-      //depthTest is false for inFront labels
-      if (inFront && sprite.material.depthTest == false) {
-        sprites.push(sprite);
-      } else if (!inFront && sprite.material.depthTest) {
-        sprites.push(sprite);
-      }      
-    });
+    // Texture update callbacks may render recursively; preserve the outer pass list.
+    const nested = this.rendering;
+    const sprites = nested ? [] : this.renderList;
+    this.rendering = true;
+    try {
+      const sceneSprites = scene?.__webglSprites;
+      for (let i = 0, n = sceneSprites?.length || 0; i < n; i++) {
+        if (!(i in sceneSprites)) continue;
+        const sprite = sceneSprites[i];
+        // Keep pass membership and sorting order, including hidden sprites.
+        if (inFront && sprite.material.depthTest == false) {
+          sprites.push(sprite);
+        } else if (!inFront && sprite.material.depthTest) {
+          sprites.push(sprite);
+        }
+      }
+      if (sprites.length) {
+        this.drawSprites(sprites, scene, camera, viewportWidth, viewportHeight, inFront);
+      }
+    } finally {
+      // Removed labels must not be retained between frames, including after errors.
+      sprites.length = 0;
+      this.rendering = nested;
+    }
+  }
 
-    let nSprites = sprites.length;
-
-    if (!nSprites) return;
-
+  private drawSprites(
+    sprites: Sprite[], scene: Scene, camera: Camera,
+    viewportWidth: number, viewportHeight: number, inFront?: boolean
+  ) {
+    const nSprites = sprites.length;
     const attributes = this.sprite.attributes;
     const uniforms = this.sprite.uniforms;
 
@@ -281,7 +300,6 @@ export class SpritePlugin {
     let sprite: Sprite;
     let material;
     let size;
-    let scale: number[] = [];
 
     for (i = 0; i < nSprites; i++) {
       sprite = sprites[i] as Sprite;
@@ -316,8 +334,8 @@ export class SpritePlugin {
         var w = material.map.image.width;
         var h = material.map.image.height;
 
-        scale[0] = (w * this.renderer.devicePixelRatio) / viewportWidth;
-        scale[1] = (h * this.renderer.devicePixelRatio) / viewportHeight;
+        let scaleX = (w * this.renderer.devicePixelRatio) / viewportWidth;
+        let scaleY = (h * this.renderer.devicePixelRatio) / viewportHeight;
 
         if (material.useScreenCoordinates === true) {
           this.gl.uniform1i(uniforms.useScreenCoordinates, 1);
@@ -342,8 +360,8 @@ export class SpritePlugin {
 
         size = 1 / (material.scaleByViewport ? viewportHeight : 1);
 
-        scale[0] *= size * sprite.scale.x;
-        scale[1] *= size * sprite.scale.y;
+        scaleX *= size * sprite.scale.x;
+        scaleY *= size * sprite.scale.y;
 
         let alignx = material?.alignment?.x,
           aligny = material?.alignment?.y;
@@ -374,7 +392,7 @@ export class SpritePlugin {
         );
 
         this.gl.uniform1f(uniforms.rotation, sprite.rotation as number);
-        this.gl.uniform2fv(uniforms.scale, scale);
+        this.gl.uniform2f(uniforms.scale, scaleX, scaleY);
 
         //this.renderer.setBlending( material.blending, material.blendEquation, material.blendSrc, material.blendDst );
         this.renderer.setDepthTest(material.depthTest);
@@ -402,6 +420,7 @@ export class SpritePlugin {
     this.sprite.vertices = this.sprite.faces = this.sprite.uniforms = null;
     this.sprite.attributes = {};
     this.sprites = undefined;
+    this.renderList.length = 0;
     this.renderer = undefined;
     this.gl = undefined;
   }

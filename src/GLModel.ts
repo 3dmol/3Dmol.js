@@ -171,8 +171,8 @@ export class GLModel {
     }> | null = null;
     private _coordIndex: Map<AtomSpec, number> | null = null;   // atom object -> index, during a build
     private _coordAtomCount = 0;                                  // length of the list that was built
-    // False once anything was drawn that the recipe above cannot express -- currently only
-    // multi-bond side offsets, whose parallel cylinders do not lie on the a1->a2 segment.
+    // False when a representation cannot be expressed by fixed points on bond axes.
+    // This includes unsupported meshes, offset bonds and length-dependent dash layouts.
     // syncAtomPositions() refuses to run when this is false rather than leaving stale geometry.
     private _coordMapComplete = true;
     // Set by drawBondSticks around each drawCyl call so the (static) imposter writer can see
@@ -591,8 +591,7 @@ export class GLModel {
         var radius = this.getRadiusFromStyle(atom, style);
 
         if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
-            var center = new Vector3(atom.x, atom.y, atom.z);
-            atom.intersectionShape.sphere.push(new Sphere(center, radius));
+            atom.intersectionShape.sphere.push(new Sphere(atom as XYZ, radius));
         }
 
         GLDraw.drawSphere(geo, atom, radius, C);
@@ -610,8 +609,7 @@ export class GLModel {
         var radius = this.getRadiusFromStyle(atom, style);
 
         if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
-            var center = new Vector3(atom.x, atom.y, atom.z);
-            atom.intersectionShape.sphere.push(new Sphere(center, radius));
+            atom.intersectionShape.sphere.push(new Sphere(atom as XYZ, radius));
         }
     };
 
@@ -644,8 +642,7 @@ export class GLModel {
         radiusArray[startv] = radius;
 
         if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
-            var center = new Vector3(atom.x, atom.y, atom.z);
-            atom.intersectionShape.sphere.push(new Sphere(center, radius));
+            atom.intersectionShape.sphere.push(new Sphere(atom as XYZ, radius));
         }
 
         geoGroup.vertices += 1;
@@ -661,7 +658,8 @@ export class GLModel {
     private static solveT(p: XYZ, a1: AtomSpec, a2: AtomSpec): number | null {
         const dx = a2.x - a1.x, dy = a2.y - a1.y, dz = a2.z - a1.z;
         const len2 = dx * dx + dy * dy + dz * dz;
-        if (len2 < 1e-12) return 0;   // degenerate (coincident atoms): everything sits at t=0
+        // Coincident endpoints do not determine t; both ends would otherwise replay at a1.
+        if (len2 < 1e-12) return null;
         const t = ((p.x - a1.x) * dx + (p.y - a1.y) * dy + (p.z - a1.z) * dz) / len2;
         const ex = a1.x + dx * t - p.x, ey = a1.y + dy * t - p.y, ez = a1.z + dz * t - p.z;
         if (ex * ex + ey * ey + ez * ez > 1e-6) return null;   // off the axis -> not replayable
@@ -777,8 +775,7 @@ export class GLModel {
         }
 
         if ((atom.clickable === true || atom.hoverable) && (atom.intersectionShape !== undefined)) {
-            var center = new Vector3(atom.x, atom.y, atom.z);
-            atom.intersectionShape.sphere.push(new Sphere(center, radius));
+            atom.intersectionShape.sphere.push(new Sphere(atom as XYZ, radius));
         }
 
         var placed = this.drawSphereImposter(geo, atom as XYZ, radius, C, alpha);
@@ -882,6 +879,8 @@ export class GLModel {
      * For two-color bonds, the first half of dashes use colors[0], second half use colors[1].
      */
     private calculateDashes(from: XYZ, to: XYZ, radius: number, dashLength: number, gapLength: number, colors?: Color[]) {
+        // Changing bond length changes the dash count and spacing, not just their positions.
+        this._coordMapComplete = false;
         const dx = to.x - from.x;
         const dy = to.y - from.y;
         const dz = to.z - from.z;
@@ -1247,8 +1246,8 @@ export class GLModel {
         // Record both endpoints for the coordinate fast path. `from` lives in the vertex array
         // and `to` in the normal array -- that is simply how this imposter encodes a cylinder,
         // so both are position data and both have to move when the atoms do. Solving t from the
-        // emitted points (rather than threading it down) means dashed segments and color-split
-        // half-bonds are handled for free: every piece still lies on the a1->a2 axis.
+        // emitted points (rather than threading it down) also handles color-split half-bonds.
+        // Dashed and offset bonds separately disable replay: their layout is not fixed.
         const ctx = GLModel._bondCtx;
         if (ctx && ctx.geometry === geo) {
             ctx.model.recordSpan(geo, geoGroup, GLModel.ARR_VERTEX, startv, 4,
@@ -1418,11 +1417,15 @@ export class GLModel {
                     }
 
                     if (isAromatic && aromaticStyle === "circle") {
+                        // A degenerate ring may emit no torus now but become visible next frame.
+                        this._coordMapComplete = false;
                         const torusColor = perBondDashed || dashedColor || C1;
                         this.drawAromaticRingTorus(atom, atom2, torusGeo, bondR, torusColor);
                     }
                 }
                 else if (renderBondOrder > 1) {
+                    // Reject even tiny side offsets that solveT's numerical tolerance may accept.
+                    this._coordMapComplete = false;
                     //multi bond caps
                     var mfromCap = 0;
                     var mtoCap = 0;
@@ -1709,11 +1712,13 @@ export class GLModel {
         }
 
         if (options.supportsImposters) {
+            // Each sphere, translucent sphere or joint-cap geometry emits at most one quad per atom.
+            const sphereVertexCapacity = atoms.length * 4;
             torusGeometry = new Geometry(true);
             torusGeometry.imposter = true;
             torusGeometry.radii = true; // radiusArray encodes outerR + billboard corner
             drawSphereFunc = this.drawAtomImposter;
-            sphereGeometry = new Geometry(true);
+            sphereGeometry = new Geometry(true, false, false, false, sphereVertexCapacity);
             sphereGeometry.imposter = true;
             // Per-atom opacity (issue #166): translucent atoms get their OWN geometry so the
             // opaque ones stay in the opaque pass (see _transSphereGeo). Only this twin
@@ -1722,13 +1727,13 @@ export class GLModel {
             // cannot fire, every sphere lands in sphereGeometry, and the whole feature is
             // inert -- which is what keeps uniform-opacity models on their legacy path.
             if (sphereOpacityVaries) {
-                this._transSphereGeo = new Geometry(true);
+                this._transSphereGeo = new Geometry(true, false, false, false, sphereVertexCapacity);
                 this._transSphereGeo.imposter = true;
                 this._transSphereGeo.alpha = true;
             }
             stickGeometry = new Geometry(true, true);
             stickGeometry.imposter = true;
-            stickGeometry.sphereGeometry = new Geometry(true); //for caps
+            stickGeometry.sphereGeometry = new Geometry(true, false, false, false, sphereVertexCapacity); //for caps
             stickGeometry.sphereGeometry.imposter = true;
             stickGeometry.drawnCaps = {};
         }
@@ -1753,6 +1758,16 @@ export class GLModel {
             // set up appropriate intersection spheres for clickable atoms
 
             if (atom && atom.style) {
+
+                // These representations have no coordinate recipes. Check requested styles,
+                // since a degenerate conformation may not emit their geometry until later.
+                const style = atom.style;
+                if ((style.cross && !style.cross.hidden) ||
+                    (style.cartoon && !style.cartoon.hidden) ||
+                    (!options.supportsImposters && ((style.sphere && !style.sphere.hidden) ||
+                        (style.stick && !style.stick.hidden)))) {
+                    this._coordMapComplete = false;
+                }
 
                 if ((atom.clickable || atom.hoverable) && atom.intersectionShape === undefined)
                     atom.intersectionShape = { sphere: [], cylinder: [], line: [], triangle: [] };
@@ -2202,7 +2217,8 @@ export class GLModel {
      * @param {number} framenum - model's atoms are set to this index in frames list
      * @param {Object} options - {fast: true} replays the frame's coordinates into the existing
      *   geometry via syncAtomPositions() instead of rebuilding it; falls back to a rebuild when
-     *   the replay cannot apply. Off by default.
+     *   the replay cannot apply. Off by default. Without fast, even the current frame is
+     *   rebuilt to reflect direct atom edits and changes to external color-function state.
      * @return {Promise}
      */
     public setFrame(framenum: number, options: { fast?: boolean } = {}) {
@@ -2258,7 +2274,7 @@ export class GLModel {
             }
             else {
                 model.atoms = model.frames[framenum];
-                // a different atom list, same atoms in the same order: indices resolve into it
+                // A single frame can still have direct atom edits or dynamic colors.
                 if (!options.fast || !model.syncAtomPositions()) model.molObj = null;
                 resolve();
             }
@@ -3285,22 +3301,25 @@ export class GLModel {
      *
      * Intended for animation: mutate `model.selectedAtoms()` / `model.atoms` x/y/z however you
      * like (linear interpolation between two conformations, torsion-space folding, MD frames)
-     * and then call this to update rendered positions. By default, setFrame and setCoordinates
+     * and then call this to update rendered positions. Atom order, bonds, styles, colors, radii
+     * and assembly metadata must stay fixed; this method does not validate those values.
+     * By default, setFrame and setCoordinates
      * invalidate geometry for rebuilding; setFrame's fast option also uses this method.
      * Here only position data changes, so colors, radii, per-atom alphas and face indices
      * are left alone and the renderer respecifies just the affected buffers.
      *
-     * Covers sphere imposters, stick imposters (including their joint caps and color-split
-     * half-bonds) and lines. NOT covered: cartoon, cross, surface, instanced and non-imposter
-     * (tessellated) geometry -- a model showing those still needs a full regeneration. Requires
+     * Covers sphere imposters, solid single-bond stick imposters (including their joint caps
+     * and color-split half-bonds) and single-bond lines. Cartoon, cross, aromatic rings, dashed
+     * or offset bonds, instanced and tessellated geometry require regeneration. Models with
+     * clickable, hoverable or context-menu atoms also require regeneration to refresh picking.
+     * Viewer-managed surfaces are not updated by this method. Requires
      * that the model has already been rendered once, since there is otherwise no geometry to
      * update.
      *
      * @return true if positions were written. False means nothing was touched and the caller
      *         should fall back to a full rebuild: either the model has not been rendered yet,
-     *         nothing trackable is styled, or the geometry contains something inexpressible as
-     *         a point on a bond axis (multi-bond side offsets), in which case a partial update
-     *         would leave visibly stale geometry behind.
+     *         nothing trackable is styled, picking needs rebuilding, or the geometry contains
+     *         something the coordinate recipes cannot update completely.
      */
     public syncAtomPositions(opts?: { scale?: (atom: AtomSpec) => number; bondThreshold?: number; }): boolean {
         var map = this._coordMap;
@@ -3310,6 +3329,12 @@ export class GLModel {
         // against; a different length means indices would land on the wrong atoms.
         var atoms = this.atoms;
         if (atoms.length !== this._coordAtomCount) return false;
+        // Picking uses separate spheres/cylinders/lines, which these recipes do not update.
+        // Check the current frame as well as the built geometry, before touching any buffers.
+        for (let i = 0; i < atoms.length; i++) {
+            const atom = atoms[i];
+            if (!atom || atom.clickable || atom.hoverable || atom.contextMenuEnabled) return false;
+        }
 
         var scale = opts && opts.scale;
         var bondThreshold = (opts && opts.bondThreshold !== undefined) ? opts.bondThreshold : 0.5;

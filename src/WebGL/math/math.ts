@@ -1044,20 +1044,18 @@ export class Vector3 {
     // newv = v + q.w * t + cross(q.xyz, t)
     // this from molecularmusings
     // http://molecularmusings.wordpress.com/2013/05/24/a-faster-quaternion-vector-multiplication/
-    const t: { x?: number; y?: number; z?: number } = {};
-    t.x = 2 * (y * qz - z * qy);
-    t.y = 2 * (z * qx - x * qz);
-    t.z = 2 * (x * qy - y * qx);
+    const tx = 2 * (y * qz - z * qy);
+    const ty = 2 * (z * qx - x * qz);
+    const tz = 2 * (x * qy - y * qx);
 
     // cross t with q
-    const t2: { x?: number; y?: number; z?: number } = {};
-    t2.x = t.y * qz - t.z * qy;
-    t2.y = t.z * qx - t.x * qz;
-    t2.z = t.x * qy - t.y * qx;
+    const t2x = ty * qz - tz * qy;
+    const t2y = tz * qx - tx * qz;
+    const t2z = tx * qy - ty * qx;
 
-    this.x = x + qw * t.x + t2.x;
-    this.y = y + qw * t.y + t2.y;
-    this.z = z + qw * t.z + t2.z;
+    this.x = x + qw * tx + t2x;
+    this.y = y + qw * ty + t2y;
+    this.z = z + qw * tz + t2z;
 
     return this;
   }
@@ -1150,19 +1148,16 @@ export class Vector3 {
     axis.normalize();
     const cosang = Math.cos(ang);
     const sinang = Math.sin(ang);
-    // Rodrigues' rotation formula, from wikipedia
-    const term1 = this.clone().multiplyScalar(cosang);
-    const term2 = axis.clone().cross(this).multiplyScalar(sinang);
-    const term3 = axis
-      .clone()
-      .multiplyScalar(axis.clone().dot(this))
-      .multiplyScalar(1 - cosang);
+    // Rodrigues' rotation formula. Capture after normalization in case axis === this.
+    const { x, y, z } = this;
+    // Preserve the Vector3 constructor defaults previously applied by clone().
+    const ax = axis.x || 0, ay = axis.y || 0, az = axis.z || 0;
+    const dot = ax * x + ay * y + az * z;
+    const scale = 1 - cosang;
 
-    const rot = term1.add(term2).add(term3);
-
-    this.x = rot.x;
-    this.y = rot.y;
-    this.z = rot.z;
+    this.x = ((x || 0) * cosang + (ay * z - az * y) * sinang) + (ax * dot) * scale;
+    this.y = ((y || 0) * cosang + (az * x - ax * z) * sinang) + (ay * dot) * scale;
+    this.z = ((z || 0) * cosang + (ax * y - ay * x) * sinang) + (az * dot) * scale;
 
     return this;
   }

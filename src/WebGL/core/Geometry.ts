@@ -391,20 +391,25 @@ export class Geometry extends EventDispatcher {
   normalsNeedUpdate: boolean = false;
   colorsNeedUpdate: boolean = false;
   buffersNeedUpdate: boolean = false;
+  /** Four-vertex, two-triangle imposters; set before allocating geometry groups. */
   imposter: boolean = false;
   instanced: boolean = false;
   geometryGroups: GeometryGroup[] = [];
   groups: number = 0;
   sphereGeometry?: Geometry;
   drawnCaps?: any;
-  
-  constructor(mesh = false, radii = false, offset = false, alpha=false) {
+  private readonly vertexCapacity: number;
+
+  // vertexCapacity is an allocation hint for imposter groups; ordinary meshes use BUFFERSIZE.
+  constructor(mesh = false, radii = false, offset = false, alpha=false, vertexCapacity = BUFFERSIZE) {
     super();
     this.id = GeometryIDCount++;
     this.mesh = mesh; // Does this geometry represent a mesh (i.e. do we need Face/Line index buffers?)
     this.radii = radii;
     this.alpha = alpha;
     this.offset = offset; //offset buffer used for instancing
+    this.vertexCapacity = Number.isFinite(vertexCapacity) ?
+      Math.min(BUFFERSIZE, Math.max(4, Math.ceil(vertexCapacity))) : BUFFERSIZE;
   }
 
   //Get geometry group to accomodate addVertices new vertices - create
@@ -417,7 +422,7 @@ export class Geometry extends EventDispatcher {
       !retGroup ||
       retGroup.vertices + addVertices > (retGroup?.vertexArray?.length || 0) / 3
     )
-      retGroup = this.addGeoGroup();
+      retGroup = this.addGeoGroup(addVertices);
 
     return retGroup;
   }
@@ -433,28 +438,31 @@ export class Geometry extends EventDispatcher {
     return ret;
   }
 
-  addGeoGroup() {
+  addGeoGroup(minVertices = 0) {
+    // A reservation can exceed the hint, but never the existing 16-bit vertex limit.
+    const capacity = this.imposter ?
+      Math.min(BUFFERSIZE, Math.max(this.vertexCapacity, Math.ceil(minVertices || 0))) : BUFFERSIZE;
     var ret = new GeometryGroup(this.geometryGroups.length);
     this.geometryGroups.push(ret);
     this.groups = this.geometryGroups.length;
   
-    ret.vertexArray = new Float32Array(BUFFERSIZE * 3);
-    ret.colorArray = new Float32Array(BUFFERSIZE * 3);
+    ret.vertexArray = new Float32Array(capacity * 3);
+    ret.colorArray = new Float32Array(capacity * 3);
   
-    //TODO: instantiating uint arrays according to max number of vertices
-    // is dangerous, since there exists the possibility that there will be
-    // more face or line indices than vertex points - but so far that doesn't
-    // seem to be the case for any of the renders
     if (this.mesh) {
-      ret.normalArray = new Float32Array(BUFFERSIZE * 3);
-      ret.faceArray = new Uint16Array(BUFFERSIZE * 6);
-      ret.lineArray = new Uint16Array(BUFFERSIZE * 6);
+      ret.normalArray = new Float32Array(capacity * 3);
+      // Six indices per complete imposter quad. Other meshes retain spare index capacity.
+      const faceCapacity = this.imposter ? Math.floor(capacity / 4) * 6 : BUFFERSIZE * 6;
+      ret.faceArray = new Uint16Array(faceCapacity);
+      // Imposter writers do not generate wireframe edges. setLineIndices() can still
+      // allocate an exact-sized array if wireframe indices are requested later.
+      if (!this.imposter) ret.lineArray = new Uint16Array(BUFFERSIZE * 6);
     }
     if (this.radii) {
-      ret.radiusArray = new Float32Array(BUFFERSIZE);
+      ret.radiusArray = new Float32Array(capacity);
     }
     if (this.alpha) {
-      ret.alphaArray = new Float32Array(BUFFERSIZE);
+      ret.alphaArray = new Float32Array(capacity);
     }
     ret.useOffset = this.offset;
   

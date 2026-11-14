@@ -121,7 +121,11 @@ export function intersectObject(group: { matrixWorld: Matrix4; }, clickable: { h
       triangle.copy(intersectionShape.triangle[i]);
       triangle.applyMatrix4(group.matrixWorld);
 
-      norm = triangle.getNormal();
+      // The normal is consumed before v1/v2 are reused for barycentric coordinates.
+      // Match getNormal()'s clone defaults and arithmetic without allocating a vector.
+      norm = v1.set(triangle.a.x || 0, triangle.a.y || 0, triangle.a.z || 0).sub(triangle.b);
+      v2.subVectors(triangle.c, triangle.b);
+      norm.cross(v2).normalize();
 
       normProj = raycaster.ray.direction.dot(norm);
 

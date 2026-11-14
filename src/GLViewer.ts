@@ -90,6 +90,14 @@ export class GLViewer {
     // private class variables
     private static readonly canvasOwners = new WeakMap<HTMLCanvasElement, { viewers: Set<GLViewer>; owned: boolean }>();
     private destroyed = false;
+    private interactiveFrame?: number;
+    private interactiveFrameWindow?: Window;
+    private interactiveMatricesDirty = false;
+    private readonly onInteractiveFrame = () => {
+        this.interactiveFrame = undefined;
+        this.interactiveFrameWindow = undefined;
+        this.show();
+    };
     private eventBody?: HTMLElement;
     private eventWindow?: Window;
     private static numWorkers = 4; // number of threads for surface generation
@@ -479,10 +487,50 @@ export class GLViewer {
         }
     };
 
+    // Apply every input event's transforms, but draw only once per display frame.
+    private requestInteractiveRender() {
+        if (this.destroyed) return;
+        // Linked/stereo viewers can handle the same input on a shared canvas.
+        // Keep their existing synchronous propagation and event ordering.
+        if (this.linkedViewers.length || this.linkedFrom.size) {
+            this.show();
+            return;
+        }
+        this.interactiveMatricesDirty = true;
+        if (this.interactiveFrame === undefined) {
+            this.interactiveFrameWindow = this.glDOM.ownerDocument.defaultView || window;
+            this.interactiveFrame = this.interactiveFrameWindow.requestAnimationFrame(this.onInteractiveFrame);
+        }
+    }
+
+    private cancelInteractiveRender() {
+        if (this.interactiveFrame !== undefined) {
+            this.interactiveFrameWindow.cancelAnimationFrame(this.interactiveFrame);
+            this.interactiveFrame = undefined;
+            this.interactiveFrameWindow = undefined;
+        }
+    }
+
+    private flushInteractiveRender() {
+        if (this.interactiveFrame !== undefined) this.show();
+    }
+
+    // Picking and coordinate conversions must see input that has not been drawn yet.
+    private syncInteractiveMatrices() {
+        if (!this.interactiveMatricesDirty || this.destroyed || !this.scene) return;
+        this.setSlabAndFog();
+        if (this.renderer.autoUpdateScene) this.scene.updateMatrixWorld();
+        if (this.camera.parent === undefined) this.camera.updateMatrixWorld();
+        this.camera.matrixWorldInverse.getInverse(this.camera.matrixWorld);
+        this.interactiveMatricesDirty = false;
+    }
+
     // display scene
     //if nolink is set/true, don't propagate changes to linked viewers
     private show(nolink?) {
         if (this.destroyed) return;
+        this.cancelInteractiveRender();
+        this.interactiveMatricesDirty = false;
         this.renderer.setViewport();
         if (!this.scene)
             return;
@@ -508,37 +556,21 @@ export class GLViewer {
     //regenerate the list of clickables
     //also updates hoverables
     private updateClickables() {
-        this.clickables.splice(0, this.clickables.length);
-        this.hoverables.splice(0, this.hoverables.length);
-        this.contextMenuEnabledObjects.splice(0, this.contextMenuEnabledObjects.length);
+        this.clickables.length = 0;
+        this.hoverables.length = 0;
+        this.contextMenuEnabledObjects.length = 0;
 
         for (let i = 0, il = this.models.length; i < il; i++) {
-            let model = this.models[i];
-            if (model) {
-                let atoms = model.selectedAtoms({
-                    clickable: true
-                });
-
-                let hoverable_atoms = model.selectedAtoms({
-                    hoverable: true
-                });
-
-                let contextMenuEnabled_atom = model.selectedAtoms({ contextMenuEnabled: true });
-                // Array.prototype.push.apply(hoverables,hoverable_atoms);
-                for (let n = 0; n < hoverable_atoms.length; n++) {
-                    this.hoverables.push(hoverable_atoms[n]);
-                }
-
-                // Array.prototype.push.apply(clickables, atoms); //add atoms into clickables
-                for (let m = 0; m < atoms.length; m++) {
-                    this.clickables.push(atoms[m]);
-                }
-
-                // add atoms into contextMenuEnabledObjects
-                for (let m = 0; m < contextMenuEnabled_atom.length; m++) {
-                    this.contextMenuEnabledObjects.push(contextMenuEnabled_atom[m]);
-                }
-
+            const model = this.models[i];
+            if (!model) continue;
+            const atoms = model.getInternalState().atoms;
+            for (let j = 0, n = atoms.length; j < n; j++) {
+                const atom = atoms[j];
+                if (!atom) continue;
+                // Match selectedAtoms({flag: true}), including its loose equality.
+                if (atom.clickable == true) this.clickables.push(atom);
+                if (atom.hoverable == true) this.hoverables.push(atom);
+                if (atom.contextMenuEnabled == true) this.contextMenuEnabledObjects.push(atom);
             }
         }
         for (let i = 0, il = this.shapes.length; i < il; i++) {
@@ -912,6 +944,7 @@ export class GLViewer {
     * @return {Object[]} Intersection records sorted by distance, nearest first.
     */
     public targetedObjects(x: number, y: number, objects) {
+        this.syncInteractiveMatrices();
         var mouse = {
             x: x,
             y: y,
@@ -930,6 +963,7 @@ export class GLViewer {
      * @return {Object|Object[]} A point or list of points with x and y page coordinates, matching the input shape.
      */
     public modelToScreen(coords) {
+        this.syncInteractiveMatrices();
         let returnsingle = false;
         if (!Array.isArray(coords)) {
             coords = [coords];
@@ -947,8 +981,10 @@ export class GLViewer {
 
         let results = [];
         let offset = this.canvasOffset();
+        // Local to this call so nested projections keep their own working vector.
+        const t = coords.length ? new Vector3() : null;
         coords.forEach(coord => {
-            let t = new Vector3(coord.x, coord.y, coord.z);
+            t.set(coord.x || 0, coord.y || 0, coord.z || 0);
             t.applyMatrix4(this.modelGroup.matrixWorld);
             this.projector.projectVector(t, this.camera);
             let screenX = (this.WIDTH / ratioX) * (t.x + 1) / 2.0 + offset.left + viewxoff;
@@ -967,6 +1003,7 @@ export class GLViewer {
      * @return {Vector3} Model displacement.
     */
     public screenOffsetToModel(x: number, y: number, modelz?) {
+        this.syncInteractiveMatrices();
         var dx = x / this.WIDTH;
         var dy = y / this.HEIGHT;
         var zpos = (modelz === undefined ? this.rotationGroup.position.z : modelz);
@@ -989,22 +1026,29 @@ export class GLViewer {
      * @return {number} Distance in model units.
     */
     public screenToModelDistance(screen: XYZ, model) {
+        this.syncInteractiveMatrices();
         let offset = this.canvasOffset();
 
         //convert model to screen to get screen z
         let mvec = new Vector3(model.x, model.y, model.z);
         mvec.applyMatrix4(this.modelGroup.matrixWorld);
-        let m = mvec.clone();
+        // Retain the world point as scalars while reusing mvec for unprojection.
+        // Keep Vector3's constructor defaults when replacing the former copies.
+        const mx = mvec.x || 0, my = mvec.y || 0, mz = mvec.z || 0;
         this.projector.projectVector(mvec, this.camera);
 
-        let t = new Vector3((screen.x - offset.left) * 2 / this.WIDTH - 1, (screen.y - offset.top) * 2 / -this.HEIGHT + 1, mvec.z);
-        this.projector.unprojectVector(t, this.camera);
+        mvec.set(((screen.x - offset.left) * 2 / this.WIDTH - 1) || 0,
+            ((screen.y - offset.top) * 2 / -this.HEIGHT + 1) || 0, mvec.z || 0);
+        this.projector.unprojectVector(mvec, this.camera);
 
-        return t.distanceTo(m);
+        const dx = mvec.x - mx, dy = mvec.y - my, dz = mvec.z - mz;
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
     };
 
     /**
      * Set a callback to call when the view has potentially changed.
+     * Mouse/touch redraws are coalesced to display frames, except for linked viewers;
+     * the callback runs after each draw, rather than after every input event.
      * @param {function|null} callback - Receives the array returned by getView(); null clears the callback.
      *
     */
@@ -1188,6 +1232,8 @@ export class GLViewer {
 
     public _handleMouseUp(ev) {
         if (this.destroyed) return;
+        this.flushInteractiveRender();
+        if (this.destroyed) return;
         // handle touch
         this.touchHold = false;
 
@@ -1231,14 +1277,22 @@ export class GLViewer {
             this.rotationGroup.position.z -= mult * scaleFactor * wd / 400;
         }
         this.rotationGroup.position.z = this.adjustZoomToLimits(this.rotationGroup.position.z);
-        this.show();
+        this.requestInteractiveRender();
     };
 
     /**
      * Return image URI of viewer contents (base64 encoded).     *
      */
     public pngURI() {
-        return this.getCanvas().toDataURL('image/png');
+        const canvas = this.getCanvas();
+        // A grid screenshot includes every viewer sharing this canvas.
+        const owners = GLViewer.canvasOwners.get(canvas);
+        if (owners) {
+            for (const viewer of owners.viewers) viewer.flushInteractiveRender();
+        } else {
+            this.flushInteractiveRender();
+        }
+        return canvas.toDataURL('image/png');
     };
 
     /**
@@ -1434,7 +1488,7 @@ export class GLViewer {
             this.rotationGroup.quaternion.multiply(this.dq);
             this.rotationGroup.quaternion.multiply(this.cq);
         }
-        this.show();
+        this.requestInteractiveRender();
     };
 
     /** User specified function for handling a context menu event.
@@ -1499,6 +1553,7 @@ export class GLViewer {
         } else {
             this.checkContainerRemoval?.();
         }
+        this.flushInteractiveRender();
         return this;
     };
 
@@ -1918,20 +1973,10 @@ export class GLViewer {
             axis = { x: vaxis.x, y: vaxis.y, z: vaxis.z };
         }
 
-        var qFromAngle = function (rangle) {
-            var s = Math.sin(rangle / 2.0);
-            var c = Math.cos(rangle / 2.0);
-            var i = 0, j = 0, k = 0;
-
-            i = axis.x * s;
-            j = axis.y * s;
-            k = axis.z * s;
-
-            return new Quaternion(i, j, k, c).normalize();
-        };
-
         var rangle = Math.PI * angle / 180.0;
-        var q = qFromAngle(rangle);
+        var s = Math.sin(rangle / 2.0), c = Math.cos(rangle / 2.0);
+        // Consumed before show() or animation callbacks; mouse rotation also resets dq.
+        var q = this.dq.set((axis.x * s) || 0, (axis.y * s) || 0, (axis.z * s) || 0, c).normalize();
 
         if (animationDuration) {
             var final = new Quaternion().copy(this.rotationGroup.quaternion).multiply(q);//final
@@ -2317,6 +2362,7 @@ export class GLViewer {
     });
      */
     public translate(x: number, y: number, animationDuration: number = 0, fixedPath: boolean = false) {
+        this.syncInteractiveMatrices();
         var dx = x / this.WIDTH;
         var dy = y / this.HEIGHT;
         var v = new Vector3(0, 0, -this.CAMERA_Z);
@@ -3708,7 +3754,8 @@ export class GLViewer {
      *
      * @param {number} framenum - frame index to use, starts at zero
      * @param {Object} options - {fast: true} replays the frame's coordinates into each model's
-     *   existing geometry instead of rebuilding it (see GLModel.setFrame); off by default
+     *   existing geometry instead of rebuilding it (see GLModel.setFrame); off by default.
+     *   Without fast, this refreshes geometry even when the selected frame has not changed.
      * @return {Promise}
      */
     public setFrame(framenum: number, options: { fast?: boolean } = {}) {
@@ -3765,6 +3812,8 @@ export class GLViewer {
      * @param {Object} options - can specify interval (speed of animation), loop (direction
      * of looping, 'backward', 'forward' or 'backAndForth'), step interval between frames ('step'), startFrame, reps (number of repetitions, 0 indicates infinite loop),
      * and fast (replay coordinates into existing geometry instead of rebuilding each frame; see setFrame).
+     * By default, models with one frame are also refreshed so direct atom edits and dynamic
+     * color functions take effect during playback.
      *
      */
 
@@ -4516,7 +4565,7 @@ export class GLViewer {
 
         var verts = geoGroup.vertexArray;
         var normalArray = geoGroup.normalArray;
-        var vA, vB, vC, norm;
+        var vA = new Vector3(), vB = new Vector3(), vC = new Vector3(), norm;
 
         // Setup colors, faces, and normals
         for (let i = 0, il = faces.length; i < il; i += 3) {
@@ -4527,12 +4576,12 @@ export class GLViewer {
 
             // setup Normals
             // todo - calculate normals in parallel code
-            vA = new Vector3(verts[offsetA], verts[offsetA + 1],
-                verts[offsetA + 2]);
-            vB = new Vector3(verts[offsetB], verts[offsetB + 1],
-                verts[offsetB + 2]);
-            vC = new Vector3(verts[offsetC], verts[offsetC + 1],
-                verts[offsetC + 2]);
+            vA.set(verts[offsetA] || 0, verts[offsetA + 1] || 0,
+                verts[offsetA + 2] || 0);
+            vB.set(verts[offsetB] || 0, verts[offsetB + 1] || 0,
+                verts[offsetB + 2] || 0);
+            vC.set(verts[offsetC] || 0, verts[offsetC + 1] || 0,
+                verts[offsetC + 2] || 0);
 
             vC.subVectors(vC, vB);
             vA.subVectors(vA, vB);
@@ -5223,6 +5272,8 @@ export class GLViewer {
     public destroy(): GLViewer {
         if (this.destroyed) return this;
         this.destroyed = true;
+        this.cancelInteractiveRender();
+        this.interactiveMatricesDirty = false;
         this.removalObserver?.disconnect();
         clearTimeout(this.removalTimeout);
         this.removalObserver = this.removalTimeout = this.checkContainerRemoval = undefined;
@@ -5353,6 +5404,9 @@ export class GLViewer {
      * @param {GLViewer} otherviewer
      */
     public linkViewer(otherviewer: GLViewer) {
+        if (this.destroyed || otherviewer.isDestroyed()) return this;
+        this.flushInteractiveRender();
+        otherviewer.flushInteractiveRender();
         if (this.destroyed || otherviewer.isDestroyed()) return this;
         this.linkedViewers.push(otherviewer);
         if (!otherviewer.linkedFrom) otherviewer.linkedFrom = new Set();

@@ -141,6 +141,8 @@ export class Renderer {
 
   //framebuffer variables
   private _fb = null;
+  private _framebufferWidth = -1;
+  private _framebufferHeight = -1;
   private _targetTexture = null;
   private _depthTexture = null;
   private _shadingTexture = null;
@@ -273,6 +275,7 @@ export class Renderer {
     this._screenshader = this._AOshader = this._blurshader = null;
     this._targetTexture = this._depthTexture = this._shadingTexture = this._scratchTexture = null;
     this._screenQuadVBO = this._fb = null;
+    this._framebufferWidth = this._framebufferHeight = -1;
     this._outlineMaterial = this._outlineSphereImposterMaterial = this._outlineStickImposterMaterial = null;
     this._currentProgram = this._currentCamera = this._currentGeometryGroupHash = null;
     this._currentMaterialId = -1;
@@ -352,9 +355,9 @@ export class Renderer {
   setViewport() {
     if (this._disposed) return;
     if (this._offscreen) {
-      //set viewport is called before every render, so setup offscreen size here
-      this._offscreen.width = this._canvas.width;
-      this._offscreen.height = this._canvas.height;
+      // The offscreen canvas is shared: another viewer may have changed its size.
+      if (this._offscreen.width !== this._canvas.width) this._offscreen.width = this._canvas.width;
+      if (this._offscreen.height !== this._canvas.height) this._offscreen.height = this._canvas.height;
     }
     if (
       this.rows != undefined &&
@@ -740,10 +743,10 @@ export class Renderer {
   setShading(scene, camera, materialType) {
     if (!this.canRenderAmbientOcclusion()) return;
 
-    //identify all matching objects
+    // Keep the first match for projection setup; prepare depth materials for all matches.
     let lights = scene.__lights;
     let fog = scene.fog;
-    let renderList = [];
+    let firstObject = null;
 
     for (let i = 0, il = scene.__webglObjects.length; i < il; i++) {
       let webglObject = scene.__webglObjects[i];
@@ -755,11 +758,11 @@ export class Renderer {
           depthMaterial.opacity = 0.0;
           webglObject.opaqueDepth = depthMaterial;
         }
-        renderList.push(webglObject);
+        if (firstObject === null) firstObject = webglObject.object;
       }
     }
 
-    if (renderList.length == 0) return;
+    if (firstObject === null) return;
 
     //setup shading texture as depth buffer
     this._gl.framebufferTexture2D(
@@ -805,12 +808,8 @@ export class Renderer {
     this._gl.uniform1f(p_uniforms.total_strength, this._AOstrength);
     this._gl.uniform1f(p_uniforms.radius, this._AOradius);
 
-    //setup full projection matrix from model to screen and inverted
-    //use first object
-    this._fullProjModelMatrix = new Matrix4();
-    this._fullProjModelMatrixInv = new Matrix4();
-    let object = renderList[0].object;
-    this._fullProjModelMatrix.multiplyMatrices(camera.projectionMatrix, object._modelViewMatrix);
+    // Reuse the projection scratch matrices with the first matching object.
+    this._fullProjModelMatrix.multiplyMatrices(camera.projectionMatrix, firstObject._modelViewMatrix);
     this._fullProjModelMatrixInv.getInverse(this._fullProjModelMatrix);
     this._gl.uniformMatrix4fv(
       p_uniforms.projectionMatrix,
@@ -935,6 +934,7 @@ export class Renderer {
     renderList = scene.__webglObjects;
     let hasvolumetric = false;
     let hasAO = this._AOEnabled;
+    let lastMatrixObject = null;
     for (i = 0, il = renderList.length; i < il; i++) {
       webglObject = renderList[i];
       object = webglObject.object;
@@ -942,7 +942,11 @@ export class Renderer {
       webglObject.render = false;
 
       if (object.visible) {
-        this.setupMatrices(object, camera);
+        // addObject stores a mesh's geometry groups consecutively.
+        if (object !== lastMatrixObject) {
+          this.setupMatrices(object, camera);
+          lastMatrixObject = object;
+        }
         this.unrollBufferMaterial(webglObject);
         webglObject.render = true;
         if (webglObject.volumetric) hasvolumetric = true;
@@ -1008,25 +1012,9 @@ export class Renderer {
   }
 
 
-  //setup framebuffer for drawing into, assumes buffers already allocated
-  setFrameBuffer() {
-    if (this._disposed) return;
-    if (this.isWebGL1() || !this._fb) return;
-    if (!this._screenshader) {
-      // Keep ordinary geometry and labels visible if presentation fails.
-      this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
-      this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
-      this._gl.scissor(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
-      this.setViewport(); // Restore the appropriate cell for a viewer grid.
-      return;
-    }
-    let width = this._viewportWidth;
-    let height = this._viewportHeight;
-
-    //when using framebuffer, always draw from origin, will shift the viewport when we render
-    this._gl.enable(this._gl.SCISSOR_TEST);
-    this._gl.scissor(0, 0, width, height);
-    this._gl.viewport(0, 0, width, height);
+  // Texture storage belongs to this renderer, even when its GL context is shared.
+  private resizeFrameBufferTextures(width: number, height: number) {
+    if (width === this._framebufferWidth && height === this._framebufferHeight) return;
 
     //color texture
     this._gl.bindTexture(this._gl.TEXTURE_2D, this._targetTexture);
@@ -1066,10 +1054,6 @@ export class Renderer {
 
     //shading texture - for AO and maybe eventually shadows? I don't like shadows
     if (this._shadingTexture) {
-      //for whatever reason, chrome seems to require this manual memory management
-      //for these textures, at least in the auto tests webpage where many viewers are being created/destroyed
-      this._gl.deleteTexture(this._shadingTexture);
-      this._shadingTexture = this._gl.createTexture();
       this._gl.bindTexture(this._gl.TEXTURE_2D, this._shadingTexture);
       this._gl.texImage2D(
         this._gl.TEXTURE_2D,
@@ -1088,8 +1072,6 @@ export class Renderer {
       this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
 
       //scratch texture, needed by AO to do blur
-      this._gl.deleteTexture(this._scratchTexture);
-      this._scratchTexture = this._gl.createTexture();
       this._gl.bindTexture(this._gl.TEXTURE_2D, this._scratchTexture);
       this._gl.texImage2D(
         this._gl.TEXTURE_2D,
@@ -1108,6 +1090,32 @@ export class Renderer {
       this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
 
     }
+    this._framebufferWidth = width;
+    this._framebufferHeight = height;
+  }
+
+  // Bind and clear every frame; resize texture storage only when needed.
+  setFrameBuffer() {
+    if (this._disposed) return;
+    if (this.isWebGL1() || !this._fb) return;
+    if (!this._screenshader) {
+      // Keep ordinary geometry and labels visible if presentation fails.
+      this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, null);
+      this._gl.viewport(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
+      this._gl.scissor(0, 0, this._gl.drawingBufferWidth, this._gl.drawingBufferHeight);
+      this.setViewport(); // Restore the appropriate cell for a viewer grid.
+      return;
+    }
+    let width = this._viewportWidth;
+    let height = this._viewportHeight;
+
+    //when using framebuffer, always draw from origin, will shift the viewport when we render
+    this._gl.enable(this._gl.SCISSOR_TEST);
+    this._gl.scissor(0, 0, width, height);
+    this._gl.viewport(0, 0, width, height);
+
+    this.resizeFrameBufferTextures(width, height);
+
     //bind fb
     this._gl.bindFramebuffer(this._gl.FRAMEBUFFER, this._fb);
     this._gl.framebufferTexture2D(
@@ -1124,6 +1132,7 @@ export class Renderer {
       this._shadingTexture,
       0
     );
+    this.setDepthWrite(true); // Reused depth storage must be cleared even after a non-writing pass.
     this._gl.clearDepth(1);
     this._gl.clear(this._gl.DEPTH_BUFFER_BIT);  //shading all ones
 
@@ -1144,6 +1153,7 @@ export class Renderer {
     if (this.isWebGL1()) return;
 
     if (!this._fb) {
+      this._framebufferWidth = this._framebufferHeight = -1;
       let width = this._viewportWidth;
       let height = this._viewportHeight;
 
@@ -2003,6 +2013,14 @@ export class Renderer {
       geometryGroup;
 
     if (object instanceof Mesh || object instanceof Line) {
+      // Each group has a render record, but the first update uploads all dirty groups.
+      // Avoid rescanning them for every subsequent record, or for an unchanged view.
+      if (!geometry.verticesNeedUpdate && !geometry.elementsNeedUpdate &&
+          !geometry.colorsNeedUpdate && !geometry.normalsNeedUpdate) {
+        geometry.buffersNeedUpdate = false;
+        return;
+      }
+
       // Animation fast path: when positions are the only thing that moved, respecify the
       // position buffers alone rather than reallocating every array in the group. Colors or
       // elements going dirty (or a group whose buffers don't exist yet) falls back to the full
@@ -2100,7 +2118,9 @@ export class Renderer {
     // Only these pass materials are renderer-owned; the base material and its
     // textures remain owned by the scene object. Deferred retirement lets the
     // replacement passes reuse their programs during this render.
-    disposeMaterials([globject.opaqueDepth, globject.transparentDepth, globject.opaqueShaded].filter(Boolean));
+    if (globject.opaqueDepth || globject.transparentDepth || globject.opaqueShaded) {
+      disposeMaterials([globject.opaqueDepth, globject.transparentDepth, globject.opaqueShaded].filter(Boolean));
+    }
     globject.opaqueDepth = null;
     globject.transparentDepth = null;
     globject.opaqueShaded = null;

@@ -518,7 +518,10 @@ export class StateManager {
         return spec.model === undefined || this.referencesModel(spec, model, modelCount);
     }
 
-    /** Bind an entry to its current surface object, since numeric IDs can be reused. */
+    /** Bind an entry to its current surface object, since numeric IDs can be reused.
+     * @param {UISurface} entry - UI entry that owns the surface.
+     * @param {Surface} surface - Surface object returned by GLViewer.getSurface.
+     */
     private registerSurface(entry: UISurface, surface: ReturnType<GLViewer['getSurface']>): void {
         if (surface) {
             let owners = this.surfaceOwners.get(surface);
