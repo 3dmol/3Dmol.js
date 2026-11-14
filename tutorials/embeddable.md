@@ -18,7 +18,7 @@ The contents of the viewer can be set and manipulated through the use of `data-`
  - **data-cid** The value describes a PubChem compound id to be loaded into the viewer.
  - **data-href** The value is a URL to a molecular data file.
  - **data-element** The value is the id of an HTML element on the current page that has molecular data embedded in it.
- - **data-type** The value is the file format (default pdb; can be pdb, sdf, xyz, mol2, or cube).  
+ - **data-type** The value is the file format (default pdb; examples include pdb, sdf, xyz, mol2, cube, and lammpstrj).
  - **data-backgroundcolor** The background color (default black).
  - **data-backgroundalpha** The background alpha (default opaque: 1.0).
  - **data-options** Options for parser.
@@ -34,13 +34,36 @@ The contents of the viewer can be set and manipulated through the use of `data-`
   - **data-zoomto** An {@link AtomSpec} selection specification to zoom to.
 
  
-Trajectory controls can be enabled independently of the edit dialog:
+Trajectory controls can be enabled independently of the edit dialog. This example
+loads the repository's [aluminum trajectory](https://3dmol.csb.pitt.edu/tests/auto/data/Al.lammpstrj),
+which contains five frames of 256 atoms. Use the play button or frame slider to
+explore the trajectory; only the trajectory controls are enabled.
 
 ```{@lang xml}
-<div style="height: 400px; width: 400px; position: relative;"
-     class="viewer_3Dmoljs" data-href="trajectory.xyz" data-type="xyz"
-     data-options="multimodel:true;frames:true" data-ui-trajectory="true"></div>
+<script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+<script src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>
+
+<div id="trajectory-example"
+     style="height: 400px; width: 400px; max-width: 100%; position: relative;"
+     class="viewer_3Dmoljs"
+     data-href="https://3dmol.org/tests/auto/data/Al.lammpstrj"
+     data-type="lammpstrj" data-options="multimodel:true;frames:true"
+     data-backgroundcolor="white" data-style="sphere:radius=0.05,color=royalblue"
+     data-ui-trajectory="true" data-ui-edit="false"
+     data-callback="function(viewer) { viewer.zoom(4); viewer.render(); }"></div>
 ```
+
+<div id="trajectory-example"
+     style="height: 400px; width: 400px; max-width: 100%; position: relative;"
+     class="viewer_3Dmoljs"
+     data-href="https://3dmol.org/tests/auto/data/Al.lammpstrj"
+     data-type="lammpstrj" data-options="multimodel:true;frames:true"
+     data-backgroundcolor="white" data-style="sphere:radius=0.05,color=royalblue"
+     data-ui-trajectory="true" data-ui-edit="false"
+     data-callback="function(viewer) { viewer.zoom(4); viewer.render(); }"></div>
+
+The callback zooms in on this file's fractional coordinates. The separate UI
+bundle provides the playback controls; `data-ui-edit="false"` disables the edit dialog.
 
 Alternatively, use `data-ui="true" data-ui-edit="false"`. The trajectory bar has a
 minimize button that collapses it to a playback icon in the upper left. When the
