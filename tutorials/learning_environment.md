@@ -127,6 +127,17 @@ your page already supplies a compatible Socket.IO client, it is reused. Set
 policy or offline asset setup requires it. That script must provide a Socket.IO
 4.x client; the session server remains a separate deployment.
 
+### Python notebooks and exported HTML
+
+The [py3Dmol constructor](https://github.com/3dmol/3Dmol.js/blob/master/py3Dmol/README.md#editing-trajectory-and-classroom-controls)
+also enables these controls. Use `learning=True` for the classroom button, or
+`learning={"mode": "hidden", "session": "my-unique-classroom"}` for hidden
+activation. The same dictionary accepts `server`, `hotkey`, and `clientURL`.
+Independent `edit=True` and `trajectory=True` options enable the other viewer
+controls. py3Dmol loads the optional UI bundle automatically, and these options
+work in both notebook displays and exported HTML. See its README for executable
+examples and bundle configuration.
+
 ## Shared scenes
 
 The instructor's edit-menu changes are shared with connected students: model

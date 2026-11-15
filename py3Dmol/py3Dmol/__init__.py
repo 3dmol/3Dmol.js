@@ -2,6 +2,7 @@ import time
 import json
 import sys
 import re
+from urllib.parse import urlsplit, urlunsplit
 
 try:
     import IPython.display
@@ -55,7 +56,8 @@ class view(object):
        browser-side promises are not supported across this one-way interface.
        https://3dmol.org/doc/GLViewer.html
     '''
-    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),format=None,js='https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js'):
+    def __init__(self,query='',width=640,height=480,viewergrid=None,data=None,style=None,linked=True,options=dict(),format=None,js=None,
+                 edit=False,trajectory=False,learning=False,ui_js=None):
         '''Create a 3Dmol.js view.
             width -- container width in pixels (int) or a CSS dimension string
             height -- container height in pixels (int) or a CSS dimension string
@@ -66,7 +68,41 @@ class view(object):
             format -- format of provided data
             style -- style to apply, with viewer grid can be indexed (r,c)
             options -- optional options to provide to $3Dmol.download or addModel
-            js -- 3Dmol.js bundle URL; the first view loads the library for the page'''
+            js -- core bundle URL; defaults to the hosted build when controls are
+                  enabled, otherwise the pinned npm bundle. The first load wins.
+            edit -- show the edit-menu button (default False)
+            trajectory -- show trajectory controls when frames are present (default False)
+            learning -- True for a classroom button, or a LearningConfig dictionary;
+                        hidden mode requires {'mode': 'hidden', 'session': 'unique-id'}.
+                        The server defaults to https://3dmol.org.
+            ui_js -- optional UI bundle URL, otherwise inferred alongside js
+            Controls require a single viewer (viewergrid=(1,1) is also supported).
+            Python queues commands; classroom events do not call back into Python.'''
+        if not isinstance(learning, (bool, dict)):
+            raise TypeError('learning must be a boolean or a configuration dictionary')
+        if isinstance(learning, dict):
+            mode = learning.get('mode', 'button')
+            if mode not in ('button', 'hidden'):
+                raise ValueError("learning mode must be 'button' or 'hidden'")
+            session = learning.get('session')
+            if mode == 'hidden' and (not isinstance(session, str) or not session.strip()):
+                raise ValueError('Hidden classroom mode requires a nonblank session identifier')
+        has_ui = bool(edit or trajectory or learning is True or isinstance(learning, dict))
+        if has_ui and viewergrid and tuple(viewergrid) != (1, 1):
+            raise ValueError('Controls require a single viewer; use separate views instead of a multi-cell viewergrid')
+        if js is None:
+            js = ('https://3dmol.org/build/3Dmol-min.js' if has_ui else
+                  'https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js')
+        if has_ui and ui_js is None:
+            parts = urlsplit(js)
+            path, matches = re.subn(r'(^|/)3Dmol(-min)?\.js$', r'\g<1>3Dmol.ui\g<2>.js', parts.path)
+            if not matches:
+                raise ValueError('Specify ui_js when js does not end in 3Dmol.js or 3Dmol-min.js')
+            ui_js = urlunsplit(parts._replace(path=path))
+        # These values live inside an inline script, not just a JavaScript string.
+        # Escape '<' so a session identifier or URL cannot close the script tag.
+        ui_config = json.dumps({'edit': bool(edit), 'trajectory': bool(trajectory),
+                                'learning': learning}).replace('<', '\\u003c')
         divid = "3dmolviewer_UNIQUEID"
         warnid = "3dmolwarning_UNIQUEID"
         self.uniqueid = None
@@ -102,25 +138,60 @@ var loadScriptAsync = function(uri){
         module = savedmodule;
         resolve();
     };
+    tag.onerror = () => {
+        exports = savedexports;
+        module = savedmodule;
+        reject(new Error('Unable to load ' + uri));
+    };
   var firstScriptTag = document.getElementsByTagName('script')[0];
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 });
 };
 
 if(typeof $3Dmolpromise === 'undefined') {
-$3Dmolpromise = null;
-  $3Dmolpromise = loadScriptAsync('%s');
+  $3Dmolpromise = typeof $3Dmol === 'undefined' ? loadScriptAsync(%s) : Promise.resolve();
 }
 
 var viewer_UNIQUEID = null;
+""" % json.dumps(js).replace('<', '\\u003c')
+
+        dependency = '$3Dmolpromise'
+        if has_ui:
+            self.startjs += """
+if(typeof $3DmolUIpromise === 'undefined') {
+  $3DmolUIpromise = $3Dmolpromise.then(function() {
+    if (typeof $3Dmol.StateManager === 'function') return;
+    return loadScriptAsync(%s);
+  }).then(function() {
+    if (typeof $3Dmol.StateManager !== 'function') {
+      throw new Error('The UI bundle does not provide StateManager. Use matching core and UI builds.');
+    }
+  });
+}
+""" % json.dumps(ui_js).replace('<', '\\u003c')
+            dependency = '$3DmolUIpromise'
+
+        self.startjs += 'var viewer_ready_UNIQUEID = %s.then(function() {\n' % dependency
+        self.startjs += """
 var warn = document.getElementById("%s");
 if(warn) {
     warn.parentNode.removeChild(warn);
 }
-""" % (js,warnid)
+""" % warnid
 
-        self.startjs += "$3Dmolpromise.then(function() {\n";
-        self.endjs = "});\n" + self.endjs
+        self.endjs = '''});
+viewer_ready_UNIQUEID.catch(function(error) {
+    var host = document.getElementById("%s");
+    if (host) {
+        var warning = document.getElementById("%s") || document.createElement('p');
+        warning.id = "%s";
+        warning.style.cssText = 'position:absolute;top:0;background:#ffcccc;color:black';
+        warning.textContent = '3Dmol.js failed to initialize: ' + error.message;
+        host.appendChild(warning);
+    }
+    console.error(error);
+});
+</script>''' % (divid, warnid, warnid)
         self.viewergrid = None
 
         if viewergrid: #create split view
@@ -136,11 +207,18 @@ if(warn) {
             if viewergrid:
                 for r in range(viewergrid[0]):
                     for c in range(viewergrid[1]):
-                        self.startjs += '$3Dmol.download("%s", viewergrid_UNIQUEID[%d][%d], %s, function() {\n' % (query,r,c,json.dumps(options))
-                        self.endjs = "})\n" + self.endjs
+                        self.startjs += 'return $3Dmol.download(%s, viewergrid_UNIQUEID[%d][%d], %s).then(function() {\n' % (json.dumps(query),r,c,json.dumps(options))
+                        self.endjs = "});\n" + self.endjs
             else:
-                self.startjs += '$3Dmol.download("%s", viewer_UNIQUEID, %s, function() {\n' % (query,json.dumps(options))
-                self.endjs = "})\n" + self.endjs
+                self.startjs += 'return $3Dmol.download(%s, viewer_UNIQUEID, %s).then(function() {\n' % (json.dumps(query),json.dumps(options))
+                self.endjs = "});\n" + self.endjs
+
+        finish = ''
+        if has_ui:
+            if learning is True or isinstance(learning, dict):
+                finish += "if (typeof $3Dmol.LearningSession !== 'function') throw new Error('This UI bundle does not support classrooms. Use matching current core and UI builds.');\n"
+            finish += 'new $3Dmol.StateManager(viewer_UNIQUEID, %s);\n' % ui_config
+        self.endjs = finish + 'return viewer_UNIQUEID;\n' + self.endjs
                 
         if viewergrid:
             for r in range(viewergrid[0]):
@@ -213,11 +291,12 @@ if(warn) {
         if self.uniqueid == None:
             script = self._make_html()
         script += '''<script>
-            $3Dmolpromise.then(function() { //wrap in promise for non-interactive functionality
+            viewer_ready_%s.then(function() { //wait for this view's scene and controls
                 %s
                 viewer_%s.render();
+                if (viewer_%s.ui) viewer_%s.ui.refresh();
             });
-            </script>''' % (self.updatejs.replace('UNIQUEID',self.uniqueid),self.uniqueid)
+            </script>''' % (self.uniqueid,self.updatejs.replace('UNIQUEID',self.uniqueid),self.uniqueid,self.uniqueid,self.uniqueid)
         self.updatejs = ''
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
 
@@ -257,8 +336,10 @@ if(warn) {
             raise AssertionError('Must instantiate viewer before generating image.')
         script = '''<img id="img_{0}">
             <script>
+            viewer_ready_{0}.then(function() {{
             var png = viewer_{0}.pngURI()
             document.getElementById('img_{0}').src = png;
+            }});
             </script>'''.format(self.uniqueid)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})
     
@@ -271,8 +352,10 @@ if(warn) {
             raise AssertionError('Must instantiate viewer before generating animated image.')
         script = '''<img id="img_{0}">
             <script>
+            viewer_ready_{0}.then(function() {{
             viewer_{0}.apngURI({1}).then(png => {{
             document.getElementById('img_{0}').src = png; }});
+            }});
             </script>'''.format(self.uniqueid,nframes)
         return IPython.display.publish_display_data({'application/3dmoljs_load.v0':script, 'text/html': script},metadata={})    
         

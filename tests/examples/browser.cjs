@@ -1,5 +1,5 @@
 // npm run test:examples:browser (after building the core and UI bundles).
-// The Python example is executed directly from its README; no network is used.
+// The Python examples are executed directly from their README; no network is used.
 'use strict';
 
 const assert = require('node:assert/strict');
@@ -12,11 +12,15 @@ const root = path.resolve(__dirname, '../..');
 const core = path.join(root, 'build/3Dmol.js');
 const ui = path.join(root, 'build/3Dmol.ui.js');
 
-async function pythonGrid(browser) {
-    const exported = JSON.parse(execFileSync('python3', [path.join(__dirname, 'export_python_grid.py')], {
+function pythonExample(...args) {
+    return JSON.parse(execFileSync('python3', [path.join(__dirname, 'export_python_grid.py'), ...args], {
         cwd: root, encoding: 'utf8'
     }));
-    const libraryURL = exported.html.match(/loadScriptAsync\('([^']+)'\)/)?.[1];
+}
+
+async function pythonGrid(browser) {
+    const exported = pythonExample('exported-grid');
+    const libraryURL = JSON.parse(exported.html.match(/loadScriptAsync\(("[^"]+")\)/)?.[1] || 'null');
     assert.ok(libraryURL, 'Python export should load its configured JavaScript bundle');
     const page = await browser.newPage();
     try {
@@ -74,6 +78,117 @@ async function pythonGrid(browser) {
         assert.deepEqual(requests, [libraryURL], 'The export must not fetch molecule data or other external assets');
         assert.deepEqual(errors, []);
         console.log('Python README grid: exported HTML, cell-specific models/styles, shared canvas, and rendered colors passed.');
+    } finally { await page.close(); }
+}
+
+async function pythonControls(browser) {
+    const button = pythonExample('viewer-controls', '--update');
+    const hidden = pythonExample('hidden-classroom');
+    const query = pythonExample('query-update', '--update');
+    const page = await browser.newPage();
+    try {
+        const errors = [], requests = [];
+        let downloadStarted;
+        const download = new Promise(resolve => { downloadStarted = resolve; });
+        page.on('pageerror', error => errors.push(error.message));
+        await page.setViewport({ width: 700, height: 900, deviceScaleFactor: 1 });
+        await page.setRequestInterception(true);
+        page.on('request', async request => {
+            requests.push(request.url());
+            if (request.url() === 'https://example.test/atoms.xyz') {
+                downloadStarted(request); return;
+            }
+            const file = new Map([
+                ['https://3dmol.org/build/3Dmol-min.js', core],
+                ['https://3dmol.org/build/3Dmol.ui-min.js', ui]
+            ]).get(request.url());
+            if (file) await request.respond({ status: 200, contentType: 'text/javascript', body: fs.readFileSync(file) });
+            else await request.abort();
+        });
+        await page.evaluate(() => {
+            // The classroom protocol has separate server/browser tests. Here a
+            // small socket stand-in checks that Python options reach the real UI.
+            window.sockets = [];
+            window.io = (server, options) => {
+                const handlers = new Map();
+                const socket = {
+                    server, options, connected: true, sent: [],
+                    on(event, callback) { handlers.set(event, callback); },
+                    off(event) { handlers.delete(event); },
+                    emit(event, data) { this.sent.push({ event, data }); },
+                    receive(event, data) { handlers.get(event)?.(data); },
+                    disconnect() { this.connected = false; }
+                };
+                sockets.push(socket); return socket;
+            };
+        });
+        // Queue an update before either bundle has loaded, as notebook cells can.
+        await page.setContent(button.html + button.update + hidden.html + query.html + query.update);
+        let downloadTimeout;
+        const pendingDownload = await Promise.race([
+            download,
+            new Promise((_, reject) => { downloadTimeout = setTimeout(() => reject(new Error('Python query did not start')), 10000); })
+        ]).finally(() => clearTimeout(downloadTimeout));
+        assert.deepEqual(await page.evaluate(id => {
+            const viewer = window['viewer_' + id];
+            return { controls: !!viewer.ui, labels: viewer.getInternalState().labels.length };
+        }, query.id), { controls: false, labels: 0 }, 'Controls and queued updates must wait for the initial query');
+        await pendingDownload.respond({
+            status: 200, contentType: 'text/plain', headers: { 'access-control-allow-origin': '*' },
+            body: '2\nDownloaded atoms\nC 0 0 0\nO 1.2 0 0\n'
+        });
+        await page.evaluate(async ids => {
+            for (const id of ids) {
+                await window['viewer_ready_' + id];
+                await window['viewer_' + id].ui.learning?.ready;
+            }
+        }, [button.id, hidden.id, query.id]);
+        assert.deepEqual(await page.evaluate(id => {
+            const viewer = window['viewer_' + id];
+            return { controls: viewer.ui.getControls(), atoms: viewer.selectedAtoms({}).length,
+                labels: viewer.getInternalState().labels.map(label => label.text) };
+        }, query.id), { controls: { edit: true, trajectory: false }, atoms: 2, labels: ['Python update'] });
+        const result = await page.evaluate(ids => ids.map(id => {
+            const viewer = window['viewer_' + id];
+            return {
+                controls: viewer.ui.getControls(), frames: viewer.getNumFrames(),
+                atoms: viewer.selectedAtoms({}).length,
+                labels: viewer.getInternalState().labels.map(label => label.text),
+                launchHidden: viewer.container.querySelector('.molui-learning-launch').hidden
+            };
+        }), [button.id, hidden.id]);
+        assert.deepEqual(result, [
+            { controls: { edit: true, trajectory: true }, frames: 2, atoms: 2, labels: ['Python update'], launchHidden: false },
+            { controls: { edit: false, trajectory: false }, frames: 1, atoms: 2, labels: [], launchHidden: true }
+        ]);
+        assert.deepEqual(requests, [
+            'https://3dmol.org/build/3Dmol-min.js', 'https://3dmol.org/build/3Dmol.ui-min.js',
+            'https://example.test/atoms.xyz'
+        ], 'Multiple Python views should load core then UI once each');
+        assert.deepEqual(await page.evaluate(() => sockets.map(socket => socket.server)), ['https://3dmol.org', 'https://3dmol.org']);
+        const buttonHost = `[id="3dmolviewer_${button.id}"]`, hiddenHost = `[id="3dmolviewer_${hidden.id}"]`;
+        await page.click(buttonHost + ' .molui-learning-launch');
+        assert.equal(await page.$eval(buttonHost + ' .molui-learning-dialog', el => el.hidden), false);
+        await page.focus(hiddenHost);
+        await page.keyboard.down('Control'); await page.keyboard.down('Alt'); await page.keyboard.press('KeyI');
+        await page.keyboard.up('Alt'); await page.keyboard.up('Control');
+        await page.waitForFunction(() => sockets[1].sent.some(message => message.event === 'create session event'));
+        const room = 'py3dmol-bonding-class-a';
+        assert.equal(await page.evaluate(() => sockets[1].sent.find(message => message.event === 'create session event').data.name), room);
+        await page.evaluate(async ({ button, hidden, room }) => {
+            sockets[1].receive('create session response', 123);
+            await window['viewer_' + button].ui.learning.join(room);
+            sockets[0].receive('join session response', 'student-id');
+        }, { button: button.id, hidden: hidden.id, room });
+        assert.deepEqual(await page.evaluate(ids => ids.map(id => {
+            const state = window['viewer_' + id].ui;
+            return { role: state.learning.getRole(), controls: state.getControls() };
+        }), [button.id, hidden.id]), [
+            { role: 'student', controls: { edit: false, trajectory: false } },
+            { role: 'instructor', controls: { edit: true, trajectory: true } }
+        ]);
+        assert.deepEqual(errors, []);
+        console.log('Python controls: README edit/trajectory/classrooms, shared scripts, download/update ordering, and role controls passed.');
     } finally { await page.close(); }
 }
 
@@ -219,6 +334,7 @@ async function reusedViewerBackground(browser) {
     const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--enable-unsafe-swiftshader'] });
     try {
         await pythonGrid(browser);
+        await pythonControls(browser);
         await viewerLifecycle(browser);
         await reusedViewerBackground(browser);
     } finally { await browser.close(); }

@@ -78,9 +78,95 @@ every cell unless `viewer=(row, column)` selects one, with zero-based indices.
 option `linked=True` links mouse controls across the grid.
 
 The `js` constructor argument selects the 3Dmol.js bundle URL. Match that bundle
-to the API documentation you use; the hosted development reference can include
-features absent from the pinned default bundle. The library is loaded once per
-page, so changing `js` on a later view does not replace an already loaded library.
+to the API documentation you use. The library is loaded once per page, so changing 
+`js` on a later view does not replace an already loaded library.
+
+
+Editing, trajectory, and classroom controls
+-------------------------------------------
+
+These optional constructor arguments enable browser controls in notebooks and
+exported HTML. All three features are disabled by default.
+
+| Argument | Behavior |
+| --- | --- |
+| `edit=True` | Show the edit button for models, styles, surfaces, volumes, and measurements |
+| `trajectory=True` | Enable trajectory controls for models loaded with frames, such as through `addModelsAsFrames` |
+| `learning=True` | Show the classroom button and session-name dialog |
+| `learning={...}` | Configure the classroom with the options below |
+| `ui_js="..."` | Override the optional UI bundle URL |
+
+The UI bundle loads automatically when any controls are requested. By default,
+its URL is the sibling `3Dmol.ui.js` or `3Dmol.ui-min.js` of the core `js` URL.
+For a custom core filename, supply `ui_js` explicitly. Use matching core and UI
+builds that include these features. When controls are enabled and `js` is omitted,
+the core defaults to `https://3dmol.org/build/3Dmol-min.js` so the new UI uses a
+matching current build. Views without controls retain the pinned CDN default.
+In a notebook mixing both kinds of views, set the same `js` URL on every view:
+the first core and UI bundles loaded on a page are reused by later views. Restart
+the notebook output page to switch bundles. The examples below select the hosted
+builds explicitly.
+
+Controls apply to one viewer. Grids with more than one cell share a container and
+canvas, so they cannot use these options; create separate `view` objects for
+independent controls or classrooms. A `viewergrid=(1, 1)` is supported.
+
+<!-- example: viewer-controls -->
+```python
+import py3Dmol
+
+frames = ("2\nFrame 0\nC 0 0 0\nO 1.2 0 0\n"
+          "2\nFrame 1\nC 0 0 0\nO 1.5 0 0\n")
+view = py3Dmol.view(width=640, height=400, edit=True, trajectory=True,
+                   learning=True, js="https://3dmol.org/build/3Dmol-min.js")
+view.addModelsAsFrames(frames, "xyz")
+view.setStyle({}, {"stick": {}, "sphere": {"scale": 0.3}})
+view.zoomTo()
+html = view.write_html()
+```
+
+Display `view` in a notebook, or save `html` to embed the same controls in a page.
+Use the classroom button to create a session or join an existing one. Pass a
+dictionary such as `learning={"mode": "button", "session": "my-class"}` to
+prefill the session name. Browser edits and classroom events are not returned to
+Python; `write_html()` exports the commands queued in Python, not subsequent
+browser edits.
+
+For hidden activation, set `mode` to `"hidden"` and provide a nonempty, unique
+`session` identifier. Give every participant the same identifier and server.
+The classroom button stays hidden while waiting. Focus the instructor's viewer
+and press **Ctrl+Alt+I** to start; other active viewers with that configuration
+automatically join as students, including viewers opened later.
+
+<!-- example: hidden-classroom -->
+```python
+import py3Dmol
+
+xyz = "2\nCarbon monoxide\nC 0 0 0\nO 1.2 0 0\n"
+view = py3Dmol.view(width=640, height=400, data=xyz, format="xyz",
+                   style={"sphere": {"scale": 0.3}, "stick": {}},
+                   learning={"mode": "hidden", "session": "py3dmol-bonding-class-a"},
+                   js="https://3dmol.org/build/3Dmol-min.js")
+html = view.write_html()
+```
+
+Replace the example session identifier with one unique to your class and viewer.
+The instructor gets the usual editing, trajectory, and classroom controls.
+Student editing and trajectory controls are disabled while following; students
+can still rotate, zoom, and answer atom queries. A session ends when the
+instructor leaves or closes their viewer.
+
+The `learning` dictionary accepts the JSON options from
+[`LearningConfig`](https://3dmol.org/doc/LearningConfig.html): `mode`, `session`,
+`server`, `hotkey`, and `clientURL`. `server` defaults to `"https://3dmol.org"`;
+set it to your session server's origin, including protocol and port when needed,
+for example `"http://127.0.0.1:5072"`. `hotkey` changes the hidden activation
+shortcut, and `clientURL` overrides the Socket.IO browser-client script. Python
+callbacks, including `socketFactory` and adapter hooks, are not supported.
+
+See the [learning-environment guide](https://github.com/3dmol/3Dmol.js/blob/master/tutorials/learning_environment.md)
+for shared scene behavior, classroom controls, and server setup. Hidden mode
+changes how controls appear; it does not authenticate instructors.
 
 
 Export a grid with independent styles
@@ -105,10 +191,11 @@ view.zoomTo()
 html = view.write_html()
 ```
 
-Run `npm run test:examples:browser` from the repository root to exercise this exact
-example with the local Python wrapper and JavaScript bundle, including both cells'
-rendered colors. The check uses Python's standard library and Chromium via the
-existing Puppeteer dependency; it does not require Jupyter or network downloads.
+Run `npm run test:examples:browser` from the repository root to exercise the grid
+and both controls examples above with the local Python wrapper and JavaScript
+bundles. The checks use Python's standard library and Chromium via the existing
+Puppeteer dependency; they do not require Jupyter or network downloads. Run
+`npm run test:python` for constructor validation and HTML serialization checks.
 
 
 License
