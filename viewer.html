@@ -19,27 +19,48 @@
     </div>
     <div id="viewer-message" role="alert" hidden></div>
     <div id="sessionconnect" class="rightdialog" role="dialog" aria-label="Join or create a classroom session">
-        <div>
-            <label for="session_name_input">Session</label>
-            <input type="text" size="12" id="session_name_input" autocomplete="off">
-            <button id="sessionconnectbutton" type="button" disabled>Create</button>
-            <button id="sessionconnectclose" type="button" class="close" aria-label="Close session dialog">×</button>
+        <div class="session-heading">
+            <div class="session-drag" data-session-drag tabindex="0" aria-label="Move classroom dialog" title="Drag to move; use arrow keys when focused">
+                <span class="session-grip" aria-hidden="true"></span><span>Classroom</span>
+            </div>
+            <button id="sessionconnectclose" type="button" class="close" title="Close session dialog" aria-label="Close session dialog">×</button>
+        </div>
+        <div class="session-body">
+            <label for="session_name_input">Session name</label>
+            <div class="session-toolbar">
+                <input type="text" size="12" id="session_name_input" autocomplete="off">
+                <button id="sessionconnectbutton" type="button" disabled>Create</button>
+            </div>
         </div>
     </div>
     <div id="sessioncontrol" class="rightdialog" role="region" aria-label="Classroom session controls">
-        <div class="sessionname">Session</div>
-        <div>
-            <button id="askbutton" type="button">Query Atoms</button>
-            <div id="sessioncontrolinfo">
-                <div id="userinfo">Users: 0</div>
-                <div><span id="responseinfo"></span><button id="refreshresults" type="button" aria-label="Refresh responses">↻</button></div>
+        <div class="session-heading">
+            <div class="session-drag" data-session-drag tabindex="0" aria-label="Move classroom controls" title="Drag to move; use arrow keys when focused">
+                <span class="session-grip" aria-hidden="true"></span><span class="sessionname">Session</span>
             </div>
-            <button id="sessiondestroy" type="button" class="close" aria-label="End session">×</button>
+            <button id="sessiondestroy" type="button" class="close" title="End session" aria-label="End session">×</button>
+        </div>
+        <div class="session-body">
+            <div class="session-toolbar">
+                <button id="askbutton" type="button" class="session-primary">Query Atoms</button>
+                <div id="sessioncontrolinfo" class="session-stats" aria-live="polite">
+                    <span id="userinfo">Users: 0</span>
+                    <span id="responseinfo"></span>
+                </div>
+                <button id="refreshresults" type="button" class="session-icon" title="Refresh responses" aria-label="Refresh responses">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8a8 8 0 1 0 1 8M19 3v5h-5"/></svg>
+                </button>
+            </div>
         </div>
     </div>
     <div id="sessionmonitor" class="rightdialog" role="region" aria-label="Classroom session">
-        <div class="sessionname">Session</div>
-        <div><span id="sessionmonitorinfo"></span><button id="sessionleave" type="button" class="close" aria-label="Leave session">×</button></div>
+        <div class="session-heading">
+            <div class="session-drag" data-session-drag tabindex="0" aria-label="Move classroom status" title="Drag to move; use arrow keys when focused">
+                <span class="session-grip" aria-hidden="true"></span><span class="sessionname">Session</span>
+            </div>
+            <button id="sessionleave" type="button" class="close" title="Leave session" aria-label="Leave session">×</button>
+        </div>
+        <div class="session-body"><span id="sessionmonitorinfo">Following instructor</span></div>
     </div>
     <div id="selectmessage" role="status">Select atom(s)</div>
 </body>

@@ -81,6 +81,10 @@
             if (![1, 2, 3, 4].includes(surface.type)) throw new Error('Unsupported surface type.');
             if (surface.calculationSpec !== undefined) assertObject(surface.calculationSpec, 'Surface calculation selection');
         }
+        if (scene.objects !== undefined) {
+            assertObject(scene.objects, 'Scene objects');
+            if (!Array.isArray(scene.objects.shapes) || !Array.isArray(scene.objects.volumes)) throw new Error('Scene objects need shapes and volumes lists.');
+        }
         if (scene.view !== undefined) {
             assertObject(scene.view, 'View settings');
             if (scene.view.projection !== undefined && !['perspective', 'orthographic'].includes(scene.view.projection)) throw new Error('Unsupported projection.');
@@ -217,21 +221,27 @@
         const viewer = options.viewer || lib.createViewer('gldiv', { defaultcolors: lib.rasmolElementColors });
         win.glviewer = viewer;
         const resources = new Map(), cache = new Map(), surfaceColors = new Map(), message = document.getElementById('viewer-message');
-        let state, unsubscribe, controller, generation = 0, suspended = true, disposed = false;
+        let state, unsubscribe, objectSnapshot, controller, generation = 0, suspended = true, disposed = false;
         let restoringURL = false, sessionUpdate;
-        let syncTimer, pendingPush = false, liveKey = '', lastURL = win.location.href, loadingURL;
-        let session = null, colorOperations = [], sessionScripts;
+        let syncTimer, pendingPush = false, liveKey = '', sessionLiveKey = '', lastURL = win.location.href, loadingURL;
+        let session = null, colorOperations = [], sessionScripts, studentControls;
+        const sessionListeners = new Set();
         let clearPicking = () => {};
-        const app = { viewer, get state() { return state; }, ready: null, getSnapshot, loadURL, syncURL, showError, acceptSessionState, sessionChanged, destroy };
+        const app = { viewer, get state() { return state; }, ready: null, getSnapshot, loadURL, syncURL, showError, acceptSessionState, getSessionState, subscribeSessionChanges, sessionChanged, destroy };
         function showError(error) {
             if (!message || disposed) return;
             message.hidden = !error; message.dataset.error = String(!!error);
             message.textContent = error ? (error.message || String(error)) : '';
         }
         function makeState(scene = {}) {
+            objectSnapshot = undefined;
+            // A direct session URL starts with locked controls, before the join
+            // acknowledgement can capture their normal availability.
+            if (session && !studentControls) studentControls = { edit: true, trajectory: true };
             state = new lib.StateManager(viewer, {
                 open: scene.open ?? (!modelList(viewer).length && !scene.session ? true : undefined),
-                allowLocalFiles: false,
+                allowLocalFiles: true,
+                edit: session ? false : undefined, trajectory: session ? false : undefined,
                 view: scene.view, onOpenChange: () => scheduleSync(true),
                 onModelLoaded(model, source) {
                     const descriptor = { kind: source.kind, value: source.value || source.name, format: source.format, frames: source.frames, title: source.name, baseStyles: baselineStyles(model) };
@@ -251,7 +261,7 @@
                     installPicking();
                 }
             });
-            unsubscribe = state.subscribe(() => { rememberSurfaceColors(); scheduleSync(true); });
+            unsubscribe = state.subscribe(() => { objectSnapshot = undefined; rememberSurfaceColors(); scheduleSync(true); notifySessionChanges(); });
         }
         function captureColors() { return modelList(viewer).map(model => ({ model, colors: model.selectedAtoms({}).map(atom => atom.color) })); }
         function applyColors(records) {
@@ -267,6 +277,7 @@
             if (session) return { models: [], selections: [], surfaces: [], session };
             const models = modelList(viewer), indices = new Map(models.map((model, index) => [model.getID(), index]));
             const spec = value => normalizeSelection(value, indices, viewer.getNextModelId());
+            const objects = objectSnapshot ?? (objectSnapshot = state.exportObjects?.());
             return {
                 models: models.map(model => {
                     const source = resources.get(model);
@@ -284,8 +295,27 @@
                     atomColors: (surfaceColors.get(surface.id) || captureColors()).filter(record => indices.has(record.model.getID()))
                         .map(record => ({ model: indices.get(record.model.getID()), colors: copy(record.colors) }))
                 })),
+                ...(objects && (objects.shapes.length || objects.volumes.length) ? { objects } : {}),
                 view: { ...state.getViewSettings(), camera: viewer.getView(), slab: viewer.getSlab(), ...state.ui.getTrajectorySettings() }, open: state.ui.isOpen
             };
+        }
+        function getSessionState() {
+            const internal = viewer.getInternalState({ compact: true });
+            if (internal.labels) internal.labels = internal.labels.filter(label => !label.style?._sessionTransient);
+            return {
+                ...internal,
+                frame: viewer.getFrame(),
+                viewSettings: { ...state.getViewSettings(), slab: viewer.getSlab() },
+                trajectory: state.ui.getTrajectorySettings(),
+                modelTitles: Array.from(state.modelTitles)
+            };
+        }
+        function subscribeSessionChanges(listener) {
+            sessionListeners.add(listener);
+            return () => sessionListeners.delete(listener);
+        }
+        function notifySessionChanges() {
+            if (!suspended && !disposed && !session) for (const listener of sessionListeners) listener();
         }
         function scheduleSync(push) {
             if (suspended || disposed) return;
@@ -438,6 +468,7 @@
                     state.setResidueLabels(id, !!entry.labelsEnabled, entry.labelStyle);
                     if (entry.labelFrame !== undefined) state.selections.get(id).labelFrame = entry.labelFrame;
                 }
+                if (scene.objects) state.restoreObjects(scene.objects);
                 await state.ui.setTrajectorySettings({ ...scene.view, frame: scene.view?.frame ?? 0 });
                 if (token !== generation || disposed) return;
                 installPicking(); viewer.render(); state.refresh();
@@ -483,11 +514,11 @@
             const label = atom => atom.resn && atom.resi !== undefined ? `${atom.resn}${atom.resi}:${atom.atom || atom.elem}` : atom.atom || atom.elem;
             viewer.setHoverable({}, true, atom => {
                 if (hover) viewer.removeLabel(hover);
-                if (clicked?.atom !== atom) hover = viewer.addLabel(label(atom), { position: atom, fontSize: 12, backgroundColor: 'black', backgroundOpacity: 0.5, alignment: 'bottomCenter' });
+                if (clicked?.atom !== atom) hover = viewer.addLabel(label(atom), { _sessionTransient: true, position: atom, fontSize: 12, backgroundColor: 'black', backgroundOpacity: 0.5, alignment: 'bottomCenter' });
             }, () => { if (hover) viewer.removeLabel(hover); hover = undefined; });
             viewer.setClickable({}, true, atom => {
                 if (hover) viewer.removeLabel(hover); hover = undefined;
-                if (!clicked) clicked = { atom, label: viewer.addLabel(label(atom), { position: atom, fontSize: 12, backgroundColor: 'blue', backgroundOpacity: 0.75 }) };
+                if (!clicked) clicked = { atom, label: viewer.addLabel(label(atom), { _sessionTransient: true, position: atom, fontSize: 12, backgroundColor: 'blue', backgroundOpacity: 0.75 }) };
                 else {
                     const previous = clicked.atom; viewer.removeLabel(clicked.label); clicked = undefined;
                     if (previous !== atom) {
@@ -505,6 +536,10 @@
         const poll = win.setInterval(() => {
             if (suspended || disposed || !state || document.hidden || session) return;
             const next = readLiveKey(); if (next !== liveKey) { liveKey = next; scheduleSync(false); }
+            // Camera motion has its own small packet; do not snapshot molecular
+            // data simply because an instructor rotates or zooms the scene.
+            const settings = JSON.stringify([viewer.getSlab(), state.ui.getTrajectorySettings()]);
+            if (settings !== sessionLiveKey) { sessionLiveKey = settings; notifySessionChanges(); }
         }, 200);
         const navigate = () => { loadURL(win.location.href).catch(showError); };
         win.addEventListener('popstate', navigate); win.addEventListener('hashchange', navigate);
@@ -523,13 +558,15 @@
             })().catch(error => { sessionScripts = undefined; throw error; });
             return sessionScripts;
         }
-        function acceptSessionState(internal) {
+        function acceptSessionState(internal, sections) {
             if (disposed || restoringURL) return Promise.resolve();
             if (sessionUpdate) {
-                sessionUpdate.pending = internal;
+                sessionUpdate.pending = { internal, sections: sessionUpdate.pending
+                    ? (!sections || !sessionUpdate.pending.sections ? undefined : Array.from(new Set([...sessionUpdate.pending.sections, ...sections])))
+                    : sections };
                 return sessionUpdate.promise;
             }
-            const update = { token: ++generation, pending: internal, promise: null };
+            const update = { token: ++generation, pending: { internal, sections }, promise: null };
             sessionUpdate = update; suspended = true;
             // Coalesce a burst of packets and keep the newest state while a frame
             // is loading. All callers wait until the newest queued state is ready.
@@ -539,22 +576,31 @@
         async function applySessionUpdates(update) {
             try {
                 while (update.pending && update.token === generation && !disposed) {
-                    const internal = update.pending, camera = viewer.getView(); update.pending = undefined;
-                    unsubscribe?.(); state?.destroy(); viewer.stopAnimate();
-                    viewer.setInternalState(internal); viewer.setView(camera); resources.clear(); surfaceColors.clear();
-                    modelList(viewer).forEach((model, index) => resources.set(model, {
-                        kind: 'snapshot', value: `Session model ${index + 1}`, title: `Session model ${index + 1}`,
-                        data: encodeData(JSON.stringify(model.getInternalState()))
-                    }));
+                    const { internal, sections } = update.pending, camera = viewer.getView(); update.pending = undefined;
+                    const full = !sections, changes = key => full || sections.includes(key);
+                    const replaceModels = changes('models');
+                    if (replaceModels) { unsubscribe?.(); state?.destroy(); state = undefined; viewer.stopAnimate(); }
+                    const scene = sections ? Object.fromEntries(sections.filter(key => !['frame', 'viewSettings', 'trajectory', 'modelTitles'].includes(key)).map(key => [key, internal[key]])) : internal;
+                    // Replaced compact models have no appearance until their
+                    // unchanged style section is reapplied as well.
+                    if (replaceModels && internal.modelStyles) scene.modelStyles = internal.modelStyles;
+                    viewer.setInternalState(scene, { partial: !full }); viewer.setView(camera);
+                    if (replaceModels) {
+                        resources.clear(); surfaceColors.clear();
+                        modelList(viewer).forEach((model, index) => resources.set(model, {
+                            kind: 'snapshot', value: `Session model ${index + 1}`, title: `Session model ${index + 1}`,
+                            data: encodeData(JSON.stringify(model.getInternalState()))
+                        }));
+                    }
                     // Older classroom senders omit the frame index. Their current
                     // atoms still identify the displayed locally stored frame.
                     let frame = internal.frame;
                     if (!Number.isInteger(frame) || frame < 0) {
-                        const longest = internal.models.filter(Boolean).sort((a, b) => b.frames.length - a.frames.length)[0];
+                        const longest = (internal.models || []).filter(Boolean).sort((a, b) => b.frames.length - a.frames.length)[0];
                         frame = longest?.frames.findIndex(atoms => Array.isArray(atoms) && atoms.length === longest.atoms.length
                             && atoms.every((atom, index) => ['x', 'y', 'z', 'elem', 'color'].every(key => atom[key] === longest.atoms[index][key]))) ?? 0;
                     }
-                    try { await viewer.setFrame(Math.max(0, frame)); }
+                    try { if (replaceModels || changes('frame')) await viewer.setFrame(Math.max(0, frame)); }
                     catch (error) {
                         if (update.token !== generation || disposed) return;
                         if (update.pending) continue;
@@ -562,7 +608,20 @@
                     }
                     if (update.token !== generation || disposed) return;
                     if (update.pending) continue;
-                    makeState({ open: false }); if (session) state.ui.element.hidden = true;
+                    if (!state) makeState({ open: false, view: internal.viewSettings });
+                    else if (changes('viewSettings') && internal.viewSettings) state.setViewSettings?.(internal.viewSettings);
+                    if (changes('viewSettings') && internal.viewSettings?.slab) viewer.setSlab(internal.viewSettings.slab.near, internal.viewSettings.slab.far);
+                    if (changes('modelTitles') && internal.modelTitles) {
+                        state.modelTitles.clear(); internal.modelTitles.forEach(([id, title]) => state.modelTitles.set(id, title));
+                    }
+                    if (changes('trajectory') && internal.trajectory) {
+                        const playback = { ...internal.trajectory }; delete playback.frame;
+                        // The instructor sends the displayed frame; a second local
+                        // playback clock would race those authoritative updates.
+                        if (session) playback.playing = false;
+                        await state.ui.setTrajectorySettings(playback);
+                    }
+                    if (session) { state.setControls?.({ edit: false, trajectory: false }); state.ui.element.hidden = true; }
                     else installPicking();
                     viewer.render();
                 }
@@ -573,6 +632,16 @@
         }
         function sessionChanged(name, joined) {
             session = joined ? name : null;
+            if (session) {
+                studentControls = studentControls || state?.getControls?.() || { edit: true, trajectory: true };
+                clearPicking(); viewer.setHoverable({}, false); viewer.setClickable({}, false);
+                state?.setControls?.({ edit: false, trajectory: false });
+                if (state?.ui.element) state.ui.element.hidden = true;
+            } else {
+                state?.setControls?.(studentControls || { edit: true, trajectory: true });
+                if (state?.ui.element) state.ui.element.hidden = false;
+                studentControls = undefined;
+            }
             if (!session && sessionUpdate) sessionUpdate.pending = undefined;
             if (!session && !disposed) installPicking();
             if (!suspended) scheduleSync(true);
@@ -587,7 +656,7 @@
         });
         function destroy() {
             disposed = true; generation++; sessionUpdate = undefined; controller?.abort(); win.leaveViewerSession?.(); clearPicking();
-            win.clearInterval(poll); win.clearTimeout(syncTimer); unsubscribe?.(); state?.destroy();
+            win.clearInterval(poll); win.clearTimeout(syncTimer); unsubscribe?.(); state?.destroy(); sessionListeners.clear();
             win.removeEventListener('popstate', navigate); win.removeEventListener('hashchange', navigate);
         }
         makeState({ open: true });

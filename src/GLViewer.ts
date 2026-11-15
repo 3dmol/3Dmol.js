@@ -15,6 +15,7 @@ import { Matrix3, Matrix4, Quaternion, Vector3, XYZ } from "./WebGL/math";
 import { CC, ColorschemeSpec, ColorSpec, elementColors } from "./colors";
 import { AtomSelectionSpec, AtomSpec } from "./specs";
 import { adjustVolumeStyle, extend, getColorFromStyle, getElement, getExtent, getPropertyRange, isEmptyObject, makeFunction, mergeGeos, PausableTimer } from "./utilities";
+import { encodeSceneValue, decodeSceneValue, snapshotGeometry, restoreGeometry } from './SceneState';
 
 export const CONTEXTS_PER_VIEWPORT = 16;
 
@@ -141,6 +142,8 @@ export class GLViewer {
     private HEIGHT: number;
     private viewChangeCallback: any = null;
     private stateChangeCallback: any = null;
+    private readonly stateChangeListeners = new Set<() => void>();
+    private bgAlpha = 1;
 
     private NEAR = 1;
     private FAR = 800;
@@ -851,6 +854,7 @@ export class GLViewer {
             this.bgColor = CC.color(this.config.backgroundColor).getHex();
         }
         this.config.backgroundAlpha = this.config.backgroundAlpha == undefined ? 1.0 : this.config.backgroundAlpha;
+        this.bgAlpha = this.config.backgroundAlpha;
 
         this.camerax = 0;
         if (typeof (this.config.camerax) != 'undefined') {
@@ -1094,46 +1098,187 @@ export class GLViewer {
         }
     };
 
+    /** Subscribe to scene renders without eagerly serializing the scene.
+     * Returns an unsubscribe function. Camera-only draws do not notify listeners.
+     */
+    public subscribeStateChanges(listener: () => void): () => void {
+        if (this.destroyed) return () => undefined;
+        this.stateChangeListeners.add(listener);
+        return () => { this.stateChangeListeners.delete(listener); };
+    }
+
     /**
-     * Return model state appropriate for passing to setInternalState.
-     * Labels, shapes, and surfaces are not captured.
-     *
-    */
-    public getInternalState() {
-        var ret = { 'models': [], 'surfaces': [], 'shapes': [], 'labels': [] };
+     * Capture models, labels, shapes, volume grids, surfaces and display settings.
+     * The detached result survives JSON serialization; executable callbacks are
+     * omitted. Surfaces and isosurfaces carry their current geometry, so restoring
+     * them does not recompute meshes or wait for surface workers.
+     * With compact:true, model appearance is separated into modelStyles so a
+     * classroom style edit need not resend coordinates and trajectory frames.
+     */
+    public getInternalState(options: { compact?: boolean } = {}) {
+        const state: any = { version: 2, models: [], shapes: [], labels: [], surfaces: [] };
+        if (options.compact) state.modelStyles = [];
         for (let i = 0; i < this.models.length; i++) {
-            if (this.models[i]) {
-                ret.models[i] = this.models[i].getInternalState();
+            const model = this.models[i];
+            if (!model) { state.models[i] = null; if (options.compact) state.modelStyles[i] = null; continue; }
+            const internal = model.getInternalState();
+            if (options.compact) {
+                const split = GLViewer.splitModelState(internal);
+                state.models[i] = split.model;
+                state.modelStyles[i] = split.appearance;
+            } else state.models[i] = encodeSceneValue(internal);
+        }
+        state.shapes = this.shapes.map(shape => shape ? shape.getInternalState() : null);
+        state.labels = this.labels.map(label => ({ text: label.text, style: encodeSceneValue(label.stylespec),
+            hidden: !label.sprite.visible }));
+        state.surfaces = Object.keys(this.surfaces).map(id => {
+            const surface = this.surfaces[id];
+            return { id: Number(id), style: encodeSceneValue(surface.style), atomsel: encodeSceneValue(surface.atomsel),
+                allsel: encodeSceneValue(surface.allsel), focus: encodeSceneValue(surface.focus),
+                parts: Array.from(surface, (part: SurfObj) => ({ geometry: snapshotGeometry(part.geo),
+                    material: GLViewer.snapshotMaterial(part.mat), doubleSided: part.mat instanceof MeshDoubleLambertMaterial,
+                    symmetries: encodeSceneValue(part.symmetries) })) };
+        });
+        state.view = { backgroundColor: this.bgColor, backgroundAlpha: this.bgAlpha,
+            projection: this.camera.ortho ? 'orthographic' : 'perspective', slab: this.getSlab(),
+            fog: this.config.disableFog ? false : { fogStart: this.fogStart, fogEnd: this.fogEnd } };
+        return state;
+    }
+
+    /** Restore a scene snapshot. partial:true replaces only the supplied sections.
+     * Models and materialized geometry are installed synchronously. Omitted
+     * sections in a full snapshot are cleared, including old model-only snapshots.
+     * Callback source strings are never restored or evaluated.
+     */
+    public setInternalState(state, options: { partial?: boolean } = {}) {
+        const has = (section: string) => !options.partial || Object.prototype.hasOwnProperty.call(state, section);
+        if (has('models')) {
+            this.removeAllModels();
+            for (let i = 0; i < (state.models || []).length; i++) {
+                if (!state.models[i]) continue;
+                const model = this.models[i] = new GLModel(i, undefined, this);
+                model.setInternalState(decodeSceneValue(state.models[i]));
             }
         }
-
-        //todo: labels, shapes, surfaces
-
-        return ret;
-    };
-
-    /**
-     * Clear the scene and restore models from an object returned by getInternalState.
-     * Existing labels, shapes, and surfaces are removed and are not restored.
-     *
-    */
-    public setInternalState(state) {
-
-        //clear out current viewer
-        this.clear();
-
-        //set model state
-        var newm = state.models;
-        for (let i = 0; i < newm.length; i++) {
-            if (newm[i]) {
-                this.models[i] = new GLModel(i, undefined, this);
-                this.models[i].setInternalState(newm[i]);
+        if (state.modelStyles) {
+            state.modelStyles.forEach((appearance, index) => {
+                if (appearance && this.models[index]) GLViewer.applyModelAppearance(this.models[index], appearance);
+            });
+        }
+        if (has('shapes')) {
+            this.removeAllShapes();
+            this.shapes = (state.shapes || []).map((record, index) => {
+                if (!record) return null;
+                const shape = record.kind === 'volume' ? GLVolumetricRender.fromInternalState(record) : GLShape.fromInternalState(record);
+                shape.shapePosition = index;
+                return shape;
+            });
+        }
+        if (has('labels')) {
+            this.removeAllLabels();
+            for (const record of state.labels || []) {
+                const label = this.addLabel(record.text, decodeSceneValue(record.style));
+                if (record.hidden) label.hide();
             }
         }
-
-        //todo: labels, shapes, surfaces
+        if (has('surfaces')) {
+            this.removeAllSurfaces();
+            for (const record of state.surfaces || []) {
+                const parts: SurfObj[] = (record.parts || []).map(part => {
+                    const material = part.doubleSided ? new MeshDoubleLambertMaterial() : new MeshLambertMaterial();
+                    // Subclass defaults are installed after the base constructor;
+                    // apply saved values afterward to retain the active side flag.
+                    material.setValues(decodeSceneValue(part.material));
+                    return { geo: restoreGeometry(part.geometry), mat: material,
+                        done: true, finished: false, symmetries: decodeSceneValue(part.symmetries) || [] };
+                });
+                const surface = new Surface(parts);
+                for (const key of ['style', 'atomsel', 'allsel', 'focus']) surface[key] = decodeSceneValue(record[key]);
+                this.surfaces[record.id] = surface;
+            }
+        }
+        if (state.view) {
+            const view = state.view;
+            this.setBackgroundColor(view.backgroundColor, view.backgroundAlpha);
+            if (view.projection) this.setProjection(view.projection);
+            if (view.slab) this.setSlab(view.slab.near, view.slab.far);
+            if (view.fog !== undefined) this.enableFog(view.fog);
+        }
         this.render();
-    };
+        return this;
+    }
+
+    private static snapshotMaterial(material: Material): any {
+        const result = {};
+        for (const key of ['opacity', 'transparent', 'wireframe', 'wireframeLinewidth', 'side', 'vertexColors',
+            'depthTest', 'depthWrite', 'linewidth', 'color', 'ambient', 'emissive', 'fog', 'visible', 'shading', 'outline',
+            'polygonOffset', 'polygonOffsetFactor', 'polygonOffsetUnits', 'alphaTest']) {
+            if (material[key] !== undefined) result[key] = encodeSceneValue(material[key]);
+        }
+        return result;
+    }
+
+    private static readonly appearanceFields = new Set(['style', 'color', 'surfaceColor', 'clickable', 'hoverable', 'hidden', 'contextMenuEnabled']);
+
+    private static splitModelState(internal): { model: any; appearance: any } {
+        const strip = atoms => atoms.map(atom => {
+            if (!atom) return null;
+            const result = {};
+            for (const key of Object.keys(atom)) if (!GLViewer.appearanceFields.has(key)) result[key] = atom[key];
+            return result;
+        });
+        const records = [], patterns = [], recordKeys = new Map(), patternKeys = new Map();
+        const appearance = atoms => {
+            const pattern = atoms.map(atom => {
+                const style: any = {};
+                for (const key of GLViewer.appearanceFields) if (atom?.[key] !== undefined) style[key] = atom[key];
+                if (atom?.style) {
+                    style.style = { ...atom.style };
+                    for (const representation of Object.keys(style.style)) {
+                        const spec = style.style[representation];
+                        if (typeof spec?.colorfunc === 'function') {
+                            style.style[representation] = { ...spec, color: getColorFromStyle(atom, spec).getHex() };
+                            delete style.style[representation].colorfunc;
+                        }
+                    }
+                }
+                const encoded = encodeSceneValue(style), key = JSON.stringify(encoded);
+                if (!recordKeys.has(key)) { recordKeys.set(key, records.length); records.push(encoded); }
+                return recordKeys.get(key);
+            });
+            const key = JSON.stringify(pattern);
+            if (!patternKeys.has(key)) { patternKeys.set(key, patterns.length); patterns.push(pattern); }
+            return patternKeys.get(key);
+        };
+        const frames = Array.isArray(internal.frames) ? internal.frames : [];
+        // Stable coordinates for stored trajectories: selecting a frame should
+        // send frame/appearance changes, not an identical copy of every frame.
+        const atoms = Array.isArray(frames[0]) ? frames[0] : internal.atoms;
+        const current = appearance(internal.atoms);
+        const frameStyles = frames.map(frame => Array.isArray(frame) ? appearance(frame) : null);
+        const model = { ...internal, atoms: strip(atoms),
+            frames: frames.map(frame => Array.isArray(frame) ? strip(frame) : frame) };
+        delete model.hidden;
+        if (internal.modelDatas?.[0]) model.modelData = internal.modelDatas[0];
+        return { model: encodeSceneValue(model), appearance: { hidden: !!internal.hidden,
+            records, patterns, atoms: current, frames: frameStyles } };
+    }
+
+    private static applyModelAppearance(model: GLModel, appearance): void {
+        const internal = model.getInternalState();
+        const apply = (atoms, patternIndex) => {
+            const pattern = appearance.patterns[patternIndex];
+            if (!pattern) return;
+            atoms.forEach((atom, index) => {
+                if (!atom || pattern[index] === undefined) return;
+                for (const key of GLViewer.appearanceFields) delete atom[key];
+                Object.assign(atom, decodeSceneValue(appearance.records[pattern[index]]));
+            });
+        };
+        (internal.frames || []).forEach((frame, index) => { if (Array.isArray(frame)) apply(frame, appearance.frames[index]); });
+        apply(internal.atoms, appearance.atoms);
+        model.setInternalState({ ...internal, hidden: appearance.hidden });
+    }
 
     /**
      * Set lower and upper limit stops for zoom.
@@ -1599,6 +1744,7 @@ export class GLViewer {
         var c = CC.color(hex);
         this.scene.fog.color = c;
         this.bgColor = c.getHex();
+        this.bgAlpha = a;
         this.renderer.setClearColorHex(c.getHex(), a);
         this.show();
 
@@ -1788,6 +1934,13 @@ export class GLViewer {
         }
         return this.models[id];
     };
+
+    /** Return a new array of the viewer's live models in creation order.
+     * Removed model slots are omitted; each model retains its original getID().
+     */
+    public getModels(): GLModel[] {
+        return this.models.filter(model => !!model);
+    }
 
 
     /**
@@ -2086,8 +2239,10 @@ export class GLViewer {
         this.updateClickables(); //must render for clickable styles to take effect
         var view = this.getView();
 
+        for (const listener of this.stateChangeListeners || []) listener();
+        if (this.destroyed) return this;
         if (this.stateChangeCallback) {
-            //todo: have ability to only send delta updates
+            // Legacy callbacks receive a snapshot; subscriptions can defer capture.
             this.stateChangeCallback(this.getInternalState());
             if (this.destroyed) return this;
         }
@@ -3043,7 +3198,7 @@ export class GLViewer {
      *
      * @param {GLShape} shape - Reference to shape object to remove
      */
-    public removeShape(shape: GLShape) {
+    public removeShape(shape: GLShape | GLVolumetricRender) {
         if (!shape)
             return this;
         shape.removegl(this.modelGroup);
@@ -5358,6 +5513,11 @@ export class GLViewer {
         });
     }
 
+    /** Return the shape at its shapePosition, or undefined after removal. */
+    public getShape(id: number): GLShape | GLVolumetricRender | undefined {
+        return this.shapes[id] || undefined;
+    }
+
     /**
      * Return surface object
      * @param {number} surf - surface id
@@ -5472,6 +5632,7 @@ export class GLViewer {
         for (const cancel of this.captureCancellations) cancel();
         this.captureCancellations.clear();
         this.callback = this.viewChangeCallback = this.stateChangeCallback = this.userContextMenuHandler = null;
+        this.stateChangeListeners?.clear();
         this.divwatcher?.disconnect();
         this.intwatcher?.disconnect();
         this.divwatcher = this.intwatcher = undefined;

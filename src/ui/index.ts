@@ -3,7 +3,7 @@ import { StateManager } from './state';
 
 export { UI, StateManager };
 export type { UIConfig, UIControlOptions, UIModelSource } from './ui';
-export type { UISelection, UIStyle, UISurface, UIViewSettings } from './state';
+export type { UISelection, UIStyle, UISurface, UIShape, UIVolume, UIViewSettings } from './state';
 export type { TrajectorySettings } from './trajectory';
 
 // Keep the optional browser bundle compatible with data-ui and existing embeds.

@@ -133,8 +133,8 @@ const server = http.createServer((request, response) => {
             await page.evaluate(() => {
                 const form = viewerApp.state.ui.element.querySelector('form');
                 const sources = [...form.querySelector('select').options].map(option => option.value);
-                if (sources.join(',') !== 'pdb,cid,url' || form.querySelector('input[type=file]')) {
-                    throw new Error('Standalone viewer should offer only PDB, PubChem, and URL loading');
+                if (sources.join(',') !== 'file,pdb,cid,url' || !form.querySelector('input[type=file]')) {
+                    throw new Error('Standalone viewer should offer local files, PDB, PubChem, and URL loading');
                 }
             });
         };

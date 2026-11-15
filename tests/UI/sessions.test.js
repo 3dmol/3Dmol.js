@@ -20,9 +20,9 @@ function initialize(pageURL, server) {
 
 describe('classroom session server routing', () => {
     test.each([
-        ['http://localhost/viewer.html', 'http://localhost:5000'],
-        ['http://localhost:8080/viewer.html', 'http://localhost:5000'],
-        ['https://localhost:8443/viewer.html', 'https://localhost:5000'],
+        ['http://localhost/viewer.html', 'http://localhost'],
+        ['http://localhost:8080/viewer.html', 'http://localhost:8080'],
+        ['https://localhost:8443/viewer.html', 'https://localhost:8443'],
         ['https://classroom.example/viewer.html', 'https://classroom.example'],
         ['https://classroom.example:8443/static/viewer.html', 'https://classroom.example:8443'],
         ['http://classroom.example:8080/viewer.html', 'http://classroom.example:8080'],

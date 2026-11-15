@@ -7,6 +7,7 @@ import type { ColorSpec } from "./colors";
 import { GLShape } from "./GLShape";
 import { AtomSelectionSpec } from "specs";
 import { GLViewer } from "GLViewer";
+import { encodeSceneValue, decodeSceneValue, snapshotGeometry, restoreGeometry } from './SceneState';
 
 
 
@@ -15,6 +16,10 @@ import { GLViewer } from "GLViewer";
  * accumulates color and opacity along viewing rays through the grid.
 */
 export interface VolumetricRendererSpec {
+    /** Hide the volume without discarding its grid or transfer function. */
+    hidden?: boolean;
+    /** Display only at this trajectory frame, when specified. */
+    frame?: number;
     /** Transfer-function points with color, opacity, and value fields. Colors and opacity are interpolated between points sorted by value.
      * Requires at least two points with finite numeric values (numbers or numeric strings) spanning a nonzero range that can be sampled without numeric overflow.
      * Opacity ranges from 0 (transparent) to 1 (opaque); numeric strings are also accepted.
@@ -61,6 +66,7 @@ export class GLVolumetricRender {
     }
 
     hidden = false;
+    frame?: number;
     boundingSphere = new Sphere();
     shapePosition: any;
     renderedShapeObj: any = null;
@@ -80,6 +86,8 @@ export class GLVolumetricRender {
                 unit: XYZ; origin: XYZ; data: number[]; getIndex: (arg0: number, arg1: number, arg2: number) => number; }, 
         spec: VolumetricRendererSpec, viewer?: GLViewer) {
         spec = spec || {};
+        this.hidden = !!spec.hidden;
+        this.frame = spec.frame;
         // Array.from also exposes sparse entries so they are validated below.
         var transferfn: any[] = Array.isArray(spec.transferfn) ? Array.from(spec.transferfn) : [];
         if (transferfn.length < 2 || transferfn.some(point => !point ||
@@ -364,6 +372,33 @@ export class GLVolumetricRender {
 
     get position() {
         return this.boundingSphere.center;
+    }
+
+    /** Capture the sampled volume and transfer function without GPU resources. */
+    public getInternalState() {
+        const data = this.data && {
+            data: this.data.data, size: this.data.size, origin: this.data.origin,
+            unit: this.data.unit, matrix: this.data.matrix
+        };
+        return { kind: 'volume', data: encodeSceneValue(data), hidden: this.hidden, frame: this.frame,
+            geometry: snapshotGeometry(this.geo), bounds: encodeSceneValue(this.boundingSphere),
+            transfer: encodeSceneValue(this.transferfunctionbuffer), min: this.min, max: this.max,
+            extent: encodeSceneValue(this.extent), maxdepth: this.maxdepth,
+            texmatrix: encodeSceneValue(this.texmatrix), minunit: this.minunit, subsamples: this.subsamples };
+    }
+
+    /** Restore already sampled data, including masks and transformed voxel grids. */
+    public static fromInternalState(state): GLVolumetricRender {
+        const volume = Object.create(GLVolumetricRender.prototype) as GLVolumetricRender;
+        for (const key of ['data', 'extent', 'texmatrix']) volume[key] = decodeSceneValue(state[key]);
+        for (const key of ['hidden', 'frame', 'min', 'max', 'maxdepth', 'minunit', 'subsamples']) volume[key] = state[key];
+        volume.transferfunctionbuffer = decodeSceneValue(state.transfer);
+        volume.geo = restoreGeometry(state.geometry);
+        const bounds = decodeSceneValue(state.bounds);
+        volume.boundingSphere = new Sphere(new Vector3(bounds.center.x, bounds.center.y,
+            bounds.center.z), bounds.radius);
+        volume.renderedShapeObj = volume.shapeObj = null;
+        return volume;
     }
 
     get x() {

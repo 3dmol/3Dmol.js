@@ -2034,15 +2034,25 @@ export class GLModel {
     }
 
     /**
-     * Return atom and frame references suitable for setInternalState. This is not a
-     * deep copy or a complete serialization of model metadata; editing the returned
-     * arrays also edits the model.
+     * Return atom, frame and metadata references suitable for setInternalState,
+     * together with model visibility and symmetry settings. This is not a deep
+     * copy: editing the returned arrays also edits the model. Use the viewer's
+     * getInternalState for a detached, JSON-safe scene snapshot.
      *
     */
     public getInternalState() {
         return {
             'atoms': this.atoms,
-            'frames': this.frames
+            'frames': this.frames,
+            'modelData': this.modelData,
+            'modelDatas': this.modelDatas,
+            'hidden': this.hidden,
+            'dontDuplicateAtoms': this.dontDuplicateAtoms,
+            // JSON cannot retain custom properties on the frames array. A remote
+            // snapshot carries its timeline but only the supplied coordinates;
+            // recipients must not independently fetch remote trajectory frames.
+            ...(this.frames.url !== undefined || this.frames.snapshot
+                ? { snapshotFrameCount: this.getNumFrames() } : {})
         };
     };
 
@@ -2053,7 +2063,15 @@ export class GLModel {
     public setInternalState(state) {
         this.frameRequest++;
         this.atoms = state.atoms;
-        this.frames = state.frames;
+        this.frames = state.frames || [];
+        if (Number.isSafeInteger(state.snapshotFrameCount) && state.snapshotFrameCount >= 0 && this.frames.url === undefined) {
+            this.frames.numFrames = state.snapshotFrameCount;
+            this.frames.snapshot = true;
+        }
+        if (state.modelData !== undefined) this.modelData = state.modelData;
+        if (state.modelDatas !== undefined) this.modelDatas = state.modelDatas;
+        if (state.hidden !== undefined) this.hidden = state.hidden;
+        if (state.dontDuplicateAtoms !== undefined) this.dontDuplicateAtoms = state.dontDuplicateAtoms;
         this.molObj = null;
     };
 
@@ -2245,6 +2263,13 @@ export class GLModel {
             const request = ++model.frameRequest;
             const requested = Number.isFinite(framenum) ? Math.trunc(framenum) : 0;
             framenum = ((requested % numFrames) + numFrames) % numFrames;
+            if (model.frames.snapshot) {
+                // Follow the instructor's timeline while displaying the latest
+                // delivered coordinates, including frame-specific overlays.
+                if (!options.fast || !model.syncAtomPositions()) model.molObj = null;
+                resolve();
+                return;
+            }
             if (model.frames.url != undefined) {
                 const frames = model.frames;
                 const atoms = model.atoms;

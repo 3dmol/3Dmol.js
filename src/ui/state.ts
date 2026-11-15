@@ -2,6 +2,9 @@ import type { AtomStyleSpec, GLModel } from "../GLModel";
 import type { GLViewer, SurfaceStyleSpec } from "../GLViewer";
 import type { Label, LabelSpec } from "../Label";
 import type { AtomSelectionSpec, AtomSpec } from "../specs";
+import type { GLShape, IsoSurfaceSpec, ShapeSpec } from "../GLShape";
+import type { VolumeData } from "../VolumeData";
+import type { GLVolumetricRender } from "../VolumetricRender";
 import { CC } from "../colors";
 import { UI, UIConfig, UIControlOptions } from "./ui";
 
@@ -43,6 +46,25 @@ export interface UISurface {
     frame?: number;
 }
 
+export interface UIShape {
+    id: string;
+    name: string;
+    kind: 'sphere' | 'arrow' | 'cylinder' | 'line' | 'box';
+    shape: GLShape;
+    spec: ShapeSpec;
+}
+
+export interface UIVolume {
+    id: string;
+    name: string;
+    data: VolumeData;
+    shape: GLShape | GLVolumetricRender;
+    spec: IsoSurfaceSpec;
+    mode: 'isosurface' | 'volume';
+    min: number;
+    max: number;
+}
+
 // Match the public SurfaceType enum without importing the surface engine into the UI bundle.
 const surfaceTypes: Record<string, number> = { VDW: 1, SES: 4, SAS: 3, MS: 2 };
 
@@ -55,6 +77,18 @@ function copy<T>(value: T): T {
         return result as T;
     }
     return value;
+}
+
+/** Portable UI object settings; core and UI bundles may have distinct Color classes. */
+function objectSettings(value: any): any {
+    return JSON.parse(JSON.stringify(value, (key, item) => {
+        if (['callback', 'hover_callback', 'unhover_callback', '__proto__', 'constructor', 'prototype'].includes(key)
+            || typeof item === 'function') return undefined;
+        if (item && typeof item.getHex === 'function' && ['r', 'g', 'b'].every(axis => Number.isFinite(item[axis]))) {
+            return item.getHex();
+        }
+        return item;
+    }));
 }
 
 /** Compare the values copied above, retaining identity for callbacks and class instances. */
@@ -89,6 +123,8 @@ function sameStyleValue(left: unknown, right: unknown): boolean {
 export class StateManager {
     public readonly selections = new Map<string, UISelection>();
     public readonly surfaces = new Map<string, UISurface>();
+    public readonly shapes = new Map<string, UIShape>();
+    public readonly volumes = new Map<string, UIVolume>();
     public readonly modelTitles = new Map<number, string>();
     public ui: UI;
     private readonly listeners = new Set<() => void>();
@@ -402,6 +438,132 @@ export class StateManager {
         this.refresh();
     }
 
+    /** Add an editable annotation shape. Coordinates are in molecular angstroms. */
+    public addShape(kind: UIShape['kind'], spec: any, name = 'Shape'): string {
+        const constructors = {
+            sphere: value => this.viewer.addSphere(value), arrow: value => this.viewer.addArrow(value),
+            cylinder: value => this.viewer.addCylinder(value), line: value => this.viewer.addLine(value),
+            box: value => this.viewer.addBox(value)
+        };
+        if (!constructors[kind]) throw new Error('Choose a supported shape.');
+        const shape = constructors[kind](copy(spec));
+        const id = this.nextID('shape', this.shapes);
+        this.shapes.set(id, { id, name, kind, shape, spec: copy(spec) });
+        this.viewer.render(); this.refresh();
+        return id;
+    }
+
+    public updateShape(id: string, patch: ShapeSpec): void {
+        const entry = this.shapes.get(id);
+        if (!entry) return;
+        entry.spec = { ...entry.spec, ...copy(patch) };
+        entry.shape.updateStyle(copy(patch));
+        this.viewer.render(); this.refresh();
+    }
+
+    public removeShape(id: string): void {
+        const entry = this.shapes.get(id);
+        if (!entry) return;
+        this.viewer.removeShape(entry.shape); this.shapes.delete(id);
+        this.viewer.render(); this.refresh();
+    }
+
+    /** Parse a scalar grid once, retaining it for subsequent contour edits. */
+    public addVolume(data: string | ArrayBuffer, format: string, spec: IsoSurfaceSpec = {},
+        name = 'Volume', mode: UIVolume['mode'] = 'isosurface'): string {
+        const Constructor = (window.$3Dmol as unknown as { VolumeData: typeof VolumeData })?.VolumeData;
+        if (!Constructor) throw new Error('The core 3Dmol bundle must be loaded before volume controls.');
+        const volume = new Constructor(data, format);
+        return this.addVolumeData(volume, spec, name, mode);
+    }
+
+    private addVolumeData(volume: VolumeData, spec: IsoSurfaceSpec, name: string, mode: UIVolume['mode']): string {
+        if (!['isosurface', 'volume'].includes(mode)) throw new Error('Choose an isosurface or volume display.');
+        const expected = volume.size.x * volume.size.y * volume.size.z;
+        if (!expected || volume.data.length !== expected) throw new Error('No complete scalar grid was found. Check the map format.');
+        let min = Infinity, max = -Infinity;
+        for (const value of volume.data) {
+            if (!Number.isFinite(value)) throw new Error('The map contains non-finite values.');
+            min = Math.min(min, value); max = Math.max(max, value);
+        }
+        if (min === max) throw new Error('The map must contain a nonconstant scalar field.');
+        const id = this.nextID('volume', this.volumes);
+        const style = { color: '#3366cc', opacity: 0.8, ...copy(spec), isoval: spec.isoval ?? (min + max) / 2 };
+        const entry: UIVolume = { id, name, data: volume, spec: style, mode, min, max, shape: undefined };
+        entry.shape = this.volumeShape(entry);
+        this.volumes.set(id, entry);
+        this.viewer.render(); this.refresh();
+        return id;
+    }
+
+    /** Portable source settings for editable objects in a viewer URL. */
+    public exportObjects() {
+        return {
+            shapes: Array.from(this.shapes.values(), entry => ({ kind: entry.kind, name: entry.name, spec: objectSettings(entry.spec) })),
+            volumes: Array.from(this.volumes.values(), entry => ({ name: entry.name, mode: entry.mode, spec: objectSettings(entry.spec),
+                data: { values: Array.from(entry.data.data), size: { ...entry.data.size }, origin: { ...entry.data.origin },
+                    unit: { ...entry.data.unit }, matrix: entry.data.matrix ? Array.from(entry.data.matrix.elements) : null } }))
+        };
+    }
+
+    /** Restore data-only object settings without evaluating callback source. */
+    public restoreObjects(records: ReturnType<StateManager['exportObjects']>): void {
+        if (!records || !Array.isArray(records.shapes) || !Array.isArray(records.volumes)) throw new Error('Invalid scene objects.');
+        for (const record of records.shapes) this.addShape(record.kind, objectSettings(record.spec), record.name);
+        const core = window.$3Dmol as unknown as { VolumeData: typeof VolumeData; Matrix4: typeof import('../WebGL/math').Matrix4 };
+        for (const record of records.volumes) {
+            const data = record.data;
+            if (!data || !Array.isArray(data.values) || !data.values.every(Number.isFinite) || !['x', 'y', 'z'].every(axis =>
+                Number.isInteger(data.size?.[axis]) && data.size[axis] > 0 && Number.isFinite(data.origin?.[axis]) && Number.isFinite(data.unit?.[axis]))) {
+                throw new Error('Invalid map grid dimensions.');
+            }
+            const volume: VolumeData = Object.create(core.VolumeData.prototype);
+            Object.assign(volume, { data: new Float32Array(data.values), size: { ...data.size }, origin: { ...data.origin },
+                unit: { ...data.unit }, matrix: null, inversematrix: null });
+            if (data.matrix) {
+                if (data.matrix.length !== 16 || !data.matrix.every(Number.isFinite)) throw new Error('Invalid map coordinate transform.');
+                volume.matrix = new core.Matrix4(); volume.matrix.elements.set(data.matrix);
+            }
+            this.addVolumeData(volume, objectSettings(record.spec), record.name, record.mode);
+        }
+    }
+
+    private volumeShape(entry: UIVolume): GLShape | GLVolumetricRender {
+        if (entry.mode === 'volume') {
+            if (!this.viewer.hasVolumetricRender()) throw new Error('Volume rendering requires WebGL 2. Use an isosurface on this device.');
+            const color = Array.isArray(entry.spec.color) ? entry.spec.color[0] : entry.spec.color;
+            return this.viewer.addVolumetricRender(entry.data, { hidden: entry.spec.hidden,
+                transferfn: [{ value: entry.min, color, opacity: 0 },
+                    { value: entry.max, color, opacity: entry.spec.opacity }] });
+        }
+        return this.viewer.addIsosurface(entry.data, copy(entry.spec));
+    }
+
+    public updateVolume(id: string, patch: IsoSurfaceSpec): void {
+        const entry = this.volumes.get(id);
+        if (!entry) return;
+        if (patch.isoval !== undefined && !Number.isFinite(patch.isoval)) throw new Error('Contour level must be finite.');
+        const spec = { ...entry.spec, ...copy(patch) };
+        if (entry.mode === 'isosurface' && (patch.isoval === undefined || patch.isoval === entry.spec.isoval)) {
+            (entry.shape as GLShape).updateStyle(copy(patch));
+        } else if (entry.mode === 'volume' && Object.keys(patch).every(key => key === 'hidden')) {
+            entry.shape.hidden = !!spec.hidden;
+        } else {
+            const next = this.volumeShape({ ...entry, spec });
+            this.viewer.removeShape(entry.shape);
+            entry.shape = next;
+        }
+        entry.spec = spec;
+        this.viewer.render(); this.refresh();
+    }
+
+    public removeVolume(id: string): void {
+        const entry = this.volumes.get(id);
+        if (!entry) return;
+        this.viewer.removeShape(entry.shape); this.volumes.delete(id);
+        this.viewer.render(); this.refresh();
+    }
+
     /** Register a surface already created by autoload or an embedding. */
     public loadSurface(type: string | number, spec: AtomSelectionSpec,
         style: SurfaceStyleSpec, surfaceId: number, calculationSpec?: AtomSelectionSpec): string {
@@ -431,6 +593,11 @@ export class StateManager {
         for (const [id, surface] of this.surfaces) {
             if (!this.ownsSurface(surface)) this.surfaces.delete(id);
         }
+        for (const entries of [this.shapes, this.volumes]) {
+            for (const [id, entry] of entries) {
+                if (this.viewer.getShape && this.viewer.getShape(entry.shape.shapePosition) !== entry.shape) entries.delete(id);
+            }
+        }
         for (const listener of this.listeners) listener();
     }
 
@@ -447,7 +614,14 @@ export class StateManager {
 
     /** Enable the edit dialog and trajectory controls independently. */
     public setControls(options: UIControlOptions): void {
-        if (!this.disposed) this.ui?.setControls(options);
+        if (this.disposed) return;
+        if (options.edit === false) {
+            for (const [id, pending] of this.pendingSurfaces) {
+                pending.removed = true;
+                if (pending.surface && this.viewer.getSurface(id) === pending.surface) this.viewer.removeSurface(id);
+            }
+        }
+        this.ui?.setControls(options);
     }
 
     public getControls(): Required<UIControlOptions> {
@@ -557,7 +731,9 @@ export class StateManager {
 
     private atoms(): Set<AtomSpec> {
         const atoms = new Set<AtomSpec>();
-        const models = this.viewer.getInternalState().models as
+        // Appearance layers need live atoms; scene snapshots are detached data.
+        const models = (this.viewer.getModels ? this.viewer.getModels().map(model => model.getInternalState())
+            : this.viewer.getInternalState().models) as
             { atoms: AtomSpec[]; frames: AtomSpec[][] }[];
         for (const model of models) {
             if (!model) continue;

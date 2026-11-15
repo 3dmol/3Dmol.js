@@ -8,39 +8,72 @@ need this service.
 For setup, viewer URLs, and proxy configuration, use the maintained
 [active learning tutorial](../tutorials/learning_environment.md). Build the main
 repository first, then run `python3 server.py` from this directory; `-p` selects
-the port (default 5000). The `static` symlink exposes the repository root, and `/`
-redirects to `/static/viewer.html`.
+the port (default 5000). It binds to `127.0.0.1` by default; use `--host 0.0.0.0`
+for direct connections from other machines. The `static` symlink exposes the
+repository root, and `/` redirects to `/static/viewer.html`.
+
+The browser connects to the page's origin for both `localhost` and `127.0.0.1`.
+When Apache serves the page, proxy `/socket.io/` to this server, or set
+`window.viewerSessionServer` explicitly for a direct connection. For local testing
+without Apache, run `python3 server.py -p 5068` and open
+`http://127.0.0.1:5068/static/viewer.html`. See the tutorial for proxy configuration
+and port-conflict troubleshooting.
 
 ## Dependencies
 
-Install these in a Python virtual environment:
+Use Python 3.10 or newer in a virtual environment. From this directory, install
+the dependencies from the maintained requirements file:
 
-pip3 install flask flask_socketio eventlet
+```bash
+python3 -m pip install --upgrade -r requirements.txt
+```
 
-## Session-server backlog
+The server uses Flask-SocketIO's native `threading` mode, `simple-websocket` for
+WebSocket transport, and one Gunicorn `gthread` worker. This is a
+[supported Flask-SocketIO deployment](https://flask-socketio.readthedocs.io/en/latest/deployment.html#gunicorn-web-server)
+with both polling and WebSocket support. Eventlet and monkey patching are no
+longer used. The explicit threading configuration also applies if eventlet remains
+installed in an older environment; it can be uninstalled from the server's virtual
+environment after upgrading.
 
-These are historical development ideas, not a list of supported features or a
-release plan. Verify each against the current server, client, and UI tests before
-starting work.
+`python3 server.py` starts Gunicorn on Linux or macOS, with 100 worker threads by
+default. Use `--threads` to adjust capacity for your class; persistent WebSocket
+connections occupy worker threads. Keep one worker because sessions live in
+process memory. For deployments that invoke Gunicorn directly, the equivalent
+command from this directory is:
 
-Lint the session code as part of the current JavaScript development workflow
-Provide viewergrid functionality with the ability to query molecules
-Add support for volumetric data in viewer
-Add support for uploading your own files (nontrivial)
-Implement save restore of state for labels, shapes, and surfaces.
-Improve efficiency of state updates
- - make sure updates are only sent if something has changed
- - only send changed part
- - could record and playback a history (this is most efficient)
-Add ability to select residues
-  -Query Atoms button becomes a pulldown button that can be either Query Atoms or Residues
-Refactor code to be general and module
-  - interface should be separate from sessions information
-  - create a Session class
-  - use Promise API to handle event/response
-Implement garbage collecting of stale sessions (24h)
-Implement status reporting/concise logging
-Implement password based authentication of controller (NOT in viewer.html)
-Implement ability to create session not as controller (initializes state, but does not control)
-Uses Session API to implement environment within py3Dmol
- -this will use the password based authentication to allow instructor to take control
+```bash
+gunicorn --worker-class gthread --workers 1 --threads 100 --bind 127.0.0.1:5000 server:app
+```
+
+Session event handling and expiry share a lock so concurrent connections cannot
+overwrite revisions, create competing controllers, or delete a renewed session.
+
+## Synchronization and cleanup
+
+The edit menu supports volumetric maps and annotation shapes alongside model
+appearance, labels, and molecular surfaces. Students receive materialized scene
+geometry, and their edit and trajectory controls are disabled while connected.
+Pending local loads and surface edits are canceled when a student joins.
+
+Scene updates are debounced and deduplicated. Compact snapshots separate model
+appearance from coordinates and stored trajectory frames; subsequent messages
+replace only changed top-level sections. The server owns revision numbers and
+retains a complete snapshot for joins and reconnects. A revision mismatch requests
+resynchronization. Camera messages do not resend the scene.
+
+Deploy the server and rebuilt viewer assets together, and reload existing browser
+tabs after upgrading so both ends use the revisioned synchronization protocol.
+
+Closing the instructor's tab or window ends the session when the server detects
+the disconnect. Connected students leave the session and regain
+editing controls, and the session name becomes available again. This cleanup
+also covers lost instructor connections, even if the browser cannot send its
+final deletion request. Students can disconnect and reconnect while the instructor
+remains connected.
+
+Sessions also expire after 48 hours without valid activity. The server checks expiry
+on access and sweeps once per minute, removes room membership, and notifies
+connected viewers. Name-availability checks and rejected updates do not keep a
+session alive. Session state is process-local and is lost on restart; run one
+session-server process unless shared storage and routing are added.

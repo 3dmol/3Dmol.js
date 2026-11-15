@@ -14,6 +14,7 @@ import { adjustVolumeStyle, extend, Func, makeFunction } from "./utilities";
 import { GradientType } from "./Gradient";
 import { AtomSelectionSpec } from "specs";
 import { GLViewer } from "GLViewer";
+import { encodeSceneValue, decodeSceneValue, snapshotGeometry, restoreGeometry } from './SceneState';
 
 
 /**
@@ -672,6 +673,39 @@ export class GLShape {
         this.geo = new Geometry(true);
         this.linegeo = new Geometry(true);
     };
+
+    /** Capture the current geometry and appearance as JSON-safe data, without callbacks. */
+    public getInternalState() {
+        if (this.color !== undefined) GLShape.updateColor(this.geo, this.color);
+        return {
+            kind: 'shape', geometry: snapshotGeometry(this.geo), lines: snapshotGeometry(this.linegeo),
+            style: encodeSceneValue({ color: this.color, hidden: this.hidden, wireframe: this.wireframe,
+                opacity: this.opacity, linewidth: this.linewidth, side: this.side, frame: this.frame }),
+            hasColor: this.color !== undefined,
+            bounds: encodeSceneValue(this.boundingSphere), components: encodeSceneValue(this.components),
+            vertexIndices: this.geo.geometryGroups.filter(group => group.vertices > 0)
+                .map(group => encodeSceneValue(GLShape.customVertexIndices.get(group)) || null)
+        };
+    }
+
+    /** Restore materialized geometry; no shape callbacks or source code are evaluated. */
+    public static fromInternalState(state): GLShape {
+        const shape = new GLShape(decodeSceneValue(state.style));
+        shape.geo = restoreGeometry(state.geometry);
+        shape.linegeo = restoreGeometry(state.lines);
+        if (!state.hasColor) delete shape.color;
+        const bounds = decodeSceneValue(state.bounds);
+        shape.boundingSphere = new Sphere(new Vector3(bounds.center.x, bounds.center.y,
+            bounds.center.z), bounds.radius);
+        if (bounds.box) shape.boundingSphere.box = bounds.box;
+        shape.components = decodeSceneValue(state.components || []);
+        for (let i = 0; i < (state.vertexIndices || []).length; i++) {
+            if (state.vertexIndices[i] && shape.geo.geometryGroups[i]) {
+                GLShape.customVertexIndices.set(shape.geo.geometryGroups[i], decodeSceneValue(state.vertexIndices[i]));
+            }
+        }
+        return shape;
+    }
 
     /** Merge supplied style properties into this shape's existing style.
      * This changes appearance, not geometry dimensions or coordinates. Call

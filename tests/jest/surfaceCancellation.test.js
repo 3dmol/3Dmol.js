@@ -89,7 +89,7 @@ describe("canceling surface generation", () => {
         }
     });
 
-    test.each(["removeSurface", "removeAllSurfaces", "clear", "destroy"])(
+    test.each(["removeSurface", "removeAllSurfaces", "clear", "destroy", "setInternalState"])(
         "%s stops workers, settles the Promise, and ignores queued delivery", async method => {
             const surface = pending(), part = surface.surface[0];
             const disposed = jest.fn();
@@ -97,7 +97,10 @@ describe("canceling surface generation", () => {
             const render = jest.spyOn(surface.v, "render");
             setTimeout(() => deliver(surface.jobs[0]), 10);
             setTimeout(() => surface.jobs[1].error({ message: "obsolete failure" }), 20);
-            expect(surface.v[method](surface.id)).toBe(surface.v);
+            const result = method === "setInternalState"
+                ? surface.v.setInternalState({ surfaces: [] }, { partial: true })
+                : surface.v[method](surface.id);
+            expect(result).toBe(surface.v);
             await expect(surface.result).resolves.toBe(surface.id);
             expectStopped(surface);
             expect(disposed).toHaveBeenCalledTimes(1);

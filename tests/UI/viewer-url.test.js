@@ -260,3 +260,16 @@ describe('standalone viewer URL API', () => {
         expect(() => parse('#state=' + encodeURIComponent(JSON.stringify(scene)))).toThrow();
     });
 });
+
+
+test('shared scenes retain editable shape and scalar-grid descriptors', () => {
+    const scene = { models: [], selections: [], surfaces: [], objects: {
+        shapes: [{ kind: 'sphere', name: 'Binding site', spec: { center: { x: 1, y: 2, z: 3 }, radius: 2, color: 'red' } }],
+        volumes: [{ name: 'Density', mode: 'isosurface', spec: { isoval: 0.5, color: 'blue' },
+            data: { values: [0, 1, 0, 1, 0, 1, 0, 1], size: { x: 2, y: 2, z: 2 },
+                origin: { x: 0, y: 0, z: 0 }, unit: { x: 1, y: 1, z: 1 }, matrix: null } }]
+    } };
+    expect(parse(ViewerURL.serialize(scene, baseURL))).toEqual(scene);
+    expect(() => ViewerURL.serialize({ ...scene, objects: { shapes: {}, volumes: [] } }, baseURL))
+        .toThrow('Scene objects need shapes and volumes lists.');
+});

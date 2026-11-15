@@ -10,16 +10,147 @@ var joinSession = function(name) {
 
 // Setup socket handlers and session related event handlers
 var initSessions = function() {
+    // Keep one connection and one set of role-owning handlers for this window.
+    if (socket) return socket;
     var initiator = false;
     var joined = false;
     var pendingJoin = false;
     var pendingCreate = false;
+    var revision = 0, lastSentState = null, pendingSnapshot = null, receivedState = null;
+    var stateTimer = null, stateDirty = false, forceFull = false, viewTimer = null, pendingView = null, lastView = '';
+    var unsubscribeState = null, unsubscribeScene = null, reconnecting = false;
+    var snapshot = function() {
+        var app = window.viewerApp;
+        var value = app && typeof app.getSessionState === 'function' ? app.getSessionState()
+            : Object.assign({}, glviewer.getInternalState({ compact: true }), { frame: glviewer.getFrame() });
+        if (value.labels) value = Object.assign({}, value, { labels: value.labels.filter(label => !label.style?._sessionTransient) });
+        return value;
+    };
+    var scheduleState = function(full) {
+        if (!initiator || !session_name) return;
+        stateDirty = true; forceFull = forceFull || !!full;
+        if (stateTimer === null) stateTimer = setTimeout(flushState, 100);
+    };
+    var flushState = function() {
+        stateTimer = null;
+        if (!initiator || !session_name || !stateDirty || pendingSnapshot || socket.connected === false) return;
+        var next;
+        try { next = JSON.parse(JSON.stringify(snapshot())); }
+        catch (error) { window.viewerApp?.showError(error); return; }
+        var patch = {};
+        Object.keys(next).forEach(function(key) {
+            if (!lastSentState || JSON.stringify(next[key]) !== JSON.stringify(lastSentState[key])) patch[key] = next[key];
+        });
+        stateDirty = false;
+        if (!forceFull && lastSentState && !Object.keys(patch).length) return;
+        var message = { name: session_name, baseRevision: revision, revision: revision + 1 };
+        if (forceFull || !lastSentState) message.state = next;
+        else message.patch = patch;
+        forceFull = false; pendingSnapshot = next;
+        socket.emit('viewer state change event', message);
+    };
+    var acknowledgeState = function(message) {
+        if (!initiator || !Number.isInteger(message.revision) || message.revision < revision) return;
+        revision = message.revision;
+        if (pendingSnapshot) { lastSentState = pendingSnapshot; pendingSnapshot = null; }
+        if (stateDirty) scheduleState(false);
+    };
+    var reconnect = function() {
+        if (reconnecting || (!initiator && !joined) || !session_name) return;
+        reconnecting = true;
+        socket.emit('reconnection', { name: session_name, secret: initiator || null, sid: joined || null });
+    };
 
     joinSession = function(name) {
-        if (pendingJoin || pendingCreate) return;
+        if (initiator || joined || pendingJoin || pendingCreate) return;
         session_name = name;
         pendingJoin = true;
         socket.emit('join session event', { name: name });
+    };
+
+    // All classroom dialogs share a floating position until the session closes.
+    var dialogs = Array.from(window.document?.querySelectorAll('.rightdialog') || []);
+    var dialogPosition = null, activeDialog = null, dialogDrag = null;
+    var placeDialog = function(dialog, left, top) {
+        var bounds = dialog.getBoundingClientRect();
+        dialogPosition = {
+            left: Math.max(12, Math.min(left, window.innerWidth - bounds.width - 12)),
+            top: Math.max(12, Math.min(top, window.innerHeight - bounds.height - 12))
+        };
+        dialog.style.left = dialogPosition.left + 'px';
+        dialog.style.top = dialogPosition.top + 'px';
+        dialog.style.right = 'auto';
+    };
+    var endDialogDrag = function() {
+        if (!dialogDrag) return;
+        var previous = dialogDrag; dialogDrag = null;
+        previous.dialog.classList.remove('is-dragging');
+        window.document.removeEventListener('pointermove', moveDialog);
+        window.document.removeEventListener('pointerup', finishDialogDrag);
+        window.document.removeEventListener('pointercancel', finishDialogDrag);
+        if (previous.handle.hasPointerCapture?.(previous.pointerId)) {
+            previous.handle.releasePointerCapture(previous.pointerId);
+        }
+    };
+    var moveDialog = function(event) {
+        if (!dialogDrag || event.pointerId !== dialogDrag.pointerId) return;
+        event.preventDefault(); event.stopPropagation();
+        placeDialog(dialogDrag.dialog, event.clientX - dialogDrag.x, event.clientY - dialogDrag.y);
+    };
+    var finishDialogDrag = function(event) {
+        if (!dialogDrag || event.pointerId !== dialogDrag.pointerId) return;
+        if (event.type === 'lostpointercapture' && event.target !== dialogDrag.handle) return;
+        event.stopPropagation(); endDialogDrag();
+    };
+    dialogs.forEach(function(dialog) {
+        var handle = dialog.querySelector('[data-session-drag]');
+        if (!handle) return;
+        // Keep controls and dragging from reaching molecular viewer gestures.
+        ['pointerdown', 'mousedown', 'touchstart', 'wheel', 'dblclick'].forEach(function(type) {
+            dialog.addEventListener(type, function(event) { event.stopPropagation(); });
+        });
+        handle.addEventListener('pointerdown', function(event) {
+            if (event.button !== 0 || event.isPrimary === false) return;
+            endDialogDrag();
+            var bounds = dialog.getBoundingClientRect();
+            event.preventDefault(); event.stopPropagation();
+            handle.focus({ preventScroll: true });
+            dialogDrag = { dialog: dialog, handle: handle, pointerId: event.pointerId,
+                x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+            dialog.classList.add('is-dragging');
+            window.document.addEventListener('pointermove', moveDialog);
+            window.document.addEventListener('pointerup', finishDialogDrag);
+            window.document.addEventListener('pointercancel', finishDialogDrag);
+            // Document listeners still handle drags when capture is unavailable.
+            try { handle.setPointerCapture?.(event.pointerId); } catch (_) {}
+        });
+        handle.addEventListener('lostpointercapture', finishDialogDrag);
+        handle.addEventListener('keydown', function(event) {
+            var direction = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+            if (!direction || event.altKey || event.ctrlKey || event.metaKey) return;
+            event.preventDefault(); event.stopPropagation();
+            var bounds = dialog.getBoundingClientRect(), step = event.shiftKey ? 1 : 10;
+            placeDialog(dialog, bounds.left + direction[0] * step, bounds.top + direction[1] * step);
+        });
+    });
+    window.addEventListener?.('resize', function() {
+        if (activeDialog && dialogPosition) placeDialog(activeDialog, dialogPosition.left, dialogPosition.top);
+    });
+    window.addEventListener?.('blur', endDialogDrag);
+    var showDialog = function(selector) {
+        endDialogDrag();
+        $('#sessionbutton').hide();
+        $('#sessionconnect,#sessioncontrol,#sessionmonitor').hide();
+        $(selector).show();
+        activeDialog = window.document?.querySelector(selector);
+        if (activeDialog && dialogPosition) placeDialog(activeDialog, dialogPosition.left, dialogPosition.top);
+    };
+    var resetDialogs = function() {
+        endDialogDrag();
+        activeDialog = dialogPosition = null;
+        dialogs.forEach(function(dialog) {
+            dialog.style.left = dialog.style.top = dialog.style.right = '';
+        });
     };
 
     var showViewerControls = function(visible) {
@@ -37,18 +168,17 @@ var initSessions = function() {
         }
     };
 
-    // Local development can serve the viewer separately from Flask on port 5000.
-    // Other hosts preserve the page origin unless an embedding supplies a server.
-    var sessionServer = window.viewerSessionServer || (window.location.hostname === 'localhost'
-        ? window.location.protocol + '//localhost:5000'
-        : window.location.origin);
+    // Use the page's server (including any reverse proxy) unless explicitly overridden.
+    var sessionServer = window.viewerSessionServer || window.location.origin;
     socket = io.connect(sessionServer);
     socket.on('connect', function() {
         socket.send('User has connected!');
+        reconnect();
     });
 
     // Show only the connect button, make sure sidebar is back
     var resetUpperRight = function() {
+        resetDialogs();
         $('#sessionbutton').show();
         $('#sessionconnect').hide();
         $('#sessioncontrol').hide();
@@ -59,8 +189,7 @@ var initSessions = function() {
 
     // Open session connection dialog
     $('#sessionbutton').on('click', function() {
-        $('#sessionbutton').hide();
-        $('#sessionconnect').show();
+        showDialog('#sessionconnect');
     });
 
     var setNumConnections = function(count) {
@@ -99,13 +228,14 @@ var initSessions = function() {
 
     // Handle connecting to a session
     var connectSession = function() {
-        if (pendingJoin || pendingCreate) return;
+        if (initiator || joined || pendingJoin || pendingCreate) return;
         session_name = $('#session_name_input').val();
         if ($('#sessionconnectbutton').text() == "Create") {
             pendingCreate = true;
+            lastSentState = JSON.parse(JSON.stringify(snapshot()));
             socket.emit('create session event', {
                 name : session_name,
-                state : Object.assign({}, glviewer.getInternalState(), { frame: glviewer.getFrame() }),
+                state : lastSentState,
                 view : glviewer.getView()
             });
         } else {
@@ -123,19 +253,36 @@ var initSessions = function() {
     // Register change callbacks
     var viewUpdateCallback = function(new_view) {
         if (!initiator || !session_name) return;
-        socket.emit('viewer view change event', {
-            name : session_name,
-            view : new_view
-        });
+        var key = JSON.stringify(new_view);
+        if (key === lastView && viewTimer === null) return;
+        pendingView = new_view.slice();
+        if (viewTimer === null) viewTimer = setTimeout(function() {
+            viewTimer = null;
+            if (!initiator || !session_name || socket.connected === false) return;
+            var key = JSON.stringify(pendingView);
+            if (key !== lastView) {
+                lastView = key;
+                socket.emit('viewer view change event', { name: session_name, view: pendingView });
+            }
+        }, 33);
     };
+    var stateUpdateCallback = function() { scheduleState(false); };
 
-    var stateUpdateCallback = function(new_state) {
-        if (!initiator || !session_name) return;
-        socket.emit('viewer state change event', {
-            name : session_name,
-            state : Object.assign({}, new_state, { frame: glviewer.getFrame() })
-        });
-    };
+    socket.on('viewer state revision', acknowledgeState);
+    socket.on('viewer state resync', function(message) {
+        if (!initiator) return;
+        revision = message.revision; pendingSnapshot = null;
+        scheduleState(true);
+    });
+    socket.on('reconnection response', function(message) {
+        reconnecting = false;
+        revision = message.revision;
+        if (message.controller && initiator) {
+            pendingSnapshot = null;
+            scheduleState(true);
+            lastView = ''; viewUpdateCallback(glviewer.getView());
+        } else if (joined) joined = message.sid;
+    });
 
     socket.on('create session response',function(msg) {
         if (!pendingCreate || !session_name) return;
@@ -146,13 +293,17 @@ var initSessions = function() {
 
             // Setup callbacks
             glviewer.setViewChangeCallback(viewUpdateCallback);
-            glviewer.setStateChangeCallback(stateUpdateCallback);
             initiator = parseInt(msg);
+            revision = 0; pendingSnapshot = null; stateDirty = false;
+            lastView = JSON.stringify(glviewer.getView());
+            if (glviewer.subscribeStateChanges) unsubscribeScene = glviewer.subscribeStateChanges(stateUpdateCallback);
+            else glviewer.setStateChangeCallback(stateUpdateCallback);
+            if (window.viewerApp?.subscribeSessionChanges) unsubscribeState = window.viewerApp.subscribeSessionChanges(stateUpdateCallback);
+            // Include edits made while the create request was in flight.
+            scheduleState(false);
     
             // Close the connection create pane and open the connection monitoring
-            $('#sessionbutton').hide();
-            $('#sessionconnect').hide();
-            $('#sessioncontrol').show();
+            showDialog('#sessioncontrol');
         } else {
             alert("Session name was already taken/ could not be created. Try Again");
             initiator = 0;
@@ -164,15 +315,13 @@ var initSessions = function() {
         if (!pendingJoin || !session_name) return;
         pendingJoin = false;
         if (msg != "0") {
-            joined = msg;
+            joined = msg; revision = 0; receivedState = null;
             // Close the connection create pane and open the connection monitoring
             $('.sessionname').text(session_name);
-            $('#sessionbutton').hide();
-            $('#sessionconnect').hide();
             // Disable the sidebar
             sessionChanged(session_name, true);
             showViewerControls(false);
-            $('#sessionmonitor').show();
+            showDialog('#sessionmonitor');
 
         } else {
             session_name = null;
@@ -190,6 +339,11 @@ var initSessions = function() {
         pendingJoin = false;
         pendingCreate = false;
         session_name = null;
+        if (stateTimer !== null) clearTimeout(stateTimer);
+        if (viewTimer !== null) clearTimeout(viewTimer);
+        stateTimer = viewTimer = null; stateDirty = forceFull = false;
+        pendingSnapshot = lastSentState = receivedState = pendingView = null; revision = 0; lastView = ''; reconnecting = false;
+        unsubscribeState?.(); unsubscribeScene?.(); unsubscribeState = unsubscribeScene = null;
         if (wasInitiator) {
             glviewer.setViewChangeCallback(null);
             glviewer.setStateChangeCallback(null);
@@ -227,6 +381,7 @@ var initSessions = function() {
     socket.on('leave session response', sessionEnded);
     socket.on('disconnect', function(reason) {
       console.log("disconnect: "+reason);
+      reconnecting = false;
       // Do NOT end session since we will attempt to reconnect
     });
 
@@ -238,15 +393,10 @@ var initSessions = function() {
         console.log('error: '+error);
     });
     
-    socket.on("reconnect", function() {
-      console.log("Reconnected");
-      if(initiator) {
-        socket.emit('reconnection', {name: session_name, secret: initiator, sid: null});
-      } else if(joined) {
-        socket.emit('reconnection', {name: session_name, secret: null, sid: joined});        
-      }
-    });    
-    
+    // Older Socket.IO clients emit reconnect on the socket; current clients
+    // reach the same path through connect. The guard avoids duplicate requests.
+    socket.on('reconnect', reconnect);
+
     socket.on("connect_timeout", function() {
       console.log("Connect timeout");
     });    
@@ -261,16 +411,30 @@ var initSessions = function() {
         }
     });
 
-    socket.on('viewer state change response', function(new_state) {
-        if (joined && !initiator) {
-            if (window.viewerApp && typeof window.viewerApp.acceptSessionState === 'function') {
-                var applied = window.viewerApp.acceptSessionState(new_state);
-                applied.catch(window.viewerApp.showError);
-                return applied;
-            } else {
-                glviewer.setInternalState(new_state);
+    socket.on('viewer state change response', function(message) {
+        if (initiator) { acknowledgeState(message); return; }
+        if (!joined) return;
+        var sections;
+        if (message.patch) {
+            if (Number.isInteger(message.revision) && message.revision <= revision) return;
+            if (!receivedState || message.baseRevision !== revision) {
+                socket.emit('request state', { name: session_name });
+                return;
             }
+            sections = Object.keys(message.patch);
+            receivedState = Object.assign({}, receivedState, message.patch);
+            revision = message.revision;
+        } else {
+            if (Number.isInteger(message.revision) && message.revision < revision) return;
+            receivedState = message.state || message;
+            revision = Number.isInteger(message.revision) ? message.revision : 0;
         }
+        if (window.viewerApp && typeof window.viewerApp.acceptSessionState === 'function') {
+            var applied = window.viewerApp.acceptSessionState(receivedState, sections);
+            applied.catch(window.viewerApp.showError);
+            return applied;
+        }
+        glviewer.setInternalState(sections ? message.patch : receivedState, { partial: !!sections });
     });
 
     var result_labels = []; // array of labels
@@ -301,7 +465,7 @@ var initSessions = function() {
             });
         } else if (val[0] == 'S') { // show results
             $('#askbutton').html('Clear Labels');
-            $('#refreshresults').show();            
+            $('#refreshresults').css('display', 'inline-flex');
             socket.emit('query fetch', {
                 name : session_name,
             });
@@ -355,7 +519,7 @@ var initSessions = function() {
             
             glviewer.setHoverable({},true,function(atom,viewer,event,container) {
                 if(!atom.hoverlabel && !atom.clicklabel) {                    
-                    current_hover_label = atom.hoverlabel = viewer.addLabel(atomLabel(atom),{position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.7, fontColor:'white'});
+                    current_hover_label = atom.hoverlabel = viewer.addLabel(atomLabel(atom),{_sessionTransient: true, position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.7, fontColor:'white'});
                 }
             },
             function(atom) { 
@@ -378,7 +542,7 @@ var initSessions = function() {
                    delete atom.clicklabel;
                } else { 
                    // Select
-                   atom.clicklabel = viewer.addLabel(atomLabel(atom), {position: atom, backgroundColor: 0x800080, backgroundOpacity: 1.0, fontColor: 'white'});
+                   atom.clicklabel = viewer.addLabel(atomLabel(atom), {_sessionTransient: true, position: atom, backgroundColor: 0x800080, backgroundOpacity: 1.0, fontColor: 'white'});
                    clicked_labels.push(atom.clicklabel);
                    if(atom.hoverlabel) {
                        glviewer.removeLabel(atom.hoverlabel);
@@ -438,9 +602,9 @@ var initSessions = function() {
           const pos = item[0];
           const p = { x: pos[0], y: pos[1], z: pos[2] };
           const val = parseInt(item[1]);
-          return glviewer.addLabel(val, { position: p, backgroundOpacity: 0.5 + (val / max) * 0.5 });
+          return glviewer.addLabel(val, { _sessionTransient: true, position: p, backgroundOpacity: 0.5 + (val / max) * 0.5 });
         });
       });
       
-    
+    return socket;
 };

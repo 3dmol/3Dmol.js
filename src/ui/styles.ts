@@ -5,7 +5,7 @@ export const uiStyles: string = `
   --molui-muted: #595974;
   --molui-border: #dcdced;
   --molui-accent: #000066;
-  --molui-paper: rgb(252 252 255 / 96%);
+  --molui-paper: rgb(252 252 255 / 60%);
   position: absolute;
   inset: 0;
   z-index: 10;
@@ -210,7 +210,7 @@ export const uiStyles: string = `
   margin: 8px 0 0;
   border: 1px solid var(--molui-border);
   border-radius: 10px;
-  background: #fff;
+  background: rgb(255,255,255,92%);
   overflow-wrap: anywhere;
 }
 .molui-card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
@@ -218,6 +218,7 @@ export const uiStyles: string = `
 .molui-card-header > button { padding: 5px 8px; font-size: 12px; }
 .molui-card .molui-field:last-child { margin-bottom: 0; }
 .molui-card > strong { display: block; margin-bottom: 6px; }
+.molui .molui-surface-actions > button { margin-left: auto; }
 .molui-selection-header { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; min-width: 0; }
 .molui-selection-visibility { display: inline-flex; flex: 0 0 32px; align-items: center; justify-content: center; min-height: 34px; margin: 0; border-radius: 7px; cursor: pointer; }
 .molui-selection-visibility:hover { background: #efeffb; }
@@ -228,8 +229,8 @@ export const uiStyles: string = `
 .molui-selection-summary-row { display: flex; align-items: flex-start; gap: 8px; margin-top: 6px; }
 .molui-selection-summary { flex: 1 1 auto; min-width: 0; margin: 0; color: var(--molui-muted); font-size: 12px; overflow-wrap: anywhere; }
 .molui-selection-summary-row > button { flex: 0 0 auto; padding: 5px 8px; font-size: 12px; }
-.molui-selection-create { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--molui-border); }
-.molui-selection-create > h3 { color: var(--molui-accent); }
+.molui .molui-create { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--molui-border); }
+.molui-create > h3 { color: var(--molui-accent); }
 .molui-selection-edit { margin-top: 8px; padding: 8px; border: 1px solid #c3c3dd; border-radius: 8px; background: #f5f5fd; }
 .molui-selection-edit > .molui-actions { margin-top: 8px; }
 .molui-style { margin-top: 8px; padding: 8px; border: 1px solid var(--molui-border); border-radius: 8px; background: #f8f8fd; }

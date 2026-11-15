@@ -42,6 +42,12 @@ function fixture() {
     const surfaces = new Map();
     const unrelatedLabel = { id: 'host-label' };
     const labels = new Set([unrelatedLabel]);
+    const shapes = [];
+    const addShape = spec => {
+        const shape = { shapePosition: shapes.length, spec: { ...spec },
+            updateStyle: jest.fn(patch => Object.assign(shape.spec, patch)) };
+        shapes.push(shape); return shape;
+    };
     const addAtoms = atoms => {
         const model = new $3Dmol.GLModel(sequence++);
         model.addAtoms(atoms.map((atom, index) => ({ x: index, y: 0, z: 0, bonds: [], ...atom })));
@@ -79,6 +85,13 @@ function fixture() {
         getFrame: () => currentFrame,
         setFrame: jest.fn(frame => Promise.all(models.map(model => model.setFrame(frame))).then(() => { currentFrame = frame; })),
         isAnimated: () => false,
+        getShape: id => shapes[id],
+        addSphere: jest.fn(addShape), addArrow: jest.fn(addShape), addCylinder: jest.fn(addShape),
+        addLine: jest.fn(addShape), addBox: jest.fn(addShape),
+        addIsosurface: jest.fn((_data, spec) => addShape(spec)),
+        addVolumetricRender: jest.fn((_data, spec) => addShape(spec)),
+        hasVolumetricRender: () => true,
+        removeShape: jest.fn(shape => { delete shapes[shape.shapePosition]; }),
         stopAnimate: jest.fn(),
         getSurface: id => surfaces.get(id),
         addSurface: jest.fn((type, style, spec, calculationSpec) => {
@@ -200,6 +213,10 @@ function addRepresentation(root, representation) {
     button(row, 'Add').click();
 }
 async function settle() { for (let index = 0; index < 6; index++) await Promise.resolve(); }
+const densityMap = 'object 1 class gridpositions counts 2 2 2\norigin 0 0 0\n'
+    + 'delta 1 0 0\ndelta 0 1 0\ndelta 0 0 1\n'
+    + 'object 2 class gridconnections counts 2 2 2\n'
+    + 'object 3 class array type double rank 0 items 8 data follows\n0 1 0 1 0 1 0 1\n';
 
 describe('guided molecular viewer UI', () => {
     let states;
@@ -221,6 +238,107 @@ describe('guided molecular viewer UI', () => {
         document.body.replaceChildren();
         global.fetch = fetchOriginal;
         jest.useRealTimers();
+    });
+
+    test('shape controls create, restyle, hide and remove annotations with state notifications', () => {
+        const { state, viewer, root } = mount();
+        const changed = jest.fn(); state.subscribe(changed);
+        const form = root.querySelector('.molui-shape-create');
+        choose(form, 'Shape', 'arrow');
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        const entry = [...state.shapes.values()][0];
+        expect(viewer.addArrow).toHaveBeenCalledWith(expect.objectContaining({ start: { x: 0, y: 0, z: 0 }, end: { x: 3, y: 0, z: 0 } }));
+        setInput(field(root.querySelector('.molui-shapes'), 'Color'), '#ff0000');
+        setInput(field(root.querySelector('.molui-shapes'), 'Opacity'), '0.5');
+        toggle(field(root.querySelector('.molui-shapes'), 'Visible'), false);
+        expect(entry.shape.spec).toMatchObject({ color: '#ff0000', opacity: 0.5, hidden: true });
+        button(root.querySelector('.molui-shapes'), 'Remove shape').click();
+        expect(state.shapes.size).toBe(0);
+        expect(viewer.removeShape).toHaveBeenCalledWith(entry.shape);
+        expect(changed).toHaveBeenCalledTimes(5);
+    });
+
+    test('map controls reuse parsed grids for contour edits and retain geometry for material edits', async () => {
+        dom.window.$3Dmol = $3Dmol;
+        const { state, viewer, root } = mount();
+        global.fetch = jest.fn(async () => ({ ok: true, text: async () => densityMap }));
+        const form = root.querySelector('.molui-volume-create');
+        choose(form, 'Map source', 'url');
+        field(form, 'Map URL').value = 'https://example.test/density.dx';
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        await settle();
+        const entry = [...state.volumes.values()][0];
+        expect(entry.data.data.length).toBe(8);
+        const grid = entry.data, original = entry.shape;
+        setInput(field(root.querySelector('.molui-volumes'), 'Contour level'), '0.25');
+        expect(viewer.addIsosurface).toHaveBeenLastCalledWith(grid, expect.objectContaining({ isoval: 0.25 }));
+        expect(viewer.removeShape).toHaveBeenCalledWith(original);
+        const regenerated = entry.shape;
+        setInput(field(root.querySelector('.molui-volumes'), 'Opacity'), '0.4');
+        expect(entry.shape).toBe(regenerated);
+        expect(entry.shape.updateStyle).toHaveBeenCalledWith({ opacity: 0.4 });
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        button(root.querySelector('.molui-volumes'), 'Remove map').click();
+        expect(state.volumes.size).toBe(0);
+        const volume = state.addVolume(densityMap, 'dx', { color: 'blue', opacity: 0.7 }, 'Density', 'volume');
+        expect(viewer.addVolumetricRender).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+            transferfn: [{ value: 0, color: 'blue', opacity: 0 }, { value: 1, color: 'blue', opacity: 0.7 }]
+        }));
+        const directShape = state.volumes.get(volume).shape;
+        state.updateVolume(volume, { hidden: true });
+        expect(state.volumes.get(volume).shape).toBe(directShape);
+        expect(directShape.hidden).toBe(true);
+        expect(viewer.addVolumetricRender).toHaveBeenCalledTimes(1);
+        state.removeVolume(volume);
+        expect(state.volumes.size).toBe(0);
+    });
+
+    test('editable object snapshots preserve transformed grids and styles across JSON', () => {
+        dom.window.$3Dmol = $3Dmol;
+        const { state } = mount();
+        state.addShape('sphere', { center: { x: 2, y: 3, z: 4 }, radius: 1,
+            color: new $3Dmol.Color(0xff0000), opacity: 0.4, hidden: true, callback: () => {} }, 'Marker');
+        const id = state.addVolume(densityMap, 'dx', { isoval: 0.25, color: 'blue', opacity: 0.6 }, 'Transformed');
+        const volume = state.volumes.get(id);
+        volume.data.matrix = new $3Dmol.Matrix4().makeTranslation(4, 5, 6);
+        state.updateVolume(id, { hidden: true });
+        const records = JSON.parse(JSON.stringify(state.exportObjects()));
+        expect(records.shapes[0].spec.color).toBe(0xff0000);
+        expect(records.shapes[0].spec.callback).toBeUndefined();
+        const restored = mount();
+        restored.state.restoreObjects(records);
+        expect(restored.state.exportObjects()).toEqual(records);
+        expect(field(restored.root.querySelector('.molui-shapes'), 'Color').value).toBe('#ff0000');
+        expect(field(restored.root.querySelector('.molui-volumes'), 'Color').value).toBe('#0000ff');
+        const grid = [...restored.state.volumes.values()][0].data;
+        expect(grid).toBeInstanceOf($3Dmol.VolumeData);
+        expect(grid.matrix).toBeInstanceOf($3Dmol.Matrix4);
+        expect(grid.data).toBeInstanceOf(Float32Array);
+        expect(grid.getVal(4, 5, 7)).toBe(1);
+        records.volumes[0].data.values[0] = null;
+        expect(() => mount().state.restoreObjects({ shapes: [], volumes: records.volumes })).toThrow();
+    });
+
+    test('disabling edits cancels structure and map loads even when their responses arrive after re-enabling', async () => {
+        const { state, viewer, root } = mount();
+        const pending = [];
+        global.fetch = jest.fn((_url, options) => new Promise(resolve => pending.push({ resolve, signal: options.signal })));
+        const molecule = root.querySelector('form');
+        choose(molecule, 'Source', 'url'); field(molecule, 'Structure URL').value = 'https://example.test/late.xyz';
+        molecule.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        const volume = root.querySelector('.molui-volume-create');
+        choose(volume, 'Map source', 'url'); field(volume, 'Map URL').value = 'https://example.test/late.dx';
+        volume.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        expect(pending).toHaveLength(2);
+        state.setControls({ edit: false });
+        expect(state.ui.isOpen).toBe(false);
+        expect(pending.every(request => request.signal.aborted)).toBe(true);
+        state.setControls({ edit: true });
+        pending[0].resolve({ ok: true, text: async () => '1\nlate\nO 0 0 0\n' });
+        pending[1].resolve({ ok: true, text: async () => densityMap });
+        await settle();
+        expect(viewer.addModelsAsFrames).not.toHaveBeenCalled();
+        expect(state.volumes.size).toBe(0);
     });
 
     test('multiple viewers have independent controls, selections, and panel IDs', () => {

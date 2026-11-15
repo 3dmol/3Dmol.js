@@ -7,6 +7,7 @@ import { TrajectoryControls } from './trajectory';
 import type { TrajectorySettings } from './trajectory';
 import { uiStyles } from './styles';
 import { SelectionEditor, selectionSummary } from './selection';
+import { SceneObjectControls } from './objects';
 
 /** Availability of the optional viewer controls. Disabling controls does not remove models. */
 export interface UIControlOptions {
@@ -107,6 +108,7 @@ export class UI {
     private readonly modelList = el('div', 'molui-list');
     private readonly selectionList = el('div', 'molui-list molui-selection-list');
     private readonly surfaceList = el('div', 'molui-list');
+    private readonly objects: SceneObjectControls;
     private readonly selectionEditor: SelectionEditor;
     private readonly selectionEditors = new Map<string, SelectionEditor>();
     private readonly collapsedSelections = new Set<string>();
@@ -132,6 +134,7 @@ export class UI {
     private surfacePending = false;
     private renamingSelection = false;
     private abort?: AbortController;
+    private loadGeneration = 0;
     private container?: HTMLElement;
     private originalPosition: string;
     private setPosition = false;
@@ -176,12 +179,12 @@ export class UI {
             this.focusControl(`${id}:name`);
         }, 'molui-primary');
         this.selectionEditor = this.makeSelectionEditor('new-selection', {}, () => this.updateSelectionDraft());
-        const create = el('div', 'molui-selection-create');
+        const create = el('div', 'molui-create molui-selection-create');
         create.append(el('h3', '', 'New selection'), this.selectionEditor.element, this.count,
             field('Representation', this.appearance), this.addSelectionButton);
         selections.append(this.selectionList, create);
         const surfaces = section('Surfaces', false);
-        const surfaceForm = el('div', 'molui-surface-create');
+        const surfaceForm = el('div', 'molui-create molui-surface-create');
         const surfaceColors = this.colorControls({}, 'surface-new');
         const type = select([['1', 'Van der Waals'], ['4', 'Solvent excluded'], ['3', 'Solvent accessible'], ['2', 'Molecular']]);
         const opacity = range(0.1, 1, 0.05, 0.7);
@@ -200,16 +203,17 @@ export class UI {
             try {
                 await this.state.addSurface(Number(type.value), { ...surfaceColors.value(), opacity: Number(opacity.value) },
                     spec, entry?.name || 'All atoms', calculation);
-            } catch (error) { this.showError(errorText(error)); }
+            } catch (error) { if (this.editEnabled && !this.destroyed) this.showError(errorText(error)); }
             finally { this.surfacePending = false; if (!this.destroyed) this.updateSurfaceSelection(); }
         }, 'molui-primary');
         this.surfaceValidation.setAttribute('aria-live', 'polite');
         this.surfaceSelection.addEventListener('change', () => this.updateSurfaceSelection());
         this.surfaceCalculation.addEventListener('change', () => this.updateSurfaceSelection());
-        surfaceForm.append(field('Show surface for', this.surfaceSelection), field('Calculate using', this.surfaceCalculation),
+        surfaceForm.append(el('h3', '', 'New surface'), field('Show surface for', this.surfaceSelection), field('Calculate using', this.surfaceCalculation),
             this.surfaceValidation, field('Surface type', type), ...surfaceColors.fields, opacityField, this.surfaceButton);
-        surfaces.append(surfaceForm, this.surfaceList);
-        body.append(this.status, models, selections, surfaces, this.viewControls());
+        surfaces.append(this.surfaceList, surfaceForm);
+        this.objects = new SceneObjectControls(state, config, message => this.showError(message));
+        body.append(this.status, models, selections, surfaces, this.objects.volumes, this.objects.shapes, this.viewControls());
         this.panel.append(header, body);
         this.trajectory = new TrajectoryControls(viewer, message => this.showError(message),
             () => this.updateTrajectoryLayout());
@@ -303,7 +307,7 @@ export class UI {
         const active = document.activeElement as HTMLElement;
         const focusKey = this.element.contains(active) ? active?.dataset.focus : undefined;
         this.signature = this.modelSignature();
-        this.renderModels(); this.renderFilters(); this.renderSelections(); this.renderSurfaces();
+        this.renderModels(); this.renderFilters(); this.renderSelections(); this.renderSurfaces(); this.objects.refresh();
         const view = this.state.getViewSettings();
         this.background.value = view.background;
         this.projection.value = view.projection;
@@ -324,6 +328,7 @@ export class UI {
     public destroy(): void {
         if (this.destroyed) return;
         this.destroyed = true;
+        this.loadGeneration++; this.objects.destroy();
         this.abort?.abort(); clearInterval(this.poll); this.unsubscribe?.(); this.observer?.disconnect();
         window.removeEventListener('resize', this.onResize);
         this.trajectory.destroy();
@@ -354,6 +359,8 @@ export class UI {
     public setControls(options: UIControlOptions): void {
         if (this.destroyed) return;
         this.editEnabled = options.edit ?? this.editEnabled;
+        if (!this.editEnabled) { this.loadGeneration++; this.abort?.abort(); }
+        this.objects.setEnabled(this.editEnabled);
         this.trajectoryEnabled = options.trajectory ?? this.trajectoryEnabled;
         this.toggle.hidden = !this.editEnabled;
         this.element.classList.toggle('molui-no-edit', !this.editEnabled);
@@ -453,7 +460,7 @@ export class UI {
         const identifierField = field('PDB ID', identifier);
         const fileField = field('Structure file', file);
         const formatField = field('File format', format);
-        const help = el('p', 'molui-muted', 'Files stay in your browser. New structures are added to the scene.');
+        const help = el('p', 'molui-muted', 'Files are read from your device. New structures are added to the scene.');
         const submit = el('button', 'molui-primary', 'Load structure'); submit.type = 'submit';
         const update = () => {
             fileField.hidden = source.value !== 'file'; identifierField.hidden = source.value === 'file';
@@ -461,14 +468,15 @@ export class UI {
             identifierField.firstElementChild.textContent = source.value === 'pdb' ? 'PDB ID' : source.value === 'cid' ? 'PubChem CID' : 'Structure URL';
             identifier.placeholder = source.value === 'pdb' ? 'e.g. 1CRN' : source.value === 'cid' ? 'e.g. 2244' : 'https://…/structure.pdb';
             help.textContent = source.value === 'url' ? 'The server must allow cross-origin requests. Choose a format if the URL has no extension.'
-                : source.value === 'file' ? 'Files stay in your browser. New structures are added to the scene.' : 'New structures are added to the scene.';
+                : source.value === 'file' ? 'Files are read from your device. New structures are added to the scene.' : 'New structures are added to the scene.';
         };
         source.addEventListener('change', update); update();
         form.append(field('Source', source), ...(this.config.allowLocalFiles !== false ? [fileField] : []),
             identifierField, formatField, trajectory.label, help, submit);
         form.addEventListener('submit', async event => {
             event.preventDefault();
-            if (this.loading) return;
+            if (this.loading || !this.editEnabled) return;
+            const generation = ++this.loadGeneration;
             this.loading = true; submit.disabled = true; submit.textContent = 'Loading…';
             form.setAttribute('aria-busy', 'true');
             this.abort = new AbortController();
@@ -505,7 +513,7 @@ export class UI {
                     if (!response.ok) throw new Error(`The structure could not be downloaded (HTTP ${response.status}).`);
                     data = /(?:bcif|mmtf|gz)$/.test(fileFormat) ? await response.arrayBuffer() : await response.text();
                 }
-                if (this.destroyed) return;
+                if (this.destroyed || !this.editEnabled || generation !== this.loadGeneration) return;
                 const model = frames ? this.state.viewer.addModelsAsFrames(data, fileFormat)
                     : this.state.viewer.addModel(data, fileFormat);
                 if (!model.selectedAtoms({}).length) {
@@ -522,7 +530,7 @@ export class UI {
                 details.open = false;
                 this.showError();
             } catch (error) {
-                if (!this.destroyed) this.showError(`Unable to load structure. ${errorText(error)}`);
+                if (!this.destroyed && this.editEnabled && generation === this.loadGeneration) this.showError(`Unable to load structure. ${errorText(error)}`);
             } finally {
                 this.loading = false; submit.disabled = false; submit.textContent = 'Load structure'; form.removeAttribute('aria-busy');
             }
@@ -983,9 +991,17 @@ export class UI {
         this.state.surfaces.forEach(entry => {
             const card = el('div', 'molui-card molui-surface-card');
             const colors = this.colorControls(entry.style, `${entry.id}:surface`, value => this.state.updateSurface(entry.id, value));
+            const opacity = range(0, 1, 0.05, entry.style.opacity ?? 1);
+            opacity.dataset.focus = `${entry.id}:surface-opacity`;
+            opacity.addEventListener('input', () => this.state.updateSurface(entry.id, { opacity: Number(opacity.value) }));
+            const wireframe = check('Wireframe', !!entry.style.wireframe);
+            wireframe.input.addEventListener('change', () => this.state.updateSurface(entry.id, { wireframe: wireframe.input.checked }));
+            const actions = el('div', 'molui-row molui-surface-actions');
+            actions.append(wireframe.label,
+                button('Remove surface', () => this.state.removeSurface(entry.id), 'molui-danger'));
             card.append(el('strong', '', entry.name),
                 el('p', 'molui-muted', `Calculated using: ${selectionSummary(entry.calculationSpec, this.state.modelTitles)}`),
-                ...colors.fields, button('Remove surface', () => this.state.removeSurface(entry.id), 'molui-danger'));
+                ...colors.fields, field('Opacity', opacity), actions);
             this.surfaceList.append(card);
         });
     }
