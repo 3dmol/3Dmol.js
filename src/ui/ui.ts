@@ -213,7 +213,7 @@ export class UI {
             this.surfaceValidation, field('Surface type', type), ...surfaceColors.fields, opacityField, this.surfaceButton);
         surfaces.append(this.surfaceList, surfaceForm);
         this.objects = new SceneObjectControls(state, config, message => this.showError(message));
-        body.append(this.status, models, selections, surfaces, this.objects.volumes, this.objects.shapes, this.viewControls());
+        body.append(this.status, models, selections, surfaces, this.objects.volumes, this.objects.measurements, this.viewControls());
         this.panel.append(header, body);
         this.trajectory = new TrajectoryControls(viewer, message => this.showError(message),
             () => this.updateTrajectoryLayout());
@@ -471,6 +471,9 @@ export class UI {
                 : source.value === 'file' ? 'Files are read from your device. New structures are added to the scene.' : 'New structures are added to the scene.';
         };
         source.addEventListener('change', update); update();
+        file.addEventListener('change', () => {
+            if (source.value === 'file' && file.files?.length) form.requestSubmit();
+        });
         form.append(field('Source', source), ...(this.config.allowLocalFiles !== false ? [fileField] : []),
             identifierField, formatField, trajectory.label, help, submit);
         form.addEventListener('submit', async event => {

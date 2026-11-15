@@ -8,7 +8,7 @@ The instructor can pose questions that the students then answer by clicking on a
 
 The instructor's edit-menu changes are shared with connected students: model
 loading and removal, selections and representations, residue labels, molecular
-surfaces, volumetric maps, annotation shapes, background, projection, and trajectory
+surfaces, volumetric maps, distance measurements, background, projection, and trajectory
 settings. Students can rotate and zoom locally, but joining closes their edit
 panel and disables editing and trajectory controls until they leave the session.
 An instructor camera change overrides their local camera view.
@@ -19,11 +19,16 @@ isosurface and adjust its contour level, color, opacity, or visibility; the pars
 grid is reused when changing the contour. Direct volume rendering uses WebGL 2.
 URL downloads require the remote server to permit cross-origin requests.
 
-Use **Shapes** to add spheres, arrows, cylinders, lines, or boxes at molecular
-coordinates, in angstroms. Each shape has color, opacity, visibility, and removal
-controls. **Surfaces** provides molecular surface calculation and material
-controls. Students receive the resulting geometry and map data, so they do not
-need the instructor's local files or repeat surface calculations.
+**Surfaces** provides molecular surface calculation and material controls.
+Annotation shapes supplied in shared URLs are also restored and synchronized.
+Students receive the resulting geometry and map data, so they do not need the
+instructor's local files or repeat surface calculations.
+
+Distance measurements are opt-in under **Measurements**; see the
+[viewer controls](tutorial-url.html#distance-measurements) for creating and
+removing them. Each measurement has color and label-visibility controls. The
+instructor's measurements, appearance changes, and removals are shared with
+students, whose editing controls remain disabled while connected.
 
 Changes are grouped briefly before transmission, and only changed scene sections
 are sent. Camera updates are separate from molecular data. Joining or reconnecting

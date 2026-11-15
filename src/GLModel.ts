@@ -3576,7 +3576,6 @@ export class GLModel {
     public addPropertyLabels(prop: string, sel: AtomSelectionSpec, style: LabelSpec) {
         let atoms = this.selectedAtoms(sel);
         let viewer = this.viewer;
-        let mystyle = deepCopy(style);
         for (let i = 0; i < atoms.length; i++) {
             let a = atoms[i];
             var label = null;
@@ -3587,6 +3586,7 @@ export class GLModel {
             }
 
             if (label != null) {
+                let mystyle = deepCopy(style);
                 mystyle.position = a;
                 viewer.addLabel(label, mystyle);
             }
@@ -3621,7 +3621,6 @@ export class GLModel {
                 bylabel[c][label].push(a);
             }
 
-            var mystyle = deepCopy(style);
             //now compute centers of mass
             for (let c in bylabel) {
                 if (bylabel.hasOwnProperty(c)) {
@@ -3637,6 +3636,9 @@ export class GLModel {
                                 sum.z += a.z;
                             }
                             sum.divideScalar(atoms.length);
+                            // Labels retain their style for later updates and
+                            // scene snapshots, so each residue needs its own.
+                            let mystyle = deepCopy(style);
                             mystyle.position = sum;
                             mystyle.frame = framenum;
                             let l = viewer.addLabel(label, mystyle, undefined, true);

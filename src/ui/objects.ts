@@ -1,4 +1,4 @@
-import type { StateManager, UIShape } from './state';
+import type { StateManager } from './state';
 import type { UIConfig } from './ui';
 import { CC } from '../colors';
 
@@ -23,9 +23,12 @@ function section(title: string): HTMLDetailsElement {
 /** Map and annotation controls share the manager's change notifications. */
 export class SceneObjectControls {
     readonly volumes = section('Volumetric data');
-    readonly shapes = section('Shapes');
+    readonly measurements = section('Measurements');
     private readonly volumeList = node('div');
-    private readonly shapeList = node('div');
+    private readonly distanceList = node('div');
+    private readonly measureToggle = node('input');
+    private readonly clearDistances = this.action('Clear distances', () => this.state.clearDistances(), true);
+    private readonly distanceHint = node('p');
     private enabled = true;
     private generation = 0;
     private abort?: AbortController;
@@ -33,14 +36,13 @@ export class SceneObjectControls {
     constructor(private readonly state: StateManager, config: UIConfig,
         private readonly error: (message?: string) => void) {
         this.volumeList.className = 'molui-list molui-volumes';
-        this.shapeList.className = 'molui-list molui-shapes';
         this.volumes.append(this.volumeList, this.volumeForm(config));
-        this.shapes.append(this.shapeList, this.shapeForm());
+        this.distanceControls();
     }
 
     setEnabled(enabled: boolean): void {
         this.enabled = enabled;
-        if (!enabled) { this.generation++; this.abort?.abort(); }
+        if (!enabled) { this.generation++; this.abort?.abort(); this.state.setDistancePicking(false); }
     }
 
     destroy(): void { this.setEnabled(false); }
@@ -55,6 +57,19 @@ export class SceneObjectControls {
         return button;
     }
 
+    private distanceControls(): void {
+        this.distanceList.className = 'molui-list molui-distances';
+        this.distanceHint.className = 'molui-muted'; this.distanceHint.setAttribute('aria-live', 'polite');
+        this.measureToggle.type = 'checkbox'; this.measureToggle.dataset.focus = 'distance-picking';
+        const enabled = node('label'); enabled.className = 'molui-check';
+        enabled.append(this.measureToggle, node('span', 'Enable measuring'));
+        this.measureToggle.addEventListener('change', () => {
+            if (this.enabled) this.state.setDistancePicking(this.measureToggle.checked);
+        });
+        const actions = node('div'); actions.className = 'molui-row molui-distance-actions'; actions.append(this.clearDistances);
+        this.measurements.append(enabled, this.distanceHint, this.distanceList, actions);
+    }
+
     private volumeForm(config: UIConfig): HTMLElement {
         const form = node('form'); form.className = 'molui-create molui-volume-create';
         const source = choice([...(config.allowLocalFiles === false ? [] : [['file', 'Local file']] as [string, string][]), ['url', 'URL']]);
@@ -65,8 +80,14 @@ export class SceneObjectControls {
         const color = node('input'); color.type = 'color'; color.value = '#3366cc';
         const fileField = field('Map file', file), urlField = field('Map URL', url);
         const submit = node('button', 'Load map'); submit.type = 'submit'; submit.className = 'molui-primary';
-        const update = () => { fileField.hidden = source.value !== 'file'; urlField.hidden = source.value === 'file'; };
+        const update = () => {
+            fileField.hidden = source.value !== 'file'; urlField.hidden = source.value === 'file';
+            url.disabled = source.value !== 'url';
+        };
         source.addEventListener('change', update); update();
+        file.addEventListener('change', () => {
+            if (source.value === 'file' && file.files?.length) form.requestSubmit();
+        });
         form.append(node('h3', 'New map'), field('Map source', source), ...(config.allowLocalFiles === false ? [] : [fileField]), urlField,
             field('Map format', format), field('Display as', mode), field('Map color', color), submit);
         form.addEventListener('submit', async event => {
@@ -108,42 +129,6 @@ export class SceneObjectControls {
         return form;
     }
 
-    private shapeForm(): HTMLElement {
-        const form = node('form'); form.className = 'molui-create molui-shape-create';
-        const kind = choice([['sphere', 'Sphere'], ['arrow', 'Arrow'], ['cylinder', 'Cylinder'], ['line', 'Line'], ['box', 'Box']]);
-        const name = node('input'); name.type = 'text'; name.placeholder = 'Annotation';
-        const start = [number(0), number(0), number(0)], end = [number(3), number(0), number(0)];
-        const radius = number(0.5, 0.001), width = number(2, 0.001), height = number(2, 0.001), depth = number(2, 0.001);
-        const color = node('input'); color.type = 'color'; color.value = '#ff8800';
-        const endpoints = node('div'), dimensions = node('div');
-        endpoints.append(...end.map((input, index) => field(`End ${'XYZ'[index]}`, input)));
-        dimensions.append(field('Width', width), field('Height', height), field('Depth', depth));
-        const radiusField = field('Radius', radius);
-        const update = () => {
-            endpoints.hidden = !['arrow', 'cylinder', 'line'].includes(kind.value);
-            dimensions.hidden = kind.value !== 'box'; radiusField.hidden = ['box', 'line'].includes(kind.value);
-        };
-        kind.addEventListener('change', update); update();
-        const submit = node('button', 'Add shape'); submit.type = 'submit'; submit.className = 'molui-primary';
-        form.append(node('h3', 'New shape'), field('Shape', kind), field('Shape name', name), ...start.map((input, index) => field(`${'XYZ'[index]} (Å)`, input)),
-            endpoints, radiusField, dimensions, field('Shape color', color), submit);
-        form.addEventListener('submit', event => {
-            event.preventDefault(); if (!this.enabled) return;
-            try {
-                const xyz = (inputs: HTMLInputElement[]) => ({ x: Number(inputs[0].value), y: Number(inputs[1].value), z: Number(inputs[2].value) });
-                if ([...start, ...end, radius, width, height, depth].some(input => !Number.isFinite(Number(input.value)))) throw new Error('Shape coordinates and dimensions must be finite.');
-                const spec: any = { color: color.value, opacity: 1 };
-                if (kind.value === 'sphere') Object.assign(spec, { center: xyz(start), radius: Number(radius.value) });
-                else if (kind.value === 'box') Object.assign(spec, { center: xyz(start), dimensions: { w: Number(width.value), h: Number(height.value), d: Number(depth.value) } });
-                else Object.assign(spec, { start: xyz(start), end: xyz(end), radius: Number(radius.value) });
-                this.state.addShape(kind.value as UIShape['kind'], spec, name.value.trim() || kind.options[kind.selectedIndex].text);
-                if (!this.state.viewer.selectedAtoms({}).length) { this.state.viewer.zoomTo(); this.state.viewer.render(); }
-                this.error();
-            } catch (error) { this.error(String(error.message || error)); }
-        });
-        return form;
-    }
-
     private styleFields(id: string, spec, update: (patch) => void): HTMLElement[] {
         const color = node('input'); color.type = 'color';
         const value = Array.isArray(spec.color) ? spec.color[0] : spec.color;
@@ -166,13 +151,56 @@ export class SceneObjectControls {
     }
 
     refresh(): void {
-        this.shapeList.replaceChildren(); this.volumeList.replaceChildren();
-        for (const entry of this.state.shapes.values()) {
-            const card = node('div'); card.className = 'molui-card';
-            card.append(node('strong', entry.name), ...this.styleFields(entry.id, entry.spec, patch => this.state.updateShape(entry.id, patch)),
-                this.action('Remove shape', () => this.state.removeShape(entry.id), true));
-            this.shapeList.append(card);
+        this.volumeList.replaceChildren();
+        const expanded = new Set(Array.from(this.distanceList.querySelectorAll<HTMLDetailsElement>('details[open]'))
+            .map(card => card.dataset.distanceId));
+        this.distanceList.replaceChildren();
+        for (const entry of this.state.distances.values()) {
+            const card = node('details'); card.className = 'molui-card molui-measurement-card'; card.dataset.distanceId = entry.id;
+            card.open = expanded.has(entry.id);
+            const summary = node('summary'); summary.dataset.focus = `${entry.id}:collapse`;
+            const heading = node('span'); heading.className = 'molui-measurement-summary';
+            const distance = `${entry.distance.toFixed(3)} Å`, name = entry.labelText.trim() || distance;
+            const caption = node('span'); caption.append(node('strong', name));
+            if (name !== distance) {
+                const value = node('span', `(${distance})`); value.className = 'molui-measurement-distance';
+                caption.append(' ', value);
+            }
+            const title = node('span', entry.name); title.className = 'molui-muted';
+            heading.append(caption, title); summary.append(heading);
+            const coordinates = (point: typeof entry.start) => [point.x, point.y, point.z].map(value => value.toFixed(3)).join(', ');
+            const start = node('p', `Start (Å): ${coordinates(entry.start)}`), end = node('p', `End (Å): ${coordinates(entry.end)}`);
+            start.className = end.className = 'molui-muted';
+            const color = node('input'); color.type = 'color'; color.value = entry.color; color.dataset.focus = `${entry.id}:color`;
+            color.addEventListener('change', () => {
+                if (!this.enabled) return;
+                try { this.state.updateDistance(entry.id, { color: color.value }); this.error(); }
+                catch (error) { this.error(String(error.message || error)); }
+            });
+            const text = node('input'); text.type = 'text'; text.value = entry.labelText; text.dataset.focus = `${entry.id}:label-text`;
+            text.addEventListener('change', () => {
+                if (!this.enabled) return;
+                this.state.updateDistance(entry.id, { labelText: text.value });
+            });
+            const visible = node('input'); visible.type = 'checkbox'; visible.checked = entry.showLabel; visible.dataset.focus = `${entry.id}:show-label`;
+            visible.addEventListener('change', () => {
+                if (!this.enabled) return;
+                this.state.updateDistance(entry.id, { showLabel: visible.checked });
+            });
+            const label = node('label'); label.className = 'molui-check'; label.append(visible, node('span', 'Show label'));
+            const appearance = node('div'); appearance.className = 'molui-measurement-appearance';
+            appearance.append(field('Color', color), field('Label text', text));
+            const actions = node('div'); actions.className = 'molui-row molui-measurement-actions';
+            actions.append(label, this.action('Remove distance', () => this.state.removeDistance(entry.id), true));
+            card.append(summary, start, end, appearance, actions);
+            this.distanceList.append(card);
         }
+        const picking = this.state.getDistancePicking();
+        this.measureToggle.checked = picking !== 'off';
+        this.measureToggle.disabled = !this.enabled;
+        this.distanceHint.textContent = picking === 'off' ? 'Enable measuring, then select two atoms. Measurements stay at their original coordinates.'
+            : picking === 'first' ? 'Select the first atom.' : 'Select the second atom. Select the first atom again to cancel.';
+        this.clearDistances.hidden = this.state.distances.size === 0;
         for (const entry of this.state.volumes.values()) {
             const card = node('div'); card.className = 'molui-card';
             card.append(node('strong', entry.name), node('p', `Values: ${entry.min.toPrecision(4)} to ${entry.max.toPrecision(4)}`));

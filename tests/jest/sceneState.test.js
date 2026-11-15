@@ -77,6 +77,31 @@ test('JSON roundtrip preserves compound/custom shapes, labels, transformed maske
     expect(parts(target.getInternalState())).toEqual(parts(source.getInternalState()));
 }, 20000);
 
+test('residue labels from the shared 1YCR scene retain their individual positions after a JSON roundtrip', () => {
+    const source = viewer(), target = viewer();
+    const pdb = require('node:fs').readFileSync(require('node:path').join(__dirname, '../test_structs/1YCR.pdb'), 'utf8');
+    source.addModel(pdb, 'pdb');
+    const labels = source.addResLabels({ chain: 'B', resi: [19, 23, 26] }, { backgroundOpacity: 0.8, fontSize: 14 });
+    const positions = labels.map(label => ({ x: label.sprite.position.x, y: label.sprite.position.y, z: label.sprite.position.z }));
+    expect(labels.map(label => label.text)).toEqual(['PHE19', 'TRP23', 'LEU26']);
+    expect(new Set(positions.map(position => JSON.stringify(position))).size).toBe(3);
+    const snapshot = roundtrip(source.getInternalState({ compact: true }));
+    expect(snapshot.labels.map(label => label.style.position)).toEqual(positions);
+    target.setInternalState(snapshot);
+    expect(target.labels.map(label => ({ x: label.sprite.position.x, y: label.sprite.position.y, z: label.sprite.position.z }))).toEqual(positions);
+    expect(parts(target.getInternalState())).toEqual(parts(snapshot));
+});
+
+test('property labels retain each atom position when sharing a scene', () => {
+    const source = viewer(), target = viewer();
+    source.addModel('2\natoms\nC -1 0 0\nO 1 0 0\n', 'xyz');
+    source.addPropertyLabels('elem', {}, { fontSize: 14 });
+    const snapshot = roundtrip(source.getInternalState());
+    expect(snapshot.labels.map(label => [label.text, label.style.position.x])).toEqual([['C', -1], ['O', 1]]);
+    target.setInternalState(snapshot);
+    expect(target.labels.map(label => [label.text, label.sprite.position.x])).toEqual([['C', -1], ['O', 1]]);
+});
+
 test('compact model styles restore gradient objects and materialize custom color functions', () => {
     const source = viewer(), target = viewer();
     source.addModel('2\natoms\nC -1 0 0\nO 1 0 0\n', 'xyz');

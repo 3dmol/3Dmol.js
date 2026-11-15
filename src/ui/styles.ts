@@ -106,7 +106,7 @@ export const uiStyles: string = `
 .molui-section { margin: 0; padding: 10px 12px; border-bottom: 1px solid var(--molui-border); }
 .molui-section:last-child { border-bottom: 0; }
 .molui-section .molui-section { margin-top: 10px; padding: 8px 0 0; border-top: 1px solid var(--molui-border); border-bottom: 0; }
-.molui-section > summary {
+:is(.molui-section, .molui-measurement-card) > summary {
   min-height: 34px;
   display: flex;
   align-items: center;
@@ -118,11 +118,11 @@ export const uiStyles: string = `
   list-style: none;
   cursor: pointer;
 }
-.molui-section > summary::-webkit-details-marker { display: none; }
-.molui-section > summary::before { content: '›'; width: 12px; font-size: 21px; line-height: 1; color: var(--molui-accent); }
-.molui-section[open] > summary { margin-bottom: 8px; }
+:is(.molui-section, .molui-measurement-card) > summary::-webkit-details-marker { display: none; }
+:is(.molui-section, .molui-measurement-card) > summary::before { content: '›'; flex: 0 0 12px; font-size: 21px; line-height: 1; color: var(--molui-accent); }
+:is(.molui-section, .molui-measurement-card)[open] > summary { margin-bottom: 8px; }
 .molui-body > .molui-section:first-of-type > summary { padding-right: 40px; }
-.molui-section[open] > summary::before { transform: rotate(90deg); }
+:is(.molui-section, .molui-measurement-card)[open] > summary::before { transform: rotate(90deg); }
 .molui-section h3, .molui-section h4 { margin: 0 0 8px; font-size: 14px; }
 .molui-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; margin: 0 0 8px; }
 .molui-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 8px; }
@@ -218,6 +218,13 @@ export const uiStyles: string = `
 .molui-card-header > button { padding: 5px 8px; font-size: 12px; }
 .molui-card .molui-field:last-child { margin-bottom: 0; }
 .molui-card > strong { display: block; margin-bottom: 6px; }
+.molui-measurement-card > summary { margin: 0; }
+.molui-measurement-summary { display: grid; min-width: 0; gap: 4px; }
+.molui-measurement-summary > .molui-muted { margin: 0; font-weight: 400; }
+.molui-measurement-distance { color: var(--molui-muted); font-weight: 400; white-space: nowrap; }
+.molui-measurement-appearance { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 10px; }
+.molui-measurement-actions { justify-content: space-between; }
+.molui-distance-actions { margin-top: 10px; }
 .molui .molui-surface-actions > button { margin-left: auto; }
 .molui-selection-header { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; min-width: 0; }
 .molui-selection-visibility { display: inline-flex; flex: 0 0 32px; align-items: center; justify-content: center; min-height: 34px; margin: 0; border-radius: 7px; cursor: pointer; }
@@ -313,7 +320,7 @@ export const uiStyles: string = `
 .molui-tiny:not(.molui-closed):not(.molui-trajectory-floating) .molui-trajectory { visibility: hidden; pointer-events: none; }
 @media (pointer: coarse) {
   .molui button, .molui select, .molui input:not([type=checkbox]):not([type=range]),
-  .molui .molui-style-header > button, .molui-section > summary, .molui-style .molui-geometry > summary,
+  .molui .molui-style-header > button, :is(.molui-section, .molui-measurement-card) > summary, .molui-style .molui-geometry > summary,
   .molui .molui-check, .molui-selection-visibility { min-height: 40px; }
   .molui-multiselect-value { min-height: 40px; padding-top: 9px; padding-bottom: 9px; }
   .molui-multiselect-value::after { top: 9px; }

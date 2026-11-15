@@ -84,6 +84,7 @@
         if (scene.objects !== undefined) {
             assertObject(scene.objects, 'Scene objects');
             if (!Array.isArray(scene.objects.shapes) || !Array.isArray(scene.objects.volumes)) throw new Error('Scene objects need shapes and volumes lists.');
+            if (scene.objects.distances !== undefined && !Array.isArray(scene.objects.distances)) throw new Error('Distance annotations must be a list.');
         }
         if (scene.view !== undefined) {
             assertObject(scene.view, 'View settings');
@@ -295,7 +296,7 @@
                     atomColors: (surfaceColors.get(surface.id) || captureColors()).filter(record => indices.has(record.model.getID()))
                         .map(record => ({ model: indices.get(record.model.getID()), colors: copy(record.colors) }))
                 })),
-                ...(objects && (objects.shapes.length || objects.volumes.length) ? { objects } : {}),
+                ...(objects && (objects.shapes.length || objects.volumes.length || objects.distances?.length) ? { objects } : {}),
                 view: { ...state.getViewSettings(), camera: viewer.getView(), slab: viewer.getSlab(), ...state.ui.getTrajectorySettings() }, open: state.ui.isOpen
             };
         }
@@ -505,32 +506,17 @@
         }
         function installPicking() {
             clearPicking();
-            let hover, clicked;
+            let hover;
             clearPicking = () => {
-                const labels = [hover, clicked?.label].filter(Boolean);
-                if (labels.length) viewer.removeLabels(labels);
-                hover = undefined; clicked = undefined;
+                if (hover) viewer.removeLabel(hover);
+                hover = undefined;
             };
             const label = atom => atom.resn && atom.resi !== undefined ? `${atom.resn}${atom.resi}:${atom.atom || atom.elem}` : atom.atom || atom.elem;
             viewer.setHoverable({}, true, atom => {
                 if (hover) viewer.removeLabel(hover);
-                if (clicked?.atom !== atom) hover = viewer.addLabel(label(atom), { _sessionTransient: true, position: atom, fontSize: 12, backgroundColor: 'black', backgroundOpacity: 0.5, alignment: 'bottomCenter' });
+                hover = viewer.addLabel(label(atom), { _sessionTransient: true, position: atom, fontSize: 12, backgroundColor: 'black', backgroundOpacity: 0.5, alignment: 'bottomCenter' });
             }, () => { if (hover) viewer.removeLabel(hover); hover = undefined; });
-            viewer.setClickable({}, true, atom => {
-                if (hover) viewer.removeLabel(hover); hover = undefined;
-                if (!clicked) clicked = { atom, label: viewer.addLabel(label(atom), { _sessionTransient: true, position: atom, fontSize: 12, backgroundColor: 'blue', backgroundOpacity: 0.75 }) };
-                else {
-                    const previous = clicked.atom; viewer.removeLabel(clicked.label); clicked = undefined;
-                    if (previous !== atom) {
-                        const start = new lib.Vector3(previous.x, previous.y, previous.z), end = new lib.Vector3(atom.x, atom.y, atom.z);
-                        const distance = lib.GLShape.distance_from(start, end); let distanceLabel;
-                        viewer.addCylinder({ dashed: true, radius: 0.05, dashLength: 0.25, gapLength: 0.15, start, end, fromCap: 2, toCap: 2, color: 'blue', clickable: true,
-                            callback(shape) { viewer.removeShape(shape); viewer.removeLabel(distanceLabel); viewer.render(); } });
-                        distanceLabel = viewer.addLabel(distance.toFixed(3), { position: start.clone().add(end).multiplyScalar(0.5), fontSize: 12, backgroundColor: 'blue', backgroundOpacity: 0.75 });
-                    }
-                }
-                viewer.render();
-            });
+            if (!state?.getDistancePicking || state.getDistancePicking() === 'off') viewer.setClickable({}, false);
         }
         function readLiveKey() { return state ? JSON.stringify([viewer.getView(), viewer.getSlab(), state.ui.getTrajectorySettings()]) : ''; }
         const poll = win.setInterval(() => {
@@ -632,6 +618,7 @@
         }
         function sessionChanged(name, joined) {
             session = joined ? name : null;
+            state?.setDistancePicking?.(false);
             if (session) {
                 studentControls = studentControls || state?.getControls?.() || { edit: true, trajectory: true };
                 clearPicking(); viewer.setHoverable({}, false); viewer.setClickable({}, false);

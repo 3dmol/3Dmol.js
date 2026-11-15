@@ -16,6 +16,7 @@ var initSessions = function() {
     var joined = false;
     var pendingJoin = false;
     var pendingCreate = false;
+    var queryActive = false;
     var revision = 0, lastSentState = null, pendingSnapshot = null, receivedState = null;
     var stateTimer = null, stateDirty = false, forceFull = false, viewTimer = null, pendingView = null, lastView = '';
     var unsubscribeState = null, unsubscribeScene = null, reconnecting = false;
@@ -430,11 +431,12 @@ var initSessions = function() {
             revision = Number.isInteger(message.revision) ? message.revision : 0;
         }
         if (window.viewerApp && typeof window.viewerApp.acceptSessionState === 'function') {
-            var applied = window.viewerApp.acceptSessionState(receivedState, sections);
+            var applied = window.viewerApp.acceptSessionState(receivedState, sections).then(restoreQueryInteractions);
             applied.catch(window.viewerApp.showError);
             return applied;
         }
         glviewer.setInternalState(sections ? message.patch : receivedState, { partial: !!sections });
+        restoreQueryInteractions();
     });
 
     var result_labels = []; // array of labels
@@ -477,6 +479,7 @@ var initSessions = function() {
     });
 
     var clientFinishQuery = function () {
+        queryActive = false;
         $('#selectmessage').hide();
         glviewer.setHoverable({},false);
         glviewer.setClickable({},false);
@@ -499,66 +502,84 @@ var initSessions = function() {
         const ret = Array.from(clicked_labels, ({ stylespec }) => [stylespec.position.x, stylespec.position.y, stylespec.position.z]);
         return ret;
     };
+    var clientStartQuery = function() {
+        queryActive = true;
+        // Show message to select atoms, setup callbacks
+        $('#selectmessage').show();
+
+        //how to label an atom
+        var atomLabel = function(atom) {
+            var l = '';
+            if(atom.resn) l = atom.resn+":"+atom.atom;
+            else if(atom.atom) l = atom.atom;
+            else l = atom.elem;
+            return l;
+        };
+
+        glviewer.setHoverable({},true,function(atom,viewer,event,container) {
+            if (!joined || !queryActive) return;
+            if(!atom.hoverlabel && !atom.clicklabel) {
+                current_hover_label = atom.hoverlabel = viewer.addLabel(atomLabel(atom),{_sessionTransient: true, position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.7, fontColor:'white'});
+            }
+        },
+        function(atom) {
+            if (!joined || !queryActive) return;
+            if(atom.hoverlabel) {
+             current_hover_label = null;
+             glviewer.removeLabel(atom.hoverlabel);
+             delete atom.hoverlabel;
+            }
+         }
+        );
+
+        glviewer.setClickable({},true, function(atom, viewer) {
+           if (!joined || !queryActive) return;
+           if(atom.clicklabel) {
+               // If already clicked, deselect
+               let idx = clicked_labels.indexOf(atom.clicklabel);
+               if(idx >= 0) {
+                   clicked_labels.splice(idx,1);
+               }
+               viewer.removeLabel(atom.clicklabel);
+               delete atom.clicklabel;
+           } else {
+               // Select
+               atom.clicklabel = viewer.addLabel(atomLabel(atom), {_sessionTransient: true, position: atom, backgroundColor: 0x800080, backgroundOpacity: 1.0, fontColor: 'white'});
+               clicked_labels.push(atom.clicklabel);
+               if(atom.hoverlabel) {
+                   glviewer.removeLabel(atom.hoverlabel);
+                   if(current_hover_label == atom.hoverlabel) current_hover_label = null;
+                   delete atom.hoverlabel;
+               }
+           }
+           // Send clicked atoms to server
+           socket.emit('query update', {
+               name : session_name,
+               selected : getClicked()
+           });
+        });
+
+        glviewer.render(); //calling render is required to register clickables - should probably fix that
+    };
+
+    // Instructor picking flags are scene metadata, not permission for students
+    // to interact. Preserve the student's current query across scene updates.
+    var restoreQueryInteractions = function() {
+        if (!joined || initiator) return;
+        if (queryActive) clientStartQuery();
+        else {
+            glviewer.setHoverable({}, false);
+            glviewer.setClickable({}, false);
+            glviewer.render();
+        }
+    };
+
     socket.on('query start response', function() {
         if (!initiator && !joined) return;
         if (initiator) {
             $('#askbutton').html('Show Results');
             $('#responseinfo').html('Responses: 0');
-        } else {
-            // Show message to select atoms, setup callbacks
-            $('#selectmessage').show();
-            
-            //how to label an atom
-            var atomLabel = function(atom) {
-                var l = '';
-                if(atom.resn) l = atom.resn+":"+atom.atom;
-                else if(atom.atom) l = atom.atom;
-                else l = atom.elem;
-                return l;
-            };
-            
-            glviewer.setHoverable({},true,function(atom,viewer,event,container) {
-                if(!atom.hoverlabel && !atom.clicklabel) {                    
-                    current_hover_label = atom.hoverlabel = viewer.addLabel(atomLabel(atom),{_sessionTransient: true, position: atom, backgroundColor: 0x800080, backgroundOpacity: 0.7, fontColor:'white'});
-                }
-            },
-            function(atom) { 
-                if(atom.hoverlabel) {
-                 current_hover_label = null;
-                 glviewer.removeLabel(atom.hoverlabel);
-                 delete atom.hoverlabel;
-                }
-             }
-            );            
-            
-            glviewer.setClickable({},true, function(atom, viewer) {
-               if(atom.clicklabel) {
-                   // If already clicked, deselect
-                   let idx = clicked_labels.indexOf(atom.clicklabel);
-                   if(idx >= 0) {
-                       clicked_labels.splice(idx,1);
-                   }
-                   viewer.removeLabel(atom.clicklabel);
-                   delete atom.clicklabel;
-               } else { 
-                   // Select
-                   atom.clicklabel = viewer.addLabel(atomLabel(atom), {_sessionTransient: true, position: atom, backgroundColor: 0x800080, backgroundOpacity: 1.0, fontColor: 'white'});
-                   clicked_labels.push(atom.clicklabel);
-                   if(atom.hoverlabel) {
-                       glviewer.removeLabel(atom.hoverlabel);
-                       if(current_hover_label == atom.hoverlabel) current_hover_label = null;
-                       delete atom.hoverlabel;
-                   }                  
-               }
-               // Send clicked atoms to server
-               socket.emit('query update', {
-                   name : session_name,
-                   selected : getClicked()
-               });               
-            });
-            
-            glviewer.render(); //calling render is required to register clickables - should probably fix that
-        }
+        } else clientStartQuery();
     });
 
     socket.on('query end response', function() {

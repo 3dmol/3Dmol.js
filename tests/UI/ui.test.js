@@ -81,6 +81,7 @@ function fixture() {
         selectedAtoms: spec => models.filter(model => modelMatches(model, spec)).flatMap(model => model.selectedAtoms(spec)),
         setStyle: (spec, style) => models.filter(model => modelMatches(model, spec)).forEach(model => model.setStyle(spec, style)),
         addStyle: (spec, style) => models.filter(model => modelMatches(model, spec)).forEach(model => model.setStyle(spec, style, true)),
+        setClickable: (spec, enabled, callback) => models.filter(model => modelMatches(model, spec)).forEach(model => model.setClickable(spec, enabled, callback)),
         getNumFrames: () => Math.max(0, ...models.map(model => model.getNumFrames())),
         getFrame: () => currentFrame,
         setFrame: jest.fn(frame => Promise.all(models.map(model => model.setFrame(frame))).then(() => { currentFrame = frame; })),
@@ -105,6 +106,14 @@ function fixture() {
         addModel: jest.fn((data, format) => parse(data, format, {})),
         removeModel: jest.fn(model => { models.splice(models.indexOf(model), 1); }),
         render: jest.fn(), zoomTo: jest.fn(), removeLabels: jest.fn(list => list.forEach(label => labels.delete(label))),
+        addLabel: jest.fn((text, stylespec) => {
+            const label = { id: `label-${nextLabel++}`, text, stylespec, sprite: { visible: true } };
+            label.hide = jest.fn(() => { label.sprite.visible = false; });
+            label.show = jest.fn(() => { label.sprite.visible = true; });
+            labels.add(label); return label;
+        }),
+        setLabelStyle: jest.fn((label, style) => { label.stylespec = style; label.show(); return label; }),
+        setLabelText: jest.fn((label, text) => { label.text = text; label.show(); return label; }),
         addResLabels: jest.fn(() => {
             const label = { id: `residue-${nextLabel++}` };
             labels.add(label);
@@ -240,22 +249,122 @@ describe('guided molecular viewer UI', () => {
         jest.useRealTimers();
     });
 
-    test('shape controls create, restyle, hide and remove annotations with state notifications', () => {
+    test('shape APIs and shared objects remain available without a Shapes section', () => {
         const { state, viewer, root } = mount();
         const changed = jest.fn(); state.subscribe(changed);
-        const form = root.querySelector('.molui-shape-create');
-        choose(form, 'Shape', 'arrow');
-        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        const entry = [...state.shapes.values()][0];
+        expect(root.querySelector('.molui-shape-create')).toBeNull();
+        expect([...root.querySelectorAll('summary')].map(summary => summary.textContent)).not.toContain('Shapes');
+        const id = state.addShape('arrow', { start: { x: 0, y: 0, z: 0 }, end: { x: 3, y: 0, z: 0 } });
+        const entry = state.shapes.get(id);
         expect(viewer.addArrow).toHaveBeenCalledWith(expect.objectContaining({ start: { x: 0, y: 0, z: 0 }, end: { x: 3, y: 0, z: 0 } }));
-        setInput(field(root.querySelector('.molui-shapes'), 'Color'), '#ff0000');
-        setInput(field(root.querySelector('.molui-shapes'), 'Opacity'), '0.5');
-        toggle(field(root.querySelector('.molui-shapes'), 'Visible'), false);
+        state.updateShape(id, { color: '#ff0000' });
+        state.updateShape(id, { opacity: 0.5 });
+        state.updateShape(id, { hidden: true });
         expect(entry.shape.spec).toMatchObject({ color: '#ff0000', opacity: 0.5, hidden: true });
-        button(root.querySelector('.molui-shapes'), 'Remove shape').click();
+        expect(state.exportObjects().shapes).toHaveLength(1);
+        state.removeShape(id);
         expect(state.shapes.size).toBe(0);
         expect(viewer.removeShape).toHaveBeenCalledWith(entry.shape);
         expect(changed).toHaveBeenCalledTimes(5);
+    });
+
+    test('distance picking is opt-in, creates removable labels and lines, and restores atom callbacks', () => {
+        const { state, viewer, root, labels } = mount();
+        const [first, second] = viewer.selectedAtoms({});
+        const original = jest.fn(); first.clickable = true; first.callback = original;
+        expect(state.getDistancePicking()).toBe('off');
+        expect(state.distances.size).toBe(0);
+        toggle(checkbox(root, 'Enable measuring'), true);
+        expect(first.callback).not.toBe(original);
+        first.callback(first);
+        expect(state.getDistancePicking()).toBe('second');
+        const temporary = [...labels].find(label => label.stylespec?._sessionTransient);
+        expect(temporary).toBeDefined();
+        second.callback(second);
+        const entry = [...state.distances.values()][0];
+        expect(entry.distance).toBe(1);
+        expect(entry.label.text).toBe('1.000 Å');
+        expect(labels.has(temporary)).toBe(false);
+        expect(viewer.addCylinder).toHaveBeenCalledWith(expect.objectContaining({ dashed: true }));
+        toggle(checkbox(root, 'Enable measuring'), false);
+        expect(first.callback).toBe(original); expect(first.clickable).toBe(true);
+        expect(second.clickable).not.toBe(true);
+        button(root, 'Remove distance').click();
+        expect(state.distances.size).toBe(0);
+        expect(labels.has(entry.label)).toBe(false);
+        expect(viewer.removeShape).toHaveBeenCalledWith(entry.shape);
+    });
+
+    test('distance endpoints survive object export, while stopping or disabling edits cancels pending picks', () => {
+        const { state, viewer, root, labels } = mount();
+        const [first, second] = viewer.selectedAtoms({});
+        toggle(checkbox(root, 'Enable measuring'), true); first.callback(first);
+        state.setControls({ edit: false });
+        expect(state.getDistancePicking()).toBe('off');
+        expect([...labels].some(label => label.stylespec?._sessionTransient)).toBe(false);
+        state.setDistancePicking(true); expect(state.getDistancePicking()).toBe('off');
+        state.setControls({ edit: true });
+        state.addDistance(first, second, 'Two atoms');
+        state.addDistance(first, { x: 3, y: 4, z: 0 });
+        const records = JSON.parse(JSON.stringify(state.exportObjects()));
+        expect(records.distances).toHaveLength(2);
+        const restored = mount(); restored.state.restoreObjects(records);
+        expect(restored.state.exportObjects()).toEqual(records);
+        expect(restored.state.getDistancePicking()).toBe('off');
+        button(restored.root, 'Clear distances').click();
+        expect(restored.state.distances.size).toBe(0);
+        expect([...restored.labels].filter(label => label.stylespec)).toHaveLength(0);
+        expect(() => restored.state.restoreObjects({ shapes: [], volumes: [], distances: [{ start: {}, end: {} }] })).toThrow();
+        toggle(checkbox(root, 'Enable measuring'), true); first.callback(first);
+        state.destroy();
+        expect(state.getDistancePicking()).toBe('off');
+        expect([...labels].some(label => label.stylespec?._sessionTransient)).toBe(false);
+        expect(first.clickable).not.toBe(true);
+    });
+
+    test('measurement cards preserve expansion and shared label text, color, and visibility through edits', () => {
+        const { state, root, viewer } = mount();
+        const id = state.addDistance({ x: 0, y: 0, z: 0 }, { x: 3, y: 4, z: 0 }, 'Two atoms');
+        const entry = state.distances.get(id), shape = entry.shape, label = entry.label;
+        const card = () => root.querySelector('.molui-measurement-card');
+        expect(card().open).toBe(false);
+        expect(card().querySelector('summary').textContent).toContain('5.000 Å');
+        expect(card().querySelector('summary').textContent).toContain('Two atoms');
+        expect(card().querySelector('summary').textContent).not.toContain('End (Å)');
+        card().open = true;
+        expect(field(card(), 'Label text').value).toBe('5.000 Å');
+        expect(card().textContent).toContain('End (Å): 3.000, 4.000, 0.000');
+        toggle(checkbox(card(), 'Show label'), false);
+        const text = field(card(), 'Label text'); text.focus();
+        setInput(text, 'Binding contact');
+        expect(label.text).toBe('Binding contact');
+        expect(label.sprite.visible).toBe(false);
+        expect(document.activeElement).toBe(field(card(), 'Label text'));
+        setInput(field(card(), 'Color'), '#ff8800');
+        expect(card().open).toBe(true);
+        expect(card().querySelector('summary').textContent).toContain('5.000 Å');
+        expect(entry.shape).toBe(shape); expect(entry.label).toBe(label);
+        expect(shape.updateStyle).toHaveBeenCalledWith({ color: '#ff8800' });
+        expect(viewer.setLabelStyle).toHaveBeenLastCalledWith(label, expect.objectContaining({
+            backgroundColor: '#ff8800', position: { x: 1.5, y: 2, z: 0 }, fontSize: 12
+        }));
+        expect(label.sprite.visible).toBe(false);
+        const records = JSON.parse(JSON.stringify(state.exportObjects()));
+        expect(records.distances[0]).toMatchObject({ color: '#ff8800', showLabel: false, labelText: 'Binding contact' });
+        const restored = mount(); restored.state.restoreObjects(records);
+        expect(restored.state.exportObjects()).toEqual(records);
+        expect([...restored.state.distances.values()][0].label.sprite.visible).toBe(false);
+        expect([...restored.state.distances.values()][0].label.text).toBe('Binding contact');
+        expect(restored.state.getDistancePicking()).toBe('off');
+        toggle(checkbox(card(), 'Show label'), true);
+        expect(label.sprite.visible).toBe(true);
+        expect(label.stylespec.backgroundColor).toBe('#ff8800');
+        card().open = false; state.refresh();
+        expect(card().open).toBe(false);
+        const old = mount(); old.state.restoreObjects({ shapes: [], volumes: [], distances: [{
+            name: 'Old measurement', start: { x: 0, y: 0, z: 0 }, end: { x: 1, y: 0, z: 0 }
+        }] });
+        expect([...old.state.distances.values()][0]).toMatchObject({ color: '#0000ff', showLabel: true, labelText: '1.000 Å' });
     });
 
     test('map controls reuse parsed grids for contour edits and retain geometry for material edits', async () => {
@@ -308,7 +417,8 @@ describe('guided molecular viewer UI', () => {
         const restored = mount();
         restored.state.restoreObjects(records);
         expect(restored.state.exportObjects()).toEqual(records);
-        expect(field(restored.root.querySelector('.molui-shapes'), 'Color').value).toBe('#ff0000');
+        expect(restored.root.querySelector('.molui-shapes')).toBeNull();
+        expect([...restored.state.shapes.values()][0].spec.color).toBe(0xff0000);
         expect(field(restored.root.querySelector('.molui-volumes'), 'Color').value).toBe('#0000ff');
         const grid = [...restored.state.volumes.values()][0].data;
         expect(grid).toBeInstanceOf($3Dmol.VolumeData);
@@ -752,7 +862,7 @@ describe('guided molecular viewer UI', () => {
             Object.defineProperty(field(root, 'Structure file'), 'files', {
                 configurable: true, value: [new File(['invalid'], 'invalid.xyz')]
             });
-            root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            field(root, 'Structure file').dispatchEvent(new Event('change', { bubbles: true }));
             await settle();
             expect(models).toEqual(originalModels);
             expect(viewer.removeModel).toHaveBeenCalledTimes(1);
@@ -762,7 +872,7 @@ describe('guided molecular viewer UI', () => {
         } finally { read.mockRestore(); }
     });
 
-    test('loading a local trajectory adds video controls without autoplay or replacing models', async () => {
+    test('choosing a local trajectory immediately loads it without autoplay or replacing models', async () => {
         const events = [];
         const onModelLoaded = jest.fn(() => events.push('loaded'));
         const { root, models, viewer, state } = mount({ onModelLoaded });
@@ -777,7 +887,7 @@ describe('guided molecular viewer UI', () => {
             Object.defineProperty(field(root, 'Structure file'), 'files', {
                 configurable: true, value: [new File([xyz], 'motion.xyz')]
             });
-            root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+            field(root, 'Structure file').dispatchEvent(new Event('change', { bubbles: true }));
             await settle();
             expect(models).toHaveLength(3);
             expect(models.slice(0, 2)).toEqual(originalModels);

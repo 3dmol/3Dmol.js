@@ -65,6 +65,19 @@ export interface UIVolume {
     max: number;
 }
 
+export interface UIDistance {
+    id: string;
+    name: string;
+    start: { x: number; y: number; z: number };
+    end: { x: number; y: number; z: number };
+    distance: number;
+    color: string;
+    showLabel: boolean;
+    labelText: string;
+    shape: GLShape;
+    label: Label;
+}
+
 // Match the public SurfaceType enum without importing the surface engine into the UI bundle.
 const surfaceTypes: Record<string, number> = { VDW: 1, SES: 4, SAS: 3, MS: 2 };
 
@@ -125,6 +138,7 @@ export class StateManager {
     public readonly surfaces = new Map<string, UISurface>();
     public readonly shapes = new Map<string, UIShape>();
     public readonly volumes = new Map<string, UIVolume>();
+    public readonly distances = new Map<string, UIDistance>();
     public readonly modelTitles = new Map<number, string>();
     public ui: UI;
     private readonly listeners = new Set<() => void>();
@@ -144,6 +158,9 @@ export class StateManager {
     private batchDepth = 0;
     private pendingLayerRender = false;
     private pendingRefresh = false;
+    private distancePicking = false;
+    private readonly distanceAtoms = new Map<AtomSpec, Pick<AtomSpec, 'clickable' | 'callback'>>();
+    private distanceStart?: { atom: AtomSpec; label: Label };
 
     constructor(public readonly viewer: GLViewer, private readonly config: UIConfig = {}) {
         // Reinitializing an embedded viewer must not leave duplicate panels/timers.
@@ -468,6 +485,132 @@ export class StateManager {
         this.viewer.render(); this.refresh();
     }
 
+    /** Add a removable, fixed-coordinate distance annotation in angstroms. */
+    public addDistance(start: UIDistance['start'], end: UIDistance['end'], name = 'Distance',
+        options: Partial<Pick<UIDistance, 'color' | 'showLabel' | 'labelText'>> = {}): string {
+        if (typeof name !== 'string' || ![start, end].every(point => point && ['x', 'y', 'z'].every(axis => Number.isFinite(point[axis])))) {
+            throw new Error('Distance endpoints must contain finite coordinates.');
+        }
+        start = { x: start.x, y: start.y, z: start.z }; end = { x: end.x, y: end.y, z: end.z };
+        const distance = Math.hypot(end.x - start.x, end.y - start.y, end.z - start.z);
+        if (!Number.isFinite(distance)) throw new Error('Distance is too large.');
+        const { color, showLabel, labelText } = this.distanceAppearance(options, distance);
+        const shape = this.viewer.addCylinder({ dashed: true, radius: 0.05, dashLength: 0.25, gapLength: 0.15,
+            start, end, fromCap: 2, toCap: 2, color });
+        const label = this.viewer.addLabel(labelText, {
+            position: { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2, z: (start.z + end.z) / 2 },
+            fontSize: 12, backgroundColor: color, backgroundOpacity: 0.75
+        });
+        if (!showLabel) label.hide();
+        const id = this.nextID('distance', this.distances);
+        this.distances.set(id, { id, name, start, end, distance, color, showLabel, labelText, shape, label });
+        this.viewer.render(); this.refresh();
+        return id;
+    }
+
+    /** Update measurement appearance and label text without rebuilding its line. */
+    public updateDistance(id: string, patch: Partial<Pick<UIDistance, 'color' | 'showLabel' | 'labelText'>>): void {
+        const entry = this.distances.get(id);
+        if (!entry) return;
+        if (this.viewer.getShape && this.viewer.getShape(entry.shape.shapePosition) !== entry.shape) {
+            this.viewer.removeLabels([entry.label]); this.distances.delete(id); this.refresh();
+            return;
+        }
+        const { color, showLabel, labelText } = this.distanceAppearance({
+            color: entry.color, showLabel: entry.showLabel, labelText: entry.labelText, ...patch
+        }, entry.distance);
+        if (color === entry.color && showLabel === entry.showLabel && labelText === entry.labelText) return;
+        if (color !== entry.color) {
+            entry.shape.updateStyle({ color });
+            this.viewer.setLabelStyle(entry.label, { ...entry.label.stylespec, backgroundColor: color });
+        }
+        if (labelText !== entry.labelText) this.viewer.setLabelText(entry.label, labelText);
+        entry.color = color; entry.showLabel = showLabel; entry.labelText = labelText;
+        if (showLabel) entry.label.show(); else entry.label.hide();
+        this.viewer.render(); this.refresh();
+    }
+
+    private distanceAppearance(options: Partial<Pick<UIDistance, 'color' | 'showLabel' | 'labelText'>>,
+        distance: number): Pick<UIDistance, 'color' | 'showLabel' | 'labelText'> {
+        if (options.color !== undefined && typeof options.color !== 'string') throw new Error('Measurement color must be a string.');
+        if (options.showLabel !== undefined && typeof options.showLabel !== 'boolean') throw new Error('Measurement label visibility must be true or false.');
+        if (options.labelText !== undefined && typeof options.labelText !== 'string') throw new Error('Measurement label text must be a string.');
+        return { color: this.backgroundHex(options.color ?? 'blue'), showLabel: options.showLabel ?? true,
+            labelText: options.labelText ?? `${distance.toFixed(3)} Å` };
+    }
+
+    public removeDistance(id: string): void {
+        const entry = this.distances.get(id);
+        if (!entry) return;
+        if (!this.viewer.getShape || this.viewer.getShape(entry.shape.shapePosition) === entry.shape) this.viewer.removeShape(entry.shape);
+        this.viewer.removeLabels([entry.label]); this.distances.delete(id);
+        this.viewer.render(); this.refresh();
+    }
+
+    public clearDistances(): void {
+        this.batch(() => { for (const id of this.distances.keys()) this.removeDistance(id); });
+    }
+
+    /** Atom distance picking is opt-in and never restored from a shared URL. */
+    public setDistancePicking(enabled: boolean): void {
+        if (enabled && (this.disposed || this.ui?.getControls().edit === false)) return;
+        if (this.distancePicking === enabled) return;
+        this.distancePicking = enabled;
+        if (!enabled) {
+            this.clearDistanceStart();
+            for (const [atom, previous] of this.distanceAtoms) this.restoreDistanceAtom(atom, previous);
+            this.distanceAtoms.clear();
+        }
+        this.refresh(); this.viewer.render();
+    }
+
+    public getDistancePicking(): 'off' | 'first' | 'second' {
+        return !this.distancePicking ? 'off' : this.distanceStart ? 'second' : 'first';
+    }
+
+    private clearDistanceStart(): void {
+        if (this.distanceStart) this.viewer.removeLabels([this.distanceStart.label]);
+        this.distanceStart = undefined;
+    }
+
+    private restoreDistanceAtom(atom: AtomSpec, previous: Pick<AtomSpec, 'clickable' | 'callback'>): void {
+        if (atom.callback !== this.pickDistanceAtom) return;
+        atom.callback = previous.callback;
+        // Preserve an explicit disable made by the host or classroom controls.
+        if (atom.clickable) atom.clickable = previous.clickable;
+    }
+
+    private readonly pickDistanceAtom = (atom: AtomSpec): void => {
+        if (!this.distancePicking || this.disposed || this.ui?.getControls().edit === false) return;
+        const title = (value: AtomSpec) => [value.chain, `${value.resn || ''}${value.resi ?? ''}`, value.atom || value.elem].filter(Boolean).join(':');
+        const first = this.distanceStart?.atom;
+        this.clearDistanceStart();
+        if (first && first !== atom) {
+            this.addDistance({ x: first.x, y: first.y, z: first.z }, { x: atom.x, y: atom.y, z: atom.z }, `${title(first)} – ${title(atom)}`);
+        } else if (!first) {
+            this.distanceStart = { atom, label: this.viewer.addLabel(title(atom), {
+                _sessionTransient: true, position: { x: atom.x, y: atom.y, z: atom.z },
+                fontSize: 12, backgroundColor: 'blue', backgroundOpacity: 0.75
+            } as LabelSpec) };
+        }
+        this.refresh(); this.viewer.render();
+    };
+
+    private refreshDistancePicking(): void {
+        if (!this.distancePicking) return;
+        const atoms = new Set(this.viewer.selectedAtoms({}));
+        if (this.distanceStart && !atoms.has(this.distanceStart.atom)) this.clearDistanceStart();
+        for (const [atom, previous] of this.distanceAtoms) if (!atoms.has(atom)) {
+            this.restoreDistanceAtom(atom, previous); this.distanceAtoms.delete(atom);
+        }
+        const added = new Set<AtomSpec>();
+        for (const atom of atoms) if (!this.distanceAtoms.has(atom)) {
+            this.distanceAtoms.set(atom, { clickable: atom.clickable, callback: atom.callback });
+            added.add(atom);
+        }
+        if (added.size) this.viewer.setClickable({ predicate: atom => added.has(atom) }, true, this.pickDistanceAtom);
+    }
+
     /** Parse a scalar grid once, retaining it for subsequent contour edits. */
     public addVolume(data: string | ArrayBuffer, format: string, spec: IsoSurfaceSpec = {},
         name = 'Volume', mode: UIVolume['mode'] = 'isosurface'): string {
@@ -500,6 +643,9 @@ export class StateManager {
     public exportObjects() {
         return {
             shapes: Array.from(this.shapes.values(), entry => ({ kind: entry.kind, name: entry.name, spec: objectSettings(entry.spec) })),
+            ...(this.distances.size ? { distances: Array.from(this.distances.values(), entry => ({ name: entry.name,
+                start: { ...entry.start }, end: { ...entry.end }, color: entry.color, showLabel: entry.showLabel,
+                labelText: entry.labelText })) } : {}),
             volumes: Array.from(this.volumes.values(), entry => ({ name: entry.name, mode: entry.mode, spec: objectSettings(entry.spec),
                 data: { values: Array.from(entry.data.data), size: { ...entry.data.size }, origin: { ...entry.data.origin },
                     unit: { ...entry.data.unit }, matrix: entry.data.matrix ? Array.from(entry.data.matrix.elements) : null } }))
@@ -509,7 +655,9 @@ export class StateManager {
     /** Restore data-only object settings without evaluating callback source. */
     public restoreObjects(records: ReturnType<StateManager['exportObjects']>): void {
         if (!records || !Array.isArray(records.shapes) || !Array.isArray(records.volumes)) throw new Error('Invalid scene objects.');
+        if (records.distances !== undefined && !Array.isArray(records.distances)) throw new Error('Invalid distance annotations.');
         for (const record of records.shapes) this.addShape(record.kind, objectSettings(record.spec), record.name);
+        for (const record of records.distances || []) this.addDistance(record.start, record.end, record.name, record);
         const core = window.$3Dmol as unknown as { VolumeData: typeof VolumeData; Matrix4: typeof import('../WebGL/math').Matrix4 };
         for (const record of records.volumes) {
             const data = record.data;
@@ -598,6 +746,12 @@ export class StateManager {
                 if (this.viewer.getShape && this.viewer.getShape(entry.shape.shapePosition) !== entry.shape) entries.delete(id);
             }
         }
+        for (const [id, entry] of this.distances) {
+            if (this.viewer.getShape && this.viewer.getShape(entry.shape.shapePosition) !== entry.shape) {
+                this.viewer.removeLabels([entry.label]); this.distances.delete(id);
+            }
+        }
+        this.refreshDistancePicking();
         for (const listener of this.listeners) listener();
     }
 
@@ -640,6 +794,7 @@ export class StateManager {
      */
     public destroy(): void {
         if (this.disposed) return;
+        this.setDistancePicking(false);
         this.disposed = true;
         this.clearSelectionLabels(...this.selectionLabels.keys());
         this.ui?.destroy();

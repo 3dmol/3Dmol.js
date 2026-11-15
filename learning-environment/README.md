@@ -51,8 +51,9 @@ overwrite revisions, create competing controllers, or delete a renewed session.
 
 ## Synchronization and cleanup
 
-The edit menu supports volumetric maps and annotation shapes alongside model
-appearance, labels, and molecular surfaces. Students receive materialized scene
+The edit menu supports volumetric maps and distance measurements alongside model
+appearance, labels, and molecular surfaces. Shapes supplied in shared URLs are
+also restored and synchronized. Students receive materialized scene
 geometry, and their edit and trajectory controls are disabled while connected.
 Pending local loads and surface edits are canceled when a student joins.
 

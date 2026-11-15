@@ -15,6 +15,7 @@ Opening that link restores:
 - Named selections, selection criteria, visibility, and every representation and its settings. A selection with Representation set to None is also preserved.
 - Residue labels and their styling, including parameters supplied in the original URL. Static labels retain the frame at which they were created.
 - Surfaces, their type and colors, the atoms shown and the atoms used for calculation, and the frame at which each surface was created.
+- Volumetric maps and distance measurements, including measurement colors and label visibility. Annotation shapes supplied in the URL are also preserved.
 - The camera position, clipping planes, background, projection, and trajectory frame, speed, loop, and play/pause state.
 
 For local files, the file contents are included in the fragment; they are not uploaded to a server. Such links can be large. Use a hosted molecular-data URL for large files, and make sure it is accessible to the people receiving the link. The fragment carries the scene settings while remote structure URLs continue to refer to their original data sources.
@@ -30,6 +31,22 @@ Browser Back and Forward restore the corresponding saved scene. Moving or collap
 | Translation | Middle Mouse Button or Ctrl+Primary                  | Triple touch         |
 | Zoom        | Scroll Wheel or Second Mouse Button or Shift+Primary | Pinch (double touch) |
 | Slab        | Ctrl+Second                                          | Not Available        |
+
+#### Distance measurements
+
+Distance measurement is off by default. In the edit menu, open **Measurements**
+and turn on **Enable measuring**, then click two atoms. The viewer adds a dashed
+line and a distance label in angstroms. Turn the toggle off to return to ordinary
+viewing or cancel an unfinished pair.
+
+Each measurement has a collapsible summary showing the distance and atom names.
+Expand it to see endpoint coordinates and edit **Color**, **Label text**, or
+**Show label**, or to **Remove distance**. Label text defaults to the measured
+distance. The color applies to the line and label background; hiding the label
+leaves the line visible. **Clear distances**
+removes all measurements. Measurements keep the coordinates picked when they
+were created, including when the trajectory frame changes. Shared links retain
+measurements and their settings, but open with measurement mode off.
 
 
 ### Building a Query String ###

@@ -120,6 +120,7 @@ describe('classroom state updates', () => {
         current.app.sessionChanged(null, false);
         expect(current.app.state.getControls()).toEqual({ edit: true, trajectory: true });
         expect(current.app.state.ui.element.hidden).toBe(false);
+        expect(current.viewer.setClickable).toHaveBeenLastCalledWith({}, false);
     });
 
     test('direct session URLs restore normal controls after joining, receiving snapshots, and leaving', async () => {

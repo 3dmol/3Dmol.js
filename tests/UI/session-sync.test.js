@@ -20,7 +20,7 @@ function fixture(url = 'https://classroom.test/viewer.html', server) {
         getInternalState: () => data, setView: jest.fn(), setInternalState: jest.fn(),
         setViewChangeCallback: callback => { viewChange = callback; }, setStateChangeCallback: jest.fn(),
         subscribeStateChanges: callback => { sceneChange = callback; return unsubscribeScene; },
-        setHoverable: jest.fn(), setClickable: jest.fn(), removeLabels: jest.fn()
+        setHoverable: jest.fn(), setClickable: jest.fn(), removeLabels: jest.fn(), render: jest.fn()
     };
     const app = window.viewerApp = {
         getSessionState: jest.fn(() => data),
@@ -159,6 +159,31 @@ describe('classroom state transport', () => {
         current.receive('leave session response');
         expect(current.app.sessionChanged).toHaveBeenLastCalledWith(null, false);
         expect(current.app.state.ui.element.hidden).toBe(false);
+    });
+
+    test('instructor picking changes preserve active student queries without reactivating finished queries', async () => {
+        current.join();
+        current.receive('query start response');
+        const pick = current.viewer.setClickable.mock.calls.at(-1)[2];
+        current.app.acceptSessionState.mockImplementationOnce(async () => {
+            current.viewer.setClickable({}, false);
+            current.viewer.setHoverable({}, false);
+        });
+        await current.receive('viewer state change response', { state: current.data, revision: 0 });
+        expect(current.viewer.setClickable).toHaveBeenLastCalledWith({}, true, expect.any(Function));
+        current.receive('query end response');
+        current.socket.emit.mockClear();
+        pick({}, current.viewer);
+        expect(current.socket.emit).not.toHaveBeenCalled();
+        current.app.acceptSessionState.mockImplementationOnce(async () => {
+            current.viewer.setClickable({}, true);
+            current.viewer.setHoverable({}, true);
+        });
+        await current.receive('viewer state change response', {
+            patch: { modelStyles: [{ records: [{ clickable: true, hoverable: true }] }] }, baseRevision: 0, revision: 1
+        });
+        expect(current.viewer.setClickable).toHaveBeenLastCalledWith({}, false);
+        expect(current.viewer.setHoverable).toHaveBeenLastCalledWith({}, false);
     });
 
     test('reconnect sends one fresh full state at the server revision', () => {
