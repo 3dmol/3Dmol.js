@@ -18,6 +18,9 @@ socketio = SocketIO(app, async_mode='threading', async_handlers=False,
 SESSION_TTL_SECONDS = 48 * 60 * 60
 SESSION_SWEEP_SECONDS = 60
 sessions = {}  # In-memory state, indexed by session name.
+# Discovery is scoped to a live socket, not a session room. Waiting embeds do
+# not count as students or allocate sessions, and room names cannot collide.
+session_watchers = {}  # Socket ID -> watched session name.
 _cleanup_started = False
 _cleanup_lock = threading.Lock()
 _sessions_lock = threading.RLock()
@@ -167,6 +170,25 @@ def handleCheckName(message):
         emit('check session name response', 'exists' if session is not None else 'free')
 
 
+@socketio.on('watch session event')
+@_serialized
+def handleWatchSession(message):
+    name, session = _session(message)
+    if name is None:
+        return
+    session_watchers[request.sid] = name
+    # Watching is discovery only: do not join, disclose scene data, or renew TTL.
+    if session is not None:
+        emit('session available', {'name': name})
+
+
+@socketio.on('unwatch session event')
+@_serialized
+def handleUnwatchSession(message):
+    if session_watchers.get(request.sid) == _name(message):
+        session_watchers.pop(request.sid, None)
+
+
 @socketio.on('create session event')
 @_serialized
 def handleCreateSession(message):
@@ -187,6 +209,9 @@ def handleCreateSession(message):
     emit('create session response', secret)
     emit('viewer state revision', {'revision': 0})
     _count(session)
+    for sid, watched in session_watchers.items():
+        if watched == name:
+            emit('session available', {'name': name}, to=sid)
     print('Session Created', name, request.sid)
 
 
@@ -275,6 +300,7 @@ def handleLeaveSession(message):
 @socketio.on('disconnect')
 @_serialized
 def handleDisconnect(reason=None):
+    session_watchers.pop(request.sid, None)
     for name, session in list(sessions.items()):
         if request.sid == session['sid']:
             # Browser unload messages are unreliable. The classroom belongs to

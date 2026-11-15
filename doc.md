@@ -114,6 +114,12 @@ import * as $3Dmol from '3dmol/build/3Dmol.js';
 
 The `3Dmol.js` bundle used above also populates `window.$3Dmol`. Native ES module builds are available as `build/3Dmol.es6.js` and `build/3Dmol.es6-min.js`; these export the core API without assigning that global. The optional UI is a separate `3Dmol.ui` bundle. Load browser-dependent code on the client, after a DOM is available; importing it during server-side rendering is not supported.
 
+The optional UI's {@link StateManager} provides editing and trajectory controls.
+Its {@link StateManager#enableLearning} method adds classroom synchronization and
+atom queries through {@link LearningSession}. The [active learning tutorial](tutorial-learning_environment.html#embedded-viewers)
+covers both embedded `data-learning` options and the JavaScript UI API, including
+hidden instructor activation.
+
 For TypeScript projects, importing the package name `3dmol` lets the compiler resolve its bundled `build/types/index.d.ts` declarations through the package metadata.
 
 ### Using the source code

@@ -1,6 +1,7 @@
 //auto-initialization
 
 import type { StateManager } from "./ui/state";
+import type { UIConfig } from './ui/ui';
 import { GLViewer, createViewer } from "./GLViewer";
 import { SurfaceType } from "./ProteinSurface4";
 import { get, getbin, makeFunction, specStringToObject } from "./utilities";
@@ -32,7 +33,7 @@ export var viewers: any = {};
 export function autoload(viewer?: any, callback?: (arg0: any) => void) {
     var i: string | number, dataname: string, type: string;
     const canceled = (glviewer: GLViewer) => {
-        if (!glviewer?.isDestroyed?.()) return false;
+        if (!glviewer?.isDestroyed?.() && glviewer?.ui?.learning?.getRole() !== 'student') return false;
         processing_autoinit = false;
         return true;
     };
@@ -237,15 +238,25 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
                     StateManager?: typeof StateManager
                 })?.StateManager;
                 const uiEnabled = !!viewerdiv.dataset.ui && viewerdiv.dataset.ui !== 'false';
-                const uiOptions = {
+                const learning = viewerdiv.dataset.learning;
+                const learningEnabled = learning !== undefined && learning !== 'false';
+                const uiOptions: UIConfig = {
                     edit: viewerdiv.dataset.uiEdit === undefined ? uiEnabled : viewerdiv.dataset.uiEdit !== 'false',
                     trajectory: viewerdiv.dataset.uiTrajectory === undefined ? uiEnabled : viewerdiv.dataset.uiTrajectory !== 'false'
                 };
+                if (learningEnabled) uiOptions.learning = {
+                    mode: learning === 'hidden' ? 'hidden' : 'button',
+                    ...(viewerdiv.dataset.learningServer ? { server: viewerdiv.dataset.learningServer } : {}),
+                    ...(viewerdiv.dataset.learningSession ? { session: viewerdiv.dataset.learningSession } : {}),
+                    ...(viewerdiv.dataset.learningHotkey ? { hotkey: viewerdiv.dataset.learningHotkey } : {})
+                };
                 const hasUIOptions = ['ui', 'uiEdit', 'uiTrajectory'].some(key => viewerdiv.dataset[key] !== undefined);
-                if (StateManagerClass && (uiOptions.edit || uiOptions.trajectory || (glviewer.ui && hasUIOptions))) {
+                if (StateManagerClass && (learningEnabled || uiOptions.edit || uiOptions.trajectory || (glviewer.ui && (hasUIOptions || learning !== undefined)))) {
                     if (glviewer.ui) {
                         UI = glviewer.ui;
                         UI.setControls(uiOptions);
+                        if (learningEnabled && !UI.learning) UI.enableLearning(uiOptions.learning);
+                        else if (learning === 'false') UI.enableLearning(false);
                     } else {
                         UI = new StateManagerClass(glviewer, uiOptions);
                     }
@@ -253,7 +264,7 @@ export function autoload(viewer?: any, callback?: (arg0: any) => void) {
             } catch (error) {
                 console.log(error);
                 //for autoload, provide a useful error message
-                viewerdiv.textContent = "WebGL appears to be disabled.";
+                viewerdiv.textContent = error instanceof Error ? error.message : "Unable to initialize the viewer.";
             }
 
             if (datauri.length != 0) {

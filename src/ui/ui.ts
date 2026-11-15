@@ -8,6 +8,7 @@ import type { TrajectorySettings } from './trajectory';
 import { uiStyles } from './styles';
 import { SelectionEditor, selectionSummary } from './selection';
 import { SceneObjectControls } from './objects';
+import type { LearningConfig } from './learning';
 
 /** Availability of the optional viewer controls. Disabling controls does not remove models. */
 export interface UIControlOptions {
@@ -19,6 +20,9 @@ export interface UIControlOptions {
 
 /** Configuration for {@link StateManager} and its optional {@link UI} controls. */
 export interface UIConfig extends UIControlOptions {
+    /** Enable classroom sharing. Hidden mode requires a unique session identifier.
+     * Requires the optional UI bundle; see {@link LearningConfig}. */
+    learning?: boolean | LearningConfig;
     /** Start with the sidebar open. Small embedded viewers default to collapsed. */
     open?: boolean;
     /** Offer local file loading alongside PDB, PubChem, and URL sources. Defaults to true. */

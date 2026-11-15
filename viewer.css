@@ -1,50 +1,5 @@
-/* Page and classroom controls only. The molecular controls style themselves. */
+/* Standalone page layout. Viewer and classroom controls live in the UI bundle. */
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; font: 14px/1.45 system-ui, -apple-system, sans-serif; color: #191933; }
 #gldiv { position: fixed; inset: 0; }
 [hidden] { display: none !important; }
-.viewer-actions { position: fixed; top: 12px; right: 12px; z-index: 20; display: flex; gap: 8px; }
-.viewer-actions button, .rightdialog button { box-sizing: border-box; min-height: 36px; border: 1px solid #dcdced; border-radius: 8px; background: #fcfcff; color: #000066; cursor: pointer; font: inherit; padding: 5px 10px; }
-.viewer-actions button { display: inline-flex; align-items: center; justify-content: center; width: 36px; padding: 7px; box-shadow: 0 3px 14px #0000661a; }
-.viewer-actions button, #gldiv .molui-toggle {
-    background: rgb(252 252 255 / 50%);
-
-}
-.viewer-actions svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.rightdialog button { min-height: 28px; padding: 3px 8px; border-color: rgb(0 0 102 / 18%); border-radius: 6px; background: rgb(252 252 255 / 45%); }
-.rightdialog button:hover { background: rgb(239 239 251 / 80%); }
-.viewer-actions button:hover, #gldiv .molui-toggle:hover:not(:disabled) { background: rgb(239 239 251 / 84%); }
-.viewer-actions button:active, #gldiv .molui-toggle:active:not(:disabled) { background: rgb(226 226 246 / 84%); }
-.rightdialog button:disabled { opacity: .5; cursor: default; }
-.viewer-actions button:focus-visible, .rightdialog :is(button, input, [data-session-drag]):focus-visible { outline: 3px solid #5454c4; outline-offset: 2px; }
 #viewer-message { position: fixed; bottom: 12px; left: 12px; z-index: 30; max-width: min(520px, calc(100% - 50px)); padding: 10px 12px; border: 1px solid #efd0cf; border-radius: 8px; background: #fff1ef; color: #982e37; overflow-wrap: anywhere; }
-.rightdialog { position: fixed; top: 12px; right: 12px; z-index: 25; width: 244px; max-width: calc(100% - 24px); max-height: calc(100% - 24px); overflow: auto; box-sizing: border-box; display: none; background: transparent; backdrop-filter: blur(4px); border: 1px solid rgb(0 0 102 / 18%); border-radius: 8px; box-shadow: 0 4px 16px #00006618; font-size: 13px; }
-.session-heading { display: flex; align-items: center; gap: 4px; padding: 3px 4px 3px 8px; background: rgb(0 0 102 / 78%); color: white; border-radius: 7px 7px 0 0; }
-.session-drag { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; align-self: stretch; cursor: grab; touch-action: none; user-select: none; border-radius: 3px; font-weight: 600; }
-.session-drag > :last-child { min-width: 0; overflow-wrap: anywhere; }
-.session-grip { flex: 0 0 8px; height: 16px; opacity: .6; background: radial-gradient(circle, currentColor 1px, transparent 1.5px) 0 0 / 4px 5px; }
-.rightdialog.is-dragging, .is-dragging [data-session-drag] { cursor: grabbing; user-select: none; }
-.rightdialog .session-heading :focus-visible { outline-color: #d4d4ff; outline-offset: 0; }
-.rightdialog .close { display: grid; place-items: center; flex: 0 0 24px; min-height: 24px; height: 24px; width: 24px; padding: 0; font-size: 20px; line-height: 1; border-color: transparent; background: transparent; color: inherit; }
-.rightdialog .close:hover { background: #ffffff24; }
-.session-body { display: grid; gap: 6px; padding: 8px; background: rgb(252 252 255 / 62%); }
-.session-body > label { font-size: 12px; font-weight: 600; color: #30304a; margin-bottom: -4px; }
-.session-toolbar { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.session-toolbar input { flex: 1; min-width: 0; }
-#askbutton { flex: 0 0 auto; }
-.rightdialog input { box-sizing: border-box; width: 9em; min-height: 28px; border: 1px solid rgb(0 0 102 / 25%); border-radius: 5px; padding: 3px 6px; background: rgb(255 255 255 / 50%); color: inherit; font: inherit; }
-.rightdialog .session-primary { background: rgb(0 0 102 / 10%); border-color: rgb(0 0 102 / 28%); color: #000066; font-weight: 500; }
-.rightdialog .session-primary:hover { background: rgb(0 0 102 / 18%); }
-.rightdialog .session-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 28px; width: 28px; padding: 4px; }
-.session-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.session-stats { display: flex; flex: 1; flex-direction: column; min-width: 0; gap: 1px; overflow-wrap: anywhere; color: #30304a; font-size: 12px; font-variant-numeric: tabular-nums; }
-.session-stats > :empty { display: none; }
-#sessionmonitor .session-heading { background: rgb(80 50 119 / 78%); }
-#sessionmonitorinfo { font-size: 12px; color: #30304a; }
-#refreshresults { display: none; }
-#selectmessage { display: none; position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 25; padding: 8px 12px; border-radius: 8px; color: white; background: #503277e8; }
-@media (pointer: coarse) {
-    .viewer-actions button, .rightdialog button, .rightdialog input { min-height: 40px; }
-    .viewer-actions button { width: 40px; }
-    .rightdialog .close { flex-basis: 40px; width: 40px; height: 40px; }
-    .rightdialog .session-icon { flex-basis: 40px; width: 40px; }
-}

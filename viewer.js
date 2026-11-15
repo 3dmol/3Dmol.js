@@ -225,10 +225,10 @@
         let state, unsubscribe, objectSnapshot, controller, generation = 0, suspended = true, disposed = false;
         let restoringURL = false, sessionUpdate;
         let syncTimer, pendingPush = false, liveKey = '', sessionLiveKey = '', lastURL = win.location.href, loadingURL;
-        let session = null, colorOperations = [], sessionScripts, studentControls;
+        let session = null, colorOperations = [], learning, studentControls;
         const sessionListeners = new Set();
         let clearPicking = () => {};
-        const app = { viewer, get state() { return state; }, ready: null, getSnapshot, loadURL, syncURL, showError, acceptSessionState, getSessionState, subscribeSessionChanges, sessionChanged, destroy };
+        const app = { viewer, get state() { return state; }, get learning() { return learning; }, enableSessions, ready: null, getSnapshot, loadURL, syncURL, showError, acceptSessionState, getSessionState, subscribeSessionChanges, sessionChanged, destroy };
         function showError(error) {
             if (!message || disposed) return;
             message.hidden = !error; message.dataset.error = String(!!error);
@@ -390,7 +390,7 @@
                 scene = parse(input, lib.specStringToObject);
                 const sources = await Promise.all(scene.models.map(source => fetchSource(source, signal)));
                 if (token !== generation || disposed) return;
-                win.leaveViewerSession?.();
+                learning?.leave();
                 unsubscribe?.(); state?.destroy(); state = undefined; viewer.stopAnimate(); viewer.clear(); resources.clear(); surfaceColors.clear();
                 session = scene.session || null; colorOperations = copy(scene.atomColors || []);
                 for (let i = 0; i < scene.models.length; i++) {
@@ -473,7 +473,7 @@
                 await state.ui.setTrajectorySettings({ ...scene.view, frame: scene.view?.frame ?? 0 });
                 if (token !== generation || disposed) return;
                 installPicking(); viewer.render(); state.refresh();
-                if (scene.session) { await enableSessions(); if (token === generation) win.joinSession(scene.session); }
+                if (scene.session) { const classroom = await enableSessions(); if (token === generation) await classroom.join(scene.session); }
                 if (token !== generation || disposed) return;
                 lastURL = win.location.href; liveKey = readLiveKey();
             } catch (error) {
@@ -529,20 +529,22 @@
         }, 200);
         const navigate = () => { loadURL(win.location.href).catch(showError); };
         win.addEventListener('popstate', navigate); win.addEventListener('hashchange', navigate);
-        function script(src) {
-            return new Promise((resolve, reject) => {
-                const element = document.createElement('script'); element.src = src;
-                element.onload = resolve; element.onerror = () => reject(new Error('Unable to load classroom session support.'));
-                document.head.append(element);
+        function createLearning() {
+            if (!learning && lib.LearningSession) learning = new lib.LearningSession(state, {
+                server: win.viewerSessionServer || win.location.origin || new URL(win.location.href).origin,
+                adapter: {
+                    getManager: () => state,
+                    getState: getSessionState, applyState: acceptSessionState,
+                    roleChanged: sessionChanged, subscribe: subscribeSessionChanges, showError
+                }
             });
+            return learning;
         }
         async function enableSessions() {
-            if (!sessionScripts) sessionScripts = (async () => {
-                if (!win.jQuery) await script('https://code.jquery.com/jquery-3.7.1.min.js');
-                if (!win.io) await script('https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.js');
-                win.initSessions();
-            })().catch(error => { sessionScripts = undefined; throw error; });
-            return sessionScripts;
+            const classroom = createLearning();
+            if (!classroom) throw new Error('Rebuild the UI bundle to enable classroom sessions.');
+            await classroom.ready;
+            return classroom;
         }
         function acceptSessionState(internal, sections) {
             if (disposed || restoringURL) return Promise.resolve();
@@ -637,16 +639,13 @@
             try { const url = syncURL(); if (win.navigator.clipboard?.writeText) await win.navigator.clipboard.writeText(url); else win.prompt('Copy this viewer URL:', url); }
             catch (error) { showError(error); }
         });
-        document.getElementById('sessionbutton')?.addEventListener('click', async event => {
-            if (sessionScripts) return; event.preventDefault();
-            try { await enableSessions(); win.jQuery('#sessionbutton').trigger('click'); } catch (error) { showError(error); }
-        });
         function destroy() {
-            disposed = true; generation++; sessionUpdate = undefined; controller?.abort(); win.leaveViewerSession?.(); clearPicking();
+            disposed = true; generation++; sessionUpdate = undefined; controller?.abort(); learning?.destroy(); learning = undefined; clearPicking();
             win.clearInterval(poll); win.clearTimeout(syncTimer); unsubscribe?.(); state?.destroy(); sessionListeners.clear();
             win.removeEventListener('popstate', navigate); win.removeEventListener('hashchange', navigate);
         }
         makeState({ open: true });
+        createLearning();
         app.ready = loadURL(options.url || win.location.href); return app;
     }
     return { parse, serialize, createApp, inferFormat };

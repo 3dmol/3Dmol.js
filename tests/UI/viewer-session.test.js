@@ -72,7 +72,13 @@ async function fixture(options = {}) {
         setControls(settings) { Object.assign(this.controls, settings); if (!this.controls.edit) this.ui.isOpen = false; }
         destroy() { this.ui.element.isConnected = false; }
     }
-    const app = createApp({ window: win, viewer, library: { StateManager } });
+    class LearningSession {
+        ready = Promise.resolve();
+        join = name => win.joinSession(name);
+        leave = () => win.leaveViewerSession();
+        destroy = () => this.leave();
+    }
+    const app = createApp({ window: win, viewer, library: { StateManager, LearningSession } });
     await app.ready;
     app.sessionChanged('Classroom', true);
     return {

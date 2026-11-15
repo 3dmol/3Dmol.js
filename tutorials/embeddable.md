@@ -35,7 +35,17 @@ Use lowercase HTML `data-` attributes to configure the viewer. Selection and sty
  - **`data-ui`** Set to `true` to enable both the edit dialog (hamburger button) and trajectory controls. Requires the separate `3Dmol.ui` bundle. Set to `false` to disable both by default.
  - **`data-ui-edit`** Set to `true` or `false` to override whether the edit dialog is available.
  - **`data-ui-trajectory`** Set to `true` or `false` to override whether trajectory controls are available. The controls only appear when the viewer has multiple trajectory frames.
+ - **`data-learning`** Set to `true` or `button` to add the classroom button, or `hidden` to start an instructor session with a hotkey. Requires the separate `3Dmol.ui` bundle. Omitted or `false` disables classroom support.
+ - **`data-learning-session`** The classroom session identifier. Required for hidden mode; viewers using the same server and identifier can join the same classroom, including across pages.
+ - **`data-learning-server`** The session server's origin, including protocol and optional port. Defaults to `https://3dmol.org`.
+ - **`data-learning-hotkey`** The hidden-mode instructor shortcut. Defaults to `Ctrl+Alt+I` while the viewer is focused.
  - **`data-zoomto`** An {@link AtomSelectionSpec} to fit in the view; omitted fits all atoms.
+
+Classroom support and editing controls are independent. For example,
+`data-learning="true" data-ui="true"` enables both; hidden classroom viewers can
+omit `data-ui` and receive editing controls when activated as the instructor.
+See [embedded classrooms and the JavaScript UI API](tutorial-learning_environment.html#embedded-viewers)
+for examples, session discovery, server setup, and cleanup.
 
  
 Trajectory controls can be enabled independently of the edit dialog. This example

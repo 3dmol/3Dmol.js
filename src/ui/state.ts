@@ -7,6 +7,8 @@ import type { VolumeData } from "../VolumeData";
 import type { GLVolumetricRender } from "../VolumetricRender";
 import { CC } from "../colors";
 import { UI, UIConfig, UIControlOptions } from "./ui";
+import { LearningSession } from './learning';
+import type { LearningConfig } from './learning';
 
 export interface UIStyle {
     id: string;
@@ -141,6 +143,8 @@ export class StateManager {
     public readonly distances = new Map<string, UIDistance>();
     public readonly modelTitles = new Map<number, string>();
     public ui: UI;
+    /** Optional classroom connection and controls, owned by this manager. */
+    public learning?: LearningSession;
     private readonly listeners = new Set<() => void>();
     private readonly baseline = new WeakMap<AtomSpec, AtomStyleSpec>();
     private readonly styledByUI = new WeakSet<AtomSpec>();
@@ -177,6 +181,15 @@ export class StateManager {
             viewer.setProjection(this.viewSettings.projection);
         }
         this.initiateUI();
+        if (config.learning) this.enableLearning(config.learning);
+    }
+
+    /** Enable classroom sharing, replacing any existing connection. Pass false to disable it. */
+    public enableLearning(config: boolean | LearningConfig = true): LearningSession | undefined {
+        this.learning?.destroy();
+        this.learning = undefined;
+        if (config && !this.disposed) this.learning = new LearningSession(this, config === true ? {} : config);
+        return this.learning;
     }
 
     /** Subscribe to state refreshes; returns a function that removes the subscription. */
@@ -455,7 +468,12 @@ export class StateManager {
         this.refresh();
     }
 
-    /** Add an editable annotation shape. Coordinates are in molecular angstroms. */
+    /**
+     * Add an editable annotation shape. Coordinates are in molecular angstroms.
+     * @param {string} kind Sphere, arrow, cylinder, line, or box, in lowercase.
+     * @param {Object} spec Shape settings for the chosen kind.
+     * @param {string} [name="Shape"] Annotation name.
+     */
     public addShape(kind: UIShape['kind'], spec: any, name = 'Shape'): string {
         const constructors = {
             sphere: value => this.viewer.addSphere(value), arrow: value => this.viewer.addArrow(value),
@@ -485,7 +503,13 @@ export class StateManager {
         this.viewer.render(); this.refresh();
     }
 
-    /** Add a removable, fixed-coordinate distance annotation in angstroms. */
+    /**
+     * Add a removable, fixed-coordinate distance annotation in angstroms.
+     * @param {XYZ} start First endpoint.
+     * @param {XYZ} end Second endpoint.
+     * @param {string} [name="Distance"] Atom information displayed in the summary.
+     * @param {Object} [options] Optional color, showLabel, and labelText settings.
+     */
     public addDistance(start: UIDistance['start'], end: UIDistance['end'], name = 'Distance',
         options: Partial<Pick<UIDistance, 'color' | 'showLabel' | 'labelText'>> = {}): string {
         if (typeof name !== 'string' || ![start, end].every(point => point && ['x', 'y', 'z'].every(axis => Number.isFinite(point[axis])))) {
@@ -611,7 +635,14 @@ export class StateManager {
         if (added.size) this.viewer.setClickable({ predicate: atom => added.has(atom) }, true, this.pickDistanceAtom);
     }
 
-    /** Parse a scalar grid once, retaining it for subsequent contour edits. */
+    /**
+     * Parse a scalar grid once, retaining it for subsequent contour edits.
+     * @param {string|ArrayBuffer} data Volumetric file contents.
+     * @param {string} format Volumetric file format.
+     * @param {IsoSurfaceSpec} [spec] Display settings.
+     * @param {string} [name="Volume"] Map name.
+     * @param {string} [mode="isosurface"] Either isosurface or volume.
+     */
     public addVolume(data: string | ArrayBuffer, format: string, spec: IsoSurfaceSpec = {},
         name = 'Volume', mode: UIVolume['mode'] = 'isosurface'): string {
         const Constructor = (window.$3Dmol as unknown as { VolumeData: typeof VolumeData })?.VolumeData;
@@ -652,7 +683,10 @@ export class StateManager {
         };
     }
 
-    /** Restore data-only object settings without evaluating callback source. */
+    /**
+     * Restore data-only object settings without evaluating callback source.
+     * @param {Object} records A snapshot returned by {@link StateManager#exportObjects}.
+     */
     public restoreObjects(records: ReturnType<StateManager['exportObjects']>): void {
         if (!records || !Array.isArray(records.shapes) || !Array.isArray(records.volumes)) throw new Error('Invalid scene objects.');
         if (records.distances !== undefined && !Array.isArray(records.distances)) throw new Error('Invalid distance annotations.');
@@ -794,6 +828,7 @@ export class StateManager {
      */
     public destroy(): void {
         if (this.disposed) return;
+        this.learning?.destroy(); this.learning = undefined;
         this.setDistancePicking(false);
         this.disposed = true;
         this.clearSelectionLabels(...this.selectionLabels.keys());

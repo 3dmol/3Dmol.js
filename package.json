@@ -98,5 +98,11 @@
     "estree-to-babel": {
       "c8": "^10.1.3"
     }
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "canvas@3.2.3": true,
+    "esbuild@0.28.2": true,
+    "puppeteer@25.17.0": true
   }
 }

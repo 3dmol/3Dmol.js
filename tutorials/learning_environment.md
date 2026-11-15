@@ -1,8 +1,131 @@
 <script src="../build/3Dmol-min.js"></script> 
 
-The [hosted 3Dmol.js viewer](tutorial-url.html) can serve as an active learning environment of engaging and querying students when teaching properties of 3D molecular structures.  The instructor creates a session using the share button in the upper right corner.  When students connect to this session, they see the same molecular view as the instructor.  Although the students can independently manipulate the view, the instructor can override their view.
+The [hosted 3Dmol.js viewer](tutorial-url.html) and embedded viewers can serve as
+an active learning environment for teaching properties of molecular structures.
+The instructor creates a session using the **Classroom** button in the upper
+right corner. Students who join see the instructor's molecular scene. They can
+rotate and zoom independently, and instructor camera changes update their views.
 
 The instructor can pose questions that the students then answer by clicking on atoms.  The accumulated and anonymous answers can then be displayed in the instructor's view.
+
+## Embedded viewers
+
+Classrooms are also available in embedded viewers through the optional
+`3Dmol.ui` bundle. Include it after the core bundle, then opt in with
+`data-learning`. No classroom connection is made by ordinary embeds.
+
+For the same classroom button and session-name dialog as the standalone viewer:
+
+```html
+<script src="https://3dmol.org/build/3Dmol-min.js"></script>
+<script src="https://3dmol.org/build/3Dmol.ui-min.js"></script>
+
+<div id="classroom-viewer" class="viewer_3Dmoljs"
+     style="width: 100%; height: 400px; position: relative;"
+     data-pdb="1YCR" data-style="cartoon"
+     data-ui="true" data-learning="true"></div>
+```
+
+Embedded classrooms use `https://3dmol.org` as their session server by default.
+Set `data-learning-server="https://classroom.example.edu"` to use another server.
+The server address includes the protocol and, when needed, a port; it is separate
+from the molecular-data URL. All participants in a classroom must use the same
+server and session identifier. A page can contain several independent classroom
+viewers, each with its own identifier and controls.
+
+### Hidden instructor activation
+
+Use `data-learning="hidden"` when the classroom button should stay hidden until
+an instructor starts the session. **An explicit `data-learning-session` is
+required.** Choose an identifier unique to the class and viewer, and put the same
+identifier on every participant's embed. Participants may be on different pages.
+
+```html
+<div id="bonding-viewer" class="viewer_3Dmoljs"
+     style="width: 100%; height: 400px; position: relative;"
+     data-pdb="1YCR" data-style="cartoon"
+     data-learning="hidden"
+     data-learning-session="biochem-bonding-class-a"></div>
+```
+
+This example uses the same core and UI scripts as the button example. Focus the
+viewer, then press **Ctrl+Alt+I** to activate the instructor. The instructor gets
+the usual editing and classroom controls, including **Query Atoms**, response
+counts, and ending the session. Use `data-learning-hotkey` to choose another
+shortcut. Keyboard input in text fields does not activate the shortcut.
+
+Other active hidden-mode embeds with the same server and identifier automatically
+join as students when the instructor starts. Viewers opened after the instructor
+starts also join. Student editing and trajectory controls are disabled while
+following; students can still rotate, zoom, and answer atom queries. Waiting for
+an instructor does not create a session or extend an existing session's lifetime.
+
+Hidden mode controls how the interface appears; it does not authenticate an
+instructor. Someone with the session identifier and shortcut can start a session
+when that identifier is free.
+
+### JavaScript UI API
+
+The same feature is available through {@link UIConfig} and {@link LearningSession}
+in `3Dmol.ui`. Enable it when creating the viewer's {@link StateManager}:
+
+```javascript
+const controls = new $3Dmol.StateManager(viewer, {
+    edit: false,
+    trajectory: false,
+    learning: {
+        mode: 'hidden',
+        session: 'biochem-bonding-class-a',
+        server: 'https://3dmol.org',
+        hotkey: 'Ctrl+Alt+I'
+    }
+});
+const classroom = controls.learning;
+```
+
+Use `learning: true` for the classroom button, or pass a {@link LearningConfig}
+object. `mode` defaults to `'button'`, and `server` defaults to
+`'https://3dmol.org'`. Hidden mode requires `session`. In button mode, `session`
+can prefill the session-name field. `edit` and `trajectory` retain their ordinary
+UI defaults; the example disables them until this viewer becomes the instructor.
+
+`classroom.open()` opens the classroom dialog. Applications can also call
+`classroom.start(name)` to create an instructor session or `classroom.join(name)`
+to join an existing session as a student. The configured `session` can be used by
+omitting `name`. `classroom.getRole()` returns `'idle'`, `'instructor'`, or
+`'student'`. `classroom.ready` resolves when the client library and event handlers
+are ready, not when a server connection or classroom join has succeeded.
+`start()` and `join()` return promises that resolve after queuing their requests;
+the role changes when the server acknowledges the request.
+
+For an existing UI manager, use {@link StateManager#enableLearning} to create and
+own the classroom controller:
+
+```javascript
+const classroom = controls.enableLearning({
+    mode: 'hidden',
+    session: 'biochem-bonding-class-a'
+});
+```
+
+Calling `enableLearning` again replaces the previous connection;
+`controls.enableLearning(false)` disables classroom support. Destroying the UI
+manager or viewer also releases its classroom connection, controls, and listeners.
+Applications that manage this lifecycle themselves can construct
+`new $3Dmol.LearningSession(controls, options)` and must call
+`classroom.destroy()` when removing it. Use one controller per viewer.
+
+`classroom.leave()` leaves the classroom, ending it when called by its instructor.
+In hidden mode, explicitly leaving also stops automatic joining. Call
+`controls.enableLearning(options)` again to resume waiting for an instructor.
+When the instructor ends a session, other hidden-mode viewers return to waiting
+for the next activation of their configured session.
+
+The Socket.IO browser client is loaded when classroom support is enabled. If
+your page already supplies a compatible Socket.IO client, it is reused. Set
+`LearningConfig.clientURL` to a self-hosted client script when a content security
+policy or offline asset setup requires it. That script must provide a Socket.IO
+4.x client; the session server remains a separate deployment.
 
 ## Shared scenes
 
@@ -37,7 +160,7 @@ models and geometry on student viewers. Local files used in a shared scene are
 sent to the session server and connected viewers.
 
 Closing the instructor's tab or window ends the session. Once the server detects
-the disconnect, students regain editing controls and the session name becomes
+the disconnect, students' previous control settings are restored and the session name becomes
 available again. Losing the instructor's connection also ends the session;
 students can reconnect while the instructor remains connected.
 
@@ -79,13 +202,20 @@ Your network must allow external connections to the specified port.
 The server runs one Gunicorn worker with 100 threads; use `--threads` to adjust capacity. Keep one worker because session state is held in process memory. See the [session-server README](https://github.com/3dmol/3Dmol.js/blob/master/learning-environment/README.md) for the equivalent Gunicorn command.
 Do <b>not</b> run this command as superuser to run the server on the privileged default webserver port 80 without consulting with a network security specialist.
 
-The viewer connects to the session server at the page's origin, preserving its hostname, protocol, and port. This applies equally to `localhost` and `127.0.0.1`; neither address selects port 5000 automatically. To serve the viewer and session server separately, set `window.viewerSessionServer` before `initSessions()` runs, for example in a script in the viewer page:
+The standalone viewer connects to the session server at the page's origin, preserving its hostname, protocol, and port. This applies equally to `localhost` and `127.0.0.1`; neither address selects port 5000 automatically. Embedded classrooms instead default to `https://3dmol.org`; point their `data-learning-server` or `LearningConfig.server` at your server. To serve the standalone viewer and session server separately, set `window.viewerSessionServer` before the viewer initializes, for example in a script in the viewer page:
 
 ```javascript
 window.viewerSessionServer = 'http://localhost:6000';
 ```
 
 Use the exact address and port on which the session server listens. In particular, `localhost` can resolve to IPv6, while the default server bind is IPv4 `127.0.0.1`. The browser also treats these hostnames as different origins. Remove the override, or set it to `window.location.origin`, when proxying through the webserver that serves the viewer.
+
+Deploy the updated session server with the rebuilt UI bundle when enabling hidden
+embeds. Automatic student discovery requires the server's session-watch events;
+an older server can accept ordinary joins but will not announce instructor
+activation to waiting viewers. Allow the embed origin to connect through your
+server/proxy CORS policy, and use HTTPS for the session server when embedding on
+an HTTPS page.
 
 If port 5000 is occupied, start the server on another port, such as `python3 server.py -p 5068`, and open `http://127.0.0.1:5068/static/viewer.html`. This direct setup needs no Apache configuration. On macOS, a `403` response with a `Server: AirTunes` header indicates that the request reached Apple's service rather than the session server; adding CORS headers in Apache will not fix that response.
 

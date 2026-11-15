@@ -210,7 +210,7 @@ export const uiStyles: string = `
   margin: 8px 0 0;
   border: 1px solid var(--molui-border);
   border-radius: 10px;
-  background: rgb(255,255,255,92%);
+  background: rgb(255,255,255,90%);
   overflow-wrap: anywhere;
 }
 .molui-card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }

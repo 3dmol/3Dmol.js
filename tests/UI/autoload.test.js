@@ -23,6 +23,7 @@ describe('embedded control availability', () => {
         StateManager = jest.fn(function (attachedViewer, config) {
             this.config = config;
             this.setControls = jest.fn();
+            this.enableLearning = jest.fn();
             this.createSelectionAndStyle = jest.fn();
             attachedViewer.ui = this;
         });
@@ -116,6 +117,17 @@ describe('embedded control availability', () => {
         expect(controls.setControls).toHaveBeenLastCalledWith({ edit: false, trajectory: false });
         expect(StateManager).toHaveBeenCalledTimes(1);
         expect(viewer.ui).toBe(controls);
+    });
+
+    test('classroom attributes enable the optional UI independently of the edit controls', () => {
+        Object.assign(host.dataset, { learning: 'hidden', learningSession: 'biochem-2026-protein-a',
+            learningServer: 'https://classroom.example', learningHotkey: 'Ctrl+Alt+I' });
+        autoload();
+        expect(StateManager).toHaveBeenCalledWith(viewer, { edit: false, trajectory: false,
+            learning: { mode: 'hidden', session: 'biochem-2026-protein-a', server: 'https://classroom.example', hotkey: 'Ctrl+Alt+I' } });
+        host.dataset.learning = 'false';
+        autoload(viewer);
+        expect(viewer.ui.enableLearning).toHaveBeenCalledWith(false);
     });
 
     test('leaves a programmatically installed UI alone without data-ui options', () => {

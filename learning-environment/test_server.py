@@ -42,6 +42,7 @@ class SessionServerTests(unittest.TestCase):
         self.now = 1000.0
         self.clients = []
         server.sessions.clear()
+        server.session_watchers.clear()
         server._cleanup_started = False
         self.clock = patch.object(server, '_clock', lambda: self.now)
         self.clock.start()
@@ -53,6 +54,7 @@ class SessionServerTests(unittest.TestCase):
             if client.is_connected():
                 client.disconnect()
         server.sessions.clear()
+        server.session_watchers.clear()
         self.clock.stop()
         self.background.stop()
 
@@ -119,6 +121,65 @@ class SessionServerTests(unittest.TestCase):
         self.assertEqual(server.sessions['Classroom']['sid'], winner_sid)
         self.assertEqual(server.sessions['Classroom']['secret'], max(responses))
         self.assertEqual(set(server.socketio.server.manager.rooms['/']['Classroom']), {winner_sid})
+
+    def test_waiting_embeds_discover_only_their_classroom_without_joining(self):
+        waiting, other = self.client(), self.client()
+        waiting.emit('watch session event', {'name': 'Classroom'})
+        other.emit('watch session event', {'name': 'Another classroom'})
+        self.assertEqual(server.sessions, {})
+        self.assertEqual(self.events(waiting), [])
+        teacher, _ = self.create()
+        self.assertEqual(self.events(waiting, 'session available'), [{'name': 'Classroom'}])
+        self.assertEqual(self.events(other), [])
+        self.assertEqual(server.sessions['Classroom']['cnt'], 0)
+        self.assertEqual(server.sessions['Classroom']['members'], set())
+        teacher.emit('viewer state change event', {'name': 'Classroom', 'baseRevision': 0, 'patch': {'frame': 1}})
+        self.assertEqual(self.events(waiting), [])
+        waiting.emit('join session event', {'name': 'Classroom'})
+        self.assertEqual(self.events(waiting, 'viewer state change response')[0]['state']['frame'], 1)
+        self.assertEqual(server.sessions['Classroom']['cnt'], 1)
+
+    def test_discovery_of_existing_sessions_does_not_extend_their_lifetime(self):
+        teacher, _ = self.create()
+        waiting = self.client()
+        self.now += server.SESSION_TTL_SECONDS - 1
+        waiting.emit('watch session event', {'name': 'Classroom'})
+        self.assertEqual(self.events(waiting, 'session available'), [{'name': 'Classroom'}])
+        self.assertEqual(server.sessions['Classroom']['last_activity'], 1000.0)
+        self.now += 1
+        waiting.emit('watch session event', {'name': 'Classroom'})
+        self.assertEqual(self.events(waiting), [])
+        self.assertNotIn('Classroom', server.sessions)
+        self.assertEqual(self.events(teacher, 'leave session response'), [{'reason': 'expired'}])
+        # Waiting clients remain subscribed when an instructor starts again.
+        self.create()
+        self.assertEqual(self.events(waiting, 'session available'), [{'name': 'Classroom'}])
+
+    def test_watch_switch_unwatch_and_disconnect_release_discovery_subscriptions(self):
+        waiting = self.client()
+        sid = server.socketio.server.manager.sid_from_eio_sid(waiting.eio_sid, '/')
+        waiting.emit('watch session event', {'name': 'Old'})
+        waiting.emit('watch session event', {'name': 'New'})
+        waiting.emit('unwatch session event', {'name': 'Old'})
+        self.assertEqual(server.session_watchers, {sid: 'New'})
+        self.create('Old')
+        self.assertEqual(self.events(waiting), [])
+        waiting.emit('unwatch session event', {'name': 'New'})
+        self.assertEqual(server.session_watchers, {})
+        self.create('New')
+        self.assertEqual(self.events(waiting), [])
+        waiting.emit('watch session event', {'name': 'Next'})
+        waiting.disconnect()
+        self.assertEqual(server.session_watchers, {})
+
+    def test_concurrent_watch_and_create_deliver_one_availability_notification(self):
+        teacher, waiting = self.client(), self.client()
+        concurrently(
+            lambda: waiting.emit('watch session event', {'name': 'Classroom'}),
+            lambda: teacher.emit('create session event', {'name': 'Classroom', 'state': copy.deepcopy(SCENE), 'view': VIEW})
+        )
+        self.assertEqual(self.events(waiting, 'session available'), [{'name': 'Classroom'}])
+        self.assertEqual(server.sessions['Classroom']['cnt'], 0)
 
     def test_concurrent_updates_cannot_accept_the_same_base_revision_twice(self):
         teacher, _ = self.create()

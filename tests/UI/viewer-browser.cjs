@@ -15,9 +15,11 @@ const xyz = '2\nfirst\nC 0 0 0\nO 1 0 0\n2\nsecond\nC 10 0 0\nO 11 0 0\n';
 const extensionlessXYZ = '2\nfirst\nC -1 -1 -1\nO -2 -1 -1\n2\nsecond\nC -10 -1 -1\nO -11 -1 -1\n';
 const tutorial = fs.readFileSync(path.join(root, 'tutorials/url.md'), 'utf8');
 const examples = [...new Set([...tutorial.matchAll(/(?:href=["']|\]\()([^"'\s)]*viewer\.html\?[^"'\s)]*)/g)].map(match => match[1].replace(/&amp;/g, '&')))];
-const sessionSocket = `window.__sessionEvents = []; window.__sessionHandlers = {};
-window.io = { connect: function () { return {
+const sessionSocket = `window.__sessionEvents = []; window.__sessionHandlers = {}; window.__sessionConnections = 0;
+window.io = { connect: function () { window.__sessionConnections++; return {
+    connected: true,
     on: function (name, callback) { window.__sessionHandlers[name] = callback; return this; },
+    off: function (name, callback) { if (window.__sessionHandlers[name] === callback) delete window.__sessionHandlers[name]; return this; },
     emit: function (name, data) { window.__sessionEvents.push({name: name, data: data}); return this; },
     send: function () {}, disconnect: function () {}
 }; } };`;
@@ -130,11 +132,15 @@ const server = http.createServer((request, response) => {
             await page.waitForFunction(() => !!window.viewerApp?.ready);
             await page.evaluate(() => viewerApp.ready);
             await page.waitForFunction(() => !!window.viewerApp?.state?.ui?.element?.isConnected);
+            await page.evaluate(() => viewerApp.learning.ready);
             await page.evaluate(() => {
                 const form = viewerApp.state.ui.element.querySelector('form');
                 const sources = [...form.querySelector('select').options].map(option => option.value);
                 if (sources.join(',') !== 'file,pdb,cid,url' || !form.querySelector('input[type=file]')) {
                     throw new Error('Standalone viewer should offer local files, PDB, PubChem, and URL loading');
+                }
+                if (document.querySelectorAll('.molui-learning').length !== 1 || window.__sessionConnections !== 1) {
+                    throw new Error('Standalone viewer should retain one scoped classroom controller and connection');
                 }
             });
         };
@@ -507,7 +513,12 @@ const server = http.createServer((request, response) => {
             const join = __sessionEvents.find(event => event.name === 'join session event');
             if (join.data.name !== 'URL+classroom room') throw new Error('Session URL did not preserve a literal plus and decode an encoded space');
             __sessionHandlers['join session response']('test-session-client');
-            if (getComputedStyle(document.getElementById('sessionmonitor')).display === 'none') throw new Error('Session response did not update controls');
+            const monitor = viewerApp.learning.element.querySelector('[role="status"]');
+            if (viewerApp.learning.getRole() !== 'student' || !monitor || monitor.hidden
+                || monitor.textContent !== 'Following instructor'
+                || viewerApp.learning.element.querySelector('.molui-learning-dialog').hidden) {
+                throw new Error('Session response did not update scoped classroom controls');
+            }
             await __sessionHandlers['viewer state change response'](payload);
             if (viewerApp.viewer.getNumFrames() !== 2 || !viewerApp.viewer.selectedAtoms({}).length) throw new Error('Session model state was not applied');
             if (viewerApp.viewer.getFrame() !== frame) throw new Error('Older session state did not infer the displayed trajectory frame');
@@ -526,7 +537,8 @@ const server = http.createServer((request, response) => {
             if (JSON.stringify(coordinates(viewerApp.viewer.selectedAtoms({}))) !== JSON.stringify(coordinates(payload.models.filter(Boolean).flatMap(model => model.atoms)))) {
                 throw new Error('A classroom update burst left stale atom coordinates');
             }
-            document.getElementById('sessionleave').click();
+            viewerApp.learning.element.querySelector('button[aria-label="Close or leave classroom"]').click();
+            if (viewerApp.learning.getRole() !== 'idle') throw new Error('Leaving a session did not clear the classroom role');
             if (viewerApp.state.ui.element.hidden) throw new Error('Leaving a session did not restore controls');
         }, { payload: sessionPayload, frame: sessionFrame });
         const sessionScene = await page.evaluate(() => ({
