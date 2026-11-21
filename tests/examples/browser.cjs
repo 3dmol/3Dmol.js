@@ -165,7 +165,7 @@ async function pythonControls(browser) {
             'https://3dmol.org/build/3Dmol-min.js', 'https://3dmol.org/build/3Dmol.ui-min.js',
             'https://example.test/atoms.xyz'
         ], 'Multiple Python views should load core then UI once each');
-        assert.deepEqual(await page.evaluate(() => sockets.map(socket => socket.server)), ['https://3dmol.org', 'https://3dmol.org']);
+        assert.deepEqual(await page.evaluate(() => sockets.map(socket => socket.server)), ['https://3dmol.csb.pitt.edu', 'https://3dmol.csb.pitt.edu']);
         const buttonHost = `[id="3dmolviewer_${button.id}"]`, hiddenHost = `[id="3dmolviewer_${hidden.id}"]`;
         await page.click(buttonHost + ' .molui-learning-launch');
         assert.equal(await page.$eval(buttonHost + ' .molui-learning-dialog', el => el.hidden), false);
