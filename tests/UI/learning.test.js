@@ -3,7 +3,7 @@ jest.mock('canvas', () => ({}));
 const { JSDOM } = require('jsdom');
 const { LearningSession } = require('../../build/3Dmol.ui.js');
 let dom, clients;
-function fixture(config = {}, permissions = { edit: true, trajectory: true }) {
+function fixture(config = {}, permissions = { edit: true, trajectory: true }, delayedClient = false) {
     const container = dom.window.document.createElement('div'); dom.window.document.body.append(container);
     const handlers = new Map(), labels = new Set(), atoms = [{ x: 0, y: 0, z: 0, chain: 'A', resn: 'ARG', resi: 12, atom: 'CA' }];
     const socket = { connected: true, on: jest.fn((event, fn) => handlers.set(event, fn)), off: jest.fn((event, fn) => { if (handlers.get(event) === fn) handlers.delete(event); }), emit: jest.fn(), disconnect: jest.fn() };
@@ -21,9 +21,11 @@ function fixture(config = {}, permissions = { edit: true, trajectory: true }) {
         setControls:jest.fn(next=>{permissions={...permissions,...next};}), setDistancePicking:jest.fn(),
         subscribe:jest.fn(()=>jest.fn()),refresh:jest.fn(),setViewSettings:jest.fn(),
         modelTitles:new Map(),selections:new Map(),surfaces:new Map(),shapes:new Map(),volumes:new Map(),distances:new Map() };
-    const session = new LearningSession(state, {...config,socketFactory:()=>socket}); clients.push(session);
+    const socketFactory=jest.fn(()=>socket);
+    const session = new LearningSession(state, {...config,...(delayedClient ? {} : {socketFactory})}); clients.push(session);
     const receive=(event,value)=>handlers.get(event)?.(value);
-    return {session,state,viewer,socket,container,atoms,labels,receive,handlers};
+    const resolveClient=()=>{dom.window.io=()=>socket;dom.window.document.querySelector('script[src*="socket.io"]').onload();};
+    return {session,state,viewer,socket,socketFactory,container,atoms,labels,receive,handlers,resolveClient};
 }
 async function settle(){for(let i=0;i<8;i++)await Promise.resolve();}
 beforeEach(()=>{jest.useFakeTimers();dom=new JSDOM('<!doctype html><body></body>',{url:'https://example.test/lesson'});clients=[];});
@@ -32,6 +34,11 @@ afterEach(()=>{clients.forEach(c=>c.destroy());dom.window.close();jest.useRealTi
 test('hidden mode requires an explicit room identifier',()=>{
     expect(()=>fixture({mode:'hidden'})).toThrow('requires a session identifier');
     expect(()=>fixture({mode:'hidden',session:'  '})).toThrow('requires a session identifier');
+});
+
+test.each([undefined,'https://classroom.example'])('classroom transport uses a direct default origin and honors a configured server (%s)',async(server)=>{
+    const c=fixture({server});await c.session.ready;
+    expect(c.socketFactory).toHaveBeenCalledWith(server||'https://3dmol.csb.pitt.edu',{forceNew:true,multiplex:false});
 });
 
 test('hidden viewers watch only their configured room and keep instructor/student roles independent',async()=>{
@@ -67,15 +74,82 @@ test('hidden activation ignores text inputs, repeats and wrong shortcuts',async(
     await settle();expect(c.socket.emit).not.toHaveBeenCalled();
 });
 
-test('losing simultaneous instructor activation joins the winning classroom',async()=>{
-    const c=fixture({mode:'hidden',session:'lesson'});await c.session.start();
-    c.receive('session available',{name:'lesson'});c.receive('create session response',0);await settle();
-    expect(c.socket.emit).toHaveBeenCalledWith('join session event',{name:'lesson'});
-    c.receive('join session response','student');expect(c.session.getRole()).toBe('student');
+test('the first shortcut opens immediately and reserves instructor activation while the client loads',async()=>{
+    const c=fixture({mode:'hidden',session:'lesson'},undefined,true);
+    const activate=()=>c.container.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'i',code:'KeyI',ctrlKey:true,altKey:true,bubbles:true}));
+    activate();
+    const dialog=c.session.element.querySelector('.molui-learning-dialog');
+    expect(dialog.hidden).toBe(false);expect(dialog.textContent).toContain('Starting classroom...');
+    activate();expect(c.socket.emit).not.toHaveBeenCalled();
+    c.socket.emit.mockImplementation(event=>{if(event==='watch session event')c.receive('session available',{name:'lesson'});});
+    c.resolveClient();await settle();
+    expect(c.socket.emit.mock.calls.filter(([event])=>event==='create session event')).toHaveLength(1);
+    expect(c.socket.emit.mock.calls.some(([event])=>event==='join session event')).toBe(false);
+    c.receive('create session response',123);expect(c.session.getRole()).toBe('instructor');
+    expect([...dialog.querySelectorAll('[role=status]')].filter(el=>!el.hidden)).toHaveLength(0);
 });
 
-test.each(['start','join'])('disconnect during pending %s permits discovery and a fresh join',async(method)=>{
-    const c=fixture({mode:'hidden',session:'lesson'});await c.session[method]();
+test.each(['leave','destroy'])('%s cancels instructor activation while the client is still loading',async(action)=>{
+    const c=fixture({mode:'hidden',session:'lesson'},undefined,true);
+    const starting=c.session.start();c.session[action]();c.resolveClient();await starting;
+    expect(c.socket.emit.mock.calls.some(([event])=>event==='create session event')).toBe(false);
+    expect(c.session.getRole()).toBe('idle');
+    if(action==='leave'){
+        await c.session.start();c.receive('create session response',123);
+        expect(c.session.getRole()).toBe('instructor');
+    }
+});
+
+test('a rejected instructor activation reports the collision without silently joining',async()=>{
+    const c=fixture({mode:'hidden',session:'lesson'});await c.session.start();
+    c.receive('session available',{name:'lesson'});c.receive('create session response',0);await settle();
+    c.receive('session available',{name:'lesson'});await settle();
+    expect(c.socket.emit.mock.calls.some(([event])=>event==='join session event')).toBe(false);
+    expect(c.session.getRole()).toBe('idle');
+    const dialog=c.session.element.querySelector('.molui-learning-dialog');
+    expect(dialog.hidden).toBe(false);expect(dialog.textContent).toContain('End the existing session or choose a different session name.');
+    expect([...dialog.querySelectorAll('[role=status]')].filter(el=>!el.hidden)).toHaveLength(0);
+    await c.session.start();c.receive('create session response',123);expect(c.session.getRole()).toBe('instructor');
+});
+
+test('disconnecting a pending instructor activation preserves intent and allows a retry',async()=>{
+    const c=fixture({mode:'hidden',session:'lesson'});await c.session.start();
+    c.receive('disconnect','transport close');
+    expect(c.session.element.querySelector('.molui-learning-dialog').textContent).toContain('connection was interrupted');
+    c.receive('connect');c.receive('session available',{name:'lesson'});await settle();
+    expect(c.socket.emit.mock.calls.some(([event])=>event==='join session event')).toBe(false);
+    c.receive('create session response',123);expect(c.session.getRole()).toBe('idle');
+    await c.session.start();c.receive('create session response',456);expect(c.session.getRole()).toBe('instructor');
+});
+
+test('instructor activation waits for a connected transport and sends only one create request',async()=>{
+    const c=fixture({mode:'hidden',session:'lesson'});c.socket.connected=false;
+    await c.session.start();await c.session.start();
+    expect(c.socket.emit.mock.calls.some(([event])=>event==='create session event')).toBe(false);
+    expect(c.session.element.querySelector('.molui-learning-dialog').textContent).toContain('Starting classroom...');
+    c.socket.connected=true;c.receive('connect');c.receive('connect');
+    expect(c.socket.emit.mock.calls.filter(([event])=>event==='create session event')).toHaveLength(1);
+    c.receive('create session response',123);expect(c.session.getRole()).toBe('instructor');
+});
+
+test('a connection failure clears pending activation for retry without buffering an orphan create',async()=>{
+    const c=fixture({mode:'hidden',session:'lesson'});c.socket.connected=false;
+    await c.session.start();c.receive('connect_error',new Error('WebSocket failed'));
+    expect(c.session.element.querySelector('.molui-learning-dialog').textContent).toContain('WebSocket failed');
+    c.socket.connected=true;c.receive('connect');c.receive('session available',{name:'lesson'});await settle();
+    expect(c.socket.emit.mock.calls.some(([event])=>event==='create session event'||event==='join session event')).toBe(false);
+    await c.session.start();c.receive('create session response',123);expect(c.session.getRole()).toBe('instructor');
+});
+
+test('leaving before transport connection cancels the queued activation',async()=>{
+    const c=fixture({mode:'hidden',session:'lesson'});c.socket.connected=false;
+    await c.session.start();c.session.leave();c.socket.connected=true;c.receive('connect');
+    expect(c.socket.emit.mock.calls.some(([event])=>event==='create session event'||event==='delete session event')).toBe(false);
+    expect(c.session.getRole()).toBe('idle');
+});
+
+test('disconnect during a pending student join permits discovery and a fresh join',async()=>{
+    const c=fixture({mode:'hidden',session:'lesson'});await c.session.join();
     c.receive('disconnect','transport close');c.receive('connect');c.receive('session available',{name:'lesson'});await settle();
     c.receive('join session response','new-student');expect(c.session.getRole()).toBe('student');
 });

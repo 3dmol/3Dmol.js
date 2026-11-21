@@ -21,7 +21,7 @@ without Apache, run `python3 server.py -p 5068` and open
 and port-conflict troubleshooting.
 
 Embedded classrooms opt in with `data-learning` or the JavaScript UI
-`learning` configuration. They default to `https://3dmol.org`; set
+`learning` configuration. They default to `https://3dmol.csb.pitt.edu`; set
 `data-learning-server` or `LearningConfig.server` to use this deployment.
 Hidden instructor activation requires an explicit session identifier shared by
 the intended viewers. See the tutorial's [embedded-viewer examples](../tutorials/learning_environment.md#embedded-viewers)

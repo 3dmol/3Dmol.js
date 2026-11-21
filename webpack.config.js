@@ -76,6 +76,9 @@ env_config = {
           terserOptions: {
             keep_classnames: true,
             compress: true,
+            // Classic scripts inherit the host page's encoding when none is
+            // supplied. Escapes keep UI text intact in local/legacy pages.
+            format: { ascii_only: true },
             mangle: {
               reserved: ["MarchingCube"],
             },

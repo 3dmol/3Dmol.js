@@ -158,7 +158,7 @@ instructor leaves or closes their viewer.
 
 The `learning` dictionary accepts the JSON options from
 [`LearningConfig`](https://3dmol.org/doc/LearningConfig.html): `mode`, `session`,
-`server`, `hotkey`, and `clientURL`. `server` defaults to `"https://3dmol.org"`;
+`server`, `hotkey`, and `clientURL`. `server` defaults to `"https://3dmol.csb.pitt.edu"`;
 set it to your session server's origin, including protocol and port when needed,
 for example `"http://127.0.0.1:5072"`. `hotkey` changes the hidden activation
 shortcut, and `clientURL` overrides the Socket.IO browser-client script. Python

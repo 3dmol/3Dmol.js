@@ -17,7 +17,7 @@ export interface LearningAdapter {
 
 /** Options for classroom controls in the optional UI bundle. */
 export interface LearningConfig {
-    /** Socket.IO server origin. Defaults to https://3dmol.org. */
+    /** Socket.IO server origin. Defaults to https://3dmol.csb.pitt.edu. */
     server?: string;
     /** Show a classroom button, or wait invisibly for an instructor. Defaults to button. */
     mode?: 'button' | 'hidden';
@@ -79,6 +79,7 @@ export class LearningSession {
     private readonly connectPanel: HTMLDivElement;
     private readonly input: HTMLInputElement;
     private readonly connectButton: HTMLButtonElement;
+    private readonly status: HTMLDivElement;
     private readonly controls: HTMLDivElement;
     private readonly ask: HTMLButtonElement;
     private readonly users: HTMLSpanElement;
@@ -92,6 +93,9 @@ export class LearningSession {
     private secret: number | null = null;
     private member: string | null = null;
     private pending: 'create' | 'join' | null = null;
+    private pendingSent = false;
+    private activation = 0;
+    private instructorRequested = false;
     private disposed = false;
     private userActivated = false;
     private watching = true;
@@ -151,6 +155,7 @@ export class LearningSession {
         this.connectButton = button('Create', () => this.connectByName()); this.connectButton.disabled = true;
         const connectRow = node('div'); connectRow.className = 'molui-learning-row molui-learning-connect'; connectRow.append(label, this.connectButton);
         this.connectPanel.append(connectRow);
+        this.status = node('div'); this.status.setAttribute('role', 'status');
         this.input.addEventListener('input', () => this.checkName());
         this.input.addEventListener('keydown', event => { if (event.key === 'Enter') this.connectByName(); });
         this.controls = node('div'); this.controls.className = 'molui-learning-row';
@@ -162,7 +167,7 @@ export class LearningSession {
         this.controls.append(this.ask, stats, this.refreshButton);
         this.monitor = node('div', 'Following instructor'); this.monitor.setAttribute('role', 'status');
         this.errorText = node('p'); this.errorText.className = 'molui-learning-error'; this.errorText.hidden = true; this.errorText.setAttribute('role', 'alert');
-        body.append(this.connectPanel, this.controls, this.monitor, this.errorText); this.dialog.append(header, body); this.element.append(this.button, this.dialog);
+        body.append(this.connectPanel, this.status, this.controls, this.monitor, this.errorText); this.dialog.append(header, body); this.element.append(this.button, this.dialog);
         this.container.append(this.element); this.renderRole();
         this.oldTabIndex = this.container.getAttribute('tabindex');
         if (this.oldTabIndex === null) this.container.tabIndex = 0;
@@ -208,7 +213,7 @@ export class LearningSession {
     private async connect(): Promise<void> {
         const io = this.config.socketFactory || await loadClient(this.document, this.config.clientURL || 'https://cdn.socket.io/4.8.1/socket.io.min.js');
         if (this.disposed) return;
-        this.socket = (typeof io === 'function' ? io : io.connect)(this.config.server || 'https://3dmol.org', { forceNew: true, multiplex: false });
+        this.socket = (typeof io === 'function' ? io : io.connect)(this.config.server || 'https://3dmol.csb.pitt.edu', { forceNew: true, multiplex: false });
         const on = (event: string, callback: (message?: any) => void) => {
             const guarded = (message?: any) => { if (!this.disposed) return callback(message); };
             this.socket.on(event, guarded); this.cleanups.push(() => this.socket?.off?.(event, guarded));
@@ -217,14 +222,24 @@ export class LearningSession {
             this.errorText.hidden = true;
             if (this.config.mode === 'hidden' && this.watching) this.socket.emit('watch session event', { name: this.room() });
             if (this.role !== 'idle' && this.name) this.socket.emit('reconnection', { name: this.name, secret: this.secret, sid: this.member });
+            this.sendPending();
             if (!this.dialog.hidden && this.role === 'idle') this.checkName();
         });
         on('disconnect', () => {
-            if (this.pending) { this.pending = null; this.name = null; }
+            if (this.pending) {
+                const creating = this.pending === 'create';
+                this.activation++; this.pending = null; this.pendingSent = false; this.name = null; this.renderRole();
+                if (creating) this.showError(new Error('The classroom connection was interrupted. Try starting the classroom again.'));
+            }
         });
-        on('connect_error', error => this.showError(new Error(`Classroom connection failed: ${error?.message || error}`)));
+        on('connect_error', error => {
+            if (this.pending) {
+                this.activation++; this.pending = null; this.pendingSent = false; this.name = null; this.renderRole();
+            }
+            this.showError(new Error(`Classroom connection failed: ${error?.message || error}`));
+        });
         on('session available', message => {
-            if (this.config.mode === 'hidden' && this.watching && message?.name === this.room() && this.role === 'idle' && !this.pending) this.join(message.name).catch(error => this.showError(error));
+            if (this.config.mode === 'hidden' && this.watching && !this.instructorRequested && message?.name === this.room() && this.role === 'idle' && !this.pending) this.join(message.name).catch(error => this.showError(error));
         });
         on('check session name response', message => {
             if (this.role !== 'idle' || this.pending) return;
@@ -232,13 +247,13 @@ export class LearningSession {
         });
         on('create session response', secret => {
             if (this.pending !== 'create' || !this.name) return;
-            this.pending = null;
+            this.pending = null; this.pendingSent = false;
             if (!secret) {
-                this.name = null;
-                if (this.config.mode === 'hidden' && this.watching) this.join(this.room()).catch(error => this.showError(error));
-                else this.showError(new Error('The classroom name is already in use.'));
+                this.name = null; this.renderRole();
+                this.showError(new Error('The classroom name is already in use. End the existing session or choose a different session name.'));
                 return;
             }
+            this.errorText.hidden = true;
             this.savedControls = this.state.getControls(); this.savedHidden = this.state.ui.element.hidden;
             this.state.setControls({ edit: true, trajectory: true }); this.state.ui.element.hidden = false;
             this.secret = Number(secret); this.role = 'instructor'; this.revision = 0; this.inFlight = undefined;
@@ -249,8 +264,9 @@ export class LearningSession {
         });
         on('join session response', member => {
             if (this.pending !== 'join' || !this.name) return;
-            this.pending = null;
-            if (!member || member === '0') { this.name = null; this.showError(new Error('The classroom is no longer available.')); return; }
+            this.pending = null; this.pendingSent = false;
+            if (!member || member === '0') { this.name = null; this.renderRole(); this.showError(new Error('The classroom is no longer available.')); return; }
+            this.errorText.hidden = true;
             this.member = member; this.role = 'student'; this.revision = 0; this.received = undefined;
             this.state.setDistancePicking(false); this.savedControls = this.state.getControls(); this.savedHidden = this.state.ui.element.hidden;
             this.adapter.roleChanged?.(this.name, true);
@@ -277,7 +293,7 @@ export class LearningSession {
         on('query end response', () => { this.query = false; this.showingResults = false; this.ask.textContent = 'Query Atoms'; this.responses.textContent = ''; this.refreshButton.hidden = true; this.clearResults(); this.clearChoices(); this.restoreQuery(); });
         on('query update response', count => { if (this.role === 'instructor') this.responses.textContent = `Responses: ${count}`; });
         on('query fetch response', results => this.showResults(results));
-        if (this.socket.connected && this.config.mode === 'hidden') this.socket.emit('watch session event', { name: this.room() });
+        if (this.socket.connected && this.config.mode === 'hidden' && this.watching) this.socket.emit('watch session event', { name: this.room() });
     }
 
     /** Open the classroom connection dialog. */
@@ -287,29 +303,51 @@ export class LearningSession {
     }
     /** Queue an instructor creation request; omitted names use the configured session. */
     async start(name = this.config.session || this.room()): Promise<void> {
-        if (this.disposed) return;
-        this.userActivated = true;
-        if (!this.errorText.hidden) { this.dialog.hidden = false; this.button.hidden = true; }
-        await this.ready; if (this.disposed || this.role !== 'idle' || this.pending) return;
+        if (this.disposed || this.role !== 'idle' || this.pending) return;
         if (!name.trim()) throw new Error('A classroom name is required.');
-        const snapshot = this.snapshot();
-        this.pending = 'create'; this.name = name; this.lastSent = snapshot;
-        if (this.config.mode === 'hidden') {
-            this.watching = true; this.socket.emit('watch session event', { name: this.room() });
+        const activation = ++this.activation;
+        this.userActivated = true; this.instructorRequested = true;
+        this.pending = 'create'; this.pendingSent = false; this.name = name; this.lastSent = undefined; this.renderRole();
+        try {
+            await this.ready;
+            if (this.disposed || activation !== this.activation) return;
+            this.lastSent = this.snapshot();
+            if (this.config.mode === 'hidden') {
+                this.watching = true; this.socket.emit('watch session event', { name: this.room() });
+            }
+            this.sendPending();
+        } catch (error) {
+            if (this.disposed || activation !== this.activation) return;
+            this.pending = null; this.pendingSent = false; this.name = null; this.renderRole(); throw error;
         }
-        this.socket.emit('create session event', { name, state: this.lastSent, view: this.viewer.getView() });
     }
     /** Queue a request to join an existing instructor session. */
     async join(name = this.config.session || this.room()): Promise<void> {
-        await this.ready; if (this.disposed || this.role !== 'idle' || this.pending) return;
+        if (this.disposed || this.role !== 'idle' || this.pending) return;
         if (!name.trim()) throw new Error('A classroom name is required.');
-        this.pending = 'join'; this.name = name; this.socket.emit('join session event', { name });
+        const activation = ++this.activation;
+        this.instructorRequested = false; this.pending = 'join'; this.pendingSent = false; this.name = name; this.renderRole();
+        try {
+            await this.ready;
+            if (this.disposed || activation !== this.activation) return;
+            this.sendPending();
+        } catch (error) {
+            if (this.disposed || activation !== this.activation) return;
+            this.pending = null; this.pendingSent = false; this.name = null; this.renderRole(); throw error;
+        }
+    }
+    private sendPending(): void {
+        if (!this.socket || this.socket.connected === false || !this.pending || this.pendingSent) return;
+        if (this.pending === 'create' && !this.lastSent) return;
+        this.pendingSent = true;
+        if (this.pending === 'create') this.socket.emit('create session event', { name: this.name, state: this.lastSent, view: this.viewer.getView() });
+        else this.socket.emit('join session event', { name: this.name });
     }
     /** Leave a classroom; instructors end it for all connected students. */
     leave(): void {
         this.watching = false;
         if (this.config.mode === 'hidden') this.socket?.emit('unwatch session event', { name: this.room() });
-        if (this.name) this.socket?.emit(this.role === 'instructor' || this.pending === 'create' ? 'delete session event' : 'leave session event', { name: this.name });
+        if (this.name && (this.role !== 'idle' || this.pendingSent)) this.socket?.emit(this.role === 'instructor' || this.pending === 'create' ? 'delete session event' : 'leave session event', { name: this.name });
         this.reset();
     }
     /** Return idle, instructor, or student. */
@@ -332,9 +370,11 @@ export class LearningSession {
         action.catch(error => this.showError(error));
     }
     private renderRole(): void {
-        this.connectPanel.hidden = this.role !== 'idle'; this.controls.hidden = this.role !== 'instructor'; this.monitor.hidden = this.role !== 'student';
+        this.connectPanel.hidden = this.role !== 'idle' || !!this.pending; this.controls.hidden = this.role !== 'instructor'; this.monitor.hidden = this.role !== 'student';
+        this.status.hidden = !this.pending;
+        this.status.textContent = this.pending === 'create' ? 'Starting classroom...' : 'Joining classroom...';
         this.heading.textContent = this.name || 'Classroom';
-        if (this.role === 'idle') this.hide(); else { this.dialog.hidden = false; this.button.hidden = true; }
+        if (this.role === 'idle' && !this.userActivated) this.hide(); else { this.dialog.hidden = false; this.button.hidden = true; }
     }
     private showError(error: Error): void {
         if (this.disposed) return;
@@ -455,7 +495,8 @@ export class LearningSession {
     }
     private reset(): void {
         const following = this.role === 'student', active = this.role !== 'idle';
-        this.role = 'idle'; this.name = null; this.secret = null; this.member = null; this.pending = null; this.userActivated = false;
+        this.activation++; this.instructorRequested = false;
+        this.role = 'idle'; this.name = null; this.secret = null; this.member = null; this.pending = null; this.pendingSent = false; this.userActivated = false;
         this.applyGeneration++; this.pendingState = undefined;
         clearTimeout(this.timer); clearInterval(this.poll); this.timer = this.poll = undefined;
         this.dirty = this.full = false; this.inFlight = this.lastSent = this.received = undefined; this.revision = 0;

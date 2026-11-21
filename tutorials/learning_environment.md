@@ -17,6 +17,7 @@ Classrooms are also available in embedded viewers through the optional
 For the same classroom button and session-name dialog as the standalone viewer:
 
 ```html
+<meta charset="utf-8">
 <script src="https://3dmol.org/build/3Dmol-min.js"></script>
 <script src="https://3dmol.org/build/3Dmol.ui-min.js"></script>
 
@@ -26,12 +27,22 @@ For the same classroom button and session-name dialog as the standalone viewer:
      data-ui="true" data-learning="true"></div>
 ```
 
-Embedded classrooms use `https://3dmol.org` as their session server by default.
+Embedded classrooms use `https://3dmol.csb.pitt.edu` as their session server by default.
 Set `data-learning-server="https://classroom.example.edu"` to use another server.
 The server address includes the protocol and, when needed, a port; it is separate
 from the molecular-data URL. All participants in a classroom must use the same
 server and session identifier. A page can contain several independent classroom
 viewers, each with its own identifier and controls.
+
+For a standalone HTML file, put `<meta charset="utf-8">` near the beginning of
+`<head>` and save the file as UTF-8. This also applies when opening the page
+directly with `file://`, so symbols and other non-ASCII text display correctly.
+Local pages still need an internet connection for the hosted scripts, molecule
+downloads, and classroom server.
+Use the direct server address `https://3dmol.csb.pitt.edu` when setting
+`data-learning-server`; the `3dmol.org` alias redirects and can prevent a
+WebSocket upgrade. Existing bundles can use the same attribute to avoid that
+redirect.
 
 ### Hidden instructor activation
 
@@ -49,10 +60,17 @@ identifier on every participant's embed. Participants may be on different pages.
 ```
 
 This example uses the same core and UI scripts as the button example. Focus the
-viewer, then press **Ctrl+Alt+I** to activate the instructor. The instructor gets
-the usual editing and classroom controls, including **Query Atoms**, response
-counts, and ending the session. Use `data-learning-hotkey` to choose another
-shortcut. Keyboard input in text fields does not activate the shortcut.
+viewer by clicking it, then press **Ctrl+Alt+I** once to activate the instructor.
+The classroom dialog immediately shows `Starting classroom...` while connecting.
+The instructor gets the usual editing and classroom controls, including **Query
+Atoms**, response counts, and ending the session. Use `data-learning-hotkey` to
+choose another shortcut. Keyboard input in text fields does not activate the
+shortcut.
+
+If another instructor already holds the name when activation is requested, the
+dialog reports that the name is in use. End the existing session or choose a
+different session identifier before retrying. A failed activation keeps this
+viewer out of student mode.
 
 Other active hidden-mode embeds with the same server and identifier automatically
 join as students when the instructor starts. Viewers opened after the instructor
@@ -76,7 +94,7 @@ const controls = new $3Dmol.StateManager(viewer, {
     learning: {
         mode: 'hidden',
         session: 'biochem-bonding-class-a',
-        server: 'https://3dmol.org',
+        server: 'https://3dmol.csb.pitt.edu',
         hotkey: 'Ctrl+Alt+I'
     }
 });
@@ -85,7 +103,7 @@ const classroom = controls.learning;
 
 Use `learning: true` for the classroom button, or pass a {@link LearningConfig}
 object. `mode` defaults to `'button'`, and `server` defaults to
-`'https://3dmol.org'`. Hidden mode requires `session`. In button mode, `session`
+`'https://3dmol.csb.pitt.edu'`. Hidden mode requires `session`. In button mode, `session`
 can prefill the session-name field. `edit` and `trajectory` retain their ordinary
 UI defaults; the example disables them until this viewer becomes the instructor.
 
@@ -213,7 +231,7 @@ Your network must allow external connections to the specified port.
 The server runs one Gunicorn worker with 100 threads; use `--threads` to adjust capacity. Keep one worker because session state is held in process memory. See the [session-server README](https://github.com/3dmol/3Dmol.js/blob/master/learning-environment/README.md) for the equivalent Gunicorn command.
 Do <b>not</b> run this command as superuser to run the server on the privileged default webserver port 80 without consulting with a network security specialist.
 
-The standalone viewer connects to the session server at the page's origin, preserving its hostname, protocol, and port. This applies equally to `localhost` and `127.0.0.1`; neither address selects port 5000 automatically. Embedded classrooms instead default to `https://3dmol.org`; point their `data-learning-server` or `LearningConfig.server` at your server. To serve the standalone viewer and session server separately, set `window.viewerSessionServer` before the viewer initializes, for example in a script in the viewer page:
+The standalone viewer connects to the session server at the page's origin, preserving its hostname, protocol, and port. This applies equally to `localhost` and `127.0.0.1`; neither address selects port 5000 automatically. Embedded classrooms instead default to `https://3dmol.csb.pitt.edu`; point their `data-learning-server` or `LearningConfig.server` at your server. To serve the standalone viewer and session server separately, set `window.viewerSessionServer` before the viewer initializes, for example in a script in the viewer page:
 
 ```javascript
 window.viewerSessionServer = 'http://localhost:6000';

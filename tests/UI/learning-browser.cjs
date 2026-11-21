@@ -1,13 +1,26 @@
 // Build first; start learning-environment/server.py --port 5072 separately.
 // Override LEARNING_TEST_ORIGIN when testing another local server.
+// Set LEARNING_TEST_FILE=1 to open the embed as a local file without a charset.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 const puppeteer = require('puppeteer');
 const origin = process.env.LEARNING_TEST_ORIGIN || 'http://127.0.0.1:5072';
-const room = 'embed-test-' + Date.now();
+const room = `embed-test-${Date.now()}-${process.pid}`;
+const html = `
+<!doctype html><html><head><script defer src="${origin}/static/build/3Dmol-min.js"></script><script defer src="${origin}/static/build/3Dmol.ui-min.js"></script></head><body>
+<script id="atoms" type="chemical/x-xyz">2\nAtoms\nC -3 0 0\nO 3 0 0\n</script>
+<div id="primary" style="position:relative;width:500px;height:600px;display:inline-block" class="viewer_3Dmoljs" data-element="atoms" data-type="xyz" data-style="sphere" data-learning="hidden" data-learning-session="${room}" data-learning-server="${origin}"></div>
+<div id="other" style="position:relative;width:500px;height:600px;display:inline-block" class="viewer_3Dmoljs" data-element="atoms" data-type="xyz" data-style="sphere" data-learning="hidden" data-learning-session="${room}-other" data-learning-server="${origin}"></div>
+</body></html>`;
 (async () => {
     const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox', '--enable-unsafe-swiftshader']});
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), '3dmol-learning-browser-'));
     try {
+        const file = path.join(directory, 'classroom.html');
+        fs.writeFileSync(file, html);
         const errors = [];
         const page = async () => {
             const p = await browser.newPage();
@@ -15,19 +28,20 @@ const room = 'embed-test-' + Date.now();
             await p.setViewport({width: 1100, height: 700});
             await p.setRequestInterception(true);
             p.on('request', request => {
-                if (request.url().endsWith('/embedded-test.html')) return request.respond({status: 200, contentType: 'text/html', body: `
-<!doctype html><html><head><script defer src="/static/build/3Dmol-min.js"></script><script defer src="/static/build/3Dmol.ui-min.js"></script></head><body>
-<script id="atoms" type="chemical/x-xyz">2\nAtoms\nC -3 0 0\nO 3 0 0\n</script>
-<div id="primary" style="position:relative;width:500px;height:600px;display:inline-block" class="viewer_3Dmoljs" data-element="atoms" data-type="xyz" data-style="sphere" data-learning="hidden" data-learning-session="${room}" data-learning-server="${origin}"></div>
-<div id="other" style="position:relative;width:500px;height:600px;display:inline-block" class="viewer_3Dmoljs" data-element="atoms" data-type="xyz" data-style="sphere" data-learning="hidden" data-learning-session="${room}-other" data-learning-server="${origin}"></div>
-</body></html>`});
+                if (request.url().endsWith('/embedded-test.html')) return request.respond({status: 200, contentType: 'text/html', body: html});
+                // Reproduce a local document loading classic scripts without
+                // a response charset, as with many static hosting setups.
+                const bundle = request.url().match(/\/build\/(3Dmol(?:\.ui)?-min\.js)$/);
+                if (process.env.LEARNING_TEST_FILE && bundle) {
+                    return request.respond({status:200,contentType:'text/javascript',body:fs.readFileSync(path.join(__dirname, '../../build', bundle[1]))});
+                }
                 // Optional local asset makes this check independent of CDN access.
                 if (/socket\.io(?:\.min)?\.js(?:\?|$)/.test(request.url()) && process.env.SOCKET_IO_CLIENT) {
                     return request.respond({status:200,contentType:'text/javascript',body:fs.readFileSync(process.env.SOCKET_IO_CLIENT)});
                 }
                 request.continue();
             });
-            await p.goto(origin + '/embedded-test.html');
+            await p.goto(process.env.LEARNING_TEST_FILE ? pathToFileURL(file).href : origin + '/embedded-test.html');
             await p.waitForFunction(() => !!$3Dmol.viewers.primary?.ui?.learning);
             await p.evaluate(() => $3Dmol.viewers.primary.ui.learning.ready);
             return p;
@@ -35,11 +49,14 @@ const room = 'embed-test-' + Date.now();
         const teacher = await page(), student = await page();
         assert.equal(await teacher.$eval('#primary .molui-learning-launch', el => el.hidden), true);
         await teacher.bringToFront();
-        await teacher.focus('#primary');
+        await teacher.click('#primary canvas');
+        assert.equal(await teacher.evaluate(() => document.activeElement.id), 'primary');
         await teacher.keyboard.down('Control'); await teacher.keyboard.down('Alt'); await teacher.keyboard.press('KeyI');
         await teacher.keyboard.up('Alt'); await teacher.keyboard.up('Control');
         await teacher.waitForFunction(() => $3Dmol.viewers.primary.ui.learning.getRole() === 'instructor', {timeout:10000}).catch(async error => { console.error(await teacher.evaluate(() => ({role:$3Dmol.viewers.primary.ui.learning.getRole(),status:document.querySelector('#primary .molui-learning').textContent,active:document.activeElement?.id}))); throw error; });
         await student.waitForFunction(() => $3Dmol.viewers.primary.ui.learning.getRole() === 'student', {polling:100});
+        assert.equal(await teacher.$eval('#primary [aria-label="Close or leave classroom"]', el => el.textContent), '\u00d7');
+        assert.equal(await teacher.$eval('#primary .molui-learning-drag', el => getComputedStyle(el, '::before').content), '"\u283f"');
         assert.deepEqual(await teacher.evaluate(() => $3Dmol.viewers.primary.ui.getControls()), {edit:true, trajectory:true});
         assert.deepEqual(await student.evaluate(() => $3Dmol.viewers.primary.ui.getControls()), {edit:false, trajectory:false});
         assert.equal(await student.evaluate(() => $3Dmol.viewers.other.ui.learning.getRole()), 'idle');
@@ -78,5 +95,5 @@ const room = 'embed-test-' + Date.now();
         await late.evaluate(() => viewerApp.destroy());
         assert.equal(await late.$('.molui-learning'), null);
         console.log('Standalone classroom controls and disposal passed.');
-    } finally { await browser.close(); }
+    } finally { await browser.close(); fs.rmSync(directory, {recursive: true, force: true}); }
 })().catch(error => { console.error(error); process.exitCode=1; });
