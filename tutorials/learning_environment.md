@@ -52,6 +52,8 @@ required.** Choose an identifier unique to the class and viewer, and put the sam
 identifier on every participant's embed. Participants may be on different pages.
 
 ```html
+<script src="https://3Dmol.csb.pitt.edu/build/3Dmol.js"></script>
+<script src="https://3dmol.csb.pitt.edu/build/3Dmol.ui-min.js"></script>
 <div id="bonding-viewer" class="viewer_3Dmoljs"
      style="width: 100%; height: 400px; position: relative;"
      data-pdb="1YCR" data-style="cartoon"
