@@ -91,8 +91,7 @@ class view(object):
         if has_ui and viewergrid and tuple(viewergrid) != (1, 1):
             raise ValueError('Controls require a single viewer; use separate views instead of a multi-cell viewergrid')
         if js is None:
-            js = ('https://3dmol.org/build/3Dmol-min.js' if has_ui else
-                  'https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js')
+            js = 'https://cdn.jsdelivr.net/npm/3dmol@3.0.0/build/3Dmol-min.js'
         if has_ui and ui_js is None:
             parts = urlsplit(js)
             path, matches = re.subn(r'(^|/)3Dmol(-min)?\.js$', r'\g<1>3Dmol.ui\g<2>.js', parts.path)

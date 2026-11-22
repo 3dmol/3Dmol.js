@@ -24,7 +24,7 @@ setup(
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
     # Keep version in synce with 3Dmol.js version.  Use "postX" suffix if needed
-    version='2.5.5',
+    version='3.0.0',
 
     description='An IPython interface for embedding 3Dmol.js views in Jupyter notebooks',
     long_description=long_description,
@@ -59,7 +59,6 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
 
     ],
