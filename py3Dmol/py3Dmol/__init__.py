@@ -68,14 +68,15 @@ class view(object):
             format -- format of provided data
             style -- style to apply, with viewer grid can be indexed (r,c)
             options -- optional options to provide to $3Dmol.download or addModel
-            js -- core bundle URL; defaults to the hosted build when controls are
-                  enabled, otherwise the pinned npm bundle. The first load wins.
+            js -- core bundle URL; defaults to the same pinned npm release for all
+                  views, with or without controls. The first load wins.
             edit -- show the edit-menu button (default False)
             trajectory -- show trajectory controls when frames are present (default False)
             learning -- True for a classroom button, or a LearningConfig dictionary;
                         hidden mode requires {'mode': 'hidden', 'session': 'unique-id'}.
-                        The server defaults to https://3dmol.org.
-            ui_js -- optional UI bundle URL, otherwise inferred alongside js
+                        The server defaults to https://3dmol.csb.pitt.edu.
+            ui_js -- optional UI bundle URL, otherwise inferred alongside js;
+                     use matching core and UI builds when overriding either URL
             Controls require a single viewer (viewergrid=(1,1) is also supported).
             Python queues commands; classroom events do not call back into Python.'''
         if not isinstance(learning, (bool, dict)):

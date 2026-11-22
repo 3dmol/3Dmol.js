@@ -96,16 +96,14 @@ exported HTML. All three features are disabled by default.
 | `learning={...}` | Configure the classroom with the options below |
 | `ui_js="..."` | Override the optional UI bundle URL |
 
-The UI bundle loads automatically when any controls are requested. By default,
+All views default to the same pinned 3Dmol.js release on jsDelivr, with or without
+controls. The UI bundle loads automatically when any controls are requested;
 its URL is the sibling `3Dmol.ui.js` or `3Dmol.ui-min.js` of the core `js` URL.
-For a custom core filename, supply `ui_js` explicitly. Use matching core and UI
-builds that include these features. When controls are enabled and `js` is omitted,
-the core defaults to `https://3dmol.org/build/3Dmol-min.js` so the new UI uses a
-matching current build. Views without controls retain the pinned CDN default.
-In a notebook mixing both kinds of views, set the same `js` URL on every view:
-the first core and UI bundles loaded on a page are reused by later views. Restart
-the notebook output page to switch bundles. The examples below select the hosted
-builds explicitly.
+To use another release or a hosted build, set `js` explicitly and use matching
+core and UI builds. For a custom core filename, supply `ui_js` explicitly.
+Use the same bundle URLs for every view on a page: the first core and UI bundles
+loaded are reused by later views. Restart the notebook output page to switch
+bundles. The examples below use the default released bundles.
 
 Controls apply to one viewer. Grids with more than one cell share a container and
 canvas, so they cannot use these options; create separate `view` objects for
@@ -118,7 +116,7 @@ import py3Dmol
 frames = ("2\nFrame 0\nC 0 0 0\nO 1.2 0 0\n"
           "2\nFrame 1\nC 0 0 0\nO 1.5 0 0\n")
 view = py3Dmol.view(width=640, height=400, edit=True, trajectory=True,
-                   learning=True, js="https://3dmol.org/build/3Dmol-min.js")
+                   learning=True)
 view.addModelsAsFrames(frames, "xyz")
 view.setStyle({}, {"stick": {}, "sphere": {"scale": 0.3}})
 view.zoomTo()
@@ -145,8 +143,7 @@ import py3Dmol
 xyz = "2\nCarbon monoxide\nC 0 0 0\nO 1.2 0 0\n"
 view = py3Dmol.view(width=640, height=400, data=xyz, format="xyz",
                    style={"sphere": {"scale": 0.3}, "stick": {}},
-                   learning={"mode": "hidden", "session": "py3dmol-bonding-class-a"},
-                   js="https://3dmol.org/build/3Dmol-min.js")
+                   learning={"mode": "hidden", "session": "py3dmol-bonding-class-a"})
 html = view.write_html()
 ```
 

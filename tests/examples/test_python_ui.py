@@ -46,25 +46,36 @@ def controls_config(html):
     return json.JSONDecoder().raw_decode(html[match.end():])[0]
 
 
+def bundle_urls(html):
+    """Read script requests without depending on a particular release number."""
+    return [json.JSONDecoder().raw_decode(html[match.end():])[0]
+            for match in re.finditer(r"\bloadScriptAsync\(\s*", html)]
+
+
 class PythonUIOptions(unittest.TestCase):
-    def test_plain_views_keep_their_existing_bundle_and_no_controls(self):
+    def test_plain_views_use_release_bundle_without_controls(self):
         for options in ({}, {"learning": False}, {"ui_js": "unused-ui.js"}):
             with self.subTest(options=options):
                 html = py3Dmol.view(**options).write_html()
-                self.assertIn(
-                    "https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js", html
-                )
+                urls = bundle_urls(html)
+                self.assertEqual(len(urls), 1)
+                self.assertRegex(urls[0],
+                    r"^https://cdn\.jsdelivr\.net/npm/3dmol@\d+\.\d+\.\d+"
+                    r"(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?/build/3Dmol-min\.js$")
                 self.assertIsNone(controls_config(html))
                 self.assertNotIn("unused-ui.js", html)
 
-    def test_controls_are_independently_enabled_and_use_current_bundles(self):
+    def test_controls_are_independently_enabled_and_use_matching_release_bundles(self):
+        # npm and Python can be released separately. Check matching bundles,
+        # not equality with this checkout's package.json version.
+        core_url, = bundle_urls(py3Dmol.view().write_html())
+        ui_url = core_url.replace("/3Dmol-min.js", "/3Dmol.ui-min.js")
         for options in ({"edit": True}, {"trajectory": True},
                         {"learning": True}, {"learning": {}},
                         {"edit": True, "trajectory": True, "learning": True}):
             with self.subTest(options=options):
                 html = py3Dmol.view(**options).write_html()
-                self.assertIn("https://3dmol.org/build/3Dmol-min.js", html)
-                self.assertIn("https://3dmol.org/build/3Dmol.ui-min.js", html)
+                self.assertEqual(bundle_urls(html), [core_url, ui_url])
                 config = controls_config(html)
                 self.assertIsNotNone(config)
                 self.assertEqual(config["edit"], options.get("edit", False))

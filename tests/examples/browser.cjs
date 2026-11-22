@@ -85,6 +85,10 @@ async function pythonControls(browser) {
     const button = pythonExample('viewer-controls', '--update');
     const hidden = pythonExample('hidden-classroom');
     const query = pythonExample('query-update', '--update');
+    const libraryURLs = Array.from(button.html.matchAll(/loadScriptAsync\(("[^"]+")\)/g), match => JSON.parse(match[1]));
+    assert.equal(libraryURLs.length, 2, 'Python controls should load core and UI bundles');
+    // Serve exported URLs from this checkout, including releases not yet on the CDN.
+    const libraries = new Map([[libraryURLs[0], core], [libraryURLs[1], ui]]);
     const page = await browser.newPage();
     try {
         const errors = [], requests = [];
@@ -98,10 +102,7 @@ async function pythonControls(browser) {
             if (request.url() === 'https://example.test/atoms.xyz') {
                 downloadStarted(request); return;
             }
-            const file = new Map([
-                ['https://3dmol.org/build/3Dmol-min.js', core],
-                ['https://3dmol.org/build/3Dmol.ui-min.js', ui]
-            ]).get(request.url());
+            const file = libraries.get(request.url());
             if (file) await request.respond({ status: 200, contentType: 'text/javascript', body: fs.readFileSync(file) });
             else await request.abort();
         });
@@ -162,7 +163,7 @@ async function pythonControls(browser) {
             { controls: { edit: false, trajectory: false }, frames: 1, atoms: 2, labels: [], launchHidden: true }
         ]);
         assert.deepEqual(requests, [
-            'https://3dmol.org/build/3Dmol-min.js', 'https://3dmol.org/build/3Dmol.ui-min.js',
+            ...libraryURLs,
             'https://example.test/atoms.xyz'
         ], 'Multiple Python views should load core then UI once each');
         assert.deepEqual(await page.evaluate(() => sockets.map(socket => socket.server)), ['https://3dmol.csb.pitt.edu', 'https://3dmol.csb.pitt.edu']);
