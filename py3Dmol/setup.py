@@ -28,7 +28,7 @@ setup(
 
     description='An IPython interface for embedding 3Dmol.js views in Jupyter notebooks',
     long_description=long_description,
-
+    long_description_content_type='text/markdown',
     # The project's main homepage.
     url='https://3dmol.org',
 

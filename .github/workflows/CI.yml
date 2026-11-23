@@ -30,9 +30,9 @@ jobs:
       - run: sudo cp /tmp/chrome-dev-builds /etc/apparmor.d/
       - name: Reload apparmor
         run: sudo service apparmor reload
-      # As our package has a postInstall script, which in turn calls `npm run build`, hence we do not need a explicit job for that
+      # npm ci also builds both bundles through the prepare script.
       - name: Install Dependencies & Build 3dmol.js
-        run: npm install 
+        run: npm ci
 
       - name: Test    
         run: npm test

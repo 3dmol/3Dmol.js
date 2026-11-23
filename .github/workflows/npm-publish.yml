@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         with:
@@ -21,6 +21,20 @@ jobs:
         with:
           cache: npm
           node-version: 24
+
+      - name: Create apparmor profile
+        run: |
+          cat > /tmp/chrome-dev-builds << EOF
+          abi <abi/4.0>,
+          include <tunables/global>
+          profile chrome.dev /@{HOME}/.cache/puppeteer/chrome/**/chrome flags=(unconfined) {
+          userns,
+          include if exists <local/chrome>
+          }
+          EOF
+      - run: sudo cp /tmp/chrome-dev-builds /etc/apparmor.d/
+      - name: Reload apparmor
+        run: sudo service apparmor reload
 
       - run: npm ci
       - run: npm test
